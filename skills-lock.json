@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "skills": {
+    "articulate": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/articulate/SKILL.md",
+      "computedHash": "6143a40175c9e8511a231bbf2ccf074b7b01c101239b8ffa54c05248d9bf6f4c"
+    },
+    "blueprint": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/blueprint/SKILL.md",
+      "computedHash": "e3b297063e627fea4259a9ac63166ab87b15cdd8488372400ff0675b58e7f567"
+    },
+    "evaluate": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/evaluate/SKILL.md",
+      "computedHash": "e5780c2f8fc35c460df0b19ca9def7cfb5f2255823267f34a5c04435cb03f4cc"
+    },
+    "fortify": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/fortify/SKILL.md",
+      "computedHash": "f20b62e4b1ad2e9e5b016f15eddbb312ddc78d6f31c0813f9badd6f85cfa8955"
+    },
+    "graphify": {
+      "source": "howell5/willhong-skills",
+      "sourceType": "github",
+      "skillPath": "skills/graphify/SKILL.md",
+      "computedHash": "80456681e8ee5e57700fcca889a46179f81354a76559744cee8977c97d1faf66"
+    },
+    "include": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/include/SKILL.md",
+      "computedHash": "6a377fe511be26ba4fae04cbbec5dcd4bc2cf35ef7f8d23e3c8fbed20abd54d3"
+    },
+    "intent": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/intent/SKILL.md",
+      "computedHash": "02cd04fa19fefb93ae01f8b2e813b3b58e5fc622129e3b92021b157973aab6bd"
+    },
+    "investigate": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/investigate/SKILL.md",
+      "computedHash": "4b4ee30d0bb47f793da71a04627f8b55d1a6c77e189248ebfbf66e2b4ee59278"
+    },
+    "journey": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/journey/SKILL.md",
+      "computedHash": "6eae886cecb2f8f64c8aa9678183cc120ab94586a0cafc6a18c9a7dedc96b8f3"
+    },
+    "localize": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/localize/SKILL.md",
+      "computedHash": "44b4a25914afbe1af5063b6817b582c074ff3d1162da0e9bc39a305bae1cb9f2"
+    },
+    "measure": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/measure/SKILL.md",
+      "computedHash": "56ce23a6dce39fb9115449f751e08fc5b0fe7fb212f846b0fc43ca2d4a25d939"
+    },
+    "organize": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/organize/SKILL.md",
+      "computedHash": "50bd613be0d0416bdab44125129206b99c5717f7bb123fde8d44145f93fdbdea"
+    },
+    "philosopher": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/philosopher/SKILL.md",
+      "computedHash": "96b5afd2de46582dd9f9c5950c082e90cbff25ee5aefafbfacdf833732a44e52"
+    },
+    "specify": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/specify/SKILL.md",
+      "computedHash": "50e2ce1dd54f9067e06b883ba8f377875699cd552944055b21be96ab514e1920"
+    },
+    "strategize": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/strategize/SKILL.md",
+      "computedHash": "7787b457c325a9c87bc17c6572e269039a14078eba9204e5e84728832d83556c"
+    },
+    "transpose": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/transpose/SKILL.md",
+      "computedHash": "172af6b404ec5264536abc1b43f9c45c1619dab1a636b6cc684311c54723e116"
+    }
+  }
+}
