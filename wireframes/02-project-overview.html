@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>02 — Project Overview</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wireframe">
+    <div class="wireframe-header">
+      <h1>02 — Project Overview: Agora project identity, not a debugging escape hatch</h1>
+      <div class="meta">Decisions doc §"What happens to Project Overview" — project name, App ID, Primary App Cert, Secondary (only when rotating), temp token, service enablement, usage link.</div>
+    </div>
+
+    <div class="app">
+      <aside class="sidebar" style="position: relative;">
+        <div class="switcher">Project Alpha</div>
+        <div class="nav-group" style="margin-top: 16px;">
+          <div class="nav-item"><span class="ico"></span>Agents</div>
+          <div class="nav-item"><span class="ico"></span>Analytics</div>
+          <div class="nav-item"><span class="ico"></span>Usage</div>
+          <div class="nav-item active"><span class="ico filled"></span>Project Overview</div>
+          <div class="nav-item"><span class="ico"></span>Vendor Credentials</div>
+        </div>
+        <div class="footer" style="position: absolute; bottom: 12px; left: 12px; right: 12px;">
+          <div class="avatar">JD</div>
+          <div class="credits">224K / 400K</div>
+          <button class="btn icon">⌘K</button>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="breadcrumb">Project Alpha › Project Overview</div>
+        <h2>Project Overview</h2>
+        <p class="subhead">Identity and configuration for this Agora project. Not for debugging agents.</p>
+
+        <!-- Project name -->
+        <div class="box">
+          <h3>Project name</h3>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input class="input" value="Project Alpha" style="max-width: 320px;">
+            <button class="btn">Rename</button>
+            <span class="tag muted">Created 12 Mar 2026</span>
+          </div>
+        </div>
+
+        <!-- App ID -->
+        <div class="box">
+          <h3>App ID</h3>
+          <div class="desc">Unique identifier for this project. Used by every Agora SDK call. Safe to share — pair with token authentication.</div>
+          <div class="row">
+            <span class="label">App ID</span>
+            <span class="value">a7f2-1c9d-0b8e-44f0-9e2c</span>
+            <div class="actions">
+              <button class="btn small">Copy</button>
+              <button class="btn small">Download .env</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- App Certificate -->
+        <div class="box">
+          <h3>App Certificate</h3>
+          <div class="desc">Required to generate authentication tokens. Treat like a password. Rotate by enabling a secondary, migrating, then revoking the primary.</div>
+
+          <div class="row">
+            <span class="label">Primary <span class="tag">Active</span></span>
+            <span class="value">••••••••••••••••••••••••••••3f9a</span>
+            <div class="actions">
+              <button class="btn small">Reveal</button>
+              <button class="btn small">Copy</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <span class="label">Secondary <span class="tag muted">Not active</span></span>
+            <span class="value" style="color: #777;">Enable when rotating</span>
+            <div class="actions">
+              <button class="btn small">Enable secondary</button>
+            </div>
+          </div>
+
+          <div class="note">
+            <strong>Rotation flow:</strong> Enable secondary → both certs valid → migrate client tokens → revoke primary. UI surfaces rotation only when actively in use; otherwise secondary stays collapsed.
+          </div>
+        </div>
+
+        <!-- Temporary token -->
+        <div class="box">
+          <h3>Generate temporary token</h3>
+          <div class="desc">Project-scoped test token. Expires in 24h max. For development only — production must use server-generated tokens.</div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Channel name</label>
+              <input class="input" placeholder="e.g. agent-test-1">
+            </div>
+            <div class="field">
+              <label>UID</label>
+              <input class="input" placeholder="0 (any user)">
+            </div>
+            <div class="field">
+              <label>Role</label>
+              <input class="input" value="Publisher · Subscriber">
+            </div>
+            <div class="field">
+              <label>Expires in</label>
+              <input class="input" value="24 hours (max)">
+            </div>
+          </div>
+          <button class="btn primary">Generate token</button>
+
+          <div class="row" style="margin-top: 16px;">
+            <span class="label">Token</span>
+            <span class="value" style="font-size: 11px;">007eJxSYHBPSc1V0DUyMjUw...</span>
+            <div class="actions">
+              <button class="btn small">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div class="box">
+          <h3>Project services</h3>
+          <div class="desc">Enable Agora services for this project. Most are auto-enabled when an agent uses them — manual toggles are an escape hatch, not a primary path.</div>
+
+          <div class="row"><span class="label">Conversational AI Engine</span><span class="tag">Enabled · auto</span><span class="value" style="color: #555;">required for voice agents</span></div>
+          <div class="row"><span class="label">Real-Time STT</span><span class="tag">Enabled · auto</span><span class="value" style="color: #555;">enabled by Appointment Reminder agent</span></div>
+          <div class="row"><span class="label">Cloud Recording</span><span class="tag muted">Off</span><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="row"><span class="label">Media Push</span><span class="tag muted">Off</span><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="row"><span class="label">Signaling</span><span class="tag muted">Off</span><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="row"><span class="label">Whiteboard</span><span class="tag muted">Off</span><div class="actions"><button class="btn small">Enable</button></div></div>
+
+          <div class="note">
+            <strong>Anti-pattern guard (decisions doc):</strong> if an agent fails because a service is off, the builder auto-enables it and shows the change inline — users should never have to leave the builder, find this page, hunt the right toggle, and come back.
+          </div>
+        </div>
+
+        <!-- Project usage shortcut -->
+        <div class="box">
+          <h3>Usage in this project</h3>
+          <div class="row">
+            <span class="label">This month</span>
+            <span class="value">176K mins used · 224K of 400K mins left</span>
+            <div class="actions">
+              <a class="btn small" href="#">View usage details →</a>
+            </div>
+          </div>
+          <div class="note">
+            <strong>Decision #5:</strong> Usage stays in project context. <strong>Billing is account-level</strong> — only surfaced here as an optional CTA when payment is needed.
+          </div>
+        </div>
+
+        <!-- Conditional billing CTA -->
+        <div class="box" style="background: #fff8e0;">
+          <h3>Account payment needed</h3>
+          <div class="desc">Your account balance will run out in ~6 days at current usage. This affects all projects on this account.</div>
+          <button class="btn primary">View account billing →</button>
+          <div class="note"><strong>Only shown when payment is actually needed.</strong> Not a permanent fixture of this page.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

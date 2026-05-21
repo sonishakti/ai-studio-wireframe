@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>06 — Agent Builder: Test without publish</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wireframe">
+    <div class="wireframe-header">
+      <h1>06 — Agent Builder: instant Test, no publish gate (Decision #1)</h1>
+      <div class="meta">Acceptance criterion: a newly created agent can be tested immediately without leaving the builder. Replaces the Publish-as-blocker pattern that drives the 77% Stage-3 drop.</div>
+    </div>
+
+    <div class="app">
+      <aside class="sidebar" style="position: relative;">
+        <div class="switcher">Project Alpha</div>
+        <div class="nav-group" style="margin-top: 16px;">
+          <div class="nav-item active"><span class="ico filled"></span>Agents</div>
+          <div class="nav-item"><span class="ico"></span>Analytics</div>
+          <div class="nav-item"><span class="ico"></span>Usage</div>
+          <div class="nav-item"><span class="ico"></span>Project Overview</div>
+          <div class="nav-item"><span class="ico"></span>Vendor Credentials</div>
+        </div>
+        <div class="footer" style="position: absolute; bottom: 12px; left: 12px; right: 12px;">
+          <div class="avatar">JD</div>
+          <div class="credits">224K / 400K</div>
+          <button class="btn icon">⌘K</button>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="breadcrumb">Project Alpha › Agents › Appointment Reminder</div>
+
+        <!-- Top bar: status + actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2>Appointment Reminder</h2>
+            <p class="subhead">Draft · auto-saved 2s ago · App ID a7f2-•••-9e2c</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn">View as code</button>
+            <button class="btn primary">Deploy to production</button>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>What changed:</strong> No "Publish" button. Test runs against the draft directly. Deploy is the named final action — and Deploy modal carries generated code, env variables, and cost visibility (Decision #2).
+        </div>
+
+        <div class="two-pane">
+          <!-- Build pane -->
+          <div>
+            <div class="tabs">
+              <div class="tab active">Build</div>
+              <div class="tab">Knowledge</div>
+              <div class="tab">Integrations</div>
+              <div class="tab">Deploy history</div>
+            </div>
+
+            <div class="box">
+              <h3>Voice</h3>
+              <div class="grid-2">
+                <div class="field"><label>Provider</label><input class="input" value="ElevenLabs (via Vendor Credentials)"></div>
+                <div class="field"><label>Voice</label><input class="input" value="Sarah · en-US"></div>
+              </div>
+            </div>
+
+            <div class="box">
+              <h3>Model</h3>
+              <div class="grid-2">
+                <div class="field"><label>LLM</label><input class="input" value="OpenAI · gpt-4o (via Vendor Credentials)"></div>
+                <div class="field"><label>Temperature</label><input class="input" value="0.6"></div>
+              </div>
+            </div>
+
+            <div class="box">
+              <h3>System prompt</h3>
+              <textarea class="input" rows="6" style="font-family: ui-monospace, Menlo, monospace;">You are calling on behalf of Dr. Chen's office to remind {{customer_name}} about their appointment on {{appointment_date}}. Be brief, warm, and confirm or reschedule.</textarea>
+            </div>
+
+            <div class="box" style="background: #fff8e0;">
+              <h3>Service auto-enable (inline fix, not a console handoff)</h3>
+              <div class="desc">This agent needs Real-Time STT. It's not enabled on this project yet. We'll enable it when you run the first test — one click, no leaving the builder.</div>
+              <button class="btn">Enable Real-Time STT for this project</button>
+              <div class="note"><strong>Decision #2 in action:</strong> users should not leave Studio to fetch App ID, certificates, or service toggles. If the agent needs it, fix it inline.</div>
+            </div>
+          </div>
+
+          <!-- Test panel -->
+          <div class="test-panel">
+            <h3>Test agent</h3>
+            <div class="desc" style="font-size: 11px; color: #555;">Runs against the current draft. No publish required.</div>
+
+            <div class="orb"></div>
+            <div style="text-align: center;">
+              <button class="btn primary" style="width: 100%;">Start call</button>
+              <div style="font-size: 11px; color: #555; margin-top: 8px;">or type — &nbsp; <input class="input" placeholder="Hi, I'm calling about..." style="font-size: 11px; padding: 4px 6px;"></div>
+            </div>
+
+            <div class="box" style="margin-top: 16px; padding: 10px;">
+              <div class="row" style="padding: 4px 0;"><span class="label" style="font-size: 11px;">Status</span><span class="tag">Draft · ready to test</span></div>
+              <div class="row" style="padding: 4px 0;"><span class="label" style="font-size: 11px;">End-to-end latency</span><span class="value" style="font-size: 11px;">— run a test —</span></div>
+              <div class="row" style="padding: 4px 0;"><span class="label" style="font-size: 11px;">LLM first token</span><span class="value" style="font-size: 11px;">— run a test —</span></div>
+              <div class="row" style="padding: 4px 0;"><span class="label" style="font-size: 11px;">Est. cost per minute</span><span class="value" style="font-size: 11px;">$0.10</span></div>
+            </div>
+
+            <div class="note" style="font-size: 10px;">
+              <strong>Anti-pattern guard:</strong> No "publish first" wall. No "configure App ID" detour. If the test fails, the error explains the cause in this panel — not a redirect to Project Overview.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Deploy modal -->
+  <div class="wireframe">
+    <div class="wireframe-header">
+      <h1>06b — Deploy modal: code + env + cost in context (Decision #2)</h1>
+      <div class="meta">Everything deployment-ready stays inside the builder. No hunting for App ID, no copy-paste from a different page.</div>
+    </div>
+
+    <div class="main" style="padding: 32px; background: #f0f0f0;">
+      <div class="box" style="max-width: 760px; margin: 0 auto; box-shadow: 4px 4px 0 #000;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3>Deploy Appointment Reminder</h3>
+          <button class="btn icon">×</button>
+        </div>
+
+        <div class="tabs"><div class="tab active">Code</div><div class="tab">Env</div><div class="tab">Embed iframe</div><div class="tab">Cost</div></div>
+
+        <div class="field"><label>Generated code (Node)</label>
+          <textarea class="input mono" rows="8" readonly>import { Agent } from '@agora/convo-ai';
+
+const agent = new Agent({
+  appId: process.env.AGORA_APP_ID,
+  appCertificate: process.env.AGORA_APP_CERT,
+  agentId: 'FSDF122S7',
+});
+
+await agent.start({ channel: 'reminder-001' });</textarea>
+        </div>
+
+        <div class="field"><label>Env variables (auto-filled from this project)</label>
+          <textarea class="input mono" rows="3" readonly>AGORA_APP_ID=a7f2-1c9d-0b8e-44f0-9e2c
+AGORA_APP_CERT=••••••••••••••••••••••••3f9a
+AGENT_ID=FSDF122S7</textarea>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <button class="btn small">Copy block</button>
+            <button class="btn small">Download .env</button>
+          </div>
+        </div>
+
+        <div class="box" style="background: #f5f5f5;">
+          <h3>Cost visibility</h3>
+          <div class="row"><span class="label">Est. per minute</span><span class="value">$0.10 (LLM $0.04 · TTS $0.03 · Agora $0.03)</span></div>
+          <div class="row"><span class="label">This month, project budget</span><span class="value">$50 cap · $0 used</span></div>
+          <div class="row"><span class="label">Suggested cap</span><span class="value">$200 / month · alert at 80%</span><div class="actions"><button class="btn small">Set cap</button></div></div>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+          <button class="btn">Cancel</button>
+          <button class="btn primary">Deploy to production</button>
+        </div>
+
+        <div class="note">
+          <strong>Decisions wired in:</strong> code + env + cost in one modal. Env values auto-filled from <a href="02-project-overview.html">Project Overview</a> — user never has to navigate there to copy an App ID. Cost cap is offered as a default, not buried.
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

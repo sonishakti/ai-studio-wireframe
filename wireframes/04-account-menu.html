@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>04 — Account menu (Jane Doe)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wireframe">
+    <div class="wireframe-header">
+      <h1>04 — Account menu: account-level items only (Decision #5)</h1>
+      <div class="meta">Click the JD avatar in the sidebar footer. Account-level surfaces — never project-scoped or agent-scoped.</div>
+    </div>
+
+    <div class="app">
+      <aside class="sidebar" style="position: relative;">
+        <div class="switcher">Project Alpha</div>
+        <div class="nav-group" style="margin-top: 16px;">
+          <div class="nav-item active"><span class="ico filled"></span>Agents</div>
+          <div class="nav-item"><span class="ico"></span>Analytics</div>
+          <div class="nav-item"><span class="ico"></span>Usage</div>
+          <div class="nav-item"><span class="ico"></span>Project Overview</div>
+          <div class="nav-item"><span class="ico"></span>Vendor Credentials</div>
+        </div>
+
+        <div class="footer" style="position: absolute; bottom: 12px; left: 12px; right: 12px;">
+          <div class="avatar" style="outline: 2px dashed #000; outline-offset: 3px;">JD</div>
+          <div class="credits">224K / 400K</div>
+          <button class="btn icon">⌘K</button>
+        </div>
+
+        <!-- Account dropdown rendered open, anchored above the avatar -->
+        <div class="dropdown" style="left: 12px; bottom: 60px; min-width: 260px;">
+          <div class="group-label">Jane Doe</div>
+          <div class="item" style="font-size: 11px; color: #555; padding-top: 0;">jane.doe@acme.com · Owner</div>
+          <div class="divider"></div>
+
+          <div class="group-label">Account</div>
+          <div class="item">Account Overview</div>
+          <div class="item">Billing</div>
+          <div class="item">Team / Workspace</div>
+          <div class="item">Agora Analytics</div>
+
+          <div class="divider"></div>
+          <div class="group-label">Developer Settings</div>
+          <div class="item">RESTful API <span class="tag muted">Customer ID + Secret</span></div>
+          <div class="item">Webhooks</div>
+          <div class="item">Audit logs</div>
+
+          <div class="divider"></div>
+          <div class="item">Preferences</div>
+          <div class="item">Sign out</div>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="breadcrumb">Project Alpha › Agents</div>
+        <h2>What lives behind the avatar</h2>
+        <p class="subhead">Decision §"Where does Customer ID / RESTful API go?" — account-level credentials are too powerful for project or agent surfaces.</p>
+
+        <div class="box">
+          <h3>Account section</h3>
+          <div class="row"><span class="label">Account Overview</span><span class="value">org info, owner, seats, security posture</span></div>
+          <div class="row"><span class="label">Billing</span><span class="value">plan, payment method, invoices, account usage roll-up</span></div>
+          <div class="row"><span class="label">Team / Workspace</span><span class="value">members, roles, SSO</span></div>
+          <div class="row"><span class="label">Agora Analytics</span><span class="value">cross-product, cross-project analytics product</span></div>
+        </div>
+
+        <div class="box">
+          <h3>Developer Settings section</h3>
+          <div class="row"><span class="label">RESTful API</span><span class="value">Customer ID + Customer Secret (account-level)</span><div class="actions"><a class="btn small" href="05-restful-api.html">Open →</a></div></div>
+          <div class="row"><span class="label">Webhooks</span><span class="value">account-level event delivery</span></div>
+          <div class="row"><span class="label">Audit logs</span><span class="value">SOC 2 / compliance trail</span></div>
+        </div>
+
+        <div class="note">
+          <strong>What is NOT here (anti-decisions):</strong> No App ID. No App Certificate. No temp tokens. No vendor keys. No agent config. Those are project- or agent-scoped — they live in <a href="02-project-overview.html">Project Overview</a> or <a href="03-vendor-credentials.html">Vendor Credentials</a>.
+        </div>
+
+        <div class="note">
+          <strong>Copy fix carried in:</strong> The menu reads "RESTful API" with a clarifying tag "Customer ID + Secret". Never "Customer ID token" — token language is reserved for RTC / AccessToken2 / temporary token.
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

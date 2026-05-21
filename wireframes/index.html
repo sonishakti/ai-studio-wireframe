@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Studio_X Wireframes — Missing Surfaces</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="index">
+    <h1>Studio_X — wireframes for the missing surfaces</h1>
+    <p class="subtitle">Black-and-white, sketch-quality. Illustrating the behaviour the decisions doc calls for but the current Figma does not yet show.</p>
+
+    <div style="border: 2px solid #000; padding: 16px; margin-bottom: 24px; box-shadow: 4px 4px 0 #000;">
+      <h2 style="font-size: 16px; margin-bottom: 6px;">▶ Interactive prototype</h2>
+      <p style="font-size: 13px; color: #555; margin-bottom: 10px;">All surfaces wired into one navigable wireframe — sidebar, switcher, account menu, modals, and screen-to-screen flow.</p>
+      <a href="app.html" style="font-weight: 600;">Open app.html →</a>
+    </div>
+
+    <h2 style="font-size: 14px; color: #555; margin-bottom: 12px;">Individual static screens</h2>
+    <ol>
+      <li>
+        <a href="01-shell.html">App shell — project switcher (top) + account menu (footer)</a>
+        <div class="desc">Decision #6: switcher lives at top, not in profile menu. Footer holds avatar / credits / ⌘K.</div>
+      </li>
+      <li>
+        <a href="02-project-overview.html">Project Overview — App ID, App Cert (primary + rotation), temp token, services</a>
+        <div class="desc">The whole page that decisions doc requires but isn't built in Figma. Project-config only — no debugging, no vendor keys, no billing.</div>
+      </li>
+      <li>
+        <a href="03-vendor-credentials.html">Vendor Credentials — single add flow, vendor first</a>
+        <div class="desc">Renamed from "Credentials". One add flow with vendor selection first (not split by ASR/LLM/TTS). Project-scoped.</div>
+      </li>
+      <li>
+        <a href="04-account-menu.html">Account menu (Jane Doe) — Billing · RESTful API · Agora Analytics · Team</a>
+        <div class="desc">Decision: Customer ID + Customer Secret live at account level, not project level.</div>
+      </li>
+      <li>
+        <a href="05-restful-api.html">Account → Developer Settings → RESTful API</a>
+        <div class="desc">Customer ID + Customer Secret screen. Sensitive — masked, account-level. "RESTful API credentials", not "Customer ID token".</div>
+      </li>
+      <li>
+        <a href="06-agent-builder.html">Agent Builder — Test without publish gate</a>
+        <div class="desc">Decision #1: instant Test → Deploy. A newly created agent can be tested immediately without leaving the builder.</div>
+      </li>
+    </ol>
+  </div>
+</body>
+</html>

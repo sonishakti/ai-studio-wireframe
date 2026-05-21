@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Studio_X — Interactive Wireframe</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="app-body">
+
+<div id="app" class="app-shell">
+
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+
+    <!-- PROJECT MODE: switcher -->
+    <div data-mode="project">
+      <div class="switcher" id="switcher" data-toggle="switcherDropdown">
+        <span id="currentProject">Project Alpha</span>
+      </div>
+      <div class="dropdown hidden" id="switcherDropdown" style="left: 12px; top: 56px;">
+        <div class="group-label">Projects</div>
+        <div class="item check" data-action="switchProject" data-project="Project Alpha">Project Alpha</div>
+        <div class="item" data-action="switchProject" data-project="Project Beta">Project Beta</div>
+        <div class="item" data-action="switchProject" data-project="Internal Demos">Internal Demos</div>
+        <div class="divider"></div>
+        <div class="item" data-action="createProject">+ Create new project</div>
+        <div class="item" data-action="viewAllProjects">View all projects →</div>
+      </div>
+
+      <div class="nav-group" style="margin-top: 16px;">
+        <a class="nav-item" data-route="agents"><span class="ico"></span>Agents</a>
+        <a class="nav-item" data-route="analytics"><span class="ico"></span>Analytics</a>
+        <a class="nav-item" data-route="usage"><span class="ico"></span>Usage</a>
+        <a class="nav-item" data-route="project-overview"><span class="ico"></span>Project Overview</a>
+        <a class="nav-item" data-route="vendor-credentials"><span class="ico"></span>Vendor Credentials</a>
+      </div>
+    </div>
+
+    <!-- ACCOUNT MODE: back-to-project + account nav -->
+    <div data-mode="account" class="hidden">
+      <div class="switcher" style="background:#f5f5f5;cursor:pointer" data-action="backToProject">
+        <span>← Back to project</span>
+      </div>
+
+      <div class="nav-group" style="margin-top: 16px;">
+        <div class="label">Account</div>
+        <a class="nav-item" data-route="account-overview"><span class="ico"></span>Account Overview</a>
+        <a class="nav-item" data-route="billing"><span class="ico"></span>Billing</a>
+        <a class="nav-item" data-route="team"><span class="ico"></span>Team / Workspace</a>
+        <a class="nav-item" data-route="agora-analytics"><span class="ico"></span>Agora Analytics</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="label">Developer Settings</div>
+        <a class="nav-item" data-route="restful-api"><span class="ico"></span>RESTful API</a>
+        <a class="nav-item" data-route="webhooks"><span class="ico"></span>Webhooks</a>
+        <a class="nav-item" data-route="audit-logs"><span class="ico"></span>Audit logs</a>
+      </div>
+    </div>
+
+    <!-- Footer (persistent) -->
+    <div class="footer">
+      <div class="avatar" id="avatar" data-toggle="accountDropdown" title="Jane Doe">JD</div>
+      <div class="credits" title="Free-tier minutes remaining">224K / 400K</div>
+      <button class="btn icon" title="Command palette">⌘K</button>
+
+      <!-- Account dropdown -->
+      <div class="dropdown hidden" id="accountDropdown" style="left: 12px; bottom: 60px; min-width: 260px;">
+        <div class="group-label">Jane Doe</div>
+        <div class="item" style="font-size: 11px; color: #555; padding-top: 0;">jane.doe@acme.com · Owner</div>
+        <div class="divider"></div>
+        <div class="group-label">Account</div>
+        <div class="item" data-action="goAccount" data-route="account-overview">Account Overview</div>
+        <div class="item" data-action="goAccount" data-route="billing">Billing</div>
+        <div class="item" data-action="goAccount" data-route="team">Team / Workspace</div>
+        <div class="item" data-action="goAccount" data-route="agora-analytics">Agora Analytics</div>
+        <div class="divider"></div>
+        <div class="group-label">Developer Settings</div>
+        <div class="item" data-action="goAccount" data-route="restful-api">RESTful API <span class="tag muted">CID + Secret</span></div>
+        <div class="item" data-action="goAccount" data-route="webhooks">Webhooks</div>
+        <div class="item" data-action="goAccount" data-route="audit-logs">Audit logs</div>
+        <div class="divider"></div>
+        <div class="item">Preferences</div>
+        <div class="item">Sign out</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <section class="main" id="main">
+
+    <!-- AGENTS LIST -->
+    <div class="screen" data-screen="agents">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Agents</div>
+      <div class="header-row">
+        <div>
+          <h2>Agents</h2>
+          <p class="subhead">Deploy your first AI agent in minutes. Import or start from a template.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn">Import agent</button>
+          <button class="btn primary" data-action="newAgent">+ New agent</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Your agents</h3>
+        <div class="row clickable" data-action="openAgent" data-agent="Appointment Reminder">
+          <span class="label">Appointment Reminder</span>
+          <span class="value">Draft · auto-saved 2s ago</span>
+          <div class="actions"><button class="btn small">Open</button></div>
+        </div>
+        <div class="row clickable" data-action="openAgent" data-agent="Sales lead Qualification Agent">
+          <span class="label">Sales lead Qualification Agent</span>
+          <span class="value"><span class="tag">Live</span> · 1.2K calls · last 1 day ago</span>
+          <div class="actions"><button class="btn small">Open</button></div>
+        </div>
+        <div class="row clickable" data-action="openAgent" data-agent="NPS Survey">
+          <span class="label">NPS Survey</span>
+          <span class="value">Draft · 3 days ago</span>
+          <div class="actions"><button class="btn small">Open</button></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>Pre-built by Agora</h3>
+        <p class="desc">Try a working agent in under a minute. No config required.</p>
+        <div class="row clickable"><span class="label">Appointment Reminder</span><span class="value">Automatically call customers to remind them of upcoming appointments</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
+        <div class="row clickable"><span class="label">NPS Survey</span><span class="value">Gather customer feedback through voice surveys</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
+        <div class="row clickable"><span class="label">Interactive Voice Response (IVR)</span><span class="value">Route callers to the right department automatically</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
+        <div class="row clickable"><span class="label">Payment Reminder</span><span class="value">Follow up with customers about pending payments</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
+        <div class="row clickable"><span class="label">Customer service for e-commerce</span><span class="value">Very short description here</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS (placeholder) -->
+    <div class="screen hidden" data-screen="analytics">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Analytics</div>
+      <h2>Analytics</h2>
+      <p class="subhead">Per-agent performance, latencies, and conversion in this project.</p>
+      <div class="empty">Wireframe placeholder — per-agent charts, latency histograms, drop-off funnels.</div>
+    </div>
+
+    <!-- USAGE (placeholder) -->
+    <div class="screen hidden" data-screen="usage">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Usage</div>
+      <h2>Usage</h2>
+      <p class="subhead">Minutes consumed in this project — not billing.</p>
+      <div class="box">
+        <h3>This month</h3>
+        <div class="row"><span class="label">Standard minutes</span><span class="value">176K of 400K used · 224K left</span></div>
+        <div class="row"><span class="label">By agent</span><span class="value">Appointment Reminder 92K · Sales lead 71K · NPS 13K</span></div>
+        <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
+      </div>
+      <div class="note">
+        <strong>Decision #5:</strong> Usage lives here in project context. Billing is at <a href="#" data-action="goAccount" data-route="billing">Account → Billing</a>.
+      </div>
+    </div>
+
+    <!-- PROJECT OVERVIEW -->
+    <div class="screen hidden" data-screen="project-overview">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Project Overview</div>
+      <h2>Project Overview</h2>
+      <p class="subhead">Identity and configuration for this Agora project. Not for debugging agents.</p>
+
+      <div class="box">
+        <h3>Project name</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="input" value="Project Alpha" style="max-width: 320px;">
+          <button class="btn">Rename</button>
+          <span class="tag muted">Created 12 Mar 2026</span>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>App ID</h3>
+        <div class="desc">Unique identifier for this project. Safe to share — pair with token authentication.</div>
+        <div class="row">
+          <span class="label">App ID</span>
+          <span class="value">a7f2-1c9d-0b8e-44f0-9e2c</span>
+          <div class="actions">
+            <button class="btn small" data-action="toast" data-msg="Copied App ID">Copy</button>
+            <button class="btn small" data-action="toast" data-msg="Downloaded .env">Download .env</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>App Certificate</h3>
+        <div class="desc">Required to generate authentication tokens. Treat like a password.</div>
+        <div class="row">
+          <span class="label">Primary <span class="tag">Active</span></span>
+          <span class="value" id="appCertVal">••••••••••••••••••••••••••••3f9a</span>
+          <div class="actions">
+            <button class="btn small" data-action="revealCert">Reveal</button>
+            <button class="btn small" data-action="toast" data-msg="Copied App Certificate">Copy</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="label">Secondary <span class="tag muted">Not active</span></span>
+          <span class="value" style="color:#777">Enable when rotating</span>
+          <div class="actions"><button class="btn small" data-action="toast" data-msg="Secondary cert enabled — start rotation">Enable secondary</button></div>
+        </div>
+        <div class="note"><strong>Rotation flow:</strong> Enable secondary → both certs valid → migrate client tokens → revoke primary.</div>
+      </div>
+
+      <div class="box">
+        <h3>Generate temporary token</h3>
+        <div class="desc">Project-scoped test token. Expires in 24h max. Development only.</div>
+        <div class="grid-2">
+          <div class="field"><label>Channel name</label><input class="input" placeholder="e.g. agent-test-1"></div>
+          <div class="field"><label>UID</label><input class="input" placeholder="0 (any user)"></div>
+          <div class="field"><label>Role</label><input class="input" value="Publisher · Subscriber"></div>
+          <div class="field"><label>Expires in</label><input class="input" value="24 hours (max)"></div>
+        </div>
+        <button class="btn primary" data-action="toast" data-msg="Temporary token generated">Generate token</button>
+      </div>
+
+      <div class="box">
+        <h3>Project services</h3>
+        <div class="desc">Most are auto-enabled when an agent uses them. Manual toggles are an escape hatch, not a primary path.</div>
+        <div class="row"><span class="label">Conversational AI Engine</span><span class="tag">Enabled · auto</span><span class="value" style="color:#555">required for voice agents</span></div>
+        <div class="row"><span class="label">Real-Time STT</span><span class="tag">Enabled · auto</span><span class="value" style="color:#555">enabled by Appointment Reminder agent</span></div>
+        <div class="row"><span class="label">Cloud Recording</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cloud Recording enabled">Enable</button></div></div>
+        <div class="row"><span class="label">Media Push</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Media Push enabled">Enable</button></div></div>
+        <div class="row"><span class="label">Signaling</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Signaling enabled">Enable</button></div></div>
+        <div class="note"><strong>Anti-pattern guard:</strong> if an agent fails because a service is off, the builder auto-enables it inline. Users should never have to leave the builder to find the right toggle.</div>
+      </div>
+
+      <div class="box">
+        <h3>Usage in this project</h3>
+        <div class="row">
+          <span class="label">This month</span>
+          <span class="value">176K mins used · 224K of 400K mins left</span>
+          <div class="actions"><a class="btn small" data-route="usage">View usage details →</a></div>
+        </div>
+        <div class="note"><strong>Decision #5:</strong> Usage stays in project context. Billing is account-level — only surfaced here when payment is needed.</div>
+      </div>
+    </div>
+
+    <!-- VENDOR CREDENTIALS -->
+    <div class="screen hidden" data-screen="vendor-credentials">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Vendor Credentials</div>
+      <div class="header-row">
+        <div>
+          <h2>Vendor Credentials</h2>
+          <p class="subhead">Third-party provider keys for agents in this project. Not Agora App ID, App Certificate, or RESTful API.</p>
+        </div>
+        <button class="btn primary" data-action="openAddCred">+ Add credential</button>
+      </div>
+
+      <div class="note">
+        <strong>Disambiguation:</strong> For your Agora App ID / Certificate / temp token, see <a href="#" data-route="project-overview">Project Overview</a>. For Customer ID + Customer Secret, see <a href="#" data-action="goAccount" data-route="restful-api">Account → Developer Settings → RESTful API</a>.
+      </div>
+
+      <div class="box">
+        <h3>Credentials in this project</h3>
+        <div id="credList">
+          <div class="row"><span class="label">OpenAI · Production</span><span class="value">sk-prod-•••3f9a</span><span class="tag">Used by 3 agents</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
+          <div class="row"><span class="label">ElevenLabs · Default voice</span><span class="value">el-•••8e2c</span><span class="tag">Used by 2 agents</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
+          <div class="row"><span class="label">Deepgram · ASR</span><span class="value">dg-•••0b8e</span><span class="tag muted">Not in use</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENT BUILDER -->
+    <div class="screen hidden" data-screen="builder">
+      <div class="breadcrumb"><a href="#" data-route="agents"><span class="proj-name">Project Alpha</span> › Agents</a> › <span id="agentName">Appointment Reminder</span></div>
+      <div class="header-row">
+        <div>
+          <h2 id="agentTitle">Appointment Reminder</h2>
+          <p class="subhead">Draft · auto-saved 2s ago · App ID a7f2-•••-9e2c</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn">View as code</button>
+          <button class="btn primary" data-action="openDeploy">Deploy to production</button>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>No "Publish" button.</strong> Test runs against the draft directly. Deploy is the named final action.
+      </div>
+
+      <div class="two-pane">
+        <div>
+          <div class="tabs" id="builderTabs">
+            <div class="tab active" data-tab="build">Build</div>
+            <div class="tab" data-tab="knowledge">Knowledge</div>
+            <div class="tab" data-tab="integrations">Integrations</div>
+            <div class="tab" data-tab="history">Deploy history</div>
+          </div>
+
+          <div class="tab-panel" data-panel="build">
+            <div class="box">
+              <h3>Voice</h3>
+              <div class="grid-2">
+                <div class="field"><label>Provider</label><input class="input" value="ElevenLabs (via Vendor Credentials)"></div>
+                <div class="field"><label>Voice</label><input class="input" value="Sarah · en-US"></div>
+              </div>
+            </div>
+            <div class="box">
+              <h3>Model</h3>
+              <div class="grid-2">
+                <div class="field"><label>LLM</label><input class="input" value="OpenAI · gpt-4o (via Vendor Credentials)"></div>
+                <div class="field"><label>Temperature</label><input class="input" value="0.6"></div>
+              </div>
+            </div>
+            <div class="box">
+              <h3>System prompt</h3>
+              <textarea class="input mono" rows="6">You are calling on behalf of Dr. Chen's office to remind {{customer_name}} about their appointment on {{appointment_date}}. Be brief, warm, and confirm or reschedule.</textarea>
+            </div>
+            <div class="box" style="background:#fff8e0">
+              <h3>Service auto-enable (inline fix, not a console handoff)</h3>
+              <div class="desc">This agent needs Real-Time STT. It's not enabled on this project yet. We'll enable it when you run the first test.</div>
+              <button class="btn" data-action="toast" data-msg="Real-Time STT enabled for Project Alpha">Enable Real-Time STT for this project</button>
+              <div class="note"><strong>Decision #2 in action:</strong> never make users leave Studio to fetch App ID, certificates, or service toggles.</div>
+            </div>
+          </div>
+
+          <div class="tab-panel hidden" data-panel="knowledge">
+            <div class="box"><h3>Knowledge</h3><div class="empty">Upload PDFs, URLs, or paste text. Wireframe placeholder.</div></div>
+          </div>
+          <div class="tab-panel hidden" data-panel="integrations">
+            <div class="box"><h3>Integrations</h3><div class="empty">Add a connector from our library of integrations below. Wireframe placeholder.</div></div>
+          </div>
+          <div class="tab-panel hidden" data-panel="history">
+            <div class="box"><h3>Deploy history</h3><div class="empty">No deploys yet. Run a test, then deploy.</div></div>
+          </div>
+        </div>
+
+        <div class="test-panel">
+          <h3>Test agent</h3>
+          <div class="desc" style="font-size:11px;color:#555">Runs against the current draft. No publish required.</div>
+          <div class="orb"></div>
+          <div style="text-align:center">
+            <button class="btn primary" style="width:100%" data-action="toast" data-msg="Calling agent — listen up">Start call</button>
+            <div style="font-size:11px;color:#555;margin-top:8px">or type — <input class="input" placeholder="Hi, I'm calling about..." style="font-size:11px;padding:4px 6px"></div>
+          </div>
+          <div class="box" style="margin-top:16px;padding:10px">
+            <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">Status</span><span class="tag">Draft · ready to test</span></div>
+            <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">End-to-end latency</span><span class="value" style="font-size:11px">— run a test —</span></div>
+            <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">LLM first token</span><span class="value" style="font-size:11px">— run a test —</span></div>
+            <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">Est. cost per minute</span><span class="value" style="font-size:11px">$0.10</span></div>
+          </div>
+          <div class="note" style="font-size:10px"><strong>Anti-pattern guard:</strong> if the test fails, the error explains the cause here — not a redirect to Project Overview.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNT OVERVIEW -->
+    <div class="screen hidden" data-screen="account-overview">
+      <div class="breadcrumb">Account › Account Overview</div>
+      <h2>Account Overview</h2>
+      <p class="subhead">Org info, owner, seats, security posture.</p>
+      <div class="empty">Wireframe placeholder — account roll-up.</div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="screen hidden" data-screen="billing">
+      <div class="breadcrumb">Account › Billing</div>
+      <h2>Billing</h2>
+      <p class="subhead">Plan, payment method, invoices. <strong>Account-level</strong> — covers all projects.</p>
+      <div class="box">
+        <h3>Current plan</h3>
+        <div class="row"><span class="label">Plan</span><span class="value">Starter · $49/mo · 50K mins included</span><div class="actions"><button class="btn small">Change plan</button></div></div>
+        <div class="row"><span class="label">Payment method</span><span class="value">Visa •••• 4242 · exp 02/28</span><div class="actions"><button class="btn small">Update</button></div></div>
+        <div class="row"><span class="label">Next invoice</span><span class="value">12 Jun 2026 · est. $49 + $0 overage</span></div>
+      </div>
+      <div class="box">
+        <h3>Usage roll-up across projects</h3>
+        <div class="row"><span class="label">Project Alpha</span><span class="value">176K mins</span></div>
+        <div class="row"><span class="label">Project Beta</span><span class="value">22K mins</span></div>
+        <div class="row"><span class="label">Internal Demos</span><span class="value">4K mins</span></div>
+      </div>
+      <div class="note"><strong>Decision #5:</strong> Billing is account-level. Per-project usage stays in <a href="#" data-action="backToProject">project context</a>.</div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="screen hidden" data-screen="team">
+      <div class="breadcrumb">Account › Team / Workspace</div>
+      <h2>Team / Workspace</h2>
+      <div class="empty">Wireframe placeholder — members, roles, SSO.</div>
+    </div>
+
+    <!-- AGORA ANALYTICS -->
+    <div class="screen hidden" data-screen="agora-analytics">
+      <div class="breadcrumb">Account › Agora Analytics</div>
+      <h2>Agora Analytics</h2>
+      <p class="subhead">Cross-project, cross-product analytics product.</p>
+      <div class="empty">Wireframe placeholder. Note: this is the analytics product, not per-agent analytics (that lives in project nav).</div>
+    </div>
+
+    <!-- RESTFUL API -->
+    <div class="screen hidden" data-screen="restful-api">
+      <div class="breadcrumb">Account › Developer Settings › RESTful API</div>
+      <h2>RESTful API credentials</h2>
+      <p class="subhead">Account-level credentials for Agora REST APIs.</p>
+      <div class="note"><strong>Doc:</strong> <a href="https://docs.agora.io/en/signaling/rest-api/restful-authentication" target="_blank">Agora — RESTful authentication</a></div>
+
+      <div class="box">
+        <h3>Active credential pair</h3>
+        <div class="row"><span class="label">Customer ID</span><span class="value">6512abc12def34567890</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Copied Customer ID">Copy</button></div></div>
+        <div class="row"><span class="label">Customer Secret</span><span class="value" id="custSecretVal">••••••••••••••••••••••••3f9a</span><div class="actions"><button class="btn small" data-action="revealSecret">Reveal</button><button class="btn small" data-action="toast" data-msg="Copied Customer Secret">Copy</button></div></div>
+        <div class="row"><span class="label">Created</span><span class="value">12 Mar 2026 · by Jane Doe</span></div>
+        <div class="row"><span class="label">Last used</span><span class="value">3 days ago · from 198.51.x.x</span></div>
+        <div style="display:flex;gap:8px;margin-top:12px"><button class="btn">Generate new pair</button><button class="btn">Revoke</button></div>
+      </div>
+
+      <div class="box">
+        <h3>Generate Base64 auth string</h3>
+        <div class="desc">Paste into the <code>Authorization: Basic …</code> header of any Agora REST call.</div>
+        <input class="input mono" value="Basic NjUxMmFiYzEyZGVmMzQ1Njc4OTA6KioqKioqKioqKioqMzlhYQ==" readonly>
+        <div style="margin-top:8px"><button class="btn small" data-action="toast" data-msg="Copied Basic auth string">Copy</button></div>
+      </div>
+
+      <div class="note"><strong>Copy:</strong> "RESTful API" — never "Customer ID token". Token language is reserved for RTC / AccessToken2 / temporary token.</div>
+    </div>
+
+    <div class="screen hidden" data-screen="webhooks">
+      <div class="breadcrumb">Account › Developer Settings › Webhooks</div>
+      <h2>Webhooks</h2><div class="empty">Wireframe placeholder.</div>
+    </div>
+    <div class="screen hidden" data-screen="audit-logs">
+      <div class="breadcrumb">Account › Developer Settings › Audit logs</div>
+      <h2>Audit logs</h2><div class="empty">Wireframe placeholder — SOC 2 compliance trail.</div>
+    </div>
+
+  </section>
+</div>
+
+<!-- ============== MODALS ============== -->
+
+<!-- Add Vendor Credential modal -->
+<div class="modal-backdrop hidden" id="addCredModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="addCredTitle">Add vendor credential</h3>
+      <button class="btn icon" data-action="closeAddCred">×</button>
+    </div>
+
+    <div class="tabs"><div class="tab active" id="stepTab1">1. Vendor</div><div class="tab" id="stepTab2">2. Details</div></div>
+
+    <!-- Step 1: vendor pick -->
+    <div id="credStep1">
+      <div class="field"><label>Search vendors</label><input class="input" placeholder="OpenAI, ElevenLabs, Deepgram, Azure, ..."></div>
+      <div class="grid-2">
+        <div class="box clickable" data-action="pickVendor" data-vendor="OpenAI"><h3>OpenAI</h3><div class="desc">LLM · TTS · Embeddings · Realtime API</div></div>
+        <div class="box clickable" data-action="pickVendor" data-vendor="ElevenLabs"><h3>ElevenLabs</h3><div class="desc">TTS · Voice cloning · Sound effects</div></div>
+        <div class="box clickable" data-action="pickVendor" data-vendor="Deepgram"><h3>Deepgram</h3><div class="desc">ASR · Streaming STT</div></div>
+        <div class="box clickable" data-action="pickVendor" data-vendor="Azure"><h3>Azure</h3><div class="desc">LLM · TTS · ASR · Translation</div></div>
+        <div class="box clickable" data-action="pickVendor" data-vendor="Anthropic"><h3>Anthropic</h3><div class="desc">LLM (Claude)</div></div>
+        <div class="box clickable" data-action="pickVendor" data-vendor="Google"><h3>Google</h3><div class="desc">LLM (Gemini) · TTS · ASR</div></div>
+      </div>
+      <div class="note"><strong>Why vendor-first:</strong> one OpenAI key may power LLM + TTS + embeddings. Splitting by service type up front would force one key into multiple records.</div>
+    </div>
+
+    <!-- Step 2: details -->
+    <div id="credStep2" class="hidden">
+      <div class="field"><label>Vendor</label><input class="input" id="vendorField" disabled></div>
+      <div class="field"><label>Credential name</label><input class="input" id="credName" placeholder="e.g. OpenAI · Production"></div>
+      <div class="grid-2">
+        <div class="field"><label>API key</label><input class="input mono" placeholder="sk-..."></div>
+        <div class="field"><label>Organization ID (optional)</label><input class="input mono" placeholder="org-..."></div>
+      </div>
+      <div class="field"><label>Note (optional)</label><input class="input" placeholder="e.g. shared prod key, rotated monthly"></div>
+      <div class="row"><span class="label">Available to</span><span class="value">All agents in this project</span><div class="actions"><button class="btn small">Restrict to specific agents</button></div></div>
+
+      <div class="modal-footer">
+        <button class="btn" data-action="credBack">← Back</button>
+        <button class="btn primary" data-action="saveCred">Save credential</button>
+      </div>
+    </div>
+
+    <div class="modal-footer" id="step1Footer">
+      <button class="btn" data-action="closeAddCred">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deploy modal -->
+<div class="modal-backdrop hidden" id="deployModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Deploy <span id="deployAgentName">Appointment Reminder</span></h3>
+      <button class="btn icon" data-action="closeDeploy">×</button>
+    </div>
+
+    <div class="tabs" id="deployTabs">
+      <div class="tab active" data-tab="code">Code</div>
+      <div class="tab" data-tab="env">Env</div>
+      <div class="tab" data-tab="embed">Embed iframe</div>
+      <div class="tab" data-tab="cost">Cost</div>
+    </div>
+
+    <div class="tab-panel" data-panel="code">
+      <div class="field"><label>Generated code (Node)</label>
+        <textarea class="input mono" rows="8" readonly>import { Agent } from '@agora/convo-ai';
+
+const agent = new Agent({
+  appId: process.env.AGORA_APP_ID,
+  appCertificate: process.env.AGORA_APP_CERT,
+  agentId: 'FSDF122S7',
+});
+
+await agent.start({ channel: 'reminder-001' });</textarea>
+      </div>
+    </div>
+
+    <div class="tab-panel hidden" data-panel="env">
+      <div class="field"><label>Env variables (auto-filled from this project)</label>
+        <textarea class="input mono" rows="3" readonly>AGORA_APP_ID=a7f2-1c9d-0b8e-44f0-9e2c
+AGORA_APP_CERT=••••••••••••••••••••••••3f9a
+AGENT_ID=FSDF122S7</textarea>
+      </div>
+      <div style="display:flex;gap:8px"><button class="btn small" data-action="toast" data-msg="Copied env block">Copy block</button><button class="btn small" data-action="toast" data-msg="Downloaded .env">Download .env</button></div>
+    </div>
+
+    <div class="tab-panel hidden" data-panel="embed">
+      <div class="field"><label>Embed iframe</label>
+        <textarea class="input mono" rows="3" readonly>&lt;iframe src="https://embed.agora.io/agent/FSDF122S7" allow="microphone" /&gt;</textarea>
+      </div>
+    </div>
+
+    <div class="tab-panel hidden" data-panel="cost">
+      <div class="row"><span class="label">Est. per minute</span><span class="value">$0.10 (LLM $0.04 · TTS $0.03 · Agora $0.03)</span></div>
+      <div class="row"><span class="label">This month, project budget</span><span class="value">$50 cap · $0 used</span></div>
+      <div class="row"><span class="label">Suggested cap</span><span class="value">$200 / month · alert at 80%</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cost cap set to $200/mo">Set cap</button></div></div>
+    </div>
+
+    <div class="note"><strong>Decisions wired in:</strong> code + env + cost in one modal. Env values auto-filled from <a href="#" data-route="project-overview">Project Overview</a> — user never has to navigate there.</div>
+
+    <div class="modal-footer">
+      <button class="btn" data-action="closeDeploy">Cancel</button>
+      <button class="btn primary" data-action="confirmDeploy">Deploy to production</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

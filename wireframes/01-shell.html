@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>01 — App shell</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wireframe">
+    <div class="wireframe-header">
+      <h1>01 — App shell: project switcher (top) + account menu (footer)</h1>
+      <div class="meta">Decision #6 — switcher lives at the top of the workspace, not buried in the profile menu. Footer is just identity / credits / search.</div>
+    </div>
+
+    <div class="app">
+      <aside class="sidebar" style="position: relative;">
+        <!-- Project switcher at the very top -->
+        <div class="switcher">Project Alpha</div>
+
+        <!-- Switcher dropdown rendered open for illustration -->
+        <div class="dropdown" style="left: 12px; top: 56px;">
+          <div class="item check">Project Alpha</div>
+          <div class="item">Project Beta</div>
+          <div class="item">Internal Demos</div>
+          <div class="divider"></div>
+          <div class="item">+ Create new project</div>
+          <div class="item">View all projects →</div>
+        </div>
+
+        <!-- Nav per decisions doc §5 project nav order -->
+        <div class="nav-group" style="margin-top: 220px;">
+          <div class="nav-item active"><span class="ico filled"></span>Agents</div>
+          <div class="nav-item"><span class="ico"></span>Analytics</div>
+          <div class="nav-item"><span class="ico"></span>Usage</div>
+          <div class="nav-item"><span class="ico"></span>Project Overview</div>
+          <div class="nav-item"><span class="ico"></span>Vendor Credentials</div>
+        </div>
+
+        <!-- Footer: avatar + credits + ⌘K. NO billing, NO RESTful, NO project switching here. -->
+        <div class="footer" style="position: absolute; bottom: 12px; left: 12px; right: 12px;">
+          <div class="avatar">JD</div>
+          <div class="credits">224K / 400K</div>
+          <button class="btn icon" title="Command palette">⌘K</button>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="breadcrumb">Project Alpha › Agents</div>
+        <h2>Agents</h2>
+        <p class="subhead">Build, test, and deploy voice AI agents in this project.</p>
+
+        <div class="note">
+          <strong>Why this layout:</strong> Project switcher is product-level wayfinding (Decision #6) — it goes top. The footer carries account-identity + ambient credits meter + ⌘K only. Billing, RESTful API, and Agora Analytics live behind the avatar (see 04).
+        </div>
+
+        <div class="box">
+          <h3>What's in the project nav (locked order)</h3>
+          <div class="row"><span class="label">Agents</span><span class="value">Build · test · deploy agents</span></div>
+          <div class="row"><span class="label">Analytics</span><span class="value">Per-agent performance, latencies, conversion</span></div>
+          <div class="row"><span class="label">Usage</span><span class="value">Minutes consumed in this project (not billing)</span></div>
+          <div class="row"><span class="label">Project Overview</span><span class="value">App ID · App Certificate · token · services</span></div>
+          <div class="row"><span class="label">Vendor Credentials</span><span class="value">OpenAI / ElevenLabs / Deepgram / Azure keys</span></div>
+        </div>
+
+        <div class="box">
+          <h3>What is NOT in the project nav</h3>
+          <div class="row"><span class="label">Billing</span><span class="value">→ Account menu (account-level)</span></div>
+          <div class="row"><span class="label">RESTful API</span><span class="value">→ Account → Developer Settings (account-level)</span></div>
+          <div class="row"><span class="label">Agora Analytics</span><span class="value">→ Account menu</span></div>
+          <div class="row"><span class="label">Team / Workspace</span><span class="value">→ Account menu</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
