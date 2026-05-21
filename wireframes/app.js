@@ -184,6 +184,17 @@
       el.textContent = el.textContent.startsWith('•') ? 'aB7xK2pQ9rT4wL6mN1vC8fH3jY5sX0eP3f9a' : '••••••••••••••••••••••••3f9a';
     },
     toast(el) { toast(el.dataset.msg || 'Action triggered'); },
+    setHomeMode(el) {
+      const mode = el.dataset.modeName;
+      const def = document.getElementById('homeDefault');
+      const fr = document.getElementById('homeFirstrun');
+      const sus = document.getElementById('homeSuspended');
+      [def, fr, sus].forEach((n) => n && n.classList.add('hidden'));
+      if (mode === 'first-run') fr && fr.classList.remove('hidden');
+      else if (mode === 'suspended') sus && sus.classList.remove('hidden');
+      else def && def.classList.remove('hidden');
+      toast(`Home state: ${mode}`);
+    },
   };
 
   // ---------- Event wiring ----------

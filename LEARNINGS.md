@@ -193,17 +193,39 @@ The word *credentials* means **three different things** across the surface area.
 - ❌ Notifications-only as a profile-menu link — needs a global 🔔 bell in the top bar when notifications exist
 
 ### Home page (workspace-level overview)
-Content blocks, priority-ordered for P1 hustler:
-1. **Resume work** — most recent agent edited, one-click reopen
-2. **Health alerts** (only when present) — failed agent, invalid vendor key, billing-in-trouble, cost cap hit
-3. **Live agent activity** (last 24h: calls, errors, p95 latency)
-4. **Projects grid** — cards per project, click to enter
-5. **Quick actions** — New agent · Import agent · Try a pre-built
-6. **Workspace usage roll-up** (across projects, current period)
-7. **What's new** (compact, dismissible)
-8. **First-run state** — replaces 1-3 when account is empty: pre-built agents to try
 
-Explicitly **not** on Home: marketing hero copy, engagement-bait widgets, cross-promotion to RTE, dense analytics charts.
+**North star (strategize, 2026-05-21):**
+- Returning user: time-to-resume-work ≤ 2 clicks from sign-in
+- First-time user: time-to-first-test-call ≤ 90 seconds
+- Hypothesis tested: H3 — first-time-returner behavior predicts 30-day retention
+
+**Page modes (structurally distinct, not conditional blocks):**
+1. **First-run** — 0 agents → "Try a pre-built agent" hero (full-page)
+2. **Returning default** — stack of 7 blocks below
+3. **Billing suspended** — recovery card replaces page; nothing else renders
+
+**Content blocks for returning default, priority-ordered:**
+1. **Resume work** — most recent agent edited, one-click reopen
+2. **Health alerts** (only when present) — failed agent, invalid vendor key, billing-in-trouble, cost cap hit. Never render an empty "no alerts ✓" trophy.
+3. **Live agent activity** (last 24h: calls, errors, p95 latency)
+4. **Projects grid** — cards per project, click to enter. Cap at 6 + "View all"
+5. **Quick actions** — New agent · Import · Try a pre-built
+6. **Workspace usage roll-up** (across projects, current period)
+7. **What's new** (compact, dismissible per-user)
+
+Explicitly **not** on Home: marketing hero copy, engagement-bait widgets, cross-promotion to RTE, dense analytics charts, "you haven't deployed in N days" guilt prompts, modal overlays on first load.
+
+**Blueprint (2026-05-21):**
+- Home touches all three gateways from §12 (`axiosStudio` + `axiosInstance` + analytics) — most data-fan-out page in the product
+- Per-block failure isolation is mandatory (no cascade)
+- Caching: health alerts no-cache (must be fresh), live activity 5min SWR, usage 1min, projects per-workspace cache, static + quick-start always available
+- Blocked on engineering questions B2 (analytics programmatic API) and B7 (cost-cap event bus); new B12 (workspace usage roll-up aggregation)
+
+**Fortify edge cases (12, priority-tagged P0–P3):**
+- P0: per-block failure isolation; billing-suspended takeover; first-run works without backend; SSR shell
+- P1: workspace switch full re-fetch (no stale flash); 24h activity local-cached; bill-shock alerts pre-emptive at ≥80% cap; empty alerts block collapses
+- P2: per-block retry; Resume Work localStorage hint; What's New dismissible & remembered
+- P3: A/B test What's New presence; click-instrument every block to validate priority
 
 ---
 

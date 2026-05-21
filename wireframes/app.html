@@ -76,8 +76,9 @@
         <a class="nav-item" data-route="session-history"><span class="ico"></span>Session History</a>
       </div>
 
-      <!-- Single item: Extensions Marketplace (promoted out of profile) -->
-      <div class="nav-group" style="padding-bottom: 4px;">
+      <!-- DISCOVER group (Extensions Marketplace as a labeled section so it stops hiding) -->
+      <div class="nav-group">
+        <div class="label">Discover</div>
         <a class="nav-item" data-route="extensions"><span class="ico"></span>Extensions Marketplace</a>
       </div>
 
@@ -181,10 +182,62 @@
           <p class="subhead">Workspace-level overview across all your projects.</p>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn" data-action="toast" data-msg="Import agent — wireframe stub">Import agent</button>
+          <button class="btn" data-action="setHomeMode" data-mode-name="first-run">View first-run state</button>
+          <button class="btn" data-action="setHomeMode" data-mode-name="suspended">View suspended state</button>
+          <button class="btn" data-action="setHomeMode" data-mode-name="default">Default</button>
           <button class="btn primary" data-route="agents" data-action="newAgent">+ New agent</button>
         </div>
       </div>
+
+      <!-- BILLING SUSPENDED takeover (edge case #7 from /fortify) — hidden by default -->
+      <div class="home-suspended hidden" id="homeSuspended">
+        <div class="box" style="border-width: 2px; background: #fff8e0;">
+          <h2 style="margin-bottom: 8px;">⚠ Account suspended</h2>
+          <p class="subhead">Your account balance has reached $0 and active agents are paused. Resolve billing to resume.</p>
+          <div class="row"><span class="label">Outstanding balance</span><span class="value">$48.20</span></div>
+          <div class="row"><span class="label">Affected agents</span><span class="value">3 live agents paused across 2 projects</span></div>
+          <div class="row"><span class="label">Estimated downtime</span><span class="value">Since 4 hours ago</span></div>
+          <div style="display:flex; gap:8px; margin-top:16px;">
+            <button class="btn primary" data-action="goAccount" data-route="billing-plans">Pay balance & resume →</button>
+            <button class="btn" data-action="toast" data-msg="Support ticket — wireframe stub">Contact support</button>
+          </div>
+          <div class="note" style="margin-top: 16px;">
+            <strong>/fortify edge case #7:</strong> when <code>financialStatus = 2</code>, the whole Home is replaced by recovery. Showing "live activity" or "what's new" while service is suspended is the LEARNINGS §6 Broken Error Recovery anti-pattern.
+          </div>
+        </div>
+      </div>
+
+      <!-- FIRST-RUN hero (edge case #1) — hidden by default -->
+      <div class="home-firstrun hidden" id="homeFirstrun">
+        <div class="box" style="border-width: 2px; padding: 32px;">
+          <h2 style="margin-bottom: 6px;">Hear an Agora agent in 60 seconds</h2>
+          <p class="subhead">Try a pre-built agent first — no setup, no credit card.</p>
+          <div class="grid-3" style="margin-top: 20px;">
+            <div class="proj-card clickable" data-action="toast" data-msg="Calling Appointment Reminder">
+              <div class="proj-name">📞 Appointment Reminder</div>
+              <div class="proj-stats">Working pre-built. Click to call now.</div>
+            </div>
+            <div class="proj-card clickable" data-action="toast" data-msg="Calling NPS Survey">
+              <div class="proj-name">📊 NPS Survey</div>
+              <div class="proj-stats">Voice feedback agent. Click to call.</div>
+            </div>
+            <div class="proj-card clickable" data-action="toast" data-msg="Calling IVR">
+              <div class="proj-name">🔀 IVR</div>
+              <div class="proj-stats">Department routing. Click to call.</div>
+            </div>
+          </div>
+          <div style="margin-top: 16px; display: flex; gap: 8px;">
+            <button class="btn primary" data-route="agents" data-action="newAgent">+ Build your own agent →</button>
+            <button class="btn" data-action="toast" data-msg="Import flow">Or import from Retell / Vapi / LiveKit</button>
+          </div>
+          <div class="note" style="margin-top: 16px;">
+            <strong>/strategize:</strong> first-time user needs to <em>hear</em> Agora before they can evaluate. Solves the ~93% Stage-2 leak (LEARNINGS §2). North-star: time-to-first-test-call ≤ 90 seconds.
+          </div>
+        </div>
+      </div>
+
+      <!-- DEFAULT (returning user) state -->
+      <div class="home-default" id="homeDefault">
 
       <!-- 1. Resume work -->
       <div class="box">
@@ -293,6 +346,7 @@
       <div class="note">
         <strong>First-run state:</strong> when this workspace has zero agents, blocks 1–3 are replaced by a "Try a pre-built agent" hero (LEARNINGS §13 Surface F).
       </div>
+      </div><!-- /home-default -->
     </div>
 
     <!-- AGENTS LIST -->
