@@ -151,7 +151,100 @@ The word *credentials* means **three different things** across the surface area.
 
 ---
 
-## 10. IA at a glance
+## 10. IA at a glance — Unified Console + Studio (locked 2026-05-21)
+
+> **Revised 2026-05-21 v2** — full Console + Studio merge after inventorying 18 production Console screenshots. 48 distinct destinations consolidated into 6 top-level sidebar groups + structured account dropdown. **"Build Agents ↗" external link to Studio is deleted; Agents are now a first-class nav item.**
+
+### Critical IA decisions
+1. **Console is the chassis** (in this merge direction) — Studio's surfaces fold in as peer nav items, not as a section. User never leaves Console.
+2. **Workspace + Project tenant model** locked. Workspace = rare switch (profile). Project = common switch (top of sidebar).
+3. **No "Settings" top-level item** — split into specific destinations under profile.
+4. **Real-Time products** sit as peers of Agents in BUILD — not as a separate Console-mode toggle.
+5. **Extensions Marketplace** lives in DISCOVER. Toggling enabled/disabled per-project lives in Project settings (polyhierarchy by design).
+
+### Sidebar
+```
+[workspace chip ▾]        (opens account dropdown to Workspaces section)
+[Project switcher ▾]      (top of sidebar — Decision #6)
+
+HOME                      workspace-level overview
+
+BUILD
+  Agents                  Studio merged in — list, builder, test, deploy
+  Real-Time products      Video · Voice · ILS · Chat · Signaling · Whiteboard
+  Integrations            Twilio · Salesforce · Zapier · HubSpot connectors
+
+DEPLOY
+  Phone Numbers
+  Web SDK
+  Campaign
+  ··· more                SIP · WhatsApp · Mobile SDKs · Embedded
+
+MONITOR
+  Analytics               per-agent + per-RTE-app
+  Call History
+  Session History
+  Usage                   per-project minutes with filters
+  Agora Analytics ↗       external advanced product
+
+DISCOVER
+  Extensions Marketplace  Cloud Recording, Media Push, ActiveFence, DeepAR, ...
+  Templates               pre-built agents
+  Docs ↗
+  Community ↗
+
+PROJECT
+  Project settings        App ID, App Cert, temp token, service toggles
+  Vendor Credentials      LLM/TTS/ASR keys
+  Notifications           project-level service config
+```
+
+### Sidebar footer (4 peer items)
+Avatar (opens account menu) · Bell (in-product notification feed) · Credits meter (free-tier visibility, ambient) · ⌘K
+
+### Account dropdown
+```
+[email · role]
+WORKSPACES   ✓ current · alternatives · + Create
+ACCOUNT      Account Overview · Billing & Subscriptions · Teams & Members ·
+             SSO Management · Notification Preferences · Profile
+DEVELOPER    RESTful API · Webhooks · Audit logs · Developer Toolkit
+HELP         Docs ↗ · Community ↗ · Contact Sales · Support tickets ·
+             System status ↗ · What's new
+Sign out
+```
+
+### Label changes from old Console + Studio
+| Was | Now |
+|---|---|
+| `Settings` (top-level) | split — specific destinations under profile |
+| `Build Agents ↗` external | `Agents` in BUILD |
+| `Subscriptions` separate | merged into `Billing & Subscriptions` |
+| `Real-Time Services` (prior wireframe) | `Real-Time products` (RTC family) |
+| `Conversational AI` | `Agents` (LiveKit/Retell convention) |
+| `More from agora` section | replaced by `DISCOVER` group |
+| `Developer Toolkit` in sidebar | profile → Developer |
+| `Build Agents ↗` promo card | deleted (feature, not banner) |
+| Bare `Credentials` | `Vendor Credentials` (project) or `RESTful API` (account) |
+| `Project Overview` (prior wireframe) | `Project settings` (avoids Home/Overview dup) |
+
+### Anti-decisions (added 2026-05-21 v2)
+- ❌ External `Build Agents ↗` link to Studio (the Console/Studio seam)
+- ❌ "Conversational AI Agents are here!" promo card (it's a feature, not a banner)
+- ❌ "More from agora" section header (marketing label, not nav)
+- ❌ `Settings` as a top-level item (too vague — must be specific)
+- ❌ "Subscriptions" separate from "Billing" (one destination for money)
+- ❌ Developer Toolkit in main sidebar (account-level, belongs in profile)
+
+### Open questions added 2026-05-21 v2
+- **B13** — Webhooks project-scoped or account-only? (Currently account.)
+- **B14** — Notification Preferences per-project or only account-level?
+- **B15** — User-creatable agent templates, or only Agora-supplied?
+- **B16** — Real-Time products: one listing screen, or 6 dedicated children (Video/Voice/ILS/Chat/Signaling/Whiteboard)?
+
+---
+
+## 10b. Prior IA notes (pre-merge, retained for context)
 
 > **Revised 2026-05-21** — moved from "L0 product toggle" pattern to grouped sidebar after testing. Tenant model also clarified: workspace + project are two distinct levels.
 
