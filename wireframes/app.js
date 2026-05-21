@@ -24,7 +24,7 @@
   function goTo(route) {
     state.route = route;
     // Determine mode based on route
-    const accountRoutes = ['account-overview', 'billing', 'team', 'agora-analytics', 'restful-api', 'webhooks', 'audit-logs'];
+    const accountRoutes = ['account-overview', 'billing-plans', 'team-sso', 'preferences', 'restful-api', 'webhooks', 'audit-logs', 'help-support', 'whats-new'];
     const targetMode = accountRoutes.includes(route) ? 'account' : 'project';
     if (state.mode !== targetMode) setMode(targetMode);
 
@@ -86,7 +86,20 @@
     },
     backToProject() {
       setMode('project');
-      goTo('agents');
+      goTo('home');
+    },
+    switchWorkspace(el) {
+      const ws = el.dataset.workspace;
+      const wsEl = document.getElementById('currentWorkspace');
+      if (wsEl) wsEl.textContent = ws;
+      const wsName = document.getElementById('wsName');
+      if (wsName) wsName.textContent = ws;
+      // Update check marks
+      document.querySelectorAll('[data-action="switchWorkspace"]').forEach((i) => {
+        i.classList.toggle('check', i.dataset.workspace === ws);
+      });
+      closeAllDropdowns();
+      toast(`Switched to ${ws}`);
     },
     goAccount(el) {
       closeAllDropdowns();
@@ -222,5 +235,5 @@
   });
 
   // ---------- Init ----------
-  goTo('agents');
+  goTo('home');
 })();

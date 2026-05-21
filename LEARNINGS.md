@@ -153,11 +153,57 @@ The word *credentials* means **three different things** across the surface area.
 
 ## 10. IA at a glance
 
-- **L0 sidebar collapses to a product toggle.** `[Agents | Real-Time]` at the top. Project chip, ⌘K, user menu collapsed into the footer.
-- **Footer = three peer-weighted 32px icon buttons** — avatar (initials) · credits meter (circular % SVG, free-tier visibility on every screen) · ⌘K. Project name lives ambient in page subheads; multi-project switching falls back to `⌘K` `@` prefix.
-- **Section order (locked):** `Build` → `Deploy` → `Monitor` → `Phone Numbers` → `Project credentials` → `Billing & Usage`.
-- **Polyhierarchy gate** expanded from 1 item to 4: Live activity + Project group + Analytics auto-redirect on mode switch.
-- **Internal type IDs stay** `'agents' | 'console'` for code stability; only user-facing labels changed.
+> **Revised 2026-05-21** — moved from "L0 product toggle" pattern to grouped sidebar after testing. Tenant model also clarified: workspace + project are two distinct levels.
+
+### Sidebar shell
+- **Top of sidebar — tenant context, top-down:**
+  1. Agora logo + collapse icon
+  2. Workspace chip (rare switch; opens workspace switcher in profile if clicked, but ambient label here)
+  3. **Project switcher** (Decision #6: top of workspace, not in profile) — `Project Alpha ▾`
+- **Group headers, ordered:** `BUILD` → `DEPLOY` → `MONITOR` → `PROJECT`. (Dropped the prior `Build → Deploy → Monitor → Phone Numbers → Project credentials → Billing & Usage` flat order in favor of grouped headers + Phone Numbers nested under DEPLOY.)
+- **Items per group (final):**
+  - **Home** (workspace-level overview — above all groups)
+  - **BUILD** — Agents · Integrations
+  - **DEPLOY** — Phone Numbers · Campaign · Web SDK · …more
+  - **MONITOR** — Analytics · Call History · Session History
+  - **PROJECT** — Project settings · Real-Time Services · Vendor Credentials · Usage
+  - **(promoted)** — Extensions Marketplace (top-level, between MONITOR and PROJECT or above BUILD)
+- **Footer = three peer-weighted icon buttons** — avatar (initials, opens account menu) · credits meter (circular % or progress bar, free-tier visibility on every screen) · ⌘K.
+- **Dropped:** `[Agents | Real-Time]` L0 toggle. Real-Time is now a project-nav item (`Real-Time Services`), not a product-toggle peer of Agents.
+
+### Tenant model
+- **Workspace** = identity-adjacent tenant (GitHub-org-like). Switching is rare. Lives **inside profile dropdown** under a "Workspaces" group.
+- **Project** = work-context tenant (GitHub-repo-like). Switching is common. Lives **at top of sidebar**.
+- Internal type IDs stay `'agents' | 'console'` for code stability; only user-facing labels changed.
+
+### Profile dropdown (behind avatar) — locked structure
+1. Email · role header (non-interactive)
+2. **Workspaces** — current + alternatives + Create workspace
+3. **Account** — Account Overview · Billing & Plans · Team & SSO · Preferences
+4. **Developer** — RESTful API · Webhooks · Audit logs · Documentation ↗
+5. **Help** — Help & Support · System status ↗ · What's new
+6. Log out
+
+### Anti-decisions (added 2026-05-21)
+- ❌ Credits meter buried in profile dropdown — it must be ambient in sidebar footer
+- ❌ "Settings" as a bare profile-menu label — rename to "Preferences" and split workspace-level config out
+- ❌ "View all plans" + "Billing" as separate items — merge into "Billing & Plans"
+- ❌ Bare "Credentials" in nav — must be scoped (`Vendor Credentials` in project nav; Agora project keys live in `Project settings`)
+- ❌ Extensions Marketplace buried in profile — promoted to top-level nav (discovery surface)
+- ❌ Notifications-only as a profile-menu link — needs a global 🔔 bell in the top bar when notifications exist
+
+### Home page (workspace-level overview)
+Content blocks, priority-ordered for P1 hustler:
+1. **Resume work** — most recent agent edited, one-click reopen
+2. **Health alerts** (only when present) — failed agent, invalid vendor key, billing-in-trouble, cost cap hit
+3. **Live agent activity** (last 24h: calls, errors, p95 latency)
+4. **Projects grid** — cards per project, click to enter
+5. **Quick actions** — New agent · Import agent · Try a pre-built
+6. **Workspace usage roll-up** (across projects, current period)
+7. **What's new** (compact, dismissible)
+8. **First-run state** — replaces 1-3 when account is empty: pre-built agents to try
+
+Explicitly **not** on Home: marketing hero copy, engagement-bait widgets, cross-promotion to RTE, dense analytics charts.
 
 ---
 

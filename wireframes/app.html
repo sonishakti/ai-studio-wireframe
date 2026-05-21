@@ -13,13 +13,32 @@
   <!-- ============== SIDEBAR ============== -->
   <aside class="sidebar">
 
-    <!-- PROJECT MODE: switcher -->
+    <!-- TOP: brand + collapse -->
+    <div class="brand-row">
+      <strong style="font-size: 16px; letter-spacing: 0.04em;">agora</strong>
+      <button class="btn icon" title="Collapse sidebar" data-action="toast" data-msg="Collapse — wireframe stub">▤</button>
+    </div>
+
+    <!-- TOP: workspace chip (rare switch — opens workspaces in account menu) -->
+    <div class="workspace-chip" data-toggle="accountDropdown" title="Switch workspace">
+      <span class="muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Workspace</span>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span id="currentWorkspace" style="font-size: 13px; font-weight: 600;">johndoe-workspace</span>
+        <span style="font-size: 10px;">▾</span>
+      </div>
+    </div>
+
+    <!-- TOP: project switcher (Decision #6) -->
     <div data-mode="project">
       <div class="switcher" id="switcher" data-toggle="switcherDropdown">
-        <span id="currentProject">Project Alpha</span>
+        <span class="muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Project</span>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span id="currentProject">Project Alpha</span>
+          <span style="font-size: 10px;">▾</span>
+        </div>
       </div>
-      <div class="dropdown hidden" id="switcherDropdown" style="left: 12px; top: 56px;">
-        <div class="group-label">Projects</div>
+      <div class="dropdown hidden" id="switcherDropdown" style="left: 12px; top: 132px;">
+        <div class="group-label">Projects in johndoe-workspace</div>
         <div class="item check" data-action="switchProject" data-project="Project Alpha">Project Alpha</div>
         <div class="item" data-action="switchProject" data-project="Project Beta">Project Beta</div>
         <div class="item" data-action="switchProject" data-project="Internal Demos">Internal Demos</div>
@@ -28,16 +47,51 @@
         <div class="item" data-action="viewAllProjects">View all projects →</div>
       </div>
 
-      <div class="nav-group" style="margin-top: 16px;">
+      <!-- Single item: Home (workspace-level overview) -->
+      <div class="nav-group" style="margin-top: 12px; padding-bottom: 4px;">
+        <a class="nav-item" data-route="home"><span class="ico"></span>Home</a>
+      </div>
+
+      <!-- BUILD -->
+      <div class="nav-group">
+        <div class="label">Build</div>
         <a class="nav-item" data-route="agents"><span class="ico"></span>Agents</a>
+        <a class="nav-item" data-route="integrations"><span class="ico"></span>Integrations</a>
+      </div>
+
+      <!-- DEPLOY -->
+      <div class="nav-group">
+        <div class="label">Deploy</div>
+        <a class="nav-item" data-route="phone-numbers"><span class="ico"></span>Phone Numbers</a>
+        <a class="nav-item" data-route="campaign"><span class="ico"></span>Campaign</a>
+        <a class="nav-item" data-route="web-sdk"><span class="ico"></span>Web SDK</a>
+        <a class="nav-item" data-route="more-deploy" style="color: #777;"><span class="ico"></span>··· more</a>
+      </div>
+
+      <!-- MONITOR -->
+      <div class="nav-group">
+        <div class="label">Monitor</div>
         <a class="nav-item" data-route="analytics"><span class="ico"></span>Analytics</a>
-        <a class="nav-item" data-route="usage"><span class="ico"></span>Usage</a>
-        <a class="nav-item" data-route="project-overview"><span class="ico"></span>Project Overview</a>
+        <a class="nav-item" data-route="call-history"><span class="ico"></span>Call History</a>
+        <a class="nav-item" data-route="session-history"><span class="ico"></span>Session History</a>
+      </div>
+
+      <!-- Single item: Extensions Marketplace (promoted out of profile) -->
+      <div class="nav-group" style="padding-bottom: 4px;">
+        <a class="nav-item" data-route="extensions"><span class="ico"></span>Extensions Marketplace</a>
+      </div>
+
+      <!-- PROJECT -->
+      <div class="nav-group">
+        <div class="label">Project</div>
+        <a class="nav-item" data-route="project-settings"><span class="ico"></span>Project settings</a>
+        <a class="nav-item" data-route="realtime-services"><span class="ico"></span>Real-Time Services</a>
         <a class="nav-item" data-route="vendor-credentials"><span class="ico"></span>Vendor Credentials</a>
+        <a class="nav-item" data-route="usage"><span class="ico"></span>Usage</a>
       </div>
     </div>
 
-    <!-- ACCOUNT MODE: back-to-project + account nav -->
+    <!-- ACCOUNT MODE sidebar -->
     <div data-mode="account" class="hidden">
       <div class="switcher" style="background:#f5f5f5;cursor:pointer" data-action="backToProject">
         <span>← Back to project</span>
@@ -46,43 +100,71 @@
       <div class="nav-group" style="margin-top: 16px;">
         <div class="label">Account</div>
         <a class="nav-item" data-route="account-overview"><span class="ico"></span>Account Overview</a>
-        <a class="nav-item" data-route="billing"><span class="ico"></span>Billing</a>
-        <a class="nav-item" data-route="team"><span class="ico"></span>Team / Workspace</a>
-        <a class="nav-item" data-route="agora-analytics"><span class="ico"></span>Agora Analytics</a>
+        <a class="nav-item" data-route="billing-plans"><span class="ico"></span>Billing &amp; Plans</a>
+        <a class="nav-item" data-route="team-sso"><span class="ico"></span>Team &amp; SSO</a>
+        <a class="nav-item" data-route="preferences"><span class="ico"></span>Preferences</a>
       </div>
 
       <div class="nav-group">
-        <div class="label">Developer Settings</div>
+        <div class="label">Developer</div>
         <a class="nav-item" data-route="restful-api"><span class="ico"></span>RESTful API</a>
         <a class="nav-item" data-route="webhooks"><span class="ico"></span>Webhooks</a>
         <a class="nav-item" data-route="audit-logs"><span class="ico"></span>Audit logs</a>
+        <a class="nav-item" data-action="toast" data-msg="docs.agora.io would open in new tab"><span class="ico"></span>Documentation ↗</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="label">Help</div>
+        <a class="nav-item" data-route="help-support"><span class="ico"></span>Help &amp; Support</a>
+        <a class="nav-item" data-action="toast" data-msg="status.agora.io would open in new tab"><span class="ico"></span>System status ↗</a>
+        <a class="nav-item" data-route="whats-new"><span class="ico"></span>What's new</a>
       </div>
     </div>
 
-    <!-- Footer (persistent) -->
+    <!-- Footer: avatar + ambient credits meter + ⌘K -->
     <div class="footer">
-      <div class="avatar" id="avatar" data-toggle="accountDropdown" title="Jane Doe">JD</div>
-      <div class="credits" title="Free-tier minutes remaining">224K / 400K</div>
+      <div class="avatar" id="avatar" data-toggle="accountDropdown" title="Jane Doe — account menu">JD</div>
+      <div class="credits-meter" title="Free-tier minutes remaining — ambient, every screen">
+        <div class="credits-bar"><div class="credits-fill" style="width: 35%"></div></div>
+        <div class="credits-text">3,500 / 10,000 mins</div>
+      </div>
       <button class="btn icon" title="Command palette">⌘K</button>
 
-      <!-- Account dropdown -->
-      <div class="dropdown hidden" id="accountDropdown" style="left: 12px; bottom: 60px; min-width: 260px;">
-        <div class="group-label">Jane Doe</div>
-        <div class="item" style="font-size: 11px; color: #555; padding-top: 0;">jane.doe@acme.com · Owner</div>
+      <!-- Account dropdown (NEW STRUCTURE per IA decision) -->
+      <div class="dropdown hidden" id="accountDropdown" style="left: 0; bottom: 60px; width: 280px;">
+        <div class="dd-header">
+          <strong>Jane Doe</strong>
+          <div class="muted" style="font-size: 11px;">jane.doe@acme.com · Owner</div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="group-label">Workspaces</div>
+        <div class="item check" data-action="switchWorkspace" data-workspace="johndoe-workspace">johndoe-workspace</div>
+        <div class="item" data-action="switchWorkspace" data-workspace="acme-dev-team">acme-dev-team</div>
+        <div class="item" data-action="toast" data-msg="Create workspace — wireframe stub">+ Create workspace</div>
+
         <div class="divider"></div>
         <div class="group-label">Account</div>
         <div class="item" data-action="goAccount" data-route="account-overview">Account Overview</div>
-        <div class="item" data-action="goAccount" data-route="billing">Billing</div>
-        <div class="item" data-action="goAccount" data-route="team">Team / Workspace</div>
-        <div class="item" data-action="goAccount" data-route="agora-analytics">Agora Analytics</div>
+        <div class="item" data-action="goAccount" data-route="billing-plans">Billing &amp; Plans</div>
+        <div class="item" data-action="goAccount" data-route="team-sso">Team &amp; SSO</div>
+        <div class="item" data-action="goAccount" data-route="preferences">Preferences</div>
+
         <div class="divider"></div>
-        <div class="group-label">Developer Settings</div>
+        <div class="group-label">Developer</div>
         <div class="item" data-action="goAccount" data-route="restful-api">RESTful API <span class="tag muted">CID + Secret</span></div>
         <div class="item" data-action="goAccount" data-route="webhooks">Webhooks</div>
         <div class="item" data-action="goAccount" data-route="audit-logs">Audit logs</div>
+        <div class="item" data-action="toast" data-msg="docs.agora.io would open in new tab">Documentation ↗</div>
+
         <div class="divider"></div>
-        <div class="item">Preferences</div>
-        <div class="item">Sign out</div>
+        <div class="group-label">Help</div>
+        <div class="item" data-action="goAccount" data-route="help-support">Help &amp; Support</div>
+        <div class="item" data-action="toast" data-msg="status.agora.io would open in new tab">System status ↗</div>
+        <div class="item" data-action="goAccount" data-route="whats-new">What's new</div>
+
+        <div class="divider"></div>
+        <div class="item" data-action="toast" data-msg="Log out — wireframe stub">↗ Log out</div>
       </div>
     </div>
   </aside>
@@ -90,13 +172,136 @@
   <!-- ============== MAIN ============== -->
   <section class="main" id="main">
 
+    <!-- HOME (workspace-level overview) -->
+    <div class="screen" data-screen="home">
+      <div class="breadcrumb"><span id="wsName">johndoe-workspace</span> › Home</div>
+      <div class="header-row">
+        <div>
+          <h2>Welcome back, Jane</h2>
+          <p class="subhead">Workspace-level overview across all your projects.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" data-action="toast" data-msg="Import agent — wireframe stub">Import agent</button>
+          <button class="btn primary" data-route="agents" data-action="newAgent">+ New agent</button>
+        </div>
+      </div>
+
+      <!-- 1. Resume work -->
+      <div class="box">
+        <h3>Resume work</h3>
+        <div class="row clickable" data-action="openAgent" data-agent="Appointment Reminder">
+          <span class="label">Appointment Reminder · Project Alpha</span>
+          <span class="value">Draft · last edited 2 min ago</span>
+          <div class="actions"><button class="btn small">Open builder →</button></div>
+        </div>
+      </div>
+
+      <!-- 2. Health alerts -->
+      <div class="box" style="border-color: #000; background: #fff8e0;">
+        <h3>⚠ Needs your attention</h3>
+        <div class="row">
+          <span class="label">OpenAI credential</span>
+          <span class="value">Returning 401 — key may have rotated</span>
+          <div class="actions"><a class="btn small" data-route="vendor-credentials">Open Vendor Credentials →</a></div>
+        </div>
+        <div class="row">
+          <span class="label">Project Beta · cost cap</span>
+          <span class="value">Hit 80% of $200 monthly cap (3 days early)</span>
+          <div class="actions"><a class="btn small" data-action="goAccount" data-route="billing-plans">View billing →</a></div>
+        </div>
+        <div class="note" style="background: transparent; border-left-color: #000;">
+          <strong>Anti-pattern guard:</strong> surface problems before they become crises (LEARNINGS §6). Only shows when alerts exist; otherwise this block disappears entirely.
+        </div>
+      </div>
+
+      <!-- 3. Live agent activity (last 24h) -->
+      <div class="box">
+        <h3>Live agent activity · last 24h</h3>
+        <div class="grid-stats">
+          <div class="stat"><div class="stat-num">1,247</div><div class="stat-label">calls</div></div>
+          <div class="stat"><div class="stat-num">98.4%</div><div class="stat-label">success</div></div>
+          <div class="stat"><div class="stat-num">820ms</div><div class="stat-label">p95 end-to-end</div></div>
+          <div class="stat"><div class="stat-num">$12.40</div><div class="stat-label">spend</div></div>
+        </div>
+        <div class="actions" style="margin-top: 12px;"><a class="btn small" data-route="analytics">View full analytics →</a></div>
+      </div>
+
+      <!-- 4. Projects grid -->
+      <div class="box">
+        <h3>Projects in this workspace</h3>
+        <div class="grid-3">
+          <div class="proj-card clickable" data-action="switchProject" data-project="Project Alpha">
+            <div class="proj-name">Project Alpha <span class="tag">Active</span></div>
+            <div class="proj-stats">
+              <div>3 agents · 1 live</div>
+              <div>176K / 400K mins</div>
+              <div class="muted">Last activity 2 min ago</div>
+            </div>
+          </div>
+          <div class="proj-card clickable" data-action="switchProject" data-project="Project Beta">
+            <div class="proj-name">Project Beta</div>
+            <div class="proj-stats">
+              <div>1 agent · 0 live</div>
+              <div>22K / 50K mins</div>
+              <div class="muted">Last activity 3 days ago</div>
+            </div>
+          </div>
+          <div class="proj-card clickable" data-action="switchProject" data-project="Internal Demos">
+            <div class="proj-name">Internal Demos</div>
+            <div class="proj-stats">
+              <div>5 agents · 5 live</div>
+              <div>4K / 10K mins</div>
+              <div class="muted">Last activity 1 week ago</div>
+            </div>
+          </div>
+          <div class="proj-card clickable" data-action="createProject" style="border-style: dashed; display: flex; align-items: center; justify-content: center; color: #555;">
+            + Create new project
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Quick actions -->
+      <div class="box">
+        <h3>Quick start</h3>
+        <p class="desc">Get from zero to a live agent in under a minute.</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn" data-route="agents" data-action="newAgent">+ New agent from scratch</button>
+          <button class="btn" data-action="toast" data-msg="Import flow — wireframe stub">↓ Import from Retell / Vapi / LiveKit</button>
+          <button class="btn" data-route="agents">▶ Try a pre-built</button>
+        </div>
+      </div>
+
+      <!-- 6. Workspace usage roll-up -->
+      <div class="box">
+        <h3>Workspace usage · this month</h3>
+        <div class="row"><span class="label">Total minutes used</span><span class="value">202K of 460K · 258K remaining</span></div>
+        <div class="row"><span class="label">Project Alpha</span><span class="value">176K mins · 88%</span></div>
+        <div class="row"><span class="label">Project Beta</span><span class="value">22K mins · 11%</span></div>
+        <div class="row"><span class="label">Internal Demos</span><span class="value">4K mins · 2%</span></div>
+        <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
+        <div class="actions" style="margin-top: 12px;"><a class="btn small" data-action="goAccount" data-route="billing-plans">Manage plan →</a></div>
+      </div>
+
+      <!-- 7. What's new (dismissible, low-key) -->
+      <div class="box" style="background: #f5f5f5;">
+        <h3>What's new <button class="btn icon" style="float: right;" data-action="toast" data-msg="Dismissed">×</button></h3>
+        <div class="row" style="padding: 4px 0;"><span class="label">Vendor Credentials</span><span class="value">Renamed from "Credentials". Vendor-first add flow.</span></div>
+        <div class="row" style="padding: 4px 0;"><span class="label">Extensions Marketplace</span><span class="value">Browse 15+ Agora extensions in one place.</span></div>
+        <div class="row" style="padding: 4px 0;"><span class="label">Test without publish</span><span class="value">Test your agent immediately — no publish step required.</span></div>
+      </div>
+
+      <div class="note">
+        <strong>First-run state:</strong> when this workspace has zero agents, blocks 1–3 are replaced by a "Try a pre-built agent" hero (LEARNINGS §13 Surface F).
+      </div>
+    </div>
+
     <!-- AGENTS LIST -->
-    <div class="screen" data-screen="agents">
+    <div class="screen hidden" data-screen="agents">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Agents</div>
       <div class="header-row">
         <div>
           <h2>Agents</h2>
-          <p class="subhead">Deploy your first AI agent in minutes. Import or start from a template.</p>
+          <p class="subhead">Build, test, and deploy voice AI agents in this project.</p>
         </div>
         <div style="display:flex;gap:8px">
           <button class="btn">Import agent</button>
@@ -134,35 +339,88 @@
       </div>
     </div>
 
-    <!-- ANALYTICS (placeholder) -->
+    <!-- INTEGRATIONS -->
+    <div class="screen hidden" data-screen="integrations">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Integrations</div>
+      <h2>Integrations</h2>
+      <p class="subhead">Pre-built connectors — Twilio, Salesforce, Zapier, HubSpot, Webhooks. Different from <a href="#" data-route="vendor-credentials">Vendor Credentials</a> (LLM/TTS/ASR API keys).</p>
+      <div class="empty">Wireframe placeholder — connector gallery.</div>
+    </div>
+
+    <!-- DEPLOY: Phone Numbers -->
+    <div class="screen hidden" data-screen="phone-numbers">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Phone Numbers</div>
+      <h2>Phone Numbers</h2>
+      <p class="subhead">Buy, port, and assign phone numbers to your agents.</p>
+      <div class="empty">Wireframe placeholder.</div>
+    </div>
+    <div class="screen hidden" data-screen="campaign">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Campaign</div>
+      <h2>Campaign</h2>
+      <p class="subhead">Outbound calling campaigns — schedule, list management, throttling.</p>
+      <div class="empty">Wireframe placeholder.</div>
+    </div>
+    <div class="screen hidden" data-screen="web-sdk">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Web SDK</div>
+      <h2>Web SDK</h2>
+      <p class="subhead">Embed your agent into a web app — iframe widget, headless SDK, React component.</p>
+      <div class="empty">Wireframe placeholder.</div>
+    </div>
+    <div class="screen hidden" data-screen="more-deploy">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Deploy › More</div>
+      <h2>More deploy surfaces</h2>
+      <div class="empty">SIP · WhatsApp · Mobile SDKs · Embedded devices — wireframe placeholder.</div>
+    </div>
+
+    <!-- MONITOR -->
     <div class="screen hidden" data-screen="analytics">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Analytics</div>
       <h2>Analytics</h2>
       <p class="subhead">Per-agent performance, latencies, and conversion in this project.</p>
-      <div class="empty">Wireframe placeholder — per-agent charts, latency histograms, drop-off funnels.</div>
+      <div class="empty">Wireframe placeholder.</div>
+    </div>
+    <div class="screen hidden" data-screen="call-history">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Call History</div>
+      <h2>Call History</h2>
+      <p class="subhead">Every call — per-agent log with playback, transcript, outcome.</p>
+      <div class="empty">Wireframe placeholder — searchable + filterable list.</div>
+    </div>
+    <div class="screen hidden" data-screen="session-history">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Session History</div>
+      <h2>Session History</h2>
+      <p class="subhead">Longer-running multi-turn sessions — distinct from per-call view.</p>
+      <div class="empty">Wireframe placeholder.</div>
     </div>
 
-    <!-- USAGE (placeholder) -->
-    <div class="screen hidden" data-screen="usage">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Usage</div>
-      <h2>Usage</h2>
-      <p class="subhead">Minutes consumed in this project — not billing.</p>
-      <div class="box">
-        <h3>This month</h3>
-        <div class="row"><span class="label">Standard minutes</span><span class="value">176K of 400K used · 224K left</span></div>
-        <div class="row"><span class="label">By agent</span><span class="value">Appointment Reminder 92K · Sales lead 71K · NPS 13K</span></div>
-        <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
-      </div>
+    <!-- EXTENSIONS MARKETPLACE (promoted from profile) -->
+    <div class="screen hidden" data-screen="extensions">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Extensions Marketplace</div>
+      <h2>Extensions Marketplace</h2>
+      <p class="subhead">Browse and enable Agora extensions for this project.</p>
+
       <div class="note">
-        <strong>Decision #5:</strong> Usage lives here in project context. Billing is at <a href="#" data-action="goAccount" data-route="billing">Account → Billing</a>.
+        <strong>Promoted from profile:</strong> this is a discovery surface — browsing what's available — so it belongs in nav, not buried in the account menu (LEARNINGS §10 anti-decision 2026-05-21).
+      </div>
+
+      <div class="grid-3">
+        <div class="ext-card"><h3>Cloud Recording</h3><div class="desc">Record agent calls to S3 / GCS.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        <div class="ext-card"><h3>Media Push</h3><div class="desc">Stream agent audio to a destination URL.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        <div class="ext-card"><h3>Signaling</h3><div class="desc">Real-time messaging channel between agent and client.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        <div class="ext-card"><h3>Whiteboard</h3><div class="desc">Collaborative whiteboard for video sessions.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        <div class="ext-card"><h3>Real-Time STT</h3><div class="desc">Speech-to-text overlay for calls.</div><div class="actions"><span class="tag">Enabled</span></div></div>
+        <div class="ext-card"><h3>Chat</h3><div class="desc">Persistent text chat alongside voice agents.</div><div class="actions"><button class="btn small">Enable</button></div></div>
       </div>
     </div>
 
-    <!-- PROJECT OVERVIEW -->
-    <div class="screen hidden" data-screen="project-overview">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Project Overview</div>
-      <h2>Project Overview</h2>
+    <!-- PROJECT SETTINGS (was "Project Overview" — renamed to avoid Home dup) -->
+    <div class="screen hidden" data-screen="project-settings">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Project settings</div>
+      <h2>Project settings</h2>
       <p class="subhead">Identity and configuration for this Agora project. Not for debugging agents.</p>
+
+      <div class="note">
+        <strong>Renamed from "Project Overview":</strong> avoids the Home/Overview dual-label confusion (IA decision 2026-05-21).
+      </div>
 
       <div class="box">
         <h3>Project name</h3>
@@ -202,7 +460,6 @@
           <span class="value" style="color:#777">Enable when rotating</span>
           <div class="actions"><button class="btn small" data-action="toast" data-msg="Secondary cert enabled — start rotation">Enable secondary</button></div>
         </div>
-        <div class="note"><strong>Rotation flow:</strong> Enable secondary → both certs valid → migrate client tokens → revoke primary.</div>
       </div>
 
       <div class="box">
@@ -211,32 +468,25 @@
         <div class="grid-2">
           <div class="field"><label>Channel name</label><input class="input" placeholder="e.g. agent-test-1"></div>
           <div class="field"><label>UID</label><input class="input" placeholder="0 (any user)"></div>
-          <div class="field"><label>Role</label><input class="input" value="Publisher · Subscriber"></div>
-          <div class="field"><label>Expires in</label><input class="input" value="24 hours (max)"></div>
         </div>
         <button class="btn primary" data-action="toast" data-msg="Temporary token generated">Generate token</button>
       </div>
 
       <div class="box">
         <h3>Project services</h3>
-        <div class="desc">Most are auto-enabled when an agent uses them. Manual toggles are an escape hatch, not a primary path.</div>
-        <div class="row"><span class="label">Conversational AI Engine</span><span class="tag">Enabled · auto</span><span class="value" style="color:#555">required for voice agents</span></div>
-        <div class="row"><span class="label">Real-Time STT</span><span class="tag">Enabled · auto</span><span class="value" style="color:#555">enabled by Appointment Reminder agent</span></div>
-        <div class="row"><span class="label">Cloud Recording</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cloud Recording enabled">Enable</button></div></div>
-        <div class="row"><span class="label">Media Push</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Media Push enabled">Enable</button></div></div>
-        <div class="row"><span class="label">Signaling</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Signaling enabled">Enable</button></div></div>
-        <div class="note"><strong>Anti-pattern guard:</strong> if an agent fails because a service is off, the builder auto-enables it inline. Users should never have to leave the builder to find the right toggle.</div>
+        <div class="desc">Most are auto-enabled when an agent uses them. Browse all options in <a href="#" data-route="extensions">Extensions Marketplace</a>.</div>
+        <div class="row"><span class="label">Conversational AI Engine</span><span class="tag">Enabled · auto</span></div>
+        <div class="row"><span class="label">Real-Time STT</span><span class="tag">Enabled · auto</span></div>
+        <div class="row"><span class="label">Cloud Recording</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-route="extensions">Browse extensions →</button></div></div>
       </div>
+    </div>
 
-      <div class="box">
-        <h3>Usage in this project</h3>
-        <div class="row">
-          <span class="label">This month</span>
-          <span class="value">176K mins used · 224K of 400K mins left</span>
-          <div class="actions"><a class="btn small" data-route="usage">View usage details →</a></div>
-        </div>
-        <div class="note"><strong>Decision #5:</strong> Usage stays in project context. Billing is account-level — only surfaced here when payment is needed.</div>
-      </div>
+    <!-- REAL-TIME SERVICES -->
+    <div class="screen hidden" data-screen="realtime-services">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Real-Time Services</div>
+      <h2>Real-Time Services</h2>
+      <p class="subhead">The legacy RTE family for this project — Video Calling, Voice Calling, Interactive Live Streaming, Broadcast, Chat, Signaling, Whiteboard.</p>
+      <div class="empty">Wireframe placeholder — list of enabled RTC products + quickstart links.</div>
     </div>
 
     <!-- VENDOR CREDENTIALS -->
@@ -251,7 +501,7 @@
       </div>
 
       <div class="note">
-        <strong>Disambiguation:</strong> For your Agora App ID / Certificate / temp token, see <a href="#" data-route="project-overview">Project Overview</a>. For Customer ID + Customer Secret, see <a href="#" data-action="goAccount" data-route="restful-api">Account → Developer Settings → RESTful API</a>.
+        <strong>Disambiguation:</strong> For your Agora App ID / Certificate / temp token, see <a href="#" data-route="project-settings">Project settings</a>. For Customer ID + Customer Secret, see <a href="#" data-action="goAccount" data-route="restful-api">Account → Developer → RESTful API</a>.
       </div>
 
       <div class="box">
@@ -262,6 +512,20 @@
           <div class="row"><span class="label">Deepgram · ASR</span><span class="value">dg-•••0b8e</span><span class="tag muted">Not in use</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
         </div>
       </div>
+    </div>
+
+    <!-- USAGE -->
+    <div class="screen hidden" data-screen="usage">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Usage</div>
+      <h2>Usage</h2>
+      <p class="subhead">Minutes consumed in this project — not billing.</p>
+      <div class="box">
+        <h3>This month</h3>
+        <div class="row"><span class="label">Standard minutes</span><span class="value">176K of 400K used · 224K left</span></div>
+        <div class="row"><span class="label">By agent</span><span class="value">Appointment Reminder 92K · Sales lead 71K · NPS 13K</span></div>
+        <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
+      </div>
+      <div class="note"><strong>Decision #5:</strong> Usage stays in project context. Billing is at <a href="#" data-action="goAccount" data-route="billing-plans">Account → Billing &amp; Plans</a>.</div>
     </div>
 
     <!-- AGENT BUILDER -->
@@ -290,77 +554,49 @@
             <div class="tab" data-tab="integrations">Integrations</div>
             <div class="tab" data-tab="history">Deploy history</div>
           </div>
-
           <div class="tab-panel" data-panel="build">
-            <div class="box">
-              <h3>Voice</h3>
-              <div class="grid-2">
-                <div class="field"><label>Provider</label><input class="input" value="ElevenLabs (via Vendor Credentials)"></div>
-                <div class="field"><label>Voice</label><input class="input" value="Sarah · en-US"></div>
-              </div>
-            </div>
-            <div class="box">
-              <h3>Model</h3>
-              <div class="grid-2">
-                <div class="field"><label>LLM</label><input class="input" value="OpenAI · gpt-4o (via Vendor Credentials)"></div>
-                <div class="field"><label>Temperature</label><input class="input" value="0.6"></div>
-              </div>
-            </div>
-            <div class="box">
-              <h3>System prompt</h3>
-              <textarea class="input mono" rows="6">You are calling on behalf of Dr. Chen's office to remind {{customer_name}} about their appointment on {{appointment_date}}. Be brief, warm, and confirm or reschedule.</textarea>
-            </div>
-            <div class="box" style="background:#fff8e0">
-              <h3>Service auto-enable (inline fix, not a console handoff)</h3>
-              <div class="desc">This agent needs Real-Time STT. It's not enabled on this project yet. We'll enable it when you run the first test.</div>
-              <button class="btn" data-action="toast" data-msg="Real-Time STT enabled for Project Alpha">Enable Real-Time STT for this project</button>
-              <div class="note"><strong>Decision #2 in action:</strong> never make users leave Studio to fetch App ID, certificates, or service toggles.</div>
-            </div>
+            <div class="box"><h3>Voice</h3><div class="grid-2"><div class="field"><label>Provider</label><input class="input" value="ElevenLabs (via Vendor Credentials)"></div><div class="field"><label>Voice</label><input class="input" value="Sarah · en-US"></div></div></div>
+            <div class="box"><h3>Model</h3><div class="grid-2"><div class="field"><label>LLM</label><input class="input" value="OpenAI · gpt-4o (via Vendor Credentials)"></div><div class="field"><label>Temperature</label><input class="input" value="0.6"></div></div></div>
+            <div class="box"><h3>System prompt</h3><textarea class="input mono" rows="6">You are calling on behalf of Dr. Chen's office to remind {{customer_name}} about their appointment on {{appointment_date}}. Be brief, warm, and confirm or reschedule.</textarea></div>
           </div>
-
-          <div class="tab-panel hidden" data-panel="knowledge">
-            <div class="box"><h3>Knowledge</h3><div class="empty">Upload PDFs, URLs, or paste text. Wireframe placeholder.</div></div>
-          </div>
-          <div class="tab-panel hidden" data-panel="integrations">
-            <div class="box"><h3>Integrations</h3><div class="empty">Add a connector from our library of integrations below. Wireframe placeholder.</div></div>
-          </div>
-          <div class="tab-panel hidden" data-panel="history">
-            <div class="box"><h3>Deploy history</h3><div class="empty">No deploys yet. Run a test, then deploy.</div></div>
-          </div>
+          <div class="tab-panel hidden" data-panel="knowledge"><div class="box"><h3>Knowledge</h3><div class="empty">Upload PDFs, URLs, or paste text. Wireframe placeholder.</div></div></div>
+          <div class="tab-panel hidden" data-panel="integrations"><div class="box"><h3>Integrations</h3><div class="empty">Add a connector from our library. Wireframe placeholder.</div></div></div>
+          <div class="tab-panel hidden" data-panel="history"><div class="box"><h3>Deploy history</h3><div class="empty">No deploys yet. Run a test, then deploy.</div></div></div>
         </div>
 
         <div class="test-panel">
           <h3>Test agent</h3>
           <div class="desc" style="font-size:11px;color:#555">Runs against the current draft. No publish required.</div>
           <div class="orb"></div>
-          <div style="text-align:center">
-            <button class="btn primary" style="width:100%" data-action="toast" data-msg="Calling agent — listen up">Start call</button>
-            <div style="font-size:11px;color:#555;margin-top:8px">or type — <input class="input" placeholder="Hi, I'm calling about..." style="font-size:11px;padding:4px 6px"></div>
-          </div>
+          <div style="text-align:center"><button class="btn primary" style="width:100%" data-action="toast" data-msg="Calling agent — listen up">Start call</button></div>
           <div class="box" style="margin-top:16px;padding:10px">
             <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">Status</span><span class="tag">Draft · ready to test</span></div>
-            <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">End-to-end latency</span><span class="value" style="font-size:11px">— run a test —</span></div>
-            <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">LLM first token</span><span class="value" style="font-size:11px">— run a test —</span></div>
             <div class="row" style="padding:4px 0"><span class="label" style="font-size:11px">Est. cost per minute</span><span class="value" style="font-size:11px">$0.10</span></div>
           </div>
-          <div class="note" style="font-size:10px"><strong>Anti-pattern guard:</strong> if the test fails, the error explains the cause here — not a redirect to Project Overview.</div>
         </div>
       </div>
     </div>
 
-    <!-- ACCOUNT OVERVIEW -->
+    <!-- ============== ACCOUNT-LEVEL SCREENS ============== -->
+
     <div class="screen hidden" data-screen="account-overview">
       <div class="breadcrumb">Account › Account Overview</div>
       <h2>Account Overview</h2>
       <p class="subhead">Org info, owner, seats, security posture.</p>
-      <div class="empty">Wireframe placeholder — account roll-up.</div>
+      <div class="box">
+        <div class="row"><span class="label">Account name</span><span class="value">Acme Inc.</span></div>
+        <div class="row"><span class="label">Owner</span><span class="value">Jane Doe · jane.doe@acme.com</span></div>
+        <div class="row"><span class="label">Workspaces</span><span class="value">2 (johndoe-workspace · acme-dev-team)</span></div>
+        <div class="row"><span class="label">Seats</span><span class="value">5 of 10 used</span></div>
+        <div class="row"><span class="label">Security</span><span class="value">SSO enabled · MFA required for owners</span></div>
+      </div>
     </div>
 
-    <!-- BILLING -->
-    <div class="screen hidden" data-screen="billing">
-      <div class="breadcrumb">Account › Billing</div>
-      <h2>Billing</h2>
-      <p class="subhead">Plan, payment method, invoices. <strong>Account-level</strong> — covers all projects.</p>
+    <div class="screen hidden" data-screen="billing-plans">
+      <div class="breadcrumb">Account › Billing &amp; Plans</div>
+      <h2>Billing &amp; Plans</h2>
+      <p class="subhead">Single page — plan selection, payment method, invoices, account-level usage.</p>
+      <div class="note"><strong>Merged from "View all plans" + "Billing":</strong> plans are billing. One destination, not two (IA decision 2026-05-21).</div>
       <div class="box">
         <h3>Current plan</h3>
         <div class="row"><span class="label">Plan</span><span class="value">Starter · $49/mo · 50K mins included</span><div class="actions"><button class="btn small">Change plan</button></div></div>
@@ -368,62 +604,79 @@
         <div class="row"><span class="label">Next invoice</span><span class="value">12 Jun 2026 · est. $49 + $0 overage</span></div>
       </div>
       <div class="box">
-        <h3>Usage roll-up across projects</h3>
-        <div class="row"><span class="label">Project Alpha</span><span class="value">176K mins</span></div>
-        <div class="row"><span class="label">Project Beta</span><span class="value">22K mins</span></div>
-        <div class="row"><span class="label">Internal Demos</span><span class="value">4K mins</span></div>
+        <h3>Available plans</h3>
+        <div class="row"><span class="label">FREE</span><span class="value">10K mins · 0 concurrent agents</span><div class="actions"><span class="tag muted">Downgrade</span></div></div>
+        <div class="row"><span class="label">STARTER · $49</span><span class="value">50K mins · 2 concurrent</span><span class="tag">Current</span></div>
+        <div class="row"><span class="label">PRO · $199</span><span class="value">200K mins · 10 concurrent</span><div class="actions"><button class="btn small">Upgrade</button></div></div>
+        <div class="row"><span class="label">BUSINESS · custom</span><span class="value">Contact sales</span><div class="actions"><button class="btn small">Talk to sales</button></div></div>
       </div>
-      <div class="note"><strong>Decision #5:</strong> Billing is account-level. Per-project usage stays in <a href="#" data-action="backToProject">project context</a>.</div>
     </div>
 
-    <!-- TEAM -->
-    <div class="screen hidden" data-screen="team">
-      <div class="breadcrumb">Account › Team / Workspace</div>
-      <h2>Team / Workspace</h2>
-      <div class="empty">Wireframe placeholder — members, roles, SSO.</div>
+    <div class="screen hidden" data-screen="team-sso">
+      <div class="breadcrumb">Account › Team &amp; SSO</div>
+      <h2>Team &amp; SSO</h2>
+      <p class="subhead">Members, roles, single sign-on.</p>
+      <div class="empty">Wireframe placeholder — member list with roles + invite + SSO config.</div>
     </div>
 
-    <!-- AGORA ANALYTICS -->
-    <div class="screen hidden" data-screen="agora-analytics">
-      <div class="breadcrumb">Account › Agora Analytics</div>
-      <h2>Agora Analytics</h2>
-      <p class="subhead">Cross-project, cross-product analytics product.</p>
-      <div class="empty">Wireframe placeholder. Note: this is the analytics product, not per-agent analytics (that lives in project nav).</div>
+    <div class="screen hidden" data-screen="preferences">
+      <div class="breadcrumb">Account › Preferences</div>
+      <h2>Preferences</h2>
+      <p class="subhead">Your personal settings — theme, locale, keyboard shortcuts, email digests.</p>
+      <div class="note"><strong>Renamed from "Settings":</strong> bare "Settings" was ambiguous (workspace? account? project? profile?). Specific name signals personal scope (IA decision 2026-05-21).</div>
+      <div class="empty">Wireframe placeholder.</div>
     </div>
 
-    <!-- RESTFUL API -->
     <div class="screen hidden" data-screen="restful-api">
-      <div class="breadcrumb">Account › Developer Settings › RESTful API</div>
+      <div class="breadcrumb">Account › Developer › RESTful API</div>
       <h2>RESTful API credentials</h2>
       <p class="subhead">Account-level credentials for Agora REST APIs.</p>
       <div class="note"><strong>Doc:</strong> <a href="https://docs.agora.io/en/signaling/rest-api/restful-authentication" target="_blank">Agora — RESTful authentication</a></div>
-
       <div class="box">
         <h3>Active credential pair</h3>
         <div class="row"><span class="label">Customer ID</span><span class="value">6512abc12def34567890</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Copied Customer ID">Copy</button></div></div>
         <div class="row"><span class="label">Customer Secret</span><span class="value" id="custSecretVal">••••••••••••••••••••••••3f9a</span><div class="actions"><button class="btn small" data-action="revealSecret">Reveal</button><button class="btn small" data-action="toast" data-msg="Copied Customer Secret">Copy</button></div></div>
         <div class="row"><span class="label">Created</span><span class="value">12 Mar 2026 · by Jane Doe</span></div>
         <div class="row"><span class="label">Last used</span><span class="value">3 days ago · from 198.51.x.x</span></div>
-        <div style="display:flex;gap:8px;margin-top:12px"><button class="btn">Generate new pair</button><button class="btn">Revoke</button></div>
       </div>
-
-      <div class="box">
-        <h3>Generate Base64 auth string</h3>
-        <div class="desc">Paste into the <code>Authorization: Basic …</code> header of any Agora REST call.</div>
-        <input class="input mono" value="Basic NjUxMmFiYzEyZGVmMzQ1Njc4OTA6KioqKioqKioqKioqMzlhYQ==" readonly>
-        <div style="margin-top:8px"><button class="btn small" data-action="toast" data-msg="Copied Basic auth string">Copy</button></div>
-      </div>
-
       <div class="note"><strong>Copy:</strong> "RESTful API" — never "Customer ID token". Token language is reserved for RTC / AccessToken2 / temporary token.</div>
     </div>
 
     <div class="screen hidden" data-screen="webhooks">
-      <div class="breadcrumb">Account › Developer Settings › Webhooks</div>
-      <h2>Webhooks</h2><div class="empty">Wireframe placeholder.</div>
+      <div class="breadcrumb">Account › Developer › Webhooks</div>
+      <h2>Webhooks</h2>
+      <p class="subhead">Account-level event delivery — agent lifecycle, billing, security events.</p>
+      <div class="empty">Wireframe placeholder.</div>
     </div>
+
     <div class="screen hidden" data-screen="audit-logs">
-      <div class="breadcrumb">Account › Developer Settings › Audit logs</div>
-      <h2>Audit logs</h2><div class="empty">Wireframe placeholder — SOC 2 compliance trail.</div>
+      <div class="breadcrumb">Account › Developer › Audit logs</div>
+      <h2>Audit logs</h2>
+      <p class="subhead">SOC 2 compliance trail — who did what, when, from where.</p>
+      <div class="empty">Wireframe placeholder.</div>
+    </div>
+
+    <div class="screen hidden" data-screen="help-support">
+      <div class="breadcrumb">Account › Help &amp; Support</div>
+      <h2>Help &amp; Support</h2>
+      <p class="subhead">Get unstuck — search docs, open a ticket, talk to humans.</p>
+      <div class="empty">Wireframe placeholder — search box, common topics, contact form, ticket history.</div>
+    </div>
+
+    <div class="screen hidden" data-screen="whats-new">
+      <div class="breadcrumb">Account › What's new</div>
+      <h2>What's new</h2>
+      <p class="subhead">Changelog. Low volume — only meaningful changes.</p>
+      <div class="box">
+        <h3>21 May 2026 — IA revision</h3>
+        <ul style="padding-left: 20px; font-size: 13px;">
+          <li>Sidebar groups: BUILD · DEPLOY · MONITOR · PROJECT</li>
+          <li>Project switcher moved from footer to top of sidebar</li>
+          <li>Extensions Marketplace promoted to top-level nav</li>
+          <li>"Credentials" disambiguated → "Vendor Credentials" + "Project settings"</li>
+          <li>Credits meter moved from profile to sidebar footer (ambient)</li>
+        </ul>
+      </div>
     </div>
 
   </section>
@@ -434,28 +687,19 @@
 <!-- Add Vendor Credential modal -->
 <div class="modal-backdrop hidden" id="addCredModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="addCredTitle">Add vendor credential</h3>
-      <button class="btn icon" data-action="closeAddCred">×</button>
-    </div>
-
+    <div class="modal-header"><h3 id="addCredTitle">Add vendor credential</h3><button class="btn icon" data-action="closeAddCred">×</button></div>
     <div class="tabs"><div class="tab active" id="stepTab1">1. Vendor</div><div class="tab" id="stepTab2">2. Details</div></div>
-
-    <!-- Step 1: vendor pick -->
     <div id="credStep1">
       <div class="field"><label>Search vendors</label><input class="input" placeholder="OpenAI, ElevenLabs, Deepgram, Azure, ..."></div>
       <div class="grid-2">
         <div class="box clickable" data-action="pickVendor" data-vendor="OpenAI"><h3>OpenAI</h3><div class="desc">LLM · TTS · Embeddings · Realtime API</div></div>
-        <div class="box clickable" data-action="pickVendor" data-vendor="ElevenLabs"><h3>ElevenLabs</h3><div class="desc">TTS · Voice cloning · Sound effects</div></div>
+        <div class="box clickable" data-action="pickVendor" data-vendor="ElevenLabs"><h3>ElevenLabs</h3><div class="desc">TTS · Voice cloning</div></div>
         <div class="box clickable" data-action="pickVendor" data-vendor="Deepgram"><h3>Deepgram</h3><div class="desc">ASR · Streaming STT</div></div>
         <div class="box clickable" data-action="pickVendor" data-vendor="Azure"><h3>Azure</h3><div class="desc">LLM · TTS · ASR · Translation</div></div>
         <div class="box clickable" data-action="pickVendor" data-vendor="Anthropic"><h3>Anthropic</h3><div class="desc">LLM (Claude)</div></div>
         <div class="box clickable" data-action="pickVendor" data-vendor="Google"><h3>Google</h3><div class="desc">LLM (Gemini) · TTS · ASR</div></div>
       </div>
-      <div class="note"><strong>Why vendor-first:</strong> one OpenAI key may power LLM + TTS + embeddings. Splitting by service type up front would force one key into multiple records.</div>
     </div>
-
-    <!-- Step 2: details -->
     <div id="credStep2" class="hidden">
       <div class="field"><label>Vendor</label><input class="input" id="vendorField" disabled></div>
       <div class="field"><label>Credential name</label><input class="input" id="credName" placeholder="e.g. OpenAI · Production"></div>
@@ -463,39 +707,23 @@
         <div class="field"><label>API key</label><input class="input mono" placeholder="sk-..."></div>
         <div class="field"><label>Organization ID (optional)</label><input class="input mono" placeholder="org-..."></div>
       </div>
-      <div class="field"><label>Note (optional)</label><input class="input" placeholder="e.g. shared prod key, rotated monthly"></div>
-      <div class="row"><span class="label">Available to</span><span class="value">All agents in this project</span><div class="actions"><button class="btn small">Restrict to specific agents</button></div></div>
-
-      <div class="modal-footer">
-        <button class="btn" data-action="credBack">← Back</button>
-        <button class="btn primary" data-action="saveCred">Save credential</button>
-      </div>
+      <div class="modal-footer"><button class="btn" data-action="credBack">← Back</button><button class="btn primary" data-action="saveCred">Save credential</button></div>
     </div>
-
-    <div class="modal-footer" id="step1Footer">
-      <button class="btn" data-action="closeAddCred">Cancel</button>
-    </div>
+    <div class="modal-footer" id="step1Footer"><button class="btn" data-action="closeAddCred">Cancel</button></div>
   </div>
 </div>
 
 <!-- Deploy modal -->
 <div class="modal-backdrop hidden" id="deployModal">
   <div class="modal">
-    <div class="modal-header">
-      <h3>Deploy <span id="deployAgentName">Appointment Reminder</span></h3>
-      <button class="btn icon" data-action="closeDeploy">×</button>
-    </div>
-
+    <div class="modal-header"><h3>Deploy <span id="deployAgentName">Appointment Reminder</span></h3><button class="btn icon" data-action="closeDeploy">×</button></div>
     <div class="tabs" id="deployTabs">
       <div class="tab active" data-tab="code">Code</div>
       <div class="tab" data-tab="env">Env</div>
-      <div class="tab" data-tab="embed">Embed iframe</div>
       <div class="tab" data-tab="cost">Cost</div>
     </div>
-
     <div class="tab-panel" data-panel="code">
-      <div class="field"><label>Generated code (Node)</label>
-        <textarea class="input mono" rows="8" readonly>import { Agent } from '@agora/convo-ai';
+      <div class="field"><label>Generated code (Node)</label><textarea class="input mono" rows="8" readonly>import { Agent } from '@agora/convo-ai';
 
 const agent = new Agent({
   appId: process.env.AGORA_APP_ID,
@@ -503,37 +731,18 @@ const agent = new Agent({
   agentId: 'FSDF122S7',
 });
 
-await agent.start({ channel: 'reminder-001' });</textarea>
-      </div>
+await agent.start({ channel: 'reminder-001' });</textarea></div>
     </div>
-
     <div class="tab-panel hidden" data-panel="env">
-      <div class="field"><label>Env variables (auto-filled from this project)</label>
-        <textarea class="input mono" rows="3" readonly>AGORA_APP_ID=a7f2-1c9d-0b8e-44f0-9e2c
+      <div class="field"><label>Env variables (auto-filled from this project)</label><textarea class="input mono" rows="3" readonly>AGORA_APP_ID=a7f2-1c9d-0b8e-44f0-9e2c
 AGORA_APP_CERT=••••••••••••••••••••••••3f9a
-AGENT_ID=FSDF122S7</textarea>
-      </div>
-      <div style="display:flex;gap:8px"><button class="btn small" data-action="toast" data-msg="Copied env block">Copy block</button><button class="btn small" data-action="toast" data-msg="Downloaded .env">Download .env</button></div>
+AGENT_ID=FSDF122S7</textarea></div>
     </div>
-
-    <div class="tab-panel hidden" data-panel="embed">
-      <div class="field"><label>Embed iframe</label>
-        <textarea class="input mono" rows="3" readonly>&lt;iframe src="https://embed.agora.io/agent/FSDF122S7" allow="microphone" /&gt;</textarea>
-      </div>
-    </div>
-
     <div class="tab-panel hidden" data-panel="cost">
-      <div class="row"><span class="label">Est. per minute</span><span class="value">$0.10 (LLM $0.04 · TTS $0.03 · Agora $0.03)</span></div>
-      <div class="row"><span class="label">This month, project budget</span><span class="value">$50 cap · $0 used</span></div>
-      <div class="row"><span class="label">Suggested cap</span><span class="value">$200 / month · alert at 80%</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cost cap set to $200/mo">Set cap</button></div></div>
+      <div class="row"><span class="label">Est. per minute</span><span class="value">$0.10</span></div>
+      <div class="row"><span class="label">Suggested cap</span><span class="value">$200 / mo · alert at 80%</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cost cap set">Set cap</button></div></div>
     </div>
-
-    <div class="note"><strong>Decisions wired in:</strong> code + env + cost in one modal. Env values auto-filled from <a href="#" data-route="project-overview">Project Overview</a> — user never has to navigate there.</div>
-
-    <div class="modal-footer">
-      <button class="btn" data-action="closeDeploy">Cancel</button>
-      <button class="btn primary" data-action="confirmDeploy">Deploy to production</button>
-    </div>
+    <div class="modal-footer"><button class="btn" data-action="closeDeploy">Cancel</button><button class="btn primary" data-action="confirmDeploy">Deploy to production</button></div>
   </div>
 </div>
 
