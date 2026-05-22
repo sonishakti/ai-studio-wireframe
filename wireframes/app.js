@@ -3,30 +3,24 @@
   'use strict';
 
   const state = {
-    mode: 'project', // 'project' | 'account'
-    route: 'agents',
-    project: 'Project Alpha',
+    route: 'home',
+    project: 'My first project',
     selectedVendor: null,
-    credentials: [], // additional vendor credentials
+    credentials: [],
   };
 
   // ---------- Helpers ----------
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  function setMode(mode) {
-    state.mode = mode;
-    $$('[data-mode]').forEach((el) => {
-      el.classList.toggle('hidden', el.dataset.mode !== mode);
-    });
-  }
+  // Route aliases (old → new)
+  const routeAliases = {
+    'realtime-products': 'realtime-services',
+  };
 
   function goTo(route) {
+    route = routeAliases[route] || route;
     state.route = route;
-    // Determine mode based on route
-    const accountRoutes = ['account-overview', 'billing-subs', 'teams-members', 'sso', 'notif-prefs', 'profile', 'restful-api', 'aa-embedded-credentials', 'webhooks', 'audit-logs', 'dev-toolkit', 'licensing', 'contact-sales', 'support-tickets', 'whats-new', 'notification-center'];
-    const targetMode = accountRoutes.includes(route) ? 'account' : 'project';
-    if (state.mode !== targetMode) setMode(targetMode);
 
     // Show the right screen
     $$('.screen').forEach((s) => s.classList.add('hidden'));
@@ -85,7 +79,6 @@
       toast('Wireframe stub — All projects page.');
     },
     backToProject() {
-      setMode('project');
       goTo('home');
     },
     switchWorkspace(el) {
@@ -270,5 +263,9 @@
   });
 
   // ---------- Init ----------
+  // Sync UI to default project state
+  $$('.proj-name').forEach((n) => (n.textContent = state.project));
+  const cp = $('#currentProject');
+  if (cp) cp.textContent = state.project;
   goTo('home');
 })();

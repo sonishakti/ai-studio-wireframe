@@ -10,8 +10,8 @@
 
 <div id="app" class="app-shell">
 
-  <!-- ============== SIDEBAR ============== -->
-  <aside class="sidebar">
+  <!-- ============== SIDEBAR (lean) ============== -->
+  <aside class="sidebar sidebar-lean">
 
     <!-- TOP: brand + collapse -->
     <div class="brand-row">
@@ -19,176 +19,110 @@
       <button class="btn icon" title="Collapse sidebar" data-action="toast" data-msg="Collapse — wireframe stub">▤</button>
     </div>
 
-    <!-- TOP: workspace chip (rare switch — opens workspaces in account menu) -->
-    <div class="workspace-chip" data-toggle="accountDropdown" title="Switch workspace">
-      <span class="muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Workspace</span>
-      <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span id="currentWorkspace" style="font-size: 13px; font-weight: 600;">johndoe-workspace</span>
-        <span style="font-size: 10px;">▾</span>
-      </div>
+    <!-- MAIN NAV — lifecycle-mirroring -->
+    <div class="nav-group" style="margin-top: 8px;">
+      <a class="nav-item" data-route="home"><span class="ico">🏠</span>Home</a>
     </div>
 
-    <!-- TOP: project switcher (Decision #6) -->
-    <div data-mode="project">
-      <div class="switcher" id="switcher" data-toggle="switcherDropdown">
-        <span class="muted" style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;">Project</span>
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <span id="currentProject">Project Alpha</span>
-          <span style="font-size: 10px;">▾</span>
+    <div class="nav-group">
+      <div class="label">Build</div>
+      <a class="nav-item" data-route="agents"><span class="ico">👤</span>Agents</a>
+      <a class="nav-item" data-route="integrations"><span class="ico">🔗</span>Integrations</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="label">Deploy</div>
+      <a class="nav-item" data-route="phone-numbers"><span class="ico">📞</span>Phone Numbers</a>
+      <a class="nav-item" data-route="campaign"><span class="ico">📢</span>Campaign</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="label">Monitor</div>
+      <a class="nav-item" data-route="analytics"><span class="ico">📊</span>Analytics</a>
+      <a class="nav-item" data-route="call-history"><span class="ico">🕘</span>Call History</a>
+      <a class="nav-item" data-route="session-history"><span class="ico">〰</span>Session History</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="label">Project</div>
+      <a class="nav-item" data-route="project-settings"><span class="ico">⚙</span>Project Settings</a>
+      <a class="nav-item" data-route="realtime-services"><span class="ico">🎥</span>Realtime Services</a>
+      <a class="nav-item" data-route="usage"><span class="ico">$</span>Usage</a>
+      <a class="nav-item" data-route="vendor-credentials"><span class="ico">🔑</span>Credentials</a>
+    </div>
+
+    <!-- Footer: search → project chip + avatar -->
+    <div class="footer footer-lean">
+      <div class="footer-search clickable" data-action="toast" data-msg="Command palette — wireframe stub">
+        <span style="display:flex;align-items:center;gap:6px;"><span>🔍</span>Search</span>
+        <span class="muted" style="font-size:11px;">⌘K</span>
+      </div>
+      <div class="footer-bottom">
+        <div class="project-chip clickable" id="projectChip" data-toggle="switcherDropdown" title="Switch project">
+          <span style="display:flex;align-items:center;gap:6px;"><span>📦</span><span id="currentProject">My first project</span></span>
         </div>
+        <div class="avatar avatar-icon" id="avatar" data-toggle="accountDropdown" title="Account menu">👤</div>
       </div>
-      <div class="dropdown hidden" id="switcherDropdown" style="left: 12px; top: 132px;">
-        <div class="group-label">Projects in johndoe-workspace</div>
-        <div class="item check" data-action="switchProject" data-project="Project Alpha">Project Alpha</div>
-        <div class="item" data-action="switchProject" data-project="Project Beta">Project Beta</div>
-        <div class="item" data-action="switchProject" data-project="Internal Demos">Internal Demos</div>
+
+      <!-- Project switcher dropdown (from project chip) -->
+      <div class="dropdown hidden" id="switcherDropdown" style="left: 12px; bottom: 60px; width: 200px;">
+        <div class="group-label">Projects</div>
+        <div class="item check" data-action="switchProject" data-project="My first project">My first project</div>
+        <div class="item" data-action="switchProject" data-project="Acme project">Acme project</div>
+        <div class="item" data-action="switchProject" data-project="Beta project">Beta project</div>
+        <div class="item" data-action="switchProject" data-project="Test project">Test project</div>
         <div class="divider"></div>
-        <div class="item" data-action="createProject">+ Create new project</div>
-        <div class="item" data-action="viewAllProjects">View all projects →</div>
+        <div class="item" data-action="createProject">+ Create Project</div>
       </div>
 
-      <!-- Single item: Home (workspace-level overview) -->
-      <div class="nav-group" style="margin-top: 12px; padding-bottom: 4px;">
-        <a class="nav-item" data-route="home"><span class="ico"></span>Home</a>
-      </div>
-
-      <!-- BUILD -->
-      <div class="nav-group">
-        <div class="label">Build</div>
-        <a class="nav-item" data-route="agents"><span class="ico"></span>Agents</a>
-        <a class="nav-item" data-route="realtime-products"><span class="ico"></span>Real-Time products</a>
-        <a class="nav-item" data-route="integrations"><span class="ico"></span>Integrations</a>
-      </div>
-
-      <!-- DEPLOY -->
-      <div class="nav-group">
-        <div class="label">Deploy</div>
-        <a class="nav-item" data-route="phone-numbers"><span class="ico"></span>Phone Numbers</a>
-        <a class="nav-item" data-route="campaign"><span class="ico"></span>Campaign</a>
-        <a class="nav-item" data-route="web-sdk"><span class="ico"></span>Web SDK</a>
-        <a class="nav-item" data-route="more-deploy" style="color: #777;"><span class="ico"></span>··· more</a>
-      </div>
-
-      <!-- MONITOR -->
-      <div class="nav-group">
-        <div class="label">Monitor</div>
-        <a class="nav-item" data-route="analytics"><span class="ico"></span>Analytics</a>
-        <a class="nav-item" data-route="call-history"><span class="ico"></span>Call History</a>
-        <a class="nav-item" data-route="session-history"><span class="ico"></span>Session History</a>
-        <a class="nav-item" data-route="usage"><span class="ico"></span>Usage</a>
-        <a class="nav-item" data-action="toast" data-msg="analytics.agora.io opens in new tab"><span class="ico"></span>Agora Analytics ↗</a>
-      </div>
-
-      <!-- DISCOVER -->
-      <div class="nav-group">
-        <div class="label">Discover</div>
-        <a class="nav-item" data-route="extensions"><span class="ico"></span>Extensions Marketplace</a>
-        <a class="nav-item" data-route="templates"><span class="ico"></span>Templates</a>
-        <a class="nav-item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico"></span>Docs ↗</a>
-        <a class="nav-item" data-action="toast" data-msg="community.agora.io opens in new tab"><span class="ico"></span>Community ↗</a>
-      </div>
-
-      <!-- PROJECT -->
-      <div class="nav-group">
-        <div class="label">Project</div>
-        <a class="nav-item" data-route="project-settings"><span class="ico"></span>Project settings</a>
-        <a class="nav-item" data-route="vendor-credentials"><span class="ico"></span>Vendor Credentials</a>
-        <a class="nav-item" data-route="project-notifications"><span class="ico"></span>Notifications</a>
-      </div>
-    </div>
-
-    <!-- ACCOUNT MODE sidebar -->
-    <div data-mode="account" class="hidden">
-      <div class="switcher" style="background:#f5f5f5;cursor:pointer" data-action="backToProject">
-        <span>← Back to project</span>
-      </div>
-
-      <div class="nav-group" style="margin-top: 16px;">
-        <div class="label">Account</div>
-        <a class="nav-item" data-route="account-overview"><span class="ico"></span>Account Overview</a>
-        <a class="nav-item" data-route="billing-subs"><span class="ico"></span>Billing &amp; Subscriptions</a>
-        <a class="nav-item" data-route="teams-members"><span class="ico"></span>Teams &amp; Members</a>
-        <a class="nav-item" data-route="sso"><span class="ico"></span>SSO Management</a>
-        <a class="nav-item" data-route="notif-prefs"><span class="ico"></span>Notification Preferences</a>
-        <a class="nav-item" data-route="profile"><span class="ico"></span>Profile</a>
-      </div>
-
-      <div class="nav-group">
-        <div class="label">Developer</div>
-        <a class="nav-item" data-route="restful-api"><span class="ico"></span>RESTful API</a>
-        <a class="nav-item" data-route="aa-embedded-credentials"><span class="ico"></span>AA Embedded Credentials</a>
-        <a class="nav-item" data-route="webhooks"><span class="ico"></span>Webhooks</a>
-        <a class="nav-item" data-route="audit-logs"><span class="ico"></span>Audit logs</a>
-        <a class="nav-item" data-route="dev-toolkit"><span class="ico"></span>Developer Toolkit</a>
-        <a class="nav-item" data-route="licensing"><span class="ico"></span>Licensing</a>
-      </div>
-
-      <div class="nav-group">
-        <div class="label">Help</div>
-        <a class="nav-item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico"></span>Docs ↗</a>
-        <a class="nav-item" data-action="toast" data-msg="community.agora.io opens in new tab"><span class="ico"></span>Community ↗</a>
-        <a class="nav-item" data-route="contact-sales"><span class="ico"></span>Contact Sales</a>
-        <a class="nav-item" data-route="support-tickets"><span class="ico"></span>Support tickets</a>
-        <a class="nav-item" data-action="toast" data-msg="status.agora.io opens in new tab"><span class="ico"></span>System status ↗</a>
-        <a class="nav-item" data-route="whats-new"><span class="ico"></span>What's new</a>
-      </div>
-    </div>
-
-    <!-- Footer: avatar + bell + ambient credits meter + ⌘K -->
-    <div class="footer">
-      <div class="avatar" id="avatar" data-toggle="accountDropdown" title="Jane Doe — account menu">JD</div>
-      <button class="btn icon" title="Notifications (3 new)" data-action="goAccount" data-route="notification-center">🔔</button>
-      <div class="credits-meter" title="Free-tier minutes remaining — ambient, every screen">
-        <div class="credits-bar"><div class="credits-fill" style="width: 35%"></div></div>
-        <div class="credits-text">3,500 / 10,000 mins</div>
-      </div>
-      <button class="btn icon" title="Command palette">⌘K</button>
-
-      <!-- Account dropdown (NEW STRUCTURE per IA decision) -->
-      <div class="dropdown hidden" id="accountDropdown" style="left: 0; bottom: 60px; width: 280px;">
+      <!-- Account dropdown (from avatar) — new lean structure -->
+      <div class="dropdown hidden" id="accountDropdown" style="left: 60px; bottom: 50px; width: 280px;">
         <div class="dd-header">
-          <strong>Jane Doe</strong>
-          <div class="muted" style="font-size: 11px;">jane.doe@acme.com · Owner</div>
+          <strong>johndoe@example.com</strong>
         </div>
 
         <div class="divider"></div>
-        <div class="group-label">Workspaces</div>
-        <div class="item check" data-action="switchWorkspace" data-workspace="johndoe-workspace">johndoe-workspace</div>
+        <div class="group-label">Workspace</div>
+        <div class="item check" data-action="switchWorkspace" data-workspace="johndoe-workspace">
+          <span id="currentWorkspace">johndoe-workspace</span>
+        </div>
         <div class="item" data-action="switchWorkspace" data-workspace="acme-dev-team">acme-dev-team</div>
-        <div class="item" data-action="toast" data-msg="Create workspace — wireframe stub">+ Create workspace</div>
 
         <div class="divider"></div>
         <div class="group-label">Account</div>
-        <div class="item" data-action="goAccount" data-route="account-overview">Account Overview</div>
-        <div class="item" data-action="goAccount" data-route="billing-subs">Billing &amp; Subscriptions</div>
-        <div class="item" data-action="goAccount" data-route="teams-members">Teams &amp; Members</div>
-        <div class="item" data-action="goAccount" data-route="sso">SSO Management</div>
-        <div class="item" data-action="goAccount" data-route="notif-prefs">Notification Preferences</div>
-        <div class="item" data-action="goAccount" data-route="profile">Profile</div>
+        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico">✓</span> View all plans</div>
+        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico">$</span> Billing</div>
+        <div class="item" data-action="goAccount" data-route="extensions"><span class="ico">🛍</span> Extensions Marketplace</div>
 
         <div class="divider"></div>
-        <div class="group-label">Developer</div>
-        <div class="item" data-action="goAccount" data-route="restful-api">RESTful API <span class="tag muted">CID + Secret</span></div>
-        <div class="item" data-action="goAccount" data-route="aa-embedded-credentials">AA Embedded Credentials <span class="tag muted">Analytics</span></div>
-        <div class="item" data-action="goAccount" data-route="webhooks">Webhooks</div>
-        <div class="item" data-action="goAccount" data-route="audit-logs">Audit logs</div>
-        <div class="item" data-action="goAccount" data-route="dev-toolkit">Developer Toolkit</div>
-        <div class="item" data-action="goAccount" data-route="licensing">Licensing</div>
+        <div class="group-label">Developer Settings</div>
+        <div class="item" data-action="goAccount" data-route="restful-api"><span class="ico">🔒</span> RESTful API</div>
 
         <div class="divider"></div>
-        <div class="group-label">Help</div>
-        <div class="item" data-action="toast" data-msg="docs.agora.io opens in new tab">Docs ↗</div>
-        <div class="item" data-action="toast" data-msg="community.agora.io opens in new tab">Community ↗</div>
-        <div class="item" data-action="goAccount" data-route="contact-sales">Contact Sales</div>
-        <div class="item" data-action="goAccount" data-route="support-tickets">Support tickets</div>
-        <div class="item" data-action="toast" data-msg="status.agora.io opens in new tab">System status ↗</div>
-        <div class="item" data-action="goAccount" data-route="whats-new">What's new</div>
+        <div class="credits-block" data-action="goAccount" data-route="billing-subs">
+          <div class="credits-header"><span>🎁 Free 10,000 Minutes</span></div>
+          <div class="credits-bar"><div class="credits-fill" style="width: 35%"></div></div>
+          <div class="credits-meta"><span class="muted">Remaining</span><span><strong>3,500 mins</strong></span></div>
+        </div>
 
         <div class="divider"></div>
-        <div class="item" data-action="toast" data-msg="Sign out — wireframe stub">↗ Sign out</div>
+        <div class="item" data-action="toast" data-msg="analytics.agora.io opens in new tab"><span class="ico">📊</span> Try Agora Analytics ↗</div>
+
+        <div class="divider"></div>
+        <div class="item" data-action="goAccount" data-route="preferences"><span class="ico">⚙</span> Preferences</div>
+        <div class="item" data-action="toast" data-msg="Sign out — wireframe stub"><span class="ico">↗</span> Log out</div>
       </div>
     </div>
   </aside>
+
+  <!-- ============== TOPBAR ============== -->
+  <div class="topbar">
+    <div class="topbar-left"></div>
+    <div class="topbar-right">
+      <button class="btn icon" title="Notifications (3 new)" data-action="goAccount" data-route="notification-center">🔔</button>
+      <button class="btn ask-btn" data-action="toast" data-msg="Ask — AI helper stub">✦ Ask</button>
+    </div>
+  </div>
 
   <!-- ============== MAIN ============== -->
   <section class="main" id="main">
@@ -978,12 +912,12 @@
       <div class="empty">Wireframe placeholder — ticket list + new ticket form.</div>
     </div>
 
-    <!-- Real-Time products (BUILD group) -->
-    <div class="screen hidden" data-screen="realtime-products">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Real-Time products</div>
-      <h2>Real-Time products</h2>
-      <p class="subhead">Agora's RTC family — peers of Agents in this project's BUILD surface. Drill in to configure.</p>
-      <div class="note"><strong>Absorbs Console's per-project configure pages:</strong> Voice/Video/ILS, Chat Basic Info, Signaling (Basic + Presence + Storage + Stream Channel), Whiteboard + Whiteboard Services, and the Flexible Classroom vertical solution.</div>
+    <!-- Realtime Services (PROJECT group) -->
+    <div class="screen hidden" data-screen="realtime-services">
+      <div class="breadcrumb"><span class="proj-name">My first project</span> › Realtime Services</div>
+      <h2>Realtime Services</h2>
+      <p class="subhead">All real-time infrastructure available in this project — RTC products and add-on capabilities. Enable what your agents need.</p>
+      <div class="note"><strong>Merges Console's RTC family + per-project add-ons:</strong> Voice/Video/ILS, Chat, Signaling (4 tabs), Whiteboard, Flexible Classroom — plus Cloud Recording, Media Push/Pull/Gateway, Real-Time STT, Video Screenshot Upload.</div>
 
       <h3 style="margin-top: 24px;">Core RTC products</h3>
       <div class="grid-3">
@@ -1152,6 +1086,73 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
         <div class="row"><span class="label">Usage queries</span><span class="value">Reconcile actual usage against reserved quota</span></div>
         <div class="note"><strong>Console parity:</strong> mirrors <code>/license-management</code> and its four children (currently gated for this account).</div>
       </div>
+    </div>
+
+    <!-- PREFERENCES — absorbs Profile + Notif Prefs + SSO + Teams + Account Overview -->
+    <div class="screen hidden" data-screen="preferences">
+      <div class="breadcrumb">Account › Preferences</div>
+      <h2>Preferences</h2>
+      <p class="subhead">Profile, security, notifications, team, and SSO — all account-level settings in one place.</p>
+
+      <div class="tabs" id="prefsTabs">
+        <div class="tab active" data-tab="prefs-profile">Profile</div>
+        <div class="tab" data-tab="prefs-notif">Notifications</div>
+        <div class="tab" data-tab="prefs-teams">Teams &amp; Members</div>
+        <div class="tab" data-tab="prefs-sso">SSO</div>
+        <div class="tab" data-tab="prefs-account">Account</div>
+      </div>
+
+      <div class="tab-panel" data-panel="prefs-profile">
+        <div class="box"><h3>Personal Information</h3>
+          <div class="grid-2"><div class="field"><label>First Name</label><input class="input" value="Shakti"></div><div class="field"><label>Last Name</label><input class="input" value="Soni"></div></div>
+        </div>
+        <div class="box"><h3>Security</h3>
+          <div class="row"><span class="label">Phone</span><span class="value">+91 9*****6036</span><div class="actions"><button class="btn small">Verify</button></div></div>
+          <div class="row"><span class="label">Email</span><span class="value">shak******@agora.io</span><div class="actions"><button class="btn small">Update</button></div></div>
+          <div class="row"><span class="label">Password</span><span class="value">••••••••••••</span><div class="actions"><button class="btn small">Reset</button></div></div>
+        </div>
+        <div class="box"><h3>Display</h3>
+          <div class="row"><span class="label">Theme</span><span class="value">System · Light · Dark</span></div>
+          <div class="row"><span class="label">Language</span><span class="value">English (US)</span></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="prefs-notif">
+        <div class="box"><h3>Notification channels</h3>
+          <div class="row"><span class="label">Account</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
+          <div class="row"><span class="label">Billing</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
+          <div class="row"><span class="label">Product</span><span class="value">— Email · — Text · ✓ Console</span></div>
+          <div class="row"><span class="label">Operation</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="prefs-teams">
+        <div class="box"><h3>Teams &amp; Permissions</h3>
+          <div class="row"><span class="label">Finance</span><span class="value">Usage: None · Finance: View</span><div class="actions"><button class="btn small">Edit</button></div></div>
+          <div class="row"><span class="label">Engineer</span><span class="value">Project: Edit · Analytics: View</span><div class="actions"><button class="btn small">Edit</button></div></div>
+          <div class="row"><span class="label">Admin</span><span class="value">All: Edit</span><div class="actions"><button class="btn small">Edit</button></div></div>
+          <div style="margin-top:12px;"><button class="btn primary">+ Add new team</button></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="prefs-sso">
+        <div class="box" style="background:#fff8e0;">
+          <h3>SSO — Requires Premium or Enterprise</h3>
+          <div class="desc">SAML / SCIM integration via Okta, Azure AD, OneLogin.</div>
+          <div style="margin-top:8px;"><button class="btn primary">Request upgrade</button></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="prefs-account">
+        <div class="box">
+          <div class="row"><span class="label">Account name</span><span class="value">Acme Inc.</span></div>
+          <div class="row"><span class="label">Owner</span><span class="value">Jane Doe · jane.doe@acme.com</span></div>
+          <div class="row"><span class="label">Workspaces</span><span class="value">2 · johndoe-workspace · acme-dev-team</span></div>
+          <div class="row"><span class="label">Seats</span><span class="value">5 of 10 used</span></div>
+        </div>
+      </div>
+
+      <div class="note"><strong>IA decision:</strong> consolidates Profile, Notification Preferences, Teams &amp; Members, SSO, and Account Overview into one tabbed surface — was 5 sidebar items, now 1 menu item.</div>
     </div>
 
     <div class="screen hidden" data-screen="whats-new">
