@@ -533,7 +533,10 @@
       <div class="tab-panel hidden" data-panel="ext-mine">
         <div class="box">
           <h3>My submissions</h3>
-          <div class="empty">No submissions yet. <a href="#" data-action="toast" data-msg="Submit extension flow — wireframe stub">Submit an extension →</a></div>
+          <div class="row clickable"><span class="label">acme-crm-sync</span><span class="value">Submitted 03 May 2026 · reviewer notes: "Add OAuth scope explanation"</span><span class="tag tag-draft">Changes requested</span><div class="actions"><button class="btn small">Open</button></div></div>
+          <div class="row clickable"><span class="label">acme-helpdesk-bridge</span><span class="value">Submitted 14 Apr 2026 · approved · published 18 Apr</span><span class="tag tag-live">Published</span><div class="actions"><button class="btn small">View public listing</button></div></div>
+          <div class="row clickable"><span class="label">acme-experimental</span><span class="value">Saved 22 May 2026 · 3 missing fields</span><span class="tag tag-draft">Draft</span><div class="actions"><button class="btn small">Continue</button></div></div>
+          <div style="margin-top:12px;"><button class="btn primary" data-action="toast" data-msg="Submit extension flow — wireframe stub">+ Submit new extension</button></div>
           <div class="note"><strong>Console parity:</strong> mirrors <code>/extensions-marketplace/my-submissions</code>.</div>
         </div>
       </div>
@@ -745,11 +748,11 @@
       <div class="tab-panel" data-panel="bill-overview">
         <div class="box">
           <h3>Account balance</h3>
-          <div class="row"><span class="label">Available balance</span><span class="value">$0.00</span><div class="actions"><button class="btn small">+ Top-up wallet</button><button class="btn small">Add card</button></div></div>
+          <div class="row"><span class="label">Available balance</span><span class="value">$0.00</span><div class="actions"><button class="btn small" data-action="openTopup">+ Top-up wallet</button><button class="btn small">Add card</button></div></div>
         </div>
         <div class="box">
           <h3>Current plan</h3>
-          <div class="row"><span class="label">Plan</span><span class="value">Starter · $49/mo · 50K mins included</span><div class="actions"><button class="btn small">Change plan</button></div></div>
+          <div class="row"><span class="label">Plan</span><span class="value">Starter · $49/mo · 50K mins included</span><div class="actions"><button class="btn small" data-action="openChangePlan">Change plan</button></div></div>
           <div class="row"><span class="label">Payment method</span><span class="value">Visa •••• 4242 · exp 02/28</span><div class="actions"><button class="btn small">Update</button></div></div>
           <div class="row"><span class="label">Next invoice</span><span class="value">12 Jun 2026 · est. $49 + $0 overage</span></div>
         </div>
@@ -760,7 +763,7 @@
           <h3>Available plans</h3>
           <div class="row"><span class="label">FREE</span><span class="value">10K mins · 0 concurrent agents</span><div class="actions"><span class="tag muted">Downgrade</span></div></div>
           <div class="row"><span class="label">STARTER · $49</span><span class="value">50K mins · 2 concurrent</span><span class="tag">Current</span></div>
-          <div class="row"><span class="label">PRO · $199</span><span class="value">200K mins · 10 concurrent</span><div class="actions"><button class="btn small">Upgrade</button></div></div>
+          <div class="row"><span class="label">PRO · $199</span><span class="value">200K mins · 10 concurrent</span><div class="actions"><button class="btn small" data-action="openChangePlan">Upgrade</button></div></div>
           <div class="row"><span class="label">BUSINESS · custom</span><span class="value">Contact sales</span><div class="actions"><button class="btn small">Talk to sales</button></div></div>
         </div>
         <div class="box">
@@ -812,7 +815,7 @@
           <h3>Analytics &amp; add-on packages</h3>
           <div class="desc">Subscription add-ons that extend a paid plan — Agora Analytics seat packs, premium support, premium SLAs.</div>
           <div class="row"><span class="label">Agora Analytics · Pro</span><span class="value">5 analyst seats · Call Inspector + Data Insights · $99/mo</span><div class="actions"><button class="btn small">Manage</button></div></div>
-          <div class="row"><span class="label">Premium support</span><span class="value">24/7 · 1h SLA · $499/mo</span><div class="actions"><button class="btn small">Upgrade</button></div></div>
+          <div class="row"><span class="label">Premium support</span><span class="value">24/7 · 1h SLA · $499/mo</span><div class="actions"><button class="btn small" data-action="openChangePlan">Upgrade</button></div></div>
           <div class="note"><strong>Console parity:</strong> mirrors <code>/finance/packages</code>.</div>
         </div>
       </div>
@@ -894,22 +897,149 @@
     <div class="screen hidden" data-screen="dev-toolkit">
       <div class="breadcrumb">Account › Developer › Developer Toolkit</div>
       <h2>Developer Toolkit</h2>
-      <p class="subhead">CLI, SDK downloads, token generators, request inspector, code samples.</p>
-      <div class="empty">Wireframe placeholder.</div>
+      <p class="subhead">CLI, SDKs, token generators, and request inspectors — everything you need to wire Agora into your stack.</p>
+
+      <div class="tabs" id="devTabs">
+        <div class="tab active" data-tab="dev-quickstart">Quick start</div>
+        <div class="tab" data-tab="dev-cli">CLI</div>
+        <div class="tab" data-tab="dev-sdks">SDKs</div>
+        <div class="tab" data-tab="dev-token">Token generator</div>
+        <div class="tab" data-tab="dev-inspector">Request inspector</div>
+      </div>
+
+      <div class="tab-panel" data-panel="dev-quickstart">
+        <div class="box"><h3>Node.js — call an agent in 30 seconds</h3>
+          <textarea class="input mono" rows="6" readonly>npm install @agora/convo-ai
+
+import { Agent } from '@agora/convo-ai';
+const agent = new Agent({ appId: process.env.AGORA_APP_ID, agentId: 'FSDF122S7' });
+await agent.start({ channel: 'demo-001' });</textarea>
+          <div class="actions" style="margin-top:8px;"><button class="btn small" data-action="toast" data-msg="Copied snippet">Copy</button></div>
+        </div>
+        <div class="box"><h3>Python</h3>
+          <textarea class="input mono" rows="5" readonly>pip install agora-convo-ai
+
+from agora_convo_ai import Agent
+agent = Agent(app_id=os.environ['AGORA_APP_ID'], agent_id='FSDF122S7')
+agent.start(channel='demo-001')</textarea>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="dev-cli">
+        <div class="box"><h3>Install</h3>
+          <textarea class="input mono" rows="2" readonly>curl -fsSL https://cli.agora.io/install.sh | sh
+agora login</textarea>
+        </div>
+        <div class="box"><h3>Common commands</h3>
+          <div class="row"><span class="label mono">agora agent list</span><span class="value">List agents in current project</span></div>
+          <div class="row"><span class="label mono">agora agent deploy</span><span class="value">Deploy the local agent.yml</span></div>
+          <div class="row"><span class="label mono">agora call --agent X</span><span class="value">Place a test call</span></div>
+          <div class="row"><span class="label mono">agora logs --tail</span><span class="value">Stream live agent logs</span></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="dev-sdks">
+        <div class="box"><h3>Pick your language</h3>
+          <div class="grid-3">
+            <div class="ext-card clickable"><h3>Node.js</h3><div class="desc">@agora/convo-ai · v3.2.1</div><div class="actions"><button class="btn small">Download</button></div></div>
+            <div class="ext-card clickable"><h3>Python</h3><div class="desc">agora-convo-ai · v3.2.1</div><div class="actions"><button class="btn small">Download</button></div></div>
+            <div class="ext-card clickable"><h3>Go</h3><div class="desc">github.com/agora/convo-ai-go · v3.2.0</div><div class="actions"><button class="btn small">Download</button></div></div>
+            <div class="ext-card clickable"><h3>Java</h3><div class="desc">io.agora:convo-ai · v3.2.0</div><div class="actions"><button class="btn small">Download</button></div></div>
+            <div class="ext-card clickable"><h3>Swift / iOS</h3><div class="desc">AgoraConvoAI · v3.1.4</div><div class="actions"><button class="btn small">Download</button></div></div>
+            <div class="ext-card clickable"><h3>Kotlin / Android</h3><div class="desc">io.agora.android:convo-ai · v3.1.4</div><div class="actions"><button class="btn small">Download</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="dev-token">
+        <div class="box"><h3>Generate a temporary token</h3>
+          <div class="desc">For local development. Expires in 24h max. For production, generate tokens server-side using your App Certificate.</div>
+          <div class="grid-2">
+            <div class="field"><label>App ID</label><input class="input mono" value="a7f2-1c9d-0b8e-44f0-9e2c"></div>
+            <div class="field"><label>Channel name</label><input class="input" placeholder="e.g. demo-001"></div>
+            <div class="field"><label>UID</label><input class="input" placeholder="0 (any user)"></div>
+            <div class="field"><label>Expiry</label><select class="input"><option>1 hour</option><option>6 hours</option><option selected>24 hours</option></select></div>
+          </div>
+          <div style="margin-top:12px;"><button class="btn primary" data-action="toast" data-msg="Token generated">Generate token</button></div>
+        </div>
+        <div class="box"><h3>cURL example (after generation)</h3>
+          <textarea class="input mono" rows="3" readonly>curl -X POST https://api.agora.io/v1/agents/start \
+  -H "X-Agora-Token: ey..." \
+  -d '{"channel":"demo-001"}'</textarea>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="dev-inspector">
+        <div class="box"><h3>Inspect a webhook payload</h3>
+          <div class="desc">Paste a JSON payload and signing header to verify the signature and pretty-print.</div>
+          <div class="field"><label>X-Agora-Signature</label><input class="input mono" placeholder="sha256=..."></div>
+          <div class="field"><label>Payload</label><textarea class="input mono" rows="5" placeholder='{"event":"call.completed", ...}'></textarea></div>
+          <div style="margin-top:8px;"><button class="btn primary" data-action="toast" data-msg="Signature verified · payload parsed">Inspect</button></div>
+        </div>
+      </div>
     </div>
 
     <div class="screen hidden" data-screen="contact-sales">
       <div class="breadcrumb">Account › Help › Contact Sales</div>
       <h2>Contact Sales</h2>
-      <p class="subhead">Enterprise pricing, custom plans, account growth.</p>
-      <div class="empty">Wireframe placeholder — contact form.</div>
+      <p class="subhead">Enterprise pricing, custom plans, volume discounts. We typically reply within 1 business day.</p>
+
+      <div class="box">
+        <h3>Tell us about your use case</h3>
+        <div class="grid-2">
+          <div class="field"><label>Company size</label><select class="input"><option>1–10</option><option>11–50</option><option selected>51–200</option><option>201–1000</option><option>1000+</option></select></div>
+          <div class="field"><label>Timeline</label><select class="input"><option>This week</option><option selected>This month</option><option>This quarter</option><option>Just exploring</option></select></div>
+          <div class="field"><label>Primary use case</label><select class="input"><option selected>Voice agents</option><option>Video calling</option><option>Chat / messaging</option><option>Signaling</option><option>Other</option></select></div>
+          <div class="field"><label>Estimated monthly volume</label><select class="input"><option>&lt; 10K mins</option><option selected>10K – 100K mins</option><option>100K – 1M mins</option><option>1M+ mins</option></select></div>
+        </div>
+        <div class="field" style="margin-top:12px;"><label>Anything specific you'd like us to know?</label><textarea class="input" rows="4" placeholder="Existing vendor, compliance needs, regions, integrations..."></textarea></div>
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="field"><label>Work email</label><input class="input" value="jane.doe@acme.com"></div>
+          <div class="field"><label>Phone (optional)</label><input class="input" placeholder="+1 ..."></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px;align-items:center;">
+          <button class="btn primary" data-action="toast" data-msg="Sent — we'll be in touch within 1 business day">Send to sales →</button>
+          <span class="muted" style="font-size:11px;">We'll reply within 1 business day. Urgent? <a href="#" data-action="goAccount" data-route="support-tickets">Open a ticket</a>.</span>
+        </div>
+      </div>
     </div>
 
     <div class="screen hidden" data-screen="support-tickets">
       <div class="breadcrumb">Account › Help › Support tickets</div>
-      <h2>Support tickets</h2>
-      <p class="subhead">Open, track, and resolve issues with Agora support.</p>
-      <div class="empty">Wireframe placeholder — ticket list + new ticket form.</div>
+      <div class="header-row">
+        <div>
+          <h2>Support tickets</h2>
+          <p class="subhead">Open, track, and resolve issues with Agora support.</p>
+        </div>
+        <button class="btn primary" data-action="openTicketModal">+ New ticket</button>
+      </div>
+
+      <div class="tabs" id="ticketTabs">
+        <div class="tab active" data-tab="tk-open">Open · 2</div>
+        <div class="tab" data-tab="tk-closed">Closed · 8</div>
+      </div>
+
+      <div class="tab-panel" data-panel="tk-open">
+        <div class="box">
+          <div class="row clickable">
+            <span class="label"><strong>#4821</strong> · SSO setup with Okta — SAML metadata mismatch</span>
+            <span class="value">High · Awaiting reply · 2h ago</span>
+            <span class="tag tag-live">Open</span>
+          </div>
+          <div class="row clickable">
+            <span class="label"><strong>#4789</strong> · Cloud Recording upload failures to GCS</span>
+            <span class="value">Medium · In progress · 1d ago</span>
+            <span class="tag tag-live">Open</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="tk-closed">
+        <div class="box">
+          <div class="row clickable"><span class="label"><strong>#4630</strong> · Add ElevenLabs voice clone</span><span class="value">Resolved · 12 May 2026</span><span class="tag tag-draft">Closed</span></div>
+          <div class="row clickable"><span class="label"><strong>#4514</strong> · Billing reconciliation for Mar invoice</span><span class="value">Resolved · 04 May 2026</span><span class="tag tag-draft">Closed</span></div>
+        </div>
+      </div>
     </div>
 
     <!-- Realtime Services (PROJECT group) -->
@@ -933,6 +1063,19 @@
       <div class="grid-3">
         <div class="ext-card clickable" data-action="toast" data-msg="Open Flexible Classroom"><h3>Flexible Classroom</h3><div class="desc">Pre-built RTC solution for education — rooms, roles, whiteboard, recording.</div></div>
       </div>
+
+      <h3 style="margin-top: 24px;">Add-on capabilities</h3>
+      <p class="desc" style="margin-bottom: 12px;">Opt-in capabilities for agents in this project. Enable per project, configure per agent.</p>
+      <div class="grid-3">
+        <div class="ext-card"><h3>Cloud Recording</h3><div class="desc">Record agent calls to S3 / GCS.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Cloud Recording enabled in My first project">Enable</button></div></div>
+        <div class="ext-card"><h3>Media Push</h3><div class="desc">Stream agent audio to RTMP/HLS destinations.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Set RTMP destination first">Enable</button></div></div>
+        <div class="ext-card"><h3>Media Pull</h3><div class="desc">Inject external media into agent channels.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Media Pull enabled">Enable</button></div></div>
+        <div class="ext-card"><h3>Media Gateway</h3><div class="desc">SIP / PSTN / WebRTC bridging.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Media Gateway requires Pro plan">Upgrade to enable</button></div></div>
+        <div class="ext-card"><h3>Real-Time STT</h3><div class="desc">Live speech-to-text overlay during calls.</div><div class="actions"><span class="tag tag-live">Enabled</span><button class="btn small" data-action="toast" data-msg="Configure RT-STT">Configure</button></div></div>
+        <div class="ext-card"><h3>Video Screenshot Upload</h3><div class="desc">Periodic frame capture for moderation pipelines.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Video Screenshot Upload enabled">Enable</button></div></div>
+      </div>
+
+      <div class="note" style="margin-top:20px;"><strong>Journey:</strong> click <em>Enable</em> for an instant project-level toggle. Click a card to configure (S3 bucket, RTMP destination, etc.). Plan-gated add-ons surface an upgrade path inline rather than failing silently.</div>
     </div>
 
     <!-- Templates (DISCOVER group) -->
@@ -951,13 +1094,22 @@
       </div>
     </div>
 
-    <!-- Project Notifications (PROJECT group, distinct from account-level prefs) -->
+    <!-- Project Notifications (now lives under Project Settings, but still reachable as standalone) -->
     <div class="screen hidden" data-screen="project-notifications">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Notifications</div>
+      <div class="breadcrumb"><a href="#" data-route="project-settings"><span class="proj-name">My first project</span> › Project Settings</a> › Notifications</div>
       <h2>Project notifications</h2>
-      <p class="subhead">Configure project-scoped notification triggers — agent events, billing thresholds, security alerts.</p>
-      <div class="note"><strong>Distinction:</strong> this is the project-level notification <em>service</em> config (which events fire). Account-level <em>preferences</em> (where you get them — Email / Text / Console) live in <a href="#" data-action="goAccount" data-route="notif-prefs">Account › Notification Preferences</a>.</div>
-      <div class="empty">Wireframe placeholder — trigger rules + webhook routes.</div>
+      <p class="subhead">Project-scoped notification triggers — which events fire from this project, and where they're routed.</p>
+      <div class="note"><strong>Distinction:</strong> this is the project-level event <em>config</em>. Per-channel <em>delivery preferences</em> (Email / Text / Console) live in <a href="#" data-action="goAccount" data-route="preferences">Preferences › Notifications</a>. Webhook destinations live in <a href="#" data-action="goAccount" data-route="webhooks">Webhooks</a>.</div>
+
+      <div class="box">
+        <h3>Trigger rules</h3>
+        <div class="row"><span class="label">Agent deployed</span><span class="value">All members · Email + Console</span><div class="actions"><button class="btn small">Edit</button></div></div>
+        <div class="row"><span class="label">Agent errored</span><span class="value">Owners + Engineers · Email + Slack webhook</span><div class="actions"><button class="btn small">Edit</button></div></div>
+        <div class="row"><span class="label">Billing threshold (80% of cap)</span><span class="value">Owners only · Email + Text</span><div class="actions"><button class="btn small">Edit</button></div></div>
+        <div class="row"><span class="label">Call failed (≥10/min)</span><span class="value">Engineers · Slack webhook</span><div class="actions"><button class="btn small">Edit</button></div></div>
+        <div class="row"><span class="label">Vendor credential 401/403</span><span class="value">Owners + Engineers · Email + Console + Slack</span><div class="actions"><button class="btn small">Edit</button></div></div>
+        <div style="margin-top:12px;"><button class="btn primary" data-action="toast" data-msg="Add trigger rule">+ Add trigger rule</button></div>
+      </div>
     </div>
 
     <div class="screen hidden" data-screen="restful-api">
@@ -977,16 +1129,73 @@
 
     <div class="screen hidden" data-screen="webhooks">
       <div class="breadcrumb">Account › Developer › Webhooks</div>
-      <h2>Webhooks</h2>
-      <p class="subhead">Account-level event delivery — agent lifecycle, billing, security events.</p>
-      <div class="empty">Wireframe placeholder.</div>
+      <div class="header-row">
+        <div>
+          <h2>Webhooks</h2>
+          <p class="subhead">Receive agent lifecycle, billing, and security events at your own endpoints.</p>
+        </div>
+        <button class="btn primary" data-action="openWebhookModal">+ Add webhook</button>
+      </div>
+
+      <div class="box">
+        <h3>Active webhooks</h3>
+        <div class="row clickable" data-action="toast" data-msg="Webhook detail — deliveries log">
+          <span class="label mono">https://api.acme.com/agora-events</span>
+          <span class="value">5 events · last delivery 2 min ago · 200 OK</span>
+          <span class="tag tag-live">Active</span>
+          <div class="actions"><button class="btn small">Edit</button><button class="btn small">Disable</button></div>
+        </div>
+        <div class="row clickable" data-action="toast" data-msg="Webhook detail">
+          <span class="label mono">https://hooks.slack.com/services/T01/B02/abcd</span>
+          <span class="value">1 event (billing.threshold) · last delivery 3h ago · 200 OK</span>
+          <span class="tag tag-live">Active</span>
+          <div class="actions"><button class="btn small">Edit</button><button class="btn small">Disable</button></div>
+        </div>
+      </div>
+
+      <div class="box" style="background:#fff8e0;">
+        <h3>Recent failures · last 24h</h3>
+        <div class="row"><span class="label mono">https://api.acme.com/agora-events</span><span class="value">3 deliveries failed · 503 from your endpoint · 04:12 UTC</span><div class="actions"><button class="btn small">Redeliver all</button></div></div>
+        <div class="note" style="background:transparent;border-left-color:#000;"><strong>Auto-disable:</strong> we disable webhooks after 100 consecutive failures over 24h and email account owners.</div>
+      </div>
+
+      <div class="box">
+        <h3>Available events</h3>
+        <div class="grid-3">
+          <div><strong>Agent</strong><div class="muted" style="font-size:11px;">agent.deployed · agent.paused · agent.errored</div></div>
+          <div><strong>Call</strong><div class="muted" style="font-size:11px;">call.started · call.completed · call.failed</div></div>
+          <div><strong>Billing</strong><div class="muted" style="font-size:11px;">billing.threshold · invoice.paid · invoice.failed</div></div>
+          <div><strong>Security</strong><div class="muted" style="font-size:11px;">member.invited · key.rotated · login.suspicious</div></div>
+          <div><strong>Project</strong><div class="muted" style="font-size:11px;">project.created · project.suspended</div></div>
+          <div><strong>Webhook</strong><div class="muted" style="font-size:11px;">webhook.disabled (meta-event)</div></div>
+        </div>
+      </div>
     </div>
 
     <div class="screen hidden" data-screen="audit-logs">
       <div class="breadcrumb">Account › Developer › Audit logs</div>
       <h2>Audit logs</h2>
-      <p class="subhead">SOC 2 compliance trail — who did what, when, from where.</p>
-      <div class="empty">Wireframe placeholder.</div>
+      <p class="subhead">SOC 2 compliance trail — who did what, when, from where. 30-day retention on Free, 1 year on Pro+.</p>
+
+      <div class="box">
+        <h3>Filters</h3>
+        <div class="grid-2">
+          <div class="field"><label>Date range</label><select class="input"><option>Last 24 hours</option><option selected>Last 7 days</option><option>Last 30 days</option><option>Custom</option></select></div>
+          <div class="field"><label>Actor</label><select class="input"><option selected>All actors</option><option>Jane Doe</option><option>API tokens</option><option>System</option></select></div>
+          <div class="field"><label>Event type</label><select class="input"><option selected>All events</option><option>agent.*</option><option>billing.*</option><option>member.*</option><option>key.*</option></select></div>
+          <div class="field"><label>Result</label><select class="input"><option selected>All</option><option>Success</option><option>Failed</option><option>Denied</option></select></div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;"><button class="btn">Apply filters</button><button class="btn">Export CSV</button></div>
+      </div>
+
+      <div class="box">
+        <h3>Events · 142 in window</h3>
+        <div class="row clickable"><span class="label mono">22 May 09:54</span><span class="value">jane.doe@acme.com · <strong>agent.deployed</strong> · Customer Support Agent · 198.51.x.x</span><span class="tag tag-live">Success</span></div>
+        <div class="row clickable"><span class="label mono">22 May 09:42</span><span class="value">jane.doe@acme.com · <strong>vendor_credential.created</strong> · OpenAI · Production · 198.51.x.x</span><span class="tag tag-live">Success</span></div>
+        <div class="row clickable"><span class="label mono">22 May 08:11</span><span class="value">API token (ci-deploy) · <strong>agent.deployed</strong> · Sales Representative · 35.244.x.x</span><span class="tag tag-live">Success</span></div>
+        <div class="row clickable"><span class="label mono">22 May 04:18</span><span class="value">unknown · <strong>login.suspicious</strong> · jane.doe@acme.com · 102.x.x.x · TOR exit</span><span class="tag tag-draft">Denied</span></div>
+        <div class="row clickable"><span class="label mono">21 May 16:02</span><span class="value">jane.doe@acme.com · <strong>member.invited</strong> · alex@acme.com · role: Engineer · 198.51.x.x</span><span class="tag tag-live">Success</span></div>
+      </div>
     </div>
 
     <div class="screen hidden" data-screen="help-support">
@@ -1013,9 +1222,24 @@
 
       <div class="box">
         <h3>Active credentials</h3>
-        <div class="row"><span class="label">aa-embed-prod</span><span class="value">Created 12 Mar 2026 · last used 3 days ago</span><div class="actions"><button class="btn small">Rotate</button><button class="btn small">Revoke</button></div></div>
-        <div class="row"><span class="label">aa-embed-staging</span><span class="value">Created 02 Apr 2026 · never used</span><div class="actions"><button class="btn small">Rotate</button><button class="btn small">Revoke</button></div></div>
-        <div style="margin-top: 12px;"><button class="btn primary" data-action="toast" data-msg="New AA Embedded credential generated">+ Create credential</button></div>
+        <div class="row"><span class="label">aa-embed-prod</span><span class="value">Created 12 Mar 2026 · last used 3 days ago · origins: app.acme.com</span><div class="actions"><button class="btn small">Rotate</button><button class="btn small">Revoke</button></div></div>
+        <div class="row"><span class="label">aa-embed-staging</span><span class="value">Created 02 Apr 2026 · never used · origins: staging.acme.com</span><div class="actions"><button class="btn small">Rotate</button><button class="btn small">Revoke</button></div></div>
+        <div style="margin-top: 12px;"><button class="btn primary" data-action="openAAEmbedForm">+ Create credential</button></div>
+      </div>
+
+      <!-- Inline create form (hidden by default) -->
+      <div class="box hidden" id="aaEmbedForm" style="background:#f5f5f5;">
+        <h3>Create AA Embedded credential</h3>
+        <div class="grid-2">
+          <div class="field"><label>Name</label><input class="input" placeholder="aa-embed-prod-v2"></div>
+          <div class="field"><label>Allowed origins</label><input class="input mono" placeholder="https://app.acme.com, https://*.acme.com"></div>
+        </div>
+        <div class="field"><label>Allowed dashboards</label><select class="input"><option selected>All dashboards in account</option><option>Call quality only</option><option>Custom selection…</option></select></div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn" data-action="closeAAEmbedForm">Cancel</button>
+          <button class="btn primary" data-action="saveAAEmbed">Create credential</button>
+        </div>
+        <div class="note"><strong>One-time reveal:</strong> after creation, the secret is shown once. Save it — you won't see it again.</div>
       </div>
 
       <div class="box">
@@ -1080,11 +1304,57 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
 
       <div class="box">
         <h3>License management surfaces (when enabled)</h3>
-        <div class="row"><span class="label">Pre-authorisation</span><span class="value">Reserve license seats before activation</span></div>
-        <div class="row"><span class="label">Quota management</span><span class="value">Allocate license capacity across projects</span></div>
-        <div class="row"><span class="label">Purchase history</span><span class="value">License pack invoices and renewals</span></div>
-        <div class="row"><span class="label">Usage queries</span><span class="value">Reconcile actual usage against reserved quota</span></div>
-        <div class="note"><strong>Console parity:</strong> mirrors <code>/license-management</code> and its four children (currently gated for this account).</div>
+        <div class="desc">Toggle the unlocked preview to see the four tabbed views consolidated from Console's four <code>/license-management/*</code> pages.</div>
+        <div style="margin-top:8px;"><button class="btn" data-action="toggleLicensingUnlocked">Preview unlocked state →</button></div>
+      </div>
+
+      <!-- Unlocked preview (hidden by default) -->
+      <div class="hidden" id="licensingUnlocked">
+        <div class="note"><strong>Preview:</strong> what an Enterprise customer with an active license pack sees. Toggle off to return to the gated state.</div>
+
+        <div class="tabs" id="licTabs">
+          <div class="tab active" data-tab="lic-quota">Quota</div>
+          <div class="tab" data-tab="lic-preauth">Pre-authorization</div>
+          <div class="tab" data-tab="lic-purchase">Purchase history</div>
+          <div class="tab" data-tab="lic-usage">Usage queries</div>
+        </div>
+
+        <div class="tab-panel" data-panel="lic-quota">
+          <div class="box"><h3>Allocated quota · 10,000 seats total</h3>
+            <div class="row"><span class="label">My first project</span><span class="value">4,200 seats allocated · 3,180 in use (76%)</span><div class="actions"><button class="btn small">Reallocate</button></div></div>
+            <div class="row"><span class="label">Acme project</span><span class="value">3,800 seats allocated · 2,950 in use (78%)</span><div class="actions"><button class="btn small">Reallocate</button></div></div>
+            <div class="row"><span class="label">Beta project</span><span class="value">2,000 seats allocated · 410 in use (21%)</span><div class="actions"><button class="btn small">Reallocate</button></div></div>
+            <div class="row"><span class="label">Unallocated pool</span><span class="value">0 seats · all seats distributed</span></div>
+          </div>
+        </div>
+
+        <div class="tab-panel hidden" data-panel="lic-preauth">
+          <div class="box"><h3>Pre-authorization rules</h3>
+            <div class="desc">Reserve seats for an event N hours before it starts. Unused reservations auto-release.</div>
+            <div class="row"><span class="label">acme-summit-2026 (event)</span><span class="value">500 seats reserved · auto-release 4h after event</span></div>
+            <div class="row"><span class="label">api-load-test (channel pattern)</span><span class="value">100 seats reserved · 24h window</span></div>
+            <div style="margin-top:12px;"><button class="btn primary">+ Reserve seats</button></div>
+          </div>
+        </div>
+
+        <div class="tab-panel hidden" data-panel="lic-purchase">
+          <div class="box"><h3>License pack purchases</h3>
+            <div class="row"><span class="label">10,000-seat annual pack</span><span class="value">Renewed 12 Jan 2026 · expires 12 Jan 2027 · $48,000</span><div class="actions"><button class="btn small">Invoice</button></div></div>
+            <div class="row"><span class="label">2,000-seat top-up</span><span class="value">14 Mar 2026 · $9,600 · one-time</span><div class="actions"><button class="btn small">Invoice</button></div></div>
+          </div>
+        </div>
+
+        <div class="tab-panel hidden" data-panel="lic-usage">
+          <div class="box"><h3>Reconciliation query</h3>
+            <div class="grid-2">
+              <div class="field"><label>From</label><input class="input" value="2026-04-01"></div>
+              <div class="field"><label>To</label><input class="input" value="2026-04-30"></div>
+              <div class="field"><label>Project</label><select class="input"><option selected>All</option><option>My first project</option><option>Acme project</option></select></div>
+              <div class="field"><label>Group by</label><select class="input"><option selected>Day</option><option>Project</option><option>License type</option></select></div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;"><button class="btn primary">Run query</button><button class="btn">Export</button></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1235,6 +1505,114 @@ AGENT_ID=FSDF122S7</textarea></div>
       <div class="row"><span class="label">Suggested cap</span><span class="value">$200 / mo · alert at 80%</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cost cap set">Set cap</button></div></div>
     </div>
     <div class="modal-footer"><button class="btn" data-action="closeDeploy">Cancel</button><button class="btn primary" data-action="confirmDeploy">Deploy to production</button></div>
+  </div>
+</div>
+
+<!-- Top-up wallet modal -->
+<div class="modal-backdrop hidden" id="topupModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Top up wallet</h3><button class="btn icon" data-action="closeTopup">×</button></div>
+    <div class="field"><label>Add to balance</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+        <button class="btn topup-chip" data-action="pickTopup" data-amount="25">$25</button>
+        <button class="btn topup-chip" data-action="pickTopup" data-amount="50">$50</button>
+        <button class="btn topup-chip selected" data-action="pickTopup" data-amount="100">$100</button>
+        <button class="btn topup-chip" data-action="pickTopup" data-amount="200">$200</button>
+        <input class="input" id="topupCustom" style="max-width:120px;" placeholder="Custom $">
+      </div>
+    </div>
+    <div class="field"><label>Payment method</label>
+      <select class="input"><option selected>Visa •••• 4242 — default</option><option>Mastercard •••• 5678</option><option>+ Use a new card</option></select>
+    </div>
+    <div class="box" style="background:#f5f5f5;margin-top:12px;">
+      <div class="row"><span class="label">Amount</span><span class="value" id="topupAmount">$100.00</span></div>
+      <div class="row"><span class="label">Processing fee (2.9% + $0.30)</span><span class="value" id="topupFee">$3.20</span></div>
+      <div class="row"><span class="label"><strong>Total</strong></span><span class="value"><strong id="topupTotal">$103.20</strong></span></div>
+      <div class="row"><span class="label muted">You'll get</span><span class="value muted">~1,000 minutes at current rates</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-action="closeTopup">Cancel</button>
+      <button class="btn primary" data-action="confirmTopup">Top up $103.20</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change plan modal -->
+<div class="modal-backdrop hidden" id="changePlanModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Upgrade to PRO</h3><button class="btn icon" data-action="closeChangePlan">×</button></div>
+    <div class="box" style="background:#f5f5f5;">
+      <div class="row"><span class="label">From</span><span class="value">STARTER · $49/mo · 50K mins · 2 concurrent agents</span></div>
+      <div class="row"><span class="label">To</span><span class="value"><strong>PRO · $199/mo · 200K mins · 10 concurrent agents</strong></span></div>
+      <div class="row"><span class="label">Prorated charge today</span><span class="value">$87.42 (22 of 30 days remaining)</span></div>
+      <div class="row"><span class="label">Next full charge</span><span class="value">12 Jun 2026 · $199.00</span></div>
+    </div>
+    <div class="box"><h3>What you gain</h3>
+      <ul style="padding-left:20px;font-size:13px;line-height:1.6;">
+        <li>4× more included minutes (50K → 200K)</li>
+        <li>5× more concurrent agents (2 → 10)</li>
+        <li>Email + chat support (was email-only)</li>
+        <li>1-year audit log retention (was 30 days)</li>
+        <li>Premium add-ons unlock (Media Gateway, Conversation Intelligence)</li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-action="closeChangePlan">Cancel</button>
+      <button class="btn primary" data-action="confirmChangePlan">Confirm upgrade — pay $87.42 today</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add webhook modal -->
+<div class="modal-backdrop hidden" id="webhookModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Add webhook</h3><button class="btn icon" data-action="closeWebhookModal">×</button></div>
+    <div class="field"><label>Endpoint URL</label><input class="input mono" placeholder="https://api.your-app.com/agora-events"></div>
+    <div class="field"><label>Subscribe to events</label>
+      <div class="grid-2" style="margin-top:6px;font-size:12px;">
+        <div><input type="checkbox" checked> agent.deployed</div>
+        <div><input type="checkbox" checked> agent.errored</div>
+        <div><input type="checkbox"> agent.paused</div>
+        <div><input type="checkbox" checked> call.completed</div>
+        <div><input type="checkbox"> call.failed</div>
+        <div><input type="checkbox" checked> billing.threshold</div>
+        <div><input type="checkbox"> invoice.paid</div>
+        <div><input type="checkbox"> member.invited</div>
+      </div>
+    </div>
+    <div class="field"><label>Signing secret (auto-generated)</label>
+      <div style="display:flex;gap:8px;">
+        <input class="input mono" value="whsec_3a7b•••••••••••••••••••••••••" readonly>
+        <button class="btn small" data-action="toast" data-msg="Copied signing secret">Copy</button>
+      </div>
+      <div class="muted" style="font-size:11px;margin-top:4px;">Use this to verify HMAC signatures on your endpoint.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-action="toast" data-msg="Sent test event — check your endpoint">Send test event</button>
+      <button class="btn" data-action="closeWebhookModal">Cancel</button>
+      <button class="btn primary" data-action="confirmWebhook">Save webhook</button>
+    </div>
+  </div>
+</div>
+
+<!-- New ticket modal -->
+<div class="modal-backdrop hidden" id="ticketModal">
+  <div class="modal">
+    <div class="modal-header"><h3>New support ticket</h3><button class="btn icon" data-action="closeTicketModal">×</button></div>
+    <div class="grid-2">
+      <div class="field"><label>Category</label><select class="input"><option selected>Technical</option><option>Billing</option><option>Security</option><option>Feature request</option></select></div>
+      <div class="field"><label>Severity</label><select class="input"><option>Low — within 5 business days</option><option selected>Medium — within 2 business days</option><option>High — within 1 business day</option><option>Urgent — within 4h (paid plans only)</option></select></div>
+    </div>
+    <div class="field"><label>Subject</label><input class="input" placeholder="Brief summary of the issue"></div>
+    <div class="field"><label>Description</label><textarea class="input" rows="5" placeholder="What happened? What did you expect? Steps to reproduce?"></textarea></div>
+    <div class="grid-2">
+      <div class="field"><label>Affected project</label><select class="input"><option selected>My first project</option><option>Acme project</option><option>None / account-level</option></select></div>
+      <div class="field"><label>Affected agent (optional)</label><select class="input"><option selected>—</option><option>Customer Support Agent</option><option>Sales Representative</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-action="closeTicketModal">Cancel</button>
+      <button class="btn primary" data-action="confirmTicket">Submit ticket</button>
+    </div>
   </div>
 </div>
 

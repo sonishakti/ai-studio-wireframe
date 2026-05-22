@@ -212,6 +212,71 @@
       el.parentElement.querySelectorAll('.row').forEach((r) => r.classList.remove('selected'));
       el.classList.add('selected');
     },
+
+    // Top-up wallet
+    openTopup() {
+      const m = $('#topupModal');
+      if (m) m.classList.remove('hidden');
+    },
+    closeTopup() { $('#topupModal').classList.add('hidden'); },
+    pickTopup(el) {
+      const amt = parseFloat(el.dataset.amount);
+      $$('.topup-chip').forEach((c) => c.classList.remove('selected'));
+      el.classList.add('selected');
+      const fee = +(amt * 0.029 + 0.30).toFixed(2);
+      const total = +(amt + fee).toFixed(2);
+      $('#topupAmount').textContent = '$' + amt.toFixed(2);
+      $('#topupFee').textContent = '$' + fee.toFixed(2);
+      $('#topupTotal').textContent = '$' + total.toFixed(2);
+      const btn = $('#topupModal .btn.primary');
+      if (btn) btn.textContent = 'Top up $' + total.toFixed(2);
+    },
+    confirmTopup() {
+      $('#topupModal').classList.add('hidden');
+      const total = $('#topupTotal') ? $('#topupTotal').textContent : '';
+      toast('Wallet topped up · ' + total);
+    },
+
+    // Change plan
+    openChangePlan() { $('#changePlanModal').classList.remove('hidden'); },
+    closeChangePlan() { $('#changePlanModal').classList.add('hidden'); },
+    confirmChangePlan() {
+      $('#changePlanModal').classList.add('hidden');
+      toast('Upgraded to PRO · $87.42 charged');
+    },
+
+    // Webhooks
+    openWebhookModal() { $('#webhookModal').classList.remove('hidden'); },
+    closeWebhookModal() { $('#webhookModal').classList.add('hidden'); },
+    confirmWebhook() {
+      $('#webhookModal').classList.add('hidden');
+      toast('Webhook saved · test event sent');
+    },
+
+    // Support tickets
+    openTicketModal() { $('#ticketModal').classList.remove('hidden'); },
+    closeTicketModal() { $('#ticketModal').classList.add('hidden'); },
+    confirmTicket() {
+      $('#ticketModal').classList.add('hidden');
+      toast('Ticket submitted · we will reply within SLA');
+    },
+
+    // AA Embedded credential create (inline panel)
+    openAAEmbedForm() {
+      const f = $('#aaEmbedForm');
+      if (f) f.classList.remove('hidden');
+    },
+    closeAAEmbedForm() { $('#aaEmbedForm').classList.add('hidden'); },
+    saveAAEmbed() {
+      $('#aaEmbedForm').classList.add('hidden');
+      toast('Credential created · secret revealed once');
+    },
+
+    // Licensing unlocked-state toggle
+    toggleLicensingUnlocked() {
+      const u = $('#licensingUnlocked');
+      if (u) u.classList.toggle('hidden');
+    },
   };
 
   // ---------- Event wiring ----------

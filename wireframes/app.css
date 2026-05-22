@@ -410,6 +410,18 @@ a[data-route], a[data-action] { color: #000; text-decoration: underline; cursor:
   background: #f4faff;
 }
 
+/* Top-up amount chips */
+.topup-chip {
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.topup-chip.selected {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
 /* Agents persistent test panel */
 .agents-test-panel {
   position: sticky;
