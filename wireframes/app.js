@@ -195,6 +195,30 @@
       else def && def.classList.remove('hidden');
       toast(`Home state: ${mode}`);
     },
+    setAgentsMode(el) {
+      const mode = el.dataset.modeName;
+      const popHdr = document.getElementById('agentsHeaderPopulated');
+      const emptyHdr = document.getElementById('agentsHeaderEmpty');
+      const table = document.getElementById('agentsTableBox');
+      if (mode === 'empty') {
+        popHdr && popHdr.classList.add('hidden');
+        emptyHdr && emptyHdr.classList.remove('hidden');
+        table && table.classList.add('hidden');
+      } else {
+        popHdr && popHdr.classList.remove('hidden');
+        emptyHdr && emptyHdr.classList.add('hidden');
+        table && table.classList.remove('hidden');
+      }
+      toast(`Agents state: ${mode}`);
+    },
+    selectTemplate(el) {
+      const name = el.dataset.agent;
+      const chip = document.getElementById('selectedAgentChip');
+      if (chip) chip.textContent = name;
+      // Highlight selection
+      el.parentElement.querySelectorAll('.row').forEach((r) => r.classList.remove('selected'));
+      el.classList.add('selected');
+    },
   };
 
   // ---------- Event wiring ----------

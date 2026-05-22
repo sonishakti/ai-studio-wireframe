@@ -372,44 +372,126 @@
     <!-- AGENTS LIST -->
     <div class="screen hidden" data-screen="agents">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Agents</div>
-      <div class="header-row">
+
+      <!-- Populated header (default) -->
+      <div class="header-row" id="agentsHeaderPopulated">
         <div>
           <h2>Agents</h2>
-          <p class="subhead">Build, test, and deploy voice AI agents in this project.</p>
+          <p class="subhead">Voice AI agents in this project. Build, test, and deploy in minutes.</p>
         </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn">Import agent</button>
-          <button class="btn primary" data-action="newAgent">+ New agent</button>
-        </div>
-      </div>
-
-      <div class="box">
-        <h3>Your agents</h3>
-        <div class="row clickable" data-action="openAgent" data-agent="Appointment Reminder">
-          <span class="label">Appointment Reminder</span>
-          <span class="value">Draft · auto-saved 2s ago</span>
-          <div class="actions"><button class="btn small">Open</button></div>
-        </div>
-        <div class="row clickable" data-action="openAgent" data-agent="Sales lead Qualification Agent">
-          <span class="label">Sales lead Qualification Agent</span>
-          <span class="value"><span class="tag">Live</span> · 1.2K calls · last 1 day ago</span>
-          <div class="actions"><button class="btn small">Open</button></div>
-        </div>
-        <div class="row clickable" data-action="openAgent" data-agent="NPS Survey">
-          <span class="label">NPS Survey</span>
-          <span class="value">Draft · 3 days ago</span>
-          <div class="actions"><button class="btn small">Open</button></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" data-action="setAgentsMode" data-mode-name="empty">View empty state</button>
+          <button class="btn">Import Agent</button>
+          <button class="btn primary" data-action="newAgent">+ Deploy New Agent</button>
         </div>
       </div>
 
-      <div class="box">
-        <h3>Pre-built by Agora</h3>
-        <p class="desc">Try a working agent in under a minute. No config required.</p>
-        <div class="row clickable"><span class="label">Appointment Reminder</span><span class="value">Automatically call customers to remind them of upcoming appointments</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="row clickable"><span class="label">NPS Survey</span><span class="value">Gather customer feedback through voice surveys</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="row clickable"><span class="label">Interactive Voice Response (IVR)</span><span class="value">Route callers to the right department automatically</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="row clickable"><span class="label">Payment Reminder</span><span class="value">Follow up with customers about pending payments</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="row clickable"><span class="label">Customer service for e-commerce</span><span class="value">Very short description here</span><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
+      <!-- Empty-state header (first-run) -->
+      <div class="header-row hidden" id="agentsHeaderEmpty">
+        <div>
+          <h2>Deploy your first AI agent in minutes</h2>
+          <p class="subhead">Import your agent OR start with a pre-built template.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" data-action="setAgentsMode" data-mode-name="populated">View populated state</button>
+          <button class="btn">Import Agent</button>
+          <button class="btn primary" data-action="newAgent">+ Deploy New Agent</button>
+        </div>
+      </div>
+
+      <div class="two-pane">
+        <div>
+          <!-- Agents table (populated state only) -->
+          <div class="box" id="agentsTableBox">
+            <table class="agent-table">
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Agent ID</th>
+                  <th>Project / App Id</th>
+                  <th>Last Published</th>
+                  <th>Last Edited <span class="muted" style="font-size:10px">↕</span></th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="clickable" data-action="openAgent" data-agent="Customer Support Agent">
+                  <td><strong>Customer Support Agent</strong></td>
+                  <td class="mono">agt-4545</td>
+                  <td><div>Alpha</div><div class="muted mono" style="font-size:11px">sh63***</div></td>
+                  <td>02/10/2026 10:00</td>
+                  <td>5 minutes ago</td>
+                  <td><span class="tag tag-live">Live</span></td>
+                  <td class="row-menu">⋮</td>
+                </tr>
+                <tr class="clickable" data-action="openAgent" data-agent="Sales Representative">
+                  <td><strong>Sales Representative</strong></td>
+                  <td class="mono">sls-7890</td>
+                  <td><div>Bravo</div><div class="muted mono" style="font-size:11px">1234***</div></td>
+                  <td>02/10/2026 10:00</td>
+                  <td>02/10/2026 10:00</td>
+                  <td><span class="tag tag-live">Live</span></td>
+                  <td class="row-menu">⋮</td>
+                </tr>
+                <tr class="clickable" data-action="openAgent" data-agent="Survey Agent">
+                  <td><strong>Survey Agent</strong></td>
+                  <td class="mono">pm-1234</td>
+                  <td><div>Charlie</div><div class="muted mono" style="font-size:11px">f434***</div></td>
+                  <td>02/04/2026 18:00</td>
+                  <td>02/04/2026 18:00</td>
+                  <td><span class="tag tag-draft">Draft</span></td>
+                  <td class="row-menu">⋮</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pre-built templates (shown in both states) -->
+          <div class="box">
+            <h3>🤖 Pre-built by agora</h3>
+            <div class="row clickable" data-action="selectTemplate" data-agent="Appointment Reminder">
+              <span class="label"><strong>Appointment Reminder</strong></span>
+              <span class="value">Automatically call customers to remind them of upcoming appointments</span>
+            </div>
+            <div class="row clickable" data-action="selectTemplate" data-agent="NPS Survey">
+              <span class="label"><strong>NPS Survey</strong></span>
+              <span class="value">Gather customer feedback through voice surveys</span>
+            </div>
+            <div class="row clickable selected" data-action="selectTemplate" data-agent="Interactive Voice Response (IVR)">
+              <span class="label"><strong>Interactive Voice Response (IVR)</strong></span>
+              <span class="value">Route callers to the right department automatically</span>
+            </div>
+            <div class="row clickable" data-action="selectTemplate" data-agent="Payment Reminder">
+              <span class="label"><strong>Payment Reminder</strong></span>
+              <span class="value">Follow up with customers about pending payments</span>
+            </div>
+            <div class="row clickable" data-action="selectTemplate" data-agent="Customer service for e-commerce">
+              <span class="label"><strong>Customer service for e-commerce</strong></span>
+              <span class="value">Very short description here</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Persistent test panel -->
+        <div class="test-panel agents-test-panel">
+          <div style="text-align:center; margin-bottom:8px;">
+            <span class="tag" id="selectedAgentChip">Interactive Voice Response (IVR)</span>
+          </div>
+          <div class="orb orb-large"></div>
+          <div style="text-align:center; margin: 8px 0 16px; font-size:13px;">Agent Idle</div>
+          <div style="text-align:center;">
+            <button class="btn primary" style="width:100%" data-action="toast" data-msg="Calling agent — listen up">📞 Start Call</button>
+          </div>
+
+          <div class="stats-block">
+            <div class="stats-row"><span class="stats-key">LLM</span><span class="stats-val">Open AI</span></div>
+            <div class="stats-row"><span class="stats-key">ASR</span><span class="stats-val">DeepGram</span></div>
+            <div class="stats-row"><span class="stats-key">TTS</span><span class="stats-val">ElevenLabs</span></div>
+            <div class="stats-row"><span class="stats-key">AVG END-TO-END LATENCY</span><span class="stats-val">—</span></div>
+            <div class="stats-row"><span class="stats-key">AVG LLM TIME TO FIRST TOKEN</span><span class="stats-val">—</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
