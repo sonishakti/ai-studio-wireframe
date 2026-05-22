@@ -1,0 +1,745 @@
+{
+  "metadata": {
+    "agent": "Migration Agent",
+    "date": "2026-02-20",
+    "branch": "main",
+    "totalOriginalPages": 87,
+    "totalMigrationPages": 87,
+    "statusCounts": {
+      "complete": 80,
+      "complete-redirect": 4,
+      "placeholder": 1,
+      "not-needed": 2,
+      "new": 2
+    },
+    "qualityCounts": {
+      "green": 75,
+      "yellow-missing-force-dynamic": 80,
+      "yellow-agora-classes": 80,
+      "red-placeholder": 1
+    },
+    "notes": "All 87 original active routes have a migration equivalent. 'complete' pages may still have quality issues (no force-dynamic on main, agora CSS classes). force-dynamic is fixed on feat/design-inspect (63 pages). The placeholder count is 1 (pre-authorization)."
+  },
+  "pages": [
+    {
+      "originalPath": "/",
+      "migrationPath": "app/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-003"],
+      "notes": "Dashboard with conditional widgets. Missing force-dynamic (main branch fails). Uses agora CSS classes."
+    },
+    {
+      "originalPath": "/onboarding",
+      "migrationPath": "app/onboarding/page.tsx",
+      "status": "complete",
+      "quality": "green",
+      "issues": [],
+      "notes": "Onboarding wrapper. Simple page."
+    },
+    {
+      "originalPath": "/404",
+      "migrationPath": null,
+      "status": "not-needed",
+      "quality": "green",
+      "issues": [],
+      "notes": "Handled by Next.js App Router not-found convention."
+    },
+    {
+      "originalPath": "/500",
+      "migrationPath": "app/error.tsx",
+      "status": "not-needed",
+      "quality": "green",
+      "issues": [],
+      "notes": "Handled by app/error.tsx (exists, 1 file)."
+    },
+    {
+      "originalPath": "/play",
+      "migrationPath": "app/playground/[[...componentId]]/page.tsx",
+      "status": "new",
+      "quality": "green",
+      "issues": [],
+      "notes": "Component playground. Renamed and upgraded to catch-all route."
+    },
+    {
+      "originalPath": "/test",
+      "migrationPath": null,
+      "status": "not-needed",
+      "quality": "green",
+      "issues": [],
+      "notes": "Dev-only modal test page. Not migrated by design."
+    },
+    {
+      "originalPath": "/billing",
+      "migrationPath": "app/billing/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-003", "ISS-008"],
+      "notes": "Main billing dashboard. Missing force-dynamic on main. Complex page with Bills, PaymentMethod, Wallet, AutoPay."
+    },
+    {
+      "originalPath": "/billing/invoices",
+      "migrationPath": "app/billing/invoices/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Invoice list with monthly/pre-paid tabs and date filter."
+    },
+    {
+      "originalPath": "/billing/manage-cards",
+      "migrationPath": "app/billing/manage-cards/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Card management."
+    },
+    {
+      "originalPath": "/billing/transactions",
+      "migrationPath": "app/billing/transactions/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Transaction history."
+    },
+    {
+      "originalPath": "/billing/withdraw-transactions",
+      "migrationPath": "app/billing/withdraw-transactions/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Withdrawal transactions."
+    },
+    {
+      "originalPath": "/billing/all-designs",
+      "migrationPath": "app/billing/all-designs/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Design review page."
+    },
+    {
+      "originalPath": "/project-management",
+      "migrationPath": "app/project-management/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Project list with create flow."
+    },
+    {
+      "originalPath": "/project-management/[projectID]",
+      "migrationPath": "app/project-management/[projectID]/page.tsx",
+      "status": "complete-redirect",
+      "quality": "green",
+      "issues": [],
+      "notes": "Server-side redirect to chat/basic-info. Uses Next.js redirect()."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat",
+      "migrationPath": "app/project-management/[projectID]/chat/page.tsx",
+      "status": "complete-redirect",
+      "quality": "green",
+      "issues": [],
+      "notes": "Redirect to basic-info."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/basic-info",
+      "migrationPath": "app/project-management/[projectID]/chat/basic-info/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "EnableChat + BasicInfoContent. Complex page."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/features-overview",
+      "migrationPath": "app/project-management/[projectID]/chat/features-overview/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "IFRAME embed."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/callback",
+      "migrationPath": "app/project-management/[projectID]/chat/callback/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/push-template",
+      "migrationPath": "app/project-management/[projectID]/chat/push-template/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/push-cert",
+      "migrationPath": "app/project-management/[projectID]/chat/push-cert/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/text-rule-config",
+      "migrationPath": "app/project-management/[projectID]/chat/text-rule-config/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/text-rule-test",
+      "migrationPath": "app/project-management/[projectID]/chat/text-rule-test/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/text-history",
+      "migrationPath": "app/project-management/[projectID]/chat/text-history/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/image-rule-config",
+      "migrationPath": "app/project-management/[projectID]/chat/image-rule-config/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/image-rule-test",
+      "migrationPath": "app/project-management/[projectID]/chat/image-rule-test/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/image-history",
+      "migrationPath": "app/project-management/[projectID]/chat/image-history/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/word-config",
+      "migrationPath": "app/project-management/[projectID]/chat/word-config/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/wordlist-rule-config",
+      "migrationPath": "app/project-management/[projectID]/chat/wordlist-rule-config/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/wordlist-history",
+      "migrationPath": "app/project-management/[projectID]/chat/wordlist-history/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/domain-rule-config",
+      "migrationPath": "app/project-management/[projectID]/chat/domain-rule-config/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/domain-history",
+      "migrationPath": "app/project-management/[projectID]/chat/domain-history/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/message-recall",
+      "migrationPath": "app/project-management/[projectID]/chat/message-recall/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/message-report",
+      "migrationPath": "app/project-management/[projectID]/chat/message-report/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/user-label",
+      "migrationPath": "app/project-management/[projectID]/chat/user-label/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/operation-manage-user",
+      "migrationPath": "app/project-management/[projectID]/chat/operation-manage-user/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/operation-manage-chatroom",
+      "migrationPath": "app/project-management/[projectID]/chat/operation-manage-chatroom/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/operation-manage-group",
+      "migrationPath": "app/project-management/[projectID]/chat/operation-manage-group/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/real-time-overview",
+      "migrationPath": "app/project-management/[projectID]/chat/real-time-overview/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/real-time-message-delivery",
+      "migrationPath": "app/project-management/[projectID]/chat/real-time-message-delivery/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/real-time-user-connect-status",
+      "migrationPath": "app/project-management/[projectID]/chat/real-time-user-connect-status/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/real-time-user-logs",
+      "migrationPath": "app/project-management/[projectID]/chat/real-time-user-logs/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/real-time-hotspot-data",
+      "migrationPath": "app/project-management/[projectID]/chat/real-time-hotspot-data/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/usages-moderation",
+      "migrationPath": "app/project-management/[projectID]/chat/usages-moderation/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/usages-translation",
+      "migrationPath": "app/project-management/[projectID]/chat/usages-translation/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/multi-device",
+      "migrationPath": "app/project-management/[projectID]/chat/multi-device/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/chat/ip-whitelist",
+      "migrationPath": "app/project-management/[projectID]/chat/ip-whitelist/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/signaling/basic",
+      "migrationPath": "app/project-management/[projectID]/signaling/basic/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/signaling/presence-configuration",
+      "migrationPath": "app/project-management/[projectID]/signaling/presence-configuration/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/signaling/storage-configuration",
+      "migrationPath": "app/project-management/[projectID]/signaling/storage-configuration/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/signaling/stream-channel-configuration",
+      "migrationPath": "app/project-management/[projectID]/signaling/stream-channel-configuration/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/media-gateway",
+      "migrationPath": "app/project-management/[projectID]/media-gateway/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/media-pull",
+      "migrationPath": "app/project-management/[projectID]/media-pull/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/media-push",
+      "migrationPath": "app/project-management/[projectID]/media-push/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/cloud-proxy",
+      "migrationPath": "app/project-management/[projectID]/cloud-proxy/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/cloud-recording",
+      "migrationPath": "app/project-management/[projectID]/cloud-recording/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/real-time-stt",
+      "migrationPath": "app/project-management/[projectID]/real-time-stt/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/cohost-authentication",
+      "migrationPath": "app/project-management/[projectID]/cohost-authentication/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/conv-ai",
+      "migrationPath": "app/project-management/[projectID]/conv-ai/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "ConvAI playground with Agora RTC SDK. Complex."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/flexible-classroom",
+      "migrationPath": "app/project-management/[projectID]/flexible-classroom/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "1226 lines of business logic. Must be carefully validated."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/video-screenshot-upload",
+      "migrationPath": "app/project-management/[projectID]/video-screenshot-upload/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/whiteboard-basic",
+      "migrationPath": "app/project-management/[projectID]/whiteboard-basic/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/project-management/[projectID]/whiteboard-services",
+      "migrationPath": "app/project-management/[projectID]/whiteboard-services/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "1235 lines of business logic. Must be carefully validated."
+    },
+    {
+      "originalPath": "/project-management/[projectID]/notifications",
+      "migrationPath": "app/project-management/[projectID]/notifications/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "598 lines of business logic. Complex."
+    },
+    {
+      "originalPath": "/subscriptions",
+      "migrationPath": "app/subscriptions/page.tsx",
+      "status": "complete-redirect",
+      "quality": "green",
+      "issues": [],
+      "notes": "Server redirect to /subscriptions/all-subscriptions."
+    },
+    {
+      "originalPath": "/subscriptions/all-subscriptions",
+      "migrationPath": "app/subscriptions/all-subscriptions/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/subscriptions/rtc-plans",
+      "migrationPath": "app/subscriptions/rtc-plans/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/subscriptions/chat-plans",
+      "migrationPath": "app/subscriptions/chat-plans/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/subscriptions/signaling-plans",
+      "migrationPath": "app/subscriptions/signaling-plans/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/license-management",
+      "migrationPath": "app/license-management/page.tsx",
+      "status": "complete-redirect",
+      "quality": "green",
+      "issues": [],
+      "notes": "Server redirect to /license-management/purchase-history."
+    },
+    {
+      "originalPath": "/license-management/purchase-history",
+      "migrationPath": "app/license-management/purchase-history/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-016"],
+      "notes": "OrdersTable component. Missing LicensePermissionGuard — page is unprotected."
+    },
+    {
+      "originalPath": "/license-management/pre-authorization",
+      "migrationPath": "app/license-management/pre-authorization/page.tsx",
+      "status": "placeholder",
+      "quality": "red",
+      "issues": ["ISS-016", "ISS-017"],
+      "notes": "PLACEHOLDER: returns 'coming soon' div. ImportLicensesTab, VerifyLicenseTab, ImportHistoryTab not implemented."
+    },
+    {
+      "originalPath": "/license-management/quota-management",
+      "migrationPath": "app/license-management/quota-management/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-016"],
+      "notes": "Missing LicensePermissionGuard."
+    },
+    {
+      "originalPath": "/license-management/usages-query",
+      "migrationPath": "app/license-management/usages-query/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-016"],
+      "notes": "Missing LicensePermissionGuard."
+    },
+    {
+      "originalPath": "/settings",
+      "migrationPath": "app/settings/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-005"],
+      "notes": "Account settings. 346 lines of business logic. Formik in original — check if migrated."
+    },
+    {
+      "originalPath": "/settings/profile",
+      "migrationPath": "app/settings/profile/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-004", "ISS-005"],
+      "notes": "717 lines. OTP, phone, email, password, OAuth. Formik in original — check if migrated. Highest complexity settings page."
+    },
+    {
+      "originalPath": "/settings/teams-members",
+      "migrationPath": "app/settings/teams-members/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-005"],
+      "notes": "Formik in original — check migration."
+    },
+    {
+      "originalPath": "/settings/notification-preferences",
+      "migrationPath": "app/settings/notification-preferences/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/settings/sso-management",
+      "migrationPath": "app/settings/sso-management/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002", "ISS-005"],
+      "notes": "Formik in original — check migration."
+    },
+    {
+      "originalPath": "/credentials",
+      "migrationPath": "app/credentials/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Permission-gated: usePermission(VIEW, AgoraAnalytics)."
+    },
+    {
+      "originalPath": "/restful-api",
+      "migrationPath": "app/restful-api/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/extensions-marketplace",
+      "migrationPath": "app/extensions-marketplace/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/extensions-marketplace/[name]",
+      "migrationPath": "app/extensions-marketplace/[name]/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/extensions-marketplace/my-submissions",
+      "migrationPath": "app/extensions-marketplace/my-submissions/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/extensions-marketplace/my-submissions/[id]",
+      "migrationPath": "app/extensions-marketplace/my-submissions/[id]/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/finance/packages",
+      "migrationPath": "app/finance/packages/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": "/usage",
+      "migrationPath": "app/usage/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "Jotai-driven usage dashboard."
+    },
+    {
+      "originalPath": "/notifications",
+      "migrationPath": "app/notifications/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "200 lines. Shallow routing implemented via URL params."
+    },
+    {
+      "originalPath": "/notifications/[messageID]",
+      "migrationPath": "app/notifications/[messageID]/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "URL param driven, shared with index page."
+    },
+    {
+      "originalPath": "/packages/aa/pay",
+      "migrationPath": "app/packages/aa/pay/page.tsx",
+      "status": "complete",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": ""
+    },
+    {
+      "originalPath": null,
+      "migrationPath": "app/purchase-history/page.tsx",
+      "status": "new",
+      "quality": "yellow",
+      "issues": ["ISS-002"],
+      "notes": "New page in migration. License purchase history (separate from license-management section). Uses OrdersTable."
+    }
+  ]
+}

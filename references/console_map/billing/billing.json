@@ -1,0 +1,72 @@
+{
+  "page": {
+    "title": "Billing",
+    "url": "https://console.agora.io/billing",
+    "section": "Billing",
+    "subsection": "Overview",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Billing",
+    "description": null,
+    "sections": [
+      {
+        "id": "account-balance",
+        "heading": "Account Balance",
+        "description": null,
+        "components": [
+          { "type": "metric_card", "label": "Available Balance", "value": "$0.00", "unit": null, "trend": null },
+          { "type": "button", "label": "Top-up Wallet", "variant": "primary", "inferred_action": "Initiates wallet top-up flow", "is_destructive": false },
+          { "type": "button", "label": "Add Card", "variant": "secondary", "inferred_action": "Opens credit card entry flow", "is_destructive": false }
+        ]
+      },
+      {
+        "id": "billing-information",
+        "heading": "Billing Information",
+        "description": null,
+        "components": [
+          { "type": "button", "label": "Add Billing Information", "variant": "secondary", "inferred_action": "Opens billing information form", "is_destructive": false },
+          { "type": "text", "role": "label", "content": "Name on Card: — (not set)" },
+          { "type": "text", "role": "label", "content": "Billing Address: (not set)" }
+        ]
+      },
+      {
+        "id": "payment-method",
+        "heading": "Payment Method",
+        "description": null,
+        "components": [
+          { "type": "button", "label": "Credit Card", "variant": "secondary", "inferred_action": "Switches to credit card payment view", "is_destructive": false },
+          { "type": "button", "label": "Bank Transfer", "variant": "secondary", "inferred_action": "Switches to bank transfer view", "is_destructive": false },
+          { "type": "text", "role": "empty_state", "content": "No Cards Added" },
+          { "type": "button", "label": "Add New Card", "variant": "primary", "inferred_action": "Opens new credit card entry form", "is_destructive": false }
+        ]
+      },
+      {
+        "id": "your-invoices",
+        "heading": "Your Invoices",
+        "description": null,
+        "components": [
+          { "type": "link", "label": "View All", "href": "/billing/invoices", "opens_in": "same_tab" },
+          { "type": "table", "columns": ["Issue date", "Billing Period", "Due Date", "Amount", "Status", "Action"], "row_count_visible": 0, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "text", "role": "empty_state", "content": "No Invoices" }
+        ]
+      },
+      {
+        "id": "your-transactions",
+        "heading": "Your Transactions",
+        "description": null,
+        "components": [
+          { "type": "link", "label": "View All", "href": "/billing/transactions", "opens_in": "same_tab" },
+          { "type": "table", "columns": ["Issue date", "Transaction ID", "Transaction Type", "Amount", "Balance"], "row_count_visible": 0, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "text", "role": "empty_state", "content": "No Transactions" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Billing"],
+    "sibling_tabs": ["Credit Card", "Bank Transfer"],
+    "child_links": ["/billing/invoices", "/billing/transactions"]
+  }
+}

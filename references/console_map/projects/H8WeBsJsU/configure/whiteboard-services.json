@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "Interactive Whiteboard — Services Configuration",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/whiteboard-services",
+    "section": "Projects",
+    "subsection": "Default Project / Configure / Interactive Whiteboard Services",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Default Project",
+    "description": null,
+    "sections": [
+      {
+        "id": "feature-status",
+        "heading": "Interactive Whiteboard",
+        "components": [
+          { "type": "badge", "label": "Inactive", "role": "feature_status" }
+        ]
+      },
+      {
+        "id": "services-configuration",
+        "heading": "Services Configuration",
+        "components": [
+          {
+            "type": "table",
+            "columns": ["Data Center", "Docs to Picture", "Docs to Web", "Screenshot", "Configure"],
+            "rows": [
+              { "data_center": "Silicon Valley, US", "docs_to_picture": "Disabled", "docs_to_web": "Disabled", "screenshot": "Disabled" },
+              { "data_center": "Singapore", "docs_to_picture": "Disabled", "docs_to_web": "Disabled", "screenshot": "Disabled" },
+              { "data_center": "Mumbai, India", "docs_to_picture": "Disabled", "docs_to_web": "Disabled", "screenshot": "Disabled" },
+              { "data_center": "Frankfurt, Europe", "docs_to_picture": "Disabled", "docs_to_web": "Disabled", "screenshot": "Disabled" },
+              { "data_center": "Hangzhou, China", "docs_to_picture": "Disabled", "docs_to_web": "Disabled", "screenshot": "Disabled" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [
+      { "label": "Back to all Projects", "href": "/project-management" }
+    ],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

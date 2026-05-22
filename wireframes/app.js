@@ -24,7 +24,7 @@
   function goTo(route) {
     state.route = route;
     // Determine mode based on route
-    const accountRoutes = ['account-overview', 'billing-subs', 'teams-members', 'sso', 'notif-prefs', 'profile', 'restful-api', 'webhooks', 'audit-logs', 'dev-toolkit', 'contact-sales', 'support-tickets', 'whats-new'];
+    const accountRoutes = ['account-overview', 'billing-subs', 'teams-members', 'sso', 'notif-prefs', 'profile', 'restful-api', 'aa-embedded-credentials', 'webhooks', 'audit-logs', 'dev-toolkit', 'licensing', 'contact-sales', 'support-tickets', 'whats-new', 'notification-center'];
     const targetMode = accountRoutes.includes(route) ? 'account' : 'project';
     if (state.mode !== targetMode) setMode(targetMode);
 

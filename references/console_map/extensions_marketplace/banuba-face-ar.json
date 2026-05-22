@@ -1,0 +1,58 @@
+{
+  "page": {
+    "title": "Banuba Face AR SDK",
+    "url": "https://console.agora.io/extensions-marketplace/banuba",
+    "section": "Extension Marketplace",
+    "subsection": "Banuba Face AR SDK",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "Banuba Face AR SDK",
+    "company": "Banuba",
+    "version": "v2.0.0",
+    "updated": "2023-12-01",
+    "platform": ["Web", "iOS", "Android", "Flutter", "React Native", "Unity"],
+    "core_features": [
+      "Face masks: High-quality 3D face masks on par with TikTok and Snapchat",
+      "AI touch-up: Remove acne and wrinkles, whiten teeth, and change the shape of a face",
+      "Virtual backgrounds: Protect privacy and customize backgrounds"
+    ],
+    "tagline": "Banuba extension for Agora lets you add augmented reality features to video calls such as face filters, face touch up filters, virtual backgrounds and avatars.",
+    "is_first_party": false
+  },
+  "layout": {
+    "primary_heading": "Banuba Face AR SDK",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "Banuba AR Face Filter",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "note", "content": "This guide is provided by Banuba. Agora is planning a documentation upgrade program for all extensions on the marketplace." },
+          { "type": "text", "role": "body", "content": "Android setup guide with Kotlin code examples; NDK/CMake required" },
+          { "type": "code_block", "language": ["Kotlin"], "api_calls": ["addExtension", "enableExtension", "setExtensionProperty", "BanubaResourceManager", "BanubaEffectsLoader"] },
+          { "type": "link", "label": "Demo app (public)", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "Github repository", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "Banuba Face AR SDK"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "page": {
+    "title": "Usage Details",
+    "url": "https://console.agora.io/usage",
+    "section": "Usage",
+    "subsection": "Usage Details",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Usage Details",
+    "description": null,
+    "sections": [
+      {
+        "id": "usage-controls",
+        "heading": "Usage Details",
+        "description": null,
+        "components": [
+          {
+            "type": "input",
+            "label": "Granularity",
+            "input_type": "select",
+            "placeholder": null,
+            "current_value": "Daily",
+            "helper_text": null
+          },
+          {
+            "type": "input",
+            "label": "Select Period",
+            "input_type": "select",
+            "placeholder": null,
+            "current_value": "Last 7 Days",
+            "helper_text": null
+          },
+          {
+            "type": "input",
+            "label": "Projects",
+            "input_type": "select",
+            "placeholder": null,
+            "current_value": "All Projects",
+            "helper_text": null
+          },
+          {
+            "type": "input",
+            "label": "Features",
+            "input_type": "select",
+            "placeholder": null,
+            "current_value": "Interactive Live Streaming",
+            "helper_text": null
+          },
+          {
+            "type": "input",
+            "label": "View Breakdown",
+            "input_type": "checkbox",
+            "placeholder": null,
+            "current_value": null,
+            "helper_text": null
+          }
+        ]
+      },
+      {
+        "id": "usage-metrics",
+        "heading": null,
+        "description": null,
+        "components": [
+          { "type": "metric_card", "label": "Audio", "value": "0", "unit": "MIN", "trend": null },
+          { "type": "metric_card", "label": "Video HD", "value": "0", "unit": "MIN", "trend": null },
+          { "type": "metric_card", "label": "Video FHD", "value": "0", "unit": "MIN", "trend": null },
+          { "type": "metric_card", "label": "Video 2K", "value": "0", "unit": "MIN", "trend": null },
+          { "type": "metric_card", "label": "Video 2K+", "value": "0", "unit": "MIN", "trend": null },
+          {
+            "type": "chart",
+            "label": "Usage over selected period",
+            "chart_type": "area",
+            "axes": { "x": "Date (05-15 to 05-21)", "y": "Usage (minutes)" }
+          },
+          {
+            "type": "table",
+            "columns": ["Date/Time", "Audio", "Video HD", "Video FHD", "Video 2K", "Video 2K+"],
+            "row_count_visible": 7,
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      },
+      {
+        "id": "usage-notes",
+        "heading": "NOTES",
+        "description": null,
+        "components": [
+          { "type": "text", "role": "helper", "content": "Data displayed is by day in UTC timezone or by hour in local timezone if selecting one day." },
+          { "type": "text", "role": "helper", "content": "There will be 2 hours latency for today's usage data." },
+          { "type": "text", "role": "helper", "content": "Usage data (by seconds) may vary from the billing data (by minutes). For exact billable usage, please visit Bill Detail in Billing." },
+          { "type": "text", "role": "helper", "content": "You have access to usage data collected within the past year." }
+        ]
+      },
+      {
+        "id": "analytics-promo",
+        "heading": "Looking for in depth analytics?",
+        "description": "Monitor, measure, and Improve quality of experience with intelligent real-time monitoring, issue detection, alerts, analysis, and diagnostics",
+        "components": [
+          {
+            "type": "link",
+            "label": "Visit Agora Analytics",
+            "href": "https://analytics-lab.agora.io/?locale=en",
+            "opens_in": "new_tab"
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Usage"],
+    "sibling_tabs": ["All", "Host", "Audience"],
+    "child_links": ["https://analytics-lab.agora.io/?locale=en"]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "Configure — Conversational AI Engine",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/conv-ai",
+    "section": "Projects > Configure",
+    "subsection": "Conversational AI Engine",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "✨ Conversational AI Engine",
+    "description": null,
+    "sections": [
+      {
+        "id": "conv-ai-configurations",
+        "heading": "Configurations",
+        "description": null,
+        "components": [
+          {
+            "type": "feature_block",
+            "feature_name": "Conversational AI Engine",
+            "section": "Conversational AI Engine",
+            "description": "Enable Conversational AI",
+            "observed_state": "enabled",
+            "toggle_present": true,
+            "toggle_is_disabled_ui": true,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": false,
+            "child_settings": [],
+            "associated_links": [
+              { "label": "Go to Agent Studio", "href": "/studio" },
+              { "label": "Explore Conversational AI Engine features", "href": "https://agora.io/en/products/conversational-ai-engine" },
+              { "label": "How to customize Conversational AI Engine?", "href": "https://docs.agora.io/en/conversational-ai/overview/product-overview" }
+            ],
+            "badges": [],
+            "notes": "Toggle is aria-checked=true (enabled) but rendered with disabled attribute — not interactable. Promo card 'Introducing Agent Studio' is shown inline."
+          },
+          {
+            "type": "text",
+            "role": "heading",
+            "content": "Introducing Agent Studio"
+          },
+          {
+            "type": "text",
+            "role": "description",
+            "content": "Build, test, and deploy production-ready Conversational AI agents in Agora's new Agent Studio."
+          },
+          {
+            "type": "link",
+            "label": "Go to Agent Studio",
+            "href": "/studio",
+            "opens_in": "same_tab"
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Conversational AI Engine"],
+    "sibling_tabs": [],
+    "child_links": ["/studio"]
+  }
+}

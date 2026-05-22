@@ -116,9 +116,11 @@
       <div class="nav-group">
         <div class="label">Developer</div>
         <a class="nav-item" data-route="restful-api"><span class="ico"></span>RESTful API</a>
+        <a class="nav-item" data-route="aa-embedded-credentials"><span class="ico"></span>AA Embedded Credentials</a>
         <a class="nav-item" data-route="webhooks"><span class="ico"></span>Webhooks</a>
         <a class="nav-item" data-route="audit-logs"><span class="ico"></span>Audit logs</a>
         <a class="nav-item" data-route="dev-toolkit"><span class="ico"></span>Developer Toolkit</a>
+        <a class="nav-item" data-route="licensing"><span class="ico"></span>Licensing</a>
       </div>
 
       <div class="nav-group">
@@ -135,7 +137,7 @@
     <!-- Footer: avatar + bell + ambient credits meter + ⌘K -->
     <div class="footer">
       <div class="avatar" id="avatar" data-toggle="accountDropdown" title="Jane Doe — account menu">JD</div>
-      <button class="btn icon" title="Notifications (3 new)" data-action="toast" data-msg="3 unread: maintenance digest · pricing notice · new agent template">🔔</button>
+      <button class="btn icon" title="Notifications (3 new)" data-action="goAccount" data-route="notification-center">🔔</button>
       <div class="credits-meter" title="Free-tier minutes remaining — ambient, every screen">
         <div class="credits-bar"><div class="credits-fill" style="width: 35%"></div></div>
         <div class="credits-text">3,500 / 10,000 mins</div>
@@ -167,9 +169,11 @@
         <div class="divider"></div>
         <div class="group-label">Developer</div>
         <div class="item" data-action="goAccount" data-route="restful-api">RESTful API <span class="tag muted">CID + Secret</span></div>
+        <div class="item" data-action="goAccount" data-route="aa-embedded-credentials">AA Embedded Credentials <span class="tag muted">Analytics</span></div>
         <div class="item" data-action="goAccount" data-route="webhooks">Webhooks</div>
         <div class="item" data-action="goAccount" data-route="audit-logs">Audit logs</div>
         <div class="item" data-action="goAccount" data-route="dev-toolkit">Developer Toolkit</div>
+        <div class="item" data-action="goAccount" data-route="licensing">Licensing</div>
 
         <div class="divider"></div>
         <div class="group-label">Help</div>
@@ -465,20 +469,57 @@
     <!-- EXTENSIONS MARKETPLACE (promoted from profile) -->
     <div class="screen hidden" data-screen="extensions">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Extensions Marketplace</div>
-      <h2>Extensions Marketplace</h2>
-      <p class="subhead">Browse and enable Agora extensions for this project.</p>
-
-      <div class="note">
-        <strong>Promoted from profile:</strong> this is a discovery surface — browsing what's available — so it belongs in nav, not buried in the account menu (LEARNINGS §10 anti-decision 2026-05-21).
+      <div class="header-row">
+        <div>
+          <h2>Extensions Marketplace</h2>
+          <p class="subhead">Browse and enable Agora capabilities and third-party extensions for this project.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" data-action="toast" data-msg="My submissions — wireframe stub">My submissions</button>
+        </div>
       </div>
 
-      <div class="grid-3">
-        <div class="ext-card"><h3>Cloud Recording</h3><div class="desc">Record agent calls to S3 / GCS.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-        <div class="ext-card"><h3>Media Push</h3><div class="desc">Stream agent audio to a destination URL.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-        <div class="ext-card"><h3>Signaling</h3><div class="desc">Real-time messaging channel between agent and client.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-        <div class="ext-card"><h3>Whiteboard</h3><div class="desc">Collaborative whiteboard for video sessions.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-        <div class="ext-card"><h3>Real-Time STT</h3><div class="desc">Speech-to-text overlay for calls.</div><div class="actions"><span class="tag">Enabled</span></div></div>
-        <div class="ext-card"><h3>Chat</h3><div class="desc">Persistent text chat alongside voice agents.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+      <div class="note">
+        <strong>Absorbs Console's project-configure long tail:</strong> Cloud Recording, Media Push, Media Pull, Media Gateway, Real-Time STT, Video Screenshot Upload — plus all 9 third-party extensions and My Submissions. One gallery instead of 17 sidebar items.
+      </div>
+
+      <div class="tabs" id="extTabs">
+        <div class="tab active" data-tab="ext-agora">Agora capabilities</div>
+        <div class="tab" data-tab="ext-third-party">Third-party extensions</div>
+        <div class="tab" data-tab="ext-mine">My submissions</div>
+      </div>
+
+      <div class="tab-panel" data-panel="ext-agora">
+        <div class="grid-3">
+          <div class="ext-card"><h3>Cloud Recording</h3><div class="desc">Record agent calls to S3 / GCS.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Media Push</h3><div class="desc">Stream agent audio to a destination URL (RTMP/HLS).</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Media Pull</h3><div class="desc">Inject external media streams into an agent channel.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Media Gateway</h3><div class="desc">SIP / PSTN / WebRTC bridging.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Real-Time STT</h3><div class="desc">Speech-to-text overlay for live calls.</div><div class="actions"><span class="tag">Enabled</span></div></div>
+          <div class="ext-card"><h3>Video Screenshot Upload</h3><div class="desc">Periodic frame capture for moderation pipelines.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="ext-third-party">
+        <div class="grid-3">
+          <div class="ext-card"><h3>Agora Noise Suppression</h3><div class="desc">AI-powered background noise removal.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Agora Spatial Audio</h3><div class="desc">3D positional audio for immersive sessions.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>BytePlus Effects</h3><div class="desc">Beauty filters, AR effects, stickers.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Conversation Intelligence</h3><div class="desc">Call summarisation, sentiment, intent extraction.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>ActiveFence Video Moderation</h3><div class="desc">Real-time content safety classifiers.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Synervoz Voice FX</h3><div class="desc">Voice transformation and effects.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>DeepAR</h3><div class="desc">Face filters and AR masks.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>FaceUnity AR Filter</h3><div class="desc">Beauty + AR overlay pipeline.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+          <div class="ext-card"><h3>Banuba Face AR</h3><div class="desc">Face tracking, makeup, AR effects.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="ext-mine">
+        <div class="box">
+          <h3>My submissions</h3>
+          <div class="empty">No submissions yet. <a href="#" data-action="toast" data-msg="Submit extension flow — wireframe stub">Submit an extension →</a></div>
+          <div class="note"><strong>Console parity:</strong> mirrors <code>/extensions-marketplace/my-submissions</code>.</div>
+        </div>
       </div>
     </div>
 
@@ -548,6 +589,20 @@
         <div class="row"><span class="label">Conversational AI Engine</span><span class="tag">Enabled · auto</span></div>
         <div class="row"><span class="label">Real-Time STT</span><span class="tag">Enabled · auto</span></div>
         <div class="row"><span class="label">Cloud Recording</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-route="extensions">Browse extensions →</button></div></div>
+      </div>
+
+      <div class="box">
+        <h3>Security</h3>
+        <div class="desc">Project-scoped authentication and authorisation policies.</div>
+        <div class="row"><span class="label">Co-Host Authentication</span><span class="value">Require token to publish as host</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Co-Host Auth toggled">Enable</button></div></div>
+        <div class="note"><strong>Console parity:</strong> mirrors <code>/cohost-authentication</code>.</div>
+      </div>
+
+      <div class="box">
+        <h3>Networking</h3>
+        <div class="desc">Route traffic through Agora's proxy for restricted-network environments (enterprise firewalls, sanctioned regions).</div>
+        <div class="row"><span class="label">Cloud Proxy</span><span class="value">Off · TCP 443 fallback available</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cloud Proxy enabled">Enable</button></div></div>
+        <div class="note"><strong>Console parity:</strong> mirrors <code>/cloud-proxy</code>.</div>
       </div>
     </div>
 
@@ -658,24 +713,92 @@
     <div class="screen hidden" data-screen="billing-subs">
       <div class="breadcrumb">Account › Billing &amp; Subscriptions</div>
       <h2>Billing &amp; Subscriptions</h2>
-      <p class="subhead">Account balance, payment methods, invoices, transactions, and subscription plans — all one destination.</p>
-      <div class="note"><strong>Merged from Console's separate "Billing" + "Subscriptions" + "View all plans":</strong> money matters live in one place (IA decision 2026-05-21 v2).</div>
-      <div class="box">
-        <h3>Account balance</h3>
-        <div class="row"><span class="label">Available balance</span><span class="value">$0.00</span><div class="actions"><button class="btn small">+ Top-up wallet</button><button class="btn small">Add card</button></div></div>
+      <p class="subhead">Account balance, payment methods, invoices, transactions, subscription plans, and add-on packages — all one destination.</p>
+      <div class="note"><strong>Merges 10 Console URLs into one:</strong> <code>/billing</code> · <code>/billing/invoices</code> · <code>/billing/transactions</code> · <code>/billing/manage-cards</code> · <code>/billing/withdraw-transactions</code> · <code>/subscriptions</code> · <code>/subscriptions/rtc-plans</code> · <code>/subscriptions/chat-plans</code> · <code>/subscriptions/signaling-plans</code> · <code>/finance/packages</code>. Money matters live in one place.</div>
+
+      <div class="tabs" id="billingTabs">
+        <div class="tab active" data-tab="bill-overview">Overview</div>
+        <div class="tab" data-tab="bill-plans">Plans</div>
+        <div class="tab" data-tab="bill-invoices">Invoices</div>
+        <div class="tab" data-tab="bill-transactions">Transactions</div>
+        <div class="tab" data-tab="bill-cards">Payment methods</div>
+        <div class="tab" data-tab="bill-withdrawals">Withdrawals</div>
+        <div class="tab" data-tab="bill-addons">Add-on packages</div>
       </div>
-      <div class="box">
-        <h3>Current plan</h3>
-        <div class="row"><span class="label">Plan</span><span class="value">Starter · $49/mo · 50K mins included</span><div class="actions"><button class="btn small">Change plan</button></div></div>
-        <div class="row"><span class="label">Payment method</span><span class="value">Visa •••• 4242 · exp 02/28</span><div class="actions"><button class="btn small">Update</button></div></div>
-        <div class="row"><span class="label">Next invoice</span><span class="value">12 Jun 2026 · est. $49 + $0 overage</span></div>
+
+      <div class="tab-panel" data-panel="bill-overview">
+        <div class="box">
+          <h3>Account balance</h3>
+          <div class="row"><span class="label">Available balance</span><span class="value">$0.00</span><div class="actions"><button class="btn small">+ Top-up wallet</button><button class="btn small">Add card</button></div></div>
+        </div>
+        <div class="box">
+          <h3>Current plan</h3>
+          <div class="row"><span class="label">Plan</span><span class="value">Starter · $49/mo · 50K mins included</span><div class="actions"><button class="btn small">Change plan</button></div></div>
+          <div class="row"><span class="label">Payment method</span><span class="value">Visa •••• 4242 · exp 02/28</span><div class="actions"><button class="btn small">Update</button></div></div>
+          <div class="row"><span class="label">Next invoice</span><span class="value">12 Jun 2026 · est. $49 + $0 overage</span></div>
+        </div>
       </div>
-      <div class="box">
-        <h3>Available plans</h3>
-        <div class="row"><span class="label">FREE</span><span class="value">10K mins · 0 concurrent agents</span><div class="actions"><span class="tag muted">Downgrade</span></div></div>
-        <div class="row"><span class="label">STARTER · $49</span><span class="value">50K mins · 2 concurrent</span><span class="tag">Current</span></div>
-        <div class="row"><span class="label">PRO · $199</span><span class="value">200K mins · 10 concurrent</span><div class="actions"><button class="btn small">Upgrade</button></div></div>
-        <div class="row"><span class="label">BUSINESS · custom</span><span class="value">Contact sales</span><div class="actions"><button class="btn small">Talk to sales</button></div></div>
+
+      <div class="tab-panel hidden" data-panel="bill-plans">
+        <div class="box">
+          <h3>Available plans</h3>
+          <div class="row"><span class="label">FREE</span><span class="value">10K mins · 0 concurrent agents</span><div class="actions"><span class="tag muted">Downgrade</span></div></div>
+          <div class="row"><span class="label">STARTER · $49</span><span class="value">50K mins · 2 concurrent</span><span class="tag">Current</span></div>
+          <div class="row"><span class="label">PRO · $199</span><span class="value">200K mins · 10 concurrent</span><div class="actions"><button class="btn small">Upgrade</button></div></div>
+          <div class="row"><span class="label">BUSINESS · custom</span><span class="value">Contact sales</span><div class="actions"><button class="btn small">Talk to sales</button></div></div>
+        </div>
+        <div class="box">
+          <h3>Plans by product family</h3>
+          <div class="row"><span class="label">RTC plans (Voice / Video / ILS)</span><span class="value">Tiered minute packs · top-ups</span><div class="actions"><button class="btn small">View RTC plans</button></div></div>
+          <div class="row"><span class="label">Chat plans</span><span class="value">DAU + message tiers</span><div class="actions"><button class="btn small">View Chat plans</button></div></div>
+          <div class="row"><span class="label">Signaling plans</span><span class="value">Peak concurrency + message tiers</span><div class="actions"><button class="btn small">View Signaling plans</button></div></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="bill-invoices">
+        <div class="box">
+          <h3>Invoices</h3>
+          <div class="row"><span class="label">INV-20260512</span><span class="value">12 May 2026 · $49.00 · Paid</span><div class="actions"><button class="btn small">Download PDF</button></div></div>
+          <div class="row"><span class="label">INV-20260412</span><span class="value">12 Apr 2026 · $49.00 · Paid</span><div class="actions"><button class="btn small">Download PDF</button></div></div>
+          <div class="row"><span class="label">INV-20260312</span><span class="value">12 Mar 2026 · $49.00 · Paid</span><div class="actions"><button class="btn small">Download PDF</button></div></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="bill-transactions">
+        <div class="box">
+          <h3>Transactions</h3>
+          <div class="row"><span class="label">Wallet top-up</span><span class="value">15 May 2026 · +$200.00 · Visa •••• 4242</span></div>
+          <div class="row"><span class="label">Subscription renewal</span><span class="value">12 May 2026 · -$49.00 · Starter plan</span></div>
+          <div class="row"><span class="label">Overage charge</span><span class="value">02 May 2026 · -$8.40 · 1,400 mins over cap</span></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="bill-cards">
+        <div class="box">
+          <h3>Payment methods</h3>
+          <div class="row"><span class="label">Visa •••• 4242 <span class="tag">Default</span></span><span class="value">Exp 02/28 · Jane Doe</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Remove</button></div></div>
+          <div class="row"><span class="label">Mastercard •••• 5678</span><span class="value">Exp 09/27 · Acme Inc.</span><div class="actions"><button class="btn small">Set default</button><button class="btn small">Remove</button></div></div>
+          <div style="margin-top: 12px;"><button class="btn primary">+ Add card</button></div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="bill-withdrawals">
+        <div class="box">
+          <h3>Withdrawals &amp; refunds</h3>
+          <div class="row"><span class="label">Refund · INV-20260312</span><span class="value">14 Mar 2026 · $12.00 · Processed</span></div>
+          <div class="row"><span class="label">Wallet withdrawal</span><span class="value">28 Feb 2026 · $50.00 · Visa •••• 4242 · Processed</span></div>
+          <div class="note"><strong>Console parity:</strong> mirrors <code>/billing/withdraw-transactions</code>.</div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="bill-addons">
+        <div class="box">
+          <h3>Analytics &amp; add-on packages</h3>
+          <div class="desc">Subscription add-ons that extend a paid plan — Agora Analytics seat packs, premium support, premium SLAs.</div>
+          <div class="row"><span class="label">Agora Analytics · Pro</span><span class="value">5 analyst seats · Call Inspector + Data Insights · $99/mo</span><div class="actions"><button class="btn small">Manage</button></div></div>
+          <div class="row"><span class="label">Premium support</span><span class="value">24/7 · 1h SLA · $499/mo</span><div class="actions"><button class="btn small">Upgrade</button></div></div>
+          <div class="note"><strong>Console parity:</strong> mirrors <code>/finance/packages</code>.</div>
+        </div>
       </div>
     </div>
 
@@ -777,15 +900,22 @@
     <div class="screen hidden" data-screen="realtime-products">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Real-Time products</div>
       <h2>Real-Time products</h2>
-      <p class="subhead">Agora's RTC family — peers of Agents in this project's BUILD surface.</p>
-      <div class="note"><strong>Open question B16:</strong> single listing screen (this one) vs. each product as its own nav child. Currently single listing — drill in to configure.</div>
+      <p class="subhead">Agora's RTC family — peers of Agents in this project's BUILD surface. Drill in to configure.</p>
+      <div class="note"><strong>Absorbs Console's per-project configure pages:</strong> Voice/Video/ILS, Chat Basic Info, Signaling (Basic + Presence + Storage + Stream Channel), Whiteboard + Whiteboard Services, and the Flexible Classroom vertical solution.</div>
+
+      <h3 style="margin-top: 24px;">Core RTC products</h3>
       <div class="grid-3">
         <div class="ext-card clickable" data-action="toast" data-msg="Open Voice Calling"><h3>Voice Calling</h3><div class="desc">Crystal-clear audio chat.</div></div>
         <div class="ext-card clickable" data-action="toast" data-msg="Open Video Calling"><h3>Video Calling</h3><div class="desc">Customizable real-time video.</div></div>
         <div class="ext-card clickable" data-action="toast" data-msg="Open Interactive Live Streaming"><h3>Interactive Live Streaming</h3><div class="desc">Live video + voice streaming.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Chat"><h3>Chat</h3><div class="desc">Private + group messaging.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Signaling"><h3>Signaling</h3><div class="desc">High-concurrency real-time messaging.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Interactive Whiteboard"><h3>Interactive Whiteboard</h3><div class="desc">Real-time visual collaboration.</div></div>
+        <div class="ext-card clickable" data-action="toast" data-msg="Open Chat (Basic Info)"><h3>Chat</h3><div class="desc">Private + group messaging. Configure basic info, app keys, push.</div></div>
+        <div class="ext-card clickable" data-action="toast" data-msg="Open Signaling — tabs: Basic / Presence / Storage / Stream Channel"><h3>Signaling</h3><div class="desc">High-concurrency real-time messaging. <span class="tag muted">4 config tabs</span></div></div>
+        <div class="ext-card clickable" data-action="toast" data-msg="Open Whiteboard — tabs: Basic / Interactive Services"><h3>Interactive Whiteboard</h3><div class="desc">Real-time visual collaboration. <span class="tag muted">2 config tabs</span></div></div>
+      </div>
+
+      <h3 style="margin-top: 24px;">Vertical solutions</h3>
+      <div class="grid-3">
+        <div class="ext-card clickable" data-action="toast" data-msg="Open Flexible Classroom"><h3>Flexible Classroom</h3><div class="desc">Pre-built RTC solution for education — rooms, roles, whiteboard, recording.</div></div>
       </div>
     </div>
 
@@ -848,6 +978,98 @@
       <h2>Help &amp; Support</h2>
       <p class="subhead">Get unstuck — search docs, open a ticket, talk to humans.</p>
       <div class="empty">Wireframe placeholder — search box, common topics, contact form, ticket history.</div>
+    </div>
+
+    <!-- AA EMBEDDED CREDENTIALS — third credential type, distinct from Vendor Creds and RESTful API -->
+    <div class="screen hidden" data-screen="aa-embedded-credentials">
+      <div class="breadcrumb">Account › Developer › AA Embedded Credentials</div>
+      <h2>AA Embedded Credentials</h2>
+      <p class="subhead">Credentials for embedding Agora Analytics dashboards into your own apps via signed URLs.</p>
+
+      <div class="note">
+        <strong>Three credential types, kept distinct on purpose:</strong>
+        <ul style="padding-left: 20px; margin-top: 6px;">
+          <li><strong>Vendor Credentials</strong> — third-party LLM/TTS/ASR keys, scoped to a project (<a href="#" data-action="backToProject" data-route="vendor-credentials">open →</a>)</li>
+          <li><strong>RESTful API</strong> — Agora Customer ID + Customer Secret for REST endpoints (<a href="#" data-action="goAccount" data-route="restful-api">open →</a>)</li>
+          <li><strong>AA Embedded Credentials</strong> — this page · for signed Agora Analytics dashboard embeds</li>
+        </ul>
+      </div>
+
+      <div class="box">
+        <h3>Active credentials</h3>
+        <div class="row"><span class="label">aa-embed-prod</span><span class="value">Created 12 Mar 2026 · last used 3 days ago</span><div class="actions"><button class="btn small">Rotate</button><button class="btn small">Revoke</button></div></div>
+        <div class="row"><span class="label">aa-embed-staging</span><span class="value">Created 02 Apr 2026 · never used</span><div class="actions"><button class="btn small">Rotate</button><button class="btn small">Revoke</button></div></div>
+        <div style="margin-top: 12px;"><button class="btn primary" data-action="toast" data-msg="New AA Embedded credential generated">+ Create credential</button></div>
+      </div>
+
+      <div class="box">
+        <h3>Quick start</h3>
+        <div class="desc">Pair the credential with the AA Embedded SDK to drop dashboards into your customer-facing apps.</div>
+        <textarea class="input mono" rows="4" readonly>import { embedDashboard } from '@agora/analytics-embed';
+
+embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });</textarea>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION CENTER — full-page destination behind the bell icon -->
+    <div class="screen hidden" data-screen="notification-center">
+      <div class="breadcrumb">Account › Notifications</div>
+      <div class="header-row">
+        <div>
+          <h2>Notifications</h2>
+          <p class="subhead">All account, billing, product, and operational notifications.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" data-action="toast" data-msg="Marked all read">Mark all read</button>
+          <button class="btn" data-action="goAccount" data-route="notif-prefs">Preferences →</button>
+        </div>
+      </div>
+
+      <div class="note"><strong>Console parity:</strong> the bell icon's full-page destination (<code>/notifications</code> in Console). Configure delivery in <a href="#" data-action="goAccount" data-route="notif-prefs">Notification Preferences</a>; configure per-project triggers in <a href="#" data-action="backToProject" data-route="project-notifications">Project › Notifications</a>.</div>
+
+      <div class="tabs" id="notifTabs">
+        <div class="tab active" data-tab="notif-all">All</div>
+        <div class="tab" data-tab="notif-billing">Billing</div>
+        <div class="tab" data-tab="notif-product">Product</div>
+        <div class="tab" data-tab="notif-ops">Operations</div>
+        <div class="tab" data-tab="notif-tickets">Tickets</div>
+      </div>
+
+      <div class="tab-panel" data-panel="notif-all">
+        <div class="box">
+          <div class="row clickable"><span class="label">⚠ Maintenance window scheduled</span><span class="value">Singapore region · 25 May 02:00 UTC · ~30 min</span><span class="tag">Operations</span></div>
+          <div class="row clickable"><span class="label">Pricing change notice</span><span class="value">RTC overage rate decreases 1 Jun 2026</span><span class="tag muted">Billing</span></div>
+          <div class="row clickable"><span class="label">New agent template available</span><span class="value">"Outbound Sales Qualifier" — try in Templates</span><span class="tag muted">Product</span></div>
+          <div class="row clickable"><span class="label">Ticket #4821 replied</span><span class="value">Support has responded to your SSO question</span><span class="tag muted">Tickets</span></div>
+          <div class="row clickable"><span class="label">Invoice INV-20260512 paid</span><span class="value">$49.00 · Visa •••• 4242</span><span class="tag muted">Billing</span></div>
+        </div>
+      </div>
+      <div class="tab-panel hidden" data-panel="notif-billing"><div class="empty">Filtered to billing — wireframe placeholder.</div></div>
+      <div class="tab-panel hidden" data-panel="notif-product"><div class="empty">Filtered to product — wireframe placeholder.</div></div>
+      <div class="tab-panel hidden" data-panel="notif-ops"><div class="empty">Filtered to operations — wireframe placeholder.</div></div>
+      <div class="tab-panel hidden" data-panel="notif-tickets"><div class="empty">Filtered to tickets — wireframe placeholder.</div></div>
+    </div>
+
+    <!-- LICENSING — plan-gated stub -->
+    <div class="screen hidden" data-screen="licensing">
+      <div class="breadcrumb">Account › Developer › Licensing</div>
+      <h2>Licensing</h2>
+      <p class="subhead">Pre-authorisation, quota management, purchase history, and usage queries for enterprise license customers.</p>
+
+      <div class="box" style="background: #fff8e0;">
+        <h3>Requires Enterprise plan</h3>
+        <div class="desc">Per-seat / per-channel licensing is only available on Enterprise plans. If you've purchased a license pack, this is where you'll manage activation, quota, and reconciliation.</div>
+        <div style="margin-top: 8px;"><button class="btn primary" data-action="goAccount" data-route="contact-sales">Contact sales →</button></div>
+      </div>
+
+      <div class="box">
+        <h3>License management surfaces (when enabled)</h3>
+        <div class="row"><span class="label">Pre-authorisation</span><span class="value">Reserve license seats before activation</span></div>
+        <div class="row"><span class="label">Quota management</span><span class="value">Allocate license capacity across projects</span></div>
+        <div class="row"><span class="label">Purchase history</span><span class="value">License pack invoices and renewals</span></div>
+        <div class="row"><span class="label">Usage queries</span><span class="value">Reconcile actual usage against reserved quota</span></div>
+        <div class="note"><strong>Console parity:</strong> mirrors <code>/license-management</code> and its four children (currently gated for this account).</div>
+      </div>
     </div>
 
     <div class="screen hidden" data-screen="whats-new">

@@ -1,0 +1,23 @@
+{
+  "page": {
+    "title": "Play",
+    "url": "https://console.agora.io/play",
+    "section": null,
+    "subsection": null,
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false,
+    "notes": "Statically exported stub route. No UI content rendered. Likely a placeholder or unreleased feature."
+  },
+  "layout": null,
+  "next_data": {
+    "page": "/play",
+    "pageProps": {},
+    "nextExport": true,
+    "autoExport": true
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

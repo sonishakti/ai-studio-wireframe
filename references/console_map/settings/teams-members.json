@@ -1,0 +1,60 @@
+{
+  "page": {
+    "title": "Teams and Members",
+    "url": "https://console.agora.io/settings/teams-members",
+    "section": "Settings",
+    "subsection": "Teams and Members",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Teams and Members",
+    "tabs": ["Account", "Teams and Members", "Notifications Preferences", "SSO Management"],
+    "active_tab": "Teams and Members",
+    "inner_tabs": ["Teams", "Members"],
+    "sections": [
+      {
+        "id": "teams",
+        "heading": "Teams & Permissions",
+        "inner_tab": "Teams",
+        "components": [
+          { "type": "button", "label": "Add New Team", "variant": "primary", "inferred_action": "Opens new team creation flow", "is_destructive": false },
+          {
+            "type": "table",
+            "columns": ["Team Name", "Usage", "Finance", "Teams and Members", "Project", "XLA", "Agora Analytics", "Data", "Action"],
+            "row_count_visible": 5,
+            "rows": [
+              { "Team Name": "Finance", "Usage": "None", "Finance": "View", "Teams and Members": "None", "Project": "None", "XLA": "None", "Agora Analytics": "None", "Data": "All Projects" },
+              { "Team Name": "Engineer", "Usage": "None", "Finance": "None", "Teams and Members": "None", "Project": "Edit", "XLA": "None", "Agora Analytics": "Call Inspector, Data Insights, Live Data", "Data": "All Projects" },
+              { "Team Name": "CS/Maintenance", "Usage": "None", "Finance": "None", "Teams and Members": "None", "Project": "None", "XLA": "None", "Agora Analytics": "Call Inspector, Data Insights, Live Data", "Data": "All Projects" },
+              { "Team Name": "Product/Operation", "Usage": "View", "Finance": "None", "Teams and Members": "None", "Project": "None", "XLA": "None", "Agora Analytics": "None", "Data": "All Projects" },
+              { "Team Name": "Admin", "Usage": "View", "Finance": "View", "Teams and Members": "Edit", "Project": "Edit", "XLA": "View", "Agora Analytics": "Call Inspector, Data Insights, Live Data", "Data": "All Projects" }
+            ],
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      },
+      {
+        "id": "members",
+        "heading": "Member Management",
+        "inner_tab": "Members",
+        "components": [
+          { "type": "button", "label": "Add New Member", "variant": "primary", "inferred_action": "Opens new member invitation flow", "is_destructive": false },
+          { "type": "text", "role": "empty_state", "content": "No members listed" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Settings"],
+    "sibling_tabs": [
+      { "label": "Account", "href": "/settings" },
+      { "label": "Teams and Members", "href": "/settings/teams-members" },
+      { "label": "Notifications Preferences", "href": "/settings/notification-preferences" },
+      { "label": "SSO Management", "href": "/settings/sso-management" }
+    ],
+    "child_links": []
+  }
+}

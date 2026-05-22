@@ -1,0 +1,62 @@
+{
+  "page": {
+    "title": "Extensions Marketplace",
+    "url": "https://console.agora.io/extensions-marketplace",
+    "section": "Extension Marketplace",
+    "subsection": "Marketplace",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Extensions Marketplace",
+    "description": null,
+    "sections": [
+      {
+        "id": "agora-extensions",
+        "heading": "Agora Extensions",
+        "description": null,
+        "components": [
+          { "type": "link", "label": "Agora AI Noise Suppression", "href": "/extensions-marketplace/agora-noise-suppression", "opens_in": "same_tab" },
+          { "type": "link", "label": "Agora 3D Spatial Audio", "href": "/extensions-marketplace/agora-spatial-audio", "opens_in": "same_tab" }
+        ]
+      },
+      {
+        "id": "other-extensions",
+        "heading": "Other Extensions",
+        "description": null,
+        "components": [
+          { "type": "link", "label": "BytePlus Effects", "href": "/extensions-marketplace/byteplus-ar", "opens_in": "same_tab" },
+          { "type": "link", "label": "Conversation Intelligence", "href": "/extensions-marketplace/symbl", "opens_in": "same_tab" },
+          { "type": "link", "label": "ActiveFence Video Content Moderation (Beta)", "href": "/extensions-marketplace/activefence-video-moderation", "opens_in": "same_tab" },
+          { "type": "link", "label": "Synervoz Voice FX", "href": "/extensions-marketplace/synervoz", "opens_in": "same_tab" },
+          { "type": "link", "label": "DeepAR", "href": "/extensions-marketplace/deepar", "opens_in": "same_tab" },
+          { "type": "link", "label": "FaceUnity AR Filter", "href": "/extensions-marketplace/faceunity-ar-en", "opens_in": "same_tab" },
+          { "type": "link", "label": "Banuba Face AR SDK", "href": "/extensions-marketplace/banuba", "opens_in": "same_tab" }
+        ]
+      },
+      {
+        "id": "featured-carousel",
+        "heading": null,
+        "description": null,
+        "components": [
+          { "type": "image", "alt_text": null, "inferred_purpose": "Featured extension promotional carousel — 5 slides" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace"],
+    "sibling_tabs": ["Marketplace", "My Submissions"],
+    "child_links": [
+      "/extensions-marketplace/agora-noise-suppression",
+      "/extensions-marketplace/agora-spatial-audio",
+      "/extensions-marketplace/byteplus-ar",
+      "/extensions-marketplace/symbl",
+      "/extensions-marketplace/activefence-video-moderation",
+      "/extensions-marketplace/synervoz",
+      "/extensions-marketplace/deepar",
+      "/extensions-marketplace/faceunity-ar-en",
+      "/extensions-marketplace/banuba"
+    ]
+  }
+}

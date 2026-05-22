@@ -1,0 +1,156 @@
+{
+  "page": {
+    "title": "RTC Pre-paid Plans",
+    "url": "https://console.agora.io/subscriptions/rtc-plans",
+    "section": "Subscriptions",
+    "subsection": "RTC Pre-paid Plans",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "RTC Packages",
+    "tabs": ["Monthly Packs", "Top-Ups"],
+    "description": null,
+    "sections": [
+      {
+        "id": "monthly-plans",
+        "heading": "Monthly Packs",
+        "tab": "Monthly Packs",
+        "tab_url_param": "?tab=monthly",
+        "components": [
+          {
+            "type": "plan_card",
+            "label": "FREE",
+            "price": "$0/mo",
+            "original_price": null,
+            "savings_pct": null,
+            "minutes": "10K standard",
+            "bonus_minutes": null,
+            "features": ["Media Encryption", "Analytics Starter Plan", "Advanced Audio Processing", "Overuse suspension"],
+            "current": true,
+            "status": "Subscribed"
+          },
+          {
+            "type": "plan_card",
+            "label": "STARTER",
+            "price": "$45.99/mo",
+            "original_price": "$49.5/mo",
+            "savings_pct": "7%",
+            "minutes": "50K standard",
+            "bonus_minutes": "3,500",
+            "features": ["Media Encryption", "Analytics Starter Plan", "Advanced Audio Processing", "Overage Post-Payment"],
+            "current": false,
+            "status": null
+          },
+          {
+            "type": "plan_card",
+            "label": "PRO",
+            "price": "$133.99/mo",
+            "original_price": "$148.5/mo",
+            "savings_pct": "10%",
+            "minutes": "150K standard",
+            "bonus_minutes": "15K",
+            "features": ["Media Encryption", "Analytics Starter Plan", "Advanced Audio Processing", "Overage Post-Payment"],
+            "current": false,
+            "status": null
+          },
+          {
+            "type": "plan_card",
+            "label": "BUSINESS",
+            "price": "$339.99/mo",
+            "original_price": "$396/mo",
+            "savings_pct": "14%",
+            "minutes": "400K standard",
+            "bonus_minutes": "56K",
+            "features": ["Media Encryption", "Analytics Starter Plan", "Advanced Audio Processing", "Overage Post-Payment"],
+            "current": false,
+            "status": null
+          },
+          {
+            "type": "plan_card",
+            "label": "BUSINESS PLUS",
+            "price": "$1,217.99/mo",
+            "original_price": "$1,485/mo",
+            "savings_pct": "18%",
+            "minutes": "1.5M standard",
+            "bonus_minutes": "270K",
+            "features": ["Media Encryption", "Analytics Starter Plan", "Advanced Audio Processing", "Overage Post-Payment"],
+            "current": false,
+            "status": null
+          },
+          {
+            "type": "button",
+            "label": "Contact Sales",
+            "variant": "secondary",
+            "inferred_action": "Opens Enterprise plan sales contact flow",
+            "is_destructive": false
+          },
+          {
+            "type": "table",
+            "label": "Purchase History",
+            "columns": ["Plan Name", "Unit Price", "Purchase Date", "Effective Date", "Expiration Date", "Status"],
+            "row_count_visible": 1,
+            "rows": [
+              { "Plan Name": "RTC Free Package", "Unit Price": "$0", "Purchase Date": "2026-05-21", "Effective Date": "2026-05-01", "Expiration Date": "2026-06-01", "Status": "ACTIVE" }
+            ],
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      },
+      {
+        "id": "topup-plans",
+        "heading": "Top-Ups",
+        "tab": "Top-Ups",
+        "tab_url_param": "?tab=top-up",
+        "components": [
+          {
+            "type": "plan_card",
+            "label": "TOP-UP PACKAGE 25K",
+            "price": "$23.5",
+            "original_price": "$24.75",
+            "savings_pct": "5%",
+            "minutes": "25K standard",
+            "validity": "1 year from purchase date",
+            "is_best_value": false
+          },
+          {
+            "type": "plan_card",
+            "label": "TOP-UP PACKAGE 250K",
+            "price": "$230",
+            "original_price": "$247.5",
+            "savings_pct": "7%",
+            "minutes": "250K standard",
+            "validity": "1 year from purchase date",
+            "is_best_value": true
+          },
+          {
+            "type": "plan_card",
+            "label": "TOP-UP PACKAGE 1000K",
+            "price": "$891",
+            "original_price": "$990",
+            "savings_pct": "10%",
+            "minutes": "1M standard",
+            "validity": "1 year from purchase date",
+            "is_best_value": false
+          },
+          {
+            "type": "table",
+            "label": "Purchase History",
+            "columns": ["Plan Name", "Unit Price", "Purchase Date", "Effective Date", "Expiration Date", "Usage"],
+            "row_count_visible": 0,
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Subscriptions", "RTC Pre-paid Plans"],
+    "sibling_tabs": ["Monthly Packs", "Top-Ups"],
+    "child_links": []
+  }
+}

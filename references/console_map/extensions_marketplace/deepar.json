@@ -1,0 +1,63 @@
+{
+  "page": {
+    "title": "DeepAR",
+    "url": "https://console.agora.io/extensions-marketplace/deepar",
+    "section": "Extension Marketplace",
+    "subsection": "DeepAR",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "DeepAR",
+    "company": "DeepAR.ai",
+    "version": "v1.0.1",
+    "updated": "2023-11-10",
+    "platform": ["Web"],
+    "core_features": [
+      "AR face filters: Enable beauty, masks & other fun effects",
+      "Virtual background: Allow for background removal and segmentation",
+      "Emotion detection: Identify facial expressions as emotions",
+      "Shoe try-on: Let users try on shoes with AR"
+    ],
+    "tagline": "Add 3D face masks, filters, background removal and other AR experiences to your app via Agora's Video SDK.",
+    "is_first_party": false
+  },
+  "layout": {
+    "primary_heading": "DeepAR",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "DeepAR",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "body", "content": "npm/yarn installation and VideoExtension integration guide" },
+          { "type": "code_block", "language": ["JavaScript"], "api_calls": ["VideoExtension", "AgoraRTC.registerExtensions", "videoTrack.pipe"] },
+          { "type": "link", "label": "Sample Demo (free)", "href": "https://github.com/DeepARSDK/quickstart-agora-web-extension", "opens_in": "new_tab" },
+          { "type": "link", "label": "DeepAR Web SDK docs", "href": "https://docs.deepar.ai/category/deepar-sdk-for-web", "opens_in": "new_tab" },
+          { "type": "link", "label": "Free filter pack", "href": "https://docs.deepar.ai/deep-ar-studio/free-filter-pack", "opens_in": "new_tab" },
+          { "type": "link", "label": "License", "href": "https://developer.deepar.ai/customer-agreement", "opens_in": "new_tab" },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "DeepAR"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": [
+      "https://github.com/DeepARSDK/quickstart-agora-web-extension",
+      "https://docs.deepar.ai/category/deepar-sdk-for-web"
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "page": {
+    "title": "Synervoz Voice FX",
+    "url": "https://console.agora.io/extensions-marketplace/synervoz",
+    "section": "Extension Marketplace",
+    "subsection": "Synervoz Voice FX",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "Synervoz Voice FX",
+    "company": "Synervoz",
+    "version": "v0.1.0",
+    "updated": "2023-03-10",
+    "platform": ["iOS", "Android"],
+    "core_features": [
+      "Professional sounding real-time audio effects",
+      "Echo, reverb, pitch shift, flanger effects"
+    ],
+    "tagline": "Add voice effects including Echo, Reverb, Flanger, and TimeStretch.",
+    "is_first_party": false
+  },
+  "layout": {
+    "primary_heading": "Synervoz Voice FX",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "Synervoz Voice FX",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "note", "content": "This guide is provided by Synervoz. Agora is planning a documentation upgrade program for all extensions on the marketplace." },
+          { "type": "text", "role": "body", "content": "3-step integration guide; configuration structs for each filter type" },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "pricing", "content": "5 cents per use (once per app execution - if extension is enabled)" },
+          { "type": "button", "label": "Buy and Activate", "variant": "primary", "inferred_action": "Purchases and activates the extension", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "Synervoz Voice FX"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

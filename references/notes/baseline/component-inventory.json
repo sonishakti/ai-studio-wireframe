@@ -1,0 +1,229 @@
+{
+  "metadata": {
+    "agent": "Baseline Agent",
+    "date": "2026-02-20",
+    "repo": "repos/console-orig",
+    "totalComponents": 219,
+    "totalHooks": 11,
+    "totalStores": 27,
+    "totalUtils": 13,
+    "complexityBreakdown": {
+      "simple": 80,
+      "moderate": 90,
+      "complex": 49
+    }
+  },
+  "components": {
+    "ui": [
+      {"name": "Button", "path": "src/components/ui/button.tsx", "category": "primitive-ui", "props": ["variant", "size", "asChild"], "variants": ["default", "destructive", "outline", "secondary", "ghost", "link"], "complexity": "simple", "notes": "CVA-based, Radix Slot support"},
+      {"name": "Dialog", "path": "src/components/ui/dialog.tsx", "category": "primitive-ui", "props": ["open", "onOpenChange", "children"], "complexity": "simple", "notes": "Radix Dialog wrapper"},
+      {"name": "DropdownMenu", "path": "src/components/ui/dropdown-menu.tsx", "category": "primitive-ui", "props": ["children"], "complexity": "simple", "notes": "Radix DropdownMenu wrapper"},
+      {"name": "Select", "path": "src/components/ui/select.tsx", "category": "primitive-ui", "props": ["value", "onValueChange", "children"], "complexity": "simple", "notes": "Radix Select wrapper"},
+      {"name": "Popover", "path": "src/components/ui/popover.tsx", "category": "primitive-ui", "props": ["children"], "complexity": "simple", "notes": "Radix Popover wrapper"},
+      {"name": "Separator", "path": "src/components/ui/separator.tsx", "category": "primitive-ui", "props": ["orientation"], "complexity": "simple"},
+      {"name": "Skeleton", "path": "src/components/ui/skeleton.tsx", "category": "primitive-ui", "props": ["className"], "complexity": "simple"},
+      {"name": "Tooltip", "path": "src/components/ui/tooltip.tsx", "category": "primitive-ui", "props": ["children"], "complexity": "simple"},
+      {"name": "Avatar", "path": "src/components/ui/avatar.tsx", "category": "primitive-ui", "props": ["src", "alt", "fallback"], "complexity": "simple"},
+      {"name": "Collapsible", "path": "src/components/ui/collapsible.tsx", "category": "primitive-ui", "props": ["open", "onOpenChange", "children"], "complexity": "simple"},
+      {"name": "Sidebar", "path": "src/components/ui/sidebar.tsx", "category": "composite-ui", "props": ["side", "variant", "collapsible"], "complexity": "complex", "notes": "747 lines, context-based compound component with SidebarProvider"},
+      {"name": "ThemeProvider", "path": "src/components/ui/theme-provider.tsx", "category": "utility-hook", "props": ["attribute", "defaultTheme", "enableSystem"], "complexity": "simple"},
+      {"name": "IconButton", "path": "src/components/ui/icon-button.tsx", "category": "primitive-ui", "props": ["icon", "variant", "size", "onClick"], "complexity": "simple"},
+      {"name": "Breadcrumb", "path": "src/components/ui/breadcrumb.tsx", "category": "primitive-ui", "props": ["children"], "complexity": "simple"}
+    ],
+    "common": [
+      {"name": "Button", "path": "src/components/common/Button.tsx", "category": "primitive-ui", "props": ["variant", "href", "target", "className", "onClick", "disabled", "loading", "children"], "variants": ["primary", "dark", "link", "outlined"], "hasInternalState": false, "complexity": "simple", "notes": "App-level button with link support via href"},
+      {"name": "InputField", "path": "src/components/common/InputField.tsx", "category": "primitive-ui", "props": ["label", "name", "type", "error", "disabled", "placeholder", "value", "onChange"], "hasInternalState": false, "complexity": "simple", "notes": "forwardRef, Formik-compatible"},
+      {"name": "SelectField", "path": "src/components/common/SelectField.tsx", "category": "primitive-ui", "props": ["options", "value", "onChange", "label", "error"], "hasInternalState": true, "complexity": "moderate", "notes": "Formik integration"},
+      {"name": "SimpleModal", "path": "src/components/common/SimpleModal.tsx", "category": "composite-ui", "props": ["open", "onClose", "title", "size", "children"], "hasInternalState": false, "complexity": "moderate", "notes": "Compound: SimpleModal.Header/.Body/.Footer. Radix Dialog based"},
+      {"name": "Loading", "path": "src/components/common/Loading.tsx", "category": "primitive-ui", "props": ["size", "className"], "complexity": "simple"},
+      {"name": "Chip", "path": "src/components/common/Chip.tsx", "category": "primitive-ui", "props": ["variant", "size", "className"], "variants": ["default", "success", "warning", "error"], "complexity": "simple", "notes": "CVA-based"},
+      {"name": "Badge", "path": "src/components/common/Badge.tsx", "category": "primitive-ui", "props": ["variant", "className"], "complexity": "simple"},
+      {"name": "TableLayout", "path": "src/components/common/TableLayout.tsx", "category": "composite-ui", "props": ["children"], "hasInternalState": false, "complexity": "moderate", "notes": "Compound: TableLayout.Head/.Body/.Row/.Details. Custom sorting in .Details via useRef"},
+      {"name": "BoxLayoutCard", "path": "src/components/common/BoxLayoutCard.tsx", "category": "composite-ui", "props": ["className", "loading"], "hasInternalState": false, "complexity": "simple", "notes": "Compound: BoxLayoutCard.Header/.Body/.ActionRight"},
+      {"name": "PageLayout", "path": "src/components/common/PageLayout.tsx", "category": "layout", "props": ["children", "title"], "complexity": "simple"},
+      {"name": "FullPageLayout", "path": "src/components/common/FullPageLayout.tsx", "category": "layout", "props": ["children"], "complexity": "simple"},
+      {"name": "SubPagePageLayout", "path": "src/components/common/SubPagePageLayout.tsx", "category": "layout", "props": ["children", "subtitle"], "complexity": "simple"},
+      {"name": "CardLayout", "path": "src/components/common/CardLayout.tsx", "category": "layout", "props": ["className", "children"], "complexity": "simple"},
+      {"name": "Header", "path": "src/components/common/Header.tsx", "category": "layout", "props": ["title", "subtitle", "action"], "complexity": "simple"},
+      {"name": "HorizontalCard", "path": "src/components/common/HorizontalCard.tsx", "category": "layout", "props": ["title", "icon", "children"], "complexity": "simple"},
+      {"name": "SimpleBorderBox", "path": "src/components/common/SimpleBorderBox.tsx", "category": "layout", "props": ["children", "className"], "complexity": "simple"},
+      {"name": "Breadcrumbs", "path": "src/components/common/Breadcrumbs.tsx", "category": "composite-ui", "props": ["items", "onClick"], "complexity": "moderate"},
+      {"name": "SimpleSelector", "path": "src/components/common/SimpleSelector.tsx", "category": "composite-ui", "props": ["options", "onChange", "value", "search"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "MultipleSelector", "path": "src/components/common/MultipleSelector.tsx", "category": "composite-ui", "props": ["options", "onChange", "value"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "MultiLayerSelector", "path": "src/components/common/MultiLayerSelector.tsx", "category": "composite-ui", "props": ["layers"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "MultiLayerNavigation", "path": "src/components/common/MultiLayerNavigation.tsx", "category": "composite-ui", "props": ["navItems"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "Pagination", "path": "src/components/common/Pagination.tsx", "category": "primitive-ui", "props": ["currentPage", "totalPages", "onPageChange"], "complexity": "simple"},
+      {"name": "DateRangePicker", "path": "src/components/common/DateRangePicker.tsx", "category": "composite-ui", "props": ["mode", "selected", "onSelect"], "complexity": "moderate", "notes": "react-day-picker based"},
+      {"name": "MonthRangePicker", "path": "src/components/common/MonthRangePicker.tsx", "category": "composite-ui", "props": ["selected", "onSelect", "mode"], "hasInternalState": true, "complexity": "complex", "notes": "364 lines, complex month selection"},
+      {"name": "StatusBadge", "path": "src/components/common/StatusBadge.tsx", "category": "primitive-ui", "props": ["status", "variant"], "complexity": "simple"},
+      {"name": "Tooltip", "path": "src/components/common/Tooltip.tsx", "category": "primitive-ui", "props": ["children", "tooltip", "position"], "complexity": "simple", "notes": "Radix Popover-based"},
+      {"name": "CopyBox", "path": "src/components/common/CopyBox.tsx", "category": "primitive-ui", "props": ["text", "children"], "hasInternalState": true, "complexity": "simple"},
+      {"name": "UploadFile", "path": "src/components/common/UploadFile.tsx", "category": "composite-ui", "props": ["accept", "onChange", "maxSize"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "FileInputField", "path": "src/components/common/FileInputField.tsx", "category": "composite-ui", "props": ["name", "label", "accept", "error"], "hasInternalState": true, "complexity": "moderate", "notes": "useRef for DOM access"},
+      {"name": "PasswordInputWithValidation", "path": "src/components/common/PasswordInputWithValidation.tsx", "category": "composite-ui", "props": ["password", "onChange", "validation"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "SwitchInput", "path": "src/components/common/SwitchInput.tsx", "category": "primitive-ui", "props": ["checked", "onChange", "label"], "complexity": "simple"},
+      {"name": "AnnouncementBanner", "path": "src/components/common/AnnouncementBanner.tsx", "category": "composite-ui", "props": ["title", "message", "onClose"], "hasInternalState": true, "complexity": "simple"},
+      {"name": "SuspensionBanner", "path": "src/components/common/SuspensionBanner.tsx", "category": "primitive-ui", "props": [], "complexity": "simple"},
+      {"name": "CreditCardExpiredBanner", "path": "src/components/common/CreditCardExpiredBanner.tsx", "category": "primitive-ui", "props": [], "complexity": "simple"},
+      {"name": "AlertBox", "path": "src/components/common/AlertBox.tsx", "category": "primitive-ui", "props": ["title", "variant", "message"], "complexity": "simple"},
+      {"name": "Timeline", "path": "src/components/common/Timeline.tsx", "category": "composite-ui", "props": ["items"], "complexity": "simple"},
+      {"name": "Lottie", "path": "src/components/common/Lottie.tsx", "category": "primitive-ui", "props": ["animationData", "loop", "autoplay"], "complexity": "simple"},
+      {"name": "ProgressBar", "path": "src/components/common/ProgressBar.tsx", "category": "primitive-ui", "props": ["value", "max", "animated"], "complexity": "simple"},
+      {"name": "Slider", "path": "src/components/common/Slider.tsx", "category": "primitive-ui", "props": ["value", "onChange", "min", "max"], "complexity": "simple"},
+      {"name": "ImageSlider", "path": "src/components/common/ImageSlider.tsx", "category": "composite-ui", "props": ["images"], "hasInternalState": true, "complexity": "moderate"},
+      {"name": "SimpleCollapsible", "path": "src/components/common/SimpleCollapsible.tsx", "category": "composite-ui", "props": ["title", "children", "defaultOpen"], "hasInternalState": true, "complexity": "simple"},
+      {"name": "SimplePopover", "path": "src/components/common/SimplePopover.tsx", "category": "composite-ui", "props": ["trigger", "children"], "hasInternalState": true, "complexity": "simple"},
+      {"name": "SimpleDropdown", "path": "src/components/common/SimpleDropdown.tsx", "category": "composite-ui", "props": ["trigger", "items", "onSelect"], "complexity": "simple"},
+      {"name": "NavGroup", "path": "src/components/common/NavGroup.tsx", "category": "layout", "props": ["title", "children", "collapsed"], "hasInternalState": true, "complexity": "simple"},
+      {"name": "NavItem", "path": "src/components/common/NavItem.tsx", "category": "layout", "props": ["icon", "label", "href", "active"], "complexity": "simple"},
+      {"name": "ButtonGroup", "path": "src/components/common/ButtonGroup.tsx", "category": "layout", "props": ["children"], "complexity": "simple"},
+      {"name": "TabBar", "path": "src/components/common/TabBar.tsx", "category": "composite-ui", "props": ["tabs", "activeTab", "onTabChange"], "complexity": "simple"}
+    ],
+    "domain": {
+      "billing": [
+        {"name": "Bills", "path": "src/components/billing/Bills.tsx", "category": "page-level", "complexity": "complex", "lines": 408, "notes": "useState x4, useAtom, useAtomValue. TableLayout, DateRangePicker"},
+        {"name": "AddCardModal", "path": "src/components/billing/AddCardModal.tsx", "category": "composite-ui", "complexity": "complex", "lines": 902, "notes": "Largest component. useState x7, Stripe Elements, Formik. CRITICAL migration target"},
+        {"name": "PaymentModal", "path": "src/components/billing/PaymentModal.tsx", "category": "composite-ui", "complexity": "moderate", "lines": 200},
+        {"name": "PaymentMethod", "path": "src/components/billing/PaymentMethod.tsx", "category": "page-level", "complexity": "complex", "lines": 339},
+        {"name": "Method", "path": "src/components/billing/Method.tsx", "category": "page-level", "complexity": "complex", "lines": 354},
+        {"name": "Invoices", "path": "src/components/billing/Invoices.tsx", "category": "page-level", "complexity": "moderate", "lines": 392},
+        {"name": "TopupWalletModal", "path": "src/components/billing/TopupWalletModal.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "WithdrawBalanceModal", "path": "src/components/billing/WithdrawBalanceModal.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "BankDetails", "path": "src/components/billing/BankDetails.tsx", "category": "primitive-ui", "complexity": "simple"},
+        {"name": "Wallet", "path": "src/components/billing/Wallet.tsx", "category": "primitive-ui", "complexity": "simple"},
+        {"name": "CredentialsTable", "path": "src/components/billing/CredentialsTable.tsx", "category": "composite-ui", "complexity": "simple"},
+        {"name": "LatestInvoiceTable", "path": "src/components/billing/LatestInvoiceTable.tsx", "category": "composite-ui", "complexity": "simple", "lines": 305},
+        {"name": "LatestTransactionTable", "path": "src/components/billing/LatestTransactionTable.tsx", "category": "composite-ui", "complexity": "simple"},
+        {"name": "PackagesTable", "path": "src/components/billing/PackagesTable.tsx", "category": "composite-ui", "complexity": "simple"}
+      ],
+      "subscriptions": [
+        {"name": "RtcPlans (index)", "path": "src/components/subscriptions/rtc-plans/index.tsx", "category": "page-level", "complexity": "complex"},
+        {"name": "SubscriptionCard", "path": "src/components/subscriptions/rtc-plans/monthly/SubscriptionCard.tsx", "category": "composite-ui", "complexity": "moderate", "lines": 396},
+        {"name": "PurchaseHistory", "path": "src/components/subscriptions/rtc-plans/monthly/PurchaseHistory.tsx", "category": "composite-ui", "complexity": "moderate", "lines": 300},
+        {"name": "ChatPricingTable", "path": "src/components/subscriptions/chat-plans/PricingTable.tsx", "category": "composite-ui", "complexity": "complex", "lines": 562},
+        {"name": "SignalingPricingTable", "path": "src/components/subscriptions/signaling-plans/PricingTable.tsx", "category": "composite-ui", "complexity": "complex", "lines": 625},
+        {"name": "RtcAnnouncementModal", "path": "src/components/subscriptions/rtc-plans/modals/RtcAnnouncementModal.tsx", "category": "composite-ui", "complexity": "simple"},
+        {"name": "AgoraAnalytics", "path": "src/components/subscriptions/agora-analytics/index.tsx", "category": "page-level", "complexity": "complex", "lines": 406}
+      ],
+      "projects": [
+        {"name": "ProjectTable", "path": "src/components/projects/ProjectTable.tsx", "category": "page-level", "complexity": "complex", "lines": 522},
+        {"name": "CreateProject", "path": "src/components/projects/CreateProject.tsx", "category": "composite-ui", "complexity": "moderate", "lines": 306},
+        {"name": "BasicSetting", "path": "src/components/projects/View/BasicSetting.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "Security", "path": "src/components/projects/View/Security.tsx", "category": "composite-ui", "complexity": "complex", "lines": 431}
+      ],
+      "project-management": [
+        {"name": "ConvAIForm", "path": "src/components/project-management/ConvAIPlayground/ConvAIForm.tsx", "category": "page-level", "complexity": "complex", "lines": 540},
+        {"name": "AgoraRTCComponent", "path": "src/components/project-management/ConvAIPlayground/AgoraRTCComponent.tsx", "category": "composite-ui", "complexity": "complex", "lines": 498, "notes": "Web Audio API + Agora SDK"},
+        {"name": "TurnDetectionSettings", "path": "src/components/project-management/ConvAIPlayground/turn-detection-settings/TurnDetectionSettings.tsx", "category": "composite-ui", "complexity": "complex", "lines": 465},
+        {"name": "TTSSettings", "path": "src/components/project-management/ConvAIPlayground/tts-settings/TTSSettings.tsx", "category": "composite-ui", "complexity": "moderate", "lines": 332},
+        {"name": "EnableChat", "path": "src/components/project-management/EnableChat.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "EnableConvAI", "path": "src/components/project-management/EnableConvAI.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "EnableMediaPush", "path": "src/components/project-management/EnableMediaPush.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "EnableMediaPull", "path": "src/components/project-management/EnableMediaPull.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "GuideBox", "path": "src/components/project-management/GuideBox.tsx", "category": "primitive-ui", "complexity": "simple"}
+      ],
+      "license-management": [
+        {"name": "ImportLicensesTab", "path": "src/components/license-management/PreAuthorization/ImportLicensesTab.tsx", "category": "page-level", "complexity": "complex", "lines": 390},
+        {"name": "VerifyLicenseTab", "path": "src/components/license-management/PreAuthorization/VerifyLicenseTab.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "ImportHistoryTab", "path": "src/components/license-management/PreAuthorization/ImportHistoryTab.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "QuotaTable", "path": "src/components/license-management/QuotaManagement/QuotaTable.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "LicensePermissionGuard", "path": "src/components/license-management/LicensePermissionGuard.tsx", "category": "utility-hook", "complexity": "simple"},
+        {"name": "NestedAccordionTable", "path": "src/components/license-management/UsageQuery/NestedAccordionTable.tsx", "category": "composite-ui", "complexity": "moderate"}
+      ],
+      "settings": [
+        {"name": "TeamManagementTable", "path": "src/components/settings/TeamManagementTable.tsx", "category": "page-level", "complexity": "complex", "lines": 791},
+        {"name": "MemberManagementTable", "path": "src/components/settings/MemberManagementTable.tsx", "category": "page-level", "complexity": "complex", "lines": 514},
+        {"name": "SAMLConfiguration", "path": "src/components/settings/SAMLConfiguration.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "OktaPasswordConfiguration", "path": "src/components/settings/OktaPasswordConfiguration.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "SCIMConfiguration", "path": "src/components/settings/SCIMConfiguration.tsx", "category": "composite-ui", "complexity": "moderate"}
+      ],
+      "usages": [
+        {"name": "UsagesActions", "path": "src/components/usages/UsagesActions.tsx", "category": "page-level", "complexity": "complex", "lines": 484},
+        {"name": "UsagesInput", "path": "src/components/usages/UsagesInput.tsx", "category": "composite-ui", "complexity": "complex", "lines": 412}
+      ],
+      "extensions-marketplace": [
+        {"name": "ExtensionNewSubmissionForm", "path": "src/components/extensions-marketplace/ExtensionNewSubmissionForm.tsx", "category": "composite-ui", "complexity": "complex", "lines": 355},
+        {"name": "ExtensionsList", "path": "src/components/extensions-marketplace/ExtensionsList.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "ExtensionDetails", "path": "src/components/extensions-marketplace/ExtensionDetails.tsx", "category": "composite-ui", "complexity": "moderate"}
+      ],
+      "onboarding": [
+        {"name": "GetStarted", "path": "src/components/onboarding/GetStarted.tsx", "category": "page-level", "complexity": "complex"},
+        {"name": "Introduction", "path": "src/components/onboarding/Introduction.tsx", "category": "composite-ui", "complexity": "moderate"}
+      ],
+      "sidebar": [
+        {"name": "AppSidebar", "path": "src/components/sidebar/app-sidebar.tsx", "category": "layout", "complexity": "moderate"},
+        {"name": "NavMain", "path": "src/components/sidebar/nav-main.tsx", "category": "layout", "complexity": "simple"},
+        {"name": "NavUser", "path": "src/components/sidebar/nav-user.tsx", "category": "layout", "complexity": "simple"},
+        {"name": "NavFooter", "path": "src/components/sidebar/nav-footer.tsx", "category": "layout", "complexity": "simple"},
+        {"name": "TeamSwitcher", "path": "src/components/sidebar/team-switcher.tsx", "category": "composite-ui", "complexity": "moderate"}
+      ],
+      "dashboard": [
+        {"name": "DashboardProjects", "path": "src/components/dashboard/Projects.tsx", "category": "page-level", "complexity": "complex"},
+        {"name": "GetStarted", "path": "src/components/dashboard/GetStarted.tsx", "category": "composite-ui", "complexity": "moderate", "lines": 297}
+      ],
+      "charts": [
+        {"name": "LineChart", "path": "src/components/charts/LineChart.tsx", "category": "composite-ui", "complexity": "simple", "lines": 72},
+        {"name": "AreaChart", "path": "src/components/charts/AreaChart.tsx", "category": "composite-ui", "complexity": "simple"}
+      ],
+      "other": [
+        {"name": "TwoFactorAuthentication", "path": "src/components/two-factor-authentication/index.tsx", "category": "composite-ui", "complexity": "complex", "lines": 430},
+        {"name": "RestfulAPITable", "path": "src/components/restful-api/RestfulAPITable.tsx", "category": "page-level", "complexity": "complex", "lines": 373},
+        {"name": "AutoPay", "path": "src/components/auto-pay/index.tsx", "category": "composite-ui", "complexity": "moderate"},
+        {"name": "PolicyUpdate", "path": "src/components/policy-update/index.tsx", "category": "composite-ui", "complexity": "simple"}
+      ]
+    }
+  },
+  "hooks": [
+    {"name": "useAuth", "path": "src/hooks/useAuth.ts", "returns": "{ auth: User, loading: boolean }", "atoms": ["authAtom", "sgCompanyAtom"], "apis": ["/userInfo", "/finance/sg-company"]},
+    {"name": "usePermission", "path": "src/hooks/usePermission.ts", "returns": "(permission, page) => boolean", "atoms": ["authAtom"]},
+    {"name": "useLicensePermission", "path": "src/hooks/useLicensePermission.ts", "returns": "{ hasAccess, isLoading }", "apis": ["license API"]},
+    {"name": "useRtcPlans", "path": "src/hooks/useRtcPlans.ts", "returns": "{ plans, isLoading, error }", "apis": ["RTC plans API"]},
+    {"name": "useRtcQuota", "path": "src/hooks/useRtcQuota.ts", "returns": "{ quota, isLoading }", "apis": ["RTC quota API"]},
+    {"name": "useFreeQuotaUsage", "path": "src/hooks/useFreeQuotaUsage.ts", "returns": "{ usage, isLoading }", "apis": ["quota API"]},
+    {"name": "useRtcAnnouncementTracking", "path": "src/hooks/useRtcAnnouncementTracking.ts", "returns": "{ shown, dismiss }", "atoms": ["rtcAnnouncementAtom"]},
+    {"name": "useElementDimension", "path": "src/hooks/useElementDimension.ts", "returns": "{ width, height }", "notes": "ResizeObserver based"},
+    {"name": "useOnClickOutside", "path": "src/hooks/useOnClickOutside.ts", "returns": "void (side effect)", "notes": "useRef + useEffect"},
+    {"name": "use-mobile", "path": "src/hooks/use-mobile.tsx", "returns": "boolean", "notes": "Media query based"}
+  ],
+  "stores": [
+    {"file": "auth.ts", "atoms": ["authAtom", "updateExtraInfoAtom"]},
+    {"file": "projects.ts", "atoms": ["projectAtom", "projectGroupAtom", "projectManagementAtom", "extensionStatusAtom", "signallingAtom", "whiteBoardAtom", "backupCertAtom", "projectAtomStatus"]},
+    {"file": "billing.ts", "atoms": ["billingAtom", "refreshCashInfoAtom", "balanceAtom"]},
+    {"file": "cards.ts", "atoms": ["creditCardsAtom"]},
+    {"file": "subscriptions.ts", "atoms": ["suspendedAtom", "allSubscriptionsAtom"]},
+    {"file": "rtc-plans.ts", "atoms": ["activeSubscriptionAtom", "rtcPlansAtom", "topUpPlansAtom"]},
+    {"file": "chat-plans.ts", "atoms": ["chatPlansAtom", "chatSubscriptionAtom"]},
+    {"file": "signaling-plans.ts", "atoms": ["signalingPlansAtom", "signalingSubscriptionAtom"]},
+    {"file": "usages.ts", "atoms": ["usagesDataAtom", "usagesFilterAtom"]},
+    {"file": "license-management.ts", "atoms": ["quotaAtom", "ordersAtom", "preAuthAtom"]},
+    {"file": "credentials.ts", "atoms": ["credentialsAtom"]},
+    {"file": "notification.ts", "atoms": ["notificationsAtom", "unreadCountAtom"]},
+    {"file": "onboarding.ts", "atoms": ["onboardingStepAtom", "completedStepsAtom"]},
+    {"file": "onboarding-flow.ts", "atoms": ["onboardingFlowAtom"]},
+    {"file": "session.ts", "atoms": ["sessionAtom"]},
+    {"file": "tour.ts", "atoms": ["tourAtom"]},
+    {"file": "extension-marketplace.ts", "atoms": ["extensionsAtom", "submissionsAtom"]},
+    {"file": "analytics.ts", "atoms": ["analyticsAtom"]},
+    {"file": "autopay.ts", "atoms": ["autoPayAtom"]},
+    {"file": "sg-company.ts", "atoms": ["sgCompanyAtom"]},
+    {"file": "restful-api.ts", "atoms": ["restfulAPIAtom"]},
+    {"file": "chat.ts", "atoms": ["chatAtom", "chatInfoStatusAtom"]},
+    {"file": "default-card-detail.ts", "atoms": ["defaultCardDetailAtom"]},
+    {"file": "rtc-announcement-tracking.ts", "atoms": ["rtcAnnouncementAtom"]},
+    {"file": "ui-customizer.ts", "atoms": ["uiCustomizerAtom"]}
+  ],
+  "utils": [
+    {"file": "axios.ts", "exports": ["axiosInstance (default)", "axiosLM", "axiosV0"]},
+    {"file": "clipboard.ts", "exports": ["copyToClipboard"]},
+    {"file": "date.ts", "exports": ["dateFromSeconds"]},
+    {"file": "string.ts", "exports": ["formatMoney", "numberShortFormatter", "ucFirst", "toTitleCase", "removeAllSpaces"]},
+    {"file": "generateTextFile.ts", "exports": ["generateTextFile"]},
+    {"file": "getBinaryFromFile.ts", "exports": ["getBinaryFromFile"]},
+    {"file": "getHashValue.ts", "exports": ["getHashValue"]},
+    {"file": "getNameInitials.ts", "exports": ["getNameInitials"]},
+    {"file": "safeJsonParse.ts", "exports": ["safeJsonParse"]},
+    {"file": "sessionStorageHelpers.ts", "exports": ["getSession", "setSession", "clearSession"]},
+    {"file": "node/check-fetch-status.ts", "exports": ["checkFetchStatus"]},
+    {"file": "transformers/rtcPlanTransformers.ts", "exports": ["RTC plan transformers"]}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "page": {
+    "title": "Manage Cards",
+    "url": "https://console.agora.io/billing/manage-cards",
+    "section": "Billing",
+    "subsection": "Manage Cards",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Manage Cards",
+    "description": null,
+    "sections": [
+      {
+        "id": "manage-cards",
+        "heading": null,
+        "components": [
+          { "type": "link", "label": "Back To Billing", "href": "/billing", "opens_in": "same_tab" },
+          { "type": "button", "label": "Add a Card", "variant": "primary", "inferred_action": "Opens card addition form", "is_destructive": false },
+          { "type": "table", "columns": ["Card", "Expiration", "Status", "Action"], "row_count": 0 },
+          { "type": "text", "role": "empty_state", "content": "No Cards Added" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [{ "label": "Back To Billing", "href": "/billing" }],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

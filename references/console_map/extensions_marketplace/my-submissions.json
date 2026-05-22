@@ -1,0 +1,30 @@
+{
+  "page": {
+    "title": "My Submissions",
+    "url": "https://console.agora.io/extensions-marketplace/my-submissions",
+    "section": "Extension Marketplace",
+    "subsection": "My Submissions",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "My Submissions",
+    "description": null,
+    "sections": [
+      {
+        "id": "submissions-list",
+        "heading": null,
+        "description": null,
+        "components": [
+          { "type": "button", "label": "Create", "variant": "primary", "inferred_action": "Opens extension submission creation flow", "is_destructive": false },
+          { "type": "text", "role": "empty_state", "content": "No submissions yet" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace"],
+    "sibling_tabs": ["Marketplace", "My Submissions"],
+    "child_links": []
+  }
+}

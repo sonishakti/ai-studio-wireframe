@@ -1,0 +1,38 @@
+{
+  "page": {
+    "title": "SSO Management",
+    "url": "https://console.agora.io/settings/sso-management",
+    "section": "Settings",
+    "subsection": "SSO Management",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false,
+    "feature_gated": true,
+    "required_plan": "Premium or Enterprise Support"
+  },
+  "layout": {
+    "primary_heading": "SSO Management",
+    "tabs": ["Account", "Teams and Members", "Notifications Preferences", "SSO Management"],
+    "active_tab": "SSO Management",
+    "sections": [
+      {
+        "id": "sso-gate",
+        "heading": null,
+        "components": [
+          { "type": "text", "role": "gate_message", "content": "This integration requires an active Premium or Enterprise Support plans." },
+          { "type": "button", "label": "Request", "variant": "primary", "inferred_action": "Requests plan upgrade or SSO access", "is_destructive": false },
+          { "type": "text", "role": "helper", "content": "If your team uses Okta as an Identity Provider (IdP), you can manage team members' access to Agora Console through SAML and SCIM, so that your team members can log into the Agora Console by using their Okta SSO credentials." }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Settings"],
+    "sibling_tabs": [
+      { "label": "Account", "href": "/settings" },
+      { "label": "Teams and Members", "href": "/settings/teams-members" },
+      { "label": "Notifications Preferences", "href": "/settings/notification-preferences" },
+      { "label": "SSO Management", "href": "/settings/sso-management" }
+    ],
+    "child_links": []
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "page": {
+    "title": "Integration",
+    "url": "https://console.agora.io/studio/integration/credentials",
+    "section": "Studio",
+    "subsection": "Integration",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Integration",
+    "description": null,
+    "sections": [
+      {
+        "id": "integration-tabs",
+        "heading": null,
+        "components": [
+          { "type": "tab", "label": "Credentials", "href": "/studio/integration/credentials", "active": true },
+          { "type": "tab", "label": "Knowledge Bases", "href": "/studio/integration/knowledge-bases", "active": false },
+          { "type": "tab", "label": "MCPs", "href": "/studio/integration/mcps", "active": false }
+        ]
+      },
+      {
+        "id": "credentials-tab",
+        "heading": "Credentials",
+        "tab": "Credentials",
+        "components": [
+          { "type": "button", "label": "Add Credential", "variant": "primary", "inferred_action": "Opens credential creation flow", "is_destructive": false },
+          { "type": "filter", "label": "Vendor", "options": ["All"] },
+          { "type": "filter", "label": "Type", "options": ["All"] },
+          { "type": "text", "role": "empty_state", "content": "No credentials found. You haven't created any credentials yet. Start by adding your first credential." },
+          { "type": "button", "label": "Add Credential", "variant": "primary", "location": "body", "inferred_action": "Opens credential creation flow", "is_destructive": false }
+        ]
+      },
+      {
+        "id": "knowledge-bases-tab",
+        "heading": "Knowledge Bases",
+        "tab": "Knowledge Bases",
+        "components": [
+          { "type": "button", "label": "Create Knowledge Base", "variant": "primary", "inferred_action": "Opens knowledge base creation flow", "is_destructive": false },
+          { "type": "notice", "role": "alpha_notice", "content": "Feature currently in public alpha. It may change and is not yet recommended for production use." },
+          { "type": "text", "role": "empty_state", "content": null }
+        ]
+      },
+      {
+        "id": "mcps-tab",
+        "heading": "MCPs",
+        "tab": "MCPs",
+        "components": [
+          { "type": "redirect", "destination": "/studio/agents", "note": "MCPs tab not yet implemented; redirects to Agents page" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [
+      { "label": "Agents", "href": "/studio/agents" },
+      { "label": "Integration", "href": "/studio/integration/credentials" },
+      { "label": "Phone Numbers", "href": "/studio/mobile-numbers" },
+      { "label": "Campaign", "href": "/studio/campaign" },
+      { "label": "Analytics", "href": "/studio/analytics" },
+      { "label": "Call History", "href": "/studio/call-history" },
+      { "label": "Session History", "href": "/studio/session-history" }
+    ],
+    "child_links": [
+      "/studio/integration/credentials",
+      "/studio/integration/knowledge-bases",
+      "/studio/integration/mcps"
+    ]
+  }
+}

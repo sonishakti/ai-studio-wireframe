@@ -1,0 +1,58 @@
+{
+  "page": {
+    "title": "Signaling Plans",
+    "url": "https://console.agora.io/subscriptions/signaling-plans",
+    "section": "Subscriptions",
+    "subsection": "Signaling Plans",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Signaling Plans",
+    "description": "Signaling 2.0 package plan comparison and subscription management.",
+    "sections": [
+      {
+        "id": "plan-comparison",
+        "heading": "Features",
+        "components": [
+          { "type": "plan_card", "label": "FREE PACKAGE", "price": "$0/mo", "current": true, "storage_gb": 1, "pcu": 20, "monthly_messages": "1M" },
+          { "type": "plan_card", "label": "STARTER PACKAGE", "price": "$59/mo", "current": false, "storage_gb": 2, "pcu": 500, "monthly_messages": "30M" },
+          { "type": "plan_card", "label": "PRO PACKAGE", "price": "$399/mo", "current": false, "storage_gb": 10, "pcu": 2500, "monthly_messages": "150M" },
+          { "type": "plan_card", "label": "BUSINESS PACKAGE", "price": "$820/mo", "current": false, "storage_gb": 20, "pcu": 5000, "monthly_messages": "500M" },
+          { "type": "plan_card", "label": "ENTERPRISE PACKAGE", "price": "Pay-Per-Use", "current": false, "storage_gb": 0, "pcu": 0, "monthly_messages": "0M" }
+        ]
+      },
+      {
+        "id": "overage-rates",
+        "heading": "Additional usage overage rates",
+        "components": [
+          { "type": "text", "role": "pricing", "content": "Peak PCU: $30 per 1,000 PCU" },
+          { "type": "text", "role": "pricing", "content": "Messages: $3 per 1 million messages" },
+          { "type": "text", "role": "pricing", "content": "Storage: $15 per 1 GB-hour" }
+        ]
+      },
+      {
+        "id": "subscription-history",
+        "heading": "Subscription History",
+        "components": [
+          {
+            "type": "table",
+            "columns": ["Plan Name", "First Purchase", "Duration", "Price"],
+            "row_count_visible": 1,
+            "rows": [
+              { "Plan Name": "Signaling Base Fee: Free Package", "First Purchase": "21 May, 2026", "Duration": "N/A", "Price": "$0/month" }
+            ],
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Subscriptions", "Signaling Plans"],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

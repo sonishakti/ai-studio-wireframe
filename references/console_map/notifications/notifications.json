@@ -1,0 +1,65 @@
+{
+  "page": {
+    "title": "Notifications",
+    "url": "https://console.agora.io/notifications",
+    "redirect_url": "https://console.agora.io/notifications/3003512",
+    "section": "Notifications",
+    "subsection": "Notifications",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Notifications",
+    "description": null,
+    "sections": [
+      {
+        "id": "category-sidebar",
+        "heading": null,
+        "components": [
+          { "type": "link", "label": "All Categories", "href": "/notifications", "opens_in": "same_tab" },
+          { "type": "link", "label": "Unread (2)", "href": null, "opens_in": "same_tab" },
+          { "type": "link", "label": "Account", "href": null, "opens_in": "same_tab" },
+          { "type": "link", "label": "Finance", "href": null, "opens_in": "same_tab" },
+          { "type": "link", "label": "Product", "href": null, "opens_in": "same_tab" },
+          { "type": "link", "label": "Promotion", "href": null, "opens_in": "same_tab" },
+          { "type": "link", "label": "Operation", "href": null, "opens_in": "same_tab" },
+          { "type": "link", "label": "Tickets", "href": null, "opens_in": "same_tab" }
+        ]
+      },
+      {
+        "id": "notification-list",
+        "heading": null,
+        "components": [
+          {
+            "type": "notification_item",
+            "id": "3003512",
+            "title": "Your RTC Free Package has been activated successfully",
+            "timestamp": "about 2 hours ago",
+            "is_read": false
+          },
+          {
+            "type": "notification_item",
+            "id": null,
+            "title": "Welcome!",
+            "timestamp": "about 2 hours ago",
+            "is_read": false
+          }
+        ]
+      },
+      {
+        "id": "notification-detail",
+        "heading": "Your RTC Free Package has been activated successfully",
+        "components": [
+          { "type": "text", "role": "timestamp", "content": "16:29 PM, May 21 2026" },
+          { "type": "text", "role": "subject", "content": "Enable Real-time Internet" },
+          { "type": "text", "role": "body", "content": "RTC Free Package successfully subscribed; valid until 2026-05-31; quota-limited; not recommended for production." }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [],
+    "child_links": ["/notifications/3003512"]
+  }
+}

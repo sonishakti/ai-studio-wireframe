@@ -1,0 +1,57 @@
+{
+  "page": {
+    "title": "BytePlus Effects",
+    "url": "https://console.agora.io/extensions-marketplace/byteplus-ar",
+    "section": "Extension Marketplace",
+    "subsection": "BytePlus Effects",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "BytePlus Effects",
+    "company": "BytePlus Pte Ltd",
+    "version": "v4.6.2",
+    "updated": "2025-08-11",
+    "platform": ["iOS", "Android", "Flutter"],
+    "core_features": [
+      "Library of effects: Choose from over 80,000 high-quality visual effects",
+      "Creator tool: Make creating AR filters and effects easier than ever",
+      "Visual algorithms: Integrate leading visual algorithms for unrivaled accuracy"
+    ],
+    "tagline": "BytePlus Effects combines over 80,000 AR effects and filters, with a simple integration via Agora's Video SDK.",
+    "is_first_party": false
+  },
+  "layout": {
+    "primary_heading": "BytePlus Effects",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "BytePlus Effects",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "body", "content": "Integration guide using setExtensionProperty key-value pattern" },
+          { "type": "code_block", "language": ["Java"], "api_calls": ["enableExtension", "setExtensionProperty", "addExtension"] },
+          { "type": "table", "columns": ["Platform", "Language", "Sample project"], "row_count_visible": 1, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "creativestore.byteplus.com/mall/cv/effect", "href": "https://creativestore.byteplus.com/mall/cv/effect", "opens_in": "new_tab" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "BytePlus Effects"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

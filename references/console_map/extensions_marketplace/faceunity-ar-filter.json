@@ -1,0 +1,57 @@
+{
+  "page": {
+    "title": "FaceUnity AR Filter",
+    "url": "https://console.agora.io/extensions-marketplace/faceunity-ar-en",
+    "section": "Extension Marketplace",
+    "subsection": "FaceUnity AR Filter",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "FaceUnity AR Filter",
+    "company": "Hangzhou Xiangxin Technology Co.,Ltd",
+    "version": "v8.14.0",
+    "updated": "2025-08-11",
+    "platform": ["Android", "iOS", "Flutter", "React Native", "Unity"],
+    "core_features": [
+      "Basic beauty: skin beautification, whitening, rosy",
+      "Advanced beauty: Add video beauty effects for shape, face and skin",
+      "Number detection: Detects the number of faces, humans, or gestures"
+    ],
+    "tagline": "FaceUnity's AR technology provides video effects specializing in portrait beautification for Agora's Video SDK.",
+    "is_first_party": false
+  },
+  "layout": {
+    "primary_heading": "FaceUnity AR Filter",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "FaceUnity AR Filter",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "body", "content": "setExtensionProperty key-value integration guide with full API reference table" },
+          { "type": "code_block", "language": ["Java"], "api_calls": ["addExtension", "enableExtension", "setExtensionProperty"] },
+          { "type": "table", "columns": ["Method keys", "Description"], "row_count_visible": 20, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "table", "columns": ["API", "Error Code", "Description"], "row_count_visible": 4, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "FaceUnity AR Filter"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

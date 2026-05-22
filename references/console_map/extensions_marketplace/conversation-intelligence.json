@@ -1,0 +1,59 @@
+{
+  "page": {
+    "title": "Conversation Intelligence",
+    "url": "https://console.agora.io/extensions-marketplace/symbl",
+    "section": "Extension Marketplace",
+    "subsection": "Conversation Intelligence",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "Conversation Intelligence",
+    "company": "Symbl.ai",
+    "version": "v1.0.0",
+    "updated": "2024-01-12",
+    "platform": ["Android"],
+    "core_features": [
+      "Process unstructured data from real-time experiences at scale",
+      "Identify and extract intents and entities",
+      "Recognize and track phrases and their meanings",
+      "Generate abstract summaries, topics, and sentiment",
+      "Customize cutting-edge machine learning models"
+    ],
+    "tagline": "This extension embeds real-time conversation intelligence into the application providing contextual analyzed conversation data along with speech recognition without any upfront training.",
+    "is_first_party": false
+  },
+  "layout": {
+    "primary_heading": "Conversation Intelligence",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "Symbl Conversation Intelligence",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "note", "content": "This guide is provided by Symbl.ai. Agora is planning a documentation upgrade program for all extensions on the marketplace." },
+          { "type": "text", "role": "body", "content": "Integration guide for Android mobile app" },
+          { "type": "link", "label": "Sample Android App Project", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "API Reference", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "Conversation Intelligence"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

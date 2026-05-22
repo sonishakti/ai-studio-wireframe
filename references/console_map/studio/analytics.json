@@ -1,0 +1,46 @@
+{
+  "page": {
+    "title": "Analytics",
+    "url": "https://console.agora.io/studio/analytics",
+    "section": "Studio",
+    "subsection": "Analytics",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Analytics",
+    "description": "Monitor, debug, and optimize voice agents with comprehensive analytics",
+    "sections": [
+      {
+        "id": "analytics-filters",
+        "heading": null,
+        "components": [
+          { "type": "filter", "label": "Date Range", "default_value": "Last 7 Days" },
+          { "type": "filter", "label": "Agent", "default_value": "Select Agents" },
+          { "type": "filter", "label": "Direction", "default_value": "Outbound" },
+          { "type": "filter", "label": "Campaign", "default_value": "Select Campaigns" }
+        ]
+      },
+      {
+        "id": "analytics-content",
+        "heading": null,
+        "components": [
+          { "type": "text", "role": "note", "content": "No data available — account has no agents or sessions." }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [
+      { "label": "Agents", "href": "/studio/agents" },
+      { "label": "Integration", "href": "/studio/integration/credentials" },
+      { "label": "Phone Numbers", "href": "/studio/mobile-numbers" },
+      { "label": "Campaign", "href": "/studio/campaign" },
+      { "label": "Analytics", "href": "/studio/analytics" },
+      { "label": "Call History", "href": "/studio/call-history" },
+      { "label": "Session History", "href": "/studio/session-history" }
+    ],
+    "child_links": []
+  }
+}

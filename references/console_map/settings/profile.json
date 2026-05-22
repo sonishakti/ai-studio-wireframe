@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "Profile",
+    "url": "https://console.agora.io/settings/profile",
+    "section": "Settings",
+    "subsection": "Profile",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Profile",
+    "tabs": ["Account", "Teams and Members", "Notifications Preferences", "SSO Management"],
+    "active_tab": "Account",
+    "sections": [
+      {
+        "id": "profile",
+        "heading": "Profile",
+        "components": [
+          { "type": "input", "label": "First Name", "input_type": "text", "required": true, "current_value": null },
+          { "type": "input", "label": "Last Name", "input_type": "text", "required": true, "current_value": null }
+        ]
+      },
+      {
+        "id": "security",
+        "heading": "Security",
+        "components": [
+          { "type": "button", "label": "Add Phone Number", "variant": "secondary", "inferred_action": "Opens phone number addition flow", "is_destructive": false },
+          { "type": "button", "label": "Update Email ID", "variant": "secondary", "inferred_action": "Opens email update flow", "is_destructive": false },
+          { "type": "button", "label": "Update Password", "variant": "secondary", "inferred_action": "Opens password update flow", "is_destructive": false }
+        ]
+      },
+      {
+        "id": "login-methods",
+        "heading": "Login Methods",
+        "components": [
+          { "type": "button", "label": "Disconnect", "context": "Google", "variant": "secondary", "inferred_action": "Disconnects Google login", "is_destructive": true, "current_state": "connected" },
+          { "type": "button", "label": "Connect", "context": "Github", "variant": "secondary", "inferred_action": "Connects Github login", "is_destructive": false, "current_state": "disconnected" },
+          { "type": "button", "label": "Connect", "context": "WeChat", "variant": "secondary", "inferred_action": "Connects WeChat login", "is_destructive": false, "current_state": "disconnected" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Settings"],
+    "sibling_tabs": [
+      { "label": "Account", "href": "/settings" },
+      { "label": "Teams and Members", "href": "/settings/teams-members" },
+      { "label": "Notifications Preferences", "href": "/settings/notification-preferences" },
+      { "label": "SSO Management", "href": "/settings/sso-management" }
+    ],
+    "child_links": []
+  }
+}

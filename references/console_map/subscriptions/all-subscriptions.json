@@ -1,0 +1,41 @@
+{
+  "page": {
+    "title": "All Subscriptions",
+    "url": "https://console.agora.io/subscriptions/all-subscriptions",
+    "section": "Subscriptions",
+    "subsection": "All Subscriptions",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "All Subscriptions",
+    "description": null,
+    "sections": [
+      {
+        "id": "chat-plan",
+        "heading": "Chat Plan",
+        "description": null,
+        "components": [
+          { "type": "text", "role": "label", "content": "Free Plan" },
+          { "type": "button", "label": "View Usage", "variant": "secondary", "inferred_action": "Navigates to Chat usage details", "is_destructive": false },
+          { "type": "button", "label": "Upgrade Plan", "variant": "primary", "inferred_action": "Opens Chat plan upgrade flow", "is_destructive": false }
+        ]
+      },
+      {
+        "id": "signaling-plan",
+        "heading": "Signaling: Standard Plan",
+        "description": null,
+        "components": [
+          { "type": "text", "role": "label", "content": "Free Plan" },
+          { "type": "button", "label": "View Usage", "variant": "secondary", "inferred_action": "Navigates to Signaling usage details", "is_destructive": false },
+          { "type": "button", "label": "Upgrade Plan", "variant": "primary", "inferred_action": "Opens Signaling plan upgrade flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Subscriptions"],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "page": {
+    "title": "Configure — Media Push",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/media-push",
+    "section": "Projects > Configure",
+    "subsection": "Media Push",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Media Push",
+    "description": null,
+    "sections": [
+      {
+        "id": "media-push-configurations",
+        "heading": "Configurations",
+        "description": null,
+        "components": [
+          {
+            "type": "feature_block",
+            "feature_name": "Media Push — Server Side RESTful API",
+            "section": "Media Push",
+            "description": "Enable Server Side RESTful API",
+            "observed_state": "indeterminate",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": false,
+            "child_settings": [],
+            "associated_links": [
+              { "label": "contact support", "href": "https://www.agora.io/en/talk-to-us/" },
+              { "label": "What is Media Push?", "href": "https://docs.agora.io/en/media-push/overview/product-overview" },
+              { "label": "Media Push Pricing", "href": "https://docs.agora.io/en/media-push/reference/pricing" }
+            ],
+            "badges": [],
+            "notes": "No Active/Inactive badge. 'Enable Server Side RESTful API' is a non-interactive label with info tooltip (cursor-default). No toggle/checkbox present. Default quota: 20 PCW."
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Media Push"],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

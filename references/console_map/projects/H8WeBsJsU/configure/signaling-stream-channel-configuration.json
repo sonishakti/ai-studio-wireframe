@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "Configure — Signaling: Stream Channel Configuration",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/stream-channel-configuration",
+    "section": "Projects > Configure",
+    "subsection": "Signaling > Stream Channel Configuration",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Signaling (RTM)",
+    "description": null,
+    "sections": [
+      {
+        "id": "signaling-stream-channel-configuration",
+        "heading": "Stream Channel Configuration",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "Active",
+            "state": "active"
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Stream Channel",
+            "section": "Signaling > Stream Channel Configuration",
+            "description": null,
+            "observed_state": "disabled",
+            "toggle_present": true,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": "Free plan (Upgrade available)",
+            "child_settings_gated": true,
+            "child_settings_visible": false,
+            "child_settings": [],
+            "associated_links": [
+              { "label": "Upgrade", "href": "/subscriptions/signaling-plans" },
+              { "label": "How to use Signaling?", "href": "https://docs.agora.io/en/signaling/overview/product-overview" },
+              { "label": "Signaling Pricing", "href": "https://docs.agora.io/en/signaling/overview/pricing" }
+            ],
+            "badges": ["Active"],
+            "notes": "Single 'Enable' toggle is off. Toggle label is 'Enable'. Child settings not shown in disabled state."
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Signaling", "Stream Channel Configuration"],
+    "sibling_tabs": ["Basic Information", "Presence Configuration", "Storage Configuration", "Stream Channel Configuration"],
+    "child_links": ["/subscriptions/signaling-plans"]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "page": {
+    "title": "License Management",
+    "url": "https://console.agora.io/license-management",
+    "section": "License Management",
+    "subsection": null,
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": true,
+    "redirect_behavior": "All sub-routes redirect to Overview (/). Section is gated behind plan or feature not active on this account."
+  },
+  "layout": null,
+  "known_sub_routes": [
+    { "path": "/license-management/pre-authorization", "accessible": false, "redirects_to": "/" },
+    { "path": "/license-management/purchase-history", "accessible": false, "redirects_to": "/" },
+    { "path": "/license-management/quota-management", "accessible": false, "redirects_to": "/" },
+    { "path": "/license-management/usages-query", "accessible": false, "redirects_to": "/" }
+  ],
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

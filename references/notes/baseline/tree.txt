@@ -1,0 +1,732 @@
+.
+├── mock-db
+│   └── onboarding.db.json
+├── pages
+│   ├── api
+│   │   ├── console-proxy
+│   │   │   ├── [endpoint].ts
+│   │   │   ├── types.ts
+│   │   │   └── utils.ts
+│   │   ├── source
+│   │   │   └── download.ts
+│   │   ├── ui-customizer
+│   │   │   └── features.ts
+│   │   ├── mock-flow.ts
+│   │   └── onboarding.ts
+│   ├── billing
+│   │   ├── all-designs.tsx
+│   │   ├── index.tsx
+│   │   ├── invoices.tsx
+│   │   ├── manage-cards.tsx
+│   │   ├── transactions.tsx
+│   │   └── withdraw-transactions.tsx
+│   ├── credentials
+│   │   └── index.tsx
+│   ├── extensions-marketplace
+│   │   ├── my-submissions
+│   │   │   ├── [id].tsx
+│   │   │   └── index.tsx
+│   │   ├── [name].tsx
+│   │   └── index.tsx
+│   ├── finance
+│   │   └── packages.tsx
+│   ├── license-management
+│   │   ├── index.tsx
+│   │   ├── pre-authorization.tsx
+│   │   ├── purchase-history.tsx
+│   │   ├── quota-management.tsx
+│   │   └── usages-query.tsx
+│   ├── notifications
+│   │   ├── [messageID].tsx
+│   │   └── index.tsx
+│   ├── packages
+│   │   └── aa
+│   │       └── pay
+│   │           └── index.tsx
+│   ├── project-management
+│   │   ├── [projectID]
+│   │   │   ├── chat
+│   │   │   │   ├── basic-info.tsx
+│   │   │   │   ├── callback-bkup.tsx
+│   │   │   │   ├── callback.tsx
+│   │   │   │   ├── domain-history.tsx
+│   │   │   │   ├── domain-rule-config.tsx
+│   │   │   │   ├── features-overview-bkup.tsx
+│   │   │   │   ├── features-overview.tsx
+│   │   │   │   ├── image-history.tsx
+│   │   │   │   ├── image-rule-config.tsx
+│   │   │   │   ├── image-rule-test.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── ip-whitelist.tsx
+│   │   │   │   ├── message-recall.tsx
+│   │   │   │   ├── message-report.tsx
+│   │   │   │   ├── multi-device.tsx
+│   │   │   │   ├── operation-manage-chatroom.tsx
+│   │   │   │   ├── operation-manage-group.tsx
+│   │   │   │   ├── operation-manage-user.tsx
+│   │   │   │   ├── push-cert-bkup.tsx
+│   │   │   │   ├── push-cert.tsx
+│   │   │   │   ├── push-template-bkup.tsx
+│   │   │   │   ├── push-template.tsx
+│   │   │   │   ├── real-time-hotspot-data.tsx
+│   │   │   │   ├── real-time-message-delivery.tsx
+│   │   │   │   ├── real-time-overview.tsx
+│   │   │   │   ├── real-time-user-connect-status.tsx
+│   │   │   │   ├── real-time-user-logs.tsx
+│   │   │   │   ├── text-history.tsx
+│   │   │   │   ├── text-rule-config.tsx
+│   │   │   │   ├── text-rule-test.tsx
+│   │   │   │   ├── usages-moderation.tsx
+│   │   │   │   ├── usages-translation.tsx
+│   │   │   │   ├── user-label.tsx
+│   │   │   │   ├── word-config.tsx
+│   │   │   │   ├── wordlist-history-bkup.tsx
+│   │   │   │   ├── wordlist-history.tsx
+│   │   │   │   ├── wordlist-rule-config-bkup.tsx
+│   │   │   │   └── wordlist-rule-config.tsx
+│   │   │   ├── signaling
+│   │   │   │   ├── basic.tsx
+│   │   │   │   ├── presence-configuration.tsx
+│   │   │   │   ├── storage-configuration.tsx
+│   │   │   │   └── stream-channel-configuration.tsx
+│   │   │   ├── cloud-proxy.tsx
+│   │   │   ├── cloud-recording.tsx
+│   │   │   ├── cohost-authentication.tsx
+│   │   │   ├── conv-ai.tsx
+│   │   │   ├── flexible-classroom.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── media-gateway.tsx
+│   │   │   ├── media-pull.tsx
+│   │   │   ├── media-push.tsx
+│   │   │   ├── notifications.tsx
+│   │   │   ├── real-time-stt.tsx
+│   │   │   ├── video-screenshot-upload.tsx
+│   │   │   ├── whiteboard-basic.tsx
+│   │   │   └── whiteboard-services.tsx
+│   │   └── index.tsx
+│   ├── restful-api
+│   │   └── index.tsx
+│   ├── settings
+│   │   ├── index.tsx
+│   │   ├── notification-preferences.tsx
+│   │   ├── profile.tsx
+│   │   ├── sso-management.tsx
+│   │   └── teams-members.tsx
+│   ├── subscriptions
+│   │   ├── all-subscriptions.tsx
+│   │   ├── chat-plans.tsx
+│   │   ├── index.tsx
+│   │   ├── rtc-plans.tsx
+│   │   └── signaling-plans.tsx
+│   ├── usage
+│   │   └── index.tsx
+│   ├── _app.tsx
+│   ├── _document.tsx
+│   ├── 404.tsx
+│   ├── 500.tsx
+│   ├── index.tsx
+│   ├── onboarding.tsx
+│   ├── play.tsx
+│   └── test.tsx
+├── public
+│   ├── icons
+│   │   ├── agora-logo-mono.svg
+│   │   ├── android.svg
+│   │   ├── apple.svg
+│   │   ├── console-logo.svg
+│   │   ├── convoai-studio-logo.svg
+│   │   ├── flutter.svg
+│   │   ├── js.svg
+│   │   ├── react.svg
+│   │   └── windows.svg
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   ├── app-builder-image.png
+│   ├── app-builder-logo.svg
+│   ├── apple-touch-icon.png
+│   ├── dashboard-builder.png
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── favicon.ico
+│   └── site.webmanifest
+├── src
+│   ├── assets
+│   │   ├── icons
+│   │   │   ├── Active.tsx
+│   │   │   ├── Agora.tsx
+│   │   │   ├── ai-agent-icon.tsx
+│   │   │   ├── AmericanExpress.tsx
+│   │   │   ├── Analytics.tsx
+│   │   │   ├── Android.tsx
+│   │   │   ├── Api.tsx
+│   │   │   ├── AppBuilder.tsx
+│   │   │   ├── Archive.tsx
+│   │   │   ├── ArrowLeft.tsx
+│   │   │   ├── ArrowRight.tsx
+│   │   │   ├── asr-icon.tsx
+│   │   │   ├── AutoPayIcon.tsx
+│   │   │   ├── Bell.tsx
+│   │   │   ├── BellUnread.tsx
+│   │   │   ├── Calendar.tsx
+│   │   │   ├── CancelOutline.tsx
+│   │   │   ├── CardBill.tsx
+│   │   │   ├── CaretDual.tsx
+│   │   │   ├── CaretUp.tsx
+│   │   │   ├── Chat.tsx
+│   │   │   ├── chatgpt-icon.tsx
+│   │   │   ├── checkbox-icon.tsx
+│   │   │   ├── CheckMark.tsx
+│   │   │   ├── CheckMarkBold.tsx
+│   │   │   ├── CheckMarkFull.tsx
+│   │   │   ├── CheckMarkOutline.tsx
+│   │   │   ├── ChevronDown.tsx
+│   │   │   ├── ChevronUp.tsx
+│   │   │   ├── Clipboard.tsx
+│   │   │   ├── close-icon.tsx
+│   │   │   ├── cloud-check-icon.tsx
+│   │   │   ├── Code.tsx
+│   │   │   ├── Codes.tsx
+│   │   │   ├── connection-dot.tsx
+│   │   │   ├── ConvoAI.tsx
+│   │   │   ├── CreateTicket.tsx
+│   │   │   ├── Cross.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Delete.tsx
+│   │   │   ├── Docs.tsx
+│   │   │   ├── Done.tsx
+│   │   │   ├── DoubleCheckMark.tsx
+│   │   │   ├── Download.tsx
+│   │   │   ├── Electron.tsx
+│   │   │   ├── EllipsisH.tsx
+│   │   │   ├── Error.tsx
+│   │   │   ├── ExtensionIcon.tsx
+│   │   │   ├── ExternalLink.tsx
+│   │   │   ├── filter-applied-icon.tsx
+│   │   │   ├── Filter.tsx
+│   │   │   ├── Flag.tsx
+│   │   │   ├── Flutter.tsx
+│   │   │   ├── Gear.tsx
+│   │   │   ├── Groups.tsx
+│   │   │   ├── Hamburger.tsx
+│   │   │   ├── Help.tsx
+│   │   │   ├── HelpOutline.tsx
+│   │   │   ├── ImagePreview.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── Info.tsx
+│   │   │   ├── InteractiveLiveStreaming.tsx
+│   │   │   ├── InteractiveWhiteboard.tsx
+│   │   │   ├── Ios.tsx
+│   │   │   ├── List.tsx
+│   │   │   ├── Loading.tsx
+│   │   │   ├── Logout.tsx
+│   │   │   ├── Macos.tsx
+│   │   │   ├── ManageAccount.tsx
+│   │   │   ├── Marketplace.tsx
+│   │   │   ├── MasterCard.tsx
+│   │   │   ├── MastercardIcon.tsx
+│   │   │   ├── Metrics.tsx
+│   │   │   ├── Mic.tsx
+│   │   │   ├── microsoft-icon.tsx
+│   │   │   ├── MonitizationIcon.tsx
+│   │   │   ├── NoCode.tsx
+│   │   │   ├── PasswordEyeClosedIcon.tsx
+│   │   │   ├── Pen.tsx
+│   │   │   ├── Pencil.tsx
+│   │   │   ├── play-icon.tsx
+│   │   │   ├── PlayPreview.tsx
+│   │   │   ├── Plus.tsx
+│   │   │   ├── Postman.tsx
+│   │   │   ├── React.tsx
+│   │   │   ├── Receipt.tsx
+│   │   │   ├── Resources.tsx
+│   │   │   ├── Restful.tsx
+│   │   │   ├── Search.tsx
+│   │   │   ├── Secure.tsx
+│   │   │   ├── SelectedCorner.tsx
+│   │   │   ├── Shield.tsx
+│   │   │   ├── ShieldPerson.tsx
+│   │   │   ├── Signaling.tsx
+│   │   │   ├── Slack.tsx
+│   │   │   ├── SmallCaret.tsx
+│   │   │   ├── Star.tsx
+│   │   │   ├── StartActive.tsx
+│   │   │   ├── Success.tsx
+│   │   │   ├── Support.tsx
+│   │   │   ├── Swap.tsx
+│   │   │   ├── Teams.tsx
+│   │   │   ├── text-to-speech-icon.tsx
+│   │   │   ├── tts-icon.tsx
+│   │   │   ├── uncheck-icon.tsx
+│   │   │   ├── UnionPay.tsx
+│   │   │   ├── Unity.tsx
+│   │   │   ├── Unsecure.tsx
+│   │   │   ├── UsageAudio.tsx
+│   │   │   ├── UsageVideo.tsx
+│   │   │   ├── UsageVideoHD.tsx
+│   │   │   ├── UsageVideoHDPlus.tsx
+│   │   │   ├── User.tsx
+│   │   │   ├── Video.tsx
+│   │   │   ├── VideoCalling.tsx
+│   │   │   ├── Visa.tsx
+│   │   │   ├── VoiceCalling.tsx
+│   │   │   ├── WarningHexa.tsx
+│   │   │   ├── Web.tsx
+│   │   │   ├── Windows.tsx
+│   │   │   └── Zap.tsx
+│   │   ├── images
+│   │   │   ├── agora-logo.svg
+│   │   │   ├── android-mono.svg
+│   │   │   ├── android.svg
+│   │   │   ├── credit-card.svg
+│   │   │   ├── electron-mono.svg
+│   │   │   ├── electron.svg
+│   │   │   ├── flutter-mono.svg
+│   │   │   ├── flutter.svg
+│   │   │   ├── ios-mono.svg
+│   │   │   ├── ios.svg
+│   │   │   ├── macos-mono.svg
+│   │   │   ├── macos.svg
+│   │   │   ├── react-mono.svg
+│   │   │   ├── react.svg
+│   │   │   ├── unity-mono.svg
+│   │   │   ├── unity.svg
+│   │   │   ├── web-mono.svg
+│   │   │   ├── web.svg
+│   │   │   ├── windows-mono.svg
+│   │   │   └── windows.svg
+│   │   └── lottie-files
+│   │       ├── convoai-ambient.json
+│   │       ├── convoai-analyzing.json
+│   │       ├── convoai-disconnected.json
+│   │       ├── convoai-joining.json
+│   │       ├── convoai-listening.json
+│   │       ├── convoai-not-joined.json
+│   │       └── convoai-talking.json
+│   ├── code-samples
+│   │   ├── dashboard
+│   │   │   └── ui-kit
+│   │   │       ├── android.mdx
+│   │   │       ├── flutter.mdx
+│   │   │       ├── ios.mdx
+│   │   │       ├── macOs.mdx
+│   │   │       ├── react-native.mdx
+│   │   │       └── web.mdx
+│   │   └── onboarding
+│   │       ├── core-sdk
+│   │       │   ├── android.mdx
+│   │       │   ├── electron.mdx
+│   │       │   ├── flutter.mdx
+│   │       │   ├── ios.mdx
+│   │       │   ├── macos.mdx
+│   │       │   ├── react.mdx
+│   │       │   ├── unity.mdx
+│   │       │   ├── web.mdx
+│   │       │   └── windows.mdx
+│   │       ├── ui-kit
+│   │       │   ├── android.mdx
+│   │       │   ├── flutter.mdx
+│   │       │   ├── ios.mdx
+│   │       │   ├── macos.mdx
+│   │       │   ├── react.mdx
+│   │       │   └── web.mdx
+│   │       └── placeholder.mdx
+│   ├── components
+│   │   ├── auto-pay
+│   │   │   └── index.tsx
+│   │   ├── billing
+│   │   │   ├── AddCardModal.tsx
+│   │   │   ├── BankDetails.tsx
+│   │   │   ├── BillingAlert.tsx
+│   │   │   ├── Bills.tsx
+│   │   │   ├── CredentialsTable.tsx
+│   │   │   ├── GenericModal.tsx
+│   │   │   ├── Invoices.tsx
+│   │   │   ├── LatestInvoiceTable.tsx
+│   │   │   ├── LatestTransactionTable.tsx
+│   │   │   ├── Method.tsx
+│   │   │   ├── Notes.tsx
+│   │   │   ├── PackagesTable.tsx
+│   │   │   ├── PaymentMethod.tsx
+│   │   │   ├── PaymentModal.tsx
+│   │   │   ├── TopupWalletModal.tsx
+│   │   │   ├── Transaction.tsx
+│   │   │   ├── Wallet.tsx
+│   │   │   ├── WithdrawBalanceModal.tsx
+│   │   │   └── WithdrawTransactions.tsx
+│   │   ├── charts
+│   │   │   ├── AreaChart.tsx
+│   │   │   └── LineChart.tsx
+│   │   ├── common
+│   │   │   ├── Accordion.tsx
+│   │   │   ├── ActionGroup.tsx
+│   │   │   ├── ActionInputField.tsx
+│   │   │   ├── AlertBox.tsx
+│   │   │   ├── AnnouncementBanner.tsx
+│   │   │   ├── BoxLayoutCard.tsx
+│   │   │   ├── Breadcrumbs.tsx
+│   │   │   ├── Button.tsx
+│   │   │   ├── ButtonGroup.tsx
+│   │   │   ├── CardLayout.tsx
+│   │   │   ├── Checkbox.tsx
+│   │   │   ├── Chip.tsx
+│   │   │   ├── CopyBox.tsx
+│   │   │   ├── CreditCardExpiredBanner.tsx
+│   │   │   ├── DateRangePicker.tsx
+│   │   │   ├── FileInputField.tsx
+│   │   │   ├── FullPageLayout.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── HorizontalCard.tsx
+│   │   │   ├── ImageSlider.tsx
+│   │   │   ├── InputField.tsx
+│   │   │   ├── InputLayout.tsx
+│   │   │   ├── ListItem.tsx
+│   │   │   ├── Loading.tsx
+│   │   │   ├── Lottie.tsx
+│   │   │   ├── MonthRangePicker.tsx
+│   │   │   ├── MultiLayerNavigation.tsx
+│   │   │   ├── MultiLayerSelector.tsx
+│   │   │   ├── MultipleSelector.tsx
+│   │   │   ├── NavGroup.tsx
+│   │   │   ├── NavItem.tsx
+│   │   │   ├── PageLayout.tsx
+│   │   │   ├── Pagination.tsx
+│   │   │   ├── PasswordInputWithValidation.tsx
+│   │   │   ├── PasswordValidationPopover.tsx
+│   │   │   ├── ProgressBar.tsx
+│   │   │   ├── Radio.tsx
+│   │   │   ├── RadioInputCard.tsx
+│   │   │   ├── ResponsiveSidebar.tsx
+│   │   │   ├── SelectField.tsx
+│   │   │   ├── Sidebar-v2.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── SimpleBorderBox.tsx
+│   │   │   ├── SimpleCollapsible.tsx
+│   │   │   ├── SimpleDropdown.tsx
+│   │   │   ├── SimpleModal.tsx
+│   │   │   ├── SimplePopover.tsx
+│   │   │   ├── SimpleSelector.tsx
+│   │   │   ├── Slider.tsx
+│   │   │   ├── StatusBadge.tsx
+│   │   │   ├── SubPagePageLayout.tsx
+│   │   │   ├── SuspensionBanner.tsx
+│   │   │   ├── SwitchInput.tsx
+│   │   │   ├── TabBar.tsx
+│   │   │   ├── TableLayout.tsx
+│   │   │   ├── Timeline.tsx
+│   │   │   ├── Tooltip.tsx
+│   │   │   └── UploadFile.tsx
+│   │   ├── dashboard
+│   │   │   ├── Billing.tsx
+│   │   │   ├── ExtensionMarketplace.tsx
+│   │   │   ├── GetStarted.tsx
+│   │   │   ├── Notification.tsx
+│   │   │   ├── Projects.tsx
+│   │   │   ├── Subscriptions.tsx
+│   │   │   ├── Usages.tsx
+│   │   │   └── Welcome.tsx
+│   │   ├── extensions-marketplace
+│   │   │   ├── ExtensionActions.tsx
+│   │   │   ├── ExtensionDetails.tsx
+│   │   │   ├── ExtensionNewSubmission.tsx
+│   │   │   ├── ExtensionNewSubmissionForm.tsx
+│   │   │   ├── ExtensionOverview.tsx
+│   │   │   ├── ExtensionPlans.tsx
+│   │   │   ├── ExtensionProjects.tsx
+│   │   │   ├── ExtensionsFilter.tsx
+│   │   │   ├── ExtensionsList.tsx
+│   │   │   ├── ExtensionsPreview.tsx
+│   │   │   └── ExtensionSubmissionList.tsx
+│   │   ├── license-management
+│   │   │   ├── PreAuthorization
+│   │   │   │   ├── BatchDetailsModal.tsx
+│   │   │   │   ├── ImportHistoryTab.tsx
+│   │   │   │   ├── ImportLicensesTab.tsx
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── ProjectSelector.tsx
+│   │   │   │   ├── utils.ts
+│   │   │   │   ├── ValidationStats.tsx
+│   │   │   │   └── VerifyLicenseTab.tsx
+│   │   │   ├── PurchaseHistory
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   ├── Filters.tsx
+│   │   │   │   └── OrdersTable.tsx
+│   │   │   ├── QuotaManagement
+│   │   │   │   ├── AllocateModal.tsx
+│   │   │   │   ├── ManageQuotaModal.tsx
+│   │   │   │   ├── QuotaHeader.tsx
+│   │   │   │   ├── QuotaListTable.tsx
+│   │   │   │   └── QuotaTable.tsx
+│   │   │   ├── UsageQuery
+│   │   │   │   ├── NestedAccordionTable.tsx
+│   │   │   │   ├── ProductTabs.tsx
+│   │   │   │   └── SummaryCards.tsx
+│   │   │   ├── components.tsx
+│   │   │   ├── LicensePermissionGuard.tsx
+│   │   │   └── utils.ts
+│   │   ├── notifications
+│   │   │   ├── NotificationCategoryList.tsx
+│   │   │   ├── NotificationMessageDetails.tsx
+│   │   │   ├── NotificationMessages.tsx
+│   │   │   └── NotificationPagination.tsx
+│   │   ├── onboarding
+│   │   │   ├── CodeBlock.tsx
+│   │   │   ├── Examples.tsx
+│   │   │   ├── GetStarted.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── Introduction.tsx
+│   │   │   ├── OnboardingProgress.tsx
+│   │   │   └── OptionSteps.tsx
+│   │   ├── policy-update
+│   │   │   └── index.tsx
+│   │   ├── project-management
+│   │   │   ├── ConvAIPlayground
+│   │   │   │   ├── asr-settings
+│   │   │   │   ├── mllm-settings
+│   │   │   │   ├── tts-settings
+│   │   │   │   ├── turn-detection-settings
+│   │   │   │   ├── AgoraRTCComponent.tsx
+│   │   │   │   ├── AgoraRTCProvider.tsx
+│   │   │   │   ├── AgoraRTCSTT.tsx
+│   │   │   │   ├── conv-ai-form-reducer.tsx
+│   │   │   │   ├── ConvAIForm.tsx
+│   │   │   │   ├── ConvAIPage.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── llm-providers.ts
+│   │   │   │   └── tts-providers.ts
+│   │   │   ├── ActiveButton.tsx
+│   │   │   ├── ArchiveProjectModal.tsx
+│   │   │   ├── ArchiveSecondaryModal.tsx
+│   │   │   ├── EnableChat.tsx
+│   │   │   ├── EnableConvAI.tsx
+│   │   │   ├── EnableMediaPull.tsx
+│   │   │   ├── EnableMediaPush.tsx
+│   │   │   ├── GuideBox.tsx
+│   │   │   ├── SecurityBoxLayoutCard.tsx
+│   │   │   ├── utils.tsx
+│   │   │   └── VideoScreenshotUploadSettings.tsx
+│   │   ├── projects
+│   │   │   ├── View
+│   │   │   │   ├── BasicSetting.tsx
+│   │   │   │   └── Security.tsx
+│   │   │   ├── CreateProject.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── ProjectTable.tsx
+│   │   ├── restful-api
+│   │   │   └── RestfulAPITable.tsx
+│   │   ├── settings
+│   │   │   ├── MemberManagementTable.tsx
+│   │   │   ├── OktaPasswordConfiguration.tsx
+│   │   │   ├── SAMLConfiguration.tsx
+│   │   │   ├── SCIMConfiguration.tsx
+│   │   │   ├── SettingsSidebar.tsx
+│   │   │   └── TeamManagementTable.tsx
+│   │   ├── sidebar
+│   │   │   ├── app-sidebar.tsx
+│   │   │   ├── index.tsx
+│   │   │   ├── nav-footer.tsx
+│   │   │   ├── nav-main.tsx
+│   │   │   ├── nav-user.tsx
+│   │   │   └── team-switcher.tsx
+│   │   ├── subscriptions
+│   │   │   ├── agora-analytics
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── PaymentMethodModal.tsx
+│   │   │   │   └── ResultModals.tsx
+│   │   │   ├── all-subscriptions
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── RtcSubscriptionUsage.tsx
+│   │   │   │   ├── SubscriptionCard.tsx
+│   │   │   │   └── SubscriptionUsage.tsx
+│   │   │   ├── chat-plans
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── pricing-schemes.ts
+│   │   │   │   ├── PricingTable.tsx
+│   │   │   │   ├── Subscription.tsx
+│   │   │   │   └── UnsubscribeModal.tsx
+│   │   │   ├── rtc-plans
+│   │   │   │   ├── data
+│   │   │   │   ├── modals
+│   │   │   │   ├── monthly
+│   │   │   │   ├── top-ups
+│   │   │   │   └── index.tsx
+│   │   │   ├── signaling-plans
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── pricing-schemes.ts
+│   │   │   │   ├── PricingTable.tsx
+│   │   │   │   └── Subscription.tsx
+│   │   │   └── SubscriptionsSidebar.tsx
+│   │   ├── two-factor-authentication
+│   │   │   └── index.tsx
+│   │   ├── ui
+│   │   │   ├── avatar.tsx
+│   │   │   ├── breadcrumb.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── collapsible.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── icon-button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── scroll-area.tsx
+│   │   │   ├── separator.tsx
+│   │   │   ├── sheet.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── theme-provider.tsx
+│   │   │   └── tooltip.tsx
+│   │   ├── usages
+│   │   │   ├── usages-utils
+│   │   │   │   ├── broadcast-usages.ts
+│   │   │   │   ├── date-fn.ts
+│   │   │   │   ├── ils-usages.ts
+│   │   │   │   └── projects.ts
+│   │   │   ├── UsagesActions.tsx
+│   │   │   ├── UsagesAnalytics.tsx
+│   │   │   ├── UsagesChart.tsx
+│   │   │   ├── UsagesInput.tsx
+│   │   │   ├── UsagesMetrics.tsx
+│   │   │   ├── UsagesNote.tsx
+│   │   │   ├── UsagesOverview.tsx
+│   │   │   └── UsagesTable.tsx
+│   │   └── navigation.tsx
+│   ├── data
+│   │   ├── demo
+│   │   │   ├── chart-data.ts
+│   │   │   ├── simple-complex-dropdown.ts
+│   │   │   └── user.json
+│   │   ├── errors
+│   │   │   ├── Analytics.ts
+│   │   │   ├── Authentication.ts
+│   │   │   ├── Components.ts
+│   │   │   ├── default.ts
+│   │   │   ├── Finance.ts
+│   │   │   ├── License.ts
+│   │   │   ├── Member.ts
+│   │   │   ├── Message.ts
+│   │   │   ├── Overview.ts
+│   │   │   ├── Paas.ts
+│   │   │   ├── Package.ts
+│   │   │   ├── Project.ts
+│   │   │   ├── Setting.ts
+│   │   │   ├── Support.ts
+│   │   │   └── Usage.ts
+│   │   ├── license-management
+│   │   │   ├── endpoints.ts
+│   │   │   └── mock-usage.ts
+│   │   ├── source
+│   │   │   ├── core-sdk
+│   │   │   │   └── react.zip
+│   │   │   └── ui-kit
+│   │   │       └── web.zip
+│   │   ├── bank-transfer-details.ts
+│   │   ├── dashboard.ts
+│   │   ├── extensions-category.ts
+│   │   ├── extensions-form.ts
+│   │   ├── features-flag.ts
+│   │   ├── navigation-menu.ts
+│   │   ├── ncs-product-id.ts
+│   │   ├── onboarding.ts
+│   │   ├── platform-icon.ts
+│   │   ├── project-management-menu.ts
+│   │   ├── sitemenu.ts
+│   │   └── usages.ts
+│   ├── hooks
+│   │   ├── use-mobile.tsx
+│   │   ├── useAuth.ts
+│   │   ├── useElementDimension.ts
+│   │   ├── useFreeQuotaUsage.ts
+│   │   ├── useLicensePermission.ts
+│   │   ├── useOnClickOutside.ts
+│   │   ├── usePermission.ts
+│   │   ├── useRtcAnnouncementTracking.ts
+│   │   ├── useRtcPlans.ts
+│   │   └── useRtcQuota.ts
+│   ├── layout
+│   │   ├── ProjectManagementLayout.tsx
+│   │   └── SignallingLayout.tsx
+│   ├── lib
+│   │   └── utils.ts
+│   ├── services
+│   │   └── license.ts
+│   ├── store
+│   │   ├── analytics.ts
+│   │   ├── auth.ts
+│   │   ├── autopay.ts
+│   │   ├── billing.ts
+│   │   ├── cards.ts
+│   │   ├── chat-plans.ts
+│   │   ├── chat.ts
+│   │   ├── credentials.ts
+│   │   ├── default-card-detail.ts
+│   │   ├── extension-marketplace.ts
+│   │   ├── index.ts
+│   │   ├── license-management.ts
+│   │   ├── notification.ts
+│   │   ├── onboarding-flow.ts
+│   │   ├── onboarding.ts
+│   │   ├── projects.ts
+│   │   ├── restful-api.ts
+│   │   ├── rtc-announcement-tracking.ts
+│   │   ├── rtc-plans.ts
+│   │   ├── session.ts
+│   │   ├── sg-company.ts
+│   │   ├── signaling-plans.ts
+│   │   ├── subsciptions.ts
+│   │   ├── tour.ts
+│   │   ├── ui-customizer.ts
+│   │   └── usages.ts
+│   ├── styles
+│   │   ├── _base.css
+│   │   ├── _content.css
+│   │   ├── _misc.css
+│   │   ├── _override.css
+│   │   └── app.css
+│   ├── types
+│   │   ├── analytics.types.ts
+│   │   ├── auth-user.types.ts
+│   │   ├── billing-types.ts
+│   │   ├── chat.types.ts
+│   │   ├── credentials.types.ts
+│   │   ├── extension-marketplace.types.ts
+│   │   ├── features-flag.ts
+│   │   ├── license-management.ts
+│   │   ├── mdx.d.ts
+│   │   ├── new-extension.ts
+│   │   ├── notification.types.ts
+│   │   ├── packages.types.ts
+│   │   ├── project.types.ts
+│   │   ├── rtc.types.ts
+│   │   ├── sso-management.ts
+│   │   ├── subscriptions.types.ts
+│   │   └── validity-checker.ts
+│   └── utils
+│       ├── node
+│       │   └── check-fetch-status.ts
+│       ├── transformers
+│       │   └── rtcPlanTransformers.ts
+│       ├── axios.ts
+│       ├── clipboard.ts
+│       ├── date.ts
+│       ├── generateTextFile.ts
+│       ├── getBinaryFromFile.ts
+│       ├── getHashValue.ts
+│       ├── getNameInitials.ts
+│       ├── safeJsonParse.ts
+│       ├── sessionStorageHelpers.ts
+│       ├── string.ts
+│       └── Toast.tsx
+├── components.json
+├── LicenseManagarrAPICall.txt
+├── mdx-components.tsx
+├── middleware.ts
+├── next.config.js
+├── okta-config-api.txt
+├── package.json
+├── postcss.config.js
+├── README.md
+├── tailwind.config.js
+├── TODO
+├── tsconfig.json
+├── vercel.json
+└── yarn.lock
+
+95 directories, 635 files

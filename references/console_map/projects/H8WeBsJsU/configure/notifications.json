@@ -1,0 +1,187 @@
+{
+  "page": {
+    "title": "Configure — Notifications",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/notifications",
+    "section": "Projects > Configure",
+    "subsection": "Notifications",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Notifications",
+    "description": null,
+    "sections": [
+      {
+        "id": "notifications-webhooks",
+        "heading": "Notifications",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "Active",
+            "state": "active"
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "RTC Channel Event Callbacks",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null },
+              { "label": "Event 01 — Event", "type": "select", "observed_value": "Select", "options": [], "helper_text": null },
+              { "label": "Event 01 — Receiving Server Region", "type": "select", "observed_value": null, "options": [], "helper_text": null },
+              { "label": "Event 01 — Receiving Server URL Endpoint", "type": "input", "observed_value": null, "options": [], "helper_text": null },
+              { "label": "Event 01 — Status", "type": "toggle", "observed_value": "on", "options": [], "helper_text": null },
+              { "label": "Event 01 — Whitelist", "type": "checkbox", "observed_value": null, "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": ["Enabled"],
+            "notes": "Expanded. Event 01 status switch: on."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Media Push Restful API",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "indeterminate",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": false,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": [],
+            "notes": "Collapsed — only Secret is visible."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Media Pull",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null },
+              { "label": "Event 01 — Status", "type": "toggle", "observed_value": "on", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": ["Enabled"],
+            "notes": "Expanded. Event 01 status switch: on."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Cloud Recording",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null },
+              { "label": "Event 01 — Status", "type": "toggle", "observed_value": "on", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": ["Enabled"],
+            "notes": "Expanded. Event 01 status switch: on."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Conversational AI Engine",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null },
+              { "label": "Event 01 — Status", "type": "toggle", "observed_value": "on", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": ["Enabled"],
+            "notes": "Expanded. Event 01 status switch: on."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Real-time STT v7.x",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null },
+              { "label": "Event 01 — Status", "type": "toggle", "observed_value": "on", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": ["Enabled"],
+            "notes": "Expanded. Event 01 status switch: on."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Real-time STT v5.x/v6.x",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "indeterminate",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": false,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": [],
+            "notes": "Collapsed — only Secret visible."
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Media Gateway",
+            "section": "Notifications",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              { "label": "Secret", "type": "input", "observed_value": "[REDACTED]", "options": [], "helper_text": null },
+              { "label": "Event 01 — Status", "type": "toggle", "observed_value": "on", "options": [], "helper_text": null }
+            ],
+            "associated_links": [],
+            "badges": ["Enabled"],
+            "notes": "Expanded. Event 01 status switch: on."
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Notifications"],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "page": {
+    "title": "ActiveFence Video Content Moderation (Beta)",
+    "url": "https://console.agora.io/extensions-marketplace/activefence-video-moderation",
+    "section": "Extension Marketplace",
+    "subsection": "ActiveFence Video Content Moderation (Beta)",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "ActiveFence Video Content Moderation (Beta)",
+    "company": "ActiveFence",
+    "version": "v1.0.0",
+    "updated": "2023-11-21",
+    "platform": ["Web", "iOS", "Android"],
+    "core_features": [
+      "Enable live video content moderation for a wide spectrum of online harms",
+      "Stop malicious, toxic, or illegal online content and behavior in real time",
+      "Ensure user safety and meet compliance needs",
+      "Integrate moderation seamlessly via Agora's developer Console and easy-to-use API"
+    ],
+    "tagline": "Protect Your Users. Protect Your Platform.",
+    "is_first_party": false,
+    "is_beta": true
+  },
+  "layout": {
+    "primary_heading": "ActiveFence Video Content Moderation (Beta)",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "ActiveFence Video Content Moderation",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "body", "content": "Trust & Safety integration guide; AI-driven content moderation setup" },
+          { "type": "code_block", "language": ["unknown"], "api_calls": [] },
+          { "type": "link", "label": "Agora Content Inspect Moderation Showcase sample app", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "Multi-channel methods", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "ActiveFence docs", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "Channel Management REST API", "href": null, "opens_in": "unknown" },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "ActiveFence Video Content Moderation (Beta)"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

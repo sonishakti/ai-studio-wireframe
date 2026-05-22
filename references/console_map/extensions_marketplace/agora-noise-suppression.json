@@ -1,0 +1,55 @@
+{
+  "page": {
+    "title": "Agora AI Noise Suppression",
+    "url": "https://console.agora.io/extensions-marketplace/agora-noise-suppression",
+    "section": "Extension Marketplace",
+    "subsection": "Agora AI Noise Suppression",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "Agora AI Noise Suppression",
+    "company": "Agora",
+    "version": "v4.1.1",
+    "updated": "2023-12-06",
+    "platform": ["Web", "iOS", "Android", "macOS", "Windows"],
+    "core_features": [
+      "Over 100 noise types can be removed",
+      "Removes reverberation and echoing",
+      "Based on deep learning models"
+    ],
+    "tagline": "Reduce background noise for real-time audio and video.",
+    "is_first_party": true
+  },
+  "layout": {
+    "primary_heading": "Agora AI Noise Suppression",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "AI Noise Suppression",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "body", "content": "Overview of noise types and reduction strategies" },
+          { "type": "image", "alt_text": "AI noise suppression architecture diagram", "inferred_purpose": "Technical architecture diagram" },
+          { "type": "code_block", "language": ["Java", "Kotlin"], "api_calls": ["setAINSMode"] },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "input", "input_type": "radio", "label": "free", "current_value": "selected" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "Agora AI Noise Suppression"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

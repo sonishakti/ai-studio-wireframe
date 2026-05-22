@@ -1,0 +1,76 @@
+{
+  "page": {
+    "title": "Projects — List",
+    "url": "https://console.agora.io/project-management",
+    "section": "Projects",
+    "subsection": "List",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "My Projects",
+    "description": null,
+    "sections": [
+      {
+        "id": "projects-list",
+        "heading": "My Projects",
+        "description": null,
+        "components": [
+          {
+            "type": "input",
+            "label": "Search for a Project",
+            "input_type": "text",
+            "placeholder": "Search for a Project",
+            "current_value": null,
+            "helper_text": null
+          },
+          {
+            "type": "button",
+            "label": "Create New",
+            "variant": "primary",
+            "inferred_action": "Opens new project creation flow",
+            "is_destructive": false
+          },
+          {
+            "type": "button",
+            "label": "1 Active",
+            "variant": "secondary",
+            "inferred_action": "Filters list to show active projects",
+            "is_destructive": false
+          },
+          {
+            "type": "button",
+            "label": "0 Archived",
+            "variant": "secondary",
+            "inferred_action": "Filters list to show archived projects",
+            "is_destructive": false
+          },
+          {
+            "type": "table",
+            "columns": ["#", "Name", "Updated", "Created", "Security", "App ID", "Action"],
+            "row_count_visible": 1,
+            "has_pagination": false,
+            "has_search": true,
+            "has_filters": true
+          },
+          {
+            "type": "status_badge",
+            "label": "Secure",
+            "state": "active"
+          },
+          {
+            "type": "code_block",
+            "label": "App ID",
+            "language": null,
+            "content": "[REDACTED]"
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects"],
+    "sibling_tabs": ["1 Active", "0 Archived"],
+    "child_links": ["/project-management/H8WeBsJsU/chat/basic-info"]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "page": {
+    "title": "Notification Preferences",
+    "url": "https://console.agora.io/settings/notification-preferences",
+    "section": "Settings",
+    "subsection": "Notification Preferences",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Notification",
+    "tabs": ["Account", "Teams and Members", "Notifications Preferences", "SSO Management"],
+    "active_tab": "Notifications Preferences",
+    "sections": [
+      {
+        "id": "notification-table",
+        "heading": null,
+        "components": [
+          {
+            "type": "table",
+            "columns": ["Type", "Email", "Text Message", "Agora Console"],
+            "row_count_visible": 6,
+            "rows": [
+              { "Type": "Account", "Email": "checked/editable", "Text": "checked/editable", "Dashboard": "checked/disabled" },
+              { "Type": "Billing", "Email": "checked/disabled", "Text": "checked/disabled", "Dashboard": "checked/disabled" },
+              { "Type": "Product", "Email": "unchecked/editable", "Text": "unchecked/disabled", "Dashboard": "checked/disabled" },
+              { "Type": "Promotion", "Email": "unchecked/editable", "Text": "unchecked/disabled", "Dashboard": "checked/disabled" },
+              { "Type": "Operation", "Email": "checked/editable", "Text": "checked/editable", "Dashboard": "checked/disabled" },
+              { "Type": "Tickets", "Email": "checked/editable", "Text": "unchecked/disabled", "Dashboard": "checked/disabled" }
+            ],
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Settings"],
+    "sibling_tabs": [
+      { "label": "Account", "href": "/settings" },
+      { "label": "Teams and Members", "href": "/settings/teams-members" },
+      { "label": "Notifications Preferences", "href": "/settings/notification-preferences" },
+      { "label": "SSO Management", "href": "/settings/sso-management" }
+    ],
+    "child_links": []
+  }
+}

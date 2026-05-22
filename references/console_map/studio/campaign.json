@@ -1,0 +1,39 @@
+{
+  "page": {
+    "title": "Campaign",
+    "url": "https://console.agora.io/studio/campaign",
+    "section": "Studio",
+    "subsection": "Campaign",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Campaign",
+    "description": "Manage and monitor your outbound calling campaigns",
+    "sections": [
+      {
+        "id": "campaign-list",
+        "heading": null,
+        "components": [
+          { "type": "button", "label": "Filter", "variant": "secondary", "inferred_action": "Opens filter panel", "is_destructive": false },
+          { "type": "button", "label": "Create Campaign", "variant": "primary", "inferred_action": "Opens campaign creation flow", "is_destructive": false },
+          { "type": "text", "role": "empty_state_heading", "content": "No Campaigns Found" },
+          { "type": "button", "label": "Create Campaign", "variant": "primary", "location": "body", "inferred_action": "Opens campaign creation flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [
+      { "label": "Agents", "href": "/studio/agents" },
+      { "label": "Integration", "href": "/studio/integration/credentials" },
+      { "label": "Phone Numbers", "href": "/studio/mobile-numbers" },
+      { "label": "Campaign", "href": "/studio/campaign" },
+      { "label": "Analytics", "href": "/studio/analytics" },
+      { "label": "Call History", "href": "/studio/call-history" },
+      { "label": "Session History", "href": "/studio/session-history" }
+    ],
+    "child_links": []
+  }
+}

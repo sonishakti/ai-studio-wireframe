@@ -1,0 +1,75 @@
+{
+  "page": {
+    "title": "Configure — Signaling: Presence Configuration",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/presence-configuration",
+    "section": "Projects > Configure",
+    "subsection": "Signaling > Presence Configuration",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Signaling (RTM)",
+    "description": null,
+    "sections": [
+      {
+        "id": "signaling-presence-configuration",
+        "heading": "Presence Configuration",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "Active",
+            "state": "active"
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Signaling Presence Configuration",
+            "section": "Signaling > Presence Configuration",
+            "description": null,
+            "observed_state": "enabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": "Free plan (Upgrade available)",
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              {
+                "label": "Max number of instant event",
+                "type": "input",
+                "observed_value": "50",
+                "options": [],
+                "helper_text": null
+              },
+              {
+                "label": "Timed event notification interval",
+                "type": "input",
+                "observed_value": "30",
+                "options": [],
+                "helper_text": null
+              },
+              {
+                "label": "Event notification debounce time",
+                "type": "input",
+                "observed_value": "2",
+                "options": [],
+                "helper_text": null
+              }
+            ],
+            "associated_links": [
+              { "label": "Upgrade", "href": "/subscriptions/signaling-plans" },
+              { "label": "How to use Signaling?", "href": "https://docs.agora.io/en/signaling/overview/product-overview" },
+              { "label": "Signaling Pricing", "href": "https://docs.agora.io/en/signaling/overview/pricing" }
+            ],
+            "badges": ["Active"],
+            "notes": "Three numeric config inputs with pre-filled defaults. No Save button visible above the fold."
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Signaling", "Presence Configuration"],
+    "sibling_tabs": ["Basic Information", "Presence Configuration", "Storage Configuration", "Stream Channel Configuration"],
+    "child_links": ["/subscriptions/signaling-plans"]
+  }
+}

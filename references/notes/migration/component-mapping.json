@@ -1,0 +1,892 @@
+{
+  "metadata": {
+    "agent": "Migration Agent",
+    "date": "2026-02-20",
+    "branch": "main",
+    "originalTotal": 219,
+    "summary": {
+      "migrated": 196,
+      "migratedWithIssues": 8,
+      "inProgress": 0,
+      "notStarted": 3,
+      "notNeeded": 12,
+      "placeholder": 1
+    }
+  },
+  "mappings": [
+    {
+      "category": "ui-primitives",
+      "original": "Button (Radix/CVA)",
+      "originalPath": "src/components/ui/button.tsx",
+      "newComponent": "button",
+      "newPath": "src/components/ui/button.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "apiParity": true,
+      "behaviorParity": true,
+      "issues": [],
+      "notes": "shadcn button with CVA variants"
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Dialog",
+      "originalPath": "src/components/ui/dialog.tsx",
+      "newComponent": "dialog",
+      "newPath": "src/components/ui/dialog.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "DropdownMenu",
+      "originalPath": "src/components/ui/dropdown-menu.tsx",
+      "newComponent": "dropdown-menu",
+      "newPath": "src/components/ui/dropdown-menu.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Select",
+      "originalPath": "src/components/ui/select.tsx",
+      "newComponent": "select",
+      "newPath": "src/components/ui/select.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Popover",
+      "originalPath": "src/components/ui/popover.tsx",
+      "newComponent": "popover",
+      "newPath": "src/components/ui/popover.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Separator",
+      "newComponent": "separator",
+      "newPath": "src/components/ui/separator.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Skeleton",
+      "newComponent": "skeleton",
+      "newPath": "src/components/ui/skeleton.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Tooltip",
+      "newComponent": "tooltip",
+      "newPath": "src/components/ui/tooltip.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Avatar",
+      "newComponent": "avatar",
+      "newPath": "src/components/ui/avatar.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Collapsible",
+      "newComponent": "collapsible",
+      "newPath": "src/components/ui/collapsible.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Sidebar",
+      "originalPath": "src/components/ui/sidebar.tsx",
+      "newComponent": "sidebar",
+      "newPath": "src/components/ui/sidebar.tsx",
+      "source": "shadcn-extended",
+      "status": "migrated",
+      "issues": [],
+      "notes": "695-line compound component, context-based. Correct shadcn sidebar pattern."
+    },
+    {
+      "category": "ui-primitives",
+      "original": "ThemeProvider",
+      "newComponent": "ThemeProvider (next-themes)",
+      "newPath": "app/layout.tsx",
+      "source": "next-themes",
+      "status": "migrated",
+      "issues": [],
+      "notes": "Moved from _app.tsx to root layout.tsx"
+    },
+    {
+      "category": "ui-primitives",
+      "original": "IconButton",
+      "newComponent": "icon-button",
+      "newPath": "src/components/ui/icon-button.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "ui-primitives",
+      "original": "Breadcrumb",
+      "newComponent": "breadcrumb",
+      "newPath": "src/components/ui/breadcrumb.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Button (common)",
+      "originalPath": "src/components/common/Button.tsx",
+      "newComponent": "button",
+      "newPath": "src/components/ui/button.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "apiParity": true,
+      "issues": [],
+      "notes": "Original common/Button replaced by shadcn button. href support via asChild."
+    },
+    {
+      "category": "common",
+      "original": "InputField",
+      "newComponent": "input",
+      "newPath": "src/components/ui/input.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": [],
+      "notes": "input-layout.tsx wraps for label+error pattern"
+    },
+    {
+      "category": "common",
+      "original": "SelectField",
+      "newComponent": "select-field",
+      "newPath": "src/components/ui/select-field.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SimpleModal",
+      "newComponent": "dialog",
+      "newPath": "src/components/ui/dialog.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": [],
+      "notes": "SimpleModal compound → Dialog + DialogContent pattern"
+    },
+    {
+      "category": "common",
+      "original": "Loading",
+      "newComponent": "spinner",
+      "newPath": "src/components/ui/spinner.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Chip",
+      "newComponent": "badge",
+      "newPath": "src/components/ui/badge.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": [],
+      "notes": "Chip CVA variants → shadcn Badge variants"
+    },
+    {
+      "category": "common",
+      "original": "Badge",
+      "newComponent": "badge",
+      "newPath": "src/components/ui/badge.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "TableLayout",
+      "newComponent": "table",
+      "newPath": "src/components/ui/table.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": [],
+      "notes": "Compound TableLayout → shadcn Table compound components"
+    },
+    {
+      "category": "common",
+      "original": "BoxLayoutCard",
+      "newComponent": "layout-card / base-card",
+      "newPath": "src/components/ui/layout-card.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "PageLayout",
+      "newComponent": "AppLayout",
+      "newPath": "src/components/layout/app-layout.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": [],
+      "notes": "PageLayout → AppLayout in root layout. Per mapping doc, wrap in AppLayout."
+    },
+    {
+      "category": "common",
+      "original": "FullPageLayout",
+      "newComponent": "full-page-layout",
+      "newPath": "src/components/layout/full-page-layout.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SubPagePageLayout",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-needed",
+      "issues": [],
+      "notes": "Mapping doc: 'We don't need subpagepage layout anymore, use div to achieve the same style'"
+    },
+    {
+      "category": "common",
+      "original": "CardLayout",
+      "newComponent": "card",
+      "newPath": "src/components/ui/card.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Header",
+      "newComponent": "header",
+      "newPath": "src/components/layout/header.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "HorizontalCard",
+      "newComponent": "horizontal-card",
+      "newPath": "src/components/ui/horizontal-card.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SimpleBorderBox",
+      "newComponent": "card",
+      "newPath": "src/components/ui/card.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Breadcrumbs",
+      "newComponent": "breadcrumb",
+      "newPath": "src/components/ui/breadcrumb.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SimpleSelector",
+      "newComponent": "select",
+      "newPath": "src/components/ui/select.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "MultipleSelector",
+      "newComponent": "select-multiple",
+      "newPath": "src/components/ui/select-multiple.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "MultiLayerSelector",
+      "newComponent": "select-nested",
+      "newPath": "src/components/ui/select-nested.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "MultiLayerNavigation",
+      "newComponent": "multi-layer-navigation",
+      "newPath": "src/components/features/project-management/multi-layer-navigation.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Pagination",
+      "newComponent": "pagination / page-pagination",
+      "newPath": "src/components/ui/pagination.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "DateRangePicker",
+      "newComponent": "date-range-picker",
+      "newPath": "src/components/ui/date-range-picker.tsx",
+      "source": "custom",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-010 — Uses agora-* CSS class names in ui/ file directly"]
+    },
+    {
+      "category": "common",
+      "original": "MonthRangePicker",
+      "newComponent": "month-range-picker",
+      "newPath": "src/components/ui/month-range-picker.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "StatusBadge",
+      "newComponent": "badge",
+      "newPath": "src/components/ui/badge.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": [],
+      "notes": "agora-status-* CSS classes in globals.css handle visual variants (ISS-009 context)"
+    },
+    {
+      "category": "common",
+      "original": "Tooltip (common)",
+      "newComponent": "tooltip",
+      "newPath": "src/components/ui/tooltip.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "CopyBox",
+      "newComponent": "input-copy",
+      "newPath": "src/components/ui/input-copy.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "UploadFile",
+      "newComponent": "file-uploader",
+      "newPath": "src/components/ui/file-uploader.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "FileInputField",
+      "newComponent": "input-file",
+      "newPath": "src/components/ui/input-file.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "PasswordInputWithValidation",
+      "newComponent": "input-password-validation",
+      "newPath": "src/components/ui/input-password-validation.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SwitchInput",
+      "newComponent": "switch",
+      "newPath": "src/components/ui/switch.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "AnnouncementBanner",
+      "newComponent": "announcement-banner",
+      "newPath": "src/components/ui/announcement-banner.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SuspensionBanner",
+      "newComponent": "suspension-banner",
+      "newPath": "src/components/ui/suspension-banner.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "CreditCardExpiredBanner",
+      "newComponent": "announcement-banner (variant)",
+      "newPath": "src/components/ui/announcement-banner.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "AlertBox",
+      "newComponent": "alert-box",
+      "newPath": "src/components/ui/alert-box.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Timeline",
+      "newComponent": "timeline",
+      "newPath": "src/components/ui/timeline.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Lottie",
+      "newComponent": "lottie",
+      "newPath": "src/components/ui/lottie.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "ProgressBar",
+      "newComponent": "progress",
+      "newPath": "src/components/ui/progress.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "Slider",
+      "newComponent": "slider",
+      "newPath": "src/components/ui/slider.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "ImageSlider",
+      "newComponent": "image-carousel",
+      "newPath": "src/components/ui/image-carousel.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SimpleCollapsible",
+      "newComponent": "collapsible",
+      "newPath": "src/components/ui/collapsible.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SimplePopover",
+      "newComponent": "popover",
+      "newPath": "src/components/ui/popover.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "SimpleDropdown",
+      "newComponent": "dropdown-menu",
+      "newPath": "src/components/ui/dropdown-menu.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "NavGroup / NavItem",
+      "newComponent": "nav-main / nav-footer",
+      "newPath": "src/components/layout/nav-main.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "ButtonGroup",
+      "newComponent": "button-group",
+      "newPath": "src/components/ui/button-group.tsx",
+      "source": "custom",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "common",
+      "original": "TabBar",
+      "newComponent": "tabs",
+      "newPath": "src/components/ui/tabs.tsx",
+      "source": "shadcn",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-billing",
+      "original": "Bills",
+      "newComponent": "bills",
+      "newPath": "src/components/features/billing/bills.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": [],
+      "notes": "Business logic preserved, shadcn components"
+    },
+    {
+      "category": "domain-billing",
+      "original": "AddCardModal",
+      "newComponent": "add-card-modal",
+      "newPath": "src/components/features/billing/add-card-modal.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — Still uses Formik. 952 lines (violates 200-line rule)", "Uses iconsax-react (TickCircle)", "Uses react-toastify instead of sonner"],
+      "notes": "Business logic preserved. Still 952 lines. Form library not converted."
+    },
+    {
+      "category": "domain-billing",
+      "original": "PaymentModal",
+      "newComponent": "payment-modal",
+      "newPath": "src/components/features/billing/payment-modal.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-billing",
+      "original": "PaymentMethod",
+      "newComponent": "payment-method",
+      "newPath": "src/components/features/billing/payment-method.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-billing",
+      "original": "Method",
+      "newComponent": "method",
+      "newPath": "src/components/features/billing/method.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-billing",
+      "original": "Invoices",
+      "newComponent": "invoices",
+      "newPath": "src/components/features/billing/invoices.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["Uses iconsax-react (HambergerMenu)"]
+    },
+    {
+      "category": "domain-billing",
+      "original": "TopupWalletModal",
+      "newComponent": "topup-wallet-modal",
+      "newPath": "src/components/features/billing/topup-wallet-modal.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-billing",
+      "original": "WithdrawBalanceModal",
+      "newComponent": "withdraw-balance-modal",
+      "newPath": "src/components/features/billing/withdraw-balance-modal.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-license",
+      "original": "ImportLicensesTab",
+      "originalPath": "src/components/license-management/PreAuthorization/ImportLicensesTab.tsx",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["ISS-003 — page is placeholder 'coming soon'"],
+      "notes": "Critical feature gap. page.tsx exists but shows placeholder. Components not migrated."
+    },
+    {
+      "category": "domain-license",
+      "original": "VerifyLicenseTab",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["ISS-003 — part of missing pre-authorization feature"]
+    },
+    {
+      "category": "domain-license",
+      "original": "ImportHistoryTab",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["ISS-003 — part of missing pre-authorization feature"]
+    },
+    {
+      "category": "domain-license",
+      "original": "LicensePermissionGuard",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["No equivalent guard in migration. License-gated pages lack protection."],
+      "notes": "Original guards entire license-management section. Migration has no equivalent."
+    },
+    {
+      "category": "domain-license",
+      "original": "QuotaTable",
+      "newComponent": "quota-list-table",
+      "newPath": "src/components/features/license-management/quota-list-table.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-license",
+      "original": "NestedAccordionTable",
+      "newComponent": "nested-accordion-table",
+      "newPath": "src/components/features/license-management/nested-accordion-table.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-settings",
+      "original": "TeamManagementTable",
+      "newComponent": "team-management-table",
+      "newPath": "src/components/features/settings/team-management-table.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — still uses Formik/Yup", "1,056 lines (violates 200-line rule)"]
+    },
+    {
+      "category": "domain-settings",
+      "original": "MemberManagementTable",
+      "newComponent": "member-management-table",
+      "newPath": "src/components/features/settings/member-management-table.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — still uses Formik/Yup", "615 lines (violates 200-line rule)"]
+    },
+    {
+      "category": "domain-settings",
+      "original": "SAMLConfiguration",
+      "newComponent": "saml-configuration",
+      "newPath": "src/components/features/settings/saml-configuration.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — still uses Formik/Yup"]
+    },
+    {
+      "category": "domain-settings",
+      "original": "OktaPasswordConfiguration",
+      "newComponent": "okta-password-configuration",
+      "newPath": "src/components/features/settings/okta-password-configuration.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — still uses Formik/Yup"]
+    },
+    {
+      "category": "domain-settings",
+      "original": "SCIMConfiguration",
+      "newComponent": "scim-configuration",
+      "newPath": "src/components/features/settings/scim-configuration.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-project",
+      "original": "ProjectTable",
+      "newComponent": "project-table",
+      "newPath": "src/components/features/project-management/project-table.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": [],
+      "notes": "527 lines but business logic density justifies it"
+    },
+    {
+      "category": "domain-project",
+      "original": "CreateProject",
+      "newComponent": "create-project",
+      "newPath": "src/components/features/project-management/create-project.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": []
+    },
+    {
+      "category": "domain-project",
+      "original": "BasicSetting",
+      "newComponent": "basic-setting",
+      "newPath": "src/components/features/project-management/basic-setting.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — still uses Formik/Yup"]
+    },
+    {
+      "category": "domain-project",
+      "original": "Security",
+      "newComponent": "security",
+      "newPath": "src/components/features/project-management/security.tsx",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-004 — still uses Formik/Yup", "472 lines"]
+    },
+    {
+      "category": "domain-project",
+      "original": "ConvAIForm",
+      "newComponent": "conv-ai-form",
+      "newPath": "src/components/features/project-management/conv-ai-playground/conv-ai-form.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": [],
+      "notes": "492 lines. Properly extracted from page. RTC SDK integration preserved."
+    },
+    {
+      "category": "domain-project",
+      "original": "AgoraRTCComponent",
+      "newComponent": "agora-rtc-component",
+      "newPath": "src/components/features/project-management/conv-ai-playground/agora-rtc-component.tsx",
+      "source": "migrated",
+      "status": "migrated",
+      "issues": ["Pre-existing console.log on line 282"],
+      "notes": "502 lines. Web Audio API + Agora SDK. Imperative DOM patterns preserved correctly."
+    },
+    {
+      "category": "hooks",
+      "original": "useAuth",
+      "newComponent": "useAuth",
+      "newPath": "src/hooks/useAuth.ts",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["Hook filename should be use-auth.ts per RULE.md"]
+    },
+    {
+      "category": "hooks",
+      "original": "usePermission",
+      "newComponent": "usePermission",
+      "newPath": "src/hooks/usePermission.ts",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["Hook filename should be use-permission.ts per RULE.md"]
+    },
+    {
+      "category": "hooks",
+      "original": "useLicensePermission",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["Hook not migrated. License-gated features lack protection."]
+    },
+    {
+      "category": "hooks",
+      "original": "useFreeQuotaUsage",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["Hook not migrated. Free quota display will be broken."]
+    },
+    {
+      "category": "hooks",
+      "original": "useRtcAnnouncementTracking",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["Hook not migrated. rtc-announcement-tracking store also missing."]
+    },
+    {
+      "category": "hooks",
+      "original": "useRtcPlans",
+      "newComponent": "useRtcPlans",
+      "newPath": "src/hooks/useRtcPlans.ts",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["Hook filename should be use-rtc-plans.ts per RULE.md"]
+    },
+    {
+      "category": "hooks",
+      "original": "useRtcQuota",
+      "newComponent": "useRtcQuota",
+      "newPath": "src/hooks/useRtcQuota.ts",
+      "source": "migrated",
+      "status": "migrated"
+    },
+    {
+      "category": "stores",
+      "original": "rtc-announcement-tracking.ts",
+      "newComponent": null,
+      "newPath": null,
+      "source": null,
+      "status": "not-started",
+      "issues": ["Store completely absent from migration. rtcAnnouncementAtom missing."]
+    },
+    {
+      "category": "stores",
+      "original": "subscriptions.ts",
+      "newComponent": "subsciptions.ts",
+      "newPath": "src/store/subsciptions.ts",
+      "source": "migrated",
+      "status": "migrated-with-issues",
+      "issues": ["ISS-013 — Filename typo: subsciptions.ts should be subscriptions.ts"]
+    }
+  ]
+}

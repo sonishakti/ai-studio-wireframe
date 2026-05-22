@@ -1,0 +1,58 @@
+{
+  "page": {
+    "title": "Agora 3D Spatial Audio",
+    "url": "https://console.agora.io/extensions-marketplace/agora-spatial-audio",
+    "section": "Extension Marketplace",
+    "subsection": "Agora 3D Spatial Audio",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "extension_metadata": {
+    "name": "Agora 3D Spatial Audio",
+    "company": "Agora",
+    "version": "v4.1.1",
+    "updated": "2023-03-31",
+    "platform": ["Web", "iOS", "Android", "macOS", "Windows"],
+    "core_features": [
+      "Background Voice Blur",
+      "Air Attenuation",
+      "Audio range",
+      "48kHz full-band sampling"
+    ],
+    "tagline": "Deliver a more natural audio experience. Make your product stand out with 3D Spatial Audio that boosts user engagement.",
+    "is_first_party": true
+  },
+  "layout": {
+    "primary_heading": "Agora 3D Spatial Audio",
+    "tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "active_tab": "User Guide",
+    "sections": [
+      {
+        "id": "user-guide",
+        "heading": "3D Spatial Audio",
+        "tab": "User Guide",
+        "components": [
+          { "type": "text", "role": "body", "content": "Product overview and feature descriptions" },
+          { "type": "table", "columns": ["Feature", "Traditional Stereo", "Agora Spatial Audio"], "row_count_visible": 3, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "image", "alt_text": "Spatial audio steps workflow", "inferred_purpose": "Implementation workflow diagram" },
+          { "type": "code_block", "language": ["Java", "Kotlin"], "api_calls": ["create", "initialize", "setAudioProfile", "setAudioScenario", "setMaxAudioRecvCount", "setAudioRecvRange", "updateSelfPosition", "updateRemotePosition", "setRemoteUserSpatialAudioParams", "setZones", "setRemoteAudioAttenuation", "setPlayerAttenuation", "setHeadphoneEQPreset", "setHeadphoneEQParameters", "removeRemotePosition", "clearRemotePositions", "muteLocalAudioStream", "enableSpatialAudio", "destroy"] },
+          { "type": "link", "label": "View Support", "href": null, "opens_in": "unknown" }
+        ]
+      },
+      {
+        "id": "plans",
+        "heading": "Plans",
+        "tab": "Plans",
+        "components": [
+          { "type": "text", "role": "body", "content": "Please contact sales regarding pricing plans and/or activation of this extension." },
+          { "type": "button", "label": "Contact Sales", "variant": "primary", "inferred_action": "Opens sales contact flow", "is_destructive": false }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Extension Marketplace", "Marketplace", "Agora 3D Spatial Audio"],
+    "sibling_tabs": ["User Guide", "Download", "Plans", "Projects"],
+    "child_links": []
+  }
+}

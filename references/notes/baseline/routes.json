@@ -1,0 +1,157 @@
+{
+  "metadata": {
+    "agent": "Baseline Agent",
+    "date": "2026-02-20",
+    "totalPages": 95,
+    "totalApiRoutes": 7,
+    "backupPages": 6,
+    "testPages": 2,
+    "complexityBreakdown": {
+      "simple": 52,
+      "moderate": 22,
+      "complex": 15,
+      "unknown": 6
+    }
+  },
+  "routes": [
+    {
+      "section": "root",
+      "routes": [
+        {"path": "/", "file": "pages/index.tsx", "layout": "PageLayout", "dataFetching": "client-jotai", "auth": "usePermission", "complexity": "moderate", "lines": 43, "notes": "Dashboard with conditional widgets"},
+        {"path": "/onboarding", "file": "pages/onboarding.tsx", "layout": "none", "dataFetching": "none", "auth": "none", "complexity": "simple", "lines": 6, "notes": "Wrapper for Onboarding component"},
+        {"path": "/404", "file": "pages/404.tsx", "layout": "none", "dataFetching": "none", "auth": "none", "complexity": "simple", "lines": 30},
+        {"path": "/500", "file": "pages/500.tsx", "layout": "none", "dataFetching": "none", "auth": "none", "complexity": "simple", "lines": 30},
+        {"path": "/play", "file": "pages/play.tsx", "layout": "none", "dataFetching": "none", "auth": "none", "complexity": "simple", "lines": 451, "notes": "DEV: Component playground (fully commented out)"},
+        {"path": "/test", "file": "pages/test.tsx", "layout": "none", "dataFetching": "client-useState", "auth": "none", "complexity": "moderate", "lines": 785, "notes": "DEV: Modal testing page"}
+      ]
+    },
+    {
+      "section": "billing",
+      "routes": [
+        {"path": "/billing", "file": "pages/billing/index.tsx", "layout": "PageLayout", "dataFetching": "client-useEffect-axios", "auth": "usePermission(VIEW, FinanceCenter)", "complexity": "complex", "lines": 337, "components": ["Bills", "PaymentMethod", "Wallet", "AutoPay", "CredentialsTable"], "notes": "Main billing dashboard"},
+        {"path": "/billing/invoices", "file": "pages/billing/invoices.tsx", "layout": "PageLayout", "dataFetching": "component-driven", "auth": "implicit", "complexity": "simple", "lines": 19},
+        {"path": "/billing/manage-cards", "file": "pages/billing/manage-cards.tsx", "layout": "PageLayout", "dataFetching": "component-driven", "auth": "implicit", "complexity": "simple", "lines": 18},
+        {"path": "/billing/transactions", "file": "pages/billing/transactions.tsx", "layout": "PageLayout", "dataFetching": "component-driven", "auth": "implicit", "complexity": "simple", "lines": 21},
+        {"path": "/billing/withdraw-transactions", "file": "pages/billing/withdraw-transactions.tsx", "layout": "PageLayout", "dataFetching": "component-driven", "auth": "implicit", "complexity": "simple"},
+        {"path": "/billing/all-designs", "file": "pages/billing/all-designs.tsx", "layout": "PageLayout", "dataFetching": "component-driven", "auth": "implicit", "complexity": "simple"}
+      ]
+    },
+    {
+      "section": "project-management",
+      "routes": [
+        {"path": "/project-management", "file": "pages/project-management/index.tsx", "layout": "PageLayout", "dataFetching": "component-driven", "auth": "implicit", "complexity": "simple", "lines": 28, "components": ["ProjectTable", "CreateProject"]},
+        {"path": "/project-management/[projectID]", "file": "pages/project-management/[projectID]/index.tsx", "layout": "none", "dataFetching": "getServerSideProps-redirect", "auth": "none", "complexity": "simple", "lines": 13, "notes": "Redirects to chat/basic-info"},
+        {"path": "/project-management/[projectID]/chat/index", "file": "pages/project-management/[projectID]/chat/index.tsx", "layout": "none", "dataFetching": "getServerSideProps-redirect", "auth": "none", "complexity": "simple", "lines": 13, "notes": "Redirects to basic-info"},
+        {"path": "/project-management/[projectID]/chat/basic-info", "file": "pages/project-management/[projectID]/chat/basic-info.tsx", "layout": "ProjectManagementLayout", "dataFetching": "client-useEffect-axios", "auth": "implicit-via-layout", "complexity": "complex", "components": ["EnableChat", "BasicInfoContent"]},
+        {"path": "/project-management/[projectID]/chat/features-overview", "file": "pages/project-management/[projectID]/chat/features-overview.tsx", "layout": "ProjectManagementLayout", "dataFetching": "jotai-atom", "auth": "implicit", "complexity": "simple", "notes": "IFRAME embed of chat.agora.io"},
+        {"path": "/project-management/[projectID]/chat/callback", "file": "pages/project-management/[projectID]/chat/callback.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/push-template", "file": "pages/project-management/[projectID]/chat/push-template.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/push-cert", "file": "pages/project-management/[projectID]/chat/push-cert.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/text-rule-config", "file": "pages/project-management/[projectID]/chat/text-rule-config.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/text-rule-test", "file": "pages/project-management/[projectID]/chat/text-rule-test.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/text-history", "file": "pages/project-management/[projectID]/chat/text-history.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/image-rule-config", "file": "pages/project-management/[projectID]/chat/image-rule-config.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/image-rule-test", "file": "pages/project-management/[projectID]/chat/image-rule-test.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/image-history", "file": "pages/project-management/[projectID]/chat/image-history.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/word-config", "file": "pages/project-management/[projectID]/chat/word-config.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/wordlist-rule-config", "file": "pages/project-management/[projectID]/chat/wordlist-rule-config.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/wordlist-history", "file": "pages/project-management/[projectID]/chat/wordlist-history.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/domain-rule-config", "file": "pages/project-management/[projectID]/chat/domain-rule-config.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/domain-history", "file": "pages/project-management/[projectID]/chat/domain-history.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/message-recall", "file": "pages/project-management/[projectID]/chat/message-recall.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/message-report", "file": "pages/project-management/[projectID]/chat/message-report.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/user-label", "file": "pages/project-management/[projectID]/chat/user-label.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/operation-manage-user", "file": "pages/project-management/[projectID]/chat/operation-manage-user.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/operation-manage-chatroom", "file": "pages/project-management/[projectID]/chat/operation-manage-chatroom.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/operation-manage-group", "file": "pages/project-management/[projectID]/chat/operation-manage-group.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/real-time-overview", "file": "pages/project-management/[projectID]/chat/real-time-overview.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/real-time-message-delivery", "file": "pages/project-management/[projectID]/chat/real-time-message-delivery.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/real-time-user-connect-status", "file": "pages/project-management/[projectID]/chat/real-time-user-connect-status.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/real-time-user-logs", "file": "pages/project-management/[projectID]/chat/real-time-user-logs.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/real-time-hotspot-data", "file": "pages/project-management/[projectID]/chat/real-time-hotspot-data.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/usages-moderation", "file": "pages/project-management/[projectID]/chat/usages-moderation.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/usages-translation", "file": "pages/project-management/[projectID]/chat/usages-translation.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/multi-device", "file": "pages/project-management/[projectID]/chat/multi-device.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/chat/ip-whitelist", "file": "pages/project-management/[projectID]/chat/ip-whitelist.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/signaling/basic", "file": "pages/project-management/[projectID]/signaling/basic.tsx", "layout": "SignallingLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/signaling/presence-configuration", "file": "pages/project-management/[projectID]/signaling/presence-configuration.tsx", "layout": "SignallingLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/signaling/storage-configuration", "file": "pages/project-management/[projectID]/signaling/storage-configuration.tsx", "layout": "SignallingLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/signaling/stream-channel-configuration", "file": "pages/project-management/[projectID]/signaling/stream-channel-configuration.tsx", "layout": "SignallingLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/media-gateway", "file": "pages/project-management/[projectID]/media-gateway.tsx", "layout": "ProjectManagementLayout", "dataFetching": "client-axios-post", "complexity": "moderate", "lines": 85},
+        {"path": "/project-management/[projectID]/media-pull", "file": "pages/project-management/[projectID]/media-pull.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/media-push", "file": "pages/project-management/[projectID]/media-push.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/cloud-proxy", "file": "pages/project-management/[projectID]/cloud-proxy.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/cloud-recording", "file": "pages/project-management/[projectID]/cloud-recording.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/real-time-stt", "file": "pages/project-management/[projectID]/real-time-stt.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/cohost-authentication", "file": "pages/project-management/[projectID]/cohost-authentication.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/conv-ai", "file": "pages/project-management/[projectID]/conv-ai.tsx", "layout": "ProjectManagementLayout", "complexity": "complex", "notes": "ConvAI playground with Agora RTC"},
+        {"path": "/project-management/[projectID]/flexible-classroom", "file": "pages/project-management/[projectID]/flexible-classroom.tsx", "layout": "ProjectManagementLayout", "complexity": "complex", "lines": 1226},
+        {"path": "/project-management/[projectID]/video-screenshot-upload", "file": "pages/project-management/[projectID]/video-screenshot-upload.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/whiteboard-basic", "file": "pages/project-management/[projectID]/whiteboard-basic.tsx", "layout": "ProjectManagementLayout", "complexity": "moderate"},
+        {"path": "/project-management/[projectID]/whiteboard-services", "file": "pages/project-management/[projectID]/whiteboard-services.tsx", "layout": "ProjectManagementLayout", "complexity": "complex", "lines": 1235},
+        {"path": "/project-management/[projectID]/notifications", "file": "pages/project-management/[projectID]/notifications.tsx", "layout": "ProjectManagementLayout", "complexity": "complex", "lines": 598}
+      ]
+    },
+    {
+      "section": "subscriptions",
+      "routes": [
+        {"path": "/subscriptions", "file": "pages/subscriptions/index.tsx", "layout": "none", "dataFetching": "getServerSideProps-redirect", "auth": "none", "complexity": "simple", "lines": 12, "notes": "Redirect to /license-management/purchase-history"},
+        {"path": "/subscriptions/all-subscriptions", "file": "pages/subscriptions/all-subscriptions.tsx", "layout": "PageLayout", "dataFetching": "useRtcPlans-hook", "auth": "none", "complexity": "simple", "lines": 14},
+        {"path": "/subscriptions/rtc-plans", "file": "pages/subscriptions/rtc-plans.tsx", "layout": "PageLayout", "complexity": "complex"},
+        {"path": "/subscriptions/chat-plans", "file": "pages/subscriptions/chat-plans.tsx", "layout": "PageLayout", "complexity": "complex"},
+        {"path": "/subscriptions/signaling-plans", "file": "pages/subscriptions/signaling-plans.tsx", "layout": "PageLayout", "complexity": "complex"}
+      ]
+    },
+    {
+      "section": "license-management",
+      "routes": [
+        {"path": "/license-management", "file": "pages/license-management/index.tsx", "layout": "PageLayout", "complexity": "simple"},
+        {"path": "/license-management/purchase-history", "file": "pages/license-management/purchase-history.tsx", "layout": "PageLayout+LicensePermissionGuard", "dataFetching": "component-driven", "auth": "LicensePermissionGuard", "complexity": "simple", "lines": 26},
+        {"path": "/license-management/pre-authorization", "file": "pages/license-management/pre-authorization.tsx", "layout": "PageLayout+LicensePermissionGuard", "complexity": "moderate"},
+        {"path": "/license-management/quota-management", "file": "pages/license-management/quota-management.tsx", "layout": "PageLayout+LicensePermissionGuard", "complexity": "moderate"},
+        {"path": "/license-management/usages-query", "file": "pages/license-management/usages-query.tsx", "layout": "PageLayout+LicensePermissionGuard", "complexity": "moderate"}
+      ]
+    },
+    {
+      "section": "settings",
+      "routes": [
+        {"path": "/settings", "file": "pages/settings/index.tsx", "layout": "SubPageLayout+SettingsSidebar", "dataFetching": "client-useEffect-axios", "auth": "useAuth", "complexity": "complex", "lines": 346, "notes": "Account settings: org name, security, 2FA, delete"},
+        {"path": "/settings/profile", "file": "pages/settings/profile.tsx", "layout": "SubPageLayout+SettingsSidebar", "dataFetching": "client-axiosV0", "auth": "useAuth", "complexity": "complex", "lines": 717, "notes": "Largest settings page. OTP, phone, email, password, OAuth"},
+        {"path": "/settings/teams-members", "file": "pages/settings/teams-members.tsx", "layout": "SubPageLayout+SettingsSidebar", "complexity": "complex"},
+        {"path": "/settings/notification-preferences", "file": "pages/settings/notification-preferences.tsx", "layout": "SubPageLayout+SettingsSidebar", "complexity": "moderate"},
+        {"path": "/settings/sso-management", "file": "pages/settings/sso-management.tsx", "layout": "SubPageLayout+SettingsSidebar", "complexity": "complex"}
+      ]
+    },
+    {
+      "section": "other",
+      "routes": [
+        {"path": "/credentials", "file": "pages/credentials/index.tsx", "layout": "FullPageLayout", "dataFetching": "jotai-loadable+axios", "auth": "usePermission(VIEW, AgoraAnalytics)", "complexity": "complex", "lines": 184},
+        {"path": "/restful-api", "file": "pages/restful-api/index.tsx", "layout": "PageLayout", "dataFetching": "client-axios-post", "auth": "authAtom-role-check", "complexity": "moderate", "lines": 75},
+        {"path": "/extensions-marketplace", "file": "pages/extensions-marketplace/index.tsx", "layout": "PageLayout", "dataFetching": "client-axios+jotai", "auth": "none", "complexity": "moderate", "lines": 115},
+        {"path": "/extensions-marketplace/[name]", "file": "pages/extensions-marketplace/[name].tsx", "layout": "PageLayout", "complexity": "moderate"},
+        {"path": "/extensions-marketplace/my-submissions", "file": "pages/extensions-marketplace/my-submissions/index.tsx", "layout": "PageLayout", "dataFetching": "client-axios+useState", "complexity": "simple", "lines": 62},
+        {"path": "/extensions-marketplace/my-submissions/[id]", "file": "pages/extensions-marketplace/my-submissions/[id].tsx", "layout": "PageLayout", "complexity": "moderate"},
+        {"path": "/finance/packages", "file": "pages/finance/packages.tsx", "layout": "PageLayout", "complexity": "moderate"},
+        {"path": "/usage", "file": "pages/usage/index.tsx", "layout": "PageLayout", "dataFetching": "jotai-atoms", "auth": "none", "complexity": "moderate", "lines": 34},
+        {"path": "/notifications", "file": "pages/notifications/index.tsx", "layout": "SubPageLayout+sidebar", "dataFetching": "jotai+axios-PUT", "auth": "none", "complexity": "complex", "lines": 200, "notes": "Shallow routing for message details"},
+        {"path": "/notifications/[messageID]", "file": "pages/notifications/[messageID].tsx", "layout": "shared-with-index", "complexity": "complex", "notes": "URL param driven, shared with index"},
+        {"path": "/packages/aa/pay", "file": "pages/packages/aa/pay/index.tsx", "layout": "PageLayout", "complexity": "moderate"}
+      ]
+    }
+  ],
+  "backupPages": [
+    "pages/project-management/[projectID]/chat/callback-bkup.tsx",
+    "pages/project-management/[projectID]/chat/features-overview-bkup.tsx",
+    "pages/project-management/[projectID]/chat/push-cert-bkup.tsx",
+    "pages/project-management/[projectID]/chat/push-template-bkup.tsx",
+    "pages/project-management/[projectID]/chat/wordlist-history-bkup.tsx",
+    "pages/project-management/[projectID]/chat/wordlist-rule-config-bkup.tsx"
+  ],
+  "apiRoutes": [
+    {"path": "/api/console-proxy/[endpoint]", "file": "pages/api/console-proxy/[endpoint].ts", "methods": ["GET", "POST", "OPTIONS"], "purpose": "CORS proxy for docs.agora.io to call console backend"},
+    {"path": "/api/onboarding", "file": "pages/api/onboarding.ts", "methods": ["GET", "POST"], "purpose": "File-based onboarding state (dev only)"},
+    {"path": "/api/mock-flow", "file": "pages/api/mock-flow.ts", "purpose": "Mock data flow"},
+    {"path": "/api/source/download", "file": "pages/api/source/download.ts", "purpose": "File download handler"},
+    {"path": "/api/ui-customizer/features", "file": "pages/api/ui-customizer/features.ts", "purpose": "Feature flags / UI config"}
+  ]
+}

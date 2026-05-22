@@ -1,0 +1,61 @@
+{
+  "page": {
+    "title": "Configure — Signaling: Storage Configuration",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/storage-configuration",
+    "section": "Projects > Configure",
+    "subsection": "Signaling > Storage Configuration",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Signaling (RTM)",
+    "description": null,
+    "sections": [
+      {
+        "id": "signaling-storage-parameters",
+        "heading": "Storage Parameters",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "Active",
+            "state": "active"
+          },
+          {
+            "type": "toggle",
+            "label": "Storage",
+            "description": null,
+            "observed_state": "off",
+            "is_disabled": false
+          },
+          {
+            "type": "toggle",
+            "label": "User attribute callback",
+            "description": null,
+            "observed_state": "off",
+            "is_disabled": false
+          },
+          {
+            "type": "toggle",
+            "label": "Channel attribute callback",
+            "description": null,
+            "observed_state": "off",
+            "is_disabled": false
+          },
+          {
+            "type": "toggle",
+            "label": "Distributed Lock",
+            "description": null,
+            "observed_state": "off",
+            "is_disabled": false
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Signaling", "Storage Configuration"],
+    "sibling_tabs": ["Basic Information", "Presence Configuration", "Storage Configuration", "Stream Channel Configuration"],
+    "child_links": ["/subscriptions/signaling-plans"]
+  }
+}

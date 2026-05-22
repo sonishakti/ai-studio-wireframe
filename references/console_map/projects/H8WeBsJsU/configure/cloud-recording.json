@@ -1,0 +1,89 @@
+{
+  "page": {
+    "title": "Configure — Cloud Recording",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/cloud-recording",
+    "section": "Projects > Configure",
+    "subsection": "Cloud Recording",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Cloud Recording",
+    "description": null,
+    "sections": [
+      {
+        "id": "cloud-recording-basic-information",
+        "heading": "Basic Information",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "Inactive",
+            "state": "inactive"
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Cloud Recording",
+            "section": "Cloud Recording",
+            "description": null,
+            "observed_state": "disabled",
+            "toggle_present": true,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": true,
+            "child_settings_visible": false,
+            "child_settings": [],
+            "associated_links": [
+              { "label": "What is Cloud Recording?", "href": "https://docs.agora.io/en/cloud-recording/overview/product-overview" },
+              { "label": "Cloud Recording Pricing", "href": "https://docs.agora.io/en/cloud-recording/reference/pricing" },
+              { "label": "contact support", "href": "https://www.agora.io/en/talk-to-us/" }
+            ],
+            "badges": ["Inactive"],
+            "notes": "Default quota: 20 PCW. Toggle label is 'Enable Cloud Recording'."
+          }
+        ]
+      },
+      {
+        "id": "cloud-recording-quickstart",
+        "heading": "Quickstart",
+        "description": "How do I use Cloud Recording?",
+        "components": [
+          {
+            "type": "link",
+            "label": "Docs",
+            "href": "https://docs.agora.io/en/cloud-recording/get-started/getstarted",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Open Postman",
+            "href": "https://documenter.getpostman.com/view/6319646/SVSLr9AM#d3952ff0-9cd7-4a82-abec-29b63735cb4f",
+            "opens_in": "new_tab"
+          }
+        ]
+      },
+      {
+        "id": "cloud-recording-usage",
+        "heading": "Usage",
+        "description": null,
+        "components": [
+          {
+            "type": "link",
+            "label": "View More",
+            "href": "/usage",
+            "opens_in": "same_tab"
+          },
+          { "type": "metric_card", "label": "Voice", "value": "0", "unit": "min", "trend": null },
+          { "type": "metric_card", "label": "Audio", "value": "0", "unit": "min", "trend": null },
+          { "type": "metric_card", "label": "Video HD", "value": "0", "unit": "min", "trend": null },
+          { "type": "metric_card", "label": "Video HD+", "value": "0", "unit": "min", "trend": null }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Cloud Recording"],
+    "sibling_tabs": [],
+    "child_links": ["/usage"]
+  }
+}

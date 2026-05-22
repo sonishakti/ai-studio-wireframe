@@ -1,0 +1,342 @@
+{
+  "page": {
+    "title": "Overview — Dashboard",
+    "url": "https://console.agora.io/",
+    "section": "Overview",
+    "subsection": "Dashboard",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Welcome Hermes 🎉",
+    "description": null,
+    "sections": [
+      {
+        "id": "projects-widget",
+        "heading": "Projects",
+        "description": null,
+        "components": [
+          {
+            "type": "link",
+            "label": "View All",
+            "href": "/project-management",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "button",
+            "label": "New Project",
+            "variant": "primary",
+            "inferred_action": "Opens new project creation flow",
+            "is_destructive": false
+          },
+          {
+            "type": "table",
+            "columns": ["Project Name", "Security Mode", "App ID", "Actions"],
+            "row_count_visible": 1,
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          },
+          {
+            "type": "status_badge",
+            "label": "Secure",
+            "state": "active"
+          },
+          {
+            "type": "code_block",
+            "label": "App ID",
+            "language": null,
+            "content": "[REDACTED]"
+          },
+          {
+            "type": "button",
+            "label": "Configure",
+            "variant": "secondary",
+            "inferred_action": "Navigates to project configuration view for Default Project",
+            "is_destructive": false
+          }
+        ]
+      },
+      {
+        "id": "billing-widget",
+        "heading": "Billing",
+        "description": "Add a card to ensure zero downtime once your free minutes are up.",
+        "components": [
+          {
+            "type": "link",
+            "label": "View Details",
+            "href": "/billing",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "text",
+            "role": "helper",
+            "content": "You will only be charged for usage beyond the free limit"
+          },
+          {
+            "type": "button",
+            "label": "Add Card",
+            "variant": "primary",
+            "inferred_action": "Opens credit card entry / billing setup flow",
+            "is_destructive": false
+          }
+        ]
+      },
+      {
+        "id": "current-subscription-widget",
+        "heading": "Current Subscription",
+        "description": null,
+        "components": [
+          {
+            "type": "button",
+            "label": "Top-Up Minutes",
+            "variant": "primary",
+            "inferred_action": "Initiates minute top-up purchase flow",
+            "is_destructive": false
+          },
+          {
+            "type": "button",
+            "label": "View All Subscriptions",
+            "variant": "secondary",
+            "inferred_action": "Navigates to subscriptions list",
+            "is_destructive": false
+          }
+        ]
+      },
+      {
+        "id": "get-started-widget",
+        "heading": "Get Started",
+        "description": "Select an Agora product to get started with the SDK quickstart.",
+        "components": [
+          {
+            "type": "button",
+            "label": "SDK Guides",
+            "variant": "secondary",
+            "inferred_action": "Switches Get Started widget to SDK Guides view",
+            "is_destructive": false
+          },
+          {
+            "type": "button",
+            "label": "App Builder",
+            "variant": "secondary",
+            "inferred_action": "Switches Get Started widget to App Builder view",
+            "is_destructive": false
+          },
+          {
+            "type": "input",
+            "label": "Platform",
+            "input_type": "select",
+            "placeholder": null,
+            "current_value": "Web",
+            "helper_text": null
+          },
+          {
+            "type": "link",
+            "label": "Conversational AI (NEW)",
+            "href": "https://docs.agora.io/en/conversational-ai/overview/product-overview?platform=web",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Voice Calling",
+            "href": "https://docs.agora.io/en/voice-calling/get-started/get-started-sdk?platform=web",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Video Calling",
+            "href": "https://docs.agora.io/en/video-calling/get-started/get-started-sdk?platform=web",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Chat",
+            "href": "https://docs.agora.io/en/agora-chat/get-started/get-started-sdk?platform=web",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Interactive Live Streaming",
+            "href": "https://docs.agora.io/en/interactive-live-streaming/get-started/get-started-sdk?platform=web",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Signaling",
+            "href": "https://docs.agora.io/en/signaling/develop/get-started-sdk?platform=web",
+            "opens_in": "new_tab"
+          },
+          {
+            "type": "link",
+            "label": "Interactive Whiteboard",
+            "href": "https://docs.agora.io/en/interactive-whiteboard/get-started/get-started-sdk?platform=web",
+            "opens_in": "new_tab"
+          }
+        ]
+      },
+      {
+        "id": "notifications-widget",
+        "heading": "Notifications",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "2 unread",
+            "state": "active"
+          },
+          {
+            "type": "link",
+            "label": "View All",
+            "href": "/notifications/3003512",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "link",
+            "label": "Your RTC Free Package has been activated successfully",
+            "href": "/notifications/3003512",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "text",
+            "role": "label",
+            "content": "about 1 hour ago"
+          },
+          {
+            "type": "link",
+            "label": "Welcome!",
+            "href": "/notifications/3003511",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "text",
+            "role": "label",
+            "content": "about 1 hour ago"
+          }
+        ]
+      },
+      {
+        "id": "extensions-marketplace-widget",
+        "heading": "Extensions Marketplace",
+        "description": null,
+        "components": [
+          {
+            "type": "link",
+            "label": "View All",
+            "href": "/extensions-marketplace",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "link",
+            "label": "ActiveFence Video Content Moderation (Beta)",
+            "href": "/extensions-marketplace/activefence-video-moderation",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "text",
+            "role": "description",
+            "content": "Protect Your Users. Protect Your Platform."
+          },
+          {
+            "type": "link",
+            "label": "DeepAR",
+            "href": "/extensions-marketplace/deepar",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "text",
+            "role": "description",
+            "content": "Add 3D face masks, filters, background removal and other AR experiences to your app via Agora's Video SDK"
+          },
+          {
+            "type": "link",
+            "label": "Banuba AR Face Filter",
+            "href": "/extensions-marketplace/banuba",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "text",
+            "role": "description",
+            "content": "Add augmented reality features to video calls such as face filters, virtual backgrounds and avatars."
+          }
+        ]
+      },
+      {
+        "id": "usage-widget",
+        "heading": "Usage (Current Billing Cycle)",
+        "description": null,
+        "components": [
+          {
+            "type": "link",
+            "label": "View Details",
+            "href": "/usage",
+            "opens_in": "same_tab"
+          },
+          {
+            "type": "input",
+            "label": "Product",
+            "input_type": "select",
+            "placeholder": null,
+            "current_value": "Interactive Live Streaming",
+            "helper_text": null
+          },
+          {
+            "type": "table",
+            "columns": ["Audio (MIN)", "Video HD (MIN)", "Video FHD (MIN)", "Video 2K (MIN)", "Video 2K+ (MIN)"],
+            "row_count_visible": 0,
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          },
+          {
+            "type": "chart",
+            "label": "Usage over current billing cycle",
+            "chart_type": "area",
+            "axes": {
+              "x": "Date (05-01 to 05-21)",
+              "y": "Usage (minutes)"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Overview"],
+    "sibling_tabs": [],
+    "child_links": [
+      "/project-management",
+      "/billing",
+      "/extensions-marketplace",
+      "/usage",
+      "/notifications/3003512",
+      "/notifications/3003511"
+    ]
+  },
+  "sidebar_navigation": {
+    "primary": [
+      { "label": "Overview", "href": "/" },
+      { "label": "Projects", "href": "/project-management" },
+      { "label": "Usage", "href": "/usage" },
+      { "label": "Billing", "href": "/billing" },
+      { "label": "Extension Marketplace", "href": "/extensions-marketplace" },
+      { "label": "Subscriptions", "href": null, "type": "button_submenu" }
+    ],
+    "more_from_agora": [
+      { "label": "Analytics", "href": "https://analytics-lab.agora.io/?locale=en", "external": true },
+      { "label": "Developer Toolkit", "href": null, "type": "button_submenu" }
+    ],
+    "promo_banner": {
+      "text": "Conversational AI Agents are here!",
+      "cta_label": "Build Agents",
+      "cta_href": "/studio"
+    }
+  },
+  "secondary_traversal_queue": [
+    {
+      "label": "Configure — Default Project",
+      "trigger": "Configure button on Overview Projects widget",
+      "project_name": "Default Project",
+      "note": "Button element (no href); requires click to navigate"
+    }
+  ]
+}

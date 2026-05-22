@@ -1,0 +1,42 @@
+{
+  "page": {
+    "title": "My Analytics Packages",
+    "url": "https://console.agora.io/finance/packages",
+    "section": "Finance",
+    "subsection": "Packages",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "My Analytics Packages",
+    "description": null,
+    "sections": [
+      {
+        "id": "packages-table",
+        "heading": null,
+        "components": [
+          {
+            "type": "table",
+            "columns": ["Package Name", "Package Type", "Purchase Date", "Effective Date", "Expiry Date", "Price", "Auto Renew", "Status"],
+            "row_count": 0
+          },
+          { "type": "text", "role": "empty_state", "content": "No packages found" }
+        ]
+      },
+      {
+        "id": "package-information",
+        "heading": "Package Information",
+        "components": [
+          { "type": "text", "role": "notice", "content": "Packages are automatically renewed unless cancelled." },
+          { "type": "text", "role": "notice", "content": "Cancelling a subscription will stop auto-renewal but your package remains active until expiry." },
+          { "type": "text", "role": "notice", "content": "For support or questions, please contact us." }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

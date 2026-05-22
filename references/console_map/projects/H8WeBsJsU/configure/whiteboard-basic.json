@@ -1,0 +1,72 @@
+{
+  "page": {
+    "title": "Configure — Interactive Whiteboard",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/whiteboard-basic",
+    "section": "Projects > Configure",
+    "subsection": "Whiteboard",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Interactive Whiteboard",
+    "description": null,
+    "sections": [
+      {
+        "id": "whiteboard-basic-information",
+        "heading": "Basic Information",
+        "description": null,
+        "components": [
+          {
+            "type": "status_badge",
+            "label": "Inactive",
+            "state": "inactive"
+          },
+          {
+            "type": "feature_block",
+            "feature_name": "Interactive Whiteboard",
+            "section": "Whiteboard",
+            "description": null,
+            "observed_state": "disabled",
+            "toggle_present": true,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": null,
+            "child_settings_gated": true,
+            "child_settings_visible": false,
+            "child_settings": [],
+            "associated_links": [
+              { "label": "Configure (whiteboard services)", "href": "/project-management/H8WeBsJsU/whiteboard-services" },
+              { "label": "contact support", "href": "https://www.agora.io/en/talk-to-us/" },
+              { "label": "How to use whiteboard", "href": "https://docs.agora.io/en/interactive-whiteboard/get-started/get-started-sdk" },
+              { "label": "Whiteboard Pricing", "href": "https://docs.agora.io/en/interactive-whiteboard/reference/pricing" }
+            ],
+            "badges": ["Inactive"],
+            "notes": "Toggle label is 'Enable Whiteboard'. Configuration sub-section visible but locked: 'You need to enable Whiteboard to configure the services.' Max concurrent channels: 50."
+          }
+        ]
+      },
+      {
+        "id": "whiteboard-configuration",
+        "heading": "Configuration",
+        "description": "Configure Whiteboard services like Docs to Web, Screenshot, etc.",
+        "components": [
+          {
+            "type": "text",
+            "role": "helper",
+            "content": "You need to enable Whiteboard to configure the services."
+          },
+          {
+            "type": "link",
+            "label": "Configure",
+            "href": "/project-management/H8WeBsJsU/whiteboard-services",
+            "opens_in": "same_tab"
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Whiteboard"],
+    "sibling_tabs": [],
+    "child_links": ["/project-management/H8WeBsJsU/whiteboard-services"]
+  }
+}

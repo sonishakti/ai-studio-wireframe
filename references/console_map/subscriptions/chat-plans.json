@@ -1,0 +1,96 @@
+{
+  "page": {
+    "title": "Chat Plans",
+    "url": "https://console.agora.io/subscriptions/chat-plans",
+    "section": "Subscriptions",
+    "subsection": "Chat Plans",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "Agora Chat Plans",
+    "description": "Plan comparison and subscription management for Agora Chat product.",
+    "sections": [
+      {
+        "id": "plan-comparison",
+        "heading": "Features",
+        "components": [
+          {
+            "type": "plan_card",
+            "label": "FREE",
+            "price": "$0/mo",
+            "current": true,
+            "mau_cap": 500,
+            "groups_limit": 100,
+            "chatrooms_limit": 100,
+            "members_per_group": 100,
+            "members_per_chatroom": 100,
+            "file_storage_gb": 1,
+            "peak_concurrent": 50
+          },
+          {
+            "type": "plan_card",
+            "label": "STARTER",
+            "price": "$349/mo",
+            "current": false,
+            "mau_cap": 50000,
+            "groups_limit": 10000,
+            "chatrooms_limit": 10000,
+            "members_per_group": 250,
+            "members_per_chatroom": 2000,
+            "file_storage_gb": 10,
+            "peak_concurrent": "10% of MAU"
+          },
+          {
+            "type": "plan_card",
+            "label": "PRO",
+            "price": "$699/mo",
+            "is_most_popular": true,
+            "current": false,
+            "mau_cap": 100000,
+            "groups_limit": 50000,
+            "chatrooms_limit": 50000,
+            "members_per_group": 1000,
+            "members_per_chatroom": 10000,
+            "file_storage_gb": 100,
+            "peak_concurrent": "10% of MAU"
+          },
+          {
+            "type": "plan_card",
+            "label": "ENTERPRISE",
+            "price": "Custom Pricing",
+            "current": false,
+            "mau_cap": "Customized",
+            "groups_limit": "Customizable (100K default)",
+            "chatrooms_limit": "Customizable (100K default)",
+            "members_per_group": "Customizable (5K default)",
+            "members_per_chatroom": "Customizable (20K default)",
+            "file_storage_gb": "Customizable (100 default)"
+          }
+        ]
+      },
+      {
+        "id": "subscription-history",
+        "heading": "Subscription History",
+        "components": [
+          {
+            "type": "table",
+            "columns": ["Plan Name", "First Purchase", "Duration", "Exp Date", "Price"],
+            "row_count_visible": 1,
+            "rows": [
+              { "Plan Name": "FREE", "First Purchase": "21 May, 2026", "Duration": "N/A", "Exp Date": "N/A", "Price": "$0/month" }
+            ],
+            "has_pagination": false,
+            "has_search": false,
+            "has_filters": false
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Subscriptions", "Chat Plans"],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

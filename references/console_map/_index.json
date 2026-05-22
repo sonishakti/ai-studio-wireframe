@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "generated_at": "2026-05-21T00:00:00Z",
+    "account": "hermes_claude_console_mapping@sharklasers.com",
+    "base_url": "https://console.agora.io",
+    "total_pages_mapped": 56
+  },
+  "pages": [
+    {
+      "file": "overview/dashboard.md",
+      "url": "https://console.agora.io/",
+      "title": "Overview (Dashboard)",
+      "section": "Overview",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/list.md",
+      "url": "https://console.agora.io/project-management",
+      "title": "Projects List",
+      "section": "Projects",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/chat-basic-info.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/chat/basic-info",
+      "title": "Configure — Chat Basic Info",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/conv-ai.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/conv-ai",
+      "title": "Configure — Conversational AI Engine",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/signaling-basic.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/basic",
+      "title": "Configure — Signaling Basic Information",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/signaling-presence-configuration.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/presence-configuration",
+      "title": "Configure — Signaling Presence Configuration",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/signaling-storage-configuration.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/storage-configuration",
+      "title": "Configure — Signaling Storage Configuration",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/signaling-stream-channel-configuration.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/signaling/stream-channel-configuration",
+      "title": "Configure — Signaling Stream Channel Configuration",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/whiteboard-basic.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/whiteboard-basic",
+      "title": "Configure — Whiteboard",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/whiteboard-services.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/whiteboard-services",
+      "title": "Configure — Interactive Whiteboard Services",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/cloud-recording.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/cloud-recording",
+      "title": "Configure — Cloud Recording",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/media-push.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/media-push",
+      "title": "Configure — Media Push",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/notifications.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/notifications",
+      "title": "Configure — Notifications",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/media-pull.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/media-pull",
+      "title": "Configure — Media Pull",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/media-gateway.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/media-gateway",
+      "title": "Configure — Media Gateway",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/flexible-classroom.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/flexible-classroom",
+      "title": "Configure — Flexible Classroom",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/cloud-proxy.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/cloud-proxy",
+      "title": "Configure — Cloud Proxy",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/cohost-authentication.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/cohost-authentication",
+      "title": "Configure — Co-Host Authentication",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/real-time-stt.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/real-time-stt",
+      "title": "Configure — Real-Time Speech-to-Text",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "projects/H8WeBsJsU/configure/video-screenshot-upload.md",
+      "url": "https://console.agora.io/project-management/H8WeBsJsU/video-screenshot-upload",
+      "title": "Configure — Video Screenshot Upload",
+      "section": "Projects / Configure",
+      "access_restricted": false
+    },
+    {
+      "file": "usage_analytics/usage.md",
+      "url": "https://console.agora.io/usage",
+      "title": "Usage Analytics",
+      "section": "Usage",
+      "access_restricted": false
+    },
+    {
+      "file": "billing/billing.md",
+      "url": "https://console.agora.io/billing",
+      "title": "Billing",
+      "section": "Billing",
+      "access_restricted": false
+    },
+    {
+      "file": "billing/invoices.md",
+      "url": "https://console.agora.io/billing/invoices",
+      "title": "Invoices",
+      "section": "Billing",
+      "access_restricted": false
+    },
+    {
+      "file": "billing/transactions.md",
+      "url": "https://console.agora.io/billing/transactions",
+      "title": "Transactions",
+      "section": "Billing",
+      "access_restricted": false
+    },
+    {
+      "file": "billing/manage-cards.md",
+      "url": "https://console.agora.io/billing/manage-cards",
+      "title": "Manage Cards",
+      "section": "Billing",
+      "access_restricted": false
+    },
+    {
+      "file": "billing/withdraw-transactions.md",
+      "url": "https://console.agora.io/billing/withdraw-transactions",
+      "title": "Withdraw Transactions",
+      "section": "Billing",
+      "access_restricted": false
+    },
+    {
+      "file": "billing/all-designs.md",
+      "url": "https://console.agora.io/billing/all-designs",
+      "title": "Billing All Designs (UI Preview)",
+      "section": "Billing",
+      "access_restricted": false,
+      "notes": "Internal design preview page with mock data — not linked from navigation"
+    },
+    {
+      "file": "extensions_marketplace/marketplace.md",
+      "url": "https://console.agora.io/extensions-marketplace",
+      "title": "Extension Marketplace",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/agora-noise-suppression.md",
+      "url": "https://console.agora.io/extensions-marketplace/agora-noise-suppression",
+      "title": "Agora Noise Suppression",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/agora-spatial-audio.md",
+      "url": "https://console.agora.io/extensions-marketplace/agora-spatial-audio",
+      "title": "Agora Spatial Audio",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/byteplus-effects.md",
+      "url": "https://console.agora.io/extensions-marketplace/byteplus-effects",
+      "title": "BytePlus Effects",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/conversation-intelligence.md",
+      "url": "https://console.agora.io/extensions-marketplace/conversation-intelligence",
+      "title": "Conversation Intelligence",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/activefence-video-moderation.md",
+      "url": "https://console.agora.io/extensions-marketplace/activefence-video-moderation",
+      "title": "ActiveFence Video Moderation",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/synervoz-voice-fx.md",
+      "url": "https://console.agora.io/extensions-marketplace/synervoz-voice-fx",
+      "title": "Synervoz Voice FX",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/deepar.md",
+      "url": "https://console.agora.io/extensions-marketplace/deepar",
+      "title": "DeepAR",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/faceunity-ar-filter.md",
+      "url": "https://console.agora.io/extensions-marketplace/faceunity-ar-filter",
+      "title": "FaceUnity AR Filter",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/banuba-face-ar.md",
+      "url": "https://console.agora.io/extensions-marketplace/banuba-face-ar",
+      "title": "Banuba Face AR",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "extensions_marketplace/my-submissions.md",
+      "url": "https://console.agora.io/extensions-marketplace/my-submissions",
+      "title": "My Submissions",
+      "section": "Extension Marketplace",
+      "access_restricted": false
+    },
+    {
+      "file": "subscriptions/all-subscriptions.md",
+      "url": "https://console.agora.io/subscriptions",
+      "title": "All Subscriptions",
+      "section": "Subscriptions",
+      "access_restricted": false
+    },
+    {
+      "file": "subscriptions/rtc-plans.md",
+      "url": "https://console.agora.io/subscriptions/rtc-plans",
+      "title": "RTC Plans",
+      "section": "Subscriptions",
+      "access_restricted": false
+    },
+    {
+      "file": "subscriptions/chat-plans.md",
+      "url": "https://console.agora.io/subscriptions/chat-plans",
+      "title": "Chat Plans",
+      "section": "Subscriptions",
+      "access_restricted": false
+    },
+    {
+      "file": "subscriptions/signaling-plans.md",
+      "url": "https://console.agora.io/subscriptions/signaling-plans",
+      "title": "Signaling Plans",
+      "section": "Subscriptions",
+      "access_restricted": false
+    },
+    {
+      "file": "credentials/credentials.md",
+      "url": "https://console.agora.io/credentials",
+      "title": "AA Embedded Credentials",
+      "section": "Developer Toolkit",
+      "access_restricted": false
+    },
+    {
+      "file": "restful-api/restful-api.md",
+      "url": "https://console.agora.io/restful-api",
+      "title": "RESTful API Keys",
+      "section": "Developer Toolkit",
+      "access_restricted": false
+    },
+    {
+      "file": "settings/profile.md",
+      "url": "https://console.agora.io/settings/profile",
+      "title": "Profile",
+      "section": "Settings",
+      "access_restricted": false
+    },
+    {
+      "file": "settings/teams-members.md",
+      "url": "https://console.agora.io/settings/teams-members",
+      "title": "Teams & Members",
+      "section": "Settings",
+      "access_restricted": false
+    },
+    {
+      "file": "settings/notification-preferences.md",
+      "url": "https://console.agora.io/settings/notification-preferences",
+      "title": "Notification Preferences",
+      "section": "Settings",
+      "access_restricted": false
+    },
+    {
+      "file": "settings/sso-management.md",
+      "url": "https://console.agora.io/settings/sso-management",
+      "title": "SSO Management",
+      "section": "Settings",
+      "access_restricted": false,
+      "notes": "Content gated behind Premium/Enterprise Support plan — shows upgrade prompt"
+    },
+    {
+      "file": "notifications/notifications.md",
+      "url": "https://console.agora.io/notifications",
+      "title": "Notifications",
+      "section": "Notifications",
+      "access_restricted": false
+    },
+    {
+      "file": "studio/agents.md",
+      "url": "https://console.agora.io/studio/agents",
+      "title": "Agents",
+      "section": "Studio",
+      "access_restricted": false
+    },
+    {
+      "file": "studio/integration.md",
+      "url": "https://console.agora.io/studio/integration/credentials",
+      "title": "Integration",
+      "section": "Studio",
+      "access_restricted": false
+    },
+    {
+      "file": "studio/campaign.md",
+      "url": "https://console.agora.io/studio/campaign",
+      "title": "Campaign",
+      "section": "Studio",
+      "access_restricted": false
+    },
+    {
+      "file": "studio/analytics.md",
+      "url": "https://console.agora.io/studio/analytics",
+      "title": "Analytics",
+      "section": "Studio",
+      "access_restricted": false
+    },
+    {
+      "file": "finance/packages.md",
+      "url": "https://console.agora.io/finance/packages",
+      "title": "My Analytics Packages",
+      "section": "Finance",
+      "access_restricted": false
+    },
+    {
+      "file": "license-management/license-management.md",
+      "url": "https://console.agora.io/license-management",
+      "title": "License Management",
+      "section": "License Management",
+      "access_restricted": true,
+      "notes": "All sub-routes redirect to Overview — plan-gated feature"
+    },
+    {
+      "file": "play.md",
+      "url": "https://console.agora.io/play",
+      "title": "Play",
+      "section": null,
+      "access_restricted": false,
+      "notes": "Statically exported stub route — no UI content rendered"
+    }
+  ],
+  "not_mapped": [
+    { "url": "/studio/mobile-numbers", "reason": "Redirects to /studio/agents" },
+    { "url": "/studio/call-history", "reason": "Redirects to /studio/agents" },
+    { "url": "/studio/session-history", "reason": "Redirects to /studio/agents" },
+    { "url": "/studio/integration/mcps", "reason": "Redirects to /studio/agents" },
+    { "url": "/license-management/pre-authorization", "reason": "Redirects to / (plan-gated)" },
+    { "url": "/license-management/purchase-history", "reason": "Redirects to / (plan-gated)" },
+    { "url": "/license-management/quota-management", "reason": "Redirects to / (plan-gated)" },
+    { "url": "/license-management/usages-query", "reason": "Redirects to / (plan-gated)" },
+    { "url": "https://analytics-lab.agora.io/", "reason": "External domain (Agora Analytics Lab)" }
+  ]
+}

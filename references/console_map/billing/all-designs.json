@@ -1,0 +1,63 @@
+{
+  "page": {
+    "title": "Billing All Designs",
+    "url": "https://console.agora.io/billing/all-designs",
+    "section": "Billing",
+    "subsection": "All Designs (UI Preview)",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false,
+    "notes": "Internal UI design preview — not linked from main navigation. Shows mock billing state variants."
+  },
+  "layout": {
+    "primary_heading": "Billing",
+    "description": null,
+    "sections": [
+      {
+        "id": "billing-failed-banner",
+        "heading": null,
+        "components": [
+          { "type": "banner", "role": "error", "content": "Billing failed for the period of Apr 2023. Pay Now to ensure zero downtime.", "data": "mock" },
+          { "type": "button", "label": "Pay Now", "variant": "primary", "is_destructive": false, "data": "mock" }
+        ]
+      },
+      {
+        "id": "next-payment-variants",
+        "heading": null,
+        "components": [
+          { "type": "text", "role": "next_payment", "content": "Next Payment: 06 Jun, 2026", "data": "mock" }
+        ]
+      },
+      {
+        "id": "payment-failed-block",
+        "heading": null,
+        "components": [
+          { "type": "banner", "role": "payment_failed", "content": "Auto-pay failed on DD-MM-YYYY via Master Card **** 9999. Pay now to avoid project suspension.", "data": "mock" },
+          { "type": "button", "label": "Pay Now", "variant": "primary", "is_destructive": false, "data": "mock" }
+        ]
+      },
+      {
+        "id": "billing-tabs",
+        "heading": null,
+        "components": [
+          { "type": "tab", "label": "Bills" },
+          { "type": "tab", "label": "All Transactions" },
+          { "type": "tab", "label": "Payment Method" },
+          { "type": "tab", "label": "Billing Information" }
+        ]
+      },
+      {
+        "id": "billing-information",
+        "heading": "Billing Information",
+        "components": [
+          { "type": "field", "label": "Name on Card", "value": "-", "data": "mock" },
+          { "type": "field", "label": "Billing Address", "value": "", "data": "mock" }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "page": {
+    "title": "RESTful API",
+    "url": "https://console.agora.io/restful-api",
+    "section": "Developer Toolkit",
+    "subsection": "RESTful API",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "layout": {
+    "primary_heading": "RESTful API",
+    "description": null,
+    "sections": [
+      {
+        "id": "api-keys-table",
+        "heading": null,
+        "components": [
+          { "type": "button", "label": "Add a Secret", "variant": "primary", "inferred_action": "Creates a new Customer ID/Secret key pair for REST API", "is_destructive": false },
+          { "type": "table", "columns": ["Customer ID", "Customer Secret", "Note", "Action"], "row_count_visible": 0, "has_pagination": false, "has_search": false, "has_filters": false },
+          { "type": "text", "role": "empty_state", "content": "No Restful API keys found" }
+        ]
+      },
+      {
+        "id": "notes",
+        "heading": "NOTE",
+        "components": [
+          { "type": "text", "role": "helper", "content": "You need the ID and secret below to use Agora RESTful API" },
+          { "type": "link", "label": "Console RESTful API Document", "href": null, "opens_in": "unknown" },
+          { "type": "text", "role": "helper", "content": "A maximum 10 active keys/secrets are permitted per account." }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": [],
+    "sibling_tabs": [],
+    "child_links": []
+  }
+}

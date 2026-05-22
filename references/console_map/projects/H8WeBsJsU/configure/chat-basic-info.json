@@ -1,0 +1,163 @@
+{
+  "page": {
+    "title": "Configure — Chat: Basic Information",
+    "url": "https://console.agora.io/project-management/H8WeBsJsU/chat/basic-info",
+    "section": "Projects > Configure",
+    "subsection": "Chat > Basic Information",
+    "accessed_at": "2026-05-21T00:00:00Z",
+    "access_restricted": false
+  },
+  "project_configure_nav": [
+    "Chat → /project-management/H8WeBsJsU/chat/basic-info",
+    "Conversational AI Engine → /project-management/H8WeBsJsU/conv-ai",
+    "Signaling (expandable)",
+    "Signaling > Basic Information → /project-management/H8WeBsJsU/signaling/basic",
+    "Signaling > Presence Configuration → /project-management/H8WeBsJsU/signaling/presence-configuration",
+    "Signaling > Storage Configuration → /project-management/H8WeBsJsU/signaling/storage-configuration",
+    "Signaling > Stream Channel Configuration → /project-management/H8WeBsJsU/signaling/stream-channel-configuration",
+    "Whiteboard → /project-management/H8WeBsJsU/whiteboard-basic",
+    "Cloud Recording → /project-management/H8WeBsJsU/cloud-recording",
+    "Media Push → /project-management/H8WeBsJsU/media-push",
+    "Notifications → /project-management/H8WeBsJsU/notifications",
+    "Media Pull → /project-management/H8WeBsJsU/media-pull",
+    "Media Gateway → /project-management/H8WeBsJsU/media-gateway",
+    "Flexible Classroom → /project-management/H8WeBsJsU/flexible-classroom",
+    "Cloud Proxy → /project-management/H8WeBsJsU/cloud-proxy",
+    "Co-Host Authentication → /project-management/H8WeBsJsU/cohost-authentication",
+    "Real-Time Speech-to-Text → /project-management/H8WeBsJsU/real-time-stt",
+    "Video Screenshot Upload → /project-management/H8WeBsJsU/video-screenshot-upload"
+  ],
+  "additional_projects_paginated": false,
+  "layout": {
+    "primary_heading": "Default Project",
+    "description": null,
+    "sections": [
+      {
+        "id": "project-header-basic-settings",
+        "heading": "Basic Settings",
+        "description": null,
+        "components": [
+          {
+            "type": "input",
+            "label": "Project Name",
+            "input_type": "text",
+            "placeholder": "Project Name",
+            "current_value": null,
+            "helper_text": null
+          },
+          {
+            "type": "code_block",
+            "label": "App ID",
+            "language": null,
+            "content": "[REDACTED]"
+          }
+        ]
+      },
+      {
+        "id": "project-header-security",
+        "heading": "Security",
+        "description": null,
+        "components": [
+          {
+            "type": "button",
+            "label": "Generate Temp Token",
+            "variant": "secondary",
+            "inferred_action": "Generates a temporary RTC authentication token",
+            "is_destructive": false
+          },
+          {
+            "type": "button",
+            "label": "Add a Certificate",
+            "variant": "secondary",
+            "inferred_action": "Opens certificate creation flow",
+            "is_destructive": false
+          },
+          {
+            "type": "code_block",
+            "label": "Primary Certificate",
+            "language": null,
+            "content": "[REDACTED]"
+          }
+        ]
+      },
+      {
+        "id": "chat-basic-information",
+        "heading": "Chat - Basic Information",
+        "description": null,
+        "components": [
+          {
+            "type": "feature_block",
+            "feature_name": "Chat",
+            "section": "Chat > Basic Information",
+            "description": "Please select a data center location that is closest to most of your end-users. Server selection cannot be changed after activation — Please confirm your selection.",
+            "observed_state": "disabled",
+            "toggle_present": false,
+            "toggle_is_disabled_ui": false,
+            "plan_gate": "Free plan (Upgrade available)",
+            "child_settings_gated": false,
+            "child_settings_visible": true,
+            "child_settings": [
+              {
+                "label": "Data Center",
+                "type": "select",
+                "observed_value": null,
+                "options": [],
+                "helper_text": "Cannot be changed after activation"
+              },
+              {
+                "label": "Chat User Temp Token",
+                "type": "input",
+                "observed_value": "[REDACTED]",
+                "options": [],
+                "helper_text": "Make sure to copy your token now and save it for future references. You won't be able to see it again."
+              },
+              {
+                "label": "Chat App Temp Token",
+                "type": "input",
+                "observed_value": "[REDACTED]",
+                "options": [],
+                "helper_text": "Make sure to copy your token now and save it for future references. You won't be able to see it again."
+              },
+              {
+                "label": "AppKey",
+                "type": "input",
+                "observed_value": null,
+                "options": [],
+                "helper_text": null
+              },
+              {
+                "label": "OrgName",
+                "type": "input",
+                "observed_value": null,
+                "options": [],
+                "helper_text": null
+              },
+              {
+                "label": "AppName",
+                "type": "input",
+                "observed_value": null,
+                "options": [],
+                "helper_text": null
+              }
+            ],
+            "associated_links": [
+              { "label": "Upgrade", "href": "/subscriptions/chat-plans" },
+              { "label": "How to use Chat?", "href": "https://docs.agora.io/en/agora-chat/get-started/enable?platform=web" },
+              { "label": "Agora Chat Pricing", "href": "https://docs.agora.io/en/agora-chat/reference/pricing-plan-details?platform=web" }
+            ],
+            "badges": ["Inactive"],
+            "notes": "Data center selection is irreversible once Chat is activated. Generate token buttons are present but state-changing."
+          }
+        ]
+      }
+    ]
+  },
+  "navigation": {
+    "breadcrumbs": ["Projects", "Default Project", "Configure", "Chat", "Basic Information"],
+    "sibling_tabs": [],
+    "child_links": [
+      "/project-management",
+      "/subscriptions/chat-plans"
+    ]
+  }
+}
