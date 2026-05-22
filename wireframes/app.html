@@ -93,10 +93,15 @@
         <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico">✓</span> View all plans</div>
         <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico">$</span> Billing</div>
         <div class="item" data-action="goAccount" data-route="extensions"><span class="ico">🛍</span> Extensions Marketplace</div>
+        <div class="item" data-action="goAccount" data-route="licensing"><span class="ico">🪪</span> Licensing</div>
 
         <div class="divider"></div>
-        <div class="group-label">Developer Settings</div>
+        <div class="group-label">Developer</div>
         <div class="item" data-action="goAccount" data-route="restful-api"><span class="ico">🔒</span> RESTful API</div>
+        <div class="item" data-action="goAccount" data-route="aa-embedded-credentials"><span class="ico">🔑</span> AA Embedded Credentials</div>
+        <div class="item" data-action="goAccount" data-route="webhooks"><span class="ico">🪝</span> Webhooks</div>
+        <div class="item" data-action="goAccount" data-route="audit-logs"><span class="ico">📋</span> Audit logs</div>
+        <div class="item" data-action="goAccount" data-route="dev-toolkit"><span class="ico">🛠</span> Developer Toolkit</div>
 
         <div class="divider"></div>
         <div class="credits-block" data-action="goAccount" data-route="billing-subs">
@@ -107,6 +112,14 @@
 
         <div class="divider"></div>
         <div class="item" data-action="toast" data-msg="analytics.agora.io opens in new tab"><span class="ico">📊</span> Try Agora Analytics ↗</div>
+
+        <div class="divider"></div>
+        <div class="group-label">Help</div>
+        <div class="item" data-action="goAccount" data-route="support-tickets"><span class="ico">🎫</span> Support tickets</div>
+        <div class="item" data-action="goAccount" data-route="contact-sales"><span class="ico">💼</span> Contact Sales</div>
+        <div class="item" data-action="goAccount" data-route="whats-new"><span class="ico">📰</span> What's new</div>
+        <div class="item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico">📖</span> Docs ↗</div>
+        <div class="item" data-action="toast" data-msg="status.agora.io opens in new tab"><span class="ico">●</span> System status ↗</div>
 
         <div class="divider"></div>
         <div class="item" data-action="goAccount" data-route="preferences"><span class="ico">⚙</span> Preferences</div>
@@ -450,18 +463,6 @@
       <p class="subhead">Outbound calling campaigns — schedule, list management, throttling.</p>
       <div class="empty">Wireframe placeholder.</div>
     </div>
-    <div class="screen hidden" data-screen="web-sdk">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Web SDK</div>
-      <h2>Web SDK</h2>
-      <p class="subhead">Embed your agent into a web app — iframe widget, headless SDK, React component.</p>
-      <div class="empty">Wireframe placeholder.</div>
-    </div>
-    <div class="screen hidden" data-screen="more-deploy">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Deploy › More</div>
-      <h2>More deploy surfaces</h2>
-      <div class="empty">SIP · WhatsApp · Mobile SDKs · Embedded devices — wireframe placeholder.</div>
-    </div>
-
     <!-- MONITOR -->
     <div class="screen hidden" data-screen="analytics">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Analytics</div>
@@ -716,19 +717,6 @@
 
     <!-- ============== ACCOUNT-LEVEL SCREENS ============== -->
 
-    <div class="screen hidden" data-screen="account-overview">
-      <div class="breadcrumb">Account › Account Overview</div>
-      <h2>Account Overview</h2>
-      <p class="subhead">Org info, owner, seats, security posture.</p>
-      <div class="box">
-        <div class="row"><span class="label">Account name</span><span class="value">Acme Inc.</span></div>
-        <div class="row"><span class="label">Owner</span><span class="value">Jane Doe · jane.doe@acme.com</span></div>
-        <div class="row"><span class="label">Workspaces</span><span class="value">2 (johndoe-workspace · acme-dev-team)</span></div>
-        <div class="row"><span class="label">Seats</span><span class="value">5 of 10 used</span></div>
-        <div class="row"><span class="label">Security</span><span class="value">SSO enabled · MFA required for owners</span></div>
-      </div>
-    </div>
-
     <div class="screen hidden" data-screen="billing-subs">
       <div class="breadcrumb">Account › Billing &amp; Subscriptions</div>
       <h2>Billing &amp; Subscriptions</h2>
@@ -818,79 +806,6 @@
           <div class="row"><span class="label">Premium support</span><span class="value">24/7 · 1h SLA · $499/mo</span><div class="actions"><button class="btn small" data-action="openChangePlan">Upgrade</button></div></div>
           <div class="note"><strong>Console parity:</strong> mirrors <code>/finance/packages</code>.</div>
         </div>
-      </div>
-    </div>
-
-    <div class="screen hidden" data-screen="teams-members">
-      <div class="breadcrumb">Account › Teams &amp; Members</div>
-      <h2>Teams &amp; Members</h2>
-      <p class="subhead">Define teams, assign roles, manage permissions across the workspace.</p>
-      <div class="tabs"><div class="tab active">Teams</div><div class="tab">Members</div></div>
-      <div class="box">
-        <h3>Teams &amp; Permissions</h3>
-        <div class="row"><span class="label">Finance</span><span class="value">Usage: None · Finance: View · Project: None</span><div class="actions"><button class="btn small">Edit</button></div></div>
-        <div class="row"><span class="label">Engineer</span><span class="value">Usage: None · Project: Edit · Agora Analytics: Call Inspector, Data Insights, Live Data</span><div class="actions"><button class="btn small">Edit</button></div></div>
-        <div class="row"><span class="label">CS/Maintenance</span><span class="value">All None except Agora Analytics</span><div class="actions"><button class="btn small">Edit</button></div></div>
-        <div class="row"><span class="label">Product/Operation</span><span class="value">Usage: View · Project: None</span><div class="actions"><button class="btn small">Edit</button></div></div>
-        <div class="row"><span class="label">Admin</span><span class="value">Usage: View · Finance: View · T&amp;M: Edit · Project: Edit · XLA: View</span><div class="actions"><button class="btn small">Edit</button></div></div>
-        <div style="margin-top: 12px;"><button class="btn primary">+ Add new team</button></div>
-      </div>
-    </div>
-
-    <div class="screen hidden" data-screen="sso">
-      <div class="breadcrumb">Account › SSO Management</div>
-      <h2>SSO Management</h2>
-      <p class="subhead">SAML / SCIM identity-provider integration.</p>
-      <div class="box" style="background: #fff8e0;">
-        <h3>Requires Premium or Enterprise plan</h3>
-        <div class="desc">SSO integration is gated. If your team uses Okta as an identity provider, you can manage team-member access via SAML and SCIM.</div>
-        <div style="margin-top: 8px;"><button class="btn primary">Request upgrade</button></div>
-      </div>
-    </div>
-
-    <div class="screen hidden" data-screen="notif-prefs">
-      <div class="breadcrumb">Account › Notification Preferences</div>
-      <h2>Notification Preferences</h2>
-      <p class="subhead">Choose what you get notified about, and where.</p>
-      <div class="box">
-        <h3>Notifications</h3>
-        <div class="row"><span class="label">Type</span><span class="value">Email · Text · Agora Console</span></div>
-        <div class="row"><span class="label">Account</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
-        <div class="row"><span class="label">Billing</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
-        <div class="row"><span class="label">Product</span><span class="value">— Email · — Text · ✓ Console</span></div>
-        <div class="row"><span class="label">Promotion</span><span class="value">— Email · — Text · ✓ Console</span></div>
-        <div class="row"><span class="label">Operation</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
-        <div class="row"><span class="label">Tickets</span><span class="value">✓ Email · — Text · ✓ Console</span></div>
-      </div>
-      <div class="note"><strong>Distinction:</strong> this is the account-level preference matrix. Project-level notification service config lives in <a href="#" data-action="backToProject" data-route="project-notifications">Project › Notifications</a>.</div>
-    </div>
-
-    <div class="screen hidden" data-screen="profile">
-      <div class="breadcrumb">Account › Profile</div>
-      <h2>Profile</h2>
-      <p class="subhead">Personal info, security, login methods, theme, language.</p>
-      <div class="box">
-        <h3>Personal Information</h3>
-        <div class="grid-2">
-          <div class="field"><label>First Name</label><input class="input" value="Shakti"></div>
-          <div class="field"><label>Last Name</label><input class="input" value="Soni"></div>
-        </div>
-      </div>
-      <div class="box">
-        <h3>Security</h3>
-        <div class="row"><span class="label">Phone</span><span class="value">+91 9*****6036</span><div class="actions"><button class="btn small">Verify</button></div></div>
-        <div class="row"><span class="label">Email</span><span class="value">shak******@agora.io</span><div class="actions"><button class="btn small">Update</button></div></div>
-        <div class="row"><span class="label">Password</span><span class="value">••••••••••••</span><div class="actions"><button class="btn small">Reset</button></div></div>
-      </div>
-      <div class="box">
-        <h3>Login Methods</h3>
-        <div class="row"><span class="label">Google</span><span class="value">Connect your Google account</span><div class="actions"><button class="btn small">Connect</button></div></div>
-        <div class="row"><span class="label">GitHub</span><span class="value">Connect your GitHub account</span><div class="actions"><button class="btn small">Connect</button></div></div>
-      </div>
-      <div class="box">
-        <h3>Display</h3>
-        <div class="row"><span class="label">Theme</span><span class="value">System · Light · Dark</span></div>
-        <div class="row"><span class="label">Language</span><span class="value">English (US)</span></div>
       </div>
     </div>
 
@@ -1078,22 +993,6 @@ agora login</textarea>
       <div class="note" style="margin-top:20px;"><strong>Journey:</strong> click <em>Enable</em> for an instant project-level toggle. Click a card to configure (S3 bucket, RTMP destination, etc.). Plan-gated add-ons surface an upgrade path inline rather than failing silently.</div>
     </div>
 
-    <!-- Templates (DISCOVER group) -->
-    <div class="screen hidden" data-screen="templates">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Templates</div>
-      <h2>Templates</h2>
-      <p class="subhead">Pre-built agents and starter projects you can fork.</p>
-      <div class="note"><strong>Open question B15:</strong> user-creatable templates, or only Agora-supplied?</div>
-      <div class="grid-3">
-        <div class="ext-card clickable" data-action="openAgent" data-agent="Appointment Reminder"><h3>Appointment Reminder</h3><div class="desc">Outbound voice reminders.</div><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="ext-card clickable" data-action="openAgent" data-agent="NPS Survey"><h3>NPS Survey</h3><div class="desc">Voice feedback collection.</div><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="ext-card clickable" data-action="openAgent" data-agent="IVR"><h3>IVR</h3><div class="desc">Department routing.</div><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="ext-card clickable" data-action="openAgent" data-agent="Payment Reminder"><h3>Payment Reminder</h3><div class="desc">Pending payment follow-up.</div><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="ext-card clickable" data-action="openAgent" data-agent="Customer Service"><h3>Customer Service</h3><div class="desc">E-commerce CX agent.</div><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-        <div class="ext-card clickable" data-action="openAgent" data-agent="Sales Lead Qualification"><h3>Sales Lead Qualification</h3><div class="desc">Inbound qualifier.</div><div class="actions"><button class="btn small">Try</button><button class="btn small">Fork</button></div></div>
-      </div>
-    </div>
-
     <!-- Project Notifications (now lives under Project Settings, but still reachable as standalone) -->
     <div class="screen hidden" data-screen="project-notifications">
       <div class="breadcrumb"><a href="#" data-route="project-settings"><span class="proj-name">My first project</span> › Project Settings</a> › Notifications</div>
@@ -1198,13 +1097,6 @@ agora login</textarea>
       </div>
     </div>
 
-    <div class="screen hidden" data-screen="help-support">
-      <div class="breadcrumb">Account › Help &amp; Support</div>
-      <h2>Help &amp; Support</h2>
-      <p class="subhead">Get unstuck — search docs, open a ticket, talk to humans.</p>
-      <div class="empty">Wireframe placeholder — search box, common topics, contact form, ticket history.</div>
-    </div>
-
     <!-- AA EMBEDDED CREDENTIALS — third credential type, distinct from Vendor Creds and RESTful API -->
     <div class="screen hidden" data-screen="aa-embedded-credentials">
       <div class="breadcrumb">Account › Developer › AA Embedded Credentials</div>
@@ -1261,11 +1153,11 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn" data-action="toast" data-msg="Marked all read">Mark all read</button>
-          <button class="btn" data-action="goAccount" data-route="notif-prefs">Preferences →</button>
+          <button class="btn" data-action="goAccount" data-route="preferences">Preferences →</button>
         </div>
       </div>
 
-      <div class="note"><strong>Console parity:</strong> the bell icon's full-page destination (<code>/notifications</code> in Console). Configure delivery in <a href="#" data-action="goAccount" data-route="notif-prefs">Notification Preferences</a>; configure per-project triggers in <a href="#" data-action="backToProject" data-route="project-notifications">Project › Notifications</a>.</div>
+      <div class="note"><strong>Console parity:</strong> the bell icon's full-page destination (<code>/notifications</code> in Console). Configure delivery in <a href="#" data-action="goAccount" data-route="preferences">Notification Preferences</a>; configure per-project triggers in <a href="#" data-action="backToProject" data-route="project-notifications">Project › Notifications</a>.</div>
 
       <div class="tabs" id="notifTabs">
         <div class="tab active" data-tab="notif-all">All</div>

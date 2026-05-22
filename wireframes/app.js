@@ -78,9 +78,6 @@
       closeAllDropdowns();
       toast('Wireframe stub — All projects page.');
     },
-    backToProject() {
-      goTo('home');
-    },
     switchWorkspace(el) {
       const ws = el.dataset.workspace;
       const wsEl = document.getElementById('currentWorkspace');
