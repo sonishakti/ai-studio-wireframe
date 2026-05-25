@@ -19,51 +19,51 @@
     <!-- TOP: brand + collapse -->
     <div class="brand-row">
       <strong style="font-size: 16px; letter-spacing: 0.04em;">agora</strong>
-      <button class="btn icon" title="Collapse sidebar" data-action="toast" data-msg="Collapse — wireframe stub">▤</button>
+      <button class="btn icon ghost" title="Collapse sidebar" data-action="toast" data-msg="Collapse — wireframe stub"><i data-lucide="panel-left"></i></button>
     </div>
 
     <!-- MAIN NAV — lifecycle-mirroring -->
     <div class="nav-group" style="margin-top: 8px;">
-      <a class="nav-item" data-route="home"><span class="ico">🏠</span>Home</a>
+      <a class="nav-item" data-route="home"><span class="ico"><i data-lucide="home"></i></span>Home</a>
     </div>
 
     <div class="nav-group">
       <div class="label">Build</div>
-      <a class="nav-item" data-route="agents"><span class="ico">👤</span>Agents</a>
-      <a class="nav-item" data-route="integrations"><span class="ico">🔗</span>Integrations</a>
+      <a class="nav-item" data-route="agents"><span class="ico"><i data-lucide="bot"></i></span>Agents</a>
+      <a class="nav-item" data-route="integrations"><span class="ico"><i data-lucide="cable"></i></span>Integrations</a>
     </div>
 
     <div class="nav-group">
       <div class="label">Deploy</div>
-      <a class="nav-item" data-route="phone-numbers"><span class="ico">📞</span>Phone Numbers</a>
-      <a class="nav-item" data-route="campaign"><span class="ico">📢</span>Campaign</a>
+      <a class="nav-item" data-route="phone-numbers"><span class="ico"><i data-lucide="phone"></i></span>Phone Numbers</a>
+      <a class="nav-item" data-route="campaign"><span class="ico"><i data-lucide="megaphone"></i></span>Campaign</a>
     </div>
 
     <div class="nav-group">
       <div class="label">Monitor</div>
-      <a class="nav-item" data-route="analytics"><span class="ico">📊</span>Analytics</a>
-      <a class="nav-item" data-route="call-history"><span class="ico">🕘</span>Call History</a>
-      <a class="nav-item" data-route="session-history"><span class="ico">〰</span>Session History</a>
+      <a class="nav-item" data-route="analytics"><span class="ico"><i data-lucide="bar-chart-3"></i></span>Analytics</a>
+      <a class="nav-item" data-route="call-history"><span class="ico"><i data-lucide="clock"></i></span>Call History</a>
+      <a class="nav-item" data-route="session-history"><span class="ico"><i data-lucide="activity"></i></span>Session History</a>
     </div>
 
     <div class="nav-group">
       <div class="label">Project</div>
-      <a class="nav-item" data-route="project-settings"><span class="ico">⚙</span>Project Settings</a>
-      <a class="nav-item" data-route="realtime-services"><span class="ico">🎥</span>Realtime Services</a>
-      <a class="nav-item" data-route="vendor-credentials"><span class="ico">🔑</span>Credentials</a>
+      <a class="nav-item" data-route="project-settings"><span class="ico"><i data-lucide="settings"></i></span>Project Settings</a>
+      <a class="nav-item" data-route="realtime-services"><span class="ico"><i data-lucide="video"></i></span>Realtime Services</a>
+      <a class="nav-item" data-route="vendor-credentials"><span class="ico"><i data-lucide="key-round"></i></span>Credentials</a>
     </div>
 
     <!-- Footer: search → project chip + avatar -->
     <div class="footer footer-lean">
       <div class="footer-search clickable" data-action="toast" data-msg="Command palette — wireframe stub">
-        <span style="display:flex;align-items:center;gap:6px;"><span>🔍</span>Search</span>
+        <span style="display:flex;align-items:center;gap:8px;"><i data-lucide="search"></i>Search</span>
         <span class="muted" style="font-size:11px;">⌘K</span>
       </div>
       <div class="footer-bottom">
         <div class="project-chip clickable" id="projectChip" data-toggle="switcherDropdown" title="Switch project">
-          <span style="display:flex;align-items:center;gap:6px;"><span>📦</span><span id="currentProject">My first project</span></span>
+          <span style="display:flex;align-items:center;gap:8px;"><i data-lucide="folder"></i><span id="currentProject">My first project</span></span>
         </div>
-        <div class="avatar avatar-icon" id="avatar" data-toggle="accountDropdown" title="Account menu">👤</div>
+        <div class="avatar avatar-icon" id="avatar" data-toggle="accountDropdown" title="Account menu"><i data-lucide="user"></i></div>
       </div>
 
       <!-- Project switcher dropdown (from project chip) -->
@@ -92,40 +92,40 @@
 
         <div class="divider"></div>
         <div class="group-label">Account</div>
-        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico">✓</span> View all plans</div>
-        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico">$</span> Billing</div>
-        <div class="item" data-action="goAccount" data-route="extensions"><span class="ico">🛍</span> Extensions Marketplace</div>
-        <div class="item" data-action="goAccount" data-route="licensing"><span class="ico">🪪</span> Licensing</div>
+        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico"><i data-lucide="list-checks"></i></span> View all plans</div>
+        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico"><i data-lucide="receipt"></i></span> Billing</div>
+        <div class="item" data-action="goAccount" data-route="extensions"><span class="ico"><i data-lucide="store"></i></span> Extensions Marketplace</div>
+        <div class="item" data-action="goAccount" data-route="licensing"><span class="ico"><i data-lucide="id-card"></i></span> Licensing</div>
 
         <div class="divider"></div>
         <div class="group-label">Developer</div>
-        <div class="item" data-action="goAccount" data-route="restful-api"><span class="ico">🔒</span> RESTful API</div>
-        <div class="item" data-action="goAccount" data-route="aa-embedded-credentials"><span class="ico">🔑</span> AA Embedded Credentials</div>
-        <div class="item" data-action="goAccount" data-route="webhooks"><span class="ico">🪝</span> Webhooks</div>
-        <div class="item" data-action="goAccount" data-route="audit-logs"><span class="ico">📋</span> Audit logs</div>
-        <div class="item" data-action="goAccount" data-route="dev-toolkit"><span class="ico">🛠</span> Developer Toolkit</div>
+        <div class="item" data-action="goAccount" data-route="restful-api"><span class="ico"><i data-lucide="lock"></i></span> RESTful API</div>
+        <div class="item" data-action="goAccount" data-route="aa-embedded-credentials"><span class="ico"><i data-lucide="key-round"></i></span> AA Embedded Credentials</div>
+        <div class="item" data-action="goAccount" data-route="webhooks"><span class="ico"><i data-lucide="webhook"></i></span> Webhooks</div>
+        <div class="item" data-action="goAccount" data-route="audit-logs"><span class="ico"><i data-lucide="clipboard-list"></i></span> Audit logs</div>
+        <div class="item" data-action="goAccount" data-route="dev-toolkit"><span class="ico"><i data-lucide="wrench"></i></span> Developer Toolkit</div>
 
         <div class="divider"></div>
         <div class="credits-block" data-action="goAccount" data-route="billing-subs">
-          <div class="credits-header"><span>🎁 Free 10,000 Minutes</span></div>
+          <div class="credits-header"><i data-lucide="gift"></i> Free 10,000 Minutes</div>
           <div class="credits-bar"><div class="credits-fill" style="width: 35%"></div></div>
           <div class="credits-meta"><span class="muted">Remaining</span><span><strong>3,500 mins</strong></span></div>
         </div>
 
         <div class="divider"></div>
-        <div class="item" data-action="toast" data-msg="analytics.agora.io opens in new tab"><span class="ico">📊</span> Try Agora Analytics ↗</div>
+        <div class="item" data-action="toast" data-msg="analytics.agora.io opens in new tab"><span class="ico"><i data-lucide="bar-chart-3"></i></span> Try Agora Analytics <i data-lucide="external-link"></i></div>
 
         <div class="divider"></div>
         <div class="group-label">Help</div>
-        <div class="item" data-action="goAccount" data-route="support-tickets"><span class="ico">🎫</span> Support tickets</div>
-        <div class="item" data-action="goAccount" data-route="contact-sales"><span class="ico">💼</span> Contact Sales</div>
-        <div class="item" data-action="goAccount" data-route="whats-new"><span class="ico">📰</span> What's new</div>
-        <div class="item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico">📖</span> Docs ↗</div>
-        <div class="item" data-action="toast" data-msg="status.agora.io opens in new tab"><span class="ico">●</span> System status ↗</div>
+        <div class="item" data-action="goAccount" data-route="support-tickets"><span class="ico"><i data-lucide="ticket"></i></span> Support tickets</div>
+        <div class="item" data-action="goAccount" data-route="contact-sales"><span class="ico"><i data-lucide="briefcase"></i></span> Contact Sales</div>
+        <div class="item" data-action="goAccount" data-route="whats-new"><span class="ico"><i data-lucide="newspaper"></i></span> What's new</div>
+        <div class="item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico"><i data-lucide="book-open"></i></span> Docs <i data-lucide="external-link"></i></div>
+        <div class="item" data-action="toast" data-msg="status.agora.io opens in new tab"><span class="ico"><i data-lucide="circle-dot"></i></span> System status <i data-lucide="external-link"></i></div>
 
         <div class="divider"></div>
-        <div class="item" data-action="goAccount" data-route="preferences"><span class="ico">⚙</span> Preferences</div>
-        <div class="item" data-action="toast" data-msg="Sign out — wireframe stub"><span class="ico">↗</span> Log out</div>
+        <div class="item" data-action="goAccount" data-route="preferences"><span class="ico"><i data-lucide="settings"></i></span> Preferences</div>
+        <div class="item" data-action="toast" data-msg="Sign out — wireframe stub"><span class="ico"><i data-lucide="log-out"></i></span> Log out</div>
       </div>
     </div>
   </aside>
@@ -134,8 +134,8 @@
   <div class="topbar">
     <div class="topbar-left"></div>
     <div class="topbar-right">
-      <button class="btn icon" title="Notifications (3 new)" data-action="goAccount" data-route="notification-center">🔔</button>
-      <button class="btn ask-btn" data-action="toast" data-msg="Ask — AI helper stub">✦ Ask</button>
+      <button class="btn icon ghost" title="Notifications (3 new)" data-action="goAccount" data-route="notification-center"><i data-lucide="bell"></i></button>
+      <button class="btn ask-btn" data-action="toast" data-msg="Ask — AI helper stub"><i data-lucide="sparkles"></i> Ask</button>
     </div>
   </div>
 
@@ -161,7 +161,7 @@
       <!-- BILLING SUSPENDED takeover (edge case #7 from /fortify) — hidden by default -->
       <div class="home-suspended hidden" id="homeSuspended">
         <div class="box warning">
-          <h2 style="margin-bottom: 8px;">⚠ Account suspended</h2>
+          <h2 style="margin-bottom: 8px; display:flex; align-items:center; gap:10px;"><i data-lucide="alert-triangle"></i> Account suspended</h2>
           <p class="subhead">Your account balance has reached $0 and active agents are paused. Resolve billing to resume.</p>
           <div class="row"><span class="label">Outstanding balance</span><span class="value">$48.20</span></div>
           <div class="row"><span class="label">Affected agents</span><span class="value">3 live agents paused across 2 projects</span></div>
@@ -183,15 +183,15 @@
           <p class="subhead">Try a pre-built agent first — no setup, no credit card.</p>
           <div class="grid-3" style="margin-top: 20px;">
             <div class="proj-card clickable" data-action="toast" data-msg="Calling Appointment Reminder">
-              <div class="proj-name">📞 Appointment Reminder</div>
+              <div class="proj-name">Appointment Reminder</div>
               <div class="proj-stats">Working pre-built. Click to call now.</div>
             </div>
             <div class="proj-card clickable" data-action="toast" data-msg="Calling NPS Survey">
-              <div class="proj-name">📊 NPS Survey</div>
+              <div class="proj-name">NPS Survey</div>
               <div class="proj-stats">Voice feedback agent. Click to call.</div>
             </div>
             <div class="proj-card clickable" data-action="toast" data-msg="Calling IVR">
-              <div class="proj-name">🔀 IVR</div>
+              <div class="proj-name">IVR</div>
               <div class="proj-stats">Department routing. Click to call.</div>
             </div>
           </div>
@@ -220,7 +220,7 @@
 
       <!-- 2. Health alerts -->
       <div class="box warning">
-        <h3>⚠ Needs your attention</h3>
+        <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="alert-triangle"></i> Needs your attention</h3>
         <div class="row">
           <span class="label">OpenAI credential</span>
           <span class="value">Returning 401 — key may have rotated</span>
@@ -288,8 +288,8 @@
         <p class="desc">Get from zero to a live agent in under a minute.</p>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button class="btn" data-route="agents" data-action="newAgent">+ New agent from scratch</button>
-          <button class="btn" data-action="toast" data-msg="Import flow — wireframe stub">↓ Import from Retell / Vapi / LiveKit</button>
-          <button class="btn" data-route="agents">▶ Try a pre-built</button>
+          <button class="btn" data-action="toast" data-msg="Import flow — wireframe stub"><i data-lucide="download"></i> Import from Retell / Vapi / LiveKit</button>
+          <button class="btn" data-route="agents"><i data-lucide="play"></i> Try a pre-built</button>
         </div>
       </div>
 
@@ -306,7 +306,7 @@
 
       <!-- 7. What's new (dismissible, low-key) -->
       <div class="box info">
-        <h3>What's new <button class="btn icon" style="float: right;" data-action="toast" data-msg="Dismissed">×</button></h3>
+        <h3>What's new <button class="btn icon" style="float: right;" data-action="toast" data-msg="Dismissed"><i data-lucide="x"></i></button></h3>
         <div class="row" style="padding: 4px 0;"><span class="label">Vendor Credentials</span><span class="value">Renamed from "Credentials". Vendor-first add flow.</span></div>
         <div class="row" style="padding: 4px 0;"><span class="label">Extensions Marketplace</span><span class="value">Browse 15+ Agora extensions in one place.</span></div>
         <div class="row" style="padding: 4px 0;"><span class="label">Test without publish</span><span class="value">Test your agent immediately — no publish step required.</span></div>
@@ -372,7 +372,7 @@
                   <td>02/10/2026 10:00</td>
                   <td>5 minutes ago</td>
                   <td><span class="tag tag-live">Live</span></td>
-                  <td class="row-menu">⋮</td>
+                  <td class="row-menu"><i data-lucide="more-vertical"></i></td>
                 </tr>
                 <tr class="clickable" data-action="openAgent" data-agent="Sales Representative">
                   <td><strong>Sales Representative</strong></td>
@@ -381,7 +381,7 @@
                   <td>02/10/2026 10:00</td>
                   <td>02/10/2026 10:00</td>
                   <td><span class="tag tag-live">Live</span></td>
-                  <td class="row-menu">⋮</td>
+                  <td class="row-menu"><i data-lucide="more-vertical"></i></td>
                 </tr>
                 <tr class="clickable" data-action="openAgent" data-agent="Survey Agent">
                   <td><strong>Survey Agent</strong></td>
@@ -390,7 +390,7 @@
                   <td>02/04/2026 18:00</td>
                   <td>02/04/2026 18:00</td>
                   <td><span class="tag tag-draft">Draft</span></td>
-                  <td class="row-menu">⋮</td>
+                  <td class="row-menu"><i data-lucide="more-vertical"></i></td>
                 </tr>
               </tbody>
             </table>
@@ -398,7 +398,7 @@
 
           <!-- Pre-built templates (shown in both states) -->
           <div class="box">
-            <h3>🤖 Pre-built by agora</h3>
+            <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="bot"></i> Pre-built by agora</h3>
             <div class="row clickable" data-action="selectTemplate" data-agent="Appointment Reminder">
               <span class="label"><strong>Appointment Reminder</strong></span>
               <span class="value">Automatically call customers to remind them of upcoming appointments</span>
@@ -430,7 +430,7 @@
           <div class="orb orb-large"></div>
           <div style="text-align:center; margin: 8px 0 16px; font-size:13px;">Agent Idle</div>
           <div style="text-align:center;">
-            <button class="btn primary" style="width:100%" data-action="toast" data-msg="Calling agent — listen up">📞 Start Call</button>
+            <button class="btn primary" style="width:100%" data-action="toast" data-msg="Calling agent — listen up"><i data-lucide="phone-call"></i> Start Call</button>
           </div>
 
           <div class="stats-block">
@@ -1246,7 +1246,7 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
 
       <div class="tab-panel" data-panel="notif-all">
         <div class="box">
-          <div class="row clickable"><span class="label">⚠ Maintenance window scheduled</span><span class="value">Singapore region · 25 May 02:00 UTC · ~30 min</span><span class="tag">Operations</span></div>
+          <div class="row clickable"><span class="label" style="display:flex;align-items:center;gap:6px;"><i data-lucide="alert-triangle"></i> Maintenance window scheduled</span><span class="value">Singapore region · 25 May 02:00 UTC · ~30 min</span><span class="tag">Operations</span></div>
           <div class="row clickable"><span class="label">Pricing change notice</span><span class="value">RTC overage rate decreases 1 Jun 2026</span><span class="tag muted">Billing</span></div>
           <div class="row clickable"><span class="label">New agent template available</span><span class="value">"Outbound Sales Qualifier" — try in Templates</span><span class="tag muted">Product</span></div>
           <div class="row clickable"><span class="label">Ticket #4821 replied</span><span class="value">Support has responded to your SSO question</span><span class="tag muted">Tickets</span></div>
@@ -1418,7 +1418,7 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
 <!-- Add Vendor Credential modal -->
 <div class="modal-backdrop hidden" id="addCredModal">
   <div class="modal">
-    <div class="modal-header"><h3 id="addCredTitle">Add vendor credential</h3><button class="btn icon" data-action="closeAddCred">×</button></div>
+    <div class="modal-header"><h3 id="addCredTitle">Add vendor credential</h3><button class="btn icon" data-action="closeAddCred"><i data-lucide="x"></i></button></div>
     <div class="tabs"><div class="tab active" id="stepTab1">1. Vendor</div><div class="tab" id="stepTab2">2. Details</div></div>
     <div id="credStep1">
       <div class="field"><label>Search vendors</label><input class="input" placeholder="OpenAI, ElevenLabs, Deepgram, Azure, ..."></div>
@@ -1447,7 +1447,7 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
 <!-- Deploy modal -->
 <div class="modal-backdrop hidden" id="deployModal">
   <div class="modal">
-    <div class="modal-header"><h3>Deploy <span id="deployAgentName">Appointment Reminder</span></h3><button class="btn icon" data-action="closeDeploy">×</button></div>
+    <div class="modal-header"><h3>Deploy <span id="deployAgentName">Appointment Reminder</span></h3><button class="btn icon" data-action="closeDeploy"><i data-lucide="x"></i></button></div>
     <div class="tabs" id="deployTabs">
       <div class="tab active" data-tab="code">Code</div>
       <div class="tab" data-tab="env">Env</div>
@@ -1480,7 +1480,7 @@ AGENT_ID=FSDF122S7</textarea></div>
 <!-- Top-up wallet modal -->
 <div class="modal-backdrop hidden" id="topupModal">
   <div class="modal">
-    <div class="modal-header"><h3>Top up wallet</h3><button class="btn icon" data-action="closeTopup">×</button></div>
+    <div class="modal-header"><h3>Top up wallet</h3><button class="btn icon" data-action="closeTopup"><i data-lucide="x"></i></button></div>
     <div class="field"><label>Add to balance</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
         <button class="btn topup-chip" data-action="pickTopup" data-amount="25">$25</button>
@@ -1509,7 +1509,7 @@ AGENT_ID=FSDF122S7</textarea></div>
 <!-- Change plan modal -->
 <div class="modal-backdrop hidden" id="changePlanModal">
   <div class="modal">
-    <div class="modal-header"><h3>Upgrade to PRO</h3><button class="btn icon" data-action="closeChangePlan">×</button></div>
+    <div class="modal-header"><h3>Upgrade to PRO</h3><button class="btn icon" data-action="closeChangePlan"><i data-lucide="x"></i></button></div>
     <div class="box info">
       <div class="row"><span class="label">From</span><span class="value">STARTER · $49/mo · 50K mins · 2 concurrent agents</span></div>
       <div class="row"><span class="label">To</span><span class="value"><strong>PRO · $199/mo · 200K mins · 10 concurrent agents</strong></span></div>
@@ -1535,7 +1535,7 @@ AGENT_ID=FSDF122S7</textarea></div>
 <!-- Add webhook modal -->
 <div class="modal-backdrop hidden" id="webhookModal">
   <div class="modal">
-    <div class="modal-header"><h3>Add webhook</h3><button class="btn icon" data-action="closeWebhookModal">×</button></div>
+    <div class="modal-header"><h3>Add webhook</h3><button class="btn icon" data-action="closeWebhookModal"><i data-lucide="x"></i></button></div>
     <div class="field"><label>Endpoint URL</label><input class="input mono" placeholder="https://api.your-app.com/agora-events"></div>
     <div class="field"><label>Subscribe to events</label>
       <div class="grid-2" style="margin-top:6px;font-size:12px;">
@@ -1567,7 +1567,7 @@ AGENT_ID=FSDF122S7</textarea></div>
 <!-- New ticket modal -->
 <div class="modal-backdrop hidden" id="ticketModal">
   <div class="modal">
-    <div class="modal-header"><h3>New support ticket</h3><button class="btn icon" data-action="closeTicketModal">×</button></div>
+    <div class="modal-header"><h3>New support ticket</h3><button class="btn icon" data-action="closeTicketModal"><i data-lucide="x"></i></button></div>
     <div class="grid-2">
       <div class="field"><label>Category</label><select class="input"><option selected>Technical</option><option>Billing</option><option>Security</option><option>Feature request</option></select></div>
       <div class="field"><label>Severity</label><select class="input"><option>Low — within 5 business days</option><option selected>Medium — within 2 business days</option><option>High — within 1 business day</option><option>Urgent — within 4h (paid plans only)</option></select></div>
@@ -1588,6 +1588,7 @@ AGENT_ID=FSDF122S7</textarea></div>
 <!-- Toast -->
 <div id="toast" class="toast hidden"></div>
 
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

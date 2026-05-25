@@ -353,10 +353,27 @@
     }
   });
 
+  // ---------- Lucide icons ----------
+  function renderIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+    }
+  }
+
   // ---------- Init ----------
   // Sync UI to default project state
   $$('.proj-name').forEach((n) => (n.textContent = state.project));
   const cp = $('#currentProject');
   if (cp) cp.textContent = state.project;
   goTo('home');
+  // Render Lucide icons. If lucide hasn't loaded yet, retry briefly.
+  if (window.lucide) renderIcons();
+  else {
+    let tries = 0;
+    const t = setInterval(() => {
+      if (window.lucide || ++tries > 20) { clearInterval(t); renderIcons(); }
+    }, 50);
+  }
+  // Expose for any dynamic-DOM consumers
+  window.__renderIcons = renderIcons;
 })();
