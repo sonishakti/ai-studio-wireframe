@@ -1,6 +1,6 @@
 /* Studio_X wireframe — shadcn design tokens, Agora blue accent */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Mono:wght@400;700&display=swap');
 
 /* ============ DESIGN TOKENS (shadcn neutral + Agora blue) ============ */
 :root {
@@ -765,3 +765,450 @@ h2 .lucide[data-lucide="alert-triangle"],
 h3 .lucide[data-lucide="alert-triangle"] {
   color: hsl(38 92% 50%);
 }
+
+/* ============================================================
+   BILLING REBUILD — shadcn-faithful components (from Figma)
+   Card, Segmented tabs, Progress, Combobox, Pagination,
+   Alert, Copy-input, Data table, Mono numerics
+   ============================================================ */
+
+/* Space Mono for currency / numeric amounts (matches Figma) */
+.mono-num {
+  font-family: 'Space Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Structured Card — replaces .box for the new billing surfaces.
+   Header is a mono-uppercase eyebrow, body has its own padding. */
+.card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.card-eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 16px;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.card-body {
+  padding: 8px 24px 24px;
+}
+.card-body > * + * { margin-top: 16px; }
+
+/* Segmented tabs (rounded background, active with secondary fill).
+   Used for Current Plan product family + Payment Methods type toggle +
+   Invoices Monthly/Pre-Paid filter. Distinct from .tabs (line-underline). */
+.seg-tabs {
+  display: inline-flex;
+  padding: 4px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  gap: 0;
+}
+.seg-tabs .seg {
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+  line-height: 20px;
+}
+.seg-tabs .seg:hover { color: hsl(var(--foreground)); }
+.seg-tabs .seg.active {
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+/* Progress bar — used in the Current Plan quota digest. */
+.progress {
+  width: 100%;
+  height: 12px;
+  background: hsl(var(--accent));
+  border-radius: 6px;
+  overflow: hidden;
+}
+.progress > .bar {
+  height: 100%;
+  background: hsl(var(--primary));
+  border-radius: 6px;
+  transition: width 240ms ease;
+}
+.progress.warning > .bar { background: hsl(var(--warning)); }
+.progress.destructive > .bar { background: hsl(var(--destructive)); }
+
+/* Combobox-style filter chip — outline button with leading icon
+   and trailing chevron. Used for date range + type filters. */
+.combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  height: 40px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 14px;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms;
+}
+.combo:hover { background: hsl(var(--muted) / 0.4); }
+.combo .lucide { width: 14px; height: 14px; color: hsl(var(--muted-foreground)); }
+
+/* Pagination — Previous · 1 · 2 · 3 · … · Next */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 20px;
+}
+.pagination .page {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.pagination .page:hover { background: hsl(var(--muted)); color: hsl(var(--foreground)); }
+.pagination .page.active {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+.pagination .page.nav { gap: 4px; padding: 0 10px; }
+.pagination .page .lucide { width: 14px; height: 14px; }
+.pagination .ellipsis {
+  padding: 0 4px;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+}
+
+/* Alert — leading icon + heading + body. Variants: warning, destructive, info. */
+.alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.alert .alert-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+.alert .alert-title {
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.alert.warning {
+  background: hsl(38 92% 50% / 0.08);
+  border-color: hsl(38 92% 50% / 0.4);
+  color: hsl(38 92% 45%);
+}
+.alert.warning .alert-title { color: hsl(38 92% 50%); }
+.alert.destructive {
+  background: hsl(var(--destructive) / 0.08);
+  border-color: hsl(var(--destructive) / 0.4);
+  color: hsl(var(--destructive));
+}
+.alert.destructive .alert-title { color: hsl(var(--destructive)); }
+.alert.info {
+  background: hsl(var(--primary) / 0.06);
+  border-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
+}
+.alert.info .alert-title { color: hsl(var(--primary)); }
+
+/* Copy-input — read-only input field with trailing icon button.
+   Used for Bank Transfer details (CID, beneficiary, swift, etc.) */
+.copy-input {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+}
+.copy-input .field-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.copy-input label {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+.copy-input .field {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 14px;
+  color: hsl(var(--foreground));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.copy-input .copy-btn {
+  align-self: flex-end;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.copy-input .copy-btn:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+.copy-input .copy-btn .lucide { width: 16px; height: 16px; }
+
+/* Data table — proper shadcn-style table for Transactions / Invoices. */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+.data-table thead th {
+  text-align: left;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted) / 0.4);
+  padding: 14px 16px;
+  border-bottom: 1px solid hsl(var(--border));
+  white-space: nowrap;
+}
+.data-table thead th.sortable { cursor: pointer; }
+.data-table thead th .lucide { width: 12px; height: 12px; vertical-align: -1px; margin-left: 4px; opacity: 0.6; }
+.data-table tbody td {
+  padding: 20px 16px;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  color: hsl(var(--foreground));
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr.clickable { cursor: pointer; transition: background 120ms; }
+.data-table tbody tr.clickable:hover { background: hsl(var(--muted) / 0.4); }
+.data-table thead th:first-child,
+.data-table tbody td:first-child { padding-left: 24px; }
+.data-table thead th:last-child,
+.data-table tbody td:last-child { padding-right: 24px; text-align: right; }
+
+/* Status badges for invoice/transaction states */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+.status-badge.issued { background: hsl(var(--primary) / 0.15); color: hsl(var(--primary)); }
+.status-badge.paid   { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+.status-badge.failed { background: hsl(var(--destructive) / 0.15); color: hsl(var(--destructive)); }
+.status-badge.pending { background: hsl(38 92% 50% / 0.15); color: hsl(38 92% 50%); }
+
+/* Disclaimer bullet list under tables */
+.disclaimer {
+  margin-top: 24px;
+  padding: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+.disclaimer ul { list-style: none; padding: 0; margin: 0; }
+.disclaimer li {
+  padding-left: 14px;
+  position: relative;
+  margin-bottom: 4px;
+}
+.disclaimer li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  top: 0;
+}
+
+/* Wallet hero — big balance numbers + secondary metric */
+.wallet-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.wallet-balances {
+  display: flex;
+  gap: 52px;
+}
+.balance-item .balance-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  margin-bottom: 8px;
+}
+.balance-item .balance-value {
+  font-family: 'Space Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: hsl(var(--foreground));
+}
+.wallet-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Plan quota row (under the segmented product-family tabs) */
+.quota-pct {
+  font-family: 'Space Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 16px;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.025em;
+}
+.quota-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 6px;
+}
+.quota-meta strong { color: hsl(var(--foreground)); font-weight: 500; }
+
+/* Card list (for Payment Methods → Credit Card list) */
+.card-list { display: flex; flex-direction: column; }
+.card-list .card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 12px;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+.card-list .card-row:last-child { border-bottom: none; }
+.card-list .card-row .lhs { display: flex; align-items: center; gap: 12px; }
+.card-list .card-brand {
+  width: 30px;
+  height: 20px;
+  border-radius: 3px;
+  background: hsl(var(--muted));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: hsl(var(--foreground));
+  flex-shrink: 0;
+}
+.card-list .card-brand.visa { background: #1a1f71; color: #fff; }
+.card-list .card-brand.mastercard {
+  background: linear-gradient(90deg, #eb001b 0 50%, #f79e1b 50% 100%);
+  color: #fff;
+  font-size: 0; /* hide text label, show gradient pill only */
+}
+.card-list .card-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  color: hsl(var(--foreground));
+}
+.card-list .card-default {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  background: hsl(var(--muted));
+  border-radius: 4px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Grid-3 cols utility for the Bank Transfer field rows */
+.bt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 12px;
+}
+.bt-grid > .copy-input { width: 100%; }
+
+/* Filter row (toolbar above tables) */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.table-toolbar .lhs { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.table-toolbar .icon-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.table-toolbar .icon-btn:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+/* Cards row for Payment Methods top section */
+.cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+.cards-row .card { margin-bottom: 0; }

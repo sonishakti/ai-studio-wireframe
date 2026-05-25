@@ -18,13 +18,12 @@
   const routeAliases = {
     'realtime-products': 'realtime-services',
     'usage': 'analytics', // Usage is now the Usage tab inside Analytics
-    'account-usage': 'billing-subs', // Account-level usage roll-up lives in Billing
+    'account-usage': 'billing-subs', // Legacy alias → lands on Billing Overview (Current Plan card has the quota digest)
   };
 
   // Routes that should deep-link to a specific tab after navigation
   const routeTabDeepLinks = {
     'usage': { panelSelector: '[data-panel="an-usage"]', tabSelector: '[data-tab="an-usage"]' },
-    'account-usage': { panelSelector: '[data-panel="bill-usage"]', tabSelector: '[data-tab="bill-usage"]' },
   };
 
   function goTo(route) {

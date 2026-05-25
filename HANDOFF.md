@@ -26,7 +26,8 @@ Studio_X is the IA + UX wireframe for merging **Agora Console** (operational con
 | 5 | `references/event-taxonomy-review.md` | 28-event canonical taxonomy with 7 P0/P1 fixes flagged on the Notion KPI doc. |
 | 6 | `references/analytics-rebuild.md` | Analytics Performance tab — Figma → wireframe + `/organize` (Agent vs RTE) + `/fortify` (12-state inventory). |
 | 7 | `references/usage-rebuild.md` | Analytics Usage tab — Agora Console Figma → adapted Studio_X version. |
-| 8 | `wireframes/app.html` + `style.css` + `app.css` + `app.js` | The wireframe itself. ~1700 lines of HTML, fully tokenized. |
+| 8 | `references/billing-journey.md` | Billing 10 end-to-end journeys mapped: top-up, pay invoice, upgrade, view usage, manage cards, download, audit transaction, bank transfer, bill-shock, suspended-account. |
+| 9 | `wireframes/app.html` + `style.css` + `app.css` + `app.js` | The wireframe itself. ~2000 lines of HTML after the Billing rebuild, fully tokenized. |
 
 ---
 
@@ -60,18 +61,22 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 
 **Analytics is a tabbed surface** (Performance · Usage · Cost) at `Monitor › Analytics`. Usage merged in from a separate sidebar item — route `/usage` still works as an alias. Performance matches the Studio Figma; Usage matches the Agora Console Figma.
 
-**Usage now exists at two scopes (polyhierarchy, locked 2026-05-26):**
-- **Monitor › Analytics › Usage** — project-scoped (current project only). Default for P1 the hustler debugging. Subhead scope-stamps the current project. Multi-project workspaces see a conditional cross-link to the account view.
-- **Account › Billing & Subscriptions › Usage** — account-scoped roll-up across all projects, with per-project breakdown table + drill-in to Monitor for each row. Default for P2/P3/P4 oversight personas. Sits next to Plans/Invoices/Transactions where the financial mental model lives.
-- Cross-links converge from 3 entry points: Home › Workspace usage tile, project-Usage subhead (conditional), and `Going deeper` notes inside Monitor › Usage.
-- Pattern matches the Extensions polyhierarchy (DISCOVER browse + Project settings enable). See `references/ia-mapping.md` Usage section for the rationale.
+**Billing rebuilt 2026-05-26 to match Figma node 142-7864:**
+- 4 tabs only: **Overview · Transactions · Invoices · Payment Methods**
+- **Plans + Add-ons** moved to a separate `/billing-plans` route (accessed from Overview's "Upgrade Plan" CTA)
+- **Withdrawals** absorbed into Transactions as a Type filter value
+- **Account-level Usage** (briefly added as a Billing tab in an earlier turn) reverted — the **Current Plan card** on Overview now answers "am I near my cap?" via a STARTER badge + product-family seg-tabs + 64% Used progress + minute counters + "View Usage →" deep-link to Monitor for the full chart
+- New shadcn-faithful components in `style.css`: `.card`, `.seg-tabs`, `.progress`, `.combo`, `.pagination`, `.alert`, `.copy-input`, `.data-table`, `.status-badge`, `.mono-num`. Space Mono added for currency amounts (matches Figma)
+- See `references/billing-journey.md` for the 10 end-to-end billing flows (top-up, pay invoice, upgrade, bank transfer, suspended-account recovery, bill-shock prevention, etc.)
 
 ---
 
 ## What's done — recent commits worth knowing
 
 ```
-a019d07 /organize: Usage polyhierarchy — project + account scopes with cross-links
+(pending) Billing rebuild from Figma node 142-7864 + /organize 4-tab structure + /journey 10 flows
+99e2047 HANDOFF: stamp the Usage polyhierarchy commit hash
+a019d07 /organize: Usage polyhierarchy — project + account scopes with cross-links (superseded by Figma rebuild)
 3aed61a /organize: lean avatar dropdown via Developer + Help hubs
 1c79750 Usage tab: rebuild from Agora Console Figma, adapted for Studio_X
 503a4f0 Analytics: rebuild Performance tab to match Figma + /organize + /fortify

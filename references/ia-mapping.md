@@ -31,10 +31,9 @@ Studio_X sidebar (LEAN — final shape)
 Studio_X sidebar (account mode)
 ├── ACCOUNT
 │   ├── Account Overview
-│   ├── Billing & Subscriptions   ← Overview · Usage (account-scoped) ·
-│   │                                Plans · Invoices · Transactions ·
-│   │                                Payment methods · Withdrawals ·
-│   │                                Add-on packages
+│   ├── Billing                   ← Overview · Transactions · Invoices ·
+│   │                                Payment Methods  (4 tabs per Figma)
+│   │                                Plans + Add-ons live at /billing-plans
 │   ├── Teams & Members
 │   ├── SSO Management
 │   ├── Notification Preferences
@@ -90,32 +89,34 @@ Standalone destinations
 | `/flexible-classroom` | Build › Real-Time products › **Flexible Classroom** | Vertical solution |
 | `/notifications` (project) | Project › **Notifications** | Already wired |
 
-### Usage (1 page → 2 destinations, polyhierarchy)
+### Usage (1 page)
 | Console URL | Studio destination |
 |---|---|
 | `/usage` | Monitor › **Analytics › Usage** tab (route alias preserves 1-click access) — **project-scoped** |
-| `/account-usage` (new alias) | Account › **Billing & Subscriptions › Usage** tab — **account-scoped roll-up across all projects** |
+| `/account-usage` (legacy alias) | Account › **Billing › Overview** — quota digest lives inside the Current Plan card |
 
 > **2026-05-22 update.** Usage was previously a standalone PROJECT sidebar item. It now lives as a tab inside `Monitor › Analytics`, alongside Performance and Cost. Rationale: all three answer the same root question — *"how are my agents doing in production?"* — at different aggregations. Splitting forced context-switching mid-debug. Route `/usage` still works via alias and auto-activates the Usage tab.
 >
-> **2026-05-26 update — polyhierarchy added.** P1 (the hustler) lives in Monitor and debugs per-project; P2 PM / P3 TAM / P4 EM live in Billing and need account-wide oversight. Usage legitimately exists at two scopes. Added `Account › Billing & Subscriptions › Usage` as the second destination — same component, account-scoped default, per-project breakdown table with drill-in. Project-Usage subhead now scope-stamps the current project ("My first project · Current billing cycle") and surfaces a conditional cross-link ("Workspace has 3 projects. View usage across all projects →") for multi-project users only. Single-project workspaces don't see the cross-link. Three entry points converge on the account view: Home › Workspace usage tile CTA, Billing tab, and the cross-link inside Monitor › Usage. Pattern matches the Extensions polyhierarchy (DISCOVER browse + Project settings enable).
+> **2026-05-26 update — polyhierarchy considered, then resolved differently.** Briefly added `Account › Billing & Subscriptions › Usage` as a second destination for P2/P3/P4 oversight personas. The Figma redesign (node 142-7864) rejected this — Billing is for *financial transactions*, not telemetry. The account-level quota question ("am I near my cap?") is now answered by the Current Plan card on Billing Overview: STARTER badge, product-family seg-tabs (Agents/RTC/Signaling/Chat), 64% Used progress bar, mins-used/mins-left counters, and a "View Usage →" link that deep-links to Monitor for the full chart. The legacy `/account-usage` alias now lands on Billing Overview rather than a dedicated tab. Per-project breakdown was dropped — if a TAM wants project-by-project usage, they switch the project chip and check Monitor › Analytics › Usage per project.
 
-### Billing (5 pages, all merged)
+### Billing — rebuilt 2026-05-26 to match Figma (node 142-7864)
+**4 tabs only:** Overview · Transactions · Invoices · Payment Methods. Plans/Add-ons live at a separate `/billing-plans` route (accessed from Overview's "Upgrade Plan" CTA). Withdrawals are now a Type filter value in Transactions, not a separate tab.
+
 | Console URL | Studio destination |
 |---|---|
-| `/billing` | Account › Billing & Subscriptions › **Overview** tab |
-| `/billing/invoices` | Account › Billing & Subscriptions › **Invoices** tab |
-| `/billing/transactions` | Account › Billing & Subscriptions › **Transactions** tab |
-| `/billing/manage-cards` | Account › Billing & Subscriptions › **Payment methods** tab |
-| `/billing/withdraw-transactions` | Account › Billing & Subscriptions › **Withdrawals** tab |
+| `/billing` | Account › Billing › **Overview** (Wallet + Current Plan + Payment Methods digest) |
+| `/billing/invoices` | Account › Billing › **Invoices** (Monthly / Pre-Paid sub-tabs, table, pagination) |
+| `/billing/transactions` | Account › Billing › **Transactions** (Type + Date filters, table, pagination) |
+| `/billing/manage-cards` | Account › Billing › **Payment Methods** (Wallet + Cards list + Bank Transfer details) |
+| `/billing/withdraw-transactions` | Transactions tab filtered to Type = Withdrawal/Refund |
 
-### Subscriptions (4 pages, all merged)
+### Subscriptions (4 pages, all merged into Plans destination)
 | Console URL | Studio destination |
 |---|---|
-| `/subscriptions` | Account › Billing & Subscriptions › **Plans** section |
-| `/subscriptions/rtc-plans` | Plans › RTC |
-| `/subscriptions/chat-plans` | Plans › Chat |
-| `/subscriptions/signaling-plans` | Plans › Signaling |
+| `/subscriptions` | Account › **Billing › Plans** (separate screen at `/billing-plans`, reached via Upgrade Plan CTA) |
+| `/subscriptions/rtc-plans` | Billing › Plans › Plans by Product Family › RTC |
+| `/subscriptions/chat-plans` | Billing › Plans › Plans by Product Family › Chat |
+| `/subscriptions/signaling-plans` | Billing › Plans › Plans by Product Family › Signaling |
 
 ### Extension Marketplace (11 pages)
 | Console URL | Studio destination |
@@ -154,7 +155,7 @@ Standalone destinations
 ### Finance (1 page)
 | Console URL | Studio destination |
 |---|---|
-| `/finance/packages` | Account › Billing & Subscriptions › **Add-on packages** section |
+| `/finance/packages` | Account › Billing › Plans › **Add-on Packages** section (Agora Analytics, Premium Support) |
 
 ### License Management (1 page, gated)
 | Console URL | Studio destination |
