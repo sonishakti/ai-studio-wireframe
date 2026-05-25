@@ -11,35 +11,22 @@ This document proves every page in the existing Agora Console has a home in the 
 ## Destination groups
 
 ```
-Studio_X sidebar (project mode)
-├── Home                          workspace overview
+Studio_X sidebar (LEAN — final shape)
+├── Home
 ├── BUILD
-│   ├── Agents                    ← Conv AI Engine (project configure)
-│   ├── Real-Time products        ← Voice/Video/ILS/Chat/Signaling/Whiteboard
-│   └── Integrations              connector library (Twilio, Salesforce, ...)
+│   ├── Agents
+│   └── Integrations
 ├── DEPLOY
 │   ├── Phone Numbers
-│   ├── Campaign
-│   ├── Web SDK
-│   └── ··· more                  (SIP, WhatsApp, Mobile, Embedded)
+│   └── Campaign
 ├── MONITOR
-│   ├── Analytics
+│   ├── Analytics                 ← tabs: Performance · Usage · Cost
 │   ├── Call History
-│   ├── Session History
-│   ├── Usage
-│   └── Agora Analytics ↗         external
-├── DISCOVER
-│   ├── Extensions Marketplace    ← Cloud Recording, Media Push/Pull/Gateway,
-│   │                                Real-Time STT, Video Screenshot Upload,
-│   │                                10 third-party extensions
-│   ├── Templates
-│   ├── Docs ↗
-│   └── Community ↗
+│   └── Session History
 └── PROJECT
-    ├── Project settings          ← App ID, App Certificate, Cloud Proxy,
-    │                                Co-Host Authentication
-    ├── Vendor Credentials        third-party LLM/TTS/ASR keys
-    └── Notifications             project-scoped triggers
+    ├── Project Settings
+    ├── Realtime Services         ← absorbs Real-Time products + RTC add-ons
+    └── Credentials                third-party LLM/TTS/ASR keys
 
 Studio_X sidebar (account mode)
 ├── ACCOUNT
@@ -105,7 +92,9 @@ Standalone destinations
 ### Usage (1 page)
 | Console URL | Studio destination |
 |---|---|
-| `/usage` | Monitor › **Usage** |
+| `/usage` | Monitor › **Analytics › Usage** tab (route alias preserves 1-click access) |
+
+> **2026-05-22 update.** Usage was previously a standalone PROJECT sidebar item. It now lives as a tab inside `Monitor › Analytics`, alongside Performance and Cost. Rationale: all three answer the same root question — *"how are my agents doing in production?"* — at different aggregations. Splitting forced context-switching mid-debug. Route `/usage` still works via alias and auto-activates the Usage tab. See [organize discussion in commit history].
 
 ### Billing (5 pages, all merged)
 | Console URL | Studio destination |

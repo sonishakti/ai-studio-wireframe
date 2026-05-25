@@ -16,9 +16,16 @@
   // Route aliases (old → new)
   const routeAliases = {
     'realtime-products': 'realtime-services',
+    'usage': 'analytics', // Usage is now the Usage tab inside Analytics
+  };
+
+  // Routes that should deep-link to a specific tab after navigation
+  const routeTabDeepLinks = {
+    'usage': { panelSelector: '[data-panel="an-usage"]', tabSelector: '[data-tab="an-usage"]' },
   };
 
   function goTo(route) {
+    const originalRoute = route;
     route = routeAliases[route] || route;
     state.route = route;
 
@@ -27,8 +34,21 @@
     const screen = $(`[data-screen="${route}"]`);
     if (screen) screen.classList.remove('hidden');
 
-    // Update active nav item
-    $$('.nav-item').forEach((n) => n.classList.toggle('active', n.dataset.route === route));
+    // Update active nav item — match against both alias-resolved and original
+    $$('.nav-item').forEach((n) => {
+      n.classList.toggle('active', n.dataset.route === route || n.dataset.route === originalRoute);
+    });
+
+    // Tab deep-link (e.g. /usage → analytics with Usage tab active)
+    const deep = routeTabDeepLinks[originalRoute];
+    if (deep && screen) {
+      $$('.tab', screen).forEach((t) => t.classList.remove('active'));
+      $$('.tab-panel', screen).forEach((p) => p.classList.add('hidden'));
+      const tab = $(deep.tabSelector, screen);
+      const panel = $(deep.panelSelector, screen);
+      if (tab) tab.classList.add('active');
+      if (panel) panel.classList.remove('hidden');
+    }
 
     // Close any open dropdowns
     closeAllDropdowns();
@@ -273,6 +293,15 @@
     toggleLicensingUnlocked() {
       const u = $('#licensingUnlocked');
       if (u) u.classList.toggle('hidden');
+    },
+
+    // Cross-tab link inside Analytics (Usage → Cost, etc.)
+    setAnalyticsTab(el) {
+      const target = el.dataset.tabTarget;
+      const screen = el.closest('.screen');
+      if (!screen) return;
+      $$('.tab', screen).forEach((t) => t.classList.toggle('active', t.dataset.tab === target));
+      $$('.tab-panel', screen).forEach((p) => p.classList.toggle('hidden', p.dataset.panel !== target));
     },
   };
 

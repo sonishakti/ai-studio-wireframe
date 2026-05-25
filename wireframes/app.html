@@ -47,7 +47,6 @@
       <div class="label">Project</div>
       <a class="nav-item" data-route="project-settings"><span class="ico">⚙</span>Project Settings</a>
       <a class="nav-item" data-route="realtime-services"><span class="ico">🎥</span>Realtime Services</a>
-      <a class="nav-item" data-route="usage"><span class="ico">$</span>Usage</a>
       <a class="nav-item" data-route="vendor-credentials"><span class="ico">🔑</span>Credentials</a>
     </div>
 
@@ -165,7 +164,7 @@
           <div class="row"><span class="label">Affected agents</span><span class="value">3 live agents paused across 2 projects</span></div>
           <div class="row"><span class="label">Estimated downtime</span><span class="value">Since 4 hours ago</span></div>
           <div style="display:flex; gap:8px; margin-top:16px;">
-            <button class="btn primary" data-action="goAccount" data-route="billing-plans">Pay balance & resume →</button>
+            <button class="btn primary" data-action="goAccount" data-route="billing-subs">Pay balance & resume →</button>
             <button class="btn" data-action="toast" data-msg="Support ticket — wireframe stub">Contact support</button>
           </div>
           <div class="note" style="margin-top: 16px;">
@@ -227,7 +226,7 @@
         <div class="row">
           <span class="label">Project Beta · cost cap</span>
           <span class="value">Hit 80% of $200 monthly cap (3 days early)</span>
-          <div class="actions"><a class="btn small" data-action="goAccount" data-route="billing-plans">View billing →</a></div>
+          <div class="actions"><a class="btn small" data-action="goAccount" data-route="billing-subs">View billing →</a></div>
         </div>
         <div class="note" style="background: transparent; border-left-color: #000;">
           <strong>Anti-pattern guard:</strong> surface problems before they become crises (LEARNINGS §6). Only shows when alerts exist; otherwise this block disappears entirely.
@@ -299,7 +298,7 @@
         <div class="row"><span class="label">Project Beta</span><span class="value">22K mins · 11%</span></div>
         <div class="row"><span class="label">Internal Demos</span><span class="value">4K mins · 2%</span></div>
         <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
-        <div class="actions" style="margin-top: 12px;"><a class="btn small" data-action="goAccount" data-route="billing-plans">Manage plan →</a></div>
+        <div class="actions" style="margin-top: 12px;"><a class="btn small" data-action="goAccount" data-route="billing-subs">Manage plan →</a></div>
       </div>
 
       <!-- 7. What's new (dismissible, low-key) -->
@@ -465,10 +464,98 @@
     </div>
     <!-- MONITOR -->
     <div class="screen hidden" data-screen="analytics">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Analytics</div>
+      <div class="breadcrumb"><span class="proj-name">My first project</span> › Analytics</div>
       <h2>Analytics</h2>
-      <p class="subhead">Per-agent performance, latencies, and conversion in this project.</p>
-      <div class="empty">Wireframe placeholder.</div>
+      <p class="subhead">Performance, usage, and cost — one observe surface. Was three Console pages.</p>
+
+      <div class="tabs" id="analyticsTabs">
+        <div class="tab active" data-tab="an-performance">Performance</div>
+        <div class="tab" data-tab="an-usage">Usage</div>
+        <div class="tab" data-tab="an-cost">Cost</div>
+      </div>
+
+      <!-- PERFORMANCE TAB -->
+      <div class="tab-panel" data-panel="an-performance">
+        <div class="box">
+          <h3>Last 24 hours · across all agents</h3>
+          <div class="grid-stats">
+            <div class="stat"><div class="stat-num">1,247</div><div class="stat-label">calls</div></div>
+            <div class="stat"><div class="stat-num">98.4%</div><div class="stat-label">success</div></div>
+            <div class="stat"><div class="stat-num">820ms</div><div class="stat-label">p95 end-to-end</div></div>
+            <div class="stat"><div class="stat-num">312ms</div><div class="stat-label">p50 TTFT</div></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Per agent</h3>
+          <div class="row"><span class="label"><strong>Customer Support Agent</strong></span><span class="value">812 calls · 99.1% success · 740ms p95 · 280ms TTFT</span><span class="tag tag-live">Live</span></div>
+          <div class="row"><span class="label"><strong>Sales Representative</strong></span><span class="value">421 calls · 97.4% success · 920ms p95 · 360ms TTFT</span><span class="tag tag-live">Live</span></div>
+          <div class="row"><span class="label"><strong>Survey Agent</strong></span><span class="value">14 calls · 92.9% success · 1,100ms p95 · 420ms TTFT</span><span class="tag tag-draft">Draft</span></div>
+        </div>
+
+        <div class="box">
+          <h3>Latency breakdown · p95</h3>
+          <div class="row"><span class="label">ASR (Deepgram)</span><span class="value">182ms</span></div>
+          <div class="row"><span class="label">LLM (OpenAI gpt-4o)</span><span class="value">412ms</span></div>
+          <div class="row"><span class="label">TTS (ElevenLabs)</span><span class="value">226ms</span></div>
+          <div class="row"><span class="label">Network + jitter buffer</span><span class="value">~80ms</span></div>
+        </div>
+      </div>
+
+      <!-- USAGE TAB -->
+      <div class="tab-panel hidden" data-panel="an-usage">
+        <div class="box">
+          <h3>This month</h3>
+          <div class="row"><span class="label">Standard minutes</span><span class="value"><strong>176K of 400K used</strong> · 224K left · 44% of cap</span></div>
+          <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
+          <div class="row"><span class="label">Trend vs. last month</span><span class="value">+18% (on pace to hit 220K)</span></div>
+        </div>
+
+        <div class="box">
+          <h3>By agent · this month</h3>
+          <div class="row"><span class="label">Customer Support Agent</span><span class="value">92K mins · 52%</span></div>
+          <div class="row"><span class="label">Sales Representative</span><span class="value">71K mins · 40%</span></div>
+          <div class="row"><span class="label">Survey Agent</span><span class="value">13K mins · 7%</span></div>
+        </div>
+
+        <div class="box">
+          <h3>Quota progress</h3>
+          <div class="credits-bar" style="height: 12px;"><div class="credits-fill" style="width:44%;background:linear-gradient(90deg,#0a85d1,#6cb6e6);"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;"><span>0</span><span>200K</span><span>400K cap</span></div>
+          <div class="note" style="margin-top:12px;"><strong>Cross-link:</strong> need more headroom? <a href="#" data-action="goAccount" data-route="billing-subs">Upgrade your plan →</a> · See <a href="#" data-action="setAnalyticsTab" data-tab-target="an-cost">Cost tab</a> for what these minutes are buying.</div>
+        </div>
+      </div>
+
+      <!-- COST TAB -->
+      <div class="tab-panel hidden" data-panel="an-cost">
+        <div class="box">
+          <h3>Spend this month</h3>
+          <div class="grid-stats">
+            <div class="stat"><div class="stat-num">$87.40</div><div class="stat-label">included plan</div></div>
+            <div class="stat"><div class="stat-num">$0.00</div><div class="stat-label">overage</div></div>
+            <div class="stat"><div class="stat-num">$87.40</div><div class="stat-label">total</div></div>
+            <div class="stat"><div class="stat-num">$110</div><div class="stat-label">forecast EOM</div></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>By agent</h3>
+          <div class="row"><span class="label">Customer Support Agent</span><span class="value">$45.60 · 52%</span></div>
+          <div class="row"><span class="label">Sales Representative</span><span class="value">$35.20 · 40%</span></div>
+          <div class="row"><span class="label">Survey Agent</span><span class="value">$6.60 · 7%</span></div>
+        </div>
+
+        <div class="box">
+          <h3>What you're paying for · per minute</h3>
+          <div class="row"><span class="label">LLM (OpenAI gpt-4o)</span><span class="value">$0.062</span></div>
+          <div class="row"><span class="label">TTS (ElevenLabs)</span><span class="value">$0.024</span></div>
+          <div class="row"><span class="label">ASR (Deepgram)</span><span class="value">$0.010</span></div>
+          <div class="row"><span class="label">Agora platform fee</span><span class="value">$0.004</span></div>
+          <div class="row"><span class="label"><strong>Total</strong></span><span class="value"><strong>$0.10 / min</strong></span></div>
+        </div>
+
+        <div class="note"><strong>Cross-link:</strong> for invoices, payment methods, and plan changes, see <a href="#" data-action="goAccount" data-route="billing-subs">Billing &amp; Subscriptions →</a>. This tab is for spend-against-activity in real time.</div>
+      </div>
     </div>
     <div class="screen hidden" data-screen="call-history">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Call History</div>
@@ -653,19 +740,6 @@
     </div>
 
     <!-- USAGE -->
-    <div class="screen hidden" data-screen="usage">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Usage</div>
-      <h2>Usage</h2>
-      <p class="subhead">Minutes consumed in this project — not billing.</p>
-      <div class="box">
-        <h3>This month</h3>
-        <div class="row"><span class="label">Standard minutes</span><span class="value">176K of 400K used · 224K left</span></div>
-        <div class="row"><span class="label">By agent</span><span class="value">Appointment Reminder 92K · Sales lead 71K · NPS 13K</span></div>
-        <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
-      </div>
-      <div class="note"><strong>Decision #5:</strong> Usage stays in project context. Billing is at <a href="#" data-action="goAccount" data-route="billing-plans">Account → Billing &amp; Plans</a>.</div>
-    </div>
-
     <!-- AGENT BUILDER -->
     <div class="screen hidden" data-screen="builder">
       <div class="breadcrumb"><a href="#" data-route="agents"><span class="proj-name">Project Alpha</span> › Agents</a> › <span id="agentName">Appointment Reminder</span></div>
