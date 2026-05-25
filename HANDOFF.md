@@ -74,7 +74,7 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 ## What's done — recent commits worth knowing
 
 ```
-(pending) Billing rebuild from Figma node 142-7864 + /organize 4-tab structure + /journey 10 flows
+a8ad720 Billing: rebuild from Figma node 142-7864 + /organize 4-tab IA + /journey 10 flows
 99e2047 HANDOFF: stamp the Usage polyhierarchy commit hash
 a019d07 /organize: Usage polyhierarchy — project + account scopes with cross-links (superseded by Figma rebuild)
 3aed61a /organize: lean avatar dropdown via Developer + Help hubs
