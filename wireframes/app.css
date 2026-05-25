@@ -201,6 +201,29 @@
   align-items: center;
   gap: 10px;
 }
+#accountDropdown .item.with-arrow .trail {
+  margin-left: auto;
+  width: 14px;
+  height: 14px;
+  color: hsl(var(--muted-foreground));
+}
+#accountDropdown .item.with-arrow:hover .trail {
+  color: hsl(var(--foreground));
+  transform: translateX(2px);
+  transition: transform 120ms ease, color 120ms ease;
+}
+
+/* Hub card headings: align Lucide icon with the title */
+.ext-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ext-card h3 .lucide {
+  width: 16px;
+  height: 16px;
+  color: hsl(var(--primary));
+}
 #accountDropdown .item .ico {
   width: 18px;
   display: inline-flex;

@@ -102,19 +102,12 @@
         <div class="item" data-action="switchWorkspace" data-workspace="acme-dev-team">acme-dev-team</div>
 
         <div class="divider"></div>
-        <div class="group-label">Account</div>
-        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico"><i data-lucide="list-checks"></i></span> View all plans</div>
-        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico"><i data-lucide="receipt"></i></span> Billing</div>
-        <div class="item" data-action="goAccount" data-route="extensions"><span class="ico"><i data-lucide="store"></i></span> Extensions Marketplace</div>
-        <div class="item" data-action="goAccount" data-route="licensing"><span class="ico"><i data-lucide="id-card"></i></span> Licensing</div>
-
-        <div class="divider"></div>
-        <div class="group-label">Developer</div>
-        <div class="item" data-action="goAccount" data-route="restful-api"><span class="ico"><i data-lucide="lock"></i></span> RESTful API</div>
-        <div class="item" data-action="goAccount" data-route="aa-embedded-credentials"><span class="ico"><i data-lucide="key-round"></i></span> AA Embedded Credentials</div>
-        <div class="item" data-action="goAccount" data-route="webhooks"><span class="ico"><i data-lucide="webhook"></i></span> Webhooks</div>
-        <div class="item" data-action="goAccount" data-route="audit-logs"><span class="ico"><i data-lucide="clipboard-list"></i></span> Audit logs</div>
-        <div class="item" data-action="goAccount" data-route="dev-toolkit"><span class="ico"><i data-lucide="wrench"></i></span> Developer Toolkit</div>
+        <div class="group-label">Theme</div>
+        <div class="theme-toggle" role="group" aria-label="Theme">
+          <button data-action="setTheme" data-theme-set="light" type="button"><i data-lucide="sun"></i> Light</button>
+          <button data-action="setTheme" data-theme-set="dark" type="button"><i data-lucide="moon"></i> Dark</button>
+          <button data-action="setTheme" data-theme-set="system" type="button"><i data-lucide="monitor"></i> System</button>
+        </div>
 
         <div class="divider"></div>
         <div class="credits-block" data-action="goAccount" data-route="billing-subs">
@@ -124,23 +117,11 @@
         </div>
 
         <div class="divider"></div>
+        <div class="item" data-action="goAccount" data-route="billing-subs"><span class="ico"><i data-lucide="receipt"></i></span> Billing</div>
+        <div class="item" data-action="goAccount" data-route="extensions"><span class="ico"><i data-lucide="store"></i></span> Extensions Marketplace</div>
+        <div class="item with-arrow" data-action="goAccount" data-route="developer"><span class="ico"><i data-lucide="wrench"></i></span> Developer <i data-lucide="chevron-right" class="trail"></i></div>
+        <div class="item with-arrow" data-action="goAccount" data-route="help"><span class="ico"><i data-lucide="life-buoy"></i></span> Help <i data-lucide="chevron-right" class="trail"></i></div>
         <div class="item" data-action="toast" data-msg="analytics.agora.io opens in new tab"><span class="ico"><i data-lucide="bar-chart-3"></i></span> Try Agora Analytics <i data-lucide="external-link"></i></div>
-
-        <div class="divider"></div>
-        <div class="group-label">Help</div>
-        <div class="item" data-action="goAccount" data-route="support-tickets"><span class="ico"><i data-lucide="ticket"></i></span> Support tickets</div>
-        <div class="item" data-action="goAccount" data-route="contact-sales"><span class="ico"><i data-lucide="briefcase"></i></span> Contact Sales</div>
-        <div class="item" data-action="goAccount" data-route="whats-new"><span class="ico"><i data-lucide="newspaper"></i></span> What's new</div>
-        <div class="item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico"><i data-lucide="book-open"></i></span> Docs <i data-lucide="external-link"></i></div>
-        <div class="item" data-action="toast" data-msg="status.agora.io opens in new tab"><span class="ico"><i data-lucide="circle-dot"></i></span> System status <i data-lucide="external-link"></i></div>
-
-        <div class="divider"></div>
-        <div class="group-label">Theme</div>
-        <div class="theme-toggle" role="group" aria-label="Theme">
-          <button data-action="setTheme" data-theme-set="light" type="button"><i data-lucide="sun"></i> Light</button>
-          <button data-action="setTheme" data-theme-set="dark" type="button"><i data-lucide="moon"></i> Dark</button>
-          <button data-action="setTheme" data-theme-set="system" type="button"><i data-lucide="monitor"></i> System</button>
-        </div>
 
         <div class="divider"></div>
         <div class="item" data-action="goAccount" data-route="preferences"><span class="ico"><i data-lucide="settings"></i></span> Preferences</div>
@@ -1175,6 +1156,94 @@
           <div class="row"><span class="label">Premium support</span><span class="value">24/7 · 1h SLA · $499/mo</span><div class="actions"><button class="btn small" data-action="openChangePlan">Upgrade</button></div></div>
           <div class="note"><strong>Console parity:</strong> mirrors <code>/finance/packages</code>.</div>
         </div>
+      </div>
+    </div>
+
+    <!-- DEVELOPER HUB — landing page for Developer dropdown item -->
+    <div class="screen hidden" data-screen="developer">
+      <div class="breadcrumb">Account › Developer</div>
+      <h2>Developer</h2>
+      <p class="subhead">Credentials, integrations, audit, and tooling for wiring Agora into your stack.</p>
+
+      <div class="grid-3">
+        <div class="ext-card clickable" data-action="goAccount" data-route="restful-api">
+          <h3><i data-lucide="lock"></i> RESTful API</h3>
+          <div class="desc">Customer ID + Customer Secret for Agora REST endpoints. Pair with token authentication.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">Last used 3 days ago</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="aa-embedded-credentials">
+          <h3><i data-lucide="key-round"></i> AA Embedded Credentials</h3>
+          <div class="desc">Signed credentials for embedding Agora Analytics dashboards into your apps.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">2 active credentials</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="webhooks">
+          <h3><i data-lucide="webhook"></i> Webhooks</h3>
+          <div class="desc">Receive agent lifecycle, billing, and security events at your endpoints.</div>
+          <div class="actions"><span class="tag tag-live">2 active</span><span class="muted" style="font-size:11px;">3 failures (24h)</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="audit-logs">
+          <h3><i data-lucide="clipboard-list"></i> Audit logs</h3>
+          <div class="desc">SOC 2 compliance trail — who did what, when, from where.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">142 events in last 7d</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="dev-toolkit">
+          <h3><i data-lucide="wrench"></i> Developer Toolkit</h3>
+          <div class="desc">CLI, SDKs, token generator, and request inspector — all in one place.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">Node · Python · Go · Java · Swift · Kotlin</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="licensing">
+          <h3><i data-lucide="id-card"></i> Licensing</h3>
+          <div class="desc">Pre-authorization, quota management, purchase history, and usage queries.</div>
+          <div class="actions"><span class="tag muted">Enterprise plan</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>IA note:</strong> these 6 surfaces were previously listed individually in the avatar dropdown. They now live behind one <em>Developer</em> entry — same 2-click reach, much leaner top-level menu.
+      </div>
+    </div>
+
+    <!-- HELP HUB — landing page for Help dropdown item -->
+    <div class="screen hidden" data-screen="help">
+      <div class="breadcrumb">Account › Help</div>
+      <h2>Help &amp; Support</h2>
+      <p class="subhead">Search docs, talk to support, contact sales, see what's new.</p>
+
+      <div class="grid-3">
+        <div class="ext-card clickable" data-action="goAccount" data-route="support-tickets">
+          <h3><i data-lucide="ticket"></i> Support tickets</h3>
+          <div class="desc">Open, track, and resolve issues with Agora support.</div>
+          <div class="actions"><span class="tag tag-live">2 open</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="contact-sales">
+          <h3><i data-lucide="briefcase"></i> Contact Sales</h3>
+          <div class="desc">Enterprise pricing, custom plans, volume discounts. Reply within 1 business day.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">For 51+ seats / 100K+ mins</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="goAccount" data-route="whats-new">
+          <h3><i data-lucide="newspaper"></i> What's new</h3>
+          <div class="desc">Changelog — only meaningful changes. Low volume.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">Last update 4 days ago</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="toast" data-msg="docs.agora.io opens in new tab">
+          <h3><i data-lucide="book-open"></i> Docs <i data-lucide="external-link" style="width:12px;height:12px;opacity:0.7;"></i></h3>
+          <div class="desc">API references, quickstarts, SDK guides, and tutorials.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">docs.agora.io</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="toast" data-msg="community.agora.io opens in new tab">
+          <h3><i data-lucide="users"></i> Community <i data-lucide="external-link" style="width:12px;height:12px;opacity:0.7;"></i></h3>
+          <div class="desc">Ask questions, share patterns, learn from other Agora builders.</div>
+          <div class="actions"><span class="muted" style="font-size:11px;">community.agora.io</span></div>
+        </div>
+        <div class="ext-card clickable" data-action="toast" data-msg="status.agora.io opens in new tab">
+          <h3><i data-lucide="circle-dot"></i> System status <i data-lucide="external-link" style="width:12px;height:12px;opacity:0.7;"></i></h3>
+          <div class="desc">Real-time service status, incident reports, scheduled maintenance.</div>
+          <div class="actions"><span class="tag tag-live">All systems operational</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>IA note:</strong> the 5 help surfaces were previously listed individually in the avatar dropdown. They live behind one <em>Help</em> entry now — same 2-click reach, much leaner top-level menu. Community card added — was external-only in the old dropdown.
       </div>
     </div>
 
