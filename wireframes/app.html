@@ -1113,17 +1113,17 @@
                 </div>
               </div>
               <div class="wallet-actions">
-                <a href="#" data-action="toast" data-msg="View estimated bill — wireframe stub" style="color: hsl(var(--primary)); text-decoration: none; font-size: 14px; font-weight: 500;">View Estimated Bill →</a>
+                <a href="#" class="link" data-action="toast" data-msg="View estimated bill — wireframe stub">View Estimated Bill →</a>
                 <button class="btn primary" data-action="openTopup"><i data-lucide="plus"></i> Top-up Wallet</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Card 2: CURRENT PLAN (product family seg-tabs + quota digest) -->
-        <div class="card">
+        <!-- Card 2: CURRENT PLAN — the hero card (product family seg-tabs + quota digest) -->
+        <div class="card is-hero">
           <div class="card-header">
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
               <span class="card-eyebrow">Current Plan</span>
               <span class="tag">STARTER</span>
             </div>
@@ -1141,8 +1141,8 @@
               <span><strong>176K</strong> mins used</span>
               <span><strong>224K</strong> of <strong>400K</strong> mins left</span>
             </div>
-            <div style="display: flex; gap: 16px; justify-content: flex-end; align-items: center; margin-top: 4px;">
-              <a href="#" data-action="goAccount" data-route="usage" style="color: hsl(var(--primary)); text-decoration: none; font-size: 14px; font-weight: 500;">View Usage →</a>
+            <div class="plan-actions">
+              <a href="#" class="link" data-action="goAccount" data-route="usage">View Usage →</a>
               <button class="btn" data-action="goAccount" data-route="billing-plans">Upgrade Plan</button>
             </div>
           </div>
@@ -1158,19 +1158,19 @@
             </div>
           </div>
           <div class="card-body">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
-              <div>
-                <label style="font-size: 14px; font-weight: 500; display: block; margin-bottom: 8px;">Default Card</label>
-                <div style="display: flex; gap: 8px; align-items: stretch;">
-                  <div style="flex: 1; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; background: hsl(var(--background)); border: 1px solid hsl(var(--input)); border-radius: calc(var(--radius) - 2px);">
+            <div class="field-grid">
+              <div class="field-block">
+                <label>Default Card</label>
+                <div class="field-row">
+                  <div class="field-pill">
                     <span class="card-brand visa">VISA</span>
                     <span class="card-num">**** **** **** 6328</span>
                   </div>
-                  <button class="btn icon" data-action="setTab" data-tab-target="bill-cards"><i data-lucide="ellipsis-vertical"></i></button>
+                  <button class="btn icon small" data-action="setTab" data-tab-target="bill-cards" aria-label="Manage payment methods"><i data-lucide="ellipsis-vertical"></i></button>
                 </div>
               </div>
-              <div>
-                <label style="font-size: 14px; font-weight: 500; display: block; margin-bottom: 8px;">Billing Email</label>
+              <div class="field-block">
+                <label>Billing Email</label>
                 <input type="email" class="input" value="john.doe@gmail.com" />
               </div>
             </div>
@@ -1370,46 +1370,46 @@
         <div class="card">
           <div class="card-header"><span class="card-eyebrow">Bank Transfer</span></div>
           <div class="card-body">
-            <div class="copy-input" style="max-width: 256px;">
-              <div class="field-wrap">
-                <label>CID</label>
-                <div class="field">488406</div>
+            <div class="copy-input" style="max-width: 220px;">
+              <label>CID</label>
+              <div class="field">
+                <span class="field-text">488406</span>
+                <button class="copy-btn" data-action="toast" data-msg="Copied 488406"><i data-lucide="copy"></i></button>
               </div>
-              <button class="copy-btn" data-action="toast" data-msg="Copied 488406"><i data-lucide="copy"></i></button>
             </div>
 
             <div class="alert warning">
               <i data-lucide="triangle-alert" class="alert-icon"></i>
               <div>
-                <div class="alert-title">Note</div>
-                Please add this to the bank transfer's "Notes". Any transactions made without providing this information will have to be disregarded.
+                <div class="alert-title">Add CID to your bank transfer's Notes</div>
+                Transactions made without this CID can't be matched to your account and will have to be disregarded.
               </div>
             </div>
 
             <div class="bt-grid">
               <div class="copy-input">
-                <div class="field-wrap"><label>Beneficiary Name</label><div class="field">AGORA LAB INC</div></div>
-                <button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button>
+                <label>Beneficiary Name</label>
+                <div class="field"><span class="field-text">AGORA LAB INC</span><button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button></div>
               </div>
               <div class="copy-input">
-                <div class="field-wrap"><label>Beneficiary Account Number</label><div class="field">120024888</div></div>
-                <button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button>
+                <label>Beneficiary Account Number</label>
+                <div class="field"><span class="field-text">120024888</span><button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button></div>
               </div>
               <div class="copy-input">
-                <div class="field-wrap"><label>Beneficiary Bank</label><div class="field">HSBC Bank USA NA</div></div>
-                <button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button>
+                <label>Beneficiary Bank</label>
+                <div class="field"><span class="field-text">HSBC Bank USA NA</span><button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button></div>
               </div>
               <div class="copy-input">
-                <div class="field-wrap"><label>Swift Code</label><div class="field">MRMDUS33</div></div>
-                <button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button>
+                <label>Swift Code</label>
+                <div class="field"><span class="field-text">MRMDUS33</span><button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button></div>
               </div>
               <div class="copy-input">
-                <div class="field-wrap"><label>Routing Number</label><div class="field">021001088</div></div>
-                <button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button>
+                <label>Routing Number</label>
+                <div class="field"><span class="field-text">021001088</span><button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button></div>
               </div>
               <div class="copy-input">
-                <div class="field-wrap"><label>Bank Address</label><div class="field">66 Hudson Blvd. New York, NY</div></div>
-                <button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button>
+                <label>Bank Address</label>
+                <div class="field"><span class="field-text">66 Hudson Blvd, New York, NY</span><button class="copy-btn" data-action="toast" data-msg="Copied"><i data-lucide="copy"></i></button></div>
               </div>
             </div>
           </div>
