@@ -487,8 +487,22 @@
     <!-- MONITOR -->
     <div class="screen hidden" data-screen="analytics">
       <div class="breadcrumb"><span class="proj-name">My first project</span> › Analytics</div>
-      <h2>Analytics</h2>
-      <p class="subhead">Performance, usage, and cost — one observe surface. Was three Console pages.</p>
+      <div class="header-row">
+        <div>
+          <h2>Analytics</h2>
+          <p class="subhead">Monitor, debug, and optimize voice agents with comprehensive analytics.</p>
+        </div>
+        <button class="btn icon ghost" title="Refresh data" data-action="toast" data-msg="Refreshed analytics"><i data-lucide="refresh-cw"></i></button>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <button class="filter-chip" data-action="toast" data-msg="Date range picker"><i data-lucide="calendar"></i> Last 7 Days <i data-lucide="chevron-down"></i></button>
+        <button class="filter-chip" data-action="toast" data-msg="Product type picker"><i data-lucide="layers"></i> All Products <i data-lucide="chevron-down"></i></button>
+        <button class="filter-chip" data-action="toast" data-msg="Agent picker"><i data-lucide="bot"></i> All Agents <i data-lucide="chevron-down"></i></button>
+        <button class="filter-chip" data-action="toast" data-msg="Call type picker"><i data-lucide="phone"></i> All Call Types <i data-lucide="chevron-down"></i></button>
+        <button class="filter-chip" data-action="toast" data-msg="Campaign picker"><i data-lucide="megaphone"></i> All Campaigns <i data-lucide="chevron-down"></i></button>
+      </div>
 
       <div class="tabs" id="analyticsTabs">
         <div class="tab active" data-tab="an-performance">Performance</div>
@@ -498,29 +512,167 @@
 
       <!-- PERFORMANCE TAB -->
       <div class="tab-panel" data-panel="an-performance">
-        <div class="box">
-          <h3>Last 24 hours · across all agents</h3>
-          <div class="grid-stats">
-            <div class="stat"><div class="stat-num">1,247</div><div class="stat-label">calls</div></div>
-            <div class="stat"><div class="stat-num">98.4%</div><div class="stat-label">success</div></div>
-            <div class="stat"><div class="stat-num">820ms</div><div class="stat-label">p95 end-to-end</div></div>
-            <div class="stat"><div class="stat-num">312ms</div><div class="stat-label">p50 TTFT</div></div>
+
+        <!-- KPI cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-head">
+              <span class="kpi-label">Answered Calls</span>
+              <i data-lucide="phone-incoming" class="kpi-icon"></i>
+            </div>
+            <div class="kpi-value">120<span class="kpi-divisor">/208</span></div>
+            <div class="kpi-delta down"><i data-lucide="trending-down"></i> Down by 19%</div>
+            <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0,35 L20,30 L40,40 L60,28 L80,38 L100,22 L120,32 L140,18 L160,28 L180,15 L200,25" fill="none" stroke="hsl(var(--primary))" stroke-width="1.5"/>
+              <path d="M0,35 L20,30 L40,40 L60,28 L80,38 L100,22 L120,32 L140,18 L160,28 L180,15 L200,25 L200,50 L0,50 Z" fill="hsl(var(--primary) / 0.12)"/>
+            </svg>
+            <div class="kpi-axis"><span>1-Dec-25</span><span>7-Dec-25</span></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-head">
+              <span class="kpi-label">Answer Rate (Avg.)</span>
+              <i data-lucide="percent" class="kpi-icon"></i>
+            </div>
+            <div class="kpi-value">95<span class="kpi-divisor">%</span></div>
+            <div class="kpi-delta up"><i data-lucide="trending-up"></i> Up by 0.4%</div>
+            <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0,30 L20,32 L40,28 L60,30 L80,26 L100,28 L120,24 L140,26 L160,22 L180,24 L200,20" fill="none" stroke="hsl(var(--success))" stroke-width="1.5"/>
+              <path d="M0,30 L20,32 L40,28 L60,30 L80,26 L100,28 L120,24 L140,26 L160,22 L180,24 L200,20 L200,50 L0,50 Z" fill="hsl(var(--success) / 0.12)"/>
+            </svg>
+            <div class="kpi-axis"><span>1-Dec-25</span><span>7-Dec-25</span></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-head">
+              <span class="kpi-label">Call Duration (Avg.)</span>
+              <i data-lucide="clock" class="kpi-icon"></i>
+            </div>
+            <div class="kpi-value">5<span class="kpi-divisor"> min</span></div>
+            <div class="kpi-delta up"><i data-lucide="trending-up"></i> Up by 4%</div>
+            <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0,30 L20,28 L40,32 L60,25 L80,30 L100,22 L120,27 L140,20 L160,25 L180,18 L200,22" fill="none" stroke="hsl(var(--primary))" stroke-width="1.5"/>
+              <path d="M0,30 L20,28 L40,32 L60,25 L80,30 L100,22 L120,27 L140,20 L160,25 L180,18 L200,22 L200,50 L0,50 Z" fill="hsl(var(--primary) / 0.12)"/>
+            </svg>
+            <div class="kpi-axis"><span>1-Dec-25</span><span>7-Dec-25</span></div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-head">
+              <span class="kpi-label">Call Duration (Total)</span>
+              <i data-lucide="timer" class="kpi-icon"></i>
+            </div>
+            <div class="kpi-value">5,500<span class="kpi-divisor"> min</span></div>
+            <div class="kpi-delta up"><i data-lucide="trending-up"></i> Up by 4%</div>
+            <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0,32 L20,28 L40,30 L60,24 L80,28 L100,18 L120,22 L140,16 L160,20 L180,12 L200,15" fill="none" stroke="hsl(var(--primary))" stroke-width="1.5"/>
+              <path d="M0,32 L20,28 L40,30 L60,24 L80,28 L100,18 L120,22 L140,16 L160,20 L180,12 L200,15 L200,50 L0,50 Z" fill="hsl(var(--primary) / 0.12)"/>
+            </svg>
+            <div class="kpi-axis"><span>1-Dec-25</span><span>7-Dec-25</span></div>
           </div>
         </div>
 
-        <div class="box">
-          <h3>Per agent</h3>
-          <div class="row"><span class="label"><strong>Customer Support Agent</strong></span><span class="value">812 calls · 99.1% success · 740ms p95 · 280ms TTFT</span><span class="tag tag-live">Live</span></div>
-          <div class="row"><span class="label"><strong>Sales Representative</strong></span><span class="value">421 calls · 97.4% success · 920ms p95 · 360ms TTFT</span><span class="tag tag-live">Live</span></div>
-          <div class="row"><span class="label"><strong>Survey Agent</strong></span><span class="value">14 calls · 92.9% success · 1,100ms p95 · 420ms TTFT</span><span class="tag tag-draft">Draft</span></div>
+        <!-- Distribution + Success Rate side-by-side -->
+        <div class="chart-row">
+          <div class="box chart-card">
+            <h3>Call Status Distribution</h3>
+            <div class="desc">Breakdown of all call statuses</div>
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut" aria-hidden="true">
+                <!-- 4000 total — segments based on percentages; circumference = 2π·45 ≈ 282.74 -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="hsl(var(--muted))" stroke-width="14"/>
+                <!-- Voicemail 15% — orange -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#f59e0b" stroke-width="14"
+                  stroke-dasharray="42.4 240.3" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+                <!-- Unanswered 5% — purple -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#a855f7" stroke-width="14"
+                  stroke-dasharray="14.1 268.6" stroke-dashoffset="-42.4" transform="rotate(-90 60 60)"/>
+                <!-- Answered 20% — primary -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="hsl(var(--primary))" stroke-width="14"
+                  stroke-dasharray="56.5 226.2" stroke-dashoffset="-56.5" transform="rotate(-90 60 60)"/>
+                <!-- Failed 24% — red -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="hsl(var(--destructive))" stroke-width="14"
+                  stroke-dasharray="67.9 214.9" stroke-dashoffset="-113" transform="rotate(-90 60 60)"/>
+                <!-- Transferred 10% — green -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="hsl(var(--success))" stroke-width="14"
+                  stroke-dasharray="28.3 254.5" stroke-dashoffset="-180.9" transform="rotate(-90 60 60)"/>
+                <!-- Transfer Failed 1% — pink -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#ec4899" stroke-width="14"
+                  stroke-dasharray="2.8 279.9" stroke-dashoffset="-209.2" transform="rotate(-90 60 60)"/>
+                <text x="60" y="58" text-anchor="middle" class="donut-num">4000</text>
+                <text x="60" y="72" text-anchor="middle" class="donut-label">Total calls</text>
+              </svg>
+              <ul class="donut-legend">
+                <li><span class="legend-dot" style="background:#f59e0b"></span><span class="legend-name">Voicemail</span><span class="legend-pct">15%</span></li>
+                <li><span class="legend-dot" style="background:#a855f7"></span><span class="legend-name">Unanswered</span><span class="legend-pct">5%</span></li>
+                <li><span class="legend-dot" style="background:hsl(var(--primary))"></span><span class="legend-name">Answered</span><span class="legend-pct">20%</span></li>
+                <li><span class="legend-dot" style="background:hsl(var(--destructive))"></span><span class="legend-name">Failed</span><span class="legend-pct">24%</span></li>
+                <li><span class="legend-dot" style="background:hsl(var(--success))"></span><span class="legend-name">Transferred</span><span class="legend-pct">10%</span></li>
+                <li><span class="legend-dot" style="background:#ec4899"></span><span class="legend-name">Transfer Failed</span><span class="legend-pct">1%</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="box chart-card">
+            <h3>Task Success Rate</h3>
+            <div class="desc">Percentage of successful tasks out of total answered calls</div>
+            <svg viewBox="0 0 400 180" class="area-chart" preserveAspectRatio="none" aria-hidden="true">
+              <!-- Y-axis grid lines -->
+              <line x1="0" y1="0" x2="400" y2="0" stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="60" x2="400" y2="60" stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="120" x2="400" y2="120" stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="180" x2="400" y2="180" stroke="hsl(var(--border))"/>
+              <!-- Area path -->
+              <path d="M0,40 L40,42 L80,38 L120,28 L160,30 L200,55 L240,90 L280,110 L320,120 L360,118 L400,125 L400,180 L0,180 Z"
+                fill="hsl(var(--primary) / 0.15)"/>
+              <path d="M0,40 L40,42 L80,38 L120,28 L160,30 L200,55 L240,90 L280,110 L320,120 L360,118 L400,125"
+                fill="none" stroke="hsl(var(--primary))" stroke-width="1.75" stroke-linejoin="round"/>
+            </svg>
+            <div class="chart-axis">
+              <span>100%</span>
+              <span style="margin-left:auto">1-Dec-25</span>
+              <span style="margin-left:24px">7-Dec-25</span>
+            </div>
+          </div>
         </div>
 
+        <!-- Top Performing list -->
         <div class="box">
-          <h3>Latency breakdown · p95</h3>
-          <div class="row"><span class="label">ASR (Deepgram)</span><span class="value">182ms</span></div>
-          <div class="row"><span class="label">LLM (OpenAI gpt-4o)</span><span class="value">412ms</span></div>
-          <div class="row"><span class="label">TTS (ElevenLabs)</span><span class="value">226ms</span></div>
-          <div class="row"><span class="label">Network + jitter buffer</span><span class="value">~80ms</span></div>
+          <h3>Top Performing Agent</h3>
+          <div class="desc">Agents ranked by session volume and performance</div>
+          <div class="top-perf">
+            <div class="perf-row">
+              <span class="perf-rank">1</span>
+              <div class="perf-info">
+                <strong>Agent Alpha</strong>
+                <span class="muted">9,433 Sessions</span>
+              </div>
+              <div class="perf-bar"><div class="perf-fill" style="width:88%"></div></div>
+              <span class="perf-pct">88% Success Rate</span>
+            </div>
+            <div class="perf-row">
+              <span class="perf-rank">2</span>
+              <div class="perf-info">
+                <strong>Agent Beta</strong>
+                <span class="muted">892 Sessions</span>
+              </div>
+              <div class="perf-bar"><div class="perf-fill" style="width:70%"></div></div>
+              <span class="perf-pct">70% Success Rate</span>
+            </div>
+            <div class="perf-row">
+              <span class="perf-rank">3</span>
+              <div class="perf-info">
+                <strong>Agent Gamma</strong>
+                <span class="muted">352 Sessions</span>
+              </div>
+              <div class="perf-bar"><div class="perf-fill" style="width:44%"></div></div>
+              <span class="perf-pct">44% Success Rate</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Multi-product view:</strong> use the <em>All Products</em> filter to switch between Agents (Conv AI), Voice / Video / ILS / Chat / Signaling (RTE). When filtered to RTE the same metrics re-render with RTE-relevant labels (sessions instead of calls, etc.). Combined "All" is the default for new accounts so users see everything that ships in their project.
         </div>
       </div>
 
