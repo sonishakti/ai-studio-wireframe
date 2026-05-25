@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Studio_X — Interactive Wireframe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="app.css">
 </head>
@@ -157,7 +160,7 @@
 
       <!-- BILLING SUSPENDED takeover (edge case #7 from /fortify) — hidden by default -->
       <div class="home-suspended hidden" id="homeSuspended">
-        <div class="box" style="border-width: 2px; background: #fff8e0;">
+        <div class="box warning">
           <h2 style="margin-bottom: 8px;">⚠ Account suspended</h2>
           <p class="subhead">Your account balance has reached $0 and active agents are paused. Resolve billing to resume.</p>
           <div class="row"><span class="label">Outstanding balance</span><span class="value">$48.20</span></div>
@@ -216,7 +219,7 @@
       </div>
 
       <!-- 2. Health alerts -->
-      <div class="box" style="border-color: #000; background: #fff8e0;">
+      <div class="box warning">
         <h3>⚠ Needs your attention</h3>
         <div class="row">
           <span class="label">OpenAI credential</span>
@@ -302,7 +305,7 @@
       </div>
 
       <!-- 7. What's new (dismissible, low-key) -->
-      <div class="box" style="background: #f5f5f5;">
+      <div class="box info">
         <h3>What's new <button class="btn icon" style="float: right;" data-action="toast" data-msg="Dismissed">×</button></h3>
         <div class="row" style="padding: 4px 0;"><span class="label">Vendor Credentials</span><span class="value">Renamed from "Credentials". Vendor-first add flow.</span></div>
         <div class="row" style="padding: 4px 0;"><span class="label">Extensions Marketplace</span><span class="value">Browse 15+ Agora extensions in one place.</span></div>
@@ -1126,7 +1129,7 @@ agora login</textarea>
         </div>
       </div>
 
-      <div class="box" style="background:#fff8e0;">
+      <div class="box warning">
         <h3>Recent failures · last 24h</h3>
         <div class="row"><span class="label mono">https://api.acme.com/agora-events</span><span class="value">3 deliveries failed · 503 from your endpoint · 04:12 UTC</span><div class="actions"><button class="btn small">Redeliver all</button></div></div>
         <div class="note" style="background:transparent;border-left-color:#000;"><strong>Auto-disable:</strong> we disable webhooks after 100 consecutive failures over 24h and email account owners.</div>
@@ -1194,7 +1197,7 @@ agora login</textarea>
       </div>
 
       <!-- Inline create form (hidden by default) -->
-      <div class="box hidden" id="aaEmbedForm" style="background:#f5f5f5;">
+      <div class="box info hidden" id="aaEmbedForm">
         <h3>Create AA Embedded credential</h3>
         <div class="grid-2">
           <div class="field"><label>Name</label><input class="input" placeholder="aa-embed-prod-v2"></div>
@@ -1262,7 +1265,7 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
       <h2>Licensing</h2>
       <p class="subhead">Pre-authorisation, quota management, purchase history, and usage queries for enterprise license customers.</p>
 
-      <div class="box" style="background: #fff8e0;">
+      <div class="box warning">
         <h3>Requires Enterprise plan</h3>
         <div class="desc">Per-seat / per-channel licensing is only available on Enterprise plans. If you've purchased a license pack, this is where you'll manage activation, quota, and reconciliation.</div>
         <div style="margin-top: 8px;"><button class="btn primary" data-action="goAccount" data-route="contact-sales">Contact sales →</button></div>
@@ -1372,7 +1375,7 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
       </div>
 
       <div class="tab-panel hidden" data-panel="prefs-sso">
-        <div class="box" style="background:#fff8e0;">
+        <div class="box warning">
           <h3>SSO — Requires Premium or Enterprise</h3>
           <div class="desc">SAML / SCIM integration via Okta, Azure AD, OneLogin.</div>
           <div style="margin-top:8px;"><button class="btn primary">Request upgrade</button></div>
@@ -1490,7 +1493,7 @@ AGENT_ID=FSDF122S7</textarea></div>
     <div class="field"><label>Payment method</label>
       <select class="input"><option selected>Visa •••• 4242 — default</option><option>Mastercard •••• 5678</option><option>+ Use a new card</option></select>
     </div>
-    <div class="box" style="background:#f5f5f5;margin-top:12px;">
+    <div class="box info" style="margin-top:12px;">
       <div class="row"><span class="label">Amount</span><span class="value" id="topupAmount">$100.00</span></div>
       <div class="row"><span class="label">Processing fee (2.9% + $0.30)</span><span class="value" id="topupFee">$3.20</span></div>
       <div class="row"><span class="label"><strong>Total</strong></span><span class="value"><strong id="topupTotal">$103.20</strong></span></div>
@@ -1507,7 +1510,7 @@ AGENT_ID=FSDF122S7</textarea></div>
 <div class="modal-backdrop hidden" id="changePlanModal">
   <div class="modal">
     <div class="modal-header"><h3>Upgrade to PRO</h3><button class="btn icon" data-action="closeChangePlan">×</button></div>
-    <div class="box" style="background:#f5f5f5;">
+    <div class="box info">
       <div class="row"><span class="label">From</span><span class="value">STARTER · $49/mo · 50K mins · 2 concurrent agents</span></div>
       <div class="row"><span class="label">To</span><span class="value"><strong>PRO · $199/mo · 200K mins · 10 concurrent agents</strong></span></div>
       <div class="row"><span class="label">Prorated charge today</span><span class="value">$87.42 (22 of 30 days remaining)</span></div>
