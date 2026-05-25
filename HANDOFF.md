@@ -71,7 +71,7 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 ## What's done — recent commits worth knowing
 
 ```
-(pending) /organize: Usage polyhierarchy — project + account scopes with cross-links
+a019d07 /organize: Usage polyhierarchy — project + account scopes with cross-links
 3aed61a /organize: lean avatar dropdown via Developer + Help hubs
 1c79750 Usage tab: rebuild from Agora Console Figma, adapted for Studio_X
 503a4f0 Analytics: rebuild Performance tab to match Figma + /organize + /fortify
