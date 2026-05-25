@@ -7,6 +7,7 @@
     project: 'My first project',
     selectedVendor: null,
     credentials: [],
+    theme: localStorage.getItem('theme') || 'system',
   };
 
   // ---------- Helpers ----------
@@ -52,8 +53,26 @@
 
     // Close any open dropdowns
     closeAllDropdowns();
-    window.scrollTo(0, 0);
+    // Scroll the .main container (the body no longer scrolls — fixed shell)
+    const mainEl = $('#main');
+    if (mainEl) mainEl.scrollTop = 0;
+    else window.scrollTo(0, 0);
   }
+
+  // ---------- Theme ----------
+  const mediaDark = window.matchMedia('(prefers-color-scheme: dark)');
+  function applyTheme(mode) {
+    const html = document.documentElement;
+    const effective = mode === 'system' ? (mediaDark.matches ? 'dark' : 'light') : mode;
+    html.classList.toggle('dark', effective === 'dark');
+    // Update segmented-control active state
+    $$('.theme-toggle button').forEach((b) => {
+      b.classList.toggle('active', b.dataset.themeSet === mode);
+    });
+  }
+  mediaDark.addEventListener('change', () => {
+    if (state.theme === 'system') applyTheme('system');
+  });
 
   function toggleDropdown(id) {
     const dd = document.getElementById(id);
@@ -303,6 +322,17 @@
       $$('.tab', screen).forEach((t) => t.classList.toggle('active', t.dataset.tab === target));
       $$('.tab-panel', screen).forEach((p) => p.classList.toggle('hidden', p.dataset.panel !== target));
     },
+
+    // Light / Dark / System theme
+    setTheme(el) {
+      const mode = el.dataset.themeSet;
+      state.theme = mode;
+      if (mode === 'system') localStorage.removeItem('theme');
+      else localStorage.setItem('theme', mode);
+      applyTheme(mode);
+      // Keep the dropdown open so the user can see the change land
+      toast(`Theme: ${mode}`);
+    },
   };
 
   // ---------- Event wiring ----------
@@ -361,6 +391,9 @@
   }
 
   // ---------- Init ----------
+  // Apply persisted theme before paint to avoid FOUC
+  applyTheme(state.theme);
+
   // Sync UI to default project state
   $$('.proj-name').forEach((n) => (n.textContent = state.project));
   const cp = $('#currentProject');

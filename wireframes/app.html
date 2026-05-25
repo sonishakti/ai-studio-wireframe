@@ -6,6 +6,17 @@
   <title>Studio_X — Interactive Wireframe</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script>
+    // Apply persisted theme before paint to prevent FOUC
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        var mode = stored || 'system';
+        var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="app.css">
 </head>
@@ -66,8 +77,8 @@
         <div class="avatar avatar-icon" id="avatar" data-toggle="accountDropdown" title="Account menu"><i data-lucide="user"></i></div>
       </div>
 
-      <!-- Project switcher dropdown (from project chip) -->
-      <div class="dropdown hidden" id="switcherDropdown" style="left: 12px; bottom: 60px; width: 200px;">
+      <!-- Project switcher dropdown (from project chip) — position: fixed escapes sidebar overflow -->
+      <div class="dropdown hidden fixed-dropdown" id="switcherDropdown" style="left: 12px; bottom: 60px; width: 200px;">
         <div class="group-label">Projects</div>
         <div class="item check" data-action="switchProject" data-project="My first project">My first project</div>
         <div class="item" data-action="switchProject" data-project="Acme project">Acme project</div>
@@ -77,8 +88,8 @@
         <div class="item" data-action="createProject">+ Create Project</div>
       </div>
 
-      <!-- Account dropdown (from avatar) — new lean structure -->
-      <div class="dropdown hidden" id="accountDropdown" style="left: 60px; bottom: 50px; width: 280px;">
+      <!-- Account dropdown (from avatar) — fixed-position, scrollable when tall -->
+      <div class="dropdown hidden fixed-dropdown" id="accountDropdown" style="left: 60px; bottom: 50px; width: 280px;">
         <div class="dd-header">
           <strong>johndoe@example.com</strong>
         </div>
@@ -122,6 +133,14 @@
         <div class="item" data-action="goAccount" data-route="whats-new"><span class="ico"><i data-lucide="newspaper"></i></span> What's new</div>
         <div class="item" data-action="toast" data-msg="docs.agora.io opens in new tab"><span class="ico"><i data-lucide="book-open"></i></span> Docs <i data-lucide="external-link"></i></div>
         <div class="item" data-action="toast" data-msg="status.agora.io opens in new tab"><span class="ico"><i data-lucide="circle-dot"></i></span> System status <i data-lucide="external-link"></i></div>
+
+        <div class="divider"></div>
+        <div class="group-label">Theme</div>
+        <div class="theme-toggle" role="group" aria-label="Theme">
+          <button data-action="setTheme" data-theme-set="light" type="button"><i data-lucide="sun"></i> Light</button>
+          <button data-action="setTheme" data-theme-set="dark" type="button"><i data-lucide="moon"></i> Dark</button>
+          <button data-action="setTheme" data-theme-set="system" type="button"><i data-lucide="monitor"></i> System</button>
+        </div>
 
         <div class="divider"></div>
         <div class="item" data-action="goAccount" data-route="preferences"><span class="ico"><i data-lucide="settings"></i></span> Preferences</div>

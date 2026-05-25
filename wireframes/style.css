@@ -26,6 +26,33 @@
   --input: 214 32% 91%;
   --ring: 204 89% 43%;
   --radius: 0.5rem;
+  color-scheme: light;
+}
+
+/* Dark mode (toggled via .dark class on <html>) */
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 8%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 204 89% 56%;
+  --primary-foreground: 222 47% 6%;
+  --secondary: 215 28% 14%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 215 28% 14%;
+  --muted-foreground: 215 16% 65%;
+  --accent: 215 28% 14%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 55%;
+  --destructive-foreground: 210 40% 98%;
+  --success: 142 71% 52%;
+  --warning: 38 92% 60%;
+  --border: 215 28% 18%;
+  --input: 215 28% 18%;
+  --ring: 204 89% 56%;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -172,7 +199,15 @@ h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: hsl(var(--fo
 }
 
 /* ============ MAIN PANE ============ */
-.main { padding: 24px 32px; overflow-y: auto; }
+.main {
+  padding: 24px 32px;
+  overflow-y: auto;
+  height: 100%;
+}
+.main::-webkit-scrollbar { width: 8px; }
+.main::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 4px; }
+.main::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
+.main::-webkit-scrollbar-track { background: transparent; }
 
 /* ============ BUTTONS ============ */
 .btn {
@@ -411,6 +446,21 @@ select.input { cursor: pointer; appearance: none; padding-right: 28px; backgroun
   z-index: 50;
   min-width: 240px;
 }
+.dark .dropdown {
+  box-shadow:
+    0 10px 38px -10px rgba(0, 0, 0, 0.6),
+    0 10px 20px -15px rgba(0, 0, 0, 0.4);
+}
+
+/* Fixed-position variant — escapes sidebar overflow context */
+.dropdown.fixed-dropdown {
+  position: fixed;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+.dropdown.fixed-dropdown::-webkit-scrollbar { width: 6px; }
+.dropdown.fixed-dropdown::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+.dropdown.fixed-dropdown::-webkit-scrollbar-track { background: transparent; }
 .dropdown .item {
   padding: 8px 12px;
   font-size: 13px;
@@ -626,6 +676,42 @@ a[data-route]:hover, a[data-action]:hover { text-decoration: underline; }
   outline: none;
   box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
 }
+
+/* ============ THEME TOGGLE (segmented control) ============ */
+.theme-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  margin: 4px 8px;
+  background: hsl(var(--muted));
+  border-radius: var(--radius);
+}
+.theme-toggle button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  border: 1px solid transparent;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  border-radius: calc(var(--radius) - 3px);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.theme-toggle button:hover { color: hsl(var(--foreground)); }
+.theme-toggle button.active {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.08),
+    0 0 0 1px hsl(var(--border));
+}
+.theme-toggle .lucide { width: 13px; height: 13px; }
 
 /* ============ LUCIDE ICONS ============ */
 /* Default size — most contexts */
