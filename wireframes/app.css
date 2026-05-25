@@ -655,6 +655,239 @@
   white-space: nowrap;
 }
 
+/* ============ USAGE TAB (Agora-Console-inspired) ============ */
+.usage-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 28px;
+  margin-bottom: 14px;
+}
+.usage-total {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.usage-num {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.usage-unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.06em;
+}
+
+.usage-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+.usage-filters .field { margin-bottom: 0; }
+.usage-breakdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+  padding-bottom: 10px;
+  cursor: pointer;
+}
+.usage-breakdown input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: hsl(var(--primary));
+  cursor: pointer;
+}
+
+/* Tier KPI strip */
+.usage-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 14px 0;
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 18px;
+  align-items: center;
+}
+.tier-kpi {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.tier-kpi .legend-dot { margin-top: 5px; width: 8px; height: 8px; }
+.tier-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+.tier-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.tier-unit {
+  font-size: 10px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.05em;
+}
+.tier-granularity { margin-left: auto; }
+.tier-granularity .input.small { height: 28px; font-size: 12px; padding: 0 28px 0 10px; min-width: 90px; }
+
+/* Multi-line chart with hover tooltip */
+.usage-chart-wrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.usage-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+  text-align: right;
+  padding: 6px 0;
+}
+.usage-chart {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+.usage-x-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+  padding-left: 48px;
+  margin-top: 6px;
+}
+
+.usage-tooltip {
+  position: absolute;
+  top: 8px;
+  left: calc((220 / 600) * 100% + 48px);
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 11px;
+  min-width: 180px;
+  box-shadow:
+    0 10px 30px -10px rgba(0,0,0,0.30),
+    0 4px 10px -6px rgba(0,0,0,0.18);
+  z-index: 5;
+}
+.dark .usage-tooltip {
+  box-shadow:
+    0 10px 30px -10px rgba(0,0,0,0.6),
+    0 4px 10px -6px rgba(0,0,0,0.4);
+}
+.tip-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 8px;
+}
+.tip-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 3px 0;
+}
+.tip-row .legend-dot { width: 7px; height: 7px; }
+.tip-name { color: hsl(var(--muted-foreground)); }
+.tip-val { font-weight: 600; color: hsl(var(--foreground)); font-variant-numeric: tabular-nums; }
+
+/* Usage drill-down table */
+.usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.usage-table thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: hsl(var(--muted-foreground));
+  padding: 12px 14px;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.4);
+  white-space: nowrap;
+}
+.usage-table thead th .lucide {
+  width: 12px;
+  height: 12px;
+  margin-left: 2px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+.usage-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+}
+.usage-table tbody tr:last-child td { border-bottom: 0; }
+.usage-table tbody tr:hover { background: hsl(var(--muted) / 0.4); }
+.usage-table tbody td:first-child { font-weight: 500; }
+
+/* Notes section */
+.usage-notes {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid hsl(var(--border));
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+}
+.usage-notes strong {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: hsl(var(--foreground));
+  margin-bottom: 6px;
+}
+.usage-notes ul { list-style: disc; padding-left: 18px; }
+.usage-notes a { color: hsl(var(--primary)); }
+
+/* Bottom CTA — Visit Agora Analytics */
+.usage-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  background: hsl(var(--primary) / 0.04);
+  border: 1px solid hsl(var(--primary) / 0.25);
+  margin-bottom: 0;
+}
+
 /* ============ TOP-UP AMOUNT CHIPS ============ */
 .topup-chip {
   padding: 0 14px;

@@ -676,27 +676,148 @@
         </div>
       </div>
 
-      <!-- USAGE TAB -->
+      <!-- USAGE TAB (Agora-Console-inspired hero + filters + multi-series chart + table) -->
       <div class="tab-panel hidden" data-panel="an-usage">
-        <div class="box">
-          <h3>This month</h3>
-          <div class="row"><span class="label">Standard minutes</span><span class="value"><strong>176K of 400K used</strong> · 224K left · 44% of cap</span></div>
-          <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
-          <div class="row"><span class="label">Trend vs. last month</span><span class="value">+18% (on pace to hit 220K)</span></div>
+
+        <!-- Total Usage Summary hero -->
+        <div class="box usage-hero">
+          <div>
+            <h3 style="margin:0; font-size:18px;">Total Usage Summary</h3>
+            <p class="desc" style="margin:4px 0 0;">Your total usage for this billing cycle · resets in 9 days</p>
+          </div>
+          <div class="usage-total"><span class="usage-num">190,112</span><span class="usage-unit">MIN</span></div>
         </div>
 
+        <!-- Usage Details: filters + tier strip + chart + table -->
         <div class="box">
-          <h3>By agent · this month</h3>
-          <div class="row"><span class="label">Customer Support Agent</span><span class="value">92K mins · 52%</span></div>
-          <div class="row"><span class="label">Sales Representative</span><span class="value">71K mins · 40%</span></div>
-          <div class="row"><span class="label">Survey Agent</span><span class="value">13K mins · 7%</span></div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <h3 style="margin:0;">Usage Details</h3>
+            <button class="btn small ghost" data-action="toast" data-msg="Export CSV"><i data-lucide="download"></i> Export CSV</button>
+          </div>
+
+          <!-- Filter row -->
+          <div class="usage-filters">
+            <div class="field"><label>Period</label><select class="input"><option selected>Current Bill Cycle</option><option>Last 7 days</option><option>Last 30 days</option><option>Custom range…</option></select></div>
+            <div class="field"><label>Product</label><select class="input"><option selected>All</option><option>Agents (Conv AI)</option><option>Voice (Audio)</option><option>Video</option><option>Interactive Live Streaming</option><option>Chat</option><option>Signaling</option></select></div>
+            <div class="field"><label>Project</label><select class="input"><option selected>All</option><option>My first project</option><option>Acme project</option><option>Beta project</option></select></div>
+            <div class="field"><label>Feature</label><select class="input"><option selected>All</option><option>Cloud Recording</option><option>Media Push</option><option>Real-Time STT</option></select></div>
+            <label class="usage-breakdown"><input type="checkbox" checked> View Breakdown</label>
+          </div>
+
+          <!-- Tier KPI strip (color-coded series legend) -->
+          <div class="usage-tiers">
+            <div class="tier-kpi"><span class="legend-dot" style="background:hsl(var(--primary))"></span><div><div class="tier-name">Agent Sessions</div><div class="tier-val">9,433<span class="tier-unit"> SESSIONS</span></div></div></div>
+            <div class="tier-kpi"><span class="legend-dot" style="background:#a855f7"></span><div><div class="tier-name">Video SD</div><div class="tier-val">72,215<span class="tier-unit"> MIN</span></div></div></div>
+            <div class="tier-kpi"><span class="legend-dot" style="background:#ec4899"></span><div><div class="tier-name">Video HD</div><div class="tier-val">90,112<span class="tier-unit"> MIN</span></div></div></div>
+            <div class="tier-kpi"><span class="legend-dot" style="background:#f59e0b"></span><div><div class="tier-name">Video FHD</div><div class="tier-val">60,011<span class="tier-unit"> MIN</span></div></div></div>
+            <div class="tier-kpi"><span class="legend-dot" style="background:hsl(var(--destructive))"></span><div><div class="tier-name">Video 2K</div><div class="tier-val">23,233<span class="tier-unit"> MIN</span></div></div></div>
+            <div class="tier-kpi"><span class="legend-dot" style="background:hsl(var(--success))"></span><div><div class="tier-name">Audio</div><div class="tier-val">93,312<span class="tier-unit"> MIN</span></div></div></div>
+            <div class="tier-kpi"><span class="legend-dot" style="background:#06b6d4"></span><div><div class="tier-name">Chat</div><div class="tier-val">106<span class="tier-unit"> DAU</span></div></div></div>
+            <div class="tier-granularity">
+              <select class="input small"><option selected>Daily</option><option>Hourly</option><option>Weekly</option></select>
+            </div>
+          </div>
+
+          <!-- Multi-series line chart with hover tooltip -->
+          <div class="usage-chart-wrap">
+            <!-- Y-axis labels -->
+            <div class="usage-y-axis">
+              <span>100k</span><span>10k</span><span>1k</span><span>100</span><span>0</span>
+            </div>
+            <svg viewBox="0 0 600 220" class="usage-chart" preserveAspectRatio="none" aria-label="Multi-series line chart of usage over time">
+              <!-- Grid lines (log-scale visual) -->
+              <line x1="0" y1="0"   x2="600" y2="0"   stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="55"  x2="600" y2="55"  stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="110" x2="600" y2="110" stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="165" x2="600" y2="165" stroke="hsl(var(--border))" stroke-dasharray="2 4"/>
+              <line x1="0" y1="220" x2="600" y2="220" stroke="hsl(var(--border))"/>
+
+              <!-- Tooltip vertical guideline -->
+              <line x1="220" y1="0" x2="220" y2="220" stroke="hsl(var(--foreground) / 0.3)" stroke-dasharray="3 3"/>
+
+              <!-- Series — varied slopes simulating log-scale spread -->
+              <polyline points="0,140 50,130 100,135 150,120 200,90 250,75 300,80 350,65 400,55 450,50 500,40 550,35 600,30"
+                fill="none" stroke="hsl(var(--primary))" stroke-width="1.75"/>
+              <polyline points="0,180 50,175 100,170 150,165 200,155 250,150 300,148 350,142 400,140 450,135 500,130 550,125 600,120"
+                fill="none" stroke="#a855f7" stroke-width="1.75"/>
+              <polyline points="0,160 50,155 100,150 150,140 200,130 250,118 300,110 350,100 400,90 450,82 500,75 550,68 600,62"
+                fill="none" stroke="#ec4899" stroke-width="1.75"/>
+              <polyline points="0,175 50,170 100,168 150,160 200,155 250,150 300,143 350,135 400,128 450,120 500,115 550,108 600,100"
+                fill="none" stroke="#f59e0b" stroke-width="1.75"/>
+              <polyline points="0,190 50,188 100,185 150,182 200,180 250,178 300,175 350,172 400,168 450,165 500,160 550,158 600,155"
+                fill="none" stroke="hsl(var(--destructive))" stroke-width="1.75"/>
+              <polyline points="0,155 50,150 100,145 150,135 200,125 250,115 300,105 350,98 400,90 450,82 500,75 550,68 600,60"
+                fill="none" stroke="hsl(var(--success))" stroke-width="1.75"/>
+              <polyline points="0,205 50,204 100,203 150,202 200,201 250,200 300,199 350,198 400,197 450,196 500,195 550,194 600,193"
+                fill="none" stroke="#06b6d4" stroke-width="1.75"/>
+            </svg>
+
+            <!-- Hover tooltip card (static for wireframe) -->
+            <div class="usage-tooltip">
+              <div class="tip-date">28 May 2026</div>
+              <div class="tip-row"><span class="legend-dot" style="background:hsl(var(--primary))"></span><span class="tip-name">Agent Sessions</span><span class="tip-val">9,433</span></div>
+              <div class="tip-row"><span class="legend-dot" style="background:#a855f7"></span><span class="tip-name">Video SD</span><span class="tip-val">48,322</span></div>
+              <div class="tip-row"><span class="legend-dot" style="background:#ec4899"></span><span class="tip-name">Video HD</span><span class="tip-val">954,385</span></div>
+              <div class="tip-row"><span class="legend-dot" style="background:#f59e0b"></span><span class="tip-name">Video FHD</span><span class="tip-val">280,933</span></div>
+              <div class="tip-row"><span class="legend-dot" style="background:hsl(var(--destructive))"></span><span class="tip-name">Video 2K</span><span class="tip-val">538,243</span></div>
+              <div class="tip-row"><span class="legend-dot" style="background:hsl(var(--success))"></span><span class="tip-name">Audio</span><span class="tip-val">933,492</span></div>
+              <div class="tip-row"><span class="legend-dot" style="background:#06b6d4"></span><span class="tip-name">Chat</span><span class="tip-val">123</span></div>
+            </div>
+          </div>
+
+          <!-- X-axis labels -->
+          <div class="usage-x-axis">
+            <span>2 AM</span><span>4 AM</span><span>6 AM</span><span>8 AM</span><span>10 AM</span><span>12 PM</span><span>2 PM</span><span>4 PM</span><span>6 PM</span><span>8 PM</span><span>10 PM</span><span>0 AM</span>
+          </div>
+
+          <!-- Tabular drilldown -->
+          <table class="usage-table" style="margin-top:20px;">
+            <thead>
+              <tr>
+                <th>Date <i data-lucide="chevron-down"></i></th>
+                <th>Agent Sessions <i data-lucide="chevron-down"></i></th>
+                <th>Video SD <i data-lucide="chevron-down"></i></th>
+                <th>Video HD <i data-lucide="chevron-down"></i></th>
+                <th>Video FHD <i data-lucide="chevron-down"></i></th>
+                <th>Video 2K <i data-lucide="chevron-down"></i></th>
+                <th>Audio <i data-lucide="chevron-down"></i></th>
+                <th>Chat <i data-lucide="chevron-down"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2 AM</td><td>1,418</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>4 AM</td><td>1,302</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>6 AM</td><td>1,455</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>8 AM</td><td>1,610</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>10 AM</td><td>1,238</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>12 PM</td><td>1,820</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>2 PM</td><td>1,704</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+              <tr><td>4 PM</td><td>1,591</td><td>47,709</td><td>17,016</td><td>76,979</td><td>75,939</td><td>4,540</td><td>24,376</td></tr>
+            </tbody>
+          </table>
+
+          <div class="usage-notes">
+            <strong>NOTE</strong>
+            <ul>
+              <li>Data displayed is by day in UTC timezone or by hour in local timezone if selecting one day.</li>
+              <li>There will be ~2 hours latency for today's usage data.</li>
+              <li>Questions about pricing? Check out our <a href="#" data-action="toast" data-msg="docs.agora.io/pricing">Pricing for Conv AI + RTC</a>.</li>
+              <li>Usage data (by seconds) may vary from billing data (by minutes). For exact billable usage, see <a href="#" data-action="goAccount" data-route="billing-subs">Bill Detail in Billing</a>.</li>
+              <li>You can check usage data collected within one year.</li>
+            </ul>
+          </div>
         </div>
 
-        <div class="box">
-          <h3>Quota progress</h3>
-          <div class="credits-bar" style="height: 12px;"><div class="credits-fill" style="width:44%;background:linear-gradient(90deg,#0a85d1,#6cb6e6);"></div></div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;"><span>0</span><span>200K</span><span>400K cap</span></div>
-          <div class="note" style="margin-top:12px;"><strong>Cross-link:</strong> need more headroom? <a href="#" data-action="goAccount" data-route="billing-subs">Upgrade your plan →</a> · See <a href="#" data-action="setAnalyticsTab" data-tab-target="an-cost">Cost tab</a> for what these minutes are buying.</div>
+        <!-- Cross-link to Cost tab -->
+        <div class="note" style="margin: 14px 0;"><strong>Going deeper on $:</strong> see <a href="#" data-action="setAnalyticsTab" data-tab-target="an-cost">Cost tab</a> for what these minutes are buying, or <a href="#" data-action="goAccount" data-route="billing-subs">Billing &amp; Subscriptions</a> for the invoice ledger.</div>
+
+        <!-- Bottom CTA — Visit Agora Analytics -->
+        <div class="box usage-cta">
+          <div>
+            <h3 style="margin:0;">Looking for in-depth analytics?</h3>
+            <p class="desc" style="margin:6px 0 0;">Monitor, measure, and improve quality of experience with intelligent real-time monitoring, issue detection, alerts, and diagnostics.</p>
+          </div>
+          <button class="btn primary" data-action="toast" data-msg="analytics.agora.io opens in new tab">Visit Agora Analytics <i data-lucide="external-link"></i></button>
         </div>
       </div>
 
