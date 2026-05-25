@@ -31,9 +31,10 @@ Studio_X sidebar (LEAN — final shape)
 Studio_X sidebar (account mode)
 ├── ACCOUNT
 │   ├── Account Overview
-│   ├── Billing & Subscriptions   ← Billing + Invoices + Transactions +
-│   │                                Manage Cards + Withdraw + Plans +
-│   │                                Analytics packages
+│   ├── Billing & Subscriptions   ← Overview · Usage (account-scoped) ·
+│   │                                Plans · Invoices · Transactions ·
+│   │                                Payment methods · Withdrawals ·
+│   │                                Add-on packages
 │   ├── Teams & Members
 │   ├── SSO Management
 │   ├── Notification Preferences
@@ -89,12 +90,15 @@ Standalone destinations
 | `/flexible-classroom` | Build › Real-Time products › **Flexible Classroom** | Vertical solution |
 | `/notifications` (project) | Project › **Notifications** | Already wired |
 
-### Usage (1 page)
+### Usage (1 page → 2 destinations, polyhierarchy)
 | Console URL | Studio destination |
 |---|---|
-| `/usage` | Monitor › **Analytics › Usage** tab (route alias preserves 1-click access) |
+| `/usage` | Monitor › **Analytics › Usage** tab (route alias preserves 1-click access) — **project-scoped** |
+| `/account-usage` (new alias) | Account › **Billing & Subscriptions › Usage** tab — **account-scoped roll-up across all projects** |
 
-> **2026-05-22 update.** Usage was previously a standalone PROJECT sidebar item. It now lives as a tab inside `Monitor › Analytics`, alongside Performance and Cost. Rationale: all three answer the same root question — *"how are my agents doing in production?"* — at different aggregations. Splitting forced context-switching mid-debug. Route `/usage` still works via alias and auto-activates the Usage tab. See [organize discussion in commit history].
+> **2026-05-22 update.** Usage was previously a standalone PROJECT sidebar item. It now lives as a tab inside `Monitor › Analytics`, alongside Performance and Cost. Rationale: all three answer the same root question — *"how are my agents doing in production?"* — at different aggregations. Splitting forced context-switching mid-debug. Route `/usage` still works via alias and auto-activates the Usage tab.
+>
+> **2026-05-26 update — polyhierarchy added.** P1 (the hustler) lives in Monitor and debugs per-project; P2 PM / P3 TAM / P4 EM live in Billing and need account-wide oversight. Usage legitimately exists at two scopes. Added `Account › Billing & Subscriptions › Usage` as the second destination — same component, account-scoped default, per-project breakdown table with drill-in. Project-Usage subhead now scope-stamps the current project ("My first project · Current billing cycle") and surfaces a conditional cross-link ("Workspace has 3 projects. View usage across all projects →") for multi-project users only. Single-project workspaces don't see the cross-link. Three entry points converge on the account view: Home › Workspace usage tile CTA, Billing tab, and the cross-link inside Monitor › Usage. Pattern matches the Extensions polyhierarchy (DISCOVER browse + Project settings enable).
 
 ### Billing (5 pages, all merged)
 | Console URL | Studio destination |

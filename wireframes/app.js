@@ -18,11 +18,13 @@
   const routeAliases = {
     'realtime-products': 'realtime-services',
     'usage': 'analytics', // Usage is now the Usage tab inside Analytics
+    'account-usage': 'billing-subs', // Account-level usage roll-up lives in Billing
   };
 
   // Routes that should deep-link to a specific tab after navigation
   const routeTabDeepLinks = {
     'usage': { panelSelector: '[data-panel="an-usage"]', tabSelector: '[data-tab="an-usage"]' },
+    'account-usage': { panelSelector: '[data-panel="bill-usage"]', tabSelector: '[data-tab="bill-usage"]' },
   };
 
   function goTo(route) {
@@ -316,6 +318,15 @@
 
     // Cross-tab link inside Analytics (Usage → Cost, etc.)
     setAnalyticsTab(el) {
+      const target = el.dataset.tabTarget;
+      const screen = el.closest('.screen');
+      if (!screen) return;
+      $$('.tab', screen).forEach((t) => t.classList.toggle('active', t.dataset.tab === target));
+      $$('.tab-panel', screen).forEach((p) => p.classList.toggle('hidden', p.dataset.panel !== target));
+    },
+
+    // Generic intra-screen tab switcher (e.g. Billing Usage → Plans / Invoices / Transactions)
+    setTab(el) {
       const target = el.dataset.tabTarget;
       const screen = el.closest('.screen');
       if (!screen) return;

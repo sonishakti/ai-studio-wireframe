@@ -301,7 +301,10 @@
         <div class="row"><span class="label">Project Beta</span><span class="value">22K mins · 11%</span></div>
         <div class="row"><span class="label">Internal Demos</span><span class="value">4K mins · 2%</span></div>
         <div class="row"><span class="label">Days until reset</span><span class="value">9 days</span></div>
-        <div class="actions" style="margin-top: 12px;"><a class="btn small" data-action="goAccount" data-route="billing-subs">Manage plan →</a></div>
+        <div class="actions" style="margin-top: 12px; gap: 8px; display: flex; flex-wrap: wrap;">
+          <a class="btn small primary" data-action="goAccount" data-route="account-usage">See full account usage →</a>
+          <a class="btn small" data-action="goAccount" data-route="billing-subs">Manage plan →</a>
+        </div>
       </div>
 
       <!-- 7. What's new (dismissible, low-key) -->
@@ -660,13 +663,19 @@
       <!-- USAGE TAB (Agora-Console-inspired hero + filters + multi-series chart + table) -->
       <div class="tab-panel hidden" data-panel="an-usage">
 
-        <!-- Total Usage Summary hero -->
+        <!-- Total Usage Summary hero — project-scoped (matches Monitor breadcrumb) -->
         <div class="box usage-hero">
           <div>
-            <h3 style="margin:0; font-size:18px;">Total Usage Summary</h3>
-            <p class="desc" style="margin:4px 0 0;">Your total usage for this billing cycle · resets in 9 days</p>
+            <h3 style="margin:0; font-size:18px;">Usage</h3>
+            <p class="desc" style="margin:4px 0 0;"><span class="proj-name">My first project</span> · Current billing cycle · resets in 9 days</p>
           </div>
-          <div class="usage-total"><span class="usage-num">190,112</span><span class="usage-unit">MIN</span></div>
+          <div class="usage-total"><span class="usage-num">176,219</span><span class="usage-unit">MIN</span></div>
+        </div>
+
+        <!-- Account-wide cross-link (shows only to multi-project workspaces) -->
+        <div class="note" style="margin: 10px 0 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <span><strong>Workspace has 3 projects.</strong> This view shows only <span class="proj-name">My first project</span>.</span>
+          <a href="#" data-action="goAccount" data-route="account-usage" class="btn small">View usage across all projects →</a>
         </div>
 
         <!-- Usage Details: filters + tier strip + chart + table -->
@@ -680,7 +689,7 @@
           <div class="usage-filters">
             <div class="field"><label>Period</label><select class="input"><option selected>Current Bill Cycle</option><option>Last 7 days</option><option>Last 30 days</option><option>Custom range…</option></select></div>
             <div class="field"><label>Product</label><select class="input"><option selected>All</option><option>Agents (Conv AI)</option><option>Voice (Audio)</option><option>Video</option><option>Interactive Live Streaming</option><option>Chat</option><option>Signaling</option></select></div>
-            <div class="field"><label>Project</label><select class="input"><option selected>All</option><option>My first project</option><option>Acme project</option><option>Beta project</option></select></div>
+            <div class="field"><label>Project</label><select class="input"><option selected>My first project</option><option>Acme project</option><option>Beta project</option><option>All projects (account view) ↗</option></select></div>
             <div class="field"><label>Feature</label><select class="input"><option selected>All</option><option>Cloud Recording</option><option>Media Push</option><option>Real-Time STT</option></select></div>
             <label class="usage-breakdown"><input type="checkbox" checked> View Breakdown</label>
           </div>
@@ -789,8 +798,8 @@
           </div>
         </div>
 
-        <!-- Cross-link to Cost tab -->
-        <div class="note" style="margin: 14px 0;"><strong>Going deeper on $:</strong> see <a href="#" data-action="setAnalyticsTab" data-tab-target="an-cost">Cost tab</a> for what these minutes are buying, or <a href="#" data-action="goAccount" data-route="billing-subs">Billing &amp; Subscriptions</a> for the invoice ledger.</div>
+        <!-- Cross-link to Cost tab + account-level Usage -->
+        <div class="note" style="margin: 14px 0;"><strong>Going deeper:</strong> see <a href="#" data-action="setAnalyticsTab" data-tab-target="an-cost">Cost tab</a> for what these minutes are buying, <a href="#" data-action="goAccount" data-route="account-usage">Account usage</a> for the same picture across all projects, or <a href="#" data-action="goAccount" data-route="billing-subs">Billing &amp; Subscriptions</a> for the invoice ledger.</div>
 
         <!-- Bottom CTA — Visit Agora Analytics -->
         <div class="box usage-cta">
@@ -1075,6 +1084,7 @@
 
       <div class="tabs" id="billingTabs">
         <div class="tab active" data-tab="bill-overview">Overview</div>
+        <div class="tab" data-tab="bill-usage">Usage</div>
         <div class="tab" data-tab="bill-plans">Plans</div>
         <div class="tab" data-tab="bill-invoices">Invoices</div>
         <div class="tab" data-tab="bill-transactions">Transactions</div>
@@ -1094,6 +1104,93 @@
           <div class="row"><span class="label">Payment method</span><span class="value">Visa •••• 4242 · exp 02/28</span><div class="actions"><button class="btn small">Update</button></div></div>
           <div class="row"><span class="label">Next invoice</span><span class="value">12 Jun 2026 · est. $49 + $0 overage</span></div>
         </div>
+      </div>
+
+      <!-- ACCOUNT-LEVEL USAGE TAB (roll-up across all projects in the workspace) -->
+      <div class="tab-panel hidden" data-panel="bill-usage">
+
+        <!-- Hero — account-scoped total + scope qualifier -->
+        <div class="box usage-hero">
+          <div>
+            <h3 style="margin:0; font-size:18px;">Account usage</h3>
+            <p class="desc" style="margin:4px 0 0;">All projects · Current billing cycle · resets in 9 days</p>
+          </div>
+          <div class="usage-total"><span class="usage-num">202,344</span><span class="usage-unit">MIN</span></div>
+        </div>
+
+        <!-- Account-scoped KPI strip — answers oversight questions -->
+        <div class="box">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <h3 style="margin:0;">Quota &amp; burn</h3>
+            <button class="btn small ghost" data-action="toast" data-msg="Export CSV"><i data-lucide="download"></i> Export CSV</button>
+          </div>
+          <div class="grid-stats">
+            <div class="stat"><div class="stat-num">202K / 460K</div><div class="stat-label">used of plan cap</div></div>
+            <div class="stat"><div class="stat-num">44%</div><div class="stat-label">of quota burned</div></div>
+            <div class="stat"><div class="stat-num">9 days</div><div class="stat-label">until reset</div></div>
+            <div class="stat"><div class="stat-num">$0.00</div><div class="stat-label">overage incurred</div></div>
+          </div>
+          <div class="note" style="margin-top:14px;"><strong>Forecast:</strong> at current burn rate (22.5K mins/day), you'll hit <strong>~258K min cap</strong> at end of cycle — well within plan. No overage expected.</div>
+        </div>
+
+        <!-- Per-project breakdown — the reason this surface exists -->
+        <div class="box">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <h3 style="margin:0;">Usage by project</h3>
+            <div style="display:flex; gap:8px;">
+              <select class="input small"><option selected>Current Bill Cycle</option><option>Last 7 days</option><option>Last 30 days</option><option>Custom range…</option></select>
+              <select class="input small"><option selected>All products</option><option>Agents (Conv AI)</option><option>Voice</option><option>Video</option><option>ILS</option><option>Chat</option><option>Signaling</option></select>
+            </div>
+          </div>
+
+          <table class="usage-table">
+            <thead>
+              <tr>
+                <th>Project <i data-lucide="chevron-down"></i></th>
+                <th>Agent sessions <i data-lucide="chevron-down"></i></th>
+                <th>RTE minutes <i data-lucide="chevron-down"></i></th>
+                <th>Chat DAU <i data-lucide="chevron-down"></i></th>
+                <th>% of account <i data-lucide="chevron-down"></i></th>
+                <th>Trend (7d)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="clickable" data-action="switchProject" data-project="My first project">
+                <td><strong>My first project</strong></td>
+                <td>9,433</td>
+                <td>176,219</td>
+                <td>106</td>
+                <td>87%</td>
+                <td><span class="muted">↑ 12%</span></td>
+                <td><a href="#" data-action="goAccount" data-route="usage" class="btn small ghost">Open in Monitor →</a></td>
+              </tr>
+              <tr class="clickable" data-action="switchProject" data-project="Acme project">
+                <td><strong>Acme project</strong></td>
+                <td>1,204</td>
+                <td>21,840</td>
+                <td>0</td>
+                <td>11%</td>
+                <td><span class="muted">↑ 3%</span></td>
+                <td><a href="#" data-action="goAccount" data-route="usage" class="btn small ghost">Open in Monitor →</a></td>
+              </tr>
+              <tr class="clickable" data-action="switchProject" data-project="Beta project">
+                <td><strong>Beta project</strong></td>
+                <td>211</td>
+                <td>4,285</td>
+                <td>0</td>
+                <td>2%</td>
+                <td><span class="muted">→ flat</span></td>
+                <td><a href="#" data-action="goAccount" data-route="usage" class="btn small ghost">Open in Monitor →</a></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="note" style="margin-top:14px;"><strong>Drill-in:</strong> click any project row (or its "Open in Monitor →" link) to switch context and inspect that project's usage in <code>Monitor › Analytics › Usage</code> — full chart, per-day granularity, and feature breakdown.</div>
+        </div>
+
+        <!-- Cross-links — the other two financial surfaces -->
+        <div class="note" style="margin: 14px 0;"><strong>Going deeper on $:</strong> see <a href="#" data-action="setTab" data-tab-target="bill-plans">Plans</a> for quota tiers and upgrades, <a href="#" data-action="setTab" data-tab-target="bill-invoices">Invoices</a> for the paid ledger, or <a href="#" data-action="setTab" data-tab-target="bill-transactions">Transactions</a> for wallet activity. This tab is for usage-against-quota across projects.</div>
       </div>
 
       <div class="tab-panel hidden" data-panel="bill-plans">
