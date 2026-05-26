@@ -76,7 +76,7 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 ## What's done — recent commits worth knowing
 
 ```
-(pending) Audit: delete Cost tab + scaffold Integrations + Figma 142-7866 gap inventory
+4769c8d Audit: delete Analytics Cost tab + scaffold Integrations + Figma 142-7866 gap inventory
 9510b8f Revert "Billing: visual polish pass — sleeker cards, tighter type, refined micro-interactions"
 8c3226e Revert "HANDOFF: stamp Billing polish commit hash"
 a8ad720 Billing: rebuild from Figma node 142-7864 + /organize 4-tab IA + /journey 10 flows
