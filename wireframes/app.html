@@ -59,7 +59,7 @@
 
     <div class="nav-group">
       <div class="label">Project</div>
-      <a class="nav-item" data-route="project-settings"><span class="ico"><i data-lucide="settings"></i></span>Project Settings</a>
+      <a class="nav-item" data-route="project-settings"><span class="ico"><i data-lucide="settings"></i></span>Project Credentials</a>
       <a class="nav-item" data-route="realtime-services"><span class="ico"><i data-lucide="video"></i></span>Realtime Services</a>
       <a class="nav-item" data-route="vendor-credentials"><span class="ico"><i data-lucide="key-round"></i></span>Credentials</a>
     </div>
@@ -1098,10 +1098,10 @@
     </div>
 
     <!-- PROJECT SETTINGS -->
-    <!-- Project Settings — from Figma 90:15739 -->
+    <!-- Project Credentials — App ID + Certificates + CLI accelerator -->
     <div class="screen hidden" data-screen="project-settings">
-      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Project Settings</div>
-      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 20px;">Project Settings</h2>
+      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Project Credentials</div>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 20px;">Project Credentials</h2>
 
       <!-- Identity card: Project Name + App ID -->
       <div class="card">
@@ -1125,7 +1125,7 @@
         </div>
       </div>
 
-      <!-- Security card: Primary Cert + Secondary Cert + Token gen + Token output -->
+      <!-- Security card: Primary Cert + Secondary Cert -->
       <div class="card">
         <div class="card-header"><span class="card-eyebrow">Security</span></div>
         <div class="card-body">
@@ -1145,22 +1145,21 @@
             </div>
             <button class="btn" data-action="toast" data-msg="Secondary certificate enabled"><i data-lucide="shield-check"></i> Enable</button>
           </div>
+        </div>
+      </div>
 
-          <div class="form-row">
-            <div class="form-row-label">
-              <div class="form-row-title">Generate Temporary Token</div>
-              <p class="form-row-help">A token to use for temporary testing. Expires in 24 hours.</p>
-            </div>
-            <button class="btn primary" data-action="toast" data-msg="Temporary token generated"><i data-lucide="plus"></i> Generate</button>
+      <!-- CLI callout — accelerator for advanced ops (incl. token generation) -->
+      <div class="card">
+        <div class="card-body" style="padding-top: 22px;">
+          <h3 class="section-title">Manage this project using the Agora CLI</h3>
+          <p class="form-row-help">Switch to this project from your terminal. The CLI also supports advanced operations like token generation.</p>
+
+          <div class="code-block">
+            <code class="code-cmd">agora project use prja7f21c9d0b8e44f09e2c5b3d</code>
+            <button class="code-copy" data-action="toast" data-msg="Copied CLI command" aria-label="Copy command"><i data-lucide="copy"></i></button>
           </div>
 
-          <div class="copy-input">
-            <div class="field">
-              <span class="field-text" style="font-size: 12px;">awie7fgikshjfgkiaerfgaeiurfghahfgkjadfhgjrf...</span>
-              <button class="copy-btn" data-action="toast" data-msg="Copied temporary token" aria-label="Copy temporary token"><i data-lucide="copy"></i></button>
-            </div>
-            <p class="form-row-help">Active for 1 day. Copy your token now and save it — you won't see it again.</p>
-          </div>
+          <a href="#" class="link" data-action="toast" data-msg="docs.agora.io/cli/install — wireframe stub">Install the Agora CLI →</a>
         </div>
       </div>
     </div>
@@ -2440,7 +2439,7 @@ agora login</textarea>
 
     <!-- Project Notifications (now lives under Project Settings, but still reachable as standalone) -->
     <div class="screen hidden" data-screen="project-notifications">
-      <div class="breadcrumb"><a href="#" data-route="project-settings"><span class="proj-name">My first project</span> › Project Settings</a> › Notifications</div>
+      <div class="breadcrumb"><a href="#" data-route="project-settings"><span class="proj-name">My first project</span> › Project Credentials</a> › Notifications</div>
       <h2>Project notifications</h2>
       <p class="subhead">Project-scoped notification triggers — which events fire from this project, and where they're routed.</p>
       <div class="box">

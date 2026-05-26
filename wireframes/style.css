@@ -1514,6 +1514,73 @@ h3 .lucide[data-lucide="alert-triangle"] {
   font-weight: 500;
 }
 
+/* ============ CODE BLOCK with copy button (shadcn install-snippet style) ============ */
+.code-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 8px 11px 16px;
+  background: hsl(220 13% 12%);
+  border: 1px solid hsl(220 13% 18%);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  color: hsl(0 0% 92%);
+  margin: 14px 0 14px;
+  overflow: hidden;
+}
+.code-block .code-cmd {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  color: inherit;
+  white-space: nowrap;
+  overflow-x: auto;
+  user-select: all;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(0 0% 100% / 0.15) transparent;
+}
+.code-block .code-cmd::-webkit-scrollbar { height: 3px; }
+.code-block .code-cmd::-webkit-scrollbar-thumb { background: hsl(0 0% 100% / 0.15); border-radius: 2px; }
+.code-block .code-cmd::-webkit-scrollbar-track { background: transparent; }
+.code-block .code-cmd::before {
+  content: '$';
+  margin-right: 10px;
+  color: hsl(0 0% 45%);
+  user-select: none;
+}
+.code-block .code-copy {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  color: hsl(0 0% 65%);
+  cursor: pointer;
+  transition: background 150ms ease-out, color 150ms ease-out;
+  flex-shrink: 0;
+}
+.code-block .code-copy:hover {
+  background: hsl(0 0% 100% / 0.08);
+  color: hsl(0 0% 95%);
+}
+.code-block .code-copy .lucide { width: 14px; height: 14px; }
+
+/* Section title used inside a card-body for a standalone block (e.g. CLI callout) */
+.card-body .section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 4px;
+  letter-spacing: -0.005em;
+}
+
 /* ============ SIDE-RAIL CTA (cross-surface accelerator) ============ */
 .side-rail-cta {
   display: flex;
