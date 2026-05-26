@@ -76,6 +76,7 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 ## What's done — recent commits worth knowing
 
 ```
+30a9be5 Realtime Services: /organize all 13 Agora services sourced live from console.agora.io
 a252200 Project Settings UI fix + /organize all Agora services into Realtime Services
 c9ae9ae Project + Profile pages: rebuild to Figma fidelity, strip wireframe notes
 4769c8d Audit: delete Analytics Cost tab + scaffold Integrations + Figma 142-7866 gap inventory
