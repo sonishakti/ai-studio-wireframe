@@ -376,12 +376,12 @@
 
     if (target.dataset.tab) {
       e.preventDefault();
-      // Support both .tabs (line-underline) and .seg-tabs (segmented pill) containers
-      const tabsRoot = target.closest('.tabs, .seg-tabs');
+      // Support .tabs (line-underline), .seg-tabs (segmented pill), AND .side-rail (vertical list) containers
+      const tabsRoot = target.closest('.tabs, .seg-tabs, .side-rail');
       if (tabsRoot) {
-        $$('.tab, .seg', tabsRoot).forEach((t) => t.classList.toggle('active', t === target));
+        $$('.tab, .seg, .side-item', tabsRoot).forEach((t) => t.classList.toggle('active', t === target));
       }
-      // Panels can be siblings of the tabs container OR siblings of an ancestor (header-row).
+      // Panels can be siblings of the tabs container OR siblings of an ancestor (header-row / side-layout).
       // Look up within the same .screen to be safe.
       const screen = target.closest('.screen') || document;
       $$('.tab-panel', screen).forEach((p) => {

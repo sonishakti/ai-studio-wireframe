@@ -1555,6 +1555,189 @@ h3 .lucide[data-lucide="alert-triangle"] {
   margin-top: 2px;
 }
 
+/* ============ RTS RIGHT-PANE (Realtime Services config) ============ */
+.rts-pane {
+  padding: 22px 24px;
+  border-left: 1px solid hsl(var(--border) / 0.6);
+  min-height: 480px;
+}
+.rts-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.rts-heading .rts-title-block { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
+.rts-heading .rts-icon {
+  width: 18px; height: 18px;
+  color: hsl(var(--primary));
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.rts-heading .rts-title {
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rts-heading .rts-sub {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 4px;
+  max-width: 56ch;
+  line-height: 1.5;
+}
+
+/* RTS sub-tabs inside a panel (e.g. Whiteboard's Basic Info / Services) */
+.rts-subtabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  margin: -4px 0 20px;
+}
+.rts-subtabs .rts-subtab {
+  padding: 10px 14px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 150ms ease-out, border-color 150ms ease-out;
+}
+.rts-subtabs .rts-subtab:hover { color: hsl(var(--foreground)); }
+.rts-subtabs .rts-subtab.active {
+  color: hsl(var(--foreground));
+  border-bottom-color: hsl(var(--primary));
+}
+
+/* Help links footer (small two-link row) */
+.help-links {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground) / 0.75);
+  margin-bottom: 8px;
+}
+.help-links + .help-links-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.help-links-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.help-links-row a {
+  font-size: 13px;
+  color: hsl(var(--primary));
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+.help-links-row a:hover { opacity: 0.8; }
+.help-links-row a .lucide { width: 12px; height: 12px; opacity: 0.7; }
+
+/* Inline metric tile (Cloud Recording Usage block) */
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.metric-tile {
+  background: hsl(var(--muted) / 0.4);
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.metric-tile .metric-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 6px;
+}
+.metric-tile .metric-value {
+  font-family: 'Space Mono', 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+}
+.metric-tile .metric-unit {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+
+/* Promo block (Conv AI "Introducing Agent Studio") */
+.promo-block {
+  background:
+    linear-gradient(135deg,
+      hsl(var(--primary) / 0.08) 0%,
+      hsl(var(--primary) / 0.02) 100%);
+  border: 1px solid hsl(var(--primary) / 0.25);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.promo-block .promo-text {
+  flex: 1;
+  min-width: 0;
+}
+.promo-block .promo-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: hsl(var(--foreground));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.promo-block .promo-desc {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+/* Quickstart block (icon + label + button) */
+.quickstart-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: hsl(var(--muted) / 0.3);
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 10px;
+}
+.quickstart-row .quickstart-label {
+  font-size: 13px;
+  color: hsl(var(--foreground));
+  font-weight: 500;
+}
+
 /* ============ DANGER ZONE ============ */
 .card.danger {
   border-color: hsl(var(--destructive) / 0.3);

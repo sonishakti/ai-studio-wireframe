@@ -1972,6 +1972,9 @@ agora login</textarea>
     <!-- Realtime Services — Figma 90:15778 + /organize: bring in ALL Agora services
          Left rail = 13 services grouped (Core RTC + Add-on Services).
          Right pane = config for the currently-active service. -->
+    <!-- Real-Time Services — /organize all 13 services Agora exposes at project level,
+         sourced live from console.agora.io. Each service in the side-rail acts as a tab
+         switching the right pane to that service's config UI. -->
     <div class="screen hidden" data-screen="realtime-services">
       <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Real-Time Services</div>
       <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">Real-Time Services</h2>
@@ -1980,60 +1983,442 @@ agora login</textarea>
         <div class="side-layout">
           <div class="side-rail" style="padding: 8px 12px 16px;">
             <div class="side-group">Core RTC</div>
-            <div class="side-item"><span class="dot"></span> Voice Calling <span class="side-tag">Enabled</span></div>
-            <div class="side-item"><span class="dot"></span> Video Calling <span class="side-tag">Enabled</span></div>
-            <div class="side-item"><span class="dot"></span> Interactive Live Streaming</div>
-            <div class="side-item"><span class="dot"></span> Signaling</div>
-            <div class="side-item"><span class="dot"></span> Chat</div>
-            <div class="side-item active"><span class="dot"></span> Interactive Whiteboard <span class="side-tag">Enabled</span></div>
+            <div class="side-item" data-tab="rts-chat"><span class="dot"></span> Chat</div>
+            <div class="side-item" data-tab="rts-signaling"><span class="dot"></span> Signaling <span class="side-tag">Active</span></div>
+            <div class="side-item active" data-tab="rts-whiteboard"><span class="dot"></span> Interactive Whiteboard <span class="side-tag">Active</span></div>
+            <div class="side-item" data-tab="rts-convai"><span class="dot"></span> Conversational AI <span class="side-tag">Active</span></div>
 
-            <div class="side-group">Add-on Services</div>
-            <div class="side-item"><span class="dot"></span> Cloud Recording <span class="side-tag">Enabled</span></div>
-            <div class="side-item"><span class="dot"></span> Cloud Player</div>
-            <div class="side-item"><span class="dot"></span> Real-Time STT <span class="side-tag">Enabled</span></div>
-            <div class="side-item"><span class="dot"></span> Media Push</div>
-            <div class="side-item"><span class="dot"></span> Media Pull</div>
-            <div class="side-item"><span class="dot"></span> Media Gateway</div>
-            <div class="side-item"><span class="dot"></span> Video Screenshot Upload</div>
+            <div class="side-group">Media Services</div>
+            <div class="side-item" data-tab="rts-cloud-recording"><span class="dot"></span> Cloud Recording <span class="side-tag">Active</span></div>
+            <div class="side-item" data-tab="rts-media-push"><span class="dot"></span> Media Push</div>
+            <div class="side-item" data-tab="rts-media-pull"><span class="dot"></span> Media Pull</div>
+            <div class="side-item" data-tab="rts-media-gateway"><span class="dot"></span> Media Gateway <span class="side-tag">Active</span></div>
+            <div class="side-item" data-tab="rts-rtstt"><span class="dot"></span> Real-Time STT</div>
+            <div class="side-item" data-tab="rts-vsu"><span class="dot"></span> Video Screenshot Upload</div>
+
+            <div class="side-group">Security &amp; Infrastructure</div>
+            <div class="side-item" data-tab="rts-cloud-proxy"><span class="dot"></span> Cloud Proxy</div>
+            <div class="side-item" data-tab="rts-cohost-auth"><span class="dot"></span> Co-Host Authentication</div>
+
+            <div class="side-group">Vertical Solutions</div>
+            <div class="side-item" data-tab="rts-flex-classroom"><span class="dot"></span> Flexible Classroom</div>
           </div>
 
-          <div style="padding: 22px 24px; border-left: 1px solid hsl(var(--border) / 0.6);">
-            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 24px;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <i data-lucide="presentation" style="width:18px;height:18px;color:hsl(var(--primary));margin-top:2px;"></i>
-                <div>
-                  <div style="font-weight: 600; font-size: 15px;">Interactive Whiteboard</div>
-                  <p class="form-row-help" style="margin-top: 4px; max-width: 56ch;">Collaborative canvas for multimodal agent workflows. Agents can perceive and annotate visual artefacts during a call.</p>
-                </div>
-              </div>
-              <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
-            </div>
+          <div class="rts-pane">
 
-            <div class="section-divider">
-              <div class="section-eyebrow">Configure</div>
-
-              <div class="form-row">
-                <div class="form-row-label">
-                  <div class="form-row-title">Allow Agent to read the board</div>
-                  <p class="form-row-help">Agent receives a JSON snapshot of whiteboard contents at each turn.</p>
-                </div>
-                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
-              </div>
-              <div class="form-row">
-                <div class="form-row-label">
-                  <div class="form-row-title">Allow Agent to write on the board</div>
-                  <p class="form-row-help">Agent can draw shapes, write text, and highlight regions. Requires read access.</p>
-                </div>
-                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
-              </div>
-              <div class="form-row">
-                <div class="form-row-label">
-                  <div class="form-row-title">Auto-clear board between calls</div>
-                  <p class="form-row-help">Reset whiteboard state when a new call session starts in this channel.</p>
+            <!-- =============== INTERACTIVE WHITEBOARD (default) =============== -->
+            <div class="tab-panel" data-panel="rts-whiteboard">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="presentation" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Interactive Whiteboard <span class="status-badge issued">Active</span></div>
+                    <p class="rts-sub">Collaborative canvas for multimodal agent workflows. Agents can perceive and annotate visual artefacts during a call.</p>
+                  </div>
                 </div>
                 <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
               </div>
+
+              <div class="rts-subtabs">
+                <button class="rts-subtab active">Basic Information</button>
+                <button class="rts-subtab">Whiteboard Services</button>
+              </div>
+
+              <div class="copy-input"><label>App Identifier</label><div class="field"><span class="field-text">••••••••••••••••••••••3f9a</span><button class="copy-btn" data-action="toast" data-msg="Copied App Identifier"><i data-lucide="copy"></i></button></div></div>
+              <div class="copy-input"><label>Access Key (AK)</label><div class="field"><span class="field-text">••••••••••••••••••••••8e2c</span><button class="copy-btn" data-action="toast" data-msg="Copied Access Key"><i data-lucide="copy"></i></button></div></div>
+              <div class="copy-input"><label>Secret Key (SK)</label><div class="field"><span class="field-text">••••••••••••••••••••••0b8e</span><button class="copy-btn" data-action="toast" data-msg="Copied Secret Key"><i data-lucide="copy"></i></button></div></div>
+
+              <div class="form-row">
+                <div class="form-row-label">
+                  <div class="form-row-title">SDK Token</div>
+                  <p class="form-row-help">Short-lived token for SDK access. Regenerate as needed.</p>
+                </div>
+                <button class="btn" data-action="toast" data-msg="SDK token generated"><i data-lucide="plus"></i> Generate</button>
+              </div>
+
+              <div class="section-divider">
+                <div class="section-eyebrow">Configure</div>
+                <div class="form-row">
+                  <div class="form-row-label"><div class="form-row-title">Configure Whiteboard services</div><p class="form-row-help">Docs to Web, Screenshot, and other Whiteboard add-ons.</p></div>
+                  <button class="btn" data-action="toast" data-msg="Configure Whiteboard services">Configure</button>
+                </div>
+                <div class="form-row">
+                  <div class="form-row-label"><div class="form-row-title">Allow Agent to read the board</div><p class="form-row-help">Agent receives a JSON snapshot of whiteboard contents each turn.</p></div>
+                  <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+                </div>
+                <div class="form-row">
+                  <div class="form-row-label"><div class="form-row-title">Allow Agent to write on the board</div><p class="form-row-help">Agent can draw shapes, write text, highlight. Requires read access.</p></div>
+                  <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+                </div>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Quota</div>Maximum concurrent channels is 50. For a higher quota, please contact support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Whiteboard docs">How to use Whiteboard <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Whiteboard pricing">Whiteboard Pricing <i data-lucide="external-link"></i></a>
+              </div>
             </div>
+
+            <!-- =============== CHAT =============== -->
+            <div class="tab-panel hidden" data-panel="rts-chat">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="message-circle" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Chat</div>
+                    <p class="rts-sub">Private and group messaging — App Key + Org Name for the Agora Chat SDK. Configure presence, storage, and stream channel as sub-tabs.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="rts-subtabs">
+                <button class="rts-subtab active">Basic Information</button>
+              </div>
+
+              <div class="copy-input"><label>App Key</label><div class="field"><span class="field-text">••••••••••••••••••</span><button class="copy-btn" data-action="toast" data-msg="Copied App Key"><i data-lucide="copy"></i></button></div></div>
+              <div class="copy-input"><label>Org Name</label><div class="field"><span class="field-text">acme-prod</span><button class="copy-btn" data-action="toast" data-msg="Copied Org Name"><i data-lucide="copy"></i></button></div></div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Test User ID</div><p class="form-row-help">Generate a test user ID + token for SDK quickstart.</p></div>
+                <button class="btn" data-action="toast" data-msg="Test User ID generated"><i data-lucide="plus"></i> Generate</button>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Plan</div>Currently on Chat Free tier. <a href="#" data-action="goAccount" data-route="billing-plans" style="color: hsl(var(--primary));">Upgrade</a> for higher DAU + message tiers.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Chat docs">How to use Chat <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Chat pricing">Agora Chat Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== SIGNALING =============== -->
+            <div class="tab-panel hidden" data-panel="rts-signaling">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="radio-tower" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Signaling <span class="status-badge issued">Active</span></div>
+                    <p class="rts-sub">High-concurrency real-time messaging — Presence, Storage, and Stream Channel sub-services configured per project.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="rts-subtabs">
+                <button class="rts-subtab active">Basic Information</button>
+                <button class="rts-subtab">Presence</button>
+                <button class="rts-subtab">Storage</button>
+                <button class="rts-subtab">Stream Channel</button>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Subscription</div><p class="form-row-help">Currently on Signaling free tier. Upgrade for higher peak concurrency and message tiers.</p></div>
+                <button class="btn" data-action="goAccount" data-route="billing-plans">View Plans</button>
+              </div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Signaling docs">How to use Signaling <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Signaling pricing">Signaling Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== CONVERSATIONAL AI ENGINE =============== -->
+            <div class="tab-panel hidden" data-panel="rts-convai">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="sparkles" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Conversational AI Engine <span class="status-badge issued">Active</span></div>
+                    <p class="rts-sub">The runtime behind Agent Studio — orchestrates LLM, TTS, ASR, and channel routing for voice AI agents.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Conversational AI</div><p class="form-row-help">Required for any agent in this project to serve calls.</p></div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="promo-block" style="margin-top: 20px;">
+                <div class="promo-text">
+                  <div class="promo-title"><i data-lucide="sparkles" style="width:14px;height:14px;color:hsl(var(--primary));"></i> Build agents in Agent Studio</div>
+                  <p class="promo-desc">Build, test, and deploy production-ready Conversational AI agents in Agora's Agent Studio. Drop into Build › Agents to design one from scratch or fork a template.</p>
+                </div>
+                <button class="btn primary" data-action="goAccount" data-route="agents">Go to Agent Studio →</button>
+              </div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Conv AI features">Explore Conv AI features <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Customize Conv AI">How to customize Conversational AI <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== CLOUD RECORDING =============== -->
+            <div class="tab-panel hidden" data-panel="rts-cloud-recording">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="video" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Cloud Recording <span class="status-badge issued">Active</span></div>
+                    <p class="rts-sub">Record agent calls to S3, GCS, or Azure Blob. REST API + console quota.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="section-divider">
+                <div class="section-eyebrow">Quickstart</div>
+                <div class="quickstart-row">
+                  <span class="quickstart-label">How do I use Cloud Recording?</span>
+                  <button class="btn" data-action="toast" data-msg="Cloud Recording docs"><i data-lucide="book-open"></i> Docs</button>
+                </div>
+                <div class="quickstart-row" style="margin-top: 8px;">
+                  <span class="quickstart-label">Test API with Postman</span>
+                  <button class="btn" data-action="toast" data-msg="Open Postman collection"><i data-lucide="external-link"></i> Open Postman</button>
+                </div>
+              </div>
+
+              <div class="section-divider">
+                <div class="section-eyebrow">Usage <span style="color:hsl(var(--muted-foreground));font-weight:400;font-family:Inter;text-transform:none;letter-spacing:0;margin-left:6px;">·</span> <a href="#" data-action="goAccount" data-route="usage" style="color:hsl(var(--primary));font-family:Inter;text-transform:none;letter-spacing:0;font-size:12px;font-weight:500;">View More →</a></div>
+                <div class="metric-row">
+                  <div class="metric-tile"><div class="metric-label">Voice</div><div class="metric-value">0<span class="metric-unit">min</span></div></div>
+                  <div class="metric-tile"><div class="metric-label">Audio</div><div class="metric-value">0<span class="metric-unit">min</span></div></div>
+                  <div class="metric-tile"><div class="metric-label">Video HD</div><div class="metric-value">0<span class="metric-unit">min</span></div></div>
+                  <div class="metric-tile"><div class="metric-label">Video HD+</div><div class="metric-value">0<span class="metric-unit">min</span></div></div>
+                </div>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Quota</div>Default quota is 20 PCW. For a higher quota, please contact support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Cloud Recording docs">What is Cloud Recording? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Cloud Recording pricing">Cloud Recording Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== MEDIA PUSH =============== -->
+            <div class="tab-panel hidden" data-panel="rts-media-push">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="upload-cloud" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Media Push <span class="status-badge paid">Inactive</span></div>
+                    <p class="rts-sub">Stream agent audio out to RTMP / HLS destinations. Server-side RESTful API.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Server Side RESTful API</div><p class="form-row-help">Programmatic control over push destinations and stream profiles.</p></div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Quota</div>Default quota is 20 PCW. For a higher quota, please contact support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Media Push docs">What is Media Push? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Media Push pricing">Media Push Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== MEDIA PULL =============== -->
+            <div class="tab-panel hidden" data-panel="rts-media-pull">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="download-cloud" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Media Pull</div>
+                    <p class="rts-sub">Inject external media streams (RTMP / HLS sources) into an agent channel.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Media Pull</div><p class="form-row-help">Adds the pull-from-URL capability to this project's agent runtime.</p></div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Quota</div>Default quota is 20 PCW. For a higher quota, please contact support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Media Pull docs">What is Media Pull? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Media Pull pricing">Media Pull Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== MEDIA GATEWAY =============== -->
+            <div class="tab-panel hidden" data-panel="rts-media-gateway">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="cable" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Media Gateway <span class="status-badge issued">Active</span></div>
+                    <p class="rts-sub">SIP / PSTN / WebRTC bridging — connect telephony and external systems to agent channels.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Media Gateway</div><p class="form-row-help">Once enabled, agents can be reached by phone numbers and SIP endpoints.</p></div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
+
+              <div class="alert warning" style="margin-top: 18px;"><i data-lucide="triangle-alert" class="alert-icon"></i><div><div class="alert-title">Disabling requires support</div>To disable Media Gateway, please contact Agora support.</div></div>
+            </div>
+
+            <!-- =============== REAL-TIME STT =============== -->
+            <div class="tab-panel hidden" data-panel="rts-rtstt">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="mic" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Real-Time Speech-to-Text <span class="status-badge paid">Inactive</span></div>
+                    <p class="rts-sub">Live speech-to-text overlay during calls. Streaming transcripts available to agents and analytics.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Real-Time STT</div><p class="form-row-help">Streams transcripts on the audio track during a call session.</p></div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Quota</div>Default quota is 10 peak concurrent workers per project. For higher please contact support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="RTSTT docs">What is Real-Time STT? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="RTSTT pricing">Real-Time STT Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== VIDEO SCREENSHOT UPLOAD =============== -->
+            <div class="tab-panel hidden" data-panel="rts-vsu">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="image-down" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Video Screenshot Upload</div>
+                    <p class="rts-sub">Periodic frame capture from video tracks for moderation, compliance, or training pipelines.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Video Screenshot Upload</div><p class="form-row-help">Frames captured at configurable intervals and pushed to your endpoint.</p></div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="VSU docs">What is Video Screenshot Upload? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Local Screenshot docs">Local Screenshot Upload <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== CLOUD PROXY =============== -->
+            <div class="tab-panel hidden" data-panel="rts-cloud-proxy">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="shield" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Cloud Proxy</div>
+                    <p class="rts-sub">Route traffic through Agora's proxy for restricted-network environments — enterprise firewalls, sanctioned regions, strict NAT.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Enable Cloud Proxy</div><p class="form-row-help">Adds TCP 443 fallback and proxy routing to all RTC connections from this project.</p></div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="alert warning" style="margin-top: 18px;"><i data-lucide="triangle-alert" class="alert-icon"></i><div><div class="alert-title">Additional charge applies</div>Cloud Proxy modes start at $500 per month. For higher PCU, please contact Agora Customer Support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Cloud Proxy docs">What is Cloud Proxy? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Cloud Proxy pricing">Cloud Proxy Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== CO-HOST AUTHENTICATION =============== -->
+            <div class="tab-panel hidden" data-panel="rts-cohost-auth">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="user-check" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Co-Host Authentication</div>
+                    <p class="rts-sub">Require token authentication for users publishing as a host. Stops anonymous broadcasters.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="alert warning"><i data-lucide="triangle-alert" class="alert-icon"></i><div><div class="alert-title">App logic change required</div>Enabling co-host authentication requires changing your app logic. Read the docs before enabling this service.</div></div>
+
+              <div class="form-row" style="margin-top: 8px;">
+                <div class="form-row-label"><div class="form-row-title">Enable Co-host Authentication</div><p class="form-row-help">All publishers must present a valid host-role token to broadcast.</p></div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="section-divider">
+                <div class="section-eyebrow">Quickstart</div>
+                <div class="quickstart-row">
+                  <span class="quickstart-label">How do I use Co-Host Authentication?</span>
+                  <button class="btn" data-action="toast" data-msg="Co-Host Auth docs"><i data-lucide="book-open"></i> Docs</button>
+                </div>
+              </div>
+
+              <div class="alert info" style="margin-top: 18px;"><i data-lucide="info" class="alert-icon"></i><div><div class="alert-title">Quota</div>Default quota is 20 PCW. For a higher quota, please contact support.</div></div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Co-Host Auth docs">What is Co-Host Authentication? <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
+            <!-- =============== FLEXIBLE CLASSROOM =============== -->
+            <div class="tab-panel hidden" data-panel="rts-flex-classroom">
+              <div class="rts-heading">
+                <div class="rts-title-block">
+                  <i data-lucide="graduation-cap" class="rts-icon"></i>
+                  <div>
+                    <div class="rts-title">Flexible Classroom</div>
+                    <p class="rts-sub">Pre-built RTC solution for education — rooms, roles, whiteboard, recording, polling. One-click launcher for instructor + student flows.</p>
+                  </div>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+
+              <div class="form-row">
+                <div class="form-row-label"><div class="form-row-title">Launch Flexible Classroom</div><p class="form-row-help">Opens the classroom launcher in a new tab with this project's credentials prefilled.</p></div>
+                <button class="btn primary" data-action="toast" data-msg="Flexible Classroom launcher"><i data-lucide="external-link"></i> Launch</button>
+              </div>
+
+              <div class="help-links">Need Help</div>
+              <div class="help-links-row">
+                <a href="#" data-action="toast" data-msg="Flexible Classroom docs">What is Flexible Classroom? <i data-lucide="external-link"></i></a>
+                <a href="#" data-action="toast" data-msg="Flexible Classroom pricing">Flexible Classroom Pricing <i data-lucide="external-link"></i></a>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
