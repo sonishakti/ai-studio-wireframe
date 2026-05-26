@@ -1212,3 +1212,306 @@ h3 .lucide[data-lucide="alert-triangle"] {
   margin-bottom: 12px;
 }
 .cards-row .card { margin-bottom: 0; }
+
+/* ============ TOGGLE SWITCH ============ */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 150ms ease-out, border-color 150ms ease-out;
+}
+.switch .slider::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 2px;
+  top: 2px;
+  background: hsl(var(--foreground));
+  border-radius: 50%;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.switch input:checked + .slider {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+.switch input:checked + .slider::before {
+  transform: translateX(16px);
+  background: hsl(var(--primary-foreground));
+}
+
+/* ============ EDIT-INPUT (input + trailing pencil button) ============ */
+.edit-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.edit-input .input { flex: 1; min-width: 0; }
+.edit-input .edit-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 150ms ease-out, color 150ms ease-out;
+  flex-shrink: 0;
+}
+.edit-input .edit-btn:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+.edit-input .edit-btn .lucide { width: 14px; height: 14px; }
+
+/* ============ PLATFORM PILL (Web/macOS/iOS/Android badges) ============ */
+.platform-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.platform-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  line-height: 18px;
+}
+
+/* ============ EXTENSION CARD ============ */
+.ext-mkt-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ext-mkt-card .ext-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ext-mkt-card .ext-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: hsl(var(--muted));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  flex-shrink: 0;
+}
+.ext-mkt-card .ext-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+  color: hsl(var(--foreground));
+}
+.ext-mkt-card .ext-vendor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+}
+.ext-mkt-card .ext-version {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2px 7px;
+  background: hsl(var(--muted));
+  border-radius: 4px;
+  color: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+}
+.ext-mkt-card .ext-desc {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+  flex: 1;
+}
+.ext-mkt-card .ext-supported {
+  font-size: 12px;
+  color: hsl(var(--foreground));
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.ext-mkt-card .btn.install { width: 100%; }
+
+/* ============ PRICING TIER CARD ============ */
+.tier-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+.tier-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tier-card.popular {
+  border-color: hsl(var(--primary) / 0.5);
+}
+.tier-card .tier-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+}
+.tier-card .tier-name { font-weight: 600; color: hsl(var(--foreground)); }
+.tier-card .tier-discount {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: hsl(var(--success) / 0.15);
+  color: hsl(var(--success));
+}
+.tier-card .tier-popular {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: hsl(var(--primary) / 0.15);
+  color: hsl(var(--primary));
+}
+.tier-card .tier-price {
+  font-family: 'Space Mono', 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
+}
+.tier-card .tier-price-old {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+  margin-left: 6px;
+}
+.tier-card .tier-price-suffix {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+.tier-card ul.tier-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.tier-card ul.tier-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: hsl(var(--foreground));
+  line-height: 1.45;
+}
+.tier-card ul.tier-features li .lucide {
+  width: 14px; height: 14px;
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.tier-card ul.tier-features li.muted { color: hsl(var(--muted-foreground)); }
+.tier-card ul.tier-features li.muted .lucide { color: hsl(var(--muted-foreground)); }
+
+/* ============ SIDE-RAIL LIST (Realtime Services left-side list) ============ */
+.side-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+.side-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.side-rail .side-item {
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 150ms ease-out, color 150ms ease-out;
+}
+.side-rail .side-item:hover {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+.side-rail .side-item.active {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+.side-rail .side-item .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(var(--muted-foreground) / 0.5);
+  flex-shrink: 0;
+}
+.side-rail .side-item.active .dot { background: hsl(var(--primary)); }
+
+/* ============ DANGER ZONE ============ */
+.card.danger {
+  border-color: hsl(var(--destructive) / 0.3);
+}
+.card.danger .card-eyebrow { color: hsl(var(--destructive)); }
+.btn.destructive .lucide { color: currentColor; }
+
+/* ============ VERIFY INPUT (input with leading verify icon) ============ */
+.verify-input { position: relative; }
+.verify-input .input { padding-left: 32px; }
+.verify-input .verify-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+}
+.verify-input .verify-icon.ok { color: hsl(var(--success)); }
+.verify-input .verify-icon.warn { color: hsl(38 92% 50%); }

@@ -515,7 +515,6 @@
           </div>
         </div>
 
-        <div class="note" style="margin-top: 18px;"><strong>IA note:</strong> different from <a href="#" data-route="vendor-credentials">Vendor Credentials</a> (LLM/TTS/ASR API keys for the agent runtime). Connectors are upstream SaaS integrations the agent talks to during a call.</div>
       </div>
 
       <!-- KNOWLEDGE BASE tab -->
@@ -915,171 +914,304 @@
     </div>
 
     <!-- EXTENSIONS MARKETPLACE (promoted from profile) -->
+    <!-- Extension Marketplace — from Figma 95:18696 -->
     <div class="screen hidden" data-screen="extensions">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Extensions Marketplace</div>
-      <div class="header-row">
-        <div>
-          <h2>Extensions Marketplace</h2>
-          <p class="subhead">Browse and enable Agora capabilities and third-party extensions for this project.</p>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" data-action="toast" data-msg="My submissions — wireframe stub">My submissions</button>
-        </div>
-      </div>
-
-      <div class="note">
-        <strong>Absorbs Console's project-configure long tail:</strong> Cloud Recording, Media Push, Media Pull, Media Gateway, Real-Time STT, Video Screenshot Upload — plus all 9 third-party extensions and My Submissions. One gallery instead of 17 sidebar items.
-      </div>
+      <div class="breadcrumb">Account › Preferences</div>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">Extension Marketplace</h2>
 
       <div class="tabs" id="extTabs">
-        <div class="tab active" data-tab="ext-agora">Agora capabilities</div>
-        <div class="tab" data-tab="ext-third-party">Third-party extensions</div>
-        <div class="tab" data-tab="ext-mine">My submissions</div>
+        <div class="tab active" data-tab="ext-marketplace">Marketplace</div>
+        <div class="tab" data-tab="ext-mine">My Submissions</div>
       </div>
 
-      <div class="tab-panel" data-panel="ext-agora">
-        <div class="grid-3">
-          <div class="ext-card"><h3>Cloud Recording</h3><div class="desc">Record agent calls to S3 / GCS.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Media Push</h3><div class="desc">Stream agent audio to a destination URL (RTMP/HLS).</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Media Pull</h3><div class="desc">Inject external media streams into an agent channel.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Media Gateway</h3><div class="desc">SIP / PSTN / WebRTC bridging.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Real-Time STT</h3><div class="desc">Speech-to-text overlay for live calls.</div><div class="actions"><span class="tag">Enabled</span></div></div>
-          <div class="ext-card"><h3>Video Screenshot Upload</h3><div class="desc">Periodic frame capture for moderation pipelines.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+      <div class="tab-panel" data-panel="ext-marketplace">
+        <div class="table-toolbar" style="margin: 16px 0;">
+          <div class="lhs">
+            <input class="input" placeholder="Search by Extension name or features…" style="width: 320px;" />
+            <button class="combo">All Platforms <i data-lucide="chevron-down"></i></button>
+          </div>
         </div>
-      </div>
 
-      <div class="tab-panel hidden" data-panel="ext-third-party">
-        <div class="grid-3">
-          <div class="ext-card"><h3>Agora Noise Suppression</h3><div class="desc">AI-powered background noise removal.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Agora Spatial Audio</h3><div class="desc">3D positional audio for immersive sessions.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>BytePlus Effects</h3><div class="desc">Beauty filters, AR effects, stickers.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Conversation Intelligence</h3><div class="desc">Call summarisation, sentiment, intent extraction.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>ActiveFence Video Moderation</h3><div class="desc">Real-time content safety classifiers.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Synervoz Voice FX</h3><div class="desc">Voice transformation and effects.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>DeepAR</h3><div class="desc">Face filters and AR masks.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>FaceUnity AR Filter</h3><div class="desc">Beauty + AR overlay pipeline.</div><div class="actions"><button class="btn small">Enable</button></div></div>
-          <div class="ext-card"><h3>Banuba Face AR</h3><div class="desc">Face tracking, makeup, AR effects.</div><div class="actions"><button class="btn small">Enable</button></div></div>
+        <div class="grid-3" style="gap: 16px;">
+          <div class="ext-mkt-card">
+            <div class="ext-head">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="ext-thumb" style="background:#a83333;color:#fff;">AR</div>
+                <div>
+                  <div class="ext-name">Face AR Effects</div>
+                  <div class="ext-vendor">Deepar.ai</div>
+                </div>
+              </div>
+              <span class="ext-version">v1.04</span>
+            </div>
+            <div class="ext-desc">Add 3D face masks, filters, background removal and other AR experiences to your app via Agora's Video SDK.</div>
+            <div>
+              <div class="ext-supported">Supported Platforms</div>
+              <div class="platform-pills">
+                <span class="platform-pill">Web</span>
+                <span class="platform-pill">macOS</span>
+                <span class="platform-pill">iOS</span>
+              </div>
+            </div>
+            <button class="btn install" data-action="toast" data-msg="Install Face AR Effects">Install</button>
+          </div>
+
+          <div class="ext-mkt-card">
+            <div class="ext-head">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="ext-thumb" style="background:#222;color:#fff;">banuba</div>
+                <div>
+                  <div class="ext-name">Banuba Face AR SDK</div>
+                  <div class="ext-vendor">Banuba.ai</div>
+                </div>
+              </div>
+              <span class="ext-version">v2.0</span>
+            </div>
+            <div class="ext-desc">Banuba extension for Agora enables video calls with features like face filters, face touch-up filters, virtual backgrounds and avatars.</div>
+            <div>
+              <div class="ext-supported">Supported Platforms</div>
+              <div class="platform-pills">
+                <span class="platform-pill">Web</span>
+                <span class="platform-pill">Windows</span>
+                <span class="platform-pill">Flutter</span>
+                <span class="platform-pill">React Native</span>
+              </div>
+            </div>
+            <button class="btn install" data-action="toast" data-msg="Install Banuba">Install</button>
+          </div>
+
+          <div class="ext-mkt-card">
+            <div class="ext-head">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="ext-thumb" style="background:#1e293b;color:#fff;">Sync</div>
+                <div>
+                  <div class="ext-name">Synervoz Voice FX</div>
+                  <div class="ext-vendor">Synervoz Inc</div>
+                </div>
+              </div>
+              <span class="ext-version">v1.04</span>
+            </div>
+            <div class="ext-desc">Add voice effects including Echo, Reverb, Flanger, and TimeStretch.</div>
+            <div>
+              <div class="ext-supported">Supported Platforms</div>
+              <div class="platform-pills">
+                <span class="platform-pill">Web</span>
+                <span class="platform-pill">Windows</span>
+                <span class="platform-pill">macOS</span>
+                <span class="platform-pill">iOS</span>
+              </div>
+            </div>
+            <button class="btn install" data-action="toast" data-msg="Install Synervoz">Install</button>
+          </div>
+
+          <div class="ext-mkt-card">
+            <div class="ext-head">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="ext-thumb" style="background:hsl(var(--primary));color:#fff;">aQra</div>
+                <div>
+                  <div class="ext-name">AI Noise Suppression</div>
+                  <div class="ext-vendor">Agora</div>
+                </div>
+              </div>
+              <span class="ext-version">v1.04</span>
+            </div>
+            <div class="ext-desc">Removes background noise from real-time audio and video.</div>
+            <div>
+              <div class="ext-supported">Supported Platforms</div>
+              <div class="platform-pills">
+                <span class="platform-pill">Web</span>
+                <span class="platform-pill">Windows</span>
+                <span class="platform-pill">macOS</span>
+                <span class="platform-pill">iOS</span>
+              </div>
+            </div>
+            <button class="btn install" data-action="toast" data-msg="Install AI Noise Suppression">Install</button>
+          </div>
+
+          <div class="ext-mkt-card">
+            <div class="ext-head">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="ext-thumb" style="background:#7c3aed;color:#fff;">symbl</div>
+                <div>
+                  <div class="ext-name">Conversation Intelligence</div>
+                  <div class="ext-vendor">Symbl.ai</div>
+                </div>
+              </div>
+              <span class="ext-version">v1.04</span>
+            </div>
+            <div class="ext-desc">Removes background noise from real-time audio and video.</div>
+            <div>
+              <div class="ext-supported">Supported Platforms</div>
+              <div class="platform-pills">
+                <span class="platform-pill">Web</span>
+                <span class="platform-pill">Windows</span>
+                <span class="platform-pill">macOS</span>
+                <span class="platform-pill">iOS</span>
+              </div>
+            </div>
+            <button class="btn install" data-action="toast" data-msg="Install Conversation Intelligence">Install</button>
+          </div>
+
+          <div class="ext-mkt-card">
+            <div class="ext-head">
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div class="ext-thumb" style="background:hsl(var(--primary));color:#fff;">aQra</div>
+                <div>
+                  <div class="ext-name">3D Spatial Audio</div>
+                  <div class="ext-vendor">Agora</div>
+                </div>
+              </div>
+              <span class="ext-version">v3.01</span>
+            </div>
+            <div class="ext-desc">Deliver a more natural audio experience. Make your product stand out with 3D Spatial Audio that boosts user engagement.</div>
+            <div>
+              <div class="ext-supported">Supported Platforms</div>
+              <div class="platform-pills">
+                <span class="platform-pill">Web</span>
+                <span class="platform-pill">Windows</span>
+                <span class="platform-pill">macOS</span>
+                <span class="platform-pill">iOS</span>
+                <span class="platform-pill">Android</span>
+              </div>
+            </div>
+            <button class="btn install" data-action="toast" data-msg="Install 3D Spatial Audio">Install</button>
+          </div>
         </div>
       </div>
 
       <div class="tab-panel hidden" data-panel="ext-mine">
-        <div class="box">
-          <h3>My submissions</h3>
-          <div class="row clickable"><span class="label">acme-crm-sync</span><span class="value">Submitted 03 May 2026 · reviewer notes: "Add OAuth scope explanation"</span><span class="tag tag-draft">Changes requested</span><div class="actions"><button class="btn small">Open</button></div></div>
-          <div class="row clickable"><span class="label">acme-helpdesk-bridge</span><span class="value">Submitted 14 Apr 2026 · approved · published 18 Apr</span><span class="tag tag-live">Published</span><div class="actions"><button class="btn small">View public listing</button></div></div>
-          <div class="row clickable"><span class="label">acme-experimental</span><span class="value">Saved 22 May 2026 · 3 missing fields</span><span class="tag tag-draft">Draft</span><div class="actions"><button class="btn small">Continue</button></div></div>
-          <div style="margin-top:12px;"><button class="btn primary" data-action="toast" data-msg="Submit extension flow — wireframe stub">+ Submit new extension</button></div>
-          <div class="note"><strong>Console parity:</strong> mirrors <code>/extensions-marketplace/my-submissions</code>.</div>
+        <div class="card" style="margin-top: 16px;">
+          <table class="data-table">
+            <thead><tr><th>Extension</th><th>Submitted</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>acme-crm-sync</td><td>03 May 2026</td><td><span class="status-badge pending">Changes requested</span></td><td><button class="btn small">Open</button></td></tr>
+              <tr><td>acme-helpdesk-bridge</td><td>14 Apr 2026</td><td><span class="status-badge issued">Published</span></td><td><button class="btn small">View listing</button></td></tr>
+              <tr><td>acme-experimental</td><td>22 May 2026</td><td><span class="status-badge paid">Draft</span></td><td><button class="btn small">Continue</button></td></tr>
+            </tbody>
+          </table>
         </div>
+        <div style="margin-top: 16px;"><button class="btn primary" data-action="toast" data-msg="Submit new extension"><i data-lucide="plus"></i> Submit new extension</button></div>
       </div>
     </div>
 
-    <!-- PROJECT SETTINGS (was "Project Overview" — renamed to avoid Home dup) -->
+    <!-- PROJECT SETTINGS -->
+    <!-- Project Settings — from Figma 90:15739 -->
     <div class="screen hidden" data-screen="project-settings">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Project settings</div>
-      <h2>Project settings</h2>
-      <p class="subhead">Identity and configuration for this Agora project. Not for debugging agents.</p>
+      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Project Settings</div>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">Project Settings</h2>
 
-      <div class="note">
-        <strong>Renamed from "Project Overview":</strong> avoids the Home/Overview dual-label confusion (IA decision 2026-05-21).
-      </div>
-
-      <div class="box">
-        <h3>Project name</h3>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input class="input" value="Project Alpha" style="max-width: 320px;">
-          <button class="btn">Rename</button>
-          <span class="tag muted">Created 12 Mar 2026</span>
-        </div>
-      </div>
-
-      <div class="box">
-        <h3>App ID</h3>
-        <div class="desc">Unique identifier for this project. Safe to share — pair with token authentication.</div>
-        <div class="row">
-          <span class="label">App ID</span>
-          <span class="value">a7f2-1c9d-0b8e-44f0-9e2c</span>
-          <div class="actions">
-            <button class="btn small" data-action="toast" data-msg="Copied App ID">Copy</button>
-            <button class="btn small" data-action="toast" data-msg="Downloaded .env">Download .env</button>
+      <div class="card">
+        <div class="card-body" style="padding-top: 20px;">
+          <div class="copy-input" style="max-width: 480px;">
+            <label>Project Name</label>
+            <div class="edit-input">
+              <input class="input" value="My First Project" />
+              <button class="btn" data-action="toast" data-msg="Renamed">Rename</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="box">
-        <h3>App Certificate</h3>
-        <div class="desc">Required to generate authentication tokens. Treat like a password.</div>
-        <div class="row">
-          <span class="label">Primary <span class="tag">Active</span></span>
-          <span class="value" id="appCertVal">••••••••••••••••••••••••••••3f9a</span>
-          <div class="actions">
-            <button class="btn small" data-action="revealCert">Reveal</button>
-            <button class="btn small" data-action="toast" data-msg="Copied App Certificate">Copy</button>
+      <div class="card">
+        <div class="card-body" style="padding-top: 20px;">
+          <div class="copy-input" style="max-width: 480px;">
+            <label>App ID</label>
+            <div class="field">
+              <span class="field-text">a7f21c9d0b8e44f09e2c5b3d</span>
+              <button class="copy-btn" data-action="toast" data-msg="Copied App ID"><i data-lucide="copy"></i></button>
+            </div>
+          </div>
+          <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 8px;">Public identifier for this project.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-eyebrow">Security</span></div>
+        <div class="card-body">
+          <div class="copy-input" style="max-width: 480px;">
+            <label>Primary Certificate</label>
+            <div class="field">
+              <span class="field-text">••••••••••••••••••••••••3f9a</span>
+              <button class="copy-btn" data-action="toast" data-msg="Copied Primary Certificate"><i data-lucide="copy"></i></button>
+            </div>
+            <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 6px;">Server side secret. Treat like a database password.</p>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 480px;">
+            <div>
+              <div style="font-size: 14px; font-weight: 500;">Secondary Certificate</div>
+              <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 2px;">Enable for enhanced security.</p>
+            </div>
+            <button class="btn" data-action="toast" data-msg="Secondary certificate enabled"><i data-lucide="shield-check"></i> Enable</button>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 480px;">
+            <div>
+              <div style="font-size: 14px; font-weight: 500;">Generate Temporary Token</div>
+              <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 2px;">A token to use for temporary testing.</p>
+            </div>
+            <button class="btn primary" data-action="toast" data-msg="Temporary token generated"><i data-lucide="plus"></i> Generate</button>
+          </div>
+
+          <div class="copy-input" style="max-width: 480px;">
+            <div class="field">
+              <span class="field-text" style="font-size: 11.5px;">awie7fgikshjfgkiaerfgaeiurfghahfgkjadfhgjrf…</span>
+              <button class="copy-btn" data-action="toast" data-msg="Copied temporary token"><i data-lucide="copy"></i></button>
+            </div>
+            <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 6px;">Active for 1 day. Copy your token now and save it. You won't see it again.</p>
           </div>
         </div>
-        <div class="row">
-          <span class="label">Secondary <span class="tag muted">Not active</span></span>
-          <span class="value" style="color:#777">Enable when rotating</span>
-          <div class="actions"><button class="btn small" data-action="toast" data-msg="Secondary cert enabled — start rotation">Enable secondary</button></div>
-        </div>
-      </div>
-
-      <div class="box">
-        <h3>Generate temporary token</h3>
-        <div class="desc">Project-scoped test token. Expires in 24h max. Development only.</div>
-        <div class="grid-2">
-          <div class="field"><label>Channel name</label><input class="input" placeholder="e.g. agent-test-1"></div>
-          <div class="field"><label>UID</label><input class="input" placeholder="0 (any user)"></div>
-        </div>
-        <button class="btn primary" data-action="toast" data-msg="Temporary token generated">Generate token</button>
-      </div>
-
-      <div class="box">
-        <h3>Project services</h3>
-        <div class="desc">Most are auto-enabled when an agent uses them. Browse all options in <a href="#" data-route="extensions">Extensions Marketplace</a>.</div>
-        <div class="row"><span class="label">Conversational AI Engine</span><span class="tag">Enabled · auto</span></div>
-        <div class="row"><span class="label">Real-Time STT</span><span class="tag">Enabled · auto</span></div>
-        <div class="row"><span class="label">Cloud Recording</span><span class="tag muted">Off</span><div class="actions"><button class="btn small" data-route="extensions">Browse extensions →</button></div></div>
-      </div>
-
-      <div class="box">
-        <h3>Security</h3>
-        <div class="desc">Project-scoped authentication and authorisation policies.</div>
-        <div class="row"><span class="label">Co-Host Authentication</span><span class="value">Require token to publish as host</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Co-Host Auth toggled">Enable</button></div></div>
-        <div class="note"><strong>Console parity:</strong> mirrors <code>/cohost-authentication</code>.</div>
-      </div>
-
-      <div class="box">
-        <h3>Networking</h3>
-        <div class="desc">Route traffic through Agora's proxy for restricted-network environments (enterprise firewalls, sanctioned regions).</div>
-        <div class="row"><span class="label">Cloud Proxy</span><span class="value">Off · TCP 443 fallback available</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Cloud Proxy enabled">Enable</button></div></div>
-        <div class="note"><strong>Console parity:</strong> mirrors <code>/cloud-proxy</code>.</div>
       </div>
     </div>
 
 
-    <!-- VENDOR CREDENTIALS -->
+    <!-- Vendor Credentials — from Figma 90:16296 -->
     <div class="screen hidden" data-screen="vendor-credentials">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Vendor Credentials</div>
+      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › API Keys</div>
       <div class="header-row">
-        <div>
-          <h2>Vendor Credentials</h2>
-          <p class="subhead">Third-party provider keys for agents in this project. Not Agora App ID, App Certificate, or RESTful API.</p>
-        </div>
-        <button class="btn primary" data-action="openAddCred">+ Add credential</button>
+        <h2 style="font-size: 24px; letter-spacing: -0.025em;">Vendor Credentials</h2>
+        <button class="btn primary" data-action="openAddCred"><i data-lucide="plus"></i> Add Credential</button>
       </div>
 
-      <div class="note">
-        <strong>Disambiguation:</strong> For your Agora App ID / Certificate / temp token, see <a href="#" data-route="project-settings">Project settings</a>. For Customer ID + Customer Secret, see <a href="#" data-action="goAccount" data-route="restful-api">Account → Developer → RESTful API</a>.
+      <div style="margin: 16px 0;">
+        <input class="input" placeholder="Search by Vendor Name…" style="max-width: 320px;" />
       </div>
 
-      <div class="box">
-        <h3>Credentials in this project</h3>
-        <div id="credList">
-          <div class="row"><span class="label">OpenAI · Production</span><span class="value">sk-prod-•••3f9a</span><span class="tag">Used by 3 agents</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
-          <div class="row"><span class="label">ElevenLabs · Default voice</span><span class="value">el-•••8e2c</span><span class="tag">Used by 2 agents</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
-          <div class="row"><span class="label">Deepgram · ASR</span><span class="value">dg-•••0b8e</span><span class="tag muted">Not in use</span><div class="actions"><button class="btn small">Edit</button><button class="btn small">Revoke</button></div></div>
-        </div>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Credential Name</th>
+              <th>Date Created</th>
+              <th>API Version</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="status-badge issued">LLM</span></td>
+              <td><span class="mono-num">my-llm-azure-cred</span></td>
+              <td>1 Mar 2025</td>
+              <td><span class="mono-num">my-azure-cred-2</span></td>
+              <td><button class="btn icon small" aria-label="Actions"><i data-lucide="ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="status-badge paid">ASR</span></td>
+              <td><span class="mono-num">my-asr-openai-cred</span></td>
+              <td>15 Apr 2025</td>
+              <td><span class="mono-num">2025-02-01-v0.32</span></td>
+              <td><button class="btn icon small" aria-label="Actions"><i data-lucide="ellipsis-vertical"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="status-badge issued">LLM</span></td>
+              <td><span class="mono-num">my-llm-azure-cred-2</span></td>
+              <td>22 May 2025</td>
+              <td><span class="mono-num">2025-02-01-v0.32</span></td>
+              <td><button class="btn icon small" aria-label="Actions"><i data-lucide="ellipsis-vertical"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -1477,36 +1609,127 @@
     </div>
 
     <!-- ===== PLANS & ADD-ONS — separate screen accessed from Upgrade Plan ===== -->
+    <!-- View all plans — from Figma 140:22149 -->
     <div class="screen hidden" data-screen="billing-plans">
-      <div class="breadcrumb"><a href="#" data-action="goAccount" data-route="billing-subs">Billing</a> › Plans</div>
-      <h2 style="font-size: 24px; letter-spacing: -0.6px; margin-bottom: 8px;">Plans &amp; Add-ons</h2>
-      <p class="subhead">Pick a tier that fits your usage. Add on premium services where you need them.</p>
+      <div class="breadcrumb">Account › Preferences › <a href="#" data-action="goAccount" data-route="billing-subs">Billing</a></div>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">View all plans</h2>
 
-      <div class="card">
-        <div class="card-header"><span class="card-eyebrow">Available Plans</span></div>
-        <div class="card-body">
-          <div class="row"><span class="label">FREE</span><span class="value">10K mins · 0 concurrent agents</span><div class="actions"><span class="tag muted">Downgrade</span></div></div>
-          <div class="row"><span class="label">STARTER · $49</span><span class="value">50K mins · 2 concurrent</span><span class="tag">Current</span></div>
-          <div class="row"><span class="label">PRO · $199</span><span class="value">200K mins · 10 concurrent</span><div class="actions"><button class="btn primary small" data-action="openChangePlan">Upgrade</button></div></div>
-          <div class="row"><span class="label">BUSINESS · custom</span><span class="value">Contact sales</span><div class="actions"><button class="btn small">Talk to sales</button></div></div>
+      <div class="tabs" id="planFamilyTabs">
+        <div class="tab" data-tab="plans-agent">Agent Studio Plans</div>
+        <div class="tab active" data-tab="plans-rtc">RTC Prepaid Plans</div>
+        <div class="tab" data-tab="plans-signaling">Signaling Plans</div>
+        <div class="tab" data-tab="plans-chat">Chat Plans</div>
+      </div>
+
+      <div class="tab-panel" data-panel="plans-rtc">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin: 20px 0 16px;">
+          <div class="seg-tabs">
+            <button class="seg active">Monthly Plans</button>
+            <button class="seg">Top-Up Packages</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn" data-action="toast" data-msg="Contact sales — wireframe stub">Talk to Sales</button>
+            <button class="btn icon" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
+            <button class="btn icon" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="tier-row">
+          <!-- FREE -->
+          <div class="tier-card">
+            <div class="tier-head"><span class="tier-name">Free</span></div>
+            <div class="tier-price">$0<span class="tier-price-suffix">/mo</span></div>
+            <ul class="tier-features">
+              <li><i data-lucide="check"></i> Includes <strong>10k</strong> standard minutes</li>
+              <li><i data-lucide="check"></i> Media Encryption</li>
+              <li><i data-lucide="check"></i> Advanced Audio Processing</li>
+              <li><i data-lucide="check"></i> Analytics Starter Plan</li>
+              <li class="muted"><i data-lucide="circle"></i> Overuse Suspension</li>
+            </ul>
+            <button class="btn" disabled style="opacity: 0.6;">Subscribed</button>
+          </div>
+
+          <!-- STARTER -->
+          <div class="tier-card">
+            <div class="tier-head"><span class="tier-name">Starter</span><span class="tier-discount">7% OFF</span></div>
+            <div class="tier-price">$49.99<span class="tier-price-old">$49.5</span><span class="tier-price-suffix">/mo</span></div>
+            <ul class="tier-features">
+              <li><i data-lucide="check"></i> Total <strong>50k</strong> standard minutes</li>
+              <li><i data-lucide="check"></i> Includes <strong>3500</strong> bonus standard minutes</li>
+              <li><i data-lucide="check"></i> Overage Post Payment</li>
+              <li class="muted"><i data-lucide="plus"></i> Everything in Free</li>
+            </ul>
+            <button class="btn primary" data-action="openChangePlan">Upgrade</button>
+          </div>
+
+          <!-- PRO (Popular) -->
+          <div class="tier-card popular">
+            <div class="tier-head"><span class="tier-name">Pro</span><span class="tier-popular">Popular</span><span class="tier-discount">10% OFF</span></div>
+            <div class="tier-price">$133.99<span class="tier-price-old">$128.5</span><span class="tier-price-suffix">/mo</span></div>
+            <ul class="tier-features">
+              <li><i data-lucide="check"></i> Total <strong>150k</strong> standard minutes</li>
+              <li><i data-lucide="check"></i> Includes <strong>15k</strong> bonus standard minutes</li>
+              <li class="muted"><i data-lucide="plus"></i> Everything in Starter</li>
+            </ul>
+            <button class="btn primary" data-action="openChangePlan">Upgrade</button>
+          </div>
+
+          <!-- BUSINESS -->
+          <div class="tier-card">
+            <div class="tier-head"><span class="tier-name">Business</span><span class="tier-discount">14% OFF</span></div>
+            <div class="tier-price">$339.99<span class="tier-price-old">$396.5</span><span class="tier-price-suffix">/mo</span></div>
+            <ul class="tier-features">
+              <li><i data-lucide="check"></i> Total <strong>400k</strong> standard minutes</li>
+              <li><i data-lucide="check"></i> Includes <strong>56k</strong> bonus standard minutes</li>
+              <li class="muted"><i data-lucide="plus"></i> Everything in Pro</li>
+            </ul>
+            <button class="btn primary" data-action="openChangePlan">Upgrade</button>
+          </div>
+
+          <!-- BUSINESS PRO -->
+          <div class="tier-card">
+            <div class="tier-head"><span class="tier-name">Business Pro</span><span class="tier-discount">18% OFF</span></div>
+            <div class="tier-price">$659.99<span class="tier-price-old">$792</span><span class="tier-price-suffix">/mo</span></div>
+            <ul class="tier-features">
+              <li><i data-lucide="check"></i> Total <strong>800k</strong> standard minutes</li>
+              <li><i data-lucide="check"></i> Includes <strong>130k</strong> bonus standard minutes</li>
+              <li class="muted"><i data-lucide="plus"></i> Everything in Business</li>
+            </ul>
+            <button class="btn primary" data-action="openChangePlan">Upgrade</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-body" style="padding: 16px 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: hsl(var(--muted-foreground));">Need a Custom Plan?</div>
+                <p style="font-size: 13px; color: hsl(var(--foreground)); margin-top: 4px;">For businesses with higher volume requirement or unique business models.</p>
+              </div>
+              <button class="btn" data-action="toast" data-msg="Contact sales — wireframe stub">Contact Us</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 32px;">
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px;">Purchase Notice:</div>
+          <ul style="font-size: 12px; color: hsl(var(--muted-foreground)); padding-left: 20px; line-height: 1.7;">
+            <li><strong>Activation &amp; Renewal:</strong> Subscription packages are activated upon payment and automatically renew 48 hours before the end-of-month expiration unless canceled.</li>
+            <li><strong>Usage &amp; Duration:</strong> Packages cover audio/video usage within the same calendar month. Overages can be covered by purchasing top-up packages.</li>
+            <li><strong>Conversion Rules:</strong> Time in the subscription package is converted based on tiered rates for voice/video calls and live streaming. See documentation for details.</li>
+            <li><strong>Upgrading:</strong> You can upgrade at any time. The new plan takes effect immediately, with new cost and quota extended to the beginning of current month. If your account has a negative balance, purchasing a prepaid package will first charge your credit card for the outstanding balance, followed by the package fee.</li>
+          </ul>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header"><span class="card-eyebrow">Plans by Product Family</span></div>
-        <div class="card-body">
-          <div class="row"><span class="label">RTC plans (Voice / Video / ILS)</span><span class="value">Tiered minute packs · top-ups</span><div class="actions"><button class="btn small">View RTC plans</button></div></div>
-          <div class="row"><span class="label">Chat plans</span><span class="value">DAU + message tiers</span><div class="actions"><button class="btn small">View Chat plans</button></div></div>
-          <div class="row"><span class="label">Signaling plans</span><span class="value">Peak concurrency + message tiers</span><div class="actions"><button class="btn small">View Signaling plans</button></div></div>
-        </div>
+      <div class="tab-panel hidden" data-panel="plans-agent">
+        <div class="empty" style="margin-top: 24px;">Agent Studio Plans — rough scaffold pending Figma frame for this tab.</div>
       </div>
-
-      <div class="card">
-        <div class="card-header"><span class="card-eyebrow">Add-on Packages</span></div>
-        <div class="card-body">
-          <div class="row"><span class="label">Agora Analytics · Pro</span><span class="value">5 analyst seats · Call Inspector + Data Insights · $99/mo</span><div class="actions"><button class="btn small">Manage</button></div></div>
-          <div class="row"><span class="label">Premium support</span><span class="value">24/7 · 1h SLA · $499/mo</span><div class="actions"><button class="btn small" data-action="openChangePlan">Upgrade</button></div></div>
-        </div>
+      <div class="tab-panel hidden" data-panel="plans-signaling">
+        <div class="empty" style="margin-top: 24px;">Signaling Plans — rough scaffold pending Figma frame for this tab.</div>
+      </div>
+      <div class="tab-panel hidden" data-panel="plans-chat">
+        <div class="empty" style="margin-top: 24px;">Chat Plans — rough scaffold pending Figma frame for this tab.</div>
       </div>
     </div>
 
@@ -1747,39 +1970,46 @@ agora login</textarea>
     </div>
 
     <!-- Realtime Services (PROJECT group) -->
+    <!-- Realtime Services — from Figma 90:15778 -->
     <div class="screen hidden" data-screen="realtime-services">
-      <div class="breadcrumb"><span class="proj-name">My first project</span> › Realtime Services</div>
-      <h2>Realtime Services</h2>
-      <p class="subhead">All real-time infrastructure available in this project — RTC products and add-on capabilities. Enable what your agents need.</p>
-      <div class="note"><strong>Merges Console's RTC family + per-project add-ons:</strong> Voice/Video/ILS, Chat, Signaling (4 tabs), Whiteboard, Flexible Classroom — plus Cloud Recording, Media Push/Pull/Gateway, Real-Time STT, Video Screenshot Upload.</div>
+      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Real Time Servies</div>
 
-      <h3 style="margin-top: 24px;">Core RTC products</h3>
-      <div class="grid-3">
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Voice Calling"><h3>Voice Calling</h3><div class="desc">Crystal-clear audio chat.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Video Calling"><h3>Video Calling</h3><div class="desc">Customizable real-time video.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Interactive Live Streaming"><h3>Interactive Live Streaming</h3><div class="desc">Live video + voice streaming.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Chat (Basic Info)"><h3>Chat</h3><div class="desc">Private + group messaging. Configure basic info, app keys, push.</div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Signaling — tabs: Basic / Presence / Storage / Stream Channel"><h3>Signaling</h3><div class="desc">High-concurrency real-time messaging. <span class="tag muted">4 config tabs</span></div></div>
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Whiteboard — tabs: Basic / Interactive Services"><h3>Interactive Whiteboard</h3><div class="desc">Real-time visual collaboration. <span class="tag muted">2 config tabs</span></div></div>
+      <div class="card" style="margin-top: 8px;">
+        <div class="side-layout">
+          <div class="side-rail" style="padding: 16px 12px;">
+            <div class="side-item"><span class="dot"></span> Chat</div>
+            <div class="side-item active"><span class="dot"></span> Cloud recording</div>
+            <div class="side-item"><span class="dot"></span> Whiteboard</div>
+            <div class="side-item"><span class="dot"></span> Media Pull</div>
+            <div class="side-item"><span class="dot"></span> Media Push</div>
+            <div class="side-item"><span class="dot"></span> Media Gateway</div>
+            <div class="side-item"><span class="dot"></span> Video Screenshot Upload</div>
+          </div>
+          <div style="padding: 20px 24px; border-left: 1px solid hsl(var(--border) / 0.6);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="presentation" style="width:18px;height:18px;color:hsl(var(--primary));"></i>
+                <div>
+                  <div style="font-weight: 600; font-size: 15px;">Interactive Whiteboard</div>
+                  <div style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 2px;">Collaborative canvas for multimodal agent workflows.</div>
+                </div>
+              </div>
+              <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+            </div>
+
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: hsl(var(--muted-foreground) / 0.75); margin-bottom: 14px;">Configure</div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid hsl(var(--border) / 0.4);">
+              <div style="font-size: 14px;">Allow Agent to read the board</div>
+              <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0;">
+              <div style="font-size: 14px;">Allow Agent to write on the board</div>
+              <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <h3 style="margin-top: 24px;">Vertical solutions</h3>
-      <div class="grid-3">
-        <div class="ext-card clickable" data-action="toast" data-msg="Open Flexible Classroom"><h3>Flexible Classroom</h3><div class="desc">Pre-built RTC solution for education — rooms, roles, whiteboard, recording.</div></div>
-      </div>
-
-      <h3 style="margin-top: 24px;">Add-on capabilities</h3>
-      <p class="desc" style="margin-bottom: 12px;">Opt-in capabilities for agents in this project. Enable per project, configure per agent.</p>
-      <div class="grid-3">
-        <div class="ext-card"><h3>Cloud Recording</h3><div class="desc">Record agent calls to S3 / GCS.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Cloud Recording enabled in My first project">Enable</button></div></div>
-        <div class="ext-card"><h3>Media Push</h3><div class="desc">Stream agent audio to RTMP/HLS destinations.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Set RTMP destination first">Enable</button></div></div>
-        <div class="ext-card"><h3>Media Pull</h3><div class="desc">Inject external media into agent channels.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Media Pull enabled">Enable</button></div></div>
-        <div class="ext-card"><h3>Media Gateway</h3><div class="desc">SIP / PSTN / WebRTC bridging.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Media Gateway requires Pro plan">Upgrade to enable</button></div></div>
-        <div class="ext-card"><h3>Real-Time STT</h3><div class="desc">Live speech-to-text overlay during calls.</div><div class="actions"><span class="tag tag-live">Enabled</span><button class="btn small" data-action="toast" data-msg="Configure RT-STT">Configure</button></div></div>
-        <div class="ext-card"><h3>Video Screenshot Upload</h3><div class="desc">Periodic frame capture for moderation pipelines.</div><div class="actions"><button class="btn small" data-action="toast" data-msg="Video Screenshot Upload enabled">Enable</button></div></div>
-      </div>
-
-      <div class="note" style="margin-top:20px;"><strong>Journey:</strong> click <em>Enable</em> for an instant project-level toggle. Click a card to configure (S3 bucket, RTMP destination, etc.). Plan-gated add-ons surface an upgrade path inline rather than failing silently.</div>
     </div>
 
     <!-- Project Notifications (now lives under Project Settings, but still reachable as standalone) -->
@@ -1787,8 +2017,6 @@ agora login</textarea>
       <div class="breadcrumb"><a href="#" data-route="project-settings"><span class="proj-name">My first project</span> › Project Settings</a> › Notifications</div>
       <h2>Project notifications</h2>
       <p class="subhead">Project-scoped notification triggers — which events fire from this project, and where they're routed.</p>
-      <div class="note"><strong>Distinction:</strong> this is the project-level event <em>config</em>. Per-channel <em>delivery preferences</em> (Email / Text / Console) live in <a href="#" data-action="goAccount" data-route="preferences">Preferences › Notifications</a>. Webhook destinations live in <a href="#" data-action="goAccount" data-route="webhooks">Webhooks</a>.</div>
-
       <div class="box">
         <h3>Trigger rules</h3>
         <div class="row"><span class="label">Agent deployed</span><span class="value">All members · Email + Console</span><div class="actions"><button class="btn small">Edit</button></div></div>
@@ -1800,19 +2028,51 @@ agora login</textarea>
       </div>
     </div>
 
+    <!-- RESTful API — from Figma 90:16721 -->
     <div class="screen hidden" data-screen="restful-api">
-      <div class="breadcrumb">Account › Developer › RESTful API</div>
-      <h2>RESTful API credentials</h2>
-      <p class="subhead">Account-level credentials for Agora REST APIs.</p>
-      <div class="note"><strong>Doc:</strong> <a href="https://docs.agora.io/en/signaling/rest-api/restful-authentication" target="_blank">Agora — RESTful authentication</a></div>
-      <div class="box">
-        <h3>Active credential pair</h3>
-        <div class="row"><span class="label">Customer ID</span><span class="value">6512abc12def34567890</span><div class="actions"><button class="btn small" data-action="toast" data-msg="Copied Customer ID">Copy</button></div></div>
-        <div class="row"><span class="label">Customer Secret</span><span class="value" id="custSecretVal">••••••••••••••••••••••••3f9a</span><div class="actions"><button class="btn small" data-action="revealSecret">Reveal</button><button class="btn small" data-action="toast" data-msg="Copied Customer Secret">Copy</button></div></div>
-        <div class="row"><span class="label">Created</span><span class="value">12 Mar 2026 · by Jane Doe</span></div>
-        <div class="row"><span class="label">Last used</span><span class="value">3 days ago · from 198.51.x.x</span></div>
+      <div class="breadcrumb">Home › RESTful API</div>
+      <div class="header-row">
+        <h2 style="font-size: 24px; letter-spacing: -0.025em;">RESTful API</h2>
+        <button class="btn primary" data-action="toast" data-msg="Add secret — wireframe stub"><i data-lucide="plus"></i> Add Secret</button>
       </div>
-      <div class="note"><strong>Copy:</strong> "RESTful API" — never "Customer ID token". Token language is reserved for RTC / AccessToken2 / temporary token.</div>
+
+      <div class="card" style="margin-top: 16px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>Customer Secret</th>
+              <th>Note</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mono-num">9f4a7c2b8d1e6f3a0b5c9d7e4f2a1b6c</span></td>
+              <td><a href="#" data-action="toast" data-msg="Downloading secret" style="color: hsl(var(--primary)); text-decoration: none; font-size: 13px;">Download <i data-lucide="download" style="width:12px;height:12px;vertical-align:-1px;"></i></a></td>
+              <td><a href="#" data-action="toast" data-msg="Add note — wireframe stub" style="color: hsl(var(--primary)); text-decoration: none; font-size: 13px;">Add Note <i data-lucide="plus" style="width:12px;height:12px;vertical-align:-1px;"></i></a></td>
+              <td><button class="btn icon small" data-action="toast" data-msg="Revoke credential — wireframe stub" aria-label="Delete" style="color: hsl(var(--destructive));"><i data-lucide="trash-2"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="mono-num">3e7b9a1c5d4f8e2b0a6c7d9f1b3e5a4c</span></td>
+              <td><a href="#" data-action="toast" data-msg="Downloading secret" style="color: hsl(var(--primary)); text-decoration: none; font-size: 13px;">Download <i data-lucide="download" style="width:12px;height:12px;vertical-align:-1px;"></i></a></td>
+              <td><a href="#" data-action="toast" data-msg="Add note — wireframe stub" style="color: hsl(var(--primary)); text-decoration: none; font-size: 13px;">Add Note <i data-lucide="plus" style="width:12px;height:12px;vertical-align:-1px;"></i></a></td>
+              <td><button class="btn icon small" data-action="toast" data-msg="Revoke credential — wireframe stub" aria-label="Delete" style="color: hsl(var(--destructive));"><i data-lucide="trash-2"></i></button></td>
+            </tr>
+            <tr>
+              <td><span class="mono-num">0a9c8e7b6d5f4a3b2c1e7d9f0b6a3c5e</span></td>
+              <td><span style="font-size: 13px; color: hsl(var(--muted-foreground));">Downloaded <i data-lucide="check" style="width:12px;height:12px;vertical-align:-1px;color:hsl(var(--success));"></i></span></td>
+              <td><span style="font-size: 13px;">Note : For testing</span></td>
+              <td><button class="btn icon small" data-action="toast" data-msg="Revoke credential — wireframe stub" aria-label="Delete" style="color: hsl(var(--destructive));"><i data-lucide="trash-2"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ol style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 16px; padding-left: 20px; line-height: 1.7;">
+        <li>A maximum of 10 keys/secrets is allowed per account.</li>
+        <li>Please use the ID and Secret above to use Agora's RESTful API.</li>
+      </ol>
     </div>
 
     <div class="screen hidden" data-screen="webhooks">
@@ -2040,10 +2300,10 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
     </div>
 
     <!-- PREFERENCES — absorbs Profile + Notif Prefs + SSO + Teams + Account Overview -->
+    <!-- Preferences — from Figma 90:16646 -->
     <div class="screen hidden" data-screen="preferences">
       <div class="breadcrumb">Account › Preferences</div>
-      <h2>Preferences</h2>
-      <p class="subhead">Profile, security, notifications, team, and SSO — all account-level settings in one place.</p>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">Preferences</h2>
 
       <div class="tabs" id="prefsTabs">
         <div class="tab active" data-tab="prefs-profile">Profile</div>
@@ -2054,56 +2314,199 @@ embedDashboard({ credentialId: 'aa-embed-prod', dashboardId: 'call-quality' });<
       </div>
 
       <div class="tab-panel" data-panel="prefs-profile">
-        <div class="box"><h3>Personal Information</h3>
-          <div class="grid-2"><div class="field"><label>First Name</label><input class="input" value="Shakti"></div><div class="field"><label>Last Name</label><input class="input" value="Soni"></div></div>
+        <!-- PERSONAL INFORMATION -->
+        <div class="card">
+          <div class="card-header"><span class="card-eyebrow">Personal Information</span></div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field-block">
+                <label>First Name</label>
+                <div class="edit-input">
+                  <input class="input" value="John" />
+                  <button class="edit-btn" data-action="toast" data-msg="Edit first name" aria-label="Edit"><i data-lucide="pencil"></i></button>
+                </div>
+              </div>
+              <div class="field-block">
+                <label>Last Name</label>
+                <div class="edit-input">
+                  <input class="input" value="Doe" />
+                  <button class="edit-btn" data-action="toast" data-msg="Edit last name" aria-label="Edit"><i data-lucide="pencil"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="field-block" style="margin-top: 20px; max-width: 320px;">
+              <label>Language</label>
+              <select class="input">
+                <option>🌐 English</option>
+                <option>🌐 Mandarin</option>
+                <option>🌐 Spanish</option>
+                <option>🌐 Japanese</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div class="box"><h3>Security</h3>
-          <div class="row"><span class="label">Phone</span><span class="value">+91 9*****6036</span><div class="actions"><button class="btn small">Verify</button></div></div>
-          <div class="row"><span class="label">Email</span><span class="value">shak******@agora.io</span><div class="actions"><button class="btn small">Update</button></div></div>
-          <div class="row"><span class="label">Password</span><span class="value">••••••••••••</span><div class="actions"><button class="btn small">Reset</button></div></div>
+
+        <!-- SECURITY -->
+        <div class="card">
+          <div class="card-header"><span class="card-eyebrow">Security</span></div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field-block">
+                <label>Email</label>
+                <div class="edit-input">
+                  <div class="verify-input" style="flex: 1;">
+                    <i data-lucide="check-circle" class="verify-icon ok"></i>
+                    <input class="input" value="jane****@agora.io" readonly />
+                  </div>
+                  <button class="edit-btn" data-action="toast" data-msg="Edit email" aria-label="Edit"><i data-lucide="pencil"></i></button>
+                </div>
+              </div>
+              <div class="field-block">
+                <label>Phone No.</label>
+                <div class="edit-input">
+                  <div class="verify-input" style="flex: 1;">
+                    <i data-lucide="alert-circle" class="verify-icon warn"></i>
+                    <input class="input" value="+1 19*******4545" />
+                  </div>
+                  <button class="btn" data-action="toast" data-msg="Send verification code">Verify</button>
+                </div>
+                <p style="font-size: 12px; color: hsl(38 92% 50%); margin-top: 6px;">Verify your phone number to proceed</p>
+              </div>
+            </div>
+
+            <div class="field-block" style="margin-top: 20px;">
+              <label>Password</label>
+              <div class="edit-input" style="max-width: 480px;">
+                <input class="input" type="password" value="••••••••••••••••" readonly />
+                <button class="btn" data-action="toast" data-msg="Password reset email sent">Reset</button>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-top: 1px solid hsl(var(--border) / 0.4); margin-top: 20px;">
+              <div style="font-size: 14px;">Enable Two-Factor Authentication</div>
+              <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-top: 1px solid hsl(var(--border) / 0.4);">
+              <div style="font-size: 14px;">Allow Agora Customer Support to login to Console account (for next 24hrs)</div>
+              <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+            </div>
+          </div>
         </div>
-        <div class="box"><h3>Display</h3>
-          <div class="row"><span class="label">Theme</span><span class="value">System · Light · Dark</span></div>
-          <div class="row"><span class="label">Language</span><span class="value">English (US)</span></div>
+
+        <!-- COMPANY INFORMATION -->
+        <div class="card">
+          <div class="card-header"><span class="card-eyebrow">Company Information</span></div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field-block">
+                <label>Organisation Name</label>
+                <div class="edit-input">
+                  <input class="input" value="ACME Incorporated" />
+                  <button class="edit-btn" data-action="toast" data-msg="Edit organisation name" aria-label="Edit"><i data-lucide="pencil"></i></button>
+                </div>
+              </div>
+              <div class="field-block">
+                <label>Company ID</label>
+                <div class="copy-input">
+                  <div class="field">
+                    <span class="field-text">44889</span>
+                    <button class="copy-btn" data-action="toast" data-msg="Copied Company ID"><i data-lucide="copy"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="card danger">
+          <div class="card-header"><span class="card-eyebrow">Danger Zone</span></div>
+          <div class="card-body">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div style="font-size: 14px;">Delete your Agora account</div>
+              <button class="btn destructive" data-action="toast" data-msg="Account deletion flow — wireframe stub">Delete <i data-lucide="trash-2"></i></button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="tab-panel hidden" data-panel="prefs-notif">
-        <div class="box"><h3>Notification channels</h3>
-          <div class="row"><span class="label">Account</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
-          <div class="row"><span class="label">Billing</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
-          <div class="row"><span class="label">Product</span><span class="value">— Email · — Text · ✓ Console</span></div>
-          <div class="row"><span class="label">Operation</span><span class="value">✓ Email · ✓ Text · ✓ Console</span></div>
+        <div class="card">
+          <div class="card-header"><span class="card-eyebrow">Notification Channels</span></div>
+          <div class="card-body">
+            <table class="data-table">
+              <thead><tr><th>Category</th><th>Email</th><th>SMS</th><th>In-Console</th></tr></thead>
+              <tbody>
+                <tr><td>Account</td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td></tr>
+                <tr><td>Billing</td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td></tr>
+                <tr><td>Product</td><td><label class="switch"><input type="checkbox" /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td></tr>
+                <tr><td>Operations</td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td><td><label class="switch"><input type="checkbox" checked /><span class="slider"></span></label></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <div class="tab-panel hidden" data-panel="prefs-teams">
-        <div class="box"><h3>Teams &amp; Permissions</h3>
-          <div class="row"><span class="label">Finance</span><span class="value">Usage: None · Finance: View</span><div class="actions"><button class="btn small">Edit</button></div></div>
-          <div class="row"><span class="label">Engineer</span><span class="value">Project: Edit · Analytics: View</span><div class="actions"><button class="btn small">Edit</button></div></div>
-          <div class="row"><span class="label">Admin</span><span class="value">All: Edit</span><div class="actions"><button class="btn small">Edit</button></div></div>
-          <div style="margin-top:12px;"><button class="btn primary">+ Add new team</button></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-eyebrow">Teams &amp; Members</span>
+            <button class="btn primary"><i data-lucide="plus"></i> Add team</button>
+          </div>
+          <div class="card-body">
+            <table class="data-table">
+              <thead><tr><th>Team</th><th>Permissions</th><th>Members</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Finance</td><td><span class="status-badge paid">Usage: None</span> <span class="status-badge issued">Finance: View</span></td><td>2 members</td><td><button class="btn icon small" aria-label="Edit"><i data-lucide="ellipsis-vertical"></i></button></td></tr>
+                <tr><td>Engineer</td><td><span class="status-badge issued">Project: Edit</span> <span class="status-badge paid">Analytics: View</span></td><td>4 members</td><td><button class="btn icon small" aria-label="Edit"><i data-lucide="ellipsis-vertical"></i></button></td></tr>
+                <tr><td>Admin</td><td><span class="status-badge issued">All: Edit</span></td><td>1 member</td><td><button class="btn icon small" aria-label="Edit"><i data-lucide="ellipsis-vertical"></i></button></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <div class="tab-panel hidden" data-panel="prefs-sso">
-        <div class="box warning">
-          <h3>SSO — Requires Premium or Enterprise</h3>
-          <div class="desc">SAML / SCIM integration via Okta, Azure AD, OneLogin.</div>
-          <div style="margin-top:8px;"><button class="btn primary">Request upgrade</button></div>
+        <div class="card">
+          <div class="card-header"><span class="card-eyebrow">Single Sign-On</span></div>
+          <div class="card-body">
+            <div class="alert info">
+              <i data-lucide="info" class="alert-icon"></i>
+              <div>
+                <div class="alert-title">Premium or Enterprise feature</div>
+                SAML / SCIM integration via Okta, Azure AD, OneLogin.
+              </div>
+            </div>
+            <button class="btn primary">Request upgrade</button>
+          </div>
         </div>
       </div>
 
       <div class="tab-panel hidden" data-panel="prefs-account">
-        <div class="box">
-          <div class="row"><span class="label">Account name</span><span class="value">Acme Inc.</span></div>
-          <div class="row"><span class="label">Owner</span><span class="value">Jane Doe · jane.doe@acme.com</span></div>
-          <div class="row"><span class="label">Workspaces</span><span class="value">2 · johndoe-workspace · acme-dev-team</span></div>
-          <div class="row"><span class="label">Seats</span><span class="value">5 of 10 used</span></div>
+        <div class="card">
+          <div class="card-header"><span class="card-eyebrow">Account</span></div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field-block">
+                <label>Account Name</label>
+                <div class="copy-input"><div class="field"><span class="field-text">ACME Incorporated</span></div></div>
+              </div>
+              <div class="field-block">
+                <label>Owner</label>
+                <div class="copy-input"><div class="field"><span class="field-text">jane.doe@acme.com</span></div></div>
+              </div>
+              <div class="field-block">
+                <label>Workspaces</label>
+                <div class="copy-input"><div class="field"><span class="field-text">2 active</span></div></div>
+              </div>
+              <div class="field-block">
+                <label>Seats</label>
+                <div class="copy-input"><div class="field"><span class="field-text">5 of 10 used</span></div></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="note"><strong>IA decision:</strong> consolidates Profile, Notification Preferences, Teams &amp; Members, SSO, and Account Overview into one tabbed surface — was 5 sidebar items, now 1 menu item.</div>
     </div>
 
     <div class="screen hidden" data-screen="whats-new">
