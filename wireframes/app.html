@@ -1098,67 +1098,65 @@
     <!-- Project Settings — from Figma 90:15739 -->
     <div class="screen hidden" data-screen="project-settings">
       <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Project Settings</div>
-      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">Project Settings</h2>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 20px;">Project Settings</h2>
 
+      <!-- Identity card: Project Name + App ID -->
       <div class="card">
-        <div class="card-body" style="padding-top: 20px;">
-          <div class="copy-input" style="max-width: 480px;">
+        <div class="card-body" style="padding-top: 22px;">
+          <div class="copy-input">
             <label>Project Name</label>
             <div class="edit-input">
               <input class="input" value="My First Project" />
-              <button class="btn" data-action="toast" data-msg="Renamed">Rename</button>
+              <button class="btn" data-action="toast" data-msg="Project renamed">Rename</button>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="card-body" style="padding-top: 20px;">
-          <div class="copy-input" style="max-width: 480px;">
+          <div class="copy-input">
             <label>App ID</label>
             <div class="field">
               <span class="field-text">a7f21c9d0b8e44f09e2c5b3d</span>
-              <button class="copy-btn" data-action="toast" data-msg="Copied App ID"><i data-lucide="copy"></i></button>
+              <button class="copy-btn" data-action="toast" data-msg="Copied App ID" aria-label="Copy App ID"><i data-lucide="copy"></i></button>
             </div>
+            <p class="form-row-help">Public identifier for this project. Safe to share — pair with token authentication.</p>
           </div>
-          <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 8px;">Public identifier for this project.</p>
         </div>
       </div>
 
+      <!-- Security card: Primary Cert + Secondary Cert + Token gen + Token output -->
       <div class="card">
         <div class="card-header"><span class="card-eyebrow">Security</span></div>
         <div class="card-body">
-          <div class="copy-input" style="max-width: 480px;">
+          <div class="copy-input">
             <label>Primary Certificate</label>
             <div class="field">
               <span class="field-text">••••••••••••••••••••••••3f9a</span>
-              <button class="copy-btn" data-action="toast" data-msg="Copied Primary Certificate"><i data-lucide="copy"></i></button>
+              <button class="copy-btn" data-action="toast" data-msg="Copied Primary Certificate" aria-label="Copy Primary Certificate"><i data-lucide="copy"></i></button>
             </div>
-            <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 6px;">Server side secret. Treat like a database password.</p>
+            <p class="form-row-help">Server-side secret. Treat like a database password.</p>
           </div>
 
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 480px;">
-            <div>
-              <div style="font-size: 14px; font-weight: 500;">Secondary Certificate</div>
-              <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 2px;">Enable for enhanced security.</p>
+          <div class="form-row">
+            <div class="form-row-label">
+              <div class="form-row-title">Secondary Certificate</div>
+              <p class="form-row-help">Enable for enhanced security. Used during certificate rotation.</p>
             </div>
             <button class="btn" data-action="toast" data-msg="Secondary certificate enabled"><i data-lucide="shield-check"></i> Enable</button>
           </div>
 
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 480px;">
-            <div>
-              <div style="font-size: 14px; font-weight: 500;">Generate Temporary Token</div>
-              <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 2px;">A token to use for temporary testing.</p>
+          <div class="form-row">
+            <div class="form-row-label">
+              <div class="form-row-title">Generate Temporary Token</div>
+              <p class="form-row-help">A token to use for temporary testing. Expires in 24 hours.</p>
             </div>
             <button class="btn primary" data-action="toast" data-msg="Temporary token generated"><i data-lucide="plus"></i> Generate</button>
           </div>
 
-          <div class="copy-input" style="max-width: 480px;">
+          <div class="copy-input">
             <div class="field">
-              <span class="field-text" style="font-size: 11.5px;">awie7fgikshjfgkiaerfgaeiurfghahfgkjadfhgjrf…</span>
-              <button class="copy-btn" data-action="toast" data-msg="Copied temporary token"><i data-lucide="copy"></i></button>
+              <span class="field-text" style="font-size: 12px;">awie7fgikshjfgkiaerfgaeiurfghahfgkjadfhgjrf...</span>
+              <button class="copy-btn" data-action="toast" data-msg="Copied temporary token" aria-label="Copy temporary token"><i data-lucide="copy"></i></button>
             </div>
-            <p style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 6px;">Active for 1 day. Copy your token now and save it. You won't see it again.</p>
+            <p class="form-row-help">Active for 1 day. Copy your token now and save it — you won't see it again.</p>
           </div>
         </div>
       </div>
@@ -1971,41 +1969,70 @@ agora login</textarea>
 
     <!-- Realtime Services (PROJECT group) -->
     <!-- Realtime Services — from Figma 90:15778 -->
+    <!-- Realtime Services — Figma 90:15778 + /organize: bring in ALL Agora services
+         Left rail = 13 services grouped (Core RTC + Add-on Services).
+         Right pane = config for the currently-active service. -->
     <div class="screen hidden" data-screen="realtime-services">
-      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Real Time Servies</div>
+      <div class="breadcrumb">Home › <span class="proj-name">My First Project</span> › Real-Time Services</div>
+      <h2 style="font-size: 24px; letter-spacing: -0.025em; margin-bottom: 16px;">Real-Time Services</h2>
 
-      <div class="card" style="margin-top: 8px;">
+      <div class="card">
         <div class="side-layout">
-          <div class="side-rail" style="padding: 16px 12px;">
+          <div class="side-rail" style="padding: 8px 12px 16px;">
+            <div class="side-group">Core RTC</div>
+            <div class="side-item"><span class="dot"></span> Voice Calling <span class="side-tag">Enabled</span></div>
+            <div class="side-item"><span class="dot"></span> Video Calling <span class="side-tag">Enabled</span></div>
+            <div class="side-item"><span class="dot"></span> Interactive Live Streaming</div>
+            <div class="side-item"><span class="dot"></span> Signaling</div>
             <div class="side-item"><span class="dot"></span> Chat</div>
-            <div class="side-item active"><span class="dot"></span> Cloud recording</div>
-            <div class="side-item"><span class="dot"></span> Whiteboard</div>
-            <div class="side-item"><span class="dot"></span> Media Pull</div>
+            <div class="side-item active"><span class="dot"></span> Interactive Whiteboard <span class="side-tag">Enabled</span></div>
+
+            <div class="side-group">Add-on Services</div>
+            <div class="side-item"><span class="dot"></span> Cloud Recording <span class="side-tag">Enabled</span></div>
+            <div class="side-item"><span class="dot"></span> Cloud Player</div>
+            <div class="side-item"><span class="dot"></span> Real-Time STT <span class="side-tag">Enabled</span></div>
             <div class="side-item"><span class="dot"></span> Media Push</div>
+            <div class="side-item"><span class="dot"></span> Media Pull</div>
             <div class="side-item"><span class="dot"></span> Media Gateway</div>
             <div class="side-item"><span class="dot"></span> Video Screenshot Upload</div>
           </div>
-          <div style="padding: 20px 24px; border-left: 1px solid hsl(var(--border) / 0.6);">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <i data-lucide="presentation" style="width:18px;height:18px;color:hsl(var(--primary));"></i>
+
+          <div style="padding: 22px 24px; border-left: 1px solid hsl(var(--border) / 0.6);">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <i data-lucide="presentation" style="width:18px;height:18px;color:hsl(var(--primary));margin-top:2px;"></i>
                 <div>
                   <div style="font-weight: 600; font-size: 15px;">Interactive Whiteboard</div>
-                  <div style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-top: 2px;">Collaborative canvas for multimodal agent workflows.</div>
+                  <p class="form-row-help" style="margin-top: 4px; max-width: 56ch;">Collaborative canvas for multimodal agent workflows. Agents can perceive and annotate visual artefacts during a call.</p>
                 </div>
               </div>
               <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
             </div>
 
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: hsl(var(--muted-foreground) / 0.75); margin-bottom: 14px;">Configure</div>
+            <div class="section-divider">
+              <div class="section-eyebrow">Configure</div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid hsl(var(--border) / 0.4);">
-              <div style="font-size: 14px;">Allow Agent to read the board</div>
-              <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
-            </div>
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0;">
-              <div style="font-size: 14px;">Allow Agent to write on the board</div>
-              <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              <div class="form-row">
+                <div class="form-row-label">
+                  <div class="form-row-title">Allow Agent to read the board</div>
+                  <p class="form-row-help">Agent receives a JSON snapshot of whiteboard contents at each turn.</p>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-label">
+                  <div class="form-row-title">Allow Agent to write on the board</div>
+                  <p class="form-row-help">Agent can draw shapes, write text, and highlight regions. Requires read access.</p>
+                </div>
+                <label class="switch"><input type="checkbox" /><span class="slider"></span></label>
+              </div>
+              <div class="form-row">
+                <div class="form-row-label">
+                  <div class="form-row-title">Auto-clear board between calls</div>
+                  <p class="form-row-help">Reset whiteboard state when a new call session starts in this channel.</p>
+                </div>
+                <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+              </div>
             </div>
           </div>
         </div>

@@ -1467,13 +1467,23 @@ h3 .lucide[data-lucide="alert-triangle"] {
   flex-direction: column;
   gap: 2px;
 }
+.side-rail .side-group {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: hsl(var(--muted-foreground) / 0.7);
+  padding: 14px 14px 6px;
+  font-weight: 500;
+}
+.side-rail .side-group:first-child { padding-top: 4px; }
 .side-rail .side-item {
-  padding: 10px 14px;
+  padding: 8px 14px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 13px;
   color: hsl(var(--muted-foreground));
   cursor: pointer;
   transition: background 150ms ease-out, color 150ms ease-out;
@@ -1490,10 +1500,60 @@ h3 .lucide[data-lucide="alert-triangle"] {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--muted-foreground) / 0.4);
   flex-shrink: 0;
 }
 .side-rail .side-item.active .dot { background: hsl(var(--primary)); }
+.side-rail .side-item .side-tag {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: hsl(var(--success) / 0.15);
+  color: hsl(var(--success));
+  font-weight: 500;
+}
+
+/* ============ SECTION DIVIDER (inside a card, with eyebrow) ============ */
+.section-divider {
+  border-top: 1px solid hsl(var(--border) / 0.6);
+  margin: 8px -24px 0;
+  padding: 14px 24px 0;
+}
+.section-divider .section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: hsl(var(--muted-foreground) / 0.75);
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+/* ============ FORM ROW (label-and-control on same line) ============ */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+}
+.form-row:first-child { border-top: none; padding-top: 0; }
+.form-row .form-row-label {
+  flex: 1;
+  min-width: 0;
+}
+.form-row .form-row-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+.form-row .form-row-help {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 2px;
+}
 
 /* ============ DANGER ZONE ============ */
 .card.danger {
