@@ -1514,6 +1514,60 @@ h3 .lucide[data-lucide="alert-triangle"] {
   font-weight: 500;
 }
 
+/* ============ SIDE-RAIL CTA (cross-surface accelerator) ============ */
+.side-rail-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 6px 4px;
+  padding: 12px 14px;
+  background:
+    linear-gradient(135deg,
+      hsl(var(--primary) / 0.06) 0%,
+      hsl(var(--primary) / 0.02) 100%);
+  border: 1px solid hsl(var(--primary) / 0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: hsl(var(--foreground));
+  transition: background 150ms ease-out, border-color 150ms ease-out;
+}
+.side-rail-cta:hover {
+  background:
+    linear-gradient(135deg,
+      hsl(var(--primary) / 0.1) 0%,
+      hsl(var(--primary) / 0.04) 100%);
+  border-color: hsl(var(--primary) / 0.4);
+}
+.side-rail-cta .cta-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.4;
+}
+.side-rail-cta .cta-title .lucide {
+  width: 14px;
+  height: 14px;
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+}
+.side-rail-cta .cta-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.side-rail-cta .cta-link .lucide {
+  width: 13px;
+  height: 13px;
+  transition: transform 150ms ease-out;
+}
+.side-rail-cta:hover .cta-link .lucide { transform: translateX(2px); }
+
 /* ============ SECTION DIVIDER (inside a card, with eyebrow) ============ */
 .section-divider {
   border-top: 1px solid hsl(var(--border) / 0.6);

@@ -930,6 +930,9 @@
             <input class="input" placeholder="Search by Extension name or features…" style="width: 320px;" />
             <button class="combo">All Platforms <i data-lucide="chevron-down"></i></button>
           </div>
+          <a href="#" class="link" data-action="backToProject" data-route="realtime-services" style="font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
+            <i data-lucide="settings-2" style="width:13px;height:13px;"></i> Configure core services →
+          </a>
         </div>
 
         <div class="grid-3" style="gap: 16px;">
@@ -2002,6 +2005,17 @@ agora login</textarea>
 
             <div class="side-group">Vertical Solutions</div>
             <div class="side-item" data-tab="rts-flex-classroom"><span class="dot"></span> Flexible Classroom</div>
+
+            <!-- Cross-surface accelerator: bridges Real-Time Services (project-scoped config)
+                 to Extensions Marketplace (account-scoped browse + install). Closes the
+                 "where do I find noise suppression / AR / Voice FX" journey gap. -->
+            <a href="#" class="side-rail-cta" data-action="goAccount" data-route="extensions">
+              <div class="cta-title">
+                <i data-lucide="puzzle"></i>
+                <span>Looking for noise suppression, AR effects, or other add-ons?</span>
+              </div>
+              <div class="cta-link">Browse Extensions Marketplace <i data-lucide="arrow-right"></i></div>
+            </a>
           </div>
 
           <div class="rts-pane">
