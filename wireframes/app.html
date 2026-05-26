@@ -448,11 +448,97 @@
     </div>
 
     <!-- INTEGRATIONS -->
+    <!-- ============================================================
+         BUILD › INTEGRATIONS — rough scaffold from Figma 90:15477
+         (Adding Connector 1.0). Three tab sections: Knowledge Base,
+         MCP, Connectors. Card gallery with Connect / Coming Soon states.
+         Different from Vendor Credentials (LLM/TTS/ASR API keys).
+         ============================================================ -->
     <div class="screen hidden" data-screen="integrations">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Integrations</div>
-      <h2>Integrations</h2>
-      <p class="subhead">Pre-built connectors — Twilio, Salesforce, Zapier, HubSpot, Webhooks. Different from <a href="#" data-route="vendor-credentials">Vendor Credentials</a> (LLM/TTS/ASR API keys).</p>
-      <div class="empty">Wireframe placeholder — connector gallery.</div>
+
+      <div class="header-row">
+        <div>
+          <h2>Integrations</h2>
+          <p class="subhead">Connect Agents to external systems — knowledge sources, MCP servers, and third-party SaaS connectors.</p>
+        </div>
+        <div class="seg-tabs" id="intTabs">
+          <button class="seg" data-tab="int-kb">Knowledge Base</button>
+          <button class="seg" data-tab="int-mcp">MCP</button>
+          <button class="seg active" data-tab="int-connectors">Connectors</button>
+        </div>
+      </div>
+
+      <!-- CONNECTORS tab (default) -->
+      <div class="tab-panel" data-panel="int-connectors">
+        <div class="header-row" style="margin-bottom: 16px;">
+          <input class="input" placeholder="Search connectors…" style="max-width: 320px;">
+          <a href="#" data-action="toast" data-msg="Connector request — wireframe stub" style="font-size: 13px; color: hsl(var(--muted-foreground));">Need an integration? Let us know <i data-lucide="external-link"></i></a>
+        </div>
+
+        <div class="box" style="text-align: center; padding: 32px 24px;">
+          <div style="margin-bottom: 12px;"><i data-lucide="plug-zap" style="width:24px;height:24px;color:hsl(var(--muted-foreground));"></i></div>
+          <h3 style="margin-bottom: 4px;">No connectors configured</h3>
+          <p class="muted" style="font-size: 13px;">Add a connector from the library below.</p>
+        </div>
+
+        <div class="grid-3" style="margin-top: 16px;">
+          <div class="ext-card clickable" data-action="toast" data-msg="Connect Hubspot — wireframe stub">
+            <h3><i data-lucide="briefcase-business"></i> Hubspot</h3>
+            <div class="desc">Service ticket management platform.</div>
+            <div class="actions"><span class="tag">Connect <i data-lucide="external-link"></i></span></div>
+          </div>
+          <div class="ext-card clickable" data-action="toast" data-msg="Connect Airtable — wireframe stub">
+            <h3><i data-lucide="table-2"></i> Airtable</h3>
+            <div class="desc">Database / spreadsheet hybrid for structured records.</div>
+            <div class="actions"><span class="tag">Connect <i data-lucide="external-link"></i></span></div>
+          </div>
+          <div class="ext-card clickable" data-action="toast" data-msg="Connect Jira — wireframe stub">
+            <h3><i data-lucide="bug"></i> Jira</h3>
+            <div class="desc">Issue tracking and project management.</div>
+            <div class="actions"><span class="tag">Connect <i data-lucide="external-link"></i></span></div>
+          </div>
+          <div class="ext-card">
+            <h3><i data-lucide="credit-card"></i> PayPal</h3>
+            <div class="desc">Payment processing and invoicing.</div>
+            <div class="actions"><span class="tag muted">Coming Soon</span></div>
+          </div>
+          <div class="ext-card">
+            <h3><i data-lucide="message-circle"></i> Whatsapp</h3>
+            <div class="desc">Messaging and business chat APIs.</div>
+            <div class="actions"><span class="tag muted">Coming Soon</span></div>
+          </div>
+          <div class="ext-card">
+            <h3><i data-lucide="ticket"></i> Zendesk</h3>
+            <div class="desc">Customer support ticketing.</div>
+            <div class="actions"><span class="tag muted">Coming Soon</span></div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top: 18px;"><strong>IA note:</strong> different from <a href="#" data-route="vendor-credentials">Vendor Credentials</a> (LLM/TTS/ASR API keys for the agent runtime). Connectors are upstream SaaS integrations the agent talks to during a call.</div>
+      </div>
+
+      <!-- KNOWLEDGE BASE tab -->
+      <div class="tab-panel hidden" data-panel="int-kb">
+        <div class="box" style="text-align: center; padding: 48px 24px;">
+          <div style="margin-bottom: 12px;"><i data-lucide="library-big" style="width:24px;height:24px;color:hsl(var(--muted-foreground));"></i></div>
+          <h3 style="margin-bottom: 4px;">Knowledge Bases</h3>
+          <p class="muted" style="font-size: 13px; max-width: 50ch; margin: 0 auto;">Upload PDFs, URLs, or structured docs an Agent can cite during a call. Vector-indexed, scoped per agent.</p>
+          <div style="margin-top: 16px;"><button class="btn primary" data-action="toast" data-msg="Knowledge base upload — wireframe stub"><i data-lucide="upload"></i> Upload knowledge</button></div>
+        </div>
+        <div class="empty">Rough scaffold — full KB list, RAG settings, and embedding model picker pending design.</div>
+      </div>
+
+      <!-- MCP tab -->
+      <div class="tab-panel hidden" data-panel="int-mcp">
+        <div class="box" style="text-align: center; padding: 48px 24px;">
+          <div style="margin-bottom: 12px;"><i data-lucide="server-cog" style="width:24px;height:24px;color:hsl(var(--muted-foreground));"></i></div>
+          <h3 style="margin-bottom: 4px;">MCP Servers</h3>
+          <p class="muted" style="font-size: 13px; max-width: 50ch; margin: 0 auto;">Hook Agents up to Model Context Protocol servers — tool use, structured data, and custom side-effects with strict scopes.</p>
+          <div style="margin-top: 16px;"><button class="btn primary" data-action="toast" data-msg="Add MCP — wireframe stub"><i data-lucide="plus"></i> Connect MCP server</button></div>
+        </div>
+        <div class="empty">Rough scaffold — MCP server list, OAuth flow, and tool registry pending design.</div>
+      </div>
     </div>
 
     <!-- DEPLOY: Phone Numbers -->
@@ -491,7 +577,6 @@
       <div class="tabs" id="analyticsTabs">
         <div class="tab active" data-tab="an-performance">Performance</div>
         <div class="tab" data-tab="an-usage">Usage</div>
-        <div class="tab" data-tab="an-cost">Cost</div>
       </div>
 
       <!-- PERFORMANCE TAB -->
@@ -798,8 +883,8 @@
           </div>
         </div>
 
-        <!-- Cross-link to Cost tab + Billing -->
-        <div class="note" style="margin: 14px 0;"><strong>Going deeper:</strong> see <a href="#" data-action="setAnalyticsTab" data-tab-target="an-cost">Cost tab</a> for what these minutes are buying, or <a href="#" data-action="goAccount" data-route="billing-subs">Billing</a> for quota status, invoices, and the wallet.</div>
+        <!-- Cross-link to Billing -->
+        <div class="note" style="margin: 14px 0;"><strong>Going deeper:</strong> see <a href="#" data-action="goAccount" data-route="billing-subs">Billing</a> for quota status, invoices, and the wallet. Per-minute cost estimates live in the Deploy modal (pre-commitment math).</div>
 
         <!-- Bottom CTA — Visit Agora Analytics -->
         <div class="box usage-cta">
@@ -811,36 +896,10 @@
         </div>
       </div>
 
-      <!-- COST TAB -->
-      <div class="tab-panel hidden" data-panel="an-cost">
-        <div class="box">
-          <h3>Spend this month</h3>
-          <div class="grid-stats">
-            <div class="stat"><div class="stat-num">$87.40</div><div class="stat-label">included plan</div></div>
-            <div class="stat"><div class="stat-num">$0.00</div><div class="stat-label">overage</div></div>
-            <div class="stat"><div class="stat-num">$87.40</div><div class="stat-label">total</div></div>
-            <div class="stat"><div class="stat-num">$110</div><div class="stat-label">forecast EOM</div></div>
-          </div>
-        </div>
-
-        <div class="box">
-          <h3>By agent</h3>
-          <div class="row"><span class="label">Customer Support Agent</span><span class="value">$45.60 · 52%</span></div>
-          <div class="row"><span class="label">Sales Representative</span><span class="value">$35.20 · 40%</span></div>
-          <div class="row"><span class="label">Survey Agent</span><span class="value">$6.60 · 7%</span></div>
-        </div>
-
-        <div class="box">
-          <h3>What you're paying for · per minute</h3>
-          <div class="row"><span class="label">LLM (OpenAI gpt-4o)</span><span class="value">$0.062</span></div>
-          <div class="row"><span class="label">TTS (ElevenLabs)</span><span class="value">$0.024</span></div>
-          <div class="row"><span class="label">ASR (Deepgram)</span><span class="value">$0.010</span></div>
-          <div class="row"><span class="label">Agora platform fee</span><span class="value">$0.004</span></div>
-          <div class="row"><span class="label"><strong>Total</strong></span><span class="value"><strong>$0.10 / min</strong></span></div>
-        </div>
-
-        <div class="note"><strong>Cross-link:</strong> for invoices, payment methods, and plan changes, see <a href="#" data-action="goAccount" data-route="billing-subs">Billing &amp; Subscriptions →</a>. This tab is for spend-against-activity in real time.</div>
-      </div>
+      <!-- Cost tab deleted 2026-05-26 — required vendor-cost data Agora doesn't have.
+           Agora platform spend now lives in Billing › Overview › Current Plan card.
+           Pre-commitment cost estimates live in the Deploy modal Cost tab.
+           See audit notes in HANDOFF.md. -->
     </div>
     <div class="screen hidden" data-screen="call-history">
       <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Call History</div>

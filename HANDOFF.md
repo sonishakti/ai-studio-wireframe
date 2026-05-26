@@ -59,7 +59,9 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 - Preferences
 - Log out
 
-**Analytics is a tabbed surface** (Performance · Usage · Cost) at `Monitor › Analytics`. Usage merged in from a separate sidebar item — route `/usage` still works as an alias. Performance matches the Studio Figma; Usage matches the Agora Console Figma.
+**Analytics is a tabbed surface** (Performance · Usage) at `Monitor › Analytics`. Usage merged in from a separate sidebar item — route `/usage` still works as an alias. Performance matches the Studio Figma; Usage matches the Agora Console Figma.
+
+**Cost tab deleted 2026-05-26** after audit. The tab claimed per-vendor cost breakdown (LLM/TTS/ASR rates, "what you're paying for · per minute") that required data Agora doesn't have — vendor invoices go directly from OpenAI/ElevenLabs/Deepgram to the user, not through Agora. Engineering open question B7 (LEARNINGS §15 — "Current cost-cap / circuit-breaker architecture?") confirmed no cost-cap API field exists. Agora platform spend now lives in Billing › Overview › Current Plan card (Agora's own data). Pre-commitment per-minute estimates live in the Deploy modal Cost tab (published vendor rates, clearly labeled as estimate). The Analytics > Cost surface was never in the Figma — it was added in commit `d64587c` without an explicit IA lock. See `references/analytics-rebuild.md`, `references/usage-rebuild.md`, `references/billing-journey.md` for the references updates.
 
 **Billing rebuilt 2026-05-26 to match Figma node 142-7864:**
 - 4 tabs only: **Overview · Transactions · Invoices · Payment Methods**
@@ -74,6 +76,9 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 ## What's done — recent commits worth knowing
 
 ```
+(pending) Audit: delete Cost tab + scaffold Integrations + Figma 142-7866 gap inventory
+9510b8f Revert "Billing: visual polish pass — sleeker cards, tighter type, refined micro-interactions"
+8c3226e Revert "HANDOFF: stamp Billing polish commit hash"
 a8ad720 Billing: rebuild from Figma node 142-7864 + /organize 4-tab IA + /journey 10 flows
 99e2047 HANDOFF: stamp the Usage polyhierarchy commit hash
 a019d07 /organize: Usage polyhierarchy — project + account scopes with cross-links (superseded by Figma rebuild)
@@ -100,14 +105,41 @@ Run `git log --oneline -20` for the full recent history.
 Listed by document — each doc's own "what's NOT done" section is authoritative.
 
 ### Wireframe gaps still labelled "placeholder"
-- `Build › Integrations` (connector gallery)
-- `Deploy › Phone Numbers` (buy / port / assign)
-- `Deploy › Campaign` (outbound dialer)
-- `Monitor › Call History` (searchable list)
-- `Monitor › Session History` (multi-turn sessions)
+- `Deploy › Phone Numbers` (buy / port / assign) — not in Figma 142-7866
+- `Deploy › Campaign` (outbound dialer) — not in Figma 142-7866
+- `Monitor › Call History` (searchable list) — not in Figma 142-7866
+- `Monitor › Session History` (multi-turn sessions) — not in Figma 142-7866
 - Notification Center filter tabs (Billing/Product/Ops/Tickets — only "All" is populated)
 
 These are flagged in commits as **Studio-core surfaces** the team is iterating separately.
+
+### Figma 142-7866 → wireframe gap inventory (2026-05-26)
+
+After auditing the "Final designs" Figma file, here's the coverage of every section against the wireframe. **Bold** = rough scaffold added this pass.
+
+| Figma section | Figma frame | Wireframe destination | State |
+|---|---|---|---|
+| 01 / Agents Pages | Agent_Landing_pro_user (90:14468) | `agents` | ✓ Built — close to Figma, may need refresh: agent table headers (Agent · Agent ID · Project/App ID · Last Published · Last Edited · Status), "Pre-built by agora" list, Interactive Voice Response side panel with orb + Start Call |
+| 01 / Agents Pages | Agent_Landing (90:14575) | `agents` (first-run mode) | ✓ Built — has first-run state, may need verification against Figma |
+| 02 / Connectors | Adding Connector 1.0 (90:15477) | **`integrations`** | **🆕 Scaffolded this pass** — Knowledge Base / MCP / Connectors seg-tabs, search input, 6-card connector grid (Hubspot, Airtable, Jira active; PayPal, Whatsapp, Zendesk Coming Soon). Knowledge Base + MCP tabs are stub panels with rough copy + CTA. |
+| 03 / Project | Projects_Overview (90:15739) | `project-settings` | ✓ Built — App ID, App Certificate (Primary + Secondary rotation), Temporary Token. Visual treatment uses `.row` patterns vs Figma's input+copy-button pattern. Functionally complete, visually diverges. |
+| 03 / Project | Projects_RTE × 2 (90:15778, 90:16296) | `realtime-services` | ✓ Built — left-side service list (Chat, Cloud Recording, Whiteboard, Media Pull/Push/Gateway, Video Screenshot Upload) + right-side configuration with toggles. May need visual refresh. |
+| 04 / Profile Menu / Billing | 5 frames (90:16767, 140:19049, 140:19192, 140:19118 + Profile-Menu) | `billing-subs` | ✓ Rebuilt 2026-05-26 from this Figma section. 4 tabs: Overview · Transactions · Invoices · Payment Methods. |
+| 05 / Profile Menu / Other Screens | Extension Marketplace (95:18696) | `extensions` | ✓ Built — Marketplace / My Submissions tabs, Platform filter, extension cards with Install. May diverge from Figma. |
+| 05 / Profile Menu / Other Screens | View all plans (140:22149) | `billing-plans` | ✓ Built 2026-05-26 as part of Billing rebuild. Figma shows Agent Studio / RTC Prepaid / Signaling / Chat tabs with Monthly/Top-Up sub-tabs and 5-tier pricing cards (Free / Starter / Pro / Business / Business Pro). **Current wireframe is simpler — just lists tiers in rows.** Refresh recommended. |
+| 05 / Profile Menu / Other Screens | Profile/Preferences (90:16646) | `preferences` | ✓ Built — needs verification: Figma has Profile / Notifications / Teams & Members / SSO / Account sub-tabs + Personal Info + Security (2FA, password) + Company Info + Danger Zone (Delete account). |
+| 05 / Profile Menu / Other Screens | Profile / RESTful API (90:16721) | `restful-api` | ✓ Built — Customer ID + Customer Secret + Download + Note + Delete row pattern. Matches Figma direction. |
+
+**Notable IA discrepancy:** Figma sidebar shows **Usage as a standalone PROJECT-level item**, not as an Analytics tab. Our wireframe merged Usage into `Monitor › Analytics › Usage` per a prior `/organize` decision. The route alias `/usage` still works, but it doesn't appear in the sidebar as a top-level item. Decision needed: revert the merge (separate sidebar item) or keep the merge.
+
+### What needs full Figma-fidelity rebuilds (vs the rough scaffolds in this pass)
+
+In priority order:
+1. **`billing-plans`** — Figma's "View all plans" is a sophisticated pricing tier UI (5 tiers, Monthly/Top-Up sub-tabs, "Need a custom plan?" CTA, purchase notice). Current implementation is row-based. Worth a proper rebuild.
+2. **`preferences`** — needs the 5-tab structure (Profile / Notifications / Teams & Members / SSO / Account) with the cards-and-fields layout.
+3. **`extensions`** (Extension Marketplace) — Figma shows platform pill badges (Web · macOS · iOS) and Install buttons. Current implementation may need refresh.
+4. **`integrations`** Knowledge Base + MCP panels — currently stub copy. Need full design (presumably exists in another Figma node not in 142-7866).
+5. **`agents`** — minor refresh to match Figma table columns + side-panel orb pattern.
 
 ### Production readiness items (from `references/usage-rebuild.md` §8)
 1. Data-freshness indicator ("Updated 2 min ago")

@@ -35,9 +35,9 @@ Added `Product` dropdown between Period and Project: `All / Agents (Conv AI) / V
 
 Added an `Agent Sessions` tier to the colored-dot strip (primary blue, `SESSIONS` unit). Sits at the front of the strip since Agents are Studio_X's center of gravity. RTC tiers (Video SD/HD/FHD/2K, Audio, Chat) follow. The unit varies honestly per tier (SESSIONS / MIN / DAU) — same pattern as Console.
 
-### 3. Cross-link to Cost tab (not just Billing)
+### 3. Cross-link to Billing
 
-The Console page links to Billing for the invoice ledger. Studio_X has a sibling **Cost tab** in Analytics (the third tab) that shows spend-against-activity in real time. Added a `Going deeper on $` note above the bottom CTA pointing to both. Billing is still linked (for actual invoices), but the Cost tab is the natural next step for someone asking *"what are these minutes buying me?"*
+The Console page links to Billing for the invoice ledger. Studio_X keeps that link — Billing is where quota, invoices, and payment methods live. (Note: a separate "Cost tab" in Analytics was prototyped briefly but **deleted 2026-05-26** because it required vendor-cost data Agora doesn't actually have. See audit notes in HANDOFF.md. Pre-commitment cost estimates live in the Deploy modal Cost tab — that's published vendor rates, clearly labeled as an estimate.)
 
 ### 4. Visual adaptation
 

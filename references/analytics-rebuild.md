@@ -137,7 +137,7 @@ The current implementation shows a populated, healthy account on a normal day. R
 | Color blind user (8% of men) | Donut "Failed" red vs "Transfer Failed" pink | Add pattern fills or text labels to slices |
 | Print / export | Dark mode charts on white paper = invisible | Force light palette for print media query |
 | First call within < 5 min | Charts empty → user thinks Analytics broken | "Data lags 3 min" banner (state #2 above) |
-| Quota at 100%, account fine | Cost tab shows green but Usage tab shows red | Cross-state consistency check before render |
+| Quota at 100%, account fine | Billing › Current Plan card shows green but Usage tab shows red | Cross-state consistency check before render |
 | Concurrent edits to filters | Loading state flickers as queries race | Debounce + cancel stale queries |
 
 ### What we are **not** designing (out of scope, hand off explicitly)

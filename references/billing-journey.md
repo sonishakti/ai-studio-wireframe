@@ -61,7 +61,7 @@ This document maps the ten user journeys the rebuilt Billing surface must suppor
 | **Personas** | P1 mid-debug, P3 doing quota check |
 | **Entry** | Billing › Overview › Current Plan card › "View Usage →" link **OR** Home › Workspace usage tile › "View billing & quota →" (reverse) |
 | **Path** | "View Usage →" routes to `Monitor › Analytics › Usage` (project-scoped per the current project chip) — full chart, per-day granularity, feature breakdown |
-| **Exit** | User is now in Monitor — they can keep drilling (Cost tab, Performance tab) or jump back to Billing via the "Going deeper" note at the bottom of Usage |
+| **Exit** | User is now in Monitor — they can keep drilling (Performance tab) or jump back to Billing via the "Going deeper" note at the bottom of Usage |
 | **Cross-link** | This is the seam between Billing (financial) and Monitor (operational). The Current Plan quota digest is the ambient "where am I against my cap" view; Monitor › Usage is the diagnostic view. |
 
 ## J5 — Add / replace a credit card
