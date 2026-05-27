@@ -30,7 +30,7 @@ const LABELS: Record<string, string> = {
   create: "New Campaign",
   calls: "Calls",
   monitor: "Monitor",
-  deploy: "Deploy",
+  deploy: "Channels",
   widget: "Web Widget",
   whatsapp: "WhatsApp",
   sms: "SMS",

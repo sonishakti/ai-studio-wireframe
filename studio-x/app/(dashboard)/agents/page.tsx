@@ -23,6 +23,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
+import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 
@@ -235,7 +236,7 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild><Link href={`/agents/${agent.id}/edit`}>Edit</Link></DropdownMenuItem>
                         <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                        <DropdownMenuItem>Publish</DropdownMenuItem>
+                        <DropdownMenuItem>Deploy</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DestructiveActionDialog
                           action="Delete"
@@ -295,9 +296,11 @@ export default function AgentsPage() {
             >
               {showFirstRun ? <><ArrowLeft className="h-3 w-3" /> View list</> : <>View first-run</>}
             </Button>
-            <Button variant="outline" className="gap-1.5">
-              <Upload className="h-4 w-4" /> Import Agent
-            </Button>
+            <ImportAgentSheet>
+              <Button variant="outline" className="gap-1.5">
+                <Upload className="h-4 w-4" /> Import Agent
+              </Button>
+            </ImportAgentSheet>
             <Button asChild>
               <Link href="/agents/new/edit">
                 <Plus className="h-4 w-4" /> {showFirstRun ? "Deploy New Agent" : "New Agent"}

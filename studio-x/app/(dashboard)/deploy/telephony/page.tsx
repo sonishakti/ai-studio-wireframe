@@ -159,7 +159,7 @@ export default function DeployTelephonyPage() {
                         </SelectContent>
                       </Select>
                       <p className="text-xs text-muted-foreground">
-                        Draft agents can be assigned but won't take live calls until published.
+                        Draft agents can be assigned but won't take live calls until deployed.
                       </p>
                     </div>
 

@@ -39,7 +39,7 @@ const HELP_LINKS = [
 ]
 
 const POPULAR_ARTICLES = [
-  "How to publish your first voice agent",
+  "How to deploy your first voice agent",
   "Setting up Twilio as a telephony vendor",
   "Connecting OpenAI GPT-4o to your agent",
   "Understanding completion rate and handle time",

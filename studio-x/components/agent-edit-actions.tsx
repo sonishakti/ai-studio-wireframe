@@ -15,7 +15,7 @@ interface Props {
 export function AgentEditActions({ agentId, isNew }: Props) {
   const router = useRouter()
   const [saving, setSaving] = React.useState(false)
-  const [publishing, setPublishing] = React.useState(false)
+  const [deploying, setDeploying] = React.useState(false)
   const [testing, setTesting] = React.useState(false)
 
   // Demo: pretend a signup happened so TTFA has a starting point
@@ -34,22 +34,22 @@ export function AgentEditActions({ agentId, isNew }: Props) {
     setSaving(false)
     toast.success(isNew ? "Agent created" : "Changes saved", {
       description: isNew
-        ? "Your new agent is in draft. Publish when ready."
+        ? "Your new agent is in draft. Deploy it when you're ready to take real calls."
         : "Configuration saved (mock).",
     })
   }
 
-  const handlePublish = async () => {
-    setPublishing(true)
+  const handleDeploy = async () => {
+    setDeploying(true)
     track(Events.agent_published, {
       agent_id: agentId,
       time_to_first_agent_ms: timeSinceSignup(),
     })
     await new Promise((r) => setTimeout(r, 800))
-    setPublishing(false)
-    toast.success("Agent published 🎉", {
-      description: "Your agent is live and ready to take calls.",
-      action: { label: "View calls", onClick: () => router.push("/calls") },
+    setDeploying(false)
+    toast.success("Agent deployed 🎉", {
+      description: "Your agent is live. Choose a channel to connect it to the world.",
+      action: { label: "Pick channel", onClick: () => router.push("/deploy") },
     })
   }
 
@@ -72,8 +72,8 @@ export function AgentEditActions({ agentId, isNew }: Props) {
       <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
         <Save className="h-3.5 w-3.5" /> {saving ? "Saving…" : "Save"}
       </Button>
-      <Button size="sm" className="gap-1.5" onClick={handlePublish} disabled={publishing}>
-        <Rocket className="h-3.5 w-3.5" /> {publishing ? "Publishing…" : isNew ? "Publish" : "Republish"}
+      <Button size="sm" className="gap-1.5" onClick={handleDeploy} disabled={deploying}>
+        <Rocket className="h-3.5 w-3.5" /> {deploying ? "Deploying…" : isNew ? "Deploy" : "Redeploy"}
       </Button>
     </div>
   )

@@ -4,6 +4,7 @@ import * as React from "react"
 import { Info, ExternalLink, Package } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
@@ -34,6 +35,10 @@ type Service = {
   configure?: { id: string; label: string; defaultOn?: boolean }[]
   quota?: string
   docs?: { label: string; href: string }[]
+  /** Marketplace extensions that augment this service. Surfaced inline so
+   *  users don't have to dig into Account → Extensions Marketplace to find
+   *  the toggle. */
+  extensions?: { id: string; name: string; vendor: string; installed: boolean; price?: string }[]
 }
 
 const SERVICES: Service[] = [
@@ -57,12 +62,26 @@ const SERVICES: Service[] = [
   { id: "signaling", name: "Signaling", group: "CORE RTC", status: "active", description: "Pub/sub messaging for real-time presence and state." },
   { id: "whiteboard", name: "Interactive Whiteboard", group: "CORE RTC", status: "active", description: "Collaborative canvas for multimodal agent workflows.", configure: [{ id: "wb-replay", label: "Session replay" }], quota: "Maximum concurrent channels is 50. For higher quotas, please contact support.", docs: [{ label: "How to use Whiteboard?", href: "#" }, { label: "Whiteboard Pricing", href: "#" }] },
   { id: "conv-ai", name: "Conversational AI Engine", group: "CORE RTC", status: "active", description: "Voice AI agent runtime with low-latency LLM orchestration." },
-  { id: "voice", name: "Voice Calling", group: "CORE RTC", status: "default", description: "Real-time voice calls with HD audio over Agora SD-RTN." },
-  { id: "video", name: "Video Calling", group: "CORE RTC", status: "default", description: "Real-time video calls with adaptive bitrate." },
+  { id: "voice", name: "Voice Calling", group: "CORE RTC", status: "default", description: "Real-time voice calls with HD audio over Agora SD-RTN.",
+    extensions: [
+      { id: "noise-cancel",  name: "AI Noise Cancellation", vendor: "Agora",      installed: false, price: "Pay-per-use" },
+      { id: "transcription", name: "Real-Time Transcription", vendor: "Agora",    installed: true,  price: "Pay-per-use" },
+    ],
+  },
+  { id: "video", name: "Video Calling", group: "CORE RTC", status: "default", description: "Real-time video calls with adaptive bitrate.",
+    extensions: [
+      { id: "face-ar",    name: "Face AR Effects",       vendor: "Deepar.ai",     installed: false, price: "Free trial" },
+      { id: "background", name: "Virtual Background",    vendor: "Agora",         installed: false, price: "Free" },
+    ],
+  },
   { id: "ils", name: "Interactive Live Streaming", group: "CORE RTC", status: "default", description: "Broadcast live with sub-second latency to massive audiences." },
 
   // ── MEDIA SERVICES ────────────────────────────────────────────────────────
-  { id: "recording", name: "Cloud Recording", group: "MEDIA SERVICES", status: "active", description: "Record channels to cloud storage in real-time." },
+  { id: "recording", name: "Cloud Recording", group: "MEDIA SERVICES", status: "active", description: "Record channels to cloud storage in real-time.",
+    extensions: [
+      { id: "moderation", name: "ActiveFence Moderation", vendor: "ActiveFence", installed: false, price: "Free tier" },
+    ],
+  },
   { id: "player", name: "Cloud Player", group: "MEDIA SERVICES", status: "default", description: "Push pre-recorded content into a live channel." },
   { id: "media-push", name: "Media Push", group: "MEDIA SERVICES", status: "default", description: "Push Agora streams to RTMP destinations." },
   { id: "media-pull", name: "Media Pull", group: "MEDIA SERVICES", status: "default", description: "Pull external RTMP streams into an Agora channel." },
@@ -204,6 +223,46 @@ export default function RealtimeServicesPage() {
               <div>
                 <p className="text-sm font-medium">Quota</p>
                 <p className="text-sm text-muted-foreground mt-0.5">{selected.quota}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Inline extensions — surface marketplace add-ons right here so
+              users don't have to dig through Account → Extensions Marketplace */}
+          {selected.extensions && selected.extensions.length > 0 && (
+            <div className="px-5 py-4 border-b">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Extensions for {selected.name}
+                </p>
+                <a href="/extensions" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                  Browse all <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              <div className="space-y-2">
+                {selected.extensions.map((ext) => (
+                  <div key={ext.id} className="flex items-center gap-3 rounded-md border p-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted shrink-0">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{ext.name}</p>
+                        {ext.installed && (
+                          <Badge variant="default" className="text-[9px] h-4 px-1.5">Installed</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        by {ext.vendor}{ext.price && ` · ${ext.price}`}
+                      </p>
+                    </div>
+                    <Button variant={ext.installed ? "outline" : "default"} size="sm" className="text-xs h-7" asChild>
+                      <a href={`/extensions/${ext.id}`}>
+                        {ext.installed ? "Manage" : "Install"}
+                      </a>
+                    </Button>
+                  </div>
+                ))}
               </div>
             </div>
           )}

@@ -48,9 +48,12 @@ import { AccountAvatarButton } from "@/components/account-avatar-button"
 const NAV_TOP: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
   { label: "Agents", href: "/agents", icon: Bot },
-  { label: "Deploy", href: "/deploy", icon: Rocket },
   { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Integrations", href: "/integrations", icon: Puzzle },
+]
+
+const NAV_CHANNELS: NavItem[] = [
+  { label: "Channels", href: "/deploy", icon: Rocket },
 ]
 
 const NAV_TELEPHONY: NavItem[] = [
@@ -192,6 +195,17 @@ export function AppSidebar() {
 
         {/* Telephony — deployment surfaces */}
         <CollapsibleGroup label="Telephony" items={NAV_TELEPHONY} />
+
+        <SidebarSeparator />
+
+        {/* Channels — all deployment channels (was Deploy at top-level) */}
+        <SidebarGroup>
+          <SidebarMenu>
+            {NAV_CHANNELS.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
 
         <SidebarSeparator />
 

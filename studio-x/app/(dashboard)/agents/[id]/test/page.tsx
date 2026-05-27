@@ -15,7 +15,7 @@ export default async function AgentTestPage({ params }: Props) {
     <div className="flex flex-col flex-1">
       <PageHeader
         title="Test Playground"
-        description={isNew ? "Test your draft agent before publishing." : "Talk to your agent right from this browser tab."}
+        description={isNew ? "Test your draft agent before deploying." : "Talk to your agent right from this browser tab."}
         actions={
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/agents/${id}/edit`}>
