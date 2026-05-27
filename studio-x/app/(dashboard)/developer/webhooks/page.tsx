@@ -1,3 +1,5 @@
+"use client"
+
 import { Plus, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +11,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const WEBHOOKS = [
   { id: "wh_01", url: "https://api.acme.com/hooks/agora", events: ["call.completed", "call.failed", "agent.error"], status: "active", lastDelivery: "2 min ago" },
@@ -58,7 +61,20 @@ export default function WebhooksPage() {
                           <DropdownMenuItem>View deliveries</DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">Delete</DropdownMenuItem>
+                          <DestructiveActionDialog
+                            action="Delete"
+                            resource="webhook endpoint"
+                            resourceId={wh.id}
+                            resourceName={wh.url}
+                            description="Future events will no longer be delivered to this URL. In-flight deliveries will complete."
+                          >
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DestructiveActionDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

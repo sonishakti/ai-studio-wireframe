@@ -34,8 +34,8 @@ const DEVELOPER_SECTIONS = [
     badge: null,
   },
   {
-    title: "AA Credentials",
-    description: "Service account credentials for server-to-server authentication.",
+    title: "Service Accounts",
+    description: "Server-to-server credentials. Keep these out of client code.",
     href: "/developer/aa-credentials",
     icon: Key,
     badge: null,

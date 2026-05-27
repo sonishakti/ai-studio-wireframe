@@ -3,6 +3,8 @@ import { DM_Sans, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
+import { CommandPalette } from "@/components/command-palette"
 import { cn } from "@/lib/utils"
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" })
@@ -26,7 +28,11 @@ export default function RootLayout({
     >
       <body className="antialiased font-sans">
         <ThemeProvider>
-          <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+          <TooltipProvider delayDuration={300}>
+            {children}
+            <CommandPalette />
+            <Toaster position="bottom-right" />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

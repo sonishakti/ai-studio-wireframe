@@ -48,7 +48,7 @@ const LABELS: Record<string, string> = {
   webhooks: "Webhooks",
   "audit-logs": "Audit Logs",
   toolkit: "SDK Toolkit",
-  "aa-credentials": "AA Credentials",
+  "aa-credentials": "Service Accounts",
   licensing: "Licensing",
   preferences: "Preferences",
   notifications: "Notifications",

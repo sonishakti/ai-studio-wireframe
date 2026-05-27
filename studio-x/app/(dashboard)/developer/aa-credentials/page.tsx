@@ -1,23 +1,26 @@
+"use client"
+
 import { Plus, MoreHorizontal, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const AA_CREDS = [
   { id: "aa_01", name: "Backend Server", clientId: "studio_aa_prod_a1b2", created: "Mar 15, 2026", lastUsed: "Just now", status: "active" },
   { id: "aa_02", name: "Reporting Worker", clientId: "studio_aa_stg_c3d4", created: "Feb 4, 2026", lastUsed: "2 days ago", status: "active" },
 ]
 
-export default function AACredentialsPage() {
+export default function ServiceAccountsPage() {
   return (
     <main className="flex-1 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Service account credentials for server-to-server API authentication.
+          Server-to-server credentials. Never expose these in client code.
         </p>
-        <Button size="sm"><Plus className="h-4 w-4" /> New Credential</Button>
+        <Button size="sm"><Plus className="h-4 w-4" /> New Service Account</Button>
       </div>
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="py-3 px-4 text-sm text-muted-foreground">
@@ -58,7 +61,20 @@ export default function AACredentialsPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>Rotate Secret</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">Revoke</DropdownMenuItem>
+                          <DestructiveActionDialog
+                            action="Revoke"
+                            resource="service account credential"
+                            resourceId={cred.id}
+                            resourceName={cred.name}
+                            description="Revoking this credential will immediately invalidate it. Any service still using these keys will start failing."
+                          >
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Revoke
+                            </DropdownMenuItem>
+                          </DestructiveActionDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

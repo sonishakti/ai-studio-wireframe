@@ -1,7 +1,6 @@
-import Link from "next/link"
-import { Save, Play } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
+import { AgentEditActions } from "@/components/agent-edit-actions"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,16 +34,7 @@ export default async function AgentEditPage({ params }: Props) {
         ]}
         title={isNew ? "New Agent" : "Support Bot v2"}
         description={isNew ? "Configure your voice AI agent." : "Edit agent configuration."}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <Play className="h-3.5 w-3.5" /> Test
-            </Button>
-            <Button size="sm" className="gap-1.5">
-              <Save className="h-3.5 w-3.5" /> Save
-            </Button>
-          </div>
-        }
+        actions={<AgentEditActions agentId={id} isNew={isNew} />}
       />
 
       <main className="flex-1 p-6">

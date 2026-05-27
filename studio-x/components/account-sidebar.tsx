@@ -51,7 +51,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 //   • Extensions Marketplace
 //   • Preferences
 //   • Developer Hub       → tabs: Overview · RESTful API · Webhooks · Audit Logs ·
-//                                 SDK Toolkit · AA Credentials · Licensing
+//                                 SDK Toolkit · Service Accounts · Licensing
 //   • Help Hub            → tabs: Overview · Contact Support · Contact Sales ·
 //                                 My Tickets · What's New
 //   • Notifications

@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Download, ChevronDown } from "lucide-react"
+import Link from "next/link"
+import { Download, ArrowRight, AlertTriangle } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { InsightsCrossLinks } from "@/components/insights-cross-links"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { track, Events } from "@/lib/analytics"
 
 // ─── metrics ────────────────────────────────────────────────────────────────
 // Matches the Console Usage pattern (Figma uDhpQnKHRYCMffKra5FDTO, node 6066:62829)
@@ -250,14 +252,20 @@ export default function UsagePage() {
             <TabsTrigger value="by-service">By Service</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="quotas" className="pt-4">
+          <TabsContent value="quotas" className="pt-4 space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {QUOTA_METERS.map((m) => {
                 const pct = (m.used / m.limit) * 100
+                const isNearLimit = pct >= 75
                 return (
-                  <Card key={m.label}>
+                  <Card key={m.label} className={isNearLimit ? "border-amber-500/40" : ""}>
                     <CardContent className="p-4">
-                      <p className="text-xs text-muted-foreground">{m.label}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">{m.label}</p>
+                        {isNearLimit && (
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                        )}
+                      </div>
                       <div className="flex items-baseline gap-1.5 mt-1">
                         <span className="text-xl font-semibold tracking-tight tabular-nums">
                           {m.used.toLocaleString()}
@@ -267,14 +275,45 @@ export default function UsagePage() {
                         </span>
                       </div>
                       <Progress value={pct} className="h-1.5 mt-3" />
-                      <p className="text-xs text-muted-foreground mt-1.5 tabular-nums">
-                        {pct.toFixed(0)}% used
-                      </p>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <p className="text-xs text-muted-foreground tabular-nums">
+                          {pct.toFixed(0)}% used
+                        </p>
+                        {isNearLimit && (
+                          <Link
+                            href="/billing/plans"
+                            onClick={() => track(Events.quota_warning_clicked, { meter: m.label, pct_used: pct })}
+                            className="text-xs text-primary hover:underline inline-flex items-center gap-0.5"
+                          >
+                            View plans
+                            <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 )
               })}
             </div>
+
+            {/* Always-visible upgrade prompt — closes the wayfinding loop
+                whether or not a meter is near limit. */}
+            <Card className="bg-muted/40 border-dashed">
+              <CardContent className="flex items-center gap-4 py-4">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-background border shrink-0">
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Need more capacity?</p>
+                  <p className="text-xs text-muted-foreground">
+                    Higher tiers unlock 50× minutes, unlimited agents, and priority routing.
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/billing/plans">View plans</Link>
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="by-service" className="pt-4">

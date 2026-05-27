@@ -115,7 +115,21 @@ function CollapsibleGroup({
 }) {
   const pathname = usePathname()
   const anyActive = items.some((i) => pathname.startsWith(i.href))
-  const [open, setOpen] = React.useState(anyActive || defaultOpen)
+  const storageKey = `sx:sidebar-group:${label}`
+
+  // Initialise from localStorage if present, otherwise fall back to
+  // defaultOpen OR being-on-an-active-route. /evaluate Issue 11 fix.
+  const [open, setOpen] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return anyActive || defaultOpen
+    const stored = window.localStorage.getItem(storageKey)
+    if (stored === null) return anyActive || defaultOpen
+    return stored === "1"
+  })
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+    window.localStorage.setItem(storageKey, open ? "1" : "0")
+  }, [open, storageKey])
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="group/collapsible">

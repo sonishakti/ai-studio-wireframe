@@ -1,3 +1,5 @@
+"use client"
+
 import { MoreHorizontal, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +10,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const SUBS = [
   { id: "sub_01", product: "Conversational AI Engine", plan: "Pay-as-you-go",  status: "active",   started: "Feb 12, 2026", renews: "Monthly", spend: "$0.00" },
@@ -92,7 +95,20 @@ export default function SubscriptionsPage() {
                           <DropdownMenuItem>View details</DropdownMenuItem>
                           <DropdownMenuItem>Change plan</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">Cancel</DropdownMenuItem>
+                          <DestructiveActionDialog
+                            action="Cancel"
+                            resource="subscription"
+                            resourceId={s.id}
+                            resourceName={s.product}
+                            description="Cancellation takes effect at the end of the current billing period. You'll keep access until then."
+                          >
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Cancel subscription
+                            </DropdownMenuItem>
+                          </DestructiveActionDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

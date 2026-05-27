@@ -1,3 +1,5 @@
+"use client"
+
 import { Plus, Copy, Eye, EyeOff, KeyRound, MoreHorizontal } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -18,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const CREDENTIALS = [
   {
@@ -133,9 +136,20 @@ export default function ProjectCredentialsPage() {
                           <DropdownMenuItem>View Certificate</DropdownMenuItem>
                           <DropdownMenuItem>Regenerate</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">
-                            Revoke
-                          </DropdownMenuItem>
+                          <DestructiveActionDialog
+                            action="Revoke"
+                            resource="project credential"
+                            resourceId={cred.id}
+                            resourceName={cred.name}
+                            description="Revoking will immediately invalidate this credential. All apps using it will fail until rotated."
+                          >
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Revoke
+                            </DropdownMenuItem>
+                          </DestructiveActionDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

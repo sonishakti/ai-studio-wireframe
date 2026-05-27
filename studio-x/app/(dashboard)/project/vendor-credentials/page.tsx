@@ -1,3 +1,5 @@
+"use client"
+
 import { Plus, Shield, Eye, EyeOff, MoreHorizontal, AlertTriangle } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -18,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const VENDORS = [
   {
@@ -166,9 +169,20 @@ export default function VendorCredentialsPage() {
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuItem>Rotate</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">
-                            Delete
-                          </DropdownMenuItem>
+                          <DestructiveActionDialog
+                            action="Delete"
+                            resource="vendor credential"
+                            resourceId={v.id}
+                            resourceName={`${v.vendor} — ${v.name}`}
+                            description="Agents using this vendor key will fail until you add a replacement. This cannot be undone."
+                          >
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DestructiveActionDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

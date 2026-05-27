@@ -1,0 +1,141 @@
+/**
+ * Studio_X — Analytics scaffolding
+ * ─────────────────────────────────
+ *
+ * Event taxonomy + tracking helpers. Wire to your real provider (Segment,
+ * Amplitude, PostHog, etc.) in `dispatch()`. Right now this just logs to the
+ * console + the `__SX_EVENTS__` window buffer so the wireframe can demo the
+ * full instrumentation surface.
+ *
+ * Naming convention: `object_verb_past_tense` (Segment style)
+ *   ✓ agent_published, project_switched, quota_warning_clicked
+ *   ✗ click_button, page_view, button_clicked (too generic)
+ *
+ * What we are NOT tracking (CLAUDE.md "Don't re-litigate"):
+ *   ✗ time-on-page · session length · DAU as primary KPIs
+ *   These are session-hygiene metrics, not product success metrics.
+ */
+
+// ─── Event names — single source of truth ────────────────────────────────────
+
+export const Events = {
+  // ── Activation funnel (north star) ─────────────────────────────────────────
+  signup_completed:           "signup_completed",
+  project_created:            "project_created",
+  agent_template_browsed:     "agent_template_browsed",
+  agent_template_selected:    "agent_template_selected",
+  agent_created:              "agent_created",
+  agent_test_started:         "agent_test_started",
+  agent_published:            "agent_published",       // ★ NORTH STAR
+
+  // ── Telephony deployment ───────────────────────────────────────────────────
+  phone_number_imported:      "phone_number_imported",
+  phone_number_assigned:      "phone_number_assigned",
+  campaign_created:           "campaign_created",
+  campaign_launched:          "campaign_launched",
+
+  // ── Insights (wayfinding the Insights group solves) ────────────────────────
+  monitor_viewed:             "monitor_viewed",
+  calls_viewed:               "calls_viewed",
+  usage_viewed:               "usage_viewed",
+  insights_cross_link_clicked:"insights_cross_link_clicked",  // Monitor → Usage etc.
+
+  // ── Project switching ──────────────────────────────────────────────────────
+  project_switcher_opened:    "project_switcher_opened",
+  project_switched:           "project_switched",
+  all_projects_viewed:        "all_projects_viewed",
+
+  // ── Account & billing ──────────────────────────────────────────────────────
+  account_menu_opened:        "account_menu_opened",
+  billing_overview_viewed:    "billing_overview_viewed",
+  plan_compared:              "plan_compared",
+  plan_upgraded:              "plan_upgraded",
+  quota_warning_clicked:      "quota_warning_clicked",   // Usage → Plans CTA
+
+  // ── Wayfinding & power-user signals ────────────────────────────────────────
+  command_palette_opened:     "command_palette_opened",  // ⌘K
+  command_executed:           "command_executed",
+  search_zero_results:        "search_zero_results",
+  destructive_action_canceled:"destructive_action_canceled",   // AlertDialog dismissed
+  destructive_action_confirmed:"destructive_action_confirmed",
+
+  // ── Errors & resilience ────────────────────────────────────────────────────
+  page_error_rendered:        "page_error_rendered",
+  not_found_rendered:         "not_found_rendered",
+  form_validation_failed:     "form_validation_failed",
+  toast_dismissed:            "toast_dismissed",
+} as const
+
+export type EventName = (typeof Events)[keyof typeof Events]
+
+// ─── Event payloads — typed per event for safety ──────────────────────────────
+
+export type EventPayloads = {
+  agent_published:             { agent_id: string; template_id?: string; time_to_first_agent_ms?: number }
+  project_switched:            { from_project_id: string; to_project_id: string }
+  insights_cross_link_clicked: { from: "monitor" | "calls" | "usage"; to: "monitor" | "calls" | "usage" }
+  quota_warning_clicked:       { meter: string; pct_used: number }
+  command_executed:            { command: string; surface: "palette" | "shortcut" }
+  destructive_action_confirmed:{ resource: string; resource_id: string }
+  destructive_action_canceled: { resource: string; resource_id: string }
+  page_error_rendered:         { path: string; digest?: string }
+  form_validation_failed:      { form: string; field: string; error: string }
+  [k: string]: Record<string, unknown> | undefined
+}
+
+// ─── Core tracking ─────────────────────────────────────────────────────────────
+
+declare global {
+  interface Window {
+    __SX_EVENTS__?: Array<{ ts: number; name: string; props?: Record<string, unknown> }>
+  }
+}
+
+/**
+ * Track an event. Replace `dispatch` with your provider integration.
+ *
+ * Usage:
+ *   track(Events.agent_published, { agent_id: "agt_01", time_to_first_agent_ms: 8214 })
+ */
+export function track<K extends EventName>(name: K, props?: EventPayloads[K]) {
+  const event = { ts: Date.now(), name, props }
+
+  // Buffer in window so the wireframe can show "what got tracked"
+  if (typeof window !== "undefined") {
+    window.__SX_EVENTS__ ??= []
+    window.__SX_EVENTS__.push(event)
+    // Keep last 100 only
+    if (window.__SX_EVENTS__.length > 100) window.__SX_EVENTS__.shift()
+  }
+
+  dispatch(event)
+}
+
+function dispatch(event: { ts: number; name: string; props?: Record<string, unknown> }) {
+  // TODO: replace with provider — Segment/Amplitude/PostHog
+  // Example: window.analytics?.track(event.name, event.props)
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.debug("[track]", event.name, event.props ?? "")
+  }
+}
+
+// ─── Activation timing — time-to-first-agent helpers ──────────────────────────
+//
+// Persist signup_completed timestamp so agent_published can compute TTFA.
+
+const SIGNUP_KEY = "sx:signup_ts"
+
+export function markSignup(ts = Date.now()) {
+  if (typeof window === "undefined") return
+  if (!window.localStorage.getItem(SIGNUP_KEY)) {
+    window.localStorage.setItem(SIGNUP_KEY, String(ts))
+  }
+}
+
+export function timeSinceSignup(): number | undefined {
+  if (typeof window === "undefined") return undefined
+  const raw = window.localStorage.getItem(SIGNUP_KEY)
+  if (!raw) return undefined
+  return Date.now() - parseInt(raw, 10)
+}

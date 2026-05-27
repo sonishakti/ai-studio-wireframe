@@ -1,3 +1,5 @@
+"use client"
+
 import { Plus, Megaphone, MoreHorizontal, Search, Filter, Play, Pause } from "lucide-react"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -21,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const CAMPAIGNS = [
   {
@@ -177,9 +180,19 @@ export default function CampaignsPage() {
                               <DropdownMenuItem>Resume</DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive focus:text-destructive">
-                              Delete
-                            </DropdownMenuItem>
+                            <DestructiveActionDialog
+                              action="Delete"
+                              resource="campaign"
+                              resourceId={c.id}
+                              resourceName={c.name}
+                            >
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DestructiveActionDialog>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

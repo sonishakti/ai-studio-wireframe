@@ -16,6 +16,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const PROJECTS = [
   { id: "prj_123456", name: "My first project", description: "Personal exploration & demos", appId: "a1b2c3d4e5f67890", plan: "Free",       env: "production", members: 1, agents: 3, status: "active",   lastActive: "2 min ago",  current: true  },
@@ -119,9 +120,20 @@ export default function ProjectsPage() {
                       <DropdownMenuItem>Duplicate</DropdownMenuItem>
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive focus:text-destructive">
-                        Archive
-                      </DropdownMenuItem>
+                      <DestructiveActionDialog
+                        action="Archive"
+                        resource="project"
+                        resourceId={p.id}
+                        resourceName={p.name}
+                        description="The project's data and agents will be moved to read-only. You can restore it within 30 days."
+                      >
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          Archive
+                        </DropdownMenuItem>
+                      </DestructiveActionDialog>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

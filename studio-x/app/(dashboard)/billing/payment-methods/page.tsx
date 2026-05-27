@@ -1,3 +1,5 @@
+"use client"
+
 import { Plus, CreditCard, MoreHorizontal, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +12,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const CARDS = [
   { id: "pm_01", brand: "Visa",       last4: "4242", expires: "12 / 28", primary: true,  type: "Personal"  },
@@ -70,7 +73,19 @@ export default function PaymentMethodsPage() {
                     {!c.primary && <DropdownMenuItem>Set as primary</DropdownMenuItem>}
                     <DropdownMenuItem>Edit</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive focus:text-destructive">Remove</DropdownMenuItem>
+                    <DestructiveActionDialog
+                      action="Remove"
+                      resource="card"
+                      resourceId={c.id}
+                      resourceName={`${c.brand} ending in ${c.last4}`}
+                    >
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        Remove
+                      </DropdownMenuItem>
+                    </DestructiveActionDialog>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

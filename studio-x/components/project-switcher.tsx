@@ -5,7 +5,6 @@ import Link from "next/link"
 import {
   FolderKanban, Check, Plus, ArrowRight, ChevronsUpDown,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
+import { toast } from "sonner"
+import { track, Events } from "@/lib/analytics"
 
 // Stub project list — in production fetch from API + cache.
 // Matches /projects page data.
@@ -29,8 +30,15 @@ export function ProjectSwitcher() {
   const current = PROJECTS.find((p) => p.current) ?? PROJECTS[0]
   const others = PROJECTS.filter((p) => !p.current)
 
+  const handleSwitch = (toId: string, toName: string) => {
+    track(Events.project_switched, { from_project_id: current.id, to_project_id: toId })
+    toast.success(`Switched to ${toName}`, {
+      description: "Reloading project data…",
+    })
+  }
+
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={(open) => { if (open) track(Events.project_switcher_opened) }}>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton
           className="flex-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -73,7 +81,11 @@ export function ProjectSwitcher() {
               Switch project
             </DropdownMenuLabel>
             {others.map((p) => (
-              <DropdownMenuItem key={p.id} className="gap-2">
+              <DropdownMenuItem
+                key={p.id}
+                className="gap-2"
+                onSelect={() => handleSwitch(p.id, p.name)}
+              >
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted shrink-0">
                   <FolderKanban className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>

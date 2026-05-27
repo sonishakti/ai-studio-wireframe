@@ -1,3 +1,5 @@
+"use client"
+
 import { Plus, Phone, MoreHorizontal, Search, Upload } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -19,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 
 const NUMBERS = [
   {
@@ -127,9 +130,20 @@ export default function PhoneNumbersPage() {
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuItem>Assign Agent</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive">
-                            Release
-                          </DropdownMenuItem>
+                          <DestructiveActionDialog
+                            action="Release"
+                            resource="phone number"
+                            resourceId={num.id}
+                            resourceName={num.number}
+                            description="Releasing this number returns it to the vendor's pool. Any agent assignments will be removed and you cannot reclaim this exact number."
+                          >
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Release
+                            </DropdownMenuItem>
+                          </DestructiveActionDialog>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

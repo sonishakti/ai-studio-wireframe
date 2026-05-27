@@ -10,7 +10,7 @@ const TABS = [
   { label: "Webhooks",        href: "/developer/webhooks" },
   { label: "Audit Logs",      href: "/developer/audit-logs" },
   { label: "SDK Toolkit",     href: "/developer/toolkit" },
-  { label: "AA Credentials",  href: "/developer/aa-credentials" },
+  { label: "Service Accounts", href: "/developer/aa-credentials" },
   { label: "Licensing",       href: "/developer/licensing" },
 ]
 
