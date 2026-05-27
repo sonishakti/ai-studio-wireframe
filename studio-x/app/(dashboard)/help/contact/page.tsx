@@ -1,5 +1,4 @@
 import { MessageCircle, Mail, Phone } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,13 +15,7 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
 
 export default function ContactPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Help Hub", href: "/help" }, { label: "Contact Support" }]}
-        title="Contact Support"
-        description="We're here to help. Choose how you'd like to reach us."
-      />
-      <main className="flex-1 p-6">
+    <main className="flex-1 p-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 max-w-4xl">
           <div className="space-y-4">
             {[
@@ -65,8 +58,7 @@ export default function ContactPage() {
               <Button className="w-full">Submit Request</Button>
             </CardContent>
           </Card>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   )
 }

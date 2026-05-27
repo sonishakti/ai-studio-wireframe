@@ -1,5 +1,4 @@
-import { Plus, Key, MoreHorizontal, Copy } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { Plus, MoreHorizontal, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,14 +12,13 @@ const AA_CREDS = [
 
 export default function AACredentialsPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Developer Hub", href: "/developer" }, { label: "AA Credentials" }]}
-        title="AA Credentials"
-        description="Service account credentials for server-to-server API authentication."
-        actions={<Button><Plus className="h-4 w-4" /> New Credential</Button>}
-      />
-      <main className="flex-1 p-6 space-y-4">
+    <main className="flex-1 p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Service account credentials for server-to-server API authentication.
+        </p>
+        <Button size="sm"><Plus className="h-4 w-4" /> New Credential</Button>
+      </div>
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="py-3 px-4 text-sm text-muted-foreground">
             AA (App-level Auth) credentials are for server-to-server calls only. Never expose the secret in client-side code.
@@ -70,7 +68,6 @@ export default function AACredentialsPage() {
             </Table>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

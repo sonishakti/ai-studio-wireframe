@@ -1,5 +1,4 @@
 import { Phone, Mail, Calendar, CheckCircle2 } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,13 +19,13 @@ const SELLING_POINTS = [
 
 export default function ContactSalesPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        title="Talk to Sales"
-        description="Tell us about your use case — we'll get back within 1 business day."
-      />
-
-      <main className="flex-1 p-6">
+    <main className="flex-1 p-6 space-y-5">
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Talk to Sales</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Tell us about your use case — we'll get back within 1 business day.
+        </p>
+      </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] max-w-5xl">
           {/* Form */}
           <Card>
@@ -117,7 +116,6 @@ export default function ContactSalesPage() {
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

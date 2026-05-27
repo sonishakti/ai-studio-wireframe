@@ -1,6 +1,5 @@
-import { Ticket, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import Link from "next/link"
-import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -15,14 +14,13 @@ const TICKETS = [
 
 export default function TicketsPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Help Hub", href: "/help" }, { label: "My Tickets" }]}
-        title="My Tickets"
-        description="Track the status of your open and closed support requests."
-        actions={<Button asChild><Link href="/help/contact">New Ticket</Link></Button>}
-      />
-      <main className="flex-1 p-6 space-y-4">
+    <main className="flex-1 p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Track the status of your open and closed support requests.
+        </p>
+        <Button size="sm" asChild><Link href="/help/contact">New Ticket</Link></Button>
+      </div>
         <div className="relative max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input placeholder="Search tickets…" className="pl-8 h-8 text-sm" />
@@ -53,7 +51,6 @@ export default function TicketsPage() {
             </Table>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

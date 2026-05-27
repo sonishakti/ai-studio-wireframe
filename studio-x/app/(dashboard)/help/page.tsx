@@ -1,6 +1,5 @@
 import { HelpCircle, MessageCircle, Ticket, Sparkles, ExternalLink, Search } from "lucide-react"
 import Link from "next/link"
-import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -49,12 +48,6 @@ const POPULAR_ARTICLES = [
 
 export default function HelpPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Help Hub" }]}
-        title="Help Hub"
-        description="Documentation, support tickets, and release notes."
-      />
 
       <main className="flex-1 p-6 space-y-6">
         {/* Search */}
@@ -117,7 +110,6 @@ export default function HelpPage() {
             ))}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

@@ -1,5 +1,4 @@
-import { ScrollText, Download, Search, Filter } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { Download, Search, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -16,14 +15,13 @@ const LOGS = [
 
 export default function AuditLogsPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Developer Hub", href: "/developer" }, { label: "Audit Logs" }]}
-        title="Audit Logs"
-        description="Every API call, config change, and user action in your project."
-        actions={<Button variant="outline" className="gap-1.5"><Download className="h-4 w-4" /> Export</Button>}
-      />
-      <main className="flex-1 p-6 space-y-4">
+    <main className="flex-1 p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Every API call, config change, and user action in your project.
+        </p>
+        <Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>
+      </div>
         <div className="flex items-center gap-3">
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -59,7 +57,6 @@ export default function AuditLogsPage() {
             </Table>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

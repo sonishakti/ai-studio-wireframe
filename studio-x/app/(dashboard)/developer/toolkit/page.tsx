@@ -1,5 +1,4 @@
-import { Wrench, Download, ExternalLink } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { Download, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,13 +19,10 @@ const SAMPLES = [
 
 export default function ToolkitPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Developer Hub", href: "/developer" }, { label: "SDK Toolkit" }]}
-        title="SDK Toolkit"
-        description="Download SDKs, sample applications, and integration guides."
-      />
-      <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
+      <p className="text-sm text-muted-foreground">
+        Download SDKs, sample applications, and integration guides.
+      </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Card>
             <CardHeader><CardTitle className="text-sm">SDKs & Clients</CardTitle></CardHeader>
@@ -56,8 +52,7 @@ export default function ToolkitPage() {
               ))}
             </CardContent>
           </Card>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   )
 }

@@ -1,5 +1,4 @@
-import { Plus, Webhook, MoreHorizontal, Zap } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { Plus, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,14 +23,13 @@ const EVENTS = [
 
 export default function WebhooksPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Developer Hub", href: "/developer" }, { label: "Webhooks" }]}
-        title="Webhooks"
-        description="Receive real-time events via HTTP POST to your endpoints."
-        actions={<Button><Plus className="h-4 w-4" /> Add Endpoint</Button>}
-      />
-      <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Receive real-time events via HTTP POST to your endpoints.
+        </p>
+        <Button size="sm"><Plus className="h-4 w-4" /> Add Endpoint</Button>
+      </div>
         <Card>
           <CardContent className="p-0">
             <Table>
@@ -76,7 +74,6 @@ export default function WebhooksPage() {
             {EVENTS.map((e) => <Badge key={e} variant="secondary" className="font-mono text-xs">{e}</Badge>)}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

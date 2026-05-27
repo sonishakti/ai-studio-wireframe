@@ -1,6 +1,5 @@
-import { Code2, ExternalLink, Key, Webhook, FileText, Wrench, ScrollText, Lock } from "lucide-react"
+import { Code2, ExternalLink, Key, Webhook, Wrench, ScrollText, Lock } from "lucide-react"
 import Link from "next/link"
-import { PageHeader } from "@/components/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -52,21 +51,14 @@ const DEVELOPER_SECTIONS = [
 
 export default function DeveloperPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Developer Hub" }]}
-        title="Developer Hub"
-        description="APIs, webhooks, SDKs, and tooling for building on Agora."
-        actions={
-          <Button variant="outline" className="gap-1.5" asChild>
-            <a href="https://docs.agora.io" target="_blank" rel="noreferrer">
-              <ExternalLink className="h-4 w-4" /> Docs
-            </a>
-          </Button>
-        }
-      />
-
-      <main className="flex-1 p-6">
+    <main className="flex-1 p-6 space-y-5">
+      <div className="flex items-center justify-end">
+        <Button variant="outline" className="gap-1.5" asChild>
+          <a href="https://docs.agora.io" target="_blank" rel="noreferrer">
+            <ExternalLink className="h-4 w-4" /> Open full docs
+          </a>
+        </Button>
+      </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {DEVELOPER_SECTIONS.map((s) => (
             <Card key={s.title} className="hover:shadow-md transition-shadow">
@@ -87,8 +79,7 @@ export default function DeveloperPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
   )
 }

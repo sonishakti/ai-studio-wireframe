@@ -5,22 +5,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   ArrowLeft,
-  CheckSquare,
   CreditCard,
   Store,
   Settings,
-  Lock,
   Code2,
-  Webhook,
-  ScrollText,
-  Wrench,
-  Key,
   HelpCircle,
-  Ticket,
-  Sparkles,
-  MessageCircle,
   Bell,
-  ChevronRight,
   Sun,
   Moon,
   LogOut,
@@ -37,9 +27,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import {
@@ -51,9 +38,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
 
-// ─── account nav structure (matches Figma node 6667:6992) ────────────────────
+// ─── account nav — 6 items, no nesting ──────────────────────────────────────
+//
+// Every item here is a HUB. Sub-pages live as tabs INSIDE the hub
+// (BillingNav, DeveloperNav, HelpNav) — not as nested sidebar items.
+// This is the "if it deserves to be a tab in a page" principle applied:
+// 15 sidebar items collapse to 6.
+//
+//   • Billing             → tabs: Overview · Plans · Subscriptions · Invoices ·
+//                                 Transactions · Payment Methods
+//   • Extensions Marketplace
+//   • Preferences
+//   • Developer Hub       → tabs: Overview · RESTful API · Webhooks · Audit Logs ·
+//                                 SDK Toolkit · AA Credentials · Licensing
+//   • Help Hub            → tabs: Overview · Contact Support · Contact Sales ·
+//                                 My Tickets · What's New
+//   • Notifications
+// ─────────────────────────────────────────────────────────────────────────────
 
 type NavItem = {
   label: string
@@ -61,44 +63,21 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>
 }
 
-// "View all plans" is the only item with expandable sub-items in the Figma —
-// they show product-level subscription destinations.
-const PLAN_PRODUCTS = [
-  { label: "Agent Studio",    href: "/billing/plans?product=agent-studio" },
-  { label: "RTC Pre-paid",    href: "/billing/plans?product=rtc-prepaid"  },
-  { label: "Signaling",       href: "/billing/plans?product=signaling"    },
-  { label: "Chat",            href: "/billing/plans?product=chat"         },
-]
-
 const NAV_ACCOUNT: NavItem[] = [
-  { label: "Billing",                href: "/billing",        icon: CreditCard },
-  { label: "Extensions Marketplace", href: "/extensions",     icon: Store      },
-  { label: "Preferences",            href: "/preferences",    icon: Settings   },
+  { label: "Billing",                href: "/billing",     icon: CreditCard },
+  { label: "Extensions Marketplace", href: "/extensions",  icon: Store      },
+  { label: "Preferences",            href: "/preferences", icon: Settings   },
 ]
 
-const NAV_DEVELOPER: NavItem[] = [
-  { label: "RESTful API",     href: "/developer/restful-api",     icon: Code2     },
-  { label: "Webhooks",        href: "/developer/webhooks",        icon: Webhook   },
-  { label: "Audit Logs",      href: "/developer/audit-logs",      icon: ScrollText },
-  { label: "SDK Toolkit",     href: "/developer/toolkit",         icon: Wrench    },
-  { label: "AA Credentials",  href: "/developer/aa-credentials",  icon: Key       },
-  { label: "Licensing",       href: "/developer/licensing",       icon: Lock      },
+const NAV_DEV_SUPPORT: NavItem[] = [
+  { label: "Developer Hub", href: "/developer",     icon: Code2      },
+  { label: "Help Hub",      href: "/help",          icon: HelpCircle },
+  { label: "Notifications", href: "/notifications", icon: Bell       },
 ]
-
-const NAV_HELP: NavItem[] = [
-  { label: "Help Hub",        href: "/help",              icon: HelpCircle    },
-  { label: "Contact Support", href: "/help/contact",      icon: MessageCircle },
-  { label: "My Tickets",      href: "/help/tickets",      icon: Ticket        },
-  { label: "What's New",      href: "/help/whats-new",    icon: Sparkles      },
-  { label: "Notifications",   href: "/notifications",     icon: Bell          },
-]
-
-// ─── shared NavLink ──────────────────────────────────────────────────────────
 
 function NavLink({ item }: { item: NavItem }) {
   const pathname = usePathname()
   const active = pathname === item.href || pathname.startsWith(item.href + "/")
-
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
@@ -111,38 +90,8 @@ function NavLink({ item }: { item: NavItem }) {
   )
 }
 
-// ─── plans group (with collapsed sub-items, like Figma) ──────────────────────
-
-function PlansGroup() {
-  const pathname = usePathname()
-  const onPlansPage = pathname.startsWith("/billing/plans")
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={onPlansPage} tooltip="View all plans">
-        <Link href="/billing/plans">
-          <CheckSquare className="h-4 w-4" />
-          <span>View all plans</span>
-        </Link>
-      </SidebarMenuButton>
-      <SidebarMenuSub>
-        {PLAN_PRODUCTS.map((p) => (
-          <SidebarMenuSubItem key={p.href}>
-            <SidebarMenuSubButton asChild>
-              <Link href={p.href}>{p.label}</Link>
-            </SidebarMenuSubButton>
-          </SidebarMenuSubItem>
-        ))}
-      </SidebarMenuSub>
-    </SidebarMenuItem>
-  )
-}
-
-// ─── user menu (still needed at footer for theme + log out) ─────────────────
-
 function AccountUserMenu() {
   const { setTheme, resolvedTheme } = useTheme()
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -192,12 +141,10 @@ function AccountUserMenu() {
   )
 }
 
-// ─── main export ─────────────────────────────────────────────────────────────
-
 export function AccountSidebar() {
   return (
     <Sidebar variant="inset">
-      {/* Header: ← Back to project */}
+      {/* ← Back to project */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -217,43 +164,23 @@ export function AccountSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* ACCOUNT */}
         <SidebarGroup>
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarMenu>
-            <PlansGroup />
-            {NAV_ACCOUNT.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
+            {NAV_ACCOUNT.map((item) => <NavLink key={item.href} item={item} />)}
           </SidebarMenu>
         </SidebarGroup>
 
         <SidebarSeparator />
 
-        {/* DEVELOPER SETTINGS */}
         <SidebarGroup>
-          <SidebarGroupLabel>Developer Settings</SidebarGroupLabel>
+          <SidebarGroupLabel>Developer & Support</SidebarGroupLabel>
           <SidebarMenu>
-            {NAV_DEVELOPER.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* HELP */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Help & Support</SidebarGroupLabel>
-          <SidebarMenu>
-            {NAV_HELP.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
+            {NAV_DEV_SUPPORT.map((item) => <NavLink key={item.href} item={item} />)}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: account user menu (still has theme/log out) */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

@@ -1,5 +1,4 @@
-import { Code2, ExternalLink, Copy } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { ExternalLink, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -27,24 +26,17 @@ const METHOD_COLOR: Record<string, string> = {
 
 export default function RestfulApiPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[
-          { label: "Developer Hub", href: "/developer" },
-          { label: "RESTful API" },
-        ]}
-        title="RESTful API"
-        description="HTTP API reference for Studio_X. Base URL: https://api.agora.io/studio"
-        actions={
-          <Button variant="outline" className="gap-1.5" asChild>
-            <a href="https://docs.agora.io" target="_blank" rel="noreferrer">
-              <ExternalLink className="h-4 w-4" /> Full Docs
-            </a>
-          </Button>
-        }
-      />
-
-      <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Base URL: <code className="font-mono">https://api.agora.io/studio</code>
+        </p>
+        <Button variant="outline" size="sm" className="gap-1.5" asChild>
+          <a href="https://docs.agora.io" target="_blank" rel="noreferrer">
+            <ExternalLink className="h-3.5 w-3.5" /> Full Docs
+          </a>
+        </Button>
+      </div>
         {/* Auth */}
         <Card>
           <CardHeader className="pb-2">
@@ -86,7 +78,6 @@ export default function RestfulApiPage() {
             ))}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

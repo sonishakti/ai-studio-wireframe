@@ -1,5 +1,3 @@
-import { Sparkles } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -47,13 +45,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 export default function WhatsNewPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Help Hub", href: "/help" }, { label: "What's New" }]}
-        title="What's New"
-        description="Release notes and feature announcements."
-      />
-      <main className="flex-1 p-6">
+    <main className="flex-1 p-6">
         <div className="max-w-2xl space-y-6">
           {RELEASES.map((release) => (
             <Card key={release.version}>
@@ -80,7 +72,6 @@ export default function WhatsNewPage() {
             </Card>
           ))}
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

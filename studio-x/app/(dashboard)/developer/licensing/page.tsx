@@ -1,5 +1,4 @@
-import { Lock, CheckCircle, XCircle } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,13 +15,10 @@ const LICENSES = [
 
 export default function LicensingPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Developer Hub", href: "/developer" }, { label: "Licensing" }]}
-        title="Licensing"
-        description="Feature entitlements for your current plan."
-      />
-      <main className="flex-1 p-6 space-y-4 max-w-2xl">
+    <main className="flex-1 p-6 space-y-4 max-w-2xl">
+      <p className="text-sm text-muted-foreground">
+        Feature entitlements for your current plan.
+      </p>
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -48,7 +44,6 @@ export default function LicensingPage() {
             ))}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }
