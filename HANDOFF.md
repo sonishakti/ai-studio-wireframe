@@ -76,6 +76,7 @@ PROJECT   ›  Project Settings · Realtime Services · Credentials
 ## What's done — recent commits worth knowing
 
 ```
+7b97fad Project Credentials: remove temp token, add Agora CLI callout, rename from Project Settings
 277be4a Real-Time Services ↔ Extensions Marketplace: cross-surface accelerator (/journey + /organize)
 ccde931 /blueprint: Real-Time Services system map (13 services + deps + failure modes)
 30a9be5 Realtime Services: /organize all 13 Agora services sourced live from console.agora.io
