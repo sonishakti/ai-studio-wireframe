@@ -1,20 +1,42 @@
 "use client"
 
 import * as React from "react"
-import { Copy, Pencil, Terminal, RotateCw, AlertTriangle } from "lucide-react"
+import { Copy, Pencil, Terminal, RotateCw, AlertTriangle, ShieldCheck } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { toast } from "sonner"
 
 export default function ProjectSettingsPage() {
   const [projectName, setProjectName] = React.useState("My First Project")
   const [editingName, setEditingName] = React.useState(false)
+  const [securedMode, setSecuredMode] = React.useState(false)
   const [hasSecondary, setHasSecondary] = React.useState(false)
+
+  // Scroll to #secured-mode anchor on initial load — used by P0 banner deep-link
+  React.useEffect(() => {
+    if (window.location.hash === "#secured-mode") {
+      document.getElementById("secured-mode")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }, [])
+
+  const handleToggleSecuredMode = (next: boolean) => {
+    setSecuredMode(next)
+    toast.success(
+      next ? "Secured mode enabled" : "Secured mode disabled",
+      {
+        description: next
+          ? "Tokens are now required for SDK authentication. Production quotas unlocked."
+          : "Project reverted to test mode. Production deployments will be rejected.",
+      },
+    )
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -72,28 +94,67 @@ export default function ProjectSettingsPage() {
             </div>
           </Card>
 
-          {/* ─── Security Card ──────────────────────────────────────── */}
-          <Card className="p-6">
-            <div className="flex items-start justify-between mb-1">
-              <h2 className="text-base font-semibold">Security</h2>
-              <DestructiveActionDialog
-                action="Regenerate"
-                resource="primary certificate"
-                resourceId="prj_123456"
-                description="Regenerating immediately invalidates the current primary certificate. Any service using it will fail until rotated. Use Secondary Certificate first for zero-downtime rotation."
-                successMessage="New primary certificate generated"
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 text-xs"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <RotateCw className="h-3 w-3" /> Regenerate
-                </Button>
-              </DestructiveActionDialog>
+          {/* ─── Secured Mode Card ──────────────────────────────────── */}
+          <Card className="p-6" id="secured-mode">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg shrink-0 ${
+                  securedMode ? "bg-emerald-500/15" : "bg-amber-500/15"
+                }`}>
+                  <ShieldCheck className={`h-5 w-5 ${securedMode ? "text-emerald-600" : "text-amber-600"}`} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-semibold">Secured mode</h2>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] ${
+                        securedMode
+                          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                      }`}
+                    >
+                      {securedMode ? "Active" : "Disabled · P0"}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-lg leading-relaxed">
+                    Required for production. When active, SDKs must authenticate with a token signed
+                    by your App Certificate — anonymous App-ID-only access is blocked and quota caps
+                    are lifted.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={securedMode}
+                onCheckedChange={handleToggleSecuredMode}
+                aria-label="Secured mode"
+              />
             </div>
+
             <Separator className="mb-5" />
+
+            {/* Cert management — only fully usable once secured mode is on */}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium">App Certificate</h3>
+              {securedMode && (
+                <DestructiveActionDialog
+                  action="Regenerate"
+                  resource="primary certificate"
+                  resourceId="prj_123456"
+                  description="Regenerating immediately invalidates the current primary certificate. Any service using it will fail until rotated. Use the Secondary Certificate first for zero-downtime rotation."
+                  successMessage="New primary certificate generated"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-xs"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <RotateCw className="h-3 w-3" /> Regenerate
+                  </Button>
+                </DestructiveActionDialog>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="space-y-1.5">

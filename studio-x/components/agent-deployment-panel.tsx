@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { SecuredModeGate } from "@/components/secured-mode-banner"
 
 // ─── channel deployment state per agent ─────────────────────────────────────
 //
@@ -56,6 +57,8 @@ const INITIAL: ChannelState[] = [
 
 export function AgentDeploymentPanel({ agentId }: { agentId: string }) {
   const [channels, setChannels] = React.useState(INITIAL)
+  // STUB — pull from project state in production
+  const securedModeEnabled = false
 
   const toggle = (id: ChannelKind) => {
     setChannels((prev) =>
@@ -79,6 +82,10 @@ export function AgentDeploymentPanel({ agentId }: { agentId: string }) {
   const configuredCount = channels.filter((c) => c.configured).length
 
   return (
+    <div className="space-y-4">
+      {/* Gate — if Secured mode is off, warn before user picks a channel */}
+      <SecuredModeGate enabled={securedModeEnabled} />
+
     <Card>
       <CardContent className="p-0">
         {/* Header — summary */}
@@ -183,5 +190,6 @@ export function AgentDeploymentPanel({ agentId }: { agentId: string }) {
         </div>
       </CardContent>
     </Card>
+    </div>
   )
 }

@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  KeyRound, Bot, Mic, Phone, ArrowRight, RefreshCw, X,
+  KeyRound, Bot, Mic, Phone, RefreshCw,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -13,38 +13,37 @@ import {
 } from "@/components/ui/select"
 import { Sparkline } from "@/components/sparkline"
 import { MetricCard, MetricSection } from "@/components/metric-section"
-import { cn } from "@/lib/utils"
+import { SecuredModeBanner } from "@/components/secured-mode-banner"
 
-// ─── "Get started" callouts (replaces ActivationChecklist) ──────────────────
-// LiveKit pattern: small dismissible link cards instead of a commitment widget.
-// Less psychologically heavy — the user picks one path, ignores the rest.
+// ─── Get-started callouts (LiveKit pattern, but Agora-flavored copy) ─────
 
 const GET_STARTED = [
   {
-    id: "project-keys",
-    title: "Project API keys",
-    description: "Create and manage access keys to integrate the SDK into your app.",
-    href: "/project/settings",
+    id: "secured-mode",
+    title: "Enable Secured mode",
+    description: "Activate the App Certificate so your project can take production traffic.",
+    href: "/project/settings#secured-mode",
     icon: KeyRound,
+    priority: true,
   },
   {
     id: "agents",
-    title: "AI Agents",
-    description: "Build and deploy multimodal and voice AI agents.",
+    title: "Build an AI Agent",
+    description: "Pick a template, configure your agent, and deploy it in minutes.",
     href: "/agents",
     icon: Bot,
   },
   {
     id: "voice-quickstart",
-    title: "Voice AI quickstart",
-    description: "Build your first voice AI agent in under 10 minutes.",
-    href: "/agents",
+    title: "Voice Calling quickstart",
+    description: "Add real-time voice to your app using the Agora Voice SDK.",
+    href: "/realtime-services",
     icon: Mic,
   },
   {
     id: "telephony",
-    title: "Telephony integration",
-    description: "Let your voice AI agent make and receive phone calls.",
+    title: "Add a phone number",
+    description: "Let your agent make and receive PSTN calls via Telephony.",
     href: "/deploy/telephony",
     icon: Phone,
   },
@@ -58,7 +57,9 @@ export default function HomePage() {
   const [dismissed, setDismissed] = React.useState(false)
   const [period, setPeriod] = React.useState("7d")
 
-  // Read dismissed state from localStorage on mount
+  // STUB — in production this comes from the project record
+  const securedModeEnabled = false
+
   React.useEffect(() => {
     setDismissed(window.localStorage.getItem(DISMISS_KEY) === "1")
   }, [])
@@ -97,7 +98,10 @@ export default function HomePage() {
       />
 
       <main className="flex-1 p-6 space-y-8">
-        {/* ─── Get started callouts (replaces checklist widget) ─────────── */}
+        {/* ─── Secured mode banner — P0 above everything ────────────────── */}
+        <SecuredModeBanner enabled={securedModeEnabled} />
+
+        {/* ─── Get started callouts ─────────────────────────────────────── */}
         {!dismissed && (
           <section>
             <div className="flex items-center justify-between mb-3">
@@ -116,11 +120,15 @@ export default function HomePage() {
                 <Link
                   key={g.id}
                   href={g.href}
-                  className="group rounded-lg border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all"
+                  className={`group rounded-lg border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all ${
+                    g.priority ? "border-amber-500/40 bg-amber-500/[0.03]" : ""
+                  }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted shrink-0">
-                      <g.icon className="h-4 w-4 text-muted-foreground" />
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${
+                      g.priority ? "bg-amber-500/15" : "bg-muted"
+                    }`}>
+                      <g.icon className={`h-4 w-4 ${g.priority ? "text-amber-600" : "text-muted-foreground"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold leading-tight">{g.title}</p>
@@ -133,103 +141,122 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* ─── Activation banner — Connection metrics ───────────────────── */}
-        <MetricSection title="Activation">
-          <MetricCard label="Connection success" value="No data for the selected time range." mute />
-          <MetricCard label="Platforms" value="No data for the selected time range." mute />
-          <MetricCard label="Connection type" value="No data for the selected time range." mute />
-          <MetricCard label="Top countries" value="No data for the selected time range." mute />
-        </MetricSection>
-
-        {/* ─── Participants ────────────────────────────────────────────── */}
-        <MetricSection title="Participants">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* ─── Project health — App Cert + connection — Agora-native ───── */}
+        <MetricSection title="Project health">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard
-              label="WebRTC Participant Minutes"
-              value="0"
-              unit="secs"
-              chart={<Sparkline data={[0, 0, 0, 0, 0, 0, 0]} />}
+              label="Secured mode"
+              value={securedModeEnabled ? "Active" : "Disabled"}
+              sub={securedModeEnabled ? "App Certificate enabled" : "Required for production"}
             />
             <MetricCard
-              label="Participant Minutes by Kind"
-              value="No data for the selected time range."
+              label="Connection success rate"
+              value="—"
+              mute
+            />
+            <MetricCard
+              label="SDK platforms in use"
+              value="—"
+              mute
+            />
+            <MetricCard
+              label="Top regions"
+              value="—"
               mute
             />
           </div>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-3">
-                Participants
-              </p>
-              <Sparkline
-                data={[0.2, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7]}
-                axisLabels={["20 May", "21 May", "22 May", "23 May", "24 May", "25 May", "26 May"]}
-                height={120}
-              />
-            </CardContent>
-          </Card>
         </MetricSection>
 
-        {/* ─── Agents ──────────────────────────────────────────────────── */}
-        <MetricSection title="Agents">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* ─── Channels — Agora's term for "rooms" (sessions where users join) */}
+        <MetricSection title="Channels">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <MetricCard
-              label="Agent Session Minutes"
+              label="Total channel sessions"
+              value="0"
+              chart={<Sparkline data={[0, 0, 0, 0, 0, 0, 0]} />}
+            />
+            <MetricCard
+              label="Peak concurrent users"
+              value="0"
+              sub="Across all channels"
+            />
+            <MetricCard
+              label="Avg session duration"
+              value="0"
+              unit="secs"
+            />
+          </div>
+        </MetricSection>
+
+        {/* ─── Voice & Video Minutes — Agora's billable units ──────────── */}
+        <MetricSection title="Voice & Video minutes">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              label="Audio minutes"
+              value="42,190"
+              unit="min"
+              delta="+8%"
+              deltaPositive
+              chart={<Sparkline data={[2100, 2800, 3900, 6100, 9500, 14000, 19000]} stroke="hsl(var(--primary))" />}
+            />
+            <MetricCard
+              label="Video SD"
+              value="72,215"
+              unit="min"
+              chart={<Sparkline data={[1200, 1800, 2400, 5800, 11000, 17000, 23000]} stroke="hsl(var(--primary))" />}
+            />
+            <MetricCard
+              label="Video HD"
+              value="90,112"
+              unit="min"
+              chart={<Sparkline data={[800, 1100, 1900, 4200, 9800, 16500, 24000]} stroke="hsl(var(--primary))" />}
+            />
+            <MetricCard
+              label="Video Full HD"
+              value="60,018"
+              unit="min"
+              chart={<Sparkline data={[400, 600, 1000, 2200, 5500, 10000, 16500]} stroke="hsl(var(--primary))" />}
+            />
+          </div>
+        </MetricSection>
+
+        {/* ─── Conversational AI — agents ──────────────────────────────── */}
+        <MetricSection title="Conversational AI">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <MetricCard
+              label="Agent minutes"
               value="18,420"
-              unit="mins"
+              unit="min"
               delta="+12%"
               deltaPositive
               chart={<Sparkline data={[120, 240, 380, 510, 820, 1290, 2150]} stroke="hsl(var(--primary))" />}
             />
             <MetricCard
-              label="Concurrent Agent Sessions"
+              label="Concurrent agent sessions"
               value="12"
-              delta="peak 28"
+              sub="Peak 28 this week"
               chart={<Sparkline data={[3, 5, 4, 8, 6, 9, 12]} stroke="hsl(var(--primary))" />}
             />
-          </div>
-        </MetricSection>
-
-        {/* ─── Telephony ────────────────────────────────────────────────── */}
-        <MetricSection title="Telephony">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <MetricCard
-              label="Minutes"
-              value="0"
-              unit="secs"
-              sub="Inbound · Outbound · Total"
-              chart={<Sparkline data={[0, 0, 0, 0, 0, 0, 0]} />}
+              label="Avg end-to-end latency"
+              value="612"
+              unit="ms"
+              sub="p50 across all agents"
             />
-            <MetricCard label="Total Inbound" value="0" unit="secs" />
-            <MetricCard label="Total Outbound" value="0" unit="secs" />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_280px]">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-3">
-                  SIP Sessions
-                </p>
-                <Sparkline
-                  data={[0, 0, 0, 0, 0, 0, 0]}
-                  axisLabels={["20 May", "22 May", "24 May", "26 May"]}
-                  height={120}
-                />
-              </CardContent>
-            </Card>
-            <MetricCard label="Total SIP Sessions" value="0" />
           </div>
         </MetricSection>
 
-        {/* ─── Data transfer ────────────────────────────────────────────── */}
-        <MetricSection title="Data transfer">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <MetricCard label="Total Upstream" value="0" unit="byte" />
-            <MetricCard label="Total Downstream" value="0" unit="byte" />
+        {/* ─── Telephony — Agora's word, correct ──────────────────────── */}
+        <MetricSection title="Telephony">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <MetricCard label="Total inbound minutes"  value="0" unit="min" />
+            <MetricCard label="Total outbound minutes" value="0" unit="min" />
+            <MetricCard label="Active SIP sessions"    value="0" />
           </div>
           <Card>
             <CardContent className="p-4">
               <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-3">
-                Data transfer
+                Inbound vs Outbound
               </p>
               <Sparkline
                 data={[0, 0, 0, 0, 0, 0, 0]}
@@ -240,30 +267,40 @@ export default function HomePage() {
           </Card>
         </MetricSection>
 
-        {/* ─── Rooms ────────────────────────────────────────────────────── */}
-        <MetricSection title="Rooms">
+        {/* ─── Cloud Recording — Agora's term, not "Egress" ───────────── */}
+        <MetricSection title="Cloud Recording">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <MetricCard label="Total Room Sessions"   value="0" />
-            <MetricCard label="Average Room Size"     value="0" />
-            <MetricCard label="Average Room Duration" value="0" unit="secs" />
+            <MetricCard label="Recording sessions"  value="0" />
+            <MetricCard label="Storage used"        value="0" unit="GB" />
+            <MetricCard label="Recorded duration"   value="0" unit="hrs" />
           </div>
         </MetricSection>
 
-        {/* ─── Egress ───────────────────────────────────────────────────── */}
-        <MetricSection title="Egress">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <MetricCard label="Total Egress Count"           value="0" />
-            <MetricCard label="Total Billable Egress Duration" value="0" unit="secs" />
-            <MetricCard label="Total Track Egress Duration"    value="0" unit="secs" />
+        {/* ─── Media Push & Pull — Agora's RTMP push/pull ─────────────── */}
+        <MetricSection title="Media Push & Pull">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard label="Media Push streams"      value="0" />
+            <MetricCard label="Media Push minutes"      value="0" unit="min" />
+            <MetricCard label="Media Pull streams"      value="0" />
+            <MetricCard label="Media Pull minutes"      value="0" unit="min" />
           </div>
         </MetricSection>
 
-        {/* ─── Ingress ──────────────────────────────────────────────────── */}
-        <MetricSection title="Ingress">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <MetricCard label="Total Ingress Count"             value="0" />
-            <MetricCard label="Total Billable Ingress Duration"  value="0" unit="secs" />
-            <MetricCard label="Total Non-Billable Ingress Duration" value="0" unit="secs" />
+        {/* ─── Chat & Signaling ───────────────────────────────────────── */}
+        <MetricSection title="Chat & Signaling">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard label="Chat messages"        value="0" />
+            <MetricCard label="Chat MAU"             value="0" />
+            <MetricCard label="Signaling messages"   value="0" />
+            <MetricCard label="Signaling peers"      value="0" />
+          </div>
+        </MetricSection>
+
+        {/* ─── Bandwidth ──────────────────────────────────────────────── */}
+        <MetricSection title="Bandwidth">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <MetricCard label="Upstream"   value="0" unit="GB" />
+            <MetricCard label="Downstream" value="0" unit="GB" />
           </div>
         </MetricSection>
       </main>
