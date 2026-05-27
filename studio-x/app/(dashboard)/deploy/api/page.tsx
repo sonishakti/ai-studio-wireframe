@@ -165,11 +165,11 @@ export default function DeployApiPage() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm">3. Get your credentials</CardTitle>
-                <CardDescription>Use Project Credentials for client-side App ID, Service Accounts for server-side auth.</CardDescription>
+                <CardDescription>Use Project Settings for the App ID + Certificate. Service Accounts for server-to-server auth.</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/project/credentials">Project credentials</Link>
+                  <Link href="/project/settings">Project settings</Link>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
                   <Link href="/developer/aa-credentials">Service accounts</Link>

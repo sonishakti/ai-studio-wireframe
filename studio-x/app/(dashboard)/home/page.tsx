@@ -24,7 +24,7 @@ const GET_STARTED = [
     id: "project-keys",
     title: "Project API keys",
     description: "Create and manage access keys to integrate the SDK into your app.",
-    href: "/project/credentials",
+    href: "/project/settings",
     icon: KeyRound,
   },
   {

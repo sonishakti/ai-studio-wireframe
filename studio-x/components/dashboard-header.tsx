@@ -40,7 +40,6 @@ const LABELS: Record<string, string> = {
   projects: "Projects",
   project: "Project",
   settings: "Project Settings",
-  credentials: "Project Credentials",
   "vendor-credentials": "Vendor Credentials",
   usage: "Usage",
   billing: "Billing",

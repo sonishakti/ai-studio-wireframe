@@ -72,7 +72,6 @@ const NAV_INSIGHTS: NavItem[] = [
 
 const NAV_PROJECT: NavItem[] = [
   { label: "Project Settings", href: "/project/settings", icon: SlidersHorizontal },
-  { label: "Project Credentials", href: "/project/credentials", icon: KeyRound },
   { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Shield },
 ]
 

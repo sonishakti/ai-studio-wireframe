@@ -47,7 +47,6 @@ const COMMANDS: Command[] = [
 
   // ── Project ──────────────────────────────────────────────────────────────
   { id: "go-proj-set",   label: "Project Settings",         href: "/project/settings",                icon: SlidersHorizontal,  group: "Project" },
-  { id: "go-proj-cred",  label: "Project Credentials",      href: "/project/credentials",             icon: KeyRound,           group: "Project" },
   { id: "go-vend-cred",  label: "Vendor Credentials",       href: "/project/vendor-credentials",      icon: Shield,             group: "Project" },
   { id: "go-projects",   label: "View all projects",        href: "/projects",                        icon: FolderKanban,       group: "Project" },
 
