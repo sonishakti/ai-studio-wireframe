@@ -27,6 +27,8 @@ import {
   Sun,
   Moon,
   Monitor,
+  Gauge,
+  SlidersHorizontal,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -82,8 +84,10 @@ const NAV_BOTTOM: NavItem[] = [
 ]
 
 const NAV_PROJECT: NavItem[] = [
+  { label: "Project Settings", href: "/project/settings", icon: SlidersHorizontal },
   { label: "Project Credentials", href: "/project/credentials", icon: KeyRound },
   { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Shield },
+  { label: "Usage", href: "/usage", icon: Gauge },
 ]
 
 type NavItem = {
