@@ -24,15 +24,22 @@ This is a **funnel rescue project** that happens to require product consolidatio
 5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
 6. `wireframes/app.html` — the wireframe itself (~5000 lines after Billing rebuild)
 
-## Current sidebar (locked shape)
+## Current sidebar (LiveKit-inspired, 2026-05-27)
 
 ```
 Home
-BUILD     ›  Agents · Integrations
-DEPLOY    ›  Phone Numbers · Campaign
-MONITOR   ›  Analytics · Call History · Session History
-PROJECT   ›  Project Credentials · Realtime Services · Credentials
+[flat]    ›  Agents · Realtime Services · Integrations
+Telephony ▾  Phone Numbers · Campaigns · Calls        [collapsible]
+[flat]    ›  Analytics
+Project   ▾  Project Credentials · Vendor Credentials [collapsible]
 ```
+
+Changes from prior lifecycle shape:
+- Section labels (BUILD/DEPLOY/MONITOR) removed — flat + collapsible instead
+- Realtime Services moved PROJECT → flat peer of Agents (LEARNINGS §10 v2)
+- Call History + Session History → unified "Calls" (All / Telephony / Realtime tabs)
+- Route aliases: `/call-history` → Calls Telephony tab; `/session-history` → Calls Realtime tab
+- "Credentials" → "Vendor Credentials" (LEARNINGS §9 scope-qualifier rule)
 
 - Footer: Search ⌘K · Project chip · Avatar
 - Topbar: Bell · ✦ Ask

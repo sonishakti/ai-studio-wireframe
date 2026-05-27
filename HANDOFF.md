@@ -33,15 +33,24 @@ Studio_X is the IA + UX wireframe for merging **Agora Console** (operational con
 
 ## Where things are in the wireframe
 
-**Sidebar (final lean shape — 10 items, 4 groups):**
+**Sidebar (LiveKit-inspired shape — 8 items, collapsible groups, no lifecycle labels):**
 
 ```
 Home
-BUILD     ›  Agents · Integrations
-DEPLOY    ›  Phone Numbers · Campaign
-MONITOR   ›  Analytics · Call History · Session History
-PROJECT   ›  Project Settings · Realtime Services · Credentials
+         ›  Agents · Realtime Services · Integrations   [flat group, no label]
+Telephony ▾  Phone Numbers · Campaigns · Calls          [collapsible]
+         ›  Analytics                                   [flat group, no label]
+Project  ▾  Project Credentials · Vendor Credentials   [collapsible]
 ```
+
+Prior lifecycle labels (BUILD/DEPLOY/MONITOR/PROJECT) removed in favour of:
+- Flat peers for primary items (Agents, Realtime Services, Integrations, Analytics)
+- Collapsible Telephony group (Phone Numbers + Campaigns + Calls)
+- Collapsible Project group (Project Credentials + Vendor Credentials)
+- "Credentials" → "Vendor Credentials" (scope qualifier per LEARNINGS §9)
+- "Call History" + "Session History" → unified "Calls" screen with All/Telephony/Realtime tabs
+- Route aliases preserved: `/call-history` → Calls (Telephony tab), `/session-history` → Calls (Realtime tab)
+- Realtime Services moved from PROJECT → flat peer of Agents (per LEARNINGS §10 v2)
 
 **Footer:** Search ⌘K · Project chip · Avatar
 

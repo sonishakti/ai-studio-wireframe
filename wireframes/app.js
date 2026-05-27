@@ -17,13 +17,17 @@
   // Route aliases (old → new)
   const routeAliases = {
     'realtime-products': 'realtime-services',
-    'usage': 'analytics', // Usage is now the Usage tab inside Analytics
-    'account-usage': 'billing-subs', // Legacy alias → lands on Billing Overview (Current Plan card has the quota digest)
+    'usage': 'analytics',        // Usage is now the Usage tab inside Analytics
+    'account-usage': 'billing-subs', // Legacy alias → Billing Overview (Current Plan card has quota digest)
+    'call-history': 'calls',     // Merged into unified Calls screen (Telephony tab)
+    'session-history': 'calls',  // Merged into unified Calls screen (Realtime tab)
   };
 
   // Routes that should deep-link to a specific tab after navigation
   const routeTabDeepLinks = {
-    'usage': { panelSelector: '[data-panel="an-usage"]', tabSelector: '[data-tab="an-usage"]' },
+    'usage':          { panelSelector: '[data-panel="an-usage"]',        tabSelector: '[data-tab="an-usage"]' },
+    'call-history':   { panelSelector: '[data-panel="calls-telephony"]', tabSelector: '[data-tab="calls-telephony"]' },
+    'session-history':{ panelSelector: '[data-panel="calls-realtime"]',  tabSelector: '[data-tab="calls-realtime"]' },
   };
 
   function goTo(route) {
@@ -307,6 +311,12 @@
     saveAAEmbed() {
       $('#aaEmbedForm').classList.add('hidden');
       toast('Credential created · secret revealed once');
+    },
+
+    // Collapsible nav group (Telephony, Project) — LiveKit-style
+    toggleNavGroup(el) {
+      const group = document.getElementById(el.dataset.group);
+      if (group) group.classList.toggle('expanded');
     },
 
     // Licensing unlocked-state toggle

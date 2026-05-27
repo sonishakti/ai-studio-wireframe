@@ -33,35 +33,46 @@
       <button class="btn icon ghost" title="Collapse sidebar" data-action="toast" data-msg="Collapse — wireframe stub"><i data-lucide="panel-left"></i></button>
     </div>
 
-    <!-- MAIN NAV — lifecycle-mirroring -->
+    <!-- MAIN NAV — LiveKit-style: flat + collapsible groups, no lifecycle labels -->
     <div class="nav-group" style="margin-top: 8px;">
       <a class="nav-item" data-route="home"><span class="ico"><i data-lucide="home"></i></span>Home</a>
     </div>
 
     <div class="nav-group">
-      <div class="label">Build</div>
       <a class="nav-item" data-route="agents"><span class="ico"><i data-lucide="bot"></i></span>Agents</a>
+      <a class="nav-item" data-route="realtime-services"><span class="ico"><i data-lucide="video"></i></span>Realtime Services</a>
       <a class="nav-item" data-route="integrations"><span class="ico"><i data-lucide="cable"></i></span>Integrations</a>
     </div>
 
-    <div class="nav-group">
-      <div class="label">Deploy</div>
-      <a class="nav-item" data-route="phone-numbers"><span class="ico"><i data-lucide="phone"></i></span>Phone Numbers</a>
-      <a class="nav-item" data-route="campaign"><span class="ico"><i data-lucide="megaphone"></i></span>Campaign</a>
+    <!-- Telephony — collapsible group like LiveKit -->
+    <div class="nav-group nav-collapsible expanded" id="navTelephony">
+      <div class="nav-expand-toggle" data-action="toggleNavGroup" data-group="navTelephony">
+        <span class="ico"><i data-lucide="phone-call"></i></span>
+        <span>Telephony</span>
+        <i data-lucide="chevron-down" class="nav-chevron"></i>
+      </div>
+      <div class="nav-sub-items">
+        <a class="nav-item sub" data-route="phone-numbers">Phone Numbers</a>
+        <a class="nav-item sub" data-route="campaign">Campaigns</a>
+        <a class="nav-item sub" data-route="calls">Calls</a>
+      </div>
     </div>
 
     <div class="nav-group">
-      <div class="label">Monitor</div>
       <a class="nav-item" data-route="analytics"><span class="ico"><i data-lucide="bar-chart-3"></i></span>Analytics</a>
-      <a class="nav-item" data-route="call-history"><span class="ico"><i data-lucide="clock"></i></span>Call History</a>
-      <a class="nav-item" data-route="session-history"><span class="ico"><i data-lucide="activity"></i></span>Session History</a>
     </div>
 
-    <div class="nav-group">
-      <div class="label">Project</div>
-      <a class="nav-item" data-route="project-settings"><span class="ico"><i data-lucide="settings"></i></span>Project Credentials</a>
-      <a class="nav-item" data-route="realtime-services"><span class="ico"><i data-lucide="video"></i></span>Realtime Services</a>
-      <a class="nav-item" data-route="vendor-credentials"><span class="ico"><i data-lucide="key-round"></i></span>Credentials</a>
+    <!-- Project — collapsible group like LiveKit's Settings -->
+    <div class="nav-group nav-collapsible expanded" id="navProject">
+      <div class="nav-expand-toggle" data-action="toggleNavGroup" data-group="navProject">
+        <span class="ico"><i data-lucide="folder-cog"></i></span>
+        <span>Project</span>
+        <i data-lucide="chevron-down" class="nav-chevron"></i>
+      </div>
+      <div class="nav-sub-items">
+        <a class="nav-item sub" data-route="project-settings">Project Credentials</a>
+        <a class="nav-item sub" data-route="vendor-credentials">Vendor Credentials</a>
+      </div>
     </div>
 
     <!-- Footer: search → project chip + avatar -->
@@ -900,18 +911,47 @@
            Pre-commitment cost estimates live in the Deploy modal Cost tab.
            See audit notes in HANDOFF.md. -->
     </div>
-    <div class="screen hidden" data-screen="call-history">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Call History</div>
-      <h2>Call History</h2>
-      <p class="subhead">Every call — per-agent log with playback, transcript, outcome.</p>
-      <div class="empty">Wireframe placeholder — searchable + filterable list.</div>
+    <!-- CALLS — unified telephony + realtime activity (replaces Call History + Session History) -->
+    <div class="screen hidden" data-screen="calls">
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Telephony › Calls</div>
+      <h2>Calls</h2>
+      <p class="subhead">All activity — telephony calls and realtime sessions in one view. Filter by channel, agent, date, or outcome.</p>
+
+      <div class="tabs" id="callsTabs" style="margin-bottom: 0;">
+        <div class="tab active" data-tab="calls-all">All</div>
+        <div class="tab" data-tab="calls-telephony">Telephony</div>
+        <div class="tab" data-tab="calls-realtime">Realtime</div>
+      </div>
+
+      <div class="tab-panel" data-panel="calls-all">
+        <div style="margin: 16px 0 12px; display: flex; gap: 8px; align-items: center;">
+          <input class="input" placeholder="Search by caller ID, agent, or transcript…" style="width: 320px;" />
+          <button class="combo">Any agent <i data-lucide="chevron-down"></i></button>
+          <button class="combo">Last 7 days <i data-lucide="chevron-down"></i></button>
+          <button class="combo">Any outcome <i data-lucide="chevron-down"></i></button>
+        </div>
+        <div class="empty">Wireframe placeholder — unified call + session log with channel badge (📞 Telephony · 🖥 Realtime), agent name, duration, outcome, and replay/transcript links.</div>
+      </div>
+      <div class="tab-panel hidden" data-panel="calls-telephony">
+        <div style="margin: 16px 0 12px; display: flex; gap: 8px; align-items: center;">
+          <input class="input" placeholder="Search by phone number, agent, or transcript…" style="width: 320px;" />
+          <button class="combo">Any agent <i data-lucide="chevron-down"></i></button>
+          <button class="combo">Last 7 days <i data-lucide="chevron-down"></i></button>
+        </div>
+        <div class="empty">Wireframe placeholder — phone calls only. Per-call log: caller ID, agent, duration, outcome, playback, transcript.</div>
+      </div>
+      <div class="tab-panel hidden" data-panel="calls-realtime">
+        <div style="margin: 16px 0 12px; display: flex; gap: 8px; align-items: center;">
+          <input class="input" placeholder="Search by session ID, agent, or transcript…" style="width: 320px;" />
+          <button class="combo">Any agent <i data-lucide="chevron-down"></i></button>
+          <button class="combo">Last 7 days <i data-lucide="chevron-down"></i></button>
+        </div>
+        <div class="empty">Wireframe placeholder — browser/SDK-initiated realtime sessions. Multi-turn conversations, session duration, latency, transcript.</div>
+      </div>
     </div>
-    <div class="screen hidden" data-screen="session-history">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Session History</div>
-      <h2>Session History</h2>
-      <p class="subhead">Longer-running multi-turn sessions — distinct from per-call view.</p>
-      <div class="empty">Wireframe placeholder.</div>
-    </div>
+
+    <!-- Legacy aliases — redirect to Calls -->
+    <!-- call-history and session-history are handled via routeAliases in app.js -->
 
     <!-- EXTENSIONS MARKETPLACE (promoted from profile) -->
     <!-- Extension Marketplace — from Figma 95:18696 -->
