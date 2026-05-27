@@ -34,18 +34,21 @@ type Metric = {
   series: number[]
 }
 
-const METRICS: Metric[] = [
-  { id: "agent",     label: "Agent Minutes", value: 18420, unit: "MIN",      color: "bg-sky-500",     dotColor: "bg-sky-500",
+/** Workload classification — drives the perspective toggle */
+type Workload = "agent" | "rte"
+
+const METRICS: (Metric & { workload: Workload })[] = [
+  { id: "agent",     label: "Agent Minutes", value: 18420, unit: "MIN",      color: "bg-sky-500",     dotColor: "bg-sky-500",     workload: "agent",
     series: [120, 240, 380, 510, 820, 1290, 2150, 3480, 5200, 8810, 13200, 18420] },
-  { id: "video-sd",  label: "Video SD",      value: 72215, unit: "MIN",      color: "bg-violet-500",  dotColor: "bg-violet-500",
+  { id: "video-sd",  label: "Video SD",      value: 72215, unit: "MIN",      color: "bg-violet-500",  dotColor: "bg-violet-500",  workload: "rte",
     series: [1200, 1800, 2400, 5800, 11000, 17000, 23000, 32000, 41000, 52000, 63000, 72215] },
-  { id: "video-hd",  label: "Video HD",      value: 90112, unit: "MIN",      color: "bg-pink-500",    dotColor: "bg-pink-500",
+  { id: "video-hd",  label: "Video HD",      value: 90112, unit: "MIN",      color: "bg-pink-500",    dotColor: "bg-pink-500",    workload: "rte",
     series: [800, 1100, 1900, 4200, 9800, 16500, 24000, 38000, 52000, 68000, 81000, 90112] },
-  { id: "video-fhd", label: "Video Full HD", value: 60018, unit: "MIN",      color: "bg-amber-500",   dotColor: "bg-amber-500",
+  { id: "video-fhd", label: "Video Full HD", value: 60018, unit: "MIN",      color: "bg-amber-500",   dotColor: "bg-amber-500",   workload: "rte",
     series: [400, 600, 1000, 2200, 5500, 10000, 16500, 26000, 38000, 48000, 55000, 60018] },
-  { id: "audio",     label: "Audio",         value: 42190, unit: "MIN",      color: "bg-emerald-500", dotColor: "bg-emerald-500",
+  { id: "audio",     label: "Audio",         value: 42190, unit: "MIN",      color: "bg-emerald-500", dotColor: "bg-emerald-500", workload: "rte",
     series: [2100, 2800, 3900, 6100, 9500, 14000, 19000, 24500, 30000, 35000, 39000, 42190] },
-  { id: "recording", label: "Cloud Recording", value: 1.42, unit: "GB-HRS", color: "bg-fuchsia-500", dotColor: "bg-fuchsia-500",
+  { id: "recording", label: "Cloud Recording", value: 1.42, unit: "GB-HRS", color: "bg-fuchsia-500", dotColor: "bg-fuchsia-500", workload: "rte",
     series: [0.02, 0.04, 0.08, 0.12, 0.22, 0.35, 0.5, 0.7, 0.92, 1.12, 1.3, 1.42] },
 ]
 
@@ -171,9 +174,32 @@ const TOP_SERVICES = [
 
 // ─── page ───────────────────────────────────────────────────────────────────
 
+type Perspective = "all" | "agent" | "rte"
+
 export default function UsagePage() {
+  const [perspective, setPerspective] = React.useState<Perspective>("all")
+
+  // visible state is derived from perspective AND user toggles
   const [visible, setVisible] = React.useState<Record<string, boolean>>(
     Object.fromEntries(METRICS.map((m) => [m.id, true])),
+  )
+
+  // When perspective changes, reset visibility to match
+  React.useEffect(() => {
+    setVisible(
+      Object.fromEntries(
+        METRICS.map((m) => [
+          m.id,
+          perspective === "all" || m.workload === perspective,
+        ]),
+      ),
+    )
+  }, [perspective])
+
+  // Filter metrics shown in the card row by perspective
+  const shownMetrics = React.useMemo(
+    () => (perspective === "all" ? METRICS : METRICS.filter((m) => m.workload === perspective)),
+    [perspective],
   )
 
   return (
@@ -183,6 +209,27 @@ export default function UsagePage() {
         description="How much you're consuming — minutes, GB and quotas for this project."
         actions={
           <div className="flex items-center gap-2">
+            {/* Perspective toggle — lets users focus on what they care about */}
+            <div className="flex items-center rounded-md border bg-background p-0.5">
+              {([
+                { id: "all",   label: "All" },
+                { id: "agent", label: "Agents" },
+                { id: "rte",   label: "RTE" },
+              ] as const).map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPerspective(p.id)}
+                  className={cn(
+                    "h-7 px-2.5 text-xs rounded transition-colors",
+                    perspective === p.id
+                      ? "bg-accent text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
             <Select defaultValue="12m">
               <SelectTrigger className="h-8 w-40 text-xs">
                 <SelectValue />
@@ -205,9 +252,9 @@ export default function UsagePage() {
         {/* ─── Top metric cards + chart ─────────────────────────── */}
         <Card>
           <CardContent className="p-6 space-y-6">
-            {/* Horizontal scrollable metric row (like the Console) */}
+            {/* Horizontal scrollable metric row (like the Console) — filters by perspective */}
             <div className="flex gap-6 overflow-x-auto pb-1">
-              {METRICS.map((m) => {
+              {shownMetrics.map((m) => {
                 const isOn = visible[m.id]
                 return (
                   <button

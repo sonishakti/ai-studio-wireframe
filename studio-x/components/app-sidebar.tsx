@@ -18,6 +18,7 @@ import {
   Sparkles,
   Gauge,
   SlidersHorizontal,
+  Rocket,
 } from "lucide-react"
 
 import {
@@ -47,6 +48,7 @@ import { AccountAvatarButton } from "@/components/account-avatar-button"
 const NAV_TOP: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
   { label: "Agents", href: "/agents", icon: Bot },
+  { label: "Deploy", href: "/deploy", icon: Rocket },
   { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Integrations", href: "/integrations", icon: Puzzle },
 ]

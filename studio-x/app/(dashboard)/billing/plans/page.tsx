@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Check, Bot, Radio, MessageSquare, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { toast } from "sonner"
 import { track, Events } from "@/lib/analytics"
 
 // Recovers the lost Figma sub-views — old AccountSidebar nested "View all
@@ -131,20 +131,39 @@ export default function PlansPage() {
                     ))}
                   </CardContent>
                   <CardFooter>
-                    <Button
-                      variant={plan.highlighted ? "default" : "outline"}
-                      className="w-full"
-                      disabled={plan.ctaDisabled}
-                      size="sm"
-                      onClick={() => {
-                        track(Events.plan_upgraded, { product: plan.product, plan: plan.name } as Record<string, unknown>)
-                        toast.success(`${plan.cta} — mock`, {
-                          description: `In production this would open ${plan.name === "Enterprise" ? "a sales contact form" : "the upgrade checkout"}.`,
-                        })
-                      }}
-                    >
-                      {plan.cta}
-                    </Button>
+                    {plan.ctaDisabled ? (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        size="sm"
+                        disabled
+                      >
+                        {plan.cta}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant={plan.highlighted ? "default" : "outline"}
+                        className="w-full"
+                        size="sm"
+                        asChild
+                        onClick={() =>
+                          track(Events.plan_compared, {
+                            product: plan.product,
+                            plan: plan.name,
+                          } as Record<string, unknown>)
+                        }
+                      >
+                        <Link
+                          href={
+                            plan.name === "Enterprise"
+                              ? "/help/contact-sales"
+                              : `/billing/upgrade?plan=${plan.name.toLowerCase()}`
+                          }
+                        >
+                          {plan.cta}
+                        </Link>
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               ))}

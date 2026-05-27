@@ -1,9 +1,10 @@
-import { Bot, Radio, Puzzle, PhoneCall, BarChart2, ArrowRight, Zap, Plus } from "lucide-react"
+import { Bot, PhoneCall, ArrowRight, Zap, Plus } from "lucide-react"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { ActivationChecklist } from "@/components/activation-checklist"
 
 const QUICK_ACTIONS = [
   { label: "Create Agent", href: "/agents", icon: Bot, description: "Build a new voice AI agent" },
@@ -34,6 +35,9 @@ export default function HomePage() {
       />
 
       <main className="flex-1 p-6 space-y-6">
+        {/* Activation checklist — auto-hides when complete or dismissed */}
+        <ActivationChecklist />
+
         {/* Metrics row */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
