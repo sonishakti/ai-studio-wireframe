@@ -1,11 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { Save, Play, Rocket } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { track, Events, timeSinceSignup, markSignup } from "@/lib/analytics"
+import { AgentDeploySheet } from "@/components/agent-deploy-sheet"
 
 interface Props {
   agentId: string
@@ -13,12 +13,10 @@ interface Props {
 }
 
 export function AgentEditActions({ agentId, isNew }: Props) {
-  const router = useRouter()
   const [saving, setSaving] = React.useState(false)
-  const [deploying, setDeploying] = React.useState(false)
   const [testing, setTesting] = React.useState(false)
 
-  // Demo: pretend a signup happened so TTFA has a starting point
+  // Mark signup once on first mount so TTFA has a starting timestamp
   React.useEffect(() => {
     markSignup()
   }, [])
@@ -36,20 +34,6 @@ export function AgentEditActions({ agentId, isNew }: Props) {
       description: isNew
         ? "Your new agent is in draft. Deploy it when you're ready to take real calls."
         : "Configuration saved (mock).",
-    })
-  }
-
-  const handleDeploy = async () => {
-    setDeploying(true)
-    track(Events.agent_published, {
-      agent_id: agentId,
-      time_to_first_agent_ms: timeSinceSignup(),
-    })
-    await new Promise((r) => setTimeout(r, 800))
-    setDeploying(false)
-    toast.success("Agent deployed 🎉", {
-      description: "Your agent is live. Choose a channel to connect it to the world.",
-      action: { label: "Pick channel", onClick: () => router.push("/deploy") },
     })
   }
 
@@ -72,9 +56,12 @@ export function AgentEditActions({ agentId, isNew }: Props) {
       <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave} disabled={saving}>
         <Save className="h-3.5 w-3.5" /> {saving ? "Saving…" : "Save"}
       </Button>
-      <Button size="sm" className="gap-1.5" onClick={handleDeploy} disabled={deploying}>
-        <Rocket className="h-3.5 w-3.5" /> {deploying ? "Deploying…" : isNew ? "Deploy" : "Redeploy"}
-      </Button>
+      {/* Deploy now opens the right-side Sheet — channel picker + status */}
+      <AgentDeploySheet agentId={agentId}>
+        <Button size="sm" className="gap-1.5">
+          <Rocket className="h-3.5 w-3.5" /> Deploy
+        </Button>
+      </AgentDeploySheet>
     </div>
   )
 }

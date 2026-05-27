@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import {
   Phone, ArrowRight, Plus, Search, Globe, Building2, Headphones,
-  CheckCircle2,
+  CheckCircle2, Megaphone,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -249,6 +249,26 @@ export default function DeployTelephonyPage() {
                 <p>Need volume pricing, dedicated numbers, or carrier compliance review?</p>
                 <Button variant="ghost" size="sm" className="mt-2 -ml-2" asChild>
                   <Link href="/help/contact-sales">Talk to sales →</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            {/* Manage existing — links to the routes that lost their sidebar slot */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Manage existing</CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs space-y-1.5">
+                <Button variant="ghost" size="sm" className="w-full justify-between -mx-2" asChild>
+                  <Link href="/telephony/phone-numbers">
+                    <span className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-muted-foreground" /> Phone Numbers</span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" className="w-full justify-between -mx-2" asChild>
+                  <Link href="/telephony/campaigns">
+                    <span className="flex items-center gap-2"><Megaphone className="h-3.5 w-3.5 text-muted-foreground" /> Campaigns</span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>

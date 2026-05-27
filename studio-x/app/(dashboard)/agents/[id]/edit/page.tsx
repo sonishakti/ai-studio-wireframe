@@ -1,7 +1,6 @@
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { AgentEditActions } from "@/components/agent-edit-actions"
-import { AgentDeploymentPanel } from "@/components/agent-deployment-panel"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -45,7 +44,6 @@ export default async function AgentEditPage({ params }: Props) {
             <TabsTrigger value="models">Models</TabsTrigger>
             <TabsTrigger value="actions">Actions</TabsTrigger>
             <TabsTrigger value="advanced">Advanced</TabsTrigger>
-            <TabsTrigger value="deploy">Deploy</TabsTrigger>
           </TabsList>
 
           {/* Prompt tab */}
@@ -242,10 +240,6 @@ Always be professional, concise, and empathetic.`
             </Card>
           </TabsContent>
 
-          {/* Deploy tab — multi-channel deployment manager inside the editor */}
-          <TabsContent value="deploy">
-            <AgentDeploymentPanel agentId={id} />
-          </TabsContent>
         </Tabs>
       </main>
     </div>

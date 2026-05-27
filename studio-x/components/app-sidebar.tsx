@@ -8,11 +8,8 @@ import {
   Bot,
   Radio,
   Puzzle,
-  Phone,
-  Megaphone,
   PhoneCall,
   Activity,
-  KeyRound,
   Shield,
   ChevronRight,
   Sparkles,
@@ -52,13 +49,11 @@ const NAV_TOP: NavItem[] = [
   { label: "Integrations", href: "/integrations", icon: Puzzle },
 ]
 
+// Channels — the catalog of where an agent can answer. Telephony is one
+// channel here; it doesn't get its own sidebar group anymore. Phone Numbers
+// and Campaigns remain as routes but surface from /deploy/telephony.
 const NAV_CHANNELS: NavItem[] = [
   { label: "Channels", href: "/deploy", icon: Rocket },
-]
-
-const NAV_TELEPHONY: NavItem[] = [
-  { label: "Phone Numbers", href: "/telephony/phone-numbers", icon: Phone },
-  { label: "Campaigns", href: "/telephony/campaigns", icon: Megaphone },
 ]
 
 // Insights — unified destination for "what happened in this project?"
@@ -192,12 +187,7 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Telephony — deployment surfaces */}
-        <CollapsibleGroup label="Telephony" items={NAV_TELEPHONY} />
-
-        <SidebarSeparator />
-
-        {/* Channels — all deployment channels (was Deploy at top-level) */}
+        {/* Channels — catalog of all deployment channels (Telephony is one) */}
         <SidebarGroup>
           <SidebarMenu>
             {NAV_CHANNELS.map((item) => (
