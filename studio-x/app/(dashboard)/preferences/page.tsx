@@ -31,7 +31,7 @@ export default function PreferencesPage() {
       />
 
       <main className="flex-1 p-6">
-        <div className="max-w-2xl space-y-6">
+        <div className="space-y-6">
           {/* Appearance */}
           <Card>
             <CardHeader>

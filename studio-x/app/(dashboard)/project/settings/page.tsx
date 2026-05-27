@@ -19,7 +19,7 @@ export default function ProjectSettingsPage() {
       <PageHeader title="Project Settings" />
 
       <main className="flex-1 p-6">
-        <div className="max-w-4xl space-y-5">
+        <div className="space-y-5">
           {/* ─── Project Info Card ──────────────────────────────────── */}
           <Card className="p-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

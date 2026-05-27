@@ -104,7 +104,7 @@ export default function PlansPage() {
                 <h3 className="text-sm font-semibold">{p.label}</h3>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {plans.map((plan) => (
                 <Card key={`${plan.product}-${plan.name}`} className={plan.highlighted ? "border-primary shadow-md" : ""}>
                   <CardHeader className="pb-4">

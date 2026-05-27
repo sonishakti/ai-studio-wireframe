@@ -102,7 +102,7 @@ export default function MonitorPage() {
                 </div>
               </CardContent>
             </Card>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {["Completion Rate", "Avg Handle Time"].map((title) => (
                 <Card key={title}>
                   <CardHeader className="pb-2">

@@ -22,7 +22,7 @@ const CARDS = [
 export default function PaymentMethodsPage() {
   return (
     <main className="flex-1 p-6">
-      <div className="max-w-4xl space-y-5">
+      <div className="space-y-5">
         {/* ─── Balance summary ─────────────────────────────────────── */}
         <Card>
           <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">

@@ -35,7 +35,7 @@ export default function ProjectNotificationsPage() {
         actions={<Button>Save Changes</Button>}
       />
 
-      <main className="flex-1 p-6 space-y-5 max-w-4xl">
+      <main className="flex-1 p-6 space-y-5">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Notification preferences</CardTitle>
@@ -78,7 +78,7 @@ export default function ProjectNotificationsPage() {
             <CardDescription>Where notifications are delivered for this project.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email-list">Email recipients</Label>
                 <Input id="email-list" placeholder="ops@acme.com, oncall@acme.com" />

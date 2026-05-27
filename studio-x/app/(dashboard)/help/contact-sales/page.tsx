@@ -88,7 +88,7 @@ export default function ContactSalesPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] max-w-5xl">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] max-w-6xl">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Tell us about your project</CardTitle>
@@ -96,7 +96,7 @@ export default function ContactSalesPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4" noValidate>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FieldText form={form} name="firstName" label="First name" error={errs.firstName?.message} />
                 <FieldText form={form} name="lastName"  label="Last name"  error={errs.lastName?.message} />
                 <FieldText form={form} name="email"     label="Work email" type="email" error={errs.email?.message} />
@@ -106,7 +106,7 @@ export default function ContactSalesPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FieldSelect
                   form={form} name="size" label="Company size" error={errs.size?.message}
                   options={[

@@ -46,7 +46,8 @@ export default function CreateCampaignPage() {
       />
 
       <main className="flex-1 p-6">
-        <div className="max-w-2xl space-y-6">
+        {/* Wider container — multi-section form benefits from two-column layouts */}
+        <div className="max-w-4xl space-y-6">
           {/* Basic info */}
           <Card>
             <CardHeader>
@@ -95,7 +96,7 @@ export default function CreateCampaignPage() {
               <CardDescription>When to run this campaign.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="start-date">Start Date</Label>
                   <Input id="start-date" type="date" />
@@ -157,7 +158,7 @@ export default function CreateCampaignPage() {
               <CardTitle className="text-sm">Dialing Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Concurrent Calls</Label>
                   <Input type="number" defaultValue="5" min={1} max={100} />

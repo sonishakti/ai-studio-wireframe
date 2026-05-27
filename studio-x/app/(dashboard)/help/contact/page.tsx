@@ -16,7 +16,7 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
 export default function ContactPage() {
   return (
     <main className="flex-1 p-6">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 max-w-4xl">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 max-w-6xl">
           <div className="space-y-4">
             {[
               { icon: MessageCircle, title: "Live Chat", desc: "Mon–Fri, 9 AM–6 PM PT", cta: "Start Chat" },

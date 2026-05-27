@@ -92,7 +92,7 @@ export default function RealtimeServicesPage() {
     <div className="flex flex-col flex-1">
       <PageHeader title="Realtime Services" />
 
-      <main className="flex-1 grid grid-cols-[260px_1fr] gap-6 p-6 min-h-0">
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 p-6 min-h-0">
         {/* ─── LEFT: grouped service list ──────────────────────────── */}
         <aside className="flex flex-col gap-6 overflow-auto">
           {GROUP_ORDER.map((group) => {
