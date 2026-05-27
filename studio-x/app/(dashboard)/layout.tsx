@@ -1,5 +1,6 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function DashboardLayout({
   children,
@@ -9,7 +10,9 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex flex-col min-h-screen overflow-hidden">
+      <SidebarInset>
+        {/* Sticky breadcrumb header — lives in the layout, not in each page */}
+        <DashboardHeader />
         {children}
       </SidebarInset>
     </SidebarProvider>
