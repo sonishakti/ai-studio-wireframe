@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 const AA_CREDS = [
   { id: "aa_01", name: "Backend Server", clientId: "studio_aa_prod_a1b2", created: "Mar 15, 2026", lastUsed: "Just now", status: "active" },
-  { id: "aa_02", name: "Analytics Worker", clientId: "studio_aa_stg_c3d4", created: "Feb 4, 2026", lastUsed: "2 days ago", status: "active" },
+  { id: "aa_02", name: "Reporting Worker", clientId: "studio_aa_stg_c3d4", created: "Feb 4, 2026", lastUsed: "2 days ago", status: "active" },
 ]
 
 export default function AACredentialsPage() {

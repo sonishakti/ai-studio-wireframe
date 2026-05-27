@@ -28,13 +28,12 @@ const TOP_AGENTS = [
   { name: "Sales Qualifier", calls: 1880, completionRate: 76, avgDuration: "2m 44s" },
 ]
 
-export default function AnalyticsPage() {
+export default function MonitorPage() {
   return (
     <div className="flex flex-col flex-1">
       <PageHeader
-        crumbs={[{ label: "Analytics" }]}
-        title="Analytics"
-        description="Performance metrics across all agents and campaigns."
+        title="Monitor"
+        description="Live performance metrics across all agents and campaigns."
         actions={
           <div className="flex items-center gap-2">
             <Select defaultValue="30d">

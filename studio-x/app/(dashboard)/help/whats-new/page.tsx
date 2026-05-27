@@ -23,7 +23,7 @@ const RELEASES = [
     changes: [
       { type: "new", text: "Vendor Credentials page — manage LLM, TTS, STT API keys in one place" },
       { type: "new", text: "Extensions Marketplace — browse and install Agora add-ons" },
-      { type: "improved", text: "Analytics page refactored with tabbed overview / by-agent view" },
+      { type: "improved", text: "Monitor page (formerly Analytics) refactored with tabbed overview / by-agent view" },
       { type: "fixed", text: "Phone number import modal now validates E.164 format" },
     ],
   },

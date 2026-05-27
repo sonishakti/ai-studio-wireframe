@@ -1,10 +1,7 @@
-import { Check, Zap } from "lucide-react"
-import Link from "next/link"
-import { PageHeader } from "@/components/page-header"
+import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 const PLANS = [
   {
@@ -15,7 +12,7 @@ const PLANS = [
     badge: "Current",
     cta: "Current plan",
     ctaDisabled: true,
-    features: ["5 agents", "200 min / month", "1 phone number", "Basic analytics", "Email support"],
+    features: ["5 agents", "200 min / month", "1 phone number", "Basic metrics", "Email support"],
   },
   {
     name: "Pro",
@@ -25,7 +22,7 @@ const PLANS = [
     badge: "Popular",
     cta: "Upgrade to Pro",
     ctaDisabled: false,
-    features: ["Unlimited agents", "10,000 min / month", "10 phone numbers", "Advanced analytics", "Telephony campaigns", "Priority support", "Audit logs"],
+    features: ["Unlimited agents", "10,000 min / month", "10 phone numbers", "Advanced metrics + monitor", "Telephony campaigns", "Priority support", "Audit logs"],
   },
   {
     name: "Enterprise",
@@ -41,13 +38,13 @@ const PLANS = [
 
 export default function PlansPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[{ label: "Billing", href: "/billing" }, { label: "Plans" }]}
-        title="Choose a Plan"
-        description="Upgrade to unlock more agents, minutes, and features."
-      />
-      <main className="flex-1 p-6">
+    <main className="flex-1 p-6">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold tracking-tight">Choose a Plan</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Upgrade to unlock more agents, minutes, and features.
+        </p>
+      </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 max-w-4xl">
           {PLANS.map((plan) => (
             <Card key={plan.name} className={plan.name === "Pro" ? "border-primary shadow-md" : ""}>
@@ -84,7 +81,6 @@ export default function PlansPage() {
             </Card>
           ))}
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

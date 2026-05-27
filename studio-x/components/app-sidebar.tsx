@@ -11,7 +11,7 @@ import {
   Phone,
   Megaphone,
   PhoneCall,
-  BarChart2,
+  Activity,
   KeyRound,
   Shield,
   Bell,
@@ -80,7 +80,7 @@ const NAV_TELEPHONY: NavItem[] = [
 ]
 
 const NAV_BOTTOM: NavItem[] = [
-  { label: "Analytics", href: "/analytics", icon: BarChart2 },
+  { label: "Monitor", href: "/monitor", icon: Activity },
 ]
 
 const NAV_PROJECT: NavItem[] = [
@@ -284,7 +284,7 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Analytics flat */}
+        {/* Monitor flat */}
         <SidebarGroup>
           <SidebarMenu>
             {NAV_BOTTOM.map((item) => (

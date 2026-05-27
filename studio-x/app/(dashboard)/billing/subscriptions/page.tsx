@@ -1,5 +1,4 @@
-import { Plus, Power, MoreHorizontal, ExternalLink } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { MoreHorizontal, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,20 +18,20 @@ const SUBS = [
 
 export default function SubscriptionsPage() {
   return (
-    <div className="flex flex-col flex-1">
-      <PageHeader
-        title="Subscriptions"
-        description="All product subscriptions and add-ons active on this account."
-        actions={
-          <Button variant="outline" className="gap-1.5" asChild>
-            <a href="#" target="_blank" rel="noreferrer">
-              <ExternalLink className="h-4 w-4" /> Manage via Stripe
-            </a>
-          </Button>
-        }
-      />
-
-      <main className="flex-1 p-6 space-y-6">
+    <main className="flex-1 p-6 space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Subscriptions</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            All product subscriptions and add-ons active on this account.
+          </p>
+        </div>
+        <Button variant="outline" className="gap-1.5" asChild>
+          <a href="#" target="_blank" rel="noreferrer">
+            <ExternalLink className="h-4 w-4" /> Manage via Stripe
+          </a>
+        </Button>
+      </div>
         {/* Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
@@ -103,7 +102,6 @@ export default function SubscriptionsPage() {
             </Table>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </main>
   )
 }

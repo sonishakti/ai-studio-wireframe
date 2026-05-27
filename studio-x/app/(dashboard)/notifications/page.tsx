@@ -41,7 +41,7 @@ const NOTIFICATIONS = [
   {
     id: "n_05",
     title: "Campaign Renewal Reminder completed",
-    body: "2,800 contacts reached. Success rate: 31%. View the full report in Analytics.",
+    body: "2,800 contacts reached. Success rate: 31%. View the full report in Monitor.",
     type: "campaign",
     read: true,
     time: "May 22, 2026",
