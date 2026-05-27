@@ -14,23 +14,11 @@ import {
   Activity,
   KeyRound,
   Shield,
-  Bell,
-  Settings,
-  CreditCard,
-  Store,
-  Code2,
-  HelpCircle,
-  LogOut,
   ChevronRight,
-  Search,
   Sparkles,
-  Sun,
-  Moon,
-  Monitor,
   Gauge,
   SlidersHorizontal,
 } from "lucide-react"
-import { useTheme } from "next-themes"
 
 import {
   Sidebar,
@@ -42,27 +30,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarSeparator,
-  useSidebar,
 } from "@/components/ui/sidebar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+
+import { ProjectSwitcher } from "@/components/project-switcher"
+import { AccountAvatarButton } from "@/components/account-avatar-button"
 
 // ─── nav structure ───────────────────────────────────────────────────────────
 
@@ -160,92 +138,6 @@ function CollapsibleGroup({
   )
 }
 
-// ─── footer user menu ─────────────────────────────────────────────────────────
-
-function UserMenu() {
-  const { setTheme, resolvedTheme } = useTheme()
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <SidebarMenuButton
-          size="lg"
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-        >
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src="" alt="User" />
-            <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-sm font-medium">
-              SS
-            </AvatarFallback>
-          </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium">Shakti Soni</span>
-            <span className="truncate text-xs text-muted-foreground">
-              soni28shakti@gmail.com
-            </span>
-          </div>
-        </SidebarMenuButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56"
-        side="top"
-        align="start"
-        sideOffset={8}
-      >
-        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
-          Workspace
-        </DropdownMenuLabel>
-        <DropdownMenuItem>
-          <span className="font-medium text-sm">Default Project</span>
-          <Badge variant="secondary" className="ml-auto text-[10px]">Free</Badge>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2">
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-          Billing
-        </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <Store className="h-4 w-4 text-muted-foreground" />
-          Extensions Marketplace
-        </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <Code2 className="h-4 w-4 text-muted-foreground" />
-          Developer Hub ↗
-        </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <HelpCircle className="h-4 w-4 text-muted-foreground" />
-          Help Hub ↗
-        </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2" asChild>
-          <Link href="/preferences">
-            <Settings className="h-4 w-4 text-muted-foreground" />
-            Preferences
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="gap-2"
-          onClick={() =>
-            setTheme(resolvedTheme === "dark" ? "light" : "dark")
-          }
-        >
-          {resolvedTheme === "dark" ? (
-            <Sun className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <Moon className="h-4 w-4 text-muted-foreground" />
-          )}
-          {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
-          <LogOut className="h-4 w-4" />
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
 // ─── main export ─────────────────────────────────────────────────────────────
 
 export function AppSidebar() {
@@ -296,11 +188,12 @@ export function AppSidebar() {
         <CollapsibleGroup label="Project" items={NAV_PROJECT} />
       </SidebarContent>
 
-      {/* Footer: user menu */}
+      {/* Footer: project switcher (left) + account avatar (right) */}
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <UserMenu />
+          <SidebarMenuItem className="flex items-center gap-1.5">
+            <ProjectSwitcher />
+            <AccountAvatarButton />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

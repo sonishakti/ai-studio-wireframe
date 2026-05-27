@@ -30,6 +30,7 @@ const LABELS: Record<string, string> = {
   create: "New Campaign",
   calls: "Calls",
   monitor: "Monitor",
+  projects: "Projects",
   project: "Project",
   settings: "Project Settings",
   credentials: "Project Credentials",

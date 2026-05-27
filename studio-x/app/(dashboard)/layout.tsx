@@ -1,5 +1,5 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
 
 export default function DashboardLayout({
@@ -9,9 +9,11 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {/* DashboardSidebar swaps between AppSidebar (project) and
+          AccountSidebar (billing/extensions/preferences/developer/help/
+          notifications) based on the current pathname. */}
+      <DashboardSidebar />
       <SidebarInset>
-        {/* Sticky breadcrumb header — lives in the layout, not in each page */}
         <DashboardHeader />
         {children}
       </SidebarInset>
