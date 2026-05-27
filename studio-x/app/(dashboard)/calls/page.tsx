@@ -127,37 +127,28 @@ export default function CallsPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <PageHeader
-        crumbs={[
-          { label: "Telephony" },
-          { label: "Calls" },
-        ]}
-        title="Calls"
-        description="What happened, call by call — telephony history and realtime sessions."
-        actions={
-          <Button variant="outline" className="gap-1.5">
-            <Download className="h-4 w-4" /> Export
-          </Button>
-        }
-      />
+      <PageHeader title="Calls" dense />
 
-      <main className="flex-1 p-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input placeholder="Search calls…" className="pl-8 h-8 text-sm" />
-          </div>
-          <Button variant="outline" size="sm" className="h-8 gap-1.5">
-            <Filter className="h-3.5 w-3.5" /> Filter
-          </Button>
-        </div>
-
+      <main className="flex-1 p-6 pt-4 space-y-4">
         <Tabs defaultValue="all">
-          <TabsList>
-            <TabsTrigger value="all">All ({CALLS.length})</TabsTrigger>
-            <TabsTrigger value="telephony">Telephony ({telephony.length})</TabsTrigger>
-            <TabsTrigger value="realtime">Realtime ({realtime.length})</TabsTrigger>
-          </TabsList>
+          {/* Dense sub-header row: tabs + search + filter + export — all inline */}
+          <div className="flex items-center gap-3 mb-4">
+            <TabsList>
+              <TabsTrigger value="all">All ({CALLS.length})</TabsTrigger>
+              <TabsTrigger value="telephony">Telephony ({telephony.length})</TabsTrigger>
+              <TabsTrigger value="realtime">Realtime ({realtime.length})</TabsTrigger>
+            </TabsList>
+            <div className="relative flex-1 max-w-xs ml-auto">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input placeholder="Search calls…" className="pl-8 h-9 text-sm" />
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Filter className="h-3.5 w-3.5" /> Filter
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Download className="h-3.5 w-3.5" /> Export
+            </Button>
+          </div>
           <TabsContent value="all">
             <Card><CardContent className="p-0"><CallTable calls={CALLS} /></CardContent></Card>
           </TabsContent>

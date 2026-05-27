@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Bot, Plus, Phone, Upload, Sparkles, ChevronRight, MoreHorizontal,
+  Bot, Plus, MessageCircle, Upload, Sparkles, ChevronRight, MoreHorizontal,
   Search, Filter, Library, ArrowLeft,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -39,6 +39,9 @@ type Template = {
 }
 
 const TEMPLATES: Template[] = [
+  // Blank goes first — most users won't use a template, they'll start from
+  // scratch. Templates are sales-led; blank is product-led.
+  { id: "blank",                name: "Blank agent",           description: "Start from scratch. Define your own prompt, voice, and tools.", llm: "Open AI",   asr: "DeepGram", tts: "ElevenLabs" },
   { id: "appointment-reminder", name: "Appointment Reminder", description: "Automatically call customers to remind them of upcoming appointments", llm: "Open AI", asr: "DeepGram", tts: "ElevenLabs" },
   { id: "nps-survey",           name: "NPS Survey",            description: "Gather customer feedback through voice surveys",                       llm: "Open AI",   asr: "DeepGram", tts: "ElevenLabs" },
   { id: "ivr",                  name: "Interactive Voice Response (IVR)", description: "Route callers to the right department automatically",       llm: "Anthropic", asr: "DeepGram", tts: "ElevenLabs" },
@@ -91,7 +94,7 @@ function TemplateRow({
             </Button>
             <Button size="sm" className="h-8 text-xs gap-1" asChild>
               <Link href={`/agents/${tpl.id}/edit`} onClick={(e) => e.stopPropagation()}>
-                Deploy as new agent
+                Use this template
                 <ChevronRight className="h-3 w-3" />
               </Link>
             </Button>
@@ -125,9 +128,9 @@ function PlaygroundPanel({ selected }: { selected: Template }) {
         >
           <div className={cn("w-20 h-20 rounded-full", isCalling ? "bg-gradient-to-br from-primary/80 to-primary/40" : "bg-gradient-to-br from-zinc-400 to-zinc-600 dark:from-zinc-500 dark:to-zinc-700")} />
         </div>
-        <p className="text-sm text-muted-foreground mt-6">{isCalling ? "Agent Listening…" : "Agent Idle"}</p>
+        <p className="text-sm text-muted-foreground mt-6">{isCalling ? "Agent listening…" : "Idle"}</p>
         <Button size="sm" className="mt-4 gap-1.5" onClick={() => setIsCalling((v) => !v)} variant={isCalling ? "destructive" : "default"}>
-          <Phone className="h-3.5 w-3.5" /> {isCalling ? "End Call" : "Start Call"}
+          <MessageCircle className="h-3.5 w-3.5" /> {isCalling ? "End conversation" : "Talk to agent"}
         </Button>
       </div>
       <Separator />
@@ -303,7 +306,7 @@ export default function AgentsPage() {
             </ImportAgentSheet>
             <Button asChild>
               <Link href="/agents/new/edit">
-                <Plus className="h-4 w-4" /> {showFirstRun ? "Deploy New Agent" : "New Agent"}
+                <Plus className="h-4 w-4" /> New agent
               </Link>
             </Button>
           </div>

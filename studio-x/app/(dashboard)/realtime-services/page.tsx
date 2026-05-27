@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils"
 //   disabled — admin/feature-flag locked at the account level
 // ─────────────────────────────────────────────────────────────────────────────
 
-type Group = "CORE RTC" | "MEDIA SERVICES" | "SECURITY & INFRASTRUCTURE" | "VERTICAL SOLUTIONS"
+type Group = "CORE RTC" | "MEDIA SERVICES"
 
 type Service = {
   id: string
@@ -41,8 +41,13 @@ type Service = {
   extensions?: { id: string; name: string; vendor: string; installed: boolean; price?: string }[]
 }
 
+// Services that show up in the configurable catalog. Audit principle: if
+// there's nothing the user does here beyond a toggle + reading the docs,
+// it doesn't belong in the catalog. Core SDK primitives (Voice / Video /
+// ILS / Signaling) move to the ALWAYS_AVAILABLE row below — they're on
+// for every project, no config surface needed.
 const SERVICES: Service[] = [
-  // ── CORE RTC ──────────────────────────────────────────────────────────────
+  // ── CORE RTC (configurable) ───────────────────────────────────────────────
   {
     id: "chat",
     name: "Chat",
@@ -59,45 +64,40 @@ const SERVICES: Service[] = [
       { label: "Chat pricing", href: "#" },
     ],
   },
-  { id: "signaling", name: "Signaling", group: "CORE RTC", status: "active", description: "Pub/sub messaging for real-time presence and state." },
   { id: "whiteboard", name: "Interactive Whiteboard", group: "CORE RTC", status: "active", description: "Collaborative canvas for multimodal agent workflows.", configure: [{ id: "wb-replay", label: "Session replay" }], quota: "Maximum concurrent channels is 50. For higher quotas, please contact support.", docs: [{ label: "How to use Whiteboard?", href: "#" }, { label: "Whiteboard Pricing", href: "#" }] },
-  { id: "conv-ai", name: "Conversational AI Engine", group: "CORE RTC", status: "active", description: "Voice AI agent runtime with low-latency LLM orchestration." },
-  { id: "voice", name: "Voice Calling", group: "CORE RTC", status: "default", description: "Real-time voice calls with HD audio over Agora SD-RTN.",
-    extensions: [
-      { id: "noise-cancel",  name: "AI Noise Cancellation", vendor: "Agora",      installed: false, price: "Pay-per-use" },
-      { id: "transcription", name: "Real-Time Transcription", vendor: "Agora",    installed: true,  price: "Pay-per-use" },
-    ],
-  },
-  { id: "video", name: "Video Calling", group: "CORE RTC", status: "default", description: "Real-time video calls with adaptive bitrate.",
-    extensions: [
-      { id: "face-ar",    name: "Face AR Effects",       vendor: "Deepar.ai",     installed: false, price: "Free trial" },
-      { id: "background", name: "Virtual Background",    vendor: "Agora",         installed: false, price: "Free" },
-    ],
-  },
-  { id: "ils", name: "Interactive Live Streaming", group: "CORE RTC", status: "default", description: "Broadcast live with sub-second latency to massive audiences." },
 
-  // ── MEDIA SERVICES ────────────────────────────────────────────────────────
+  // ── MEDIA SERVICES (configurable) ─────────────────────────────────────────
   { id: "recording", name: "Cloud Recording", group: "MEDIA SERVICES", status: "active", description: "Record channels to cloud storage in real-time.",
     extensions: [
       { id: "moderation", name: "ActiveFence Moderation", vendor: "ActiveFence", installed: false, price: "Free tier" },
     ],
   },
-  { id: "player", name: "Cloud Player", group: "MEDIA SERVICES", status: "default", description: "Push pre-recorded content into a live channel." },
   { id: "media-push", name: "Media Push", group: "MEDIA SERVICES", status: "default", description: "Push Agora streams to RTMP destinations." },
   { id: "media-pull", name: "Media Pull", group: "MEDIA SERVICES", status: "default", description: "Pull external RTMP streams into an Agora channel." },
   { id: "gateway", name: "Media Gateway", group: "MEDIA SERVICES", status: "active", description: "Bridge Agora to SIP, WebRTC, or other protocols." },
-  { id: "stt", name: "Real-Time STT", group: "MEDIA SERVICES", status: "default", description: "Live speech-to-text transcription." },
-  { id: "screenshot", name: "Video Screenshot Upload", group: "MEDIA SERVICES", status: "default", description: "Capture frames and upload to cloud storage." },
-
-  // ── SECURITY & INFRASTRUCTURE ─────────────────────────────────────────────
-  { id: "proxy", name: "Cloud Proxy", group: "SECURITY & INFRASTRUCTURE", status: "default", description: "Route traffic through a fixed allow-list of IPs for restrictive networks." },
-  { id: "cohost-auth", name: "Co-Host Authentication", group: "SECURITY & INFRASTRUCTURE", status: "default", description: "Token-based co-host privilege escalation for live streams." },
-
-  // ── VERTICAL SOLUTIONS ────────────────────────────────────────────────────
-  { id: "classroom", name: "Flexible Classroom", group: "VERTICAL SOLUTIONS", status: "default", description: "Pre-built classroom UI with whiteboard, breakouts and recording." },
+  { id: "stt", name: "Real-Time STT", group: "MEDIA SERVICES", status: "default", description: "Live speech-to-text transcription.",
+    extensions: [
+      { id: "transcription", name: "Real-Time Transcription", vendor: "Agora", installed: true, price: "Pay-per-use" },
+    ],
+  },
 ]
 
-const GROUP_ORDER: Group[] = ["CORE RTC", "MEDIA SERVICES", "SECURITY & INFRASTRUCTURE", "VERTICAL SOLUTIONS"]
+// Core SDK primitives — always on for every project, nothing to configure
+// at the project level. Listed for awareness; clicking opens the docs.
+const ALWAYS_AVAILABLE = [
+  { id: "voice",       name: "Voice Calling",                docs: "#" },
+  { id: "video",       name: "Video Calling",                docs: "#" },
+  { id: "ils",         name: "Interactive Live Streaming",   docs: "#" },
+  { id: "signaling",   name: "Signaling",                    docs: "#" },
+  { id: "conv-ai",     name: "Conversational AI Engine",     docs: "#" },
+  { id: "player",      name: "Cloud Player",                 docs: "#" },
+  { id: "screenshot",  name: "Video Screenshot Upload",      docs: "#" },
+  { id: "proxy",       name: "Cloud Proxy",                  docs: "#" },
+  { id: "cohost-auth", name: "Co-Host Authentication",       docs: "#" },
+  { id: "classroom",   name: "Flexible Classroom",           docs: "#" },
+]
+
+const GROUP_ORDER: Group[] = ["CORE RTC", "MEDIA SERVICES"]
 
 // ─── component ───────────────────────────────────────────────────────────────
 
@@ -114,6 +114,19 @@ export default function RealtimeServicesPage() {
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 p-6 min-h-0">
         {/* ─── LEFT: grouped service list ──────────────────────────── */}
         <aside className="flex flex-col gap-6 overflow-auto">
+          {/* Always-available primitives — no per-project config */}
+          <div className="rounded-md border bg-muted/30 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-1.5">
+              Always available
+            </p>
+            <p className="text-xs text-muted-foreground leading-snug">
+              {ALWAYS_AVAILABLE.map((s) => s.name).join(" · ")}
+            </p>
+            <p className="text-[10px] text-muted-foreground/70 mt-2">
+              On for every project. Nothing to configure here — use the SDK.
+            </p>
+          </div>
+
           {GROUP_ORDER.map((group) => {
             const items = SERVICES.filter((s) => s.group === group)
             if (items.length === 0) return null

@@ -75,13 +75,6 @@ const VENDORS = [
   },
 ]
 
-const CATEGORY_COLORS: Record<string, string> = {
-  LLM: "bg-violet-500/10 text-violet-600 border-violet-200",
-  TTS: "bg-blue-500/10 text-blue-600 border-blue-200",
-  STT: "bg-teal-500/10 text-teal-600 border-teal-200",
-  Telephony: "bg-orange-500/10 text-orange-600 border-orange-200",
-}
-
 export default function VendorCredentialsPage() {
   return (
     <div className="flex flex-col flex-1">
@@ -131,13 +124,9 @@ export default function VendorCredentialsPage() {
                   <TableRow key={v.id}>
                     <TableCell className="font-medium">{v.vendor}</TableCell>
                     <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${
-                          CATEGORY_COLORS[v.category] ?? ""
-                        }`}
-                      >
+                      <Badge variant="outline" className="text-xs">
                         {v.category}
-                      </span>
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{v.name}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">{v.keyHint}</TableCell>

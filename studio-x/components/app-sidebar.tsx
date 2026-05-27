@@ -15,7 +15,7 @@ import {
   Sparkles,
   Gauge,
   SlidersHorizontal,
-  Rocket,
+  Megaphone,
 } from "lucide-react"
 
 import {
@@ -49,11 +49,14 @@ const NAV_TOP: NavItem[] = [
   { label: "Integrations", href: "/integrations", icon: Puzzle },
 ]
 
-// Channels — the catalog of where an agent can answer. Telephony is one
-// channel here; it doesn't get its own sidebar group anymore. Phone Numbers
-// and Campaigns remain as routes but surface from /deploy/telephony.
-const NAV_CHANNELS: NavItem[] = [
-  { label: "Channels", href: "/deploy", icon: Rocket },
+// Campaigns — replaces "Channels" (which conflicted with Agora's "channel"
+// RTC connection term). Houses call-centre features: inbound queue,
+// outbound dialing, phone numbers, cross-campaign analytics.
+//
+// Per-agent deployment lives inside the agent builder's right-side sheet,
+// not in the sidebar.
+const NAV_CAMPAIGNS: NavItem[] = [
+  { label: "Campaigns", href: "/campaigns", icon: Megaphone },
 ]
 
 // Insights — unified destination for "what happened in this project?"
@@ -187,10 +190,10 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Channels — catalog of all deployment channels (Telephony is one) */}
+        {/* Campaigns — call-centre features (inbound + outbound + numbers) */}
         <SidebarGroup>
           <SidebarMenu>
-            {NAV_CHANNELS.map((item) => (
+            {NAV_CAMPAIGNS.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
           </SidebarMenu>

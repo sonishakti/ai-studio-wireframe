@@ -25,7 +25,7 @@ export function AgentDeploySheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="sm:max-w-xl w-full overflow-y-auto">
+      <SheetContent className="sm:max-w-[640px] w-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Deploy this agent</SheetTitle>
           <SheetDescription>

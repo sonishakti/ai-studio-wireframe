@@ -2,9 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import {
-  KeyRound, Bot, Mic, Phone, RefreshCw,
-} from "lucide-react"
+import { Bot, Mic, Phone, RefreshCw } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,19 +11,10 @@ import {
 } from "@/components/ui/select"
 import { Sparkline } from "@/components/sparkline"
 import { MetricCard, MetricSection } from "@/components/metric-section"
-import { SecuredModeBanner } from "@/components/secured-mode-banner"
 
 // ─── Get-started callouts (LiveKit pattern, but Agora-flavored copy) ─────
 
 const GET_STARTED = [
-  {
-    id: "secured-mode",
-    title: "Enable Secured mode",
-    description: "Activate the App Certificate so your project can take production traffic.",
-    href: "/project/settings#secured-mode",
-    icon: KeyRound,
-    priority: true,
-  },
   {
     id: "agents",
     title: "Build an AI Agent",
@@ -44,7 +33,7 @@ const GET_STARTED = [
     id: "telephony",
     title: "Add a phone number",
     description: "Let your agent make and receive PSTN calls via Telephony.",
-    href: "/deploy/telephony",
+    href: "/campaigns",
     icon: Phone,
   },
 ]
@@ -58,7 +47,9 @@ export default function HomePage() {
   const [period, setPeriod] = React.useState("7d")
 
   // STUB — in production this comes from the project record
-  const securedModeEnabled = false
+  // Secured mode is on by default for new projects — only legacy projects
+  // need the migration warning, and that path is handled elsewhere.
+  const securedModeEnabled = true
 
   React.useEffect(() => {
     setDismissed(window.localStorage.getItem(DISMISS_KEY) === "1")
@@ -98,9 +89,6 @@ export default function HomePage() {
       />
 
       <main className="flex-1 p-6 space-y-8">
-        {/* ─── Secured mode banner — P0 above everything ────────────────── */}
-        <SecuredModeBanner enabled={securedModeEnabled} />
-
         {/* ─── Get started callouts ─────────────────────────────────────── */}
         {!dismissed && (
           <section>
@@ -115,20 +103,16 @@ export default function HomePage() {
                 Dismiss
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {GET_STARTED.map((g) => (
                 <Link
                   key={g.id}
                   href={g.href}
-                  className={`group rounded-lg border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all ${
-                    g.priority ? "border-amber-500/40 bg-amber-500/[0.03]" : ""
-                  }`}
+                  className="group rounded-lg border bg-card p-4 hover:border-foreground/30 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${
-                      g.priority ? "bg-amber-500/15" : "bg-muted"
-                    }`}>
-                      <g.icon className={`h-4 w-4 ${g.priority ? "text-amber-600" : "text-muted-foreground"}`} />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 bg-muted">
+                      <g.icon className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold leading-tight">{g.title}</p>
