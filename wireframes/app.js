@@ -319,6 +319,89 @@
       if (group) group.classList.toggle('expanded');
     },
 
+    // Phone Numbers — import modal
+    openImportNumberModal() { $('#importNumberModal').classList.remove('hidden'); },
+    closeImportNumberModal() { $('#importNumberModal').classList.add('hidden'); },
+    confirmImportNumber() {
+      const num = $('#importPhoneNumber')?.value || '+1 (555) 000-0000';
+      const label = $('#importPhoneLabel')?.value || 'Untitled';
+      const vendor = $('#importPhoneVendor')?.value || 'Twilio';
+      const sip = $('#importSipDomain')?.value || 'sip.example.com';
+      // Append row to phone numbers table if visible
+      const tbody = document.querySelector('[data-screen="phone-numbers"] tbody');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.className = 'clickable';
+        tr.dataset.action = 'toast';
+        tr.dataset.msg = 'Edit phone number — wireframe stub';
+        tr.innerHTML = `<td class="mono">${num}</td><td>${label}</td><td>${vendor}</td><td class="mono" style="font-size:12px;color:hsl(var(--muted-foreground))">${sip}</td><td><span class="tag muted">Unassigned</span></td><td class="row-menu"><i data-lucide="more-vertical"></i></td>`;
+        tbody.appendChild(tr);
+      }
+      actions.closeImportNumberModal();
+      toast(`Imported ${num}`);
+      renderIcons();
+    },
+
+    // Campaigns — create modal
+    openCreateCampaign() { $('#createCampaignModal').classList.remove('hidden'); },
+    closeCreateCampaign() { $('#createCampaignModal').classList.add('hidden'); },
+    saveCampaignDraft() {
+      const name = $('#newCampaignName')?.value || 'Untitled Campaign';
+      actions.closeCreateCampaign();
+      const tbody = document.querySelector('#campaignTableBox tbody');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.className = 'clickable';
+        tr.dataset.action = 'toast';
+        tr.dataset.msg = 'Edit draft campaign — wireframe stub';
+        tr.innerHTML = `<td><strong>${name}</strong></td><td><span class="tag tag-draft">Draft</span></td><td style="color:hsl(var(--muted-foreground))">—</td><td style="color:hsl(var(--muted-foreground))">—</td><td style="color:hsl(var(--muted-foreground))">—</td><td style="color:hsl(var(--muted-foreground))">—</td><td class="row-menu"><i data-lucide="more-vertical"></i></td>`;
+        tbody.appendChild(tr);
+      }
+      toast(`Saved draft: ${name}`);
+      renderIcons();
+    },
+    confirmCreateCampaign() {
+      const name = $('#newCampaignName')?.value || 'Untitled Campaign';
+      const agent = $('#newCampaignAgent')?.value || '—';
+      const phone = ($('#newCampaignPhone')?.value || '').split(' · ')[0] || '—';
+      actions.closeCreateCampaign();
+      const tbody = document.querySelector('#campaignTableBox tbody');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.className = 'clickable';
+        tr.dataset.action = 'toast';
+        tr.dataset.msg = 'View campaign — wireframe stub';
+        tr.innerHTML = `<td><strong>${name}</strong></td><td><span class="tag tag-scheduled">Scheduled</span></td><td>${agent}</td><td class="mono" style="font-size:13px">${phone}</td><td>${new Date().toLocaleDateString()}</td><td style="font-size:12px;color:hsl(var(--muted-foreground))">Custom window</td><td class="row-menu"><i data-lucide="more-vertical"></i></td>`;
+        tbody.appendChild(tr);
+      }
+      toast(`Campaign scheduled: ${name}`);
+      renderIcons();
+    },
+
+    // Extension detail navigation
+    openExtDetail(el) {
+      const name = el.dataset.ext || 'Face AR Effects';
+      const vendor = el.dataset.extVendor || '';
+      const desc = el.dataset.extDesc || '';
+      const version = el.dataset.extVersion || '';
+      const initials = el.dataset.extInitials || name.slice(0,2).toUpperCase();
+      const bg = el.dataset.extBg || '#a83333';
+      // Update detail screen content
+      const nameEl = document.getElementById('extDetailName');
+      const titleEl = document.getElementById('extDetailTitle');
+      const vendorEl = document.getElementById('extDetailVendor');
+      const descEl = document.getElementById('extDetailDesc');
+      const versionEl = document.getElementById('extDetailVersion');
+      const thumbEl = document.getElementById('extDetailThumb');
+      if (nameEl) nameEl.textContent = name;
+      if (titleEl) titleEl.textContent = name;
+      if (vendorEl) vendorEl.textContent = vendor;
+      if (descEl) descEl.textContent = desc;
+      if (versionEl) versionEl.textContent = version;
+      if (thumbEl) { thumbEl.textContent = initials; thumbEl.style.background = bg; }
+      goTo('extension-detail');
+    },
+
     // Licensing unlocked-state toggle
     toggleLicensingUnlocked() {
       const u = $('#licensingUnlocked');

@@ -552,17 +552,331 @@
     </div>
 
     <!-- DEPLOY: Phone Numbers -->
+    <!-- TELEPHONY › PHONE NUMBERS -->
     <div class="screen hidden" data-screen="phone-numbers">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Phone Numbers</div>
-      <h2>Phone Numbers</h2>
-      <p class="subhead">Buy, port, and assign phone numbers to your agents.</p>
-      <div class="empty">Wireframe placeholder.</div>
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Telephony › Phone Numbers</div>
+
+      <div class="header-row">
+        <div>
+          <h2>Phone Numbers</h2>
+          <p class="subhead">Manage SIP/PSTN phone numbers and associate them with deployed agents.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" data-action="toast" data-msg="Opens provider portal — not hosted by Agora"><i data-lucide="external-link"></i> Manage at Provider</button>
+          <button class="btn primary" data-action="openImportNumberModal"><i data-lucide="plus"></i> Import Number</button>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="header-row" style="margin:12px 0 4px">
+        <input class="input" placeholder="Search numbers or labels…" style="max-width:300px;">
+        <span class="muted" style="font-size:13px;">4 numbers &nbsp;·&nbsp; Page 1 of 1</span>
+      </div>
+
+      <!-- Table -->
+      <div class="box" style="padding:0;overflow:hidden;">
+        <table class="agent-table">
+          <thead>
+            <tr>
+              <th>Phone Number</th>
+              <th>Label</th>
+              <th>Vendor</th>
+              <th>SIP Domain</th>
+              <th>Agent</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="clickable" data-action="toast" data-msg="Edit phone number — wireframe stub">
+              <td class="mono">+1 (415) 555-0102</td>
+              <td>Outbound Primary</td>
+              <td>Twilio</td>
+              <td class="mono" style="font-size:12px;color:hsl(var(--muted-foreground))">sip.twilio.com</td>
+              <td><span class="tag tag-live">Customer Support Agent</span></td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="Edit phone number — wireframe stub">
+              <td class="mono">+1 (650) 555-0183</td>
+              <td>Sales Line</td>
+              <td>Twilio</td>
+              <td class="mono" style="font-size:12px;color:hsl(var(--muted-foreground))">sip.twilio.com</td>
+              <td><span class="tag tag-live">Sales Representative</span></td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="Assign an agent to this number">
+              <td class="mono">+1 (212) 555-0147</td>
+              <td>Inbound Support</td>
+              <td>Vonage</td>
+              <td class="mono" style="font-size:12px;color:hsl(var(--muted-foreground))">sip.vonage.com</td>
+              <td><span class="tag muted">Unassigned</span></td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="Assign an agent to this number">
+              <td class="mono">+44 20 7946 0001</td>
+              <td>UK Pilot</td>
+              <td>Bandwidth</td>
+              <td class="mono" style="font-size:12px;color:hsl(var(--muted-foreground))">sip.bandwidth.com</td>
+              <td><span class="tag muted">Unassigned</span></td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note" style="margin-top:12px;">
+        Numbers are imported from your SIP provider — Agora does not provision numbers directly. Unassigned numbers accumulate charges at the provider level.
+      </div>
+
+      <!-- Import Number modal -->
+      <div class="modal-backdrop hidden" id="importNumberModal">
+        <div class="modal" style="max-width:480px;">
+          <div class="modal-header">
+            <h3>Import Phone Number</h3>
+            <button class="btn icon ghost" data-action="closeImportNumberModal"><i data-lucide="x"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="field"><label>Phone Number <span style="color:hsl(var(--destructive))">*</span></label><input class="input" placeholder="+1 (555) 000-0000" id="importPhoneNumber"></div>
+            <div class="field"><label>Label</label><input class="input" placeholder="e.g. Outbound Sales" id="importPhoneLabel"></div>
+            <div class="field">
+              <label>Vendor <span style="color:hsl(var(--destructive))">*</span></label>
+              <select class="input" id="importPhoneVendor">
+                <option value="">Select vendor…</option>
+                <option>Twilio</option>
+                <option>Vonage</option>
+                <option>Bandwidth</option>
+                <option>Plivo</option>
+                <option>Sinch</option>
+              </select>
+            </div>
+            <div class="field"><label>SIP Outbound Domain</label><input class="input" placeholder="sip.yourdomain.com" id="importSipDomain"></div>
+            <div class="field">
+              <label>Assign to Agent</label>
+              <select class="input">
+                <option value="">None — assign later</option>
+                <option>Customer Support Agent</option>
+                <option>Sales Representative</option>
+                <option>Survey Agent</option>
+              </select>
+            </div>
+            <div class="note" style="margin-top:0;margin-bottom:0;">Numbers must be pre-purchased at your SIP provider. The vendor credential must already exist in <a href="#" data-route="vendor-credentials" style="color:hsl(var(--primary))">Vendor Credentials</a>.</div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn" data-action="closeImportNumberModal">Cancel</button>
+            <button class="btn primary" data-action="confirmImportNumber">Import Number</button>
+          </div>
+        </div>
+      </div>
     </div>
+    <!-- TELEPHONY › CAMPAIGNS -->
     <div class="screen hidden" data-screen="campaign">
-      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Campaign</div>
-      <h2>Campaign</h2>
-      <p class="subhead">Outbound calling campaigns — schedule, list management, throttling.</p>
-      <div class="empty">Wireframe placeholder.</div>
+      <div class="breadcrumb"><span class="proj-name">Project Alpha</span> › Telephony › Campaigns</div>
+
+      <div class="header-row">
+        <div>
+          <h2>Campaigns</h2>
+          <p class="subhead">Manage and monitor outbound calling campaigns — schedule, contact lists, dialing speed.</p>
+        </div>
+        <button class="btn primary" data-action="openCreateCampaign"><i data-lucide="plus"></i> Create Campaign</button>
+      </div>
+
+      <!-- Filter / search toolbar -->
+      <div class="filter-bar" style="margin:12px 0;">
+        <input class="input" placeholder="Search campaigns…" style="max-width:240px;font-size:13px;">
+        <button class="filter-chip" data-action="toast" data-msg="Filter by status">
+          <i data-lucide="circle-dot"></i> All Status <i data-lucide="chevron-down"></i>
+        </button>
+        <button class="filter-chip" data-action="toast" data-msg="Filter by agent">
+          <i data-lucide="bot"></i> All Agents <i data-lucide="chevron-down"></i>
+        </button>
+        <button class="filter-chip" data-action="toast" data-msg="Filter by phone number">
+          <i data-lucide="phone"></i> All Numbers <i data-lucide="chevron-down"></i>
+        </button>
+      </div>
+
+      <!-- Campaigns table -->
+      <div class="box" style="padding:0;overflow:hidden;" id="campaignTableBox">
+        <table class="agent-table">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th>Agent</th>
+              <th>Phone Number</th>
+              <th>Scheduled / Started <span class="muted" style="font-size:10px">↕</span></th>
+              <th>Call Window</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="clickable" data-action="toast" data-msg="View campaign details — wireframe stub">
+              <td><strong>Appointment Reminder – Feb</strong></td>
+              <td><span class="tag tag-live">In Progress</span></td>
+              <td>Customer Support Agent</td>
+              <td class="mono" style="font-size:13px">+1 (415) 555-0102</td>
+              <td>02/15/2026 09:00</td>
+              <td style="font-size:12px;color:hsl(var(--muted-foreground))">9:00–17:00 Mon–Fri</td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="View campaign details — wireframe stub">
+              <td><strong>Sales Outbound – March</strong></td>
+              <td><span class="tag tag-scheduled">Scheduled</span></td>
+              <td>Sales Representative</td>
+              <td class="mono" style="font-size:13px">+1 (650) 555-0183</td>
+              <td>03/01/2026 08:00</td>
+              <td style="font-size:12px;color:hsl(var(--muted-foreground))">8:00–18:00 Mon–Sat</td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="Edit draft campaign">
+              <td><strong>NPS Survey Q1 2026</strong></td>
+              <td><span class="tag tag-draft">Draft</span></td>
+              <td>Survey Agent</td>
+              <td style="color:hsl(var(--muted-foreground));font-size:13px">— unassigned</td>
+              <td style="color:hsl(var(--muted-foreground))">—</td>
+              <td style="color:hsl(var(--muted-foreground))">—</td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="View results for completed campaign">
+              <td><strong>Black Friday Reminder 2025</strong></td>
+              <td><span class="tag tag-completed">Completed</span></td>
+              <td>Customer Support Agent</td>
+              <td class="mono" style="font-size:13px">+1 (415) 555-0102</td>
+              <td>11/29/2025 08:00</td>
+              <td style="font-size:12px;color:hsl(var(--muted-foreground))">8:00–20:00 All days</td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+            <tr class="clickable" data-action="toast" data-msg="Resume paused campaign">
+              <td><strong>Payment Follow-up – Jan</strong></td>
+              <td><span class="tag tag-paused">Paused</span></td>
+              <td>Customer Support Agent</td>
+              <td class="mono" style="font-size:13px">+1 (415) 555-0102</td>
+              <td>01/10/2026 09:00</td>
+              <td style="font-size:12px;color:hsl(var(--muted-foreground))">9:00–17:00 Mon–Fri</td>
+              <td class="row-menu"><i data-lucide="more-vertical"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:13px;color:hsl(var(--muted-foreground));">
+        <span>5 campaigns</span>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <button class="btn small" disabled>← Prev</button>
+          <span style="padding:0 8px;">Page 1 of 1</span>
+          <button class="btn small" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- ============ CREATE CAMPAIGN MODAL ============ -->
+      <div class="modal-backdrop hidden" id="createCampaignModal">
+        <div class="modal" style="max-width:560px;">
+          <div class="modal-header">
+            <div>
+              <h3>Create Campaign</h3>
+              <p class="muted" style="font-size:12px;margin-top:2px;">Configure outbound campaign settings.</p>
+            </div>
+            <button class="btn icon ghost" data-action="closeCreateCampaign"><i data-lucide="x"></i></button>
+          </div>
+          <div class="modal-body">
+
+            <!-- Basic info -->
+            <div class="field">
+              <label>Campaign Name <span style="color:hsl(var(--destructive))">*</span></label>
+              <input class="input" placeholder="e.g. Appointment Reminder – March" id="newCampaignName">
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label>Agent <span style="color:hsl(var(--destructive))">*</span></label>
+                <select class="input" id="newCampaignAgent">
+                  <option value="">Select deployed agent…</option>
+                  <option>Customer Support Agent</option>
+                  <option>Sales Representative</option>
+                  <option>Survey Agent</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Phone Number <span style="color:hsl(var(--destructive))">*</span></label>
+                <select class="input" id="newCampaignPhone">
+                  <option value="">Select number…</option>
+                  <option>+1 (415) 555-0102 · Outbound Primary</option>
+                  <option>+1 (650) 555-0183 · Sales Line</option>
+                  <option>+1 (212) 555-0147 · Inbound Support</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Contact list -->
+            <div class="field">
+              <label>Contact List</label>
+              <div class="box" style="padding:16px;text-align:center;cursor:pointer;border-style:dashed;" data-action="toast" data-msg="File picker — wireframe stub">
+                <i data-lucide="upload" style="width:18px;height:18px;color:hsl(var(--muted-foreground));margin-bottom:6px;"></i>
+                <div style="font-size:13px;font-weight:500;">Upload CSV</div>
+                <div class="muted" style="font-size:11px;">One phone number per row, UTF-8 encoded</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                <hr style="flex:1;border:none;border-top:1px solid hsl(var(--border));">
+                <span class="muted" style="font-size:11px;">or paste numbers</span>
+                <hr style="flex:1;border:none;border-top:1px solid hsl(var(--border));">
+              </div>
+              <textarea class="input mono" rows="3" placeholder="+1-555-000-0001&#10;+1-555-000-0002&#10;+1-555-000-0003" style="font-size:12px;margin-top:6px;"></textarea>
+            </div>
+
+            <!-- Call window -->
+            <div style="font-size:13px;font-weight:500;margin:4px 0 8px;">Call Window</div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Start Time</label>
+                <input class="input" type="time" value="09:00" id="newCampaignStart">
+              </div>
+              <div class="field">
+                <label>End Time</label>
+                <input class="input" type="time" value="17:00" id="newCampaignEnd">
+              </div>
+            </div>
+
+            <!-- Days of week -->
+            <div class="field">
+              <label>Days of Week</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" checked> Mon</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" checked> Tue</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" checked> Wed</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" checked> Thu</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox" checked> Fri</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox"> Sat</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;"><input type="checkbox"> Sun</label>
+              </div>
+            </div>
+
+            <!-- Dialing speed + schedule date -->
+            <div class="grid-2">
+              <div class="field">
+                <label>Dialing Speed</label>
+                <select class="input" id="newCampaignSpeed">
+                  <option>1 concurrent call</option>
+                  <option>2 concurrent calls</option>
+                  <option selected>5 concurrent calls</option>
+                  <option>10 concurrent calls</option>
+                  <option>Custom</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Launch Date &amp; Time</label>
+                <input class="input" type="datetime-local" id="newCampaignLaunch">
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer" style="justify-content:space-between;">
+            <button class="btn" data-action="closeCreateCampaign">Cancel</button>
+            <div style="display:flex;gap:8px;">
+              <button class="btn" data-action="saveCampaignDraft">Save as Draft</button>
+              <button class="btn primary" data-action="confirmCreateCampaign"><i data-lucide="megaphone"></i> Schedule Campaign</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- MONITOR -->
     <div class="screen hidden" data-screen="analytics">
@@ -996,7 +1310,7 @@
                 <span class="platform-pill">iOS</span>
               </div>
             </div>
-            <button class="btn install" data-action="toast" data-msg="Install Face AR Effects">Install</button>
+            <button class="btn install" data-action="openExtDetail" data-ext="Face AR Effects" data-ext-vendor="Deepar.ai" data-ext-version="v1.04" data-ext-initials="AR" data-ext-bg="#a83333" data-ext-desc="Add 3D face masks, filters, background removal and other AR experiences to your app via Agora's Video SDK.">View Details</button>
           </div>
 
           <div class="ext-mkt-card">
@@ -1020,7 +1334,7 @@
                 <span class="platform-pill">React Native</span>
               </div>
             </div>
-            <button class="btn install" data-action="toast" data-msg="Install Banuba">Install</button>
+            <button class="btn install" data-action="openExtDetail" data-ext="Banuba Face AR SDK" data-ext-vendor="Banuba.ai" data-ext-version="v2.0" data-ext-initials="BA" data-ext-bg="#222" data-ext-desc="Banuba extension for Agora enables video calls with features like face filters, face touch-up filters, virtual backgrounds and avatars.">View Details</button>
           </div>
 
           <div class="ext-mkt-card">
@@ -1044,7 +1358,7 @@
                 <span class="platform-pill">iOS</span>
               </div>
             </div>
-            <button class="btn install" data-action="toast" data-msg="Install Synervoz">Install</button>
+            <button class="btn install" data-action="openExtDetail" data-ext="Synervoz Voice FX" data-ext-vendor="Synervoz Inc" data-ext-version="v1.04" data-ext-initials="SV" data-ext-bg="#1e293b" data-ext-desc="Add voice effects including Echo, Reverb, Flanger, and TimeStretch.">View Details</button>
           </div>
 
           <div class="ext-mkt-card">
@@ -1068,7 +1382,7 @@
                 <span class="platform-pill">iOS</span>
               </div>
             </div>
-            <button class="btn install" data-action="toast" data-msg="Install AI Noise Suppression">Install</button>
+            <button class="btn install" data-action="openExtDetail" data-ext="AI Noise Suppression" data-ext-vendor="Agora" data-ext-version="v1.04" data-ext-initials="AI" data-ext-bg="hsl(204 89% 43%)" data-ext-desc="Removes background noise from real-time audio and video in AI-powered way.">View Details</button>
           </div>
 
           <div class="ext-mkt-card">
@@ -1092,7 +1406,7 @@
                 <span class="platform-pill">iOS</span>
               </div>
             </div>
-            <button class="btn install" data-action="toast" data-msg="Install Conversation Intelligence">Install</button>
+            <button class="btn install" data-action="openExtDetail" data-ext="Conversation Intelligence" data-ext-vendor="Symbl.ai" data-ext-version="v1.04" data-ext-initials="CI" data-ext-bg="#7c3aed" data-ext-desc="Real-time conversation analytics, transcription, sentiment analysis, and topic detection for your calls.">View Details</button>
           </div>
 
           <div class="ext-mkt-card">
@@ -1117,7 +1431,7 @@
                 <span class="platform-pill">Android</span>
               </div>
             </div>
-            <button class="btn install" data-action="toast" data-msg="Install 3D Spatial Audio">Install</button>
+            <button class="btn install" data-action="openExtDetail" data-ext="3D Spatial Audio" data-ext-vendor="Agora" data-ext-version="v3.01" data-ext-initials="3D" data-ext-bg="hsl(204 89% 43%)" data-ext-desc="Deliver a more natural audio experience with 3D Spatial Audio that boosts user engagement.">View Details</button>
           </div>
         </div>
       </div>
@@ -1134,6 +1448,152 @@
           </table>
         </div>
         <div style="margin-top: 16px;"><button class="btn primary" data-action="toast" data-msg="Submit new extension"><i data-lucide="plus"></i> Submit new extension</button></div>
+      </div>
+    </div>
+
+    <!-- EXTENSION DETAIL (from extensions-marketplace/[name].tsx) -->
+    <div class="screen hidden" data-screen="extension-detail">
+      <div class="breadcrumb">Account › <a href="#" data-action="goAccount" data-route="extensions">Extension Marketplace</a> › <span id="extDetailName">Face AR Effects</span></div>
+
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:24px;margin-top:4px;">
+        <!-- Main column -->
+        <div>
+          <!-- Overview card -->
+          <div class="box" style="margin-bottom:16px;">
+            <div style="display:flex;gap:16px;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid hsl(var(--border));margin-bottom:16px;">
+              <div id="extDetailThumb" class="ext-thumb" style="width:64px;height:64px;font-size:13px;flex-shrink:0;background:#a83333;color:#fff;">AR</div>
+              <div style="flex:1;">
+                <h2 style="font-size:20px;font-weight:600;margin-bottom:4px;" id="extDetailTitle">Face AR Effects</h2>
+                <div class="muted" style="font-size:13px;" id="extDetailVendor">Deepar.ai</div>
+                <p style="font-size:13px;margin-top:6px;" id="extDetailDesc">Add 3D face masks, filters, background removal and other AR experiences to your app via Agora's Video SDK.</p>
+              </div>
+              <span class="ext-version" id="extDetailVersion">v1.04</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;">
+              <div>
+                <div class="muted" style="font-size:11px;margin-bottom:3px;">Company</div>
+                <div style="font-size:13px;font-weight:500;">Deepar.ai</div>
+              </div>
+              <div>
+                <div class="muted" style="font-size:11px;margin-bottom:3px;">Version</div>
+                <div style="font-size:13px;font-weight:500;">1.0.4</div>
+              </div>
+              <div>
+                <div class="muted" style="font-size:11px;margin-bottom:3px;">Updated</div>
+                <div style="font-size:13px;font-weight:500;">2025-10-14</div>
+              </div>
+              <div>
+                <div class="muted" style="font-size:11px;margin-bottom:3px;">Platform</div>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;">
+                  <span class="platform-pill">Web</span>
+                  <span class="platform-pill">macOS</span>
+                  <span class="platform-pill">iOS</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Core Features</div>
+              <ul style="font-size:13px;padding-left:18px;margin:0;color:hsl(var(--foreground));line-height:1.8;">
+                <li>Real-time 3D face mask and filter overlays</li>
+                <li>Background removal and virtual background replacement</li>
+                <li>Face beautification (smoothing, tone correction)</li>
+                <li>Emotion detection and pose estimation</li>
+                <li>Low-latency GPU pipeline — &lt;2 ms processing overhead</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Documentation card -->
+          <div class="box">
+            <div class="tabs" id="extDocTabs" style="margin-bottom:16px;">
+              <div class="tab active" data-tab="ext-docs">Documentation</div>
+              <div class="tab" data-tab="ext-api">API Reference</div>
+              <div class="tab" data-tab="ext-changelog">Changelog</div>
+            </div>
+            <div class="tab-panel" data-panel="ext-docs">
+              <h3 style="font-size:15px;margin-bottom:8px;">Quick Start</h3>
+              <p style="font-size:13px;line-height:1.7;margin-bottom:12px;">Install the extension from the marketplace and enable it for your project. Then initialise the SDK in your application:</p>
+              <div class="code-block" style="margin-bottom:12px;">
+                <code class="code-cmd">npm install agora-extension-face-ar@1.0.4</code>
+                <button class="code-copy" data-action="toast" data-msg="Copied install command"><i data-lucide="copy"></i></button>
+              </div>
+              <div class="code-block">
+                <code class="code-cmd">import FaceARExtension from 'agora-extension-face-ar';<br>AgoraRTC.registerExtensions([new FaceARExtension()]);</code>
+                <button class="code-copy" data-action="toast" data-msg="Copied code snippet"><i data-lucide="copy"></i></button>
+              </div>
+              <a href="#" class="link" style="font-size:13px;margin-top:12px;display:inline-flex;align-items:center;gap:4px;" data-action="toast" data-msg="Full docs — external link">Full documentation <i data-lucide="external-link" style="width:12px;height:12px;"></i></a>
+            </div>
+            <div class="tab-panel hidden" data-panel="ext-api">
+              <div class="empty">API reference — wireframe placeholder.</div>
+            </div>
+            <div class="tab-panel hidden" data-panel="ext-changelog">
+              <div style="font-size:13px;line-height:1.8;">
+                <div style="margin-bottom:12px;"><strong>v1.0.4</strong> · 2025-10-14 — Performance improvements; reduced GPU memory footprint by 30%.</div>
+                <div style="margin-bottom:12px;"><strong>v1.0.3</strong> · 2025-08-01 — Added virtual background replacement. Fixed crash on Safari 17.</div>
+                <div><strong>v1.0.0</strong> · 2025-04-12 — Initial release.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar: Plans + Projects -->
+        <div>
+          <div class="box" style="position:sticky;top:16px;">
+            <div class="tabs" id="extSidebarTabs">
+              <div class="tab active" data-tab="ext-plans">Plans</div>
+              <div class="tab" data-tab="ext-projects">Projects</div>
+            </div>
+
+            <!-- Plans tab -->
+            <div class="tab-panel" data-panel="ext-plans" style="margin-top:12px;">
+              <div style="border:2px solid hsl(var(--border));border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer;" data-action="toast" data-msg="Select Free Trial plan">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                  <div style="font-size:13px;font-weight:600;">Free Trial</div>
+                  <span class="tag tag-live">Active</span>
+                </div>
+                <div class="muted" style="font-size:12px;">30 days · up to 10 concurrent users</div>
+                <div style="font-size:16px;font-weight:700;margin-top:6px;">$0<span class="muted" style="font-size:12px;font-weight:400;"> / project</span></div>
+              </div>
+              <div style="border:1px solid hsl(var(--border));border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer;" data-action="toast" data-msg="Select Basic plan">
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Basic</div>
+                <div class="muted" style="font-size:12px;">Unlimited users · standard support</div>
+                <div style="font-size:16px;font-weight:700;margin-top:6px;">$49<span class="muted" style="font-size:12px;font-weight:400;"> / project / month</span></div>
+              </div>
+              <div style="border:1px solid hsl(var(--border));border-radius:var(--radius);padding:14px;margin-bottom:16px;cursor:pointer;" data-action="toast" data-msg="Select Pro plan">
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Pro</div>
+                <div class="muted" style="font-size:12px;">Unlimited users · priority support + SLA</div>
+                <div style="font-size:16px;font-weight:700;margin-top:6px;">$149<span class="muted" style="font-size:12px;font-weight:400;"> / project / month</span></div>
+              </div>
+              <button class="btn primary" style="width:100%;" data-action="toast" data-msg="Upgrade plan — wireframe stub">Upgrade Plan</button>
+            </div>
+
+            <!-- Projects tab -->
+            <div class="tab-panel hidden" data-panel="ext-projects" style="margin-top:12px;">
+              <p class="muted" style="font-size:12px;margin-bottom:10px;">Enable this extension for specific projects.</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border));">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">Project Alpha</div>
+                  <div class="muted" style="font-size:11px;">sh63***</div>
+                </div>
+                <span class="tag tag-live">Enabled</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid hsl(var(--border));">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">Project Bravo</div>
+                  <div class="muted" style="font-size:11px;">1234***</div>
+                </div>
+                <button class="btn small" data-action="toast" data-msg="Enable for Project Bravo">Enable</button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">Project Charlie</div>
+                  <div class="muted" style="font-size:11px;">f434***</div>
+                </div>
+                <button class="btn small" data-action="toast" data-msg="Enable for Project Charlie">Enable</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

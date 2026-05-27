@@ -6,7 +6,7 @@
 
 - **Wireframe (start here):** https://ai-studio-console-redesign.vercel.app/wireframes/app.html
 - Root: https://ai-studio-console-redesign.vercel.app
-- Source: `wireframes/app.html` — vanilla HTML/CSS/JS, no build step
+- Source: `wireframes/app.html` — vanilla HTML/CSS/JS, no build step — **29 screens, 3634 lines**
 - `git push origin main` → live in ~60s (Vercel auto-deploys from `sonishakti/ai-studio-wireframe` mirror)
 
 ## What this is
@@ -95,7 +95,7 @@ Changes from prior lifecycle shape:
 | Skill | When |
 |---|---|
 | `/organize` | Anything navigational, hierarchical, "where should X live" |
-| `/journey` | New flow end-to-end (Integrations, Phone Numbers, Campaign placeholders still need this) |
+| `/journey` | New flow end-to-end — agent create → first campaign, or onboarding flow |
 | `/articulate` | Tightening copy — Help hub, Contact Sales, error messages |
 | `/fortify` | Edge cases — anywhere you see `class="empty">Wireframe placeholder` |
 | `/measure` | Metrics work, paired with `references/event-taxonomy-review.md` |

@@ -472,6 +472,24 @@ select.input { cursor: pointer; appearance: none; padding-right: 28px; backgroun
   background: hsl(var(--warning) / 0.12);
   color: hsl(38 92% 35%);
 }
+.tag-scheduled {
+  background: hsl(217 91% 60% / 0.12);
+  color: hsl(217 91% 38%);
+  border-color: hsl(217 91% 60% / 0.25);
+}
+.tag-completed {
+  background: hsl(142 71% 41% / 0.12);
+  color: hsl(142 71% 30%);
+  border-color: hsl(142 71% 41% / 0.25);
+}
+.tag-paused {
+  background: hsl(38 92% 50% / 0.12);
+  color: hsl(38 60% 38%);
+  border-color: hsl(38 92% 50% / 0.25);
+}
+.dark .tag-scheduled { color: hsl(217 91% 72%); }
+.dark .tag-completed  { color: hsl(142 71% 62%); }
+.dark .tag-paused     { color: hsl(38 92% 65%); }
 
 /* ============ DROPDOWN ============ */
 .dropdown {

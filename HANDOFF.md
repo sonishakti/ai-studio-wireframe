@@ -119,14 +119,18 @@ Run `git log --oneline -20` for the full recent history.
 
 Listed by document — each doc's own "what's NOT done" section is authoritative.
 
-### Wireframe gaps still labelled "placeholder"
-- `Deploy › Phone Numbers` (buy / port / assign) — not in Figma 142-7866
-- `Deploy › Campaign` (outbound dialer) — not in Figma 142-7866
-- `Monitor › Call History` (searchable list) — not in Figma 142-7866
-- `Monitor › Session History` (multi-turn sessions) — not in Figma 142-7866
-- Notification Center filter tabs (Billing/Product/Ops/Tickets — only "All" is populated)
+### Wireframe gaps — 2026-05-27 session resolved these stubs
 
-These are flagged in commits as **Studio-core surfaces** the team is iterating separately.
+**✅ Filled this session (scouted from convo-ai-studio + agora-console source code):**
+- `Telephony › Phone Numbers` — full table (number/label/vendor/SIP domain/agent columns), Import Number modal (phone/label/vendor/SIP domain/assign-agent form), vendor note. All interactions live.
+- `Telephony › Campaigns` — full table (5 sample rows with all 5 statuses: In Progress · Scheduled · Draft · Completed · Paused), filter bar (search + status/agent/phone chips), Create Campaign modal (name, agent, phone, CSV upload, call window, days-of-week, dialing speed, launch date), Save as Draft + Schedule actions that append to table live.
+- `Extensions › [Extension Name] detail` — new `extension-detail` screen built from `agora-console/pages/extensions-marketplace/[name].tsx`. Two-column layout: left = overview card (icon/name/vendor/version/updated/platform/core features) + docs/API/changelog tabs; right sidebar = Plans tab (Free/Basic/Pro pricing cards) + Projects tab (enable per project). Marketplace card buttons changed from toast → navigate to this screen with dynamic content.
+- 3 new CSS tag variants: `.tag-scheduled`, `.tag-completed`, `.tag-paused` for campaign status badges.
+- New JS actions: `openImportNumberModal`, `closeImportNumberModal`, `confirmImportNumber`, `openCreateCampaign`, `closeCreateCampaign`, `saveCampaignDraft`, `confirmCreateCampaign`, `openExtDetail`.
+
+**Still open (non-core, lower priority):**
+- Notification Center filter tabs (Billing/Product/Ops/Tickets — only "All" is populated)
+- Onboarding flow (agora-console/pages/onboarding.tsx — multi-step SDK quickstart wizard)
 
 ### Figma 142-7866 → wireframe gap inventory (2026-05-26)
 
