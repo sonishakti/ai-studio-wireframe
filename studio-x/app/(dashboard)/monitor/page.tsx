@@ -1,5 +1,6 @@
 import { Download, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { InsightsCrossLinks } from "@/components/insights-cross-links"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -33,7 +34,7 @@ export default function MonitorPage() {
     <div className="flex flex-col flex-1">
       <PageHeader
         title="Monitor"
-        description="Live performance metrics across all agents and campaigns."
+        description="How well it's running — completion rate, latency, errors across all agents."
         actions={
           <div className="flex items-center gap-2">
             <Select defaultValue="30d">
@@ -164,6 +165,8 @@ export default function MonitorPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <InsightsCrossLinks source="monitor" />
       </main>
     </div>
   )

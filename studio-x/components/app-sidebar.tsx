@@ -76,18 +76,21 @@ const NAV_TOP: NavItem[] = [
 const NAV_TELEPHONY: NavItem[] = [
   { label: "Phone Numbers", href: "/telephony/phone-numbers", icon: Phone },
   { label: "Campaigns", href: "/telephony/campaigns", icon: Megaphone },
-  { label: "Calls", href: "/telephony/calls", icon: PhoneCall },
 ]
 
-const NAV_BOTTOM: NavItem[] = [
+// Insights — unified destination for "what happened in this project?"
+// Co-locates Monitor (performance), Calls (history) and Usage (consumption)
+// because journeys 1–4 cross all three (see HANDOFF.md IA decision).
+const NAV_INSIGHTS: NavItem[] = [
   { label: "Monitor", href: "/monitor", icon: Activity },
+  { label: "Calls", href: "/calls", icon: PhoneCall },
+  { label: "Usage", href: "/usage", icon: Gauge },
 ]
 
 const NAV_PROJECT: NavItem[] = [
   { label: "Project Settings", href: "/project/settings", icon: SlidersHorizontal },
   { label: "Project Credentials", href: "/project/credentials", icon: KeyRound },
   { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Shield },
-  { label: "Usage", href: "/usage", icon: Gauge },
 ]
 
 type NavItem = {
@@ -279,23 +282,17 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Telephony collapsible */}
+        {/* Telephony — deployment surfaces */}
         <CollapsibleGroup label="Telephony" items={NAV_TELEPHONY} />
 
         <SidebarSeparator />
 
-        {/* Monitor flat */}
-        <SidebarGroup>
-          <SidebarMenu>
-            {NAV_BOTTOM.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {/* Insights — "what happened" surfaces (Monitor + Calls + Usage) */}
+        <CollapsibleGroup label="Insights" items={NAV_INSIGHTS} />
 
         <SidebarSeparator />
 
-        {/* Project collapsible */}
+        {/* Project — configuration surfaces */}
         <CollapsibleGroup label="Project" items={NAV_PROJECT} />
       </SidebarContent>
 

@@ -1,5 +1,6 @@
 import { PhoneCall, Search, Filter, Download } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { InsightsCrossLinks } from "@/components/insights-cross-links"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -132,7 +133,7 @@ export default function CallsPage() {
           { label: "Calls" },
         ]}
         title="Calls"
-        description="Unified view of telephony call history and realtime sessions."
+        description="What happened, call by call — telephony history and realtime sessions."
         actions={
           <Button variant="outline" className="gap-1.5">
             <Download className="h-4 w-4" /> Export
@@ -167,6 +168,8 @@ export default function CallsPage() {
             <Card><CardContent className="p-0"><CallTable calls={realtime} /></CardContent></Card>
           </TabsContent>
         </Tabs>
+
+        <InsightsCrossLinks source="calls" />
       </main>
     </div>
   )

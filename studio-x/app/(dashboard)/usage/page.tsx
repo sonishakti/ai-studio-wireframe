@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Download, ChevronDown } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { InsightsCrossLinks } from "@/components/insights-cross-links"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -177,7 +178,7 @@ export default function UsagePage() {
     <div className="flex flex-col flex-1">
       <PageHeader
         title="Usage"
-        description="Consumption across all Agora services for this project."
+        description="How much you're consuming — minutes, GB and quotas for this project."
         actions={
           <div className="flex items-center gap-2">
             <Select defaultValue="12m">
@@ -310,6 +311,8 @@ export default function UsagePage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <InsightsCrossLinks source="usage" />
       </main>
     </div>
   )

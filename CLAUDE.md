@@ -24,22 +24,36 @@ This is a **funnel rescue project** that happens to require product consolidatio
 5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
 6. `wireframes/app.html` — the wireframe itself (~5000 lines after Billing rebuild)
 
-## Current sidebar (LiveKit-inspired, 2026-05-27)
+## Current sidebar (Insights-grouped, 2026-05-27 v3)
 
 ```
 Home
 [flat]    ›  Agents · Realtime Services · Integrations
-Telephony ▾  Phone Numbers · Campaigns · Calls        [collapsible]
-[flat]    ›  Analytics
-Project   ▾  Project Credentials · Vendor Credentials [collapsible]
+Telephony ▾  Phone Numbers · Campaigns                [collapsible]
+Insights  ▾  Monitor · Calls · Usage                  [collapsible — NEW]
+Project   ▾  Project Settings · Project Credentials · Vendor Credentials
 ```
 
-Changes from prior lifecycle shape:
+Changes from v2 (2026-05-27):
+- Calls moved out of Telephony → Insights (it's observational, not deployment)
+- Usage moved out of Project → Insights (it's observational, not config)
+- Monitor moved out of flat top → Insights (joined its siblings)
+- Project group is now purely configuration
+
+Why: journeys 1–4 ("Did my campaign work?", "Why is my agent slow?",
+"Should I upgrade?", "Show me this month") all cross Monitor + Calls + Usage.
+Forcing them into 3 different sidebar groups made every "what happened?"
+question a 3-destination scavenger hunt. Grouping them together + adding
+in-page cross-link callouts solves the wayfinding problem.
+
+Routing change: `/telephony/calls` → `/calls` so URL matches the IA group.
+
+Earlier history:
 - Section labels (BUILD/DEPLOY/MONITOR) removed — flat + collapsible instead
 - Realtime Services moved PROJECT → flat peer of Agents (LEARNINGS §10 v2)
 - Call History + Session History → unified "Calls" (All / Telephony / Realtime tabs)
-- Route aliases: `/call-history` → Calls Telephony tab; `/session-history` → Calls Realtime tab
 - "Credentials" → "Vendor Credentials" (LEARNINGS §9 scope-qualifier rule)
+- "Analytics" sidebar label rejected (collides with Agora Analytics product) → "Monitor"
 
 - Footer: Search ⌘K · Project chip · Avatar
 - Topbar: Bell · ✦ Ask
@@ -55,6 +69,8 @@ Changes from prior lifecycle shape:
 - "Telemetry" as user-facing label rejected → use "Live activity".
 - "Observe" as a section header rejected → use "Monitor".
 - "Console" as a toggle label rejected → use "Real-Time".
+- "Analytics" as a sidebar label rejected → use "Monitor" (Agora Analytics is a separate product).
+- Monitor + Calls + Usage live together under "Insights" group. Don't re-flatten — journeys 1–4 cross all three (see studio-x sidebar comment).
 
 ## Open IA tensions (do litigate)
 
