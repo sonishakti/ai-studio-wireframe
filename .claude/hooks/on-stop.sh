@@ -3,7 +3,8 @@
 # Runs on every Stop event. Skips silently if nothing changed.
 
 REPO="/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign"
-LIVE_URL="https://ai-studio-console-redesign.vercel.app/wireframes/app.html"
+LIVE_URL="https://ai-studio-console-redesign.vercel.app"
+WIRE_URL="https://ai-studio-console-redesign.vercel.app/wireframes/app.html"
 
 cd "$REPO" || exit 0
 
@@ -12,7 +13,7 @@ git add -A 2>/dev/null
 
 # Nothing to commit → just show the URL
 if git diff --cached --quiet; then
-  echo "{\"systemMessage\": \"Nothing new to commit.\n🌐 Live: $LIVE_URL\"}"
+  echo "{\"systemMessage\": \"Nothing new to commit.\n🌐 App: $LIVE_URL\n📐 Wireframe: $WIRE_URL\"}"
   exit 0
 fi
 
@@ -29,7 +30,7 @@ fi
 
 # Commit
 git commit -m "$MSG" \
-  -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>" \
+  -m "Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>" \
   2>&1
 
 # Push to origin (both mirrors via dual push URL)
@@ -38,9 +39,9 @@ PUSH_EXIT=$?
 
 if [ $PUSH_EXIT -eq 0 ]; then
   HASH=$(git rev-parse --short HEAD)
-  echo "{\"systemMessage\": \"✓ Committed & pushed (${HASH}) — ${MSG}\n🌐 Live (~60s): ${LIVE_URL}\"}"
+  echo "{\"systemMessage\": \"✓ Committed & pushed (${HASH}) — ${MSG}\n🌐 App (~60s): ${LIVE_URL}\n📐 Wireframe: ${WIRE_URL}\"}"
 else
   # Push failed — still show commit succeeded and the URL
   HASH=$(git rev-parse --short HEAD)
-  echo "{\"systemMessage\": \"✓ Committed (${HASH}) locally.\n⚠ Push failed: ${PUSH_OUT}\n🌐 URL (may be stale): ${LIVE_URL}\"}"
+  echo "{\"systemMessage\": \"✓ Committed (${HASH}) locally.\n⚠ Push failed: ${PUSH_OUT}\n🌐 App (may be stale): ${LIVE_URL}\"}"
 fi
