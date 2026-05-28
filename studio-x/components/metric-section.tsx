@@ -7,7 +7,8 @@ import { Info } from "lucide-react"
  * MetricSection — LiveKit-style grouped block of metric cards.
  *
  * Pattern: small section header (chevron + title), then a stack of children
- * (usually MetricCard rows or grids). Used on /home, /usage, /monitor.
+ * (usually MetricCard rows or grids). Used on /home, /billing/usage, and per-
+ * campaign analytics.
  */
 export function MetricSection({
   title,

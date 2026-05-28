@@ -360,7 +360,7 @@ export default function UpgradePage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto pt-2">
                 <Button asChild>
-                  <Link href="/usage">View new quota</Link>
+                  <Link href="/billing/usage">View new quota</Link>
                 </Button>
                 <Button variant="outline" asChild>
                   <Link href="/billing/invoices">See receipt</Link>

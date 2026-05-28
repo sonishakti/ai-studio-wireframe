@@ -46,7 +46,7 @@ export default function BillingOverviewPage() {
                 <CardDescription className="text-xs mt-0.5">May 1 – May 31, 2026</CardDescription>
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link href="/usage">View details <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+                <Link href="/billing/usage">View details <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
               </Button>
             </div>
           </CardHeader>

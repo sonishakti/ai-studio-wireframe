@@ -8,14 +8,13 @@ import {
   Bot,
   Radio,
   Puzzle,
-  PhoneCall,
-  Activity,
   Shield,
   ChevronRight,
   Sparkles,
-  Gauge,
   SlidersHorizontal,
   Megaphone,
+  Rocket,
+  Hash,
 } from "lucide-react"
 
 import {
@@ -47,25 +46,16 @@ const NAV_TOP: NavItem[] = [
   { label: "Agents", href: "/agents", icon: Bot },
   { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Integrations", href: "/integrations", icon: Puzzle },
+  { label: "Deploy", href: "/deploy", icon: Rocket },
 ]
 
-// Campaigns — replaces "Channels" (which conflicted with Agora's "channel"
-// RTC connection term). Houses call-centre features: inbound queue,
-// outbound dialing, phone numbers, cross-campaign analytics.
-//
-// Per-agent deployment lives inside the agent builder's right-side sheet,
-// not in the sidebar.
+// Campaigns — omnichannel hub. A campaign owns multiple modalities (telephony,
+// WhatsApp, web, SMS) and its analytics/calls live as tabs inside the campaign
+// detail page. Phone numbers are managed here too because that's where they're
+// assigned.
 const NAV_CAMPAIGNS: NavItem[] = [
   { label: "Campaigns", href: "/campaigns", icon: Megaphone },
-]
-
-// Insights — unified destination for "what happened in this project?"
-// Co-locates Monitor (performance), Calls (history) and Usage (consumption)
-// because journeys 1–4 cross all three (see HANDOFF.md IA decision).
-const NAV_INSIGHTS: NavItem[] = [
-  { label: "Monitor", href: "/monitor", icon: Activity },
-  { label: "Calls", href: "/calls", icon: PhoneCall },
-  { label: "Usage", href: "/usage", icon: Gauge },
+  { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Hash },
 ]
 
 const NAV_PROJECT: NavItem[] = [
@@ -87,7 +77,9 @@ function NavLink({ item }: { item: NavItem }) {
   const active =
     item.href === "/home"
       ? pathname === "/home"
-      : pathname.startsWith(item.href)
+      : item.href === "/campaigns"
+        ? pathname === "/campaigns" || pathname.startsWith("/campaigns/new") || /^\/campaigns\/[^/]+$/.test(pathname)
+        : pathname.startsWith(item.href)
 
   return (
     <SidebarMenuItem>
@@ -119,8 +111,6 @@ function CollapsibleGroup({
   const anyActive = items.some((i) => pathname.startsWith(i.href))
   const storageKey = `sx:sidebar-group:${label}`
 
-  // Initialise from localStorage if present, otherwise fall back to
-  // defaultOpen OR being-on-an-active-route. /evaluate Issue 11 fix.
   const [open, setOpen] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return anyActive || defaultOpen
     const stored = window.localStorage.getItem(storageKey)
@@ -179,7 +169,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Flat top items */}
+        {/* Flat top items: build → deploy progression */}
         <SidebarGroup>
           <SidebarMenu>
             {NAV_TOP.map((item) => (
@@ -190,19 +180,8 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Campaigns — call-centre features (inbound + outbound + numbers) */}
-        <SidebarGroup>
-          <SidebarMenu>
-            {NAV_CAMPAIGNS.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* Insights — "what happened" surfaces (Monitor + Calls + Usage) */}
-        <CollapsibleGroup label="Insights" items={NAV_INSIGHTS} />
+        {/* Campaigns — omnichannel hub (campaigns + phone numbers) */}
+        <CollapsibleGroup label="Campaigns" items={NAV_CAMPAIGNS} />
 
         <SidebarSeparator />
 

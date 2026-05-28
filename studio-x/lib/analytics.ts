@@ -64,6 +64,13 @@ export const Events = {
   cert_secondary_enabled:           "cert_secondary_enabled",
   cert_secondary_disable_requested: "cert_secondary_disable_requested",
 
+  // ── Deploy chooser & campaign creation ────────────────────────────────────
+  deploy_chooser_viewed:            "deploy_chooser_viewed",
+  deploy_chooser_option_selected:   "deploy_chooser_option_selected",
+  campaign_wizard_step_completed:   "campaign_wizard_step_completed",
+  campaign_channel_added:           "campaign_channel_added",
+  campaign_channel_removed:         "campaign_channel_removed",
+
   // ── Errors & resilience ────────────────────────────────────────────────────
   page_error_rendered:        "page_error_rendered",
   not_found_rendered:         "not_found_rendered",

@@ -295,11 +295,11 @@ function CompletionCelebration({ onDismiss }: { onDismiss: () => void }) {
         <div className="flex-1">
           <p className="text-sm font-semibold">Activation complete 🎉</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Your first agent is live and deployed. Watch it work in Monitor.
+            Your first agent is live and deployed. Open Campaigns to watch it work.
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/monitor">Open Monitor</Link>
+          <Link href="/campaigns">Open Campaigns</Link>
         </Button>
         <Button variant="ghost" size="sm" onClick={onDismiss}>
           Dismiss

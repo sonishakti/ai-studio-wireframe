@@ -37,13 +37,12 @@ const COMMANDS: Command[] = [
   { id: "go-agents",     label: "Agents",                   href: "/agents",                          icon: Bot,                group: "Pages" },
   { id: "go-rtc",        label: "Realtime Services",        href: "/realtime-services",               icon: Radio,              group: "Pages" },
   { id: "go-integ",      label: "Integrations",             href: "/integrations",                    icon: Puzzle,             group: "Pages" },
-  { id: "go-numbers",    label: "Phone Numbers",            href: "/telephony/phone-numbers",         icon: Phone,              group: "Pages" },
-  { id: "go-camp",       label: "Campaigns",                href: "/telephony/campaigns",             icon: Megaphone,          group: "Pages" },
+  { id: "go-numbers",    label: "Phone Numbers",            href: "/campaigns/phone-numbers",         icon: Phone,              group: "Pages" },
+  { id: "go-camp",       label: "Campaigns",                href: "/campaigns",                       icon: Megaphone,          group: "Pages" },
+  { id: "go-deploy",     label: "Deploy",                   href: "/deploy",                          icon: Activity,           group: "Pages", keywords: ["go live", "publish", "ship"] },
 
-  // ── Insights ─────────────────────────────────────────────────────────────
-  { id: "go-monitor",    label: "Monitor",                  href: "/monitor",                         icon: Activity,           group: "Insights", keywords: ["performance", "metrics"] },
-  { id: "go-calls",      label: "Calls",                    href: "/calls",                           icon: PhoneCall,          group: "Insights", keywords: ["history", "sessions"] },
-  { id: "go-usage",      label: "Usage",                    href: "/usage",                           icon: Gauge,              group: "Insights", keywords: ["consumption", "minutes", "quotas"] },
+  // ── Billing ──────────────────────────────────────────────────────────────
+  { id: "go-usage",      label: "Usage",                    href: "/billing/usage",                   icon: Gauge,              group: "Billing", keywords: ["consumption", "minutes", "quotas"] },
 
   // ── Project ──────────────────────────────────────────────────────────────
   { id: "go-proj-set",   label: "Project Settings",         href: "/project/settings",                icon: SlidersHorizontal,  group: "Project" },
@@ -69,7 +68,7 @@ const COMMANDS: Command[] = [
 
   // ── Actions ──────────────────────────────────────────────────────────────
   { id: "new-agent",     label: "Create a new agent",       href: "/agents/new/edit",                 icon: Plus,               group: "Actions", keywords: ["create", "new"] },
-  { id: "new-camp",      label: "Create a new campaign",    href: "/telephony/campaigns/create",      icon: Plus,               group: "Actions", keywords: ["create"] },
+  { id: "new-camp",      label: "Create a new campaign",    href: "/campaigns/new",                   icon: Plus,               group: "Actions", keywords: ["create"] },
 ]
 
 export function CommandPalette() {

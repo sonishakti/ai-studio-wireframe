@@ -1,9 +1,24 @@
-import { redirect } from "next/navigation"
+import { PageHeader } from "@/components/page-header"
+import { DeployChooser, DeployChooserFooter } from "@/components/deploy-chooser"
 
-// /deploy (the old "Channels" catalog) is deprecated. The umbrella term
-// "Channels" conflicted with Agora's "channel" RTC connection meaning.
-// Call-centre features now live under /campaigns. Per-agent deployment
-// lives inside the agent builder's right-side Sheet.
-export default function DeployLegacyRedirect() {
-  redirect("/campaigns")
+export const metadata = {
+  title: "Deploy",
+}
+
+export default function DeployHubPage() {
+  return (
+    <div className="flex flex-col flex-1">
+      <PageHeader
+        title="Deploy an agent"
+        description="Pick how your agent goes live. You can add more channels later."
+      />
+
+      <main className="flex-1 p-6">
+        <div className="mx-auto w-full max-w-4xl space-y-6">
+          <DeployChooser variant="page" />
+          <DeployChooserFooter />
+        </div>
+      </main>
+    </div>
+  )
 }
