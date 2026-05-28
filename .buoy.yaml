@@ -1,0 +1,21 @@
+# Buoy Configuration
+# Auto-generated - customize to match your project
+# Docs: https://buoy.design/docs/configuration
+
+project:
+  name: ai-studio-console-redesign
+sources:
+  tokens:
+    enabled: true
+    files:
+      - convo-ai-studio/mocks/handlers/tokens.ts
+      - wireframes/style.css
+      - studio-x/app/globals.css
+      - convo-ai-studio/app/globals.css
+      - studio-x/public/wireframes/style.css
+      - agora-console/src/styles/app.css
+  figma:
+    enabled: false
+output:
+  format: table
+  colors: true

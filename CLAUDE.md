@@ -137,3 +137,37 @@ grep -n "data-route" wireframes/app.html | head -20
 # Find a screen by route
 grep -n 'id="route-' wireframes/app.html
 ```
+
+## Design System
+
+## Design System Rules
+
+This project uses the ai-studio-console-redesign Design System. Follow these rules when generating code:
+
+### Token Requirements
+
+**NEVER hardcode these values:**
+- Colors: Use design tokens or utility classes
+- Typography: Use font tokens
+
+**Quick Reference:**
+- --background: 0 0% 100%
+- --color-sidebar-ring: var(--sidebar-ring)
+- --color-sidebar-border: var(--sidebar-border)
+
+### Anti-Patterns
+
+AVOID:
+- `<div onClick>` - Use `<Button>` or semantic elements
+- Inline styles for colors/spacing - Use tokens or classes
+- Creating component variants that already exist
+- Arbitrary values (e.g., `p-[13px]`) - Use scale values
+
+### Validation
+
+Run before committing:
+```bash
+buoy drift check          # Quick validation
+buoy show drift          # Detailed drift analysis
+buoy drift fix --dry-run  # See suggested fixes
+```
