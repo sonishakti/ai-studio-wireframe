@@ -62,10 +62,10 @@ export function CodeBlock({
         <div className="flex items-center justify-between border-b bg-background/60 px-3 py-1.5">
           <div className="flex items-center gap-2 min-w-0">
             {filename && (
-              <span className="font-mono text-[11px] text-foreground truncate">{filename}</span>
+              <span className="font-mono text-xs text-foreground truncate">{filename}</span>
             )}
             {language && (
-              <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+              <span className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
                 {language}
               </span>
             )}

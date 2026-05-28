@@ -239,7 +239,7 @@ export default function HomePage() {
           </div>
           <Card>
             <CardContent className="p-4">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-3">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
                 Inbound vs Outbound
               </p>
               <Sparkline

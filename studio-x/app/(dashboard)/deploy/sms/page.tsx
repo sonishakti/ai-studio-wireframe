@@ -114,7 +114,7 @@ export default function DeploySmsPage() {
                   <li>United Kingdom</li>
                   <li>Most EU countries</li>
                 </ul>
-                <p className="text-[10px] text-muted-foreground pt-2 border-t">A2P 10DLC registration required for US numbers.</p>
+                <p className="text-xs text-muted-foreground pt-2 border-t">A2P 10DLC registration required for US numbers.</p>
               </CardContent>
             </Card>
           </aside>

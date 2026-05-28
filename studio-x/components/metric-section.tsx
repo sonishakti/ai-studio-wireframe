@@ -60,7 +60,7 @@ export function MetricCard({
       <CardContent className="p-0 space-y-3">
         {/* Label */}
         <div className="flex items-center gap-1.5">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {label}
           </p>
           <Info className="h-2.5 w-2.5 text-muted-foreground/40" />

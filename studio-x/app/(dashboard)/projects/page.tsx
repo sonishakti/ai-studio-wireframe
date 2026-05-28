@@ -99,7 +99,7 @@ export default function ProjectsPage() {
                           {p.name}
                         </p>
                         {p.current && (
-                          <Badge variant="default" className="text-[10px] gap-1">
+                          <Badge variant="default" className="text-xs gap-1">
                             <CheckCircle2 className="h-2.5 w-2.5" /> Current
                           </Badge>
                         )}
@@ -140,7 +140,7 @@ export default function ProjectsPage() {
 
                 {/* App ID row */}
                 <div className="mt-4 flex items-center gap-2 rounded-md bg-muted/50 px-2.5 py-1.5">
-                  <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider shrink-0">App ID</span>
+                  <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider shrink-0">App ID</span>
                   <span className="font-mono text-xs flex-1 truncate">{p.appId}</span>
                   <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0">
                     <Copy className="h-3 w-3" />
@@ -151,13 +151,13 @@ export default function ProjectsPage() {
                 <div className="mt-4 flex items-center gap-2 flex-wrap">
                   <Badge
                     variant="outline"
-                    className={`text-[10px] ${ENV_STYLES[p.env] ?? ""}`}
+                    className={`text-xs ${ENV_STYLES[p.env] ?? ""}`}
                   >
                     {p.env}
                   </Badge>
-                  <Badge variant="secondary" className="text-[10px]">{p.plan}</Badge>
+                  <Badge variant="secondary" className="text-xs">{p.plan}</Badge>
                   {p.status === "archived" && (
-                    <Badge variant="outline" className="text-[10px]">archived</Badge>
+                    <Badge variant="outline" className="text-xs">archived</Badge>
                   )}
                 </div>
 

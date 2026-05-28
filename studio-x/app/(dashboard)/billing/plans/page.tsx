@@ -111,7 +111,7 @@ export default function PlansPage() {
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-base">{plan.name}</CardTitle>
                       {plan.badge && (
-                        <Badge variant={plan.highlighted ? "default" : "secondary"} className="text-[10px]">
+                        <Badge variant={plan.highlighted ? "default" : "secondary"} className="text-xs">
                           {plan.badge}
                         </Badge>
                       )}

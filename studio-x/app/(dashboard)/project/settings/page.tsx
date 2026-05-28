@@ -103,7 +103,7 @@ export default function ProjectSettingsPage() {
                     <h2 className="text-base font-semibold">Secured mode</h2>
                     <Badge
                       variant="outline"
-                      className="text-[10px] border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      className="text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                     >
                       Active
                     </Badge>
@@ -164,7 +164,7 @@ export default function ProjectSettingsPage() {
                 <p className="text-xs text-muted-foreground">
                   Server-side secret. Treat like a database password.
                 </p>
-                <div className="flex items-center gap-3 pt-1 text-[11px] text-muted-foreground">
+                <div className="flex items-center gap-3 pt-1 text-xs text-muted-foreground">
                   <span>Created <span className="tabular-nums">Mar 12, 2026</span></span>
                   <span>·</span>
                   <span>Last used <span className="tabular-nums">2 min ago</span></span>

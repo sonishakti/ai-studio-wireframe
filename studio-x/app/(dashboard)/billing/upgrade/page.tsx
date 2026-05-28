@@ -124,7 +124,7 @@ export default function UpgradePage() {
                 >
                   <span
                     className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-mono tabular-nums",
+                      "flex h-5 w-5 items-center justify-center rounded-full text-xs font-mono tabular-nums",
                       isDone
                         ? "bg-emerald-500/15 text-emerald-600"
                         : isCurrent
@@ -169,7 +169,7 @@ export default function UpgradePage() {
                   >
                     <div className="flex items-start justify-between">
                       <p className="text-base font-semibold">{p.name}</p>
-                      {p.recommended && <Badge className="text-[10px]">Recommended</Badge>}
+                      {p.recommended && <Badge className="text-xs">Recommended</Badge>}
                     </div>
                     <p className="text-2xl font-bold tracking-tight mt-2">
                       ${p.price}<span className="text-xs text-muted-foreground font-normal">/mo</span>

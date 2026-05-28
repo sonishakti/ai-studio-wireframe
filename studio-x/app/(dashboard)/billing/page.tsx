@@ -52,7 +52,7 @@ export default function BillingOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between mb-2">
-              <Badge variant="secondary" className="text-[10px]">Free tier</Badge>
+              <Badge variant="secondary" className="text-xs">Free tier</Badge>
               <span className="text-sm font-semibold tabular-nums">64% Used</span>
             </div>
             <Progress value={64} className="h-2" />
@@ -81,7 +81,7 @@ export default function BillingOverviewPage() {
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <span className="text-sm font-medium">•••• {pm.last4}</span>
-                {pm.primary && <Badge variant="secondary" className="text-[10px]">Primary</Badge>}
+                {pm.primary && <Badge variant="secondary" className="text-xs">Primary</Badge>}
                 <span className="text-xs text-muted-foreground ml-auto">{pm.brand}</span>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
                   <MoreHorizontal className="h-3.5 w-3.5" />

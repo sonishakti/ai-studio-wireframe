@@ -143,7 +143,7 @@ export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
 
           {/* Example */}
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">
               Example config
             </p>
             <CodeBlock language="json" filename="agent-config.json">
@@ -172,7 +172,7 @@ export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
                       added to this project as a draft.
                     </p>
                     {validation.warnings?.map((w) => (
-                      <Badge key={w} variant="outline" className="text-[10px] mt-2 font-normal">
+                      <Badge key={w} variant="outline" className="text-xs mt-2 font-normal">
                         ⚠ {w}
                       </Badge>
                     ))}

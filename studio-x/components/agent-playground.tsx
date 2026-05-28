@@ -204,7 +204,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
               Live transcript
               {state === "active" && (
-                <Badge variant="default" className="text-[10px] gap-1 ml-1">
+                <Badge variant="default" className="text-xs gap-1 ml-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   recording
                 </Badge>
@@ -236,7 +236,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
                         : <User className="h-3 w-3 text-muted-foreground" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                         {t.speaker === "agent" ? "Agent" : "You"}
                         <span className="text-muted-foreground/60 normal-case font-normal tabular-nums ml-2">
                           {formatMs(t.at)}
@@ -264,7 +264,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">End-to-end latency</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">End-to-end latency</p>
               <p className="text-xl font-semibold tabular-nums mt-0.5">{latency.value}</p>
               <p className="text-xs text-muted-foreground">{latency.sub}</p>
             </div>
@@ -276,7 +276,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
                 { label: "TTS",  value: state === "active" ? "210 ms" : "—" },
               ].map((m) => (
                 <div key={m.label}>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{m.label}</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{m.label}</p>
                   <p className="text-sm font-semibold tabular-nums mt-0.5">{m.value}</p>
                 </div>
               ))}

@@ -99,7 +99,7 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
             <text
               x={-8} y={yScale(g)}
               textAnchor="end" dominantBaseline="middle"
-              className="fill-muted-foreground text-[10px] font-mono"
+              className="fill-muted-foreground text-xs font-mono"
             >
               {g >= 1000 ? `${g / 1000}k` : g}
             </text>
@@ -112,7 +112,7 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
             key={m}
             x={xScale(i)} y={innerH + 18}
             textAnchor="middle"
-            className="fill-muted-foreground text-[10px] font-mono"
+            className="fill-muted-foreground text-xs font-mono"
           >
             {m}
           </text>
@@ -273,7 +273,7 @@ export default function UsagePage() {
                       <span className="text-2xl font-semibold tracking-tight tabular-nums">
                         {m.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </span>
-                      <span className="text-[10px] font-mono uppercase text-muted-foreground tracking-wider">
+                      <span className="text-xs font-mono uppercase text-muted-foreground tracking-wider">
                         {m.unit}
                       </span>
                     </div>

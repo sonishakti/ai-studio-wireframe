@@ -109,7 +109,7 @@ export default function DeployTelephonyPage() {
 
                     {/* Results */}
                     <div className="space-y-2 pt-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {BUYABLE_NUMBERS.length} numbers available
                       </p>
                       {BUYABLE_NUMBERS.map((n) => {
@@ -129,7 +129,7 @@ export default function DeployTelephonyPage() {
                             </div>
                             <div className="flex gap-1.5">
                               {n.capabilities.map((c) => (
-                                <Badge key={c} variant="secondary" className="text-[10px]">{c}</Badge>
+                                <Badge key={c} variant="secondary" className="text-xs">{c}</Badge>
                               ))}
                             </div>
                             <span className="text-sm tabular-nums font-medium ml-2">{n.monthly}<span className="text-xs text-muted-foreground font-normal">/mo</span></span>

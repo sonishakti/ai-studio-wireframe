@@ -58,7 +58,7 @@ export function ProjectSwitcher() {
         align="start"
         sideOffset={8}
       >
-        <DropdownMenuLabel className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Current project
         </DropdownMenuLabel>
         <DropdownMenuItem className="gap-2 cursor-default focus:bg-accent/50">
@@ -67,7 +67,7 @@ export function ProjectSwitcher() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{current.name}</p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {current.env} · {current.plan}
             </p>
           </div>
@@ -77,7 +77,7 @@ export function ProjectSwitcher() {
         {others.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            <DropdownMenuLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Switch project
             </DropdownMenuLabel>
             {others.map((p) => (
@@ -91,7 +91,7 @@ export function ProjectSwitcher() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{p.name}</p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {p.env} · {p.plan}
                   </p>
                 </div>

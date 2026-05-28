@@ -85,22 +85,22 @@ export default async function ExtensionDetailPage({ params }: Props) {
               <Separator />
               <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4 py-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Company</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Company</p>
                   <p className="text-sm font-medium mt-1">{ext.vendor}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Version</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Version</p>
                   <p className="text-sm font-medium mt-1 tabular-nums">{ext.version}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Updated</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Updated</p>
                   <p className="text-sm font-medium mt-1 tabular-nums">{ext.updated}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Platform</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Platform</p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {ext.platforms.map((p) => (
-                      <Badge key={p} variant="secondary" className="text-[10px]">{p}</Badge>
+                      <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
                     ))}
                   </div>
                 </div>
@@ -203,7 +203,7 @@ AgoraRTC.registerExtensions([new FaceARExtension()]);`}</code>
                       }`}
                     >
                       <span className="text-sm">{p.name}</span>
-                      <Badge variant={p.enabled ? "default" : "secondary"} className="text-[10px]">
+                      <Badge variant={p.enabled ? "default" : "secondary"} className="text-xs">
                         {p.enabled ? "Enabled" : "Off"}
                       </Badge>
                     </div>

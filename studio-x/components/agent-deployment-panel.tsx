@@ -123,13 +123,13 @@ export function AgentDeploymentPanel({ agentId }: { agentId: string }) {
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-medium">{c.label}</p>
                   {c.active && (
-                    <Badge variant="default" className="text-[9px] h-4 px-1.5 gap-0.5">
+                    <Badge variant="default" className="text-xs h-4 px-1.5 gap-0.5">
                       <span className="h-1 w-1 rounded-full bg-emerald-300" />
                       Live
                     </Badge>
                   )}
                   {c.configured && !c.active && (
-                    <Badge variant="outline" className="text-[9px] h-4 px-1.5">Paused</Badge>
+                    <Badge variant="outline" className="text-xs h-4 px-1.5">Paused</Badge>
                   )}
                 </div>
                 {c.detail ? (

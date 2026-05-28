@@ -96,7 +96,7 @@ function NavLink({ item }: { item: NavItem }) {
           <item.icon className="h-4 w-4" />
           <span>{item.label}</span>
           {item.badge && (
-            <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">
+            <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0">
               {item.badge}
             </Badge>
           )}

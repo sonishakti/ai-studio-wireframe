@@ -127,12 +127,12 @@ export default function DeployWhatsAppPage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">Service conversations</span><span className="font-medium">Free</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Utility messages</span><span className="font-medium tabular-nums">$0.005 each</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Marketing messages</span><span className="font-medium tabular-nums">$0.025 each</span></div>
-                <p className="text-[10px] text-muted-foreground pt-2 border-t">Meta sets the rates. Studio_X passes through at cost.</p>
+                <p className="text-xs text-muted-foreground pt-2 border-t">Meta sets the rates. Studio_X passes through at cost.</p>
               </CardContent>
             </Card>
             <Card className="bg-muted/40 border-dashed">
               <CardContent className="py-4 text-xs text-muted-foreground space-y-2">
-                <Badge variant="outline" className="text-[9px]">Approval time</Badge>
+                <Badge variant="outline" className="text-xs">Approval time</Badge>
                 <p>Most WhatsApp Business connections approve within 24 hours. Enterprise-tier customers get priority review.</p>
               </CardContent>
             </Card>

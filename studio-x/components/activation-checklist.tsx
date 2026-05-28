@@ -169,7 +169,7 @@ export function ActivationChecklist() {
                 <h2 className="text-base font-semibold tracking-tight">
                   Get to your first deployed agent
                 </h2>
-                <Badge variant="secondary" className="text-[10px]">
+                <Badge variant="secondary" className="text-xs">
                   {doneCount} / {totalCount}
                 </Badge>
               </div>
@@ -219,7 +219,7 @@ export function ActivationChecklist() {
                   >
                     {/* Index + status */}
                     <div className="flex items-center gap-3 shrink-0 pt-0.5">
-                      <span className="text-[10px] font-mono text-muted-foreground tabular-nums w-4">
+                      <span className="text-xs font-mono text-muted-foreground tabular-nums w-4">
                         {i + 1}
                       </span>
                       {isDone ? (
@@ -246,7 +246,7 @@ export function ActivationChecklist() {
                           {step.title}
                         </p>
                         {isCurrent && (
-                          <Badge className="text-[9px] h-4 px-1.5">Up next</Badge>
+                          <Badge className="text-xs h-4 px-1.5">Up next</Badge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">

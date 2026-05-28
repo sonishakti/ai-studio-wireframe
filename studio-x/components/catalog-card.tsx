@@ -104,13 +104,13 @@ export function CatalogCard({
             {status && status !== "available" && (
               <Badge
                 variant="outline"
-                className={cn("text-[10px] shrink-0", STATUS_STYLES[status])}
+                className={cn("text-xs shrink-0", STATUS_STYLES[status])}
               >
                 {statusLabel ?? STATUS_LABELS[status]}
               </Badge>
             )}
             {status === "available" && statusLabel && (
-              <Badge variant="outline" className="text-[10px] shrink-0">
+              <Badge variant="outline" className="text-xs shrink-0">
                 {statusLabel}
               </Badge>
             )}
@@ -127,7 +127,7 @@ export function CatalogCard({
           {/* Footer: meta + action */}
           <div className="flex items-center justify-between mt-auto pt-1">
             {meta ? (
-              <span className="text-[11px] text-muted-foreground">{meta}</span>
+              <span className="text-xs text-muted-foreground">{meta}</span>
             ) : <span />}
             {!isUnavailable && (
               <span className="text-xs font-medium text-primary inline-flex items-center gap-0.5">

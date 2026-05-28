@@ -56,7 +56,7 @@ export function AccountAvatarButton() {
             >
               <Avatar className="h-7 w-7 rounded-lg">
                 <AvatarImage src="" alt="" />
-                <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-[11px] font-medium">
+                <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xs font-medium">
                   SS
                 </AvatarFallback>
               </Avatar>
@@ -125,7 +125,7 @@ export function AccountAvatarButton() {
             <Moon className="h-4 w-4 text-muted-foreground" />
           )}
           {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
-          <kbd className="ml-auto text-[10px] font-mono text-muted-foreground bg-muted px-1 py-0.5 rounded">d</kbd>
+          <kbd className="ml-auto text-xs font-mono text-muted-foreground bg-muted px-1 py-0.5 rounded">d</kbd>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

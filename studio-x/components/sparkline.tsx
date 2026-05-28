@@ -94,7 +94,7 @@ export function Sparkline({
           x={padding.left + (i / (axisLabels.length - 1 || 1)) * innerW}
           y={height - 2}
           textAnchor={i === 0 ? "start" : i === axisLabels.length - 1 ? "end" : "middle"}
-          className="fill-muted-foreground text-[8px] font-mono"
+          className="fill-muted-foreground text-xs font-mono"
         >
           {l}
         </text>

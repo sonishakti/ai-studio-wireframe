@@ -244,7 +244,7 @@ export default function CampaignsPage() {
               ].map((m) => (
                 <Card key={m.label}>
                   <CardContent className="p-4">
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{m.label}</p>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{m.label}</p>
                     <p className="text-2xl font-semibold tabular-nums mt-1">{m.value}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{m.sub}</p>
                   </CardContent>

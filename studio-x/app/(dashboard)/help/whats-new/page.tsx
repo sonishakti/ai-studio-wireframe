@@ -60,7 +60,7 @@ export default function WhatsNewPage() {
                 {release.changes.map((c, i) => (
                   <div key={i}>
                     <div className="flex items-start gap-3 py-2.5 text-sm">
-                      <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${TYPE_COLORS[c.type]}`}>
+                      <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-xs font-bold uppercase ${TYPE_COLORS[c.type]}`}>
                         {c.type}
                       </span>
                       <span>{c.text}</span>

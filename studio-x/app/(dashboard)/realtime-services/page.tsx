@@ -119,7 +119,7 @@ export default function RealtimeServicesPage() {
             if (items.length === 0) return null
             return (
               <div key={group}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground px-2 mb-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground px-2 mb-2">
                   {group}
                 </p>
                 <nav className="space-y-0.5">
@@ -147,7 +147,7 @@ export default function RealtimeServicesPage() {
                         {svc.status === "active" && (
                           <Badge
                             variant="outline"
-                            className="shrink-0 h-5 px-1.5 text-[10px] border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                            className="shrink-0 h-5 px-1.5 text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                           >
                             Active
                           </Badge>
@@ -155,7 +155,7 @@ export default function RealtimeServicesPage() {
                         {svc.status === "disabled" && (
                           <Badge
                             variant="outline"
-                            className="shrink-0 h-5 px-1.5 text-[10px] border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            className="shrink-0 h-5 px-1.5 text-xs border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400"
                           >
                             Disabled
                           </Badge>
@@ -179,7 +179,7 @@ export default function RealtimeServicesPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-semibold">{selected.name}</h2>
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {selected.group}
                   </span>
                 </div>
@@ -197,7 +197,7 @@ export default function RealtimeServicesPage() {
 
           {selected.configure && enabledState && (
             <div className="p-5 border-b">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-3">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
                 Configure
               </p>
               <div className="space-y-0">
@@ -232,7 +232,7 @@ export default function RealtimeServicesPage() {
           {selected.extensions && selected.extensions.length > 0 && (
             <div className="px-5 py-4 border-b">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Extensions for {selected.name}
                 </p>
                 <a href="/extensions" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
@@ -249,7 +249,7 @@ export default function RealtimeServicesPage() {
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">{ext.name}</p>
                         {ext.installed && (
-                          <Badge variant="default" className="text-[9px] h-4 px-1.5">Installed</Badge>
+                          <Badge variant="default" className="text-xs h-4 px-1.5">Installed</Badge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">

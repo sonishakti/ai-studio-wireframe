@@ -57,7 +57,7 @@ function ConnectorCard({ c }: { c: Connector }) {
           {c.initials}
         </div>
         {isComingSoon ? (
-          <Badge variant="outline" className="text-[10px]">
+          <Badge variant="outline" className="text-xs">
             Coming Soon
           </Badge>
         ) : (
@@ -127,7 +127,7 @@ export default function IntegrationsPage() {
                     <p className="text-sm font-semibold">{kb.name}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">Source: {kb.source}</p>
                     <div className="flex items-center justify-between mt-3">
-                      <Badge variant={kb.status === "ready" ? "default" : "secondary"} className="text-[10px]">
+                      <Badge variant={kb.status === "ready" ? "default" : "secondary"} className="text-xs">
                         {kb.status}
                       </Badge>
                       <span className="text-xs tabular-nums">
@@ -160,7 +160,7 @@ export default function IntegrationsPage() {
                     <p className="text-sm font-semibold">{s.name}</p>
                     <p className="text-xs text-muted-foreground font-mono truncate">{s.url}</p>
                   </div>
-                  <Badge variant="secondary" className="text-[10px]">{s.tools} tools</Badge>
+                  <Badge variant="secondary" className="text-xs">{s.tools} tools</Badge>
                   <Button variant="outline" size="sm">Configure</Button>
                 </div>
               ))}

@@ -36,7 +36,7 @@ export function InsightsCrossLinks({ source }: { source: Source }) {
   const siblings = ALL.filter((s) => s.id !== source)
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
         Related views
       </p>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -56,7 +56,7 @@ export function SecuredModeBanner({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold">Your project is in test mode</p>
-              <Badge variant="outline" className="text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-400">
+              <Badge variant="outline" className="text-xs border-amber-500/40 text-amber-700 dark:text-amber-400">
                 P0
               </Badge>
             </div>
@@ -121,7 +121,7 @@ export function SecuredModePill({ enabled }: { enabled: boolean }) {
     <Badge
       variant="outline"
       className={cn(
-        "gap-1 text-[10px]",
+        "gap-1 text-xs",
         enabled
           ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
           : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400",

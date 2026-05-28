@@ -112,7 +112,7 @@ function AccountUserMenu() {
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
-        <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        <DropdownMenuLabel className="text-xs uppercase tracking-wider text-muted-foreground">
           Signed in as
         </DropdownMenuLabel>
         <DropdownMenuItem className="cursor-default focus:bg-accent/40">

@@ -71,7 +71,7 @@ export default function RestfulApiPage() {
                   </span>
                   <span className="font-mono text-xs flex-1">{ep.path}</span>
                   <span className="text-muted-foreground text-xs">{ep.description}</span>
-                  <Badge variant="outline" className="text-[10px] shrink-0">{ep.category}</Badge>
+                  <Badge variant="outline" className="text-xs shrink-0">{ep.category}</Badge>
                 </div>
                 {i < ENDPOINTS.length - 1 && <Separator />}
               </div>

@@ -241,7 +241,7 @@ export default function DeployWidgetPage() {
                     >
                       <Copy className="h-3 w-3 mr-1" /> Copy
                     </Button>
-                    <pre className="font-mono text-[11px] p-4 overflow-x-auto leading-relaxed pr-16">
+                    <pre className="font-mono text-xs p-4 overflow-x-auto leading-relaxed pr-16">
                       <code>{snippet}</code>
                     </pre>
                   </CardContent>
@@ -261,7 +261,7 @@ export default function DeployWidgetPage() {
 
             <Card className="bg-muted/40 border-dashed">
               <CardContent className="py-3 px-4 flex items-start gap-2">
-                <Badge variant="secondary" className="text-[9px] mt-0.5 shrink-0">PRO TIP</Badge>
+                <Badge variant="secondary" className="text-xs mt-0.5 shrink-0">PRO TIP</Badge>
                 <p className="text-xs text-muted-foreground leading-snug">
                   Want to embed the widget in a React component instead?{" "}
                   <Link href="/deploy/api" className="underline hover:text-foreground">

@@ -58,8 +58,8 @@ export default function PaymentMethodsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{c.brand} •••• {c.last4}</p>
-                    {c.primary && <Badge variant="secondary" className="text-[10px]">Primary</Badge>}
-                    <Badge variant="outline" className="text-[10px]">{c.type}</Badge>
+                    {c.primary && <Badge variant="secondary" className="text-xs">Primary</Badge>}
+                    <Badge variant="outline" className="text-xs">{c.type}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">Expires {c.expires}</p>
                 </div>
