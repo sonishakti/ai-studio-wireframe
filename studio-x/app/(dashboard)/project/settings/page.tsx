@@ -8,9 +8,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   ArrowLeftRight,
-  KeyRound,
   Mail,
-  ExternalLink,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -20,15 +18,6 @@ import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,11 +48,6 @@ export default function ProjectSettingsPage() {
   // Dialog open state
   const [swapOpen, setSwapOpen] = React.useState(false)
   const [disableOpen, setDisableOpen] = React.useState(false)
-  const [tokenOpen, setTokenOpen] = React.useState(false)
-
-  // Temp token state inside the modal
-  const [channelName, setChannelName] = React.useState("")
-  const [generatedToken, setGeneratedToken] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (window.location.hash === "#secured-mode") {
@@ -94,32 +78,6 @@ export default function ProjectSettingsPage() {
       description: `Open the link sent to ${OWNER_EMAIL} to finish disabling the secondary certificate.`,
       icon: <Mail className="h-4 w-4" />,
     })
-  }
-
-  const handleGenerateTempToken = () => {
-    if (!channelName.trim()) {
-      track(Events.form_validation_failed, {
-        form: "generate_temp_token",
-        field: "channel_name",
-        error: "required",
-      })
-      toast.error("Channel name required")
-      return
-    }
-    const mock = `007e${Math.random().toString(36).slice(2, 10).toUpperCase()}IAB${Math.random()
-      .toString(36)
-      .slice(2, 28)
-      .toUpperCase()}`
-    setGeneratedToken(mock)
-    track(Events.cert_temp_token_generated, {
-      project_id: "prj_123456",
-      channel: channelName,
-    })
-  }
-
-  const resetTempTokenDialog = () => {
-    setChannelName("")
-    setGeneratedToken(null)
   }
 
   return (
@@ -185,162 +143,25 @@ export default function ProjectSettingsPage() {
           {/* ─── Security / Secured Mode Card ───────────────────────── */}
           <Card className="p-6" id="secured-mode">
             {/* Header row */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-emerald-500/15">
-                  <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold">Security</h2>
-                    <Badge
-                      variant="outline"
-                      className="text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                    >
-                      Secured mode active
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-lg leading-relaxed">
-                    SDKs authenticate with a token signed by your App Certificate. To disable
-                    Secured mode entirely, contact support.
-                  </p>
-                </div>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-emerald-500/15">
+                <ShieldCheck className="h-5 w-5 text-emerald-600" />
               </div>
-
-              {/* Generate Temp Token */}
-              <Dialog
-                open={tokenOpen}
-                onOpenChange={(o) => {
-                  setTokenOpen(o)
-                  if (!o) resetTempTokenDialog()
-                }}
-              >
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
-                    <KeyRound className="h-3.5 w-3.5" />
-                    Generate Temp Token
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Generate Temporary Token</DialogTitle>
-                    <DialogDescription>
-                      Short-lived RTC token for testing. Expires after 24 hours.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_240px]">
-                    {/* Left: form */}
-                    <div className="space-y-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="channel-name">Channel Name</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="channel-name"
-                            value={channelName}
-                            onChange={(e) => setChannelName(e.target.value)}
-                            placeholder="e.g. demo-channel"
-                            className="font-mono text-sm"
-                          />
-                          <Button onClick={handleGenerateTempToken} className="shrink-0">
-                            Generate
-                          </Button>
-                        </div>
-                      </div>
-
-                      {generatedToken && (
-                        <div className="space-y-1.5">
-                          <Label htmlFor="generated-token">Token</Label>
-                          <div className="relative">
-                            <Input
-                              id="generated-token"
-                              value={generatedToken}
-                              readOnly
-                              className="pr-9 font-mono text-xs"
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                              onClick={() => {
-                                void navigator.clipboard.writeText(generatedToken)
-                                toast.success("Token copied")
-                              }}
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Expires in 24 hours · Channel{" "}
-                            <span className="font-mono">{channelName}</span>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right: warning + help */}
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-2.5 rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
-                        <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                        <p className="text-xs text-foreground leading-relaxed">
-                          RTC Temp tokens should{" "}
-                          <span className="font-semibold">NOT</span> be used in a production
-                          environment.
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold">Need Help?</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          In production, run a token server in your security infrastructure to
-                          control channel access.
-                        </p>
-                        <div className="space-y-1.5 pt-1">
-                          <a
-                            href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-1 text-xs text-primary hover:underline"
-                          >
-                            Deploy a token server
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                          <a
-                            href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-1 text-xs text-primary hover:underline"
-                          >
-                            What are tokens?
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                          <a
-                            href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex items-center gap-1 text-xs text-primary hover:underline"
-                          >
-                            What are token servers?
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <DialogFooter className="sm:justify-start">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setTokenOpen(false)
-                        resetTempTokenDialog()
-                      }}
-                    >
-                      Close
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold">Security</h2>
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                  >
+                    Secured mode active
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 max-w-lg leading-relaxed">
+                  SDKs authenticate with a token signed by your App Certificate. To disable
+                  Secured mode entirely, contact support.
+                </p>
+              </div>
             </div>
 
             <Separator className="mb-5" />
@@ -439,26 +260,19 @@ export default function ProjectSettingsPage() {
           <Card className="p-6">
             <h2 className="text-base font-semibold mb-1">Manage with CLI</h2>
             <p className="text-sm text-muted-foreground mb-5">
-              Switch to this project from your terminal.
+              Switch projects, rotate certificates, and generate temp tokens from your terminal.
             </p>
-            <div className="relative">
-              <Terminal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value="agora project use prj_123456"
-                readOnly
-                className="pl-9 pr-9 font-mono text-sm"
+
+            <div className="space-y-3">
+              <CliCommand
+                label="Use this project"
+                command="agora project use prj_123456"
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                onClick={() => {
-                  void navigator.clipboard.writeText("agora project use prj_123456")
-                  toast.success("Command copied")
-                }}
-              >
-                <Copy className="h-3.5 w-3.5" />
-              </Button>
+              <CliCommand
+                label="Generate a temp token for testing"
+                command="agora token create --channel demo-channel --expires 24h"
+                hint="Temp tokens are CLI-only. For production, run a token server in your own infrastructure."
+              />
             </div>
           </Card>
         </div>
@@ -488,6 +302,45 @@ export default function ProjectSettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  )
+}
+
+// ─── CliCommand subcomponent ─────────────────────────────────────────────────
+
+function CliCommand({
+  label,
+  command,
+  hint,
+}: {
+  label: string
+  command: string
+  hint?: string
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <div className="relative">
+        <Terminal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={command}
+          readOnly
+          className="pl-9 pr-9 font-mono text-sm"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+          onClick={() => {
+            void navigator.clipboard.writeText(command)
+            toast.success("Command copied")
+          }}
+        >
+          <Copy className="h-3.5 w-3.5" />
+          <span className="sr-only">Copy command</span>
+        </Button>
+      </div>
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   )
 }
