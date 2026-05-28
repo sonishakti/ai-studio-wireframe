@@ -1,7 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { Copy, Pencil, Terminal, RotateCw, AlertTriangle, ShieldCheck } from "lucide-react"
+import {
+  Copy,
+  Pencil,
+  Terminal,
+  AlertTriangle,
+  ShieldCheck,
+  ArrowLeftRight,
+  KeyRound,
+  Mail,
+  ExternalLink,
+} from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,19 +19,52 @@ import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
+import { Switch } from "@/components/ui/switch"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
+
+const OWNER_EMAIL = "soni28shakti@gmail.com"
+const MASKED = "••••••••••••••••"
 
 export default function ProjectSettingsPage() {
   const [projectName, setProjectName] = React.useState("My First Project")
   const [editingName, setEditingName] = React.useState(false)
-  // Secured mode is on by default for all new projects. The UI shows status
-  // + rotation controls but does NOT expose an off-switch — disabling
-  // Secured Mode is a support-only path for legacy projects.
-  const securedMode = true
-  const [hasSecondary, setHasSecondary] = React.useState(false)
 
-  // Scroll to #secured-mode anchor on initial load
+  // Secured mode is on by default for all new projects. Disabling is a
+  // support-only path for legacy projects — no toggle exposed here.
+  const securedMode = true
+
+  // Rotation state — secondary off by default. Primary cert always exists.
+  const [hasSecondary, setHasSecondary] = React.useState(true)
+
+  // Dialog open state
+  const [swapOpen, setSwapOpen] = React.useState(false)
+  const [disableOpen, setDisableOpen] = React.useState(false)
+  const [tokenOpen, setTokenOpen] = React.useState(false)
+
+  // Temp token state inside the modal
+  const [channelName, setChannelName] = React.useState("")
+  const [generatedToken, setGeneratedToken] = React.useState<string | null>(null)
+
   React.useEffect(() => {
     if (window.location.hash === "#secured-mode") {
       document.getElementById("secured-mode")?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -30,9 +73,53 @@ export default function ProjectSettingsPage() {
 
   const handleEnableSecondary = () => {
     setHasSecondary(true)
+    track(Events.cert_secondary_enabled, { project_id: "prj_123456" })
     toast.success("Secondary certificate enabled", {
-      description: "Use this for zero-downtime rotation. Switch traffic to the new cert, then regenerate primary.",
+      description: "Use this for zero-downtime rotation. Swap when your services are ready.",
     })
+  }
+
+  const handleConfirmSwap = () => {
+    setSwapOpen(false)
+    track(Events.cert_swap_confirmed, { project_id: "prj_123456" })
+    toast.success("Certificates swapped", {
+      description: "What was the secondary is now the primary. Update any services still signing with the old key.",
+    })
+  }
+
+  const handleConfirmDisable = () => {
+    setDisableOpen(false)
+    track(Events.cert_secondary_disable_requested, { project_id: "prj_123456" })
+    toast.info("Confirmation email sent", {
+      description: `Open the link sent to ${OWNER_EMAIL} to finish disabling the secondary certificate.`,
+      icon: <Mail className="h-4 w-4" />,
+    })
+  }
+
+  const handleGenerateTempToken = () => {
+    if (!channelName.trim()) {
+      track(Events.form_validation_failed, {
+        form: "generate_temp_token",
+        field: "channel_name",
+        error: "required",
+      })
+      toast.error("Channel name required")
+      return
+    }
+    const mock = `007e${Math.random().toString(36).slice(2, 10).toUpperCase()}IAB${Math.random()
+      .toString(36)
+      .slice(2, 28)
+      .toUpperCase()}`
+    setGeneratedToken(mock)
+    track(Events.cert_temp_token_generated, {
+      project_id: "prj_123456",
+      channel: channelName,
+    })
+  }
+
+  const resetTempTokenDialog = () => {
+    setChannelName("")
+    setGeneratedToken(null)
   }
 
   return (
@@ -79,6 +166,10 @@ export default function ProjectSettingsPage() {
                     variant="ghost"
                     size="icon"
                     className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => {
+                      void navigator.clipboard.writeText("prj_123456")
+                      toast.success("App ID copied")
+                    }}
                   >
                     <Copy className="h-3.5 w-3.5" />
                     <span className="sr-only">Copy App ID</span>
@@ -91,8 +182,9 @@ export default function ProjectSettingsPage() {
             </div>
           </Card>
 
-          {/* ─── Secured Mode Card ──────────────────────────────────── */}
+          {/* ─── Security / Secured Mode Card ───────────────────────── */}
           <Card className="p-6" id="secured-mode">
+            {/* Header row */}
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-emerald-500/15">
@@ -100,106 +192,244 @@ export default function ProjectSettingsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold">Secured mode</h2>
+                    <h2 className="text-base font-semibold">Security</h2>
                     <Badge
                       variant="outline"
                       className="text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                     >
-                      Active
+                      Secured mode active
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1 max-w-lg leading-relaxed">
-                    SDKs authenticate with a token signed by your App Certificate. Secured mode is
-                    on by default for new projects — to disable it, contact support.
+                    SDKs authenticate with a token signed by your App Certificate. To disable
+                    Secured mode entirely, contact support.
                   </p>
                 </div>
               </div>
+
+              {/* Generate Temp Token */}
+              <Dialog
+                open={tokenOpen}
+                onOpenChange={(o) => {
+                  setTokenOpen(o)
+                  if (!o) resetTempTokenDialog()
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+                    <KeyRound className="h-3.5 w-3.5" />
+                    Generate Temp Token
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Generate Temporary Token</DialogTitle>
+                    <DialogDescription>
+                      Short-lived RTC token for testing. Expires after 24 hours.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_240px]">
+                    {/* Left: form */}
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="channel-name">Channel Name</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="channel-name"
+                            value={channelName}
+                            onChange={(e) => setChannelName(e.target.value)}
+                            placeholder="e.g. demo-channel"
+                            className="font-mono text-sm"
+                          />
+                          <Button onClick={handleGenerateTempToken} className="shrink-0">
+                            Generate
+                          </Button>
+                        </div>
+                      </div>
+
+                      {generatedToken && (
+                        <div className="space-y-1.5">
+                          <Label htmlFor="generated-token">Token</Label>
+                          <div className="relative">
+                            <Input
+                              id="generated-token"
+                              value={generatedToken}
+                              readOnly
+                              className="pr-9 font-mono text-xs"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                              onClick={() => {
+                                void navigator.clipboard.writeText(generatedToken)
+                                toast.success("Token copied")
+                              }}
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Expires in 24 hours · Channel{" "}
+                            <span className="font-mono">{channelName}</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: warning + help */}
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-2.5 rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
+                        <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                        <p className="text-xs text-foreground leading-relaxed">
+                          RTC Temp tokens should{" "}
+                          <span className="font-semibold">NOT</span> be used in a production
+                          environment.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold">Need Help?</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          In production, run a token server in your security infrastructure to
+                          control channel access.
+                        </p>
+                        <div className="space-y-1.5 pt-1">
+                          <a
+                            href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            Deploy a token server
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                          <a
+                            href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            What are tokens?
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                          <a
+                            href="https://docs.agora.io/en/video-calling/get-started/authentication-workflow"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-xs text-primary hover:underline"
+                          >
+                            What are token servers?
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DialogFooter className="sm:justify-start">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setTokenOpen(false)
+                        resetTempTokenDialog()
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <Separator className="mb-5" />
 
-            {/* Cert management */}
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium">App Certificate</h3>
-              {(
-                <DestructiveActionDialog
-                  action="Regenerate"
-                  resource="primary certificate"
-                  resourceId="prj_123456"
-                  description="Regenerating immediately invalidates the current primary certificate. Any service using it will fail until rotated. Use the Secondary Certificate first for zero-downtime rotation."
-                  successMessage="New primary certificate generated"
-                >
+            {/* Certificate rotation pair */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch">
+              {/* Primary cert */}
+              <CertCard
+                label="Primary Certificate"
+                masked={MASKED}
+                meta="Created Mar 12, 2026 · Last used 2 min ago"
+                helper="Server-side secret. Treat like a database password."
+              />
+
+              {/* Swap control */}
+              <div className="flex sm:flex-col items-center justify-center sm:py-2">
+                <AlertDialog open={swapOpen} onOpenChange={setSwapOpen}>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="gap-1.5 text-xs"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <RotateCw className="h-3 w-3" /> Regenerate
-                  </Button>
-                </DestructiveActionDialog>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="primary-cert">Primary Certificate</Label>
-                <div className="relative">
-                  <Input
-                    id="primary-cert"
-                    type="password"
-                    value="••••••••••••••••"
-                    readOnly
-                    className="pr-9 font-mono"
-                  />
-                  <Button
-                    variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                    onClick={() => toast.success("Copied certificate")}
+                    className="h-9 w-9 rounded-full shrink-0"
+                    onClick={() => setSwapOpen(true)}
+                    disabled={!hasSecondary}
+                    title={
+                      hasSecondary
+                        ? "Swap primary and secondary"
+                        : "Enable a secondary certificate to swap"
+                    }
                   >
-                    <Copy className="h-3.5 w-3.5" />
+                    <ArrowLeftRight className="h-4 w-4 text-primary" />
+                    <span className="sr-only">Swap certificates</span>
                   </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Server-side secret. Treat like a database password.
-                </p>
-                <div className="flex items-center gap-3 pt-1 text-xs text-muted-foreground">
-                  <span>Created <span className="tabular-nums">Mar 12, 2026</span></span>
-                  <span>·</span>
-                  <span>Last used <span className="tabular-nums">2 min ago</span></span>
-                </div>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Swap primary and secondary?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        The current secondary certificate becomes the new primary. Make sure every
+                        service signing tokens has been updated, or new joins will start failing.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleConfirmSwap}>
+                        Swap
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="secondary-cert">Secondary Certificate</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="secondary-cert"
-                    value={hasSecondary ? "••••••••••••••••" : "None"}
-                    readOnly
-                    className={hasSecondary ? "font-mono" : "text-muted-foreground"}
+              {/* Secondary cert */}
+              <CertCard
+                label="Secondary Certificate"
+                masked={hasSecondary ? MASKED : null}
+                meta={
+                  hasSecondary
+                    ? "Created Mar 12, 2026 · Last used 1 hr ago"
+                    : "Enable to start a zero-downtime rotation."
+                }
+                helper={
+                  hasSecondary
+                    ? "Used as fallback during rotation. Disable when you no longer need it."
+                    : undefined
+                }
+                toggle={
+                  <Switch
+                    checked={hasSecondary}
+                    onCheckedChange={(next) => {
+                      if (next) {
+                        handleEnableSecondary()
+                      } else {
+                        setDisableOpen(true)
+                      }
+                    }}
+                    aria-label="Toggle secondary certificate"
                   />
-                  {!hasSecondary && (
-                    <Button onClick={handleEnableSecondary} className="shrink-0">
-                      Enable
-                    </Button>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Enable for zero-downtime certificate rotation.
-                </p>
-              </div>
+                }
+                onEnable={!hasSecondary ? handleEnableSecondary : undefined}
+              />
             </div>
 
-            {/* Rotation tip — only show when secondary exists */}
+            {/* Rotation tip */}
             {hasSecondary && (
               <div className="mt-5 flex items-start gap-2.5 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">Rotation in progress.</span> Both
-                  certificates are accepted right now. Once all services have switched to the new
-                  one, remove the old certificate to complete the rotation.
+                  certificates sign valid tokens right now. Once every service has switched, swap
+                  them and disable the old one.
                 </p>
               </div>
             )}
@@ -222,6 +452,10 @@ export default function ProjectSettingsPage() {
                 variant="ghost"
                 size="icon"
                 className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                onClick={() => {
+                  void navigator.clipboard.writeText("agora project use prj_123456")
+                  toast.success("Command copied")
+                }}
               >
                 <Copy className="h-3.5 w-3.5" />
               </Button>
@@ -229,6 +463,94 @@ export default function ProjectSettingsPage() {
           </Card>
         </div>
       </main>
+
+      {/* ─── Disable Secondary Certificate confirmation ───────────── */}
+      <AlertDialog open={disableOpen} onOpenChange={setDisableOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disable Secondary Certificate</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will fail all requests to join a channel signed by this certificate. Make sure
+              every client has the latest install with tokens generated by the primary certificate.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
+            <Mail className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              For safety, we&apos;ll email a confirmation link to{" "}
+              <span className="font-medium text-foreground">{OWNER_EMAIL}</span>. The certificate
+              stays active until you click the link.
+            </p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDisable}>Verify</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
+
+// ─── CertCard subcomponent ───────────────────────────────────────────────────
+
+interface CertCardProps {
+  label: string
+  masked: string | null
+  meta: string
+  helper?: string
+  toggle?: React.ReactNode
+  onEnable?: () => void
+}
+
+function CertCard({ label, masked, meta, helper, toggle, onEnable }: CertCardProps) {
+  return (
+    <div className="rounded-lg border border-border bg-card/50 p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-sm font-medium">{label}</Label>
+        {toggle}
+      </div>
+
+      {masked ? (
+        <div className="relative">
+          <Input
+            type="password"
+            value={masked}
+            readOnly
+            className="pr-9 font-mono"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+            onClick={() => {
+              void navigator.clipboard.writeText("mock-certificate-value")
+              toast.success(`${label} copied`)
+            }}
+          >
+            <Copy className="h-3.5 w-3.5" />
+            <span className="sr-only">Copy {label.toLowerCase()}</span>
+          </Button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <Input
+            value="Not enabled"
+            readOnly
+            className="text-muted-foreground"
+          />
+          {onEnable && (
+            <Button onClick={onEnable} className="shrink-0">
+              Enable
+            </Button>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-1">
+        {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
+        <p className="text-xs text-muted-foreground tabular-nums">{meta}</p>
+      </div>
     </div>
   )
 }

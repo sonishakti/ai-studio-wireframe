@@ -59,6 +59,12 @@ export const Events = {
   destructive_action_canceled:"destructive_action_canceled",   // AlertDialog dismissed
   destructive_action_confirmed:"destructive_action_confirmed",
 
+  // ── Security / certificate rotation ────────────────────────────────────────
+  cert_temp_token_generated:        "cert_temp_token_generated",
+  cert_swap_confirmed:              "cert_swap_confirmed",
+  cert_secondary_enabled:           "cert_secondary_enabled",
+  cert_secondary_disable_requested: "cert_secondary_disable_requested",
+
   // ── Errors & resilience ────────────────────────────────────────────────────
   page_error_rendered:        "page_error_rendered",
   not_found_rendered:         "not_found_rendered",
