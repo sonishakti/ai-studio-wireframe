@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bell } from "lucide-react"
+import { Bell, CircleHelp, Sparkles } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { openComposerPanel } from "@/components/composer-panel"
 
 // ─── segment → human label map ───────────────────────────────────────────────
 
@@ -122,14 +123,25 @@ export function DashboardHeader() {
       </Breadcrumb>
 
       <div className="ml-auto flex shrink-0 items-center gap-1.5">
-        <Button variant="ghost" size="icon" className="relative h-8 w-8">
+        <Button variant="ghost" size="icon" className="h-8 w-8" title="Help">
+          <CircleHelp className="h-4 w-4" />
+          <span className="sr-only">Help</span>
+        </Button>
+        <Button variant="ghost" size="icon" className="relative h-8 w-8" title="Notifications">
           <Bell className="h-4 w-4" />
           <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
           <span className="sr-only">Notifications</span>
         </Button>
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-          <span className="text-primary">✦</span>
-          Ask
+        <Separator orientation="vertical" className="h-4 mx-1" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 text-xs"
+          onClick={openComposerPanel}
+          title="Composer (⌘J)"
+        >
+          Composer
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
         </Button>
       </div>
     </header>

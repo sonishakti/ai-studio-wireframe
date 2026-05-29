@@ -111,15 +111,15 @@ function NavLink({ item }: { item: NavItem }) {
 }
 
 function ComposerItem() {
+  const pathname = usePathname()
+  const active = pathname === "/composer"
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        tooltip="Composer (⌘K)"
-        onClick={openCommandPalette}
-        className="cursor-pointer"
-      >
-        <Sparkles className="h-4 w-4" />
-        <span>Composer</span>
+      <SidebarMenuButton asChild isActive={active} tooltip="Composer">
+        <Link href="/composer">
+          <Sparkles className="h-4 w-4" />
+          <span>Composer</span>
+        </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
   )

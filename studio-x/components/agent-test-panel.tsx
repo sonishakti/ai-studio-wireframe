@@ -109,33 +109,79 @@ function StatRow({ label, value, mono = false }: { label: string; value: string;
 /**
  * AgentSphere — animated gradient orb representing the agent's state.
  * Pure CSS — no canvas/three.js needed at wireframe altitude.
+ *
+ * Layers (bottom → top):
+ *   1. Ambient glow halo (pulses slowly)
+ *   2. Outer ring (subtle border)
+ *   3. Base radial gradient (deep blue/cyan with depth)
+ *   4. Specular highlight (top-left)
+ *   5. Inner shadow + glow (gives ball-shape)
+ *   6. Breathing pulse overlay (active state only)
  */
-function AgentSphere({ size = 132 }: { size?: number }) {
+function AgentSphere({ size = 132, active = false }: { size?: number; active?: boolean }) {
   return (
-    <div
-      className="relative shrink-0 rounded-full overflow-hidden"
-      style={{ width: size, height: size }}
-    >
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      {/* Ambient halo — breathing glow behind the sphere */}
       <div
-        className="absolute inset-0 rounded-full opacity-90"
+        className="absolute inset-0 rounded-full -z-0"
         style={{
           background:
-            "radial-gradient(circle at 32% 28%, oklch(0.85 0.12 240) 0%, oklch(0.55 0.18 250) 38%, oklch(0.28 0.12 260) 70%, oklch(0.12 0.06 265) 100%)",
+            "radial-gradient(circle, rgba(80,140,255,0.20) 0%, rgba(80,140,255,0) 65%)",
+          transform: "scale(1.6)",
+          animation: "sx-sphere-breathe 6s ease-in-out infinite",
         }}
       />
-      <div
-        className="absolute inset-0 rounded-full mix-blend-overlay"
-        style={{
-          background:
-            "radial-gradient(circle at 28% 24%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 30%)",
-        }}
-      />
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          boxShadow: "inset 0 -12px 24px rgba(0,0,0,0.45), 0 0 60px 4px rgba(80,140,255,0.15)",
-        }}
-      />
+
+      {/* Sphere body */}
+      <div className="absolute inset-0 rounded-full overflow-hidden shadow-[inset_0_-14px_28px_rgba(0,0,0,0.55),0_0_40px_-4px_rgba(80,140,255,0.25)]">
+        {/* Base radial — deep blue gradient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 32% 28%, oklch(0.88 0.10 235) 0%, oklch(0.62 0.18 245) 28%, oklch(0.34 0.16 255) 58%, oklch(0.16 0.08 265) 92%)",
+          }}
+        />
+
+        {/* Edge darkening for ball-shape */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 50%, transparent 55%, rgba(0,0,0,0.35) 100%)",
+          }}
+        />
+
+        {/* Specular highlight — top-left bright spot */}
+        <div
+          className="absolute inset-0 mix-blend-screen"
+          style={{
+            background:
+              "radial-gradient(ellipse 38% 28% at 30% 24%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 60%)",
+          }}
+        />
+
+        {/* Secondary tiny specular */}
+        <div
+          className="absolute inset-0 mix-blend-screen"
+          style={{
+            background:
+              "radial-gradient(ellipse 14% 10% at 28% 22%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
+          }}
+        />
+
+        {/* Active pulse — only when connected */}
+        {active && (
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(160,210,255,0.4) 0%, transparent 60%)",
+              animation: "sx-sphere-pulse 1.8s ease-in-out infinite",
+            }}
+          />
+        )}
+      </div>
     </div>
   )
 }

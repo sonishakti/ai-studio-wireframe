@@ -127,3 +127,14 @@
     @apply font-sans;
     }
 }
+
+/* AgentSphere animations — used by components/agent-test-panel.tsx */
+@keyframes sx-sphere-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1.55); }
+  50%      { opacity: 0.85; transform: scale(1.72); }
+}
+
+@keyframes sx-sphere-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.65; }
+}

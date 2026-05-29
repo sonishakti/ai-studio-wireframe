@@ -1,6 +1,7 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
+import { ComposerPanelMount } from "@/components/composer-panel"
 
 export default function DashboardLayout({
   children,
@@ -30,6 +31,10 @@ export default function DashboardLayout({
           {children}
         </div>
       </SidebarInset>
+
+      {/* Global Composer slide-over — opened from anywhere via
+          openComposerPanel() or window event sx:open-composer. */}
+      <ComposerPanelMount />
     </SidebarProvider>
   )
 }
