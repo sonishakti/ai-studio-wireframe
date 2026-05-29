@@ -4,17 +4,18 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  Home,
   Bot,
-  Radio,
-  Puzzle,
-  Shield,
-  ChevronRight,
-  Sparkles,
-  SlidersHorizontal,
+  Library,
+  Phone,
   Megaphone,
-  Rocket,
-  Hash,
+  ScatterChart,
+  History,
+  Activity,
+  Settings2,
+  Radio,
+  Key,
+  Sparkles,
+  TextSearch,
 } from "lucide-react"
 
 import {
@@ -22,7 +23,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -30,38 +30,23 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 
 import { ProjectSwitcher } from "@/components/project-switcher"
 import { AccountAvatarButton } from "@/components/account-avatar-button"
 
+/** Open the global command palette from anywhere. */
+function openCommandPalette() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("sx:open-command-palette"))
+  }
+}
+
 // ─── nav structure ───────────────────────────────────────────────────────────
-
-const NAV_TOP: NavItem[] = [
-  { label: "Home", href: "/home", icon: Home },
-  { label: "Agents", href: "/agents", icon: Bot },
-  { label: "Realtime Services", href: "/realtime-services", icon: Radio },
-  { label: "Integrations", href: "/integrations", icon: Puzzle },
-  { label: "Deploy", href: "/deploy", icon: Rocket },
-]
-
-// Campaigns — omnichannel hub. A campaign owns multiple modalities (telephony,
-// WhatsApp, web, SMS) and its analytics/calls live as tabs inside the campaign
-// detail page. Phone numbers are managed here too because that's where they're
-// assigned.
-const NAV_CAMPAIGNS: NavItem[] = [
-  { label: "Campaigns", href: "/campaigns", icon: Megaphone },
-  { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Hash },
-]
-
-const NAV_PROJECT: NavItem[] = [
-  { label: "Project Settings", href: "/project/settings", icon: SlidersHorizontal },
-  { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Shield },
-]
+//
+// Per the Figma "Design Theme and UI" reference: items + grouping match the
+// Composer / Build / Deploy / Insights / Project clusters, but rendered as
+// flat sections separated by dividers — no uppercase BUILD/DEPLOY/INSIGHTS
+// label headers (per CLAUDE.md "Don't re-litigate" — section labels rejected).
 
 type NavItem = {
   label: string
@@ -70,16 +55,43 @@ type NavItem = {
   badge?: string
 }
 
+const NAV_BUILD: NavItem[] = [
+  { label: "Agents", href: "/agents", icon: Bot },
+  { label: "Integrations", href: "/integrations", icon: Library },
+]
+
+const NAV_DEPLOY: NavItem[] = [
+  { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Phone },
+  { label: "Campaigns", href: "/campaigns", icon: Megaphone },
+]
+
+const NAV_INSIGHTS: NavItem[] = [
+  { label: "Monitor", href: "/monitor", icon: ScatterChart },
+  { label: "Call History", href: "/calls", icon: History },
+  { label: "Session History", href: "/session-history", icon: Activity },
+]
+
+const NAV_PROJECT: NavItem[] = [
+  { label: "Project Settings", href: "/project/settings", icon: Settings2 },
+  { label: "Realtime Services", href: "/realtime-services", icon: Radio },
+  { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Key },
+]
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
+
+function isItemActive(itemHref: string, pathname: string): boolean {
+  if (itemHref === "/campaigns") {
+    // Match /campaigns root, /campaigns/new, /campaigns/[id] but NOT /campaigns/phone-numbers
+    if (pathname === "/campaigns") return true
+    if (pathname.startsWith("/campaigns/phone-numbers")) return false
+    return pathname.startsWith("/campaigns/")
+  }
+  return pathname === itemHref || pathname.startsWith(itemHref + "/")
+}
 
 function NavLink({ item }: { item: NavItem }) {
   const pathname = usePathname()
-  const active =
-    item.href === "/home"
-      ? pathname === "/home"
-      : item.href === "/campaigns"
-        ? pathname === "/campaigns" || pathname.startsWith("/campaigns/new") || /^\/campaigns\/[^/]+$/.test(pathname)
-        : pathname.startsWith(item.href)
+  const active = isItemActive(item.href, pathname)
 
   return (
     <SidebarMenuItem>
@@ -98,49 +110,34 @@ function NavLink({ item }: { item: NavItem }) {
   )
 }
 
-function CollapsibleGroup({
-  label,
-  items,
-  defaultOpen = true,
-}: {
-  label: string
-  items: NavItem[]
-  defaultOpen?: boolean
-}) {
-  const pathname = usePathname()
-  const anyActive = items.some((i) => pathname.startsWith(i.href))
-  const storageKey = `sx:sidebar-group:${label}`
-
-  const [open, setOpen] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return anyActive || defaultOpen
-    const stored = window.localStorage.getItem(storageKey)
-    if (stored === null) return anyActive || defaultOpen
-    return stored === "1"
-  })
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return
-    window.localStorage.setItem(storageKey, open ? "1" : "0")
-  }, [open, storageKey])
-
+function ComposerItem() {
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="group/collapsible">
-      <SidebarGroup className="py-0">
-        <CollapsibleTrigger asChild>
-          <SidebarGroupLabel className="cursor-pointer select-none hover:text-foreground transition-colors">
-            {label}
-            <ChevronRight className="ml-auto h-3.5 w-3.5 transition-transform group-data-[state=open]/collapsible:rotate-90" />
-          </SidebarGroupLabel>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenu>
-            {items.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </CollapsibleContent>
-      </SidebarGroup>
-    </Collapsible>
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        tooltip="Composer (⌘K)"
+        onClick={openCommandPalette}
+        className="cursor-pointer"
+      >
+        <Sparkles className="h-4 w-4" />
+        <span>Composer</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
+function SearchItem() {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        tooltip="Search (⌘K)"
+        onClick={openCommandPalette}
+        className="cursor-pointer border border-border text-muted-foreground hover:text-foreground"
+      >
+        <TextSearch className="h-4 w-4" />
+        <span className="flex-1 text-left">Search</span>
+        <kbd className="text-xs font-mono tracking-wider">⌘K</kbd>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   )
 }
 
@@ -154,7 +151,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/home">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Sparkles className="h-4 w-4" />
                 </div>
@@ -169,10 +166,19 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Flat top items: build → deploy progression */}
+        {/* Composer — opens command palette */}
         <SidebarGroup>
           <SidebarMenu>
-            {NAV_TOP.map((item) => (
+            <ComposerItem />
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* Build — Agents, Integrations */}
+        <SidebarGroup>
+          <SidebarMenu>
+            {NAV_BUILD.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
           </SidebarMenu>
@@ -180,16 +186,48 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Campaigns — omnichannel hub (campaigns + phone numbers) */}
-        <CollapsibleGroup label="Campaigns" items={NAV_CAMPAIGNS} />
+        {/* Deploy — Phone Numbers, Campaigns */}
+        <SidebarGroup>
+          <SidebarMenu>
+            {NAV_DEPLOY.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
 
         <SidebarSeparator />
 
-        {/* Project — configuration surfaces */}
-        <CollapsibleGroup label="Project" items={NAV_PROJECT} />
+        {/* Insights — Monitor, Call History, Session History */}
+        <SidebarGroup>
+          <SidebarMenu>
+            {NAV_INSIGHTS.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* Project — Settings, Realtime Services, Vendor Credentials */}
+        <SidebarGroup>
+          <SidebarMenu>
+            {NAV_PROJECT.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* Search ⌘K */}
+        <SidebarGroup>
+          <SidebarMenu>
+            <SearchItem />
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: project switcher (left) + account avatar (right) */}
+      {/* Footer: project switcher + account avatar */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-1.5">

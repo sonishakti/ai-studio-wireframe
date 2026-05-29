@@ -3,16 +3,21 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Bot, Plus, MessageCircle, Upload, Sparkles, ChevronRight, MoreHorizontal,
-  Search, Filter, Library, ArrowLeft,
+  Bot,
+  Plus,
+  Upload,
+  ChevronRight,
+  MoreHorizontal,
+  Search,
+  Filter,
+  Library,
+  ArrowLeft,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet"
@@ -24,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
+import { AgentTestPanel } from "@/components/agent-test-panel"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 
@@ -61,7 +67,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
   live: "default", draft: "secondary", paused: "outline",
 }
 
-// ─── template card (reused in both first-run and Sheet) ──────────────────────
+// ─── template row ────────────────────────────────────────────────────────────
 
 function TemplateRow({
   tpl,
@@ -79,7 +85,9 @@ function TemplateRow({
       onClick={onSelect}
       className={cn(
         "w-full rounded-lg border bg-card px-4 py-4 text-left transition-all",
-        isSelected ? "border-primary/60 shadow-sm ring-1 ring-primary/30" : "hover:border-foreground/20 hover:bg-accent/30",
+        isSelected
+          ? "border-primary/60 shadow-sm ring-1 ring-primary/30"
+          : "hover:border-foreground/20 hover:bg-accent/30",
       )}
     >
       <div className="flex items-start justify-between gap-4">
@@ -89,11 +97,22 @@ function TemplateRow({
         </div>
         {isSelected && (
           <div className="flex items-center gap-2 shrink-0">
-            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={(e) => { e.stopPropagation(); onTest() }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={(e) => {
+                e.stopPropagation()
+                onTest()
+              }}
+            >
               Test
             </Button>
             <Button size="sm" className="h-8 text-xs gap-1" asChild>
-              <Link href={`/agents/${tpl.id}/edit`} onClick={(e) => e.stopPropagation()}>
+              <Link
+                href={`/agents/${tpl.id}/edit`}
+                onClick={(e) => e.stopPropagation()}
+              >
                 Use this template
                 <ChevronRight className="h-3 w-3" />
               </Link>
@@ -105,48 +124,10 @@ function TemplateRow({
   )
 }
 
-// ─── shared playground stats sidebar ─────────────────────────────────────────
-
-function PlaygroundPanel({ selected }: { selected: Template }) {
-  const [isCalling, setIsCalling] = React.useState(false)
-  return (
-    <aside className="rounded-lg border bg-card flex flex-col">
-      <div className="flex items-center justify-center pt-6 pb-4">
-        <Badge variant="outline" className="gap-1.5 px-3 py-1">
-          <Sparkles className="h-3 w-3 text-primary" />
-          {selected.name}
-        </Badge>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
-        <div
-          className={cn(
-            "relative w-32 h-32 rounded-full flex items-center justify-center transition-all",
-            isCalling
-              ? "bg-gradient-to-br from-primary/40 via-primary/20 to-transparent shadow-[0_0_60px_-10px_hsl(var(--primary)/0.5)] animate-pulse"
-              : "bg-gradient-to-br from-zinc-300 via-zinc-200 to-zinc-100 dark:from-zinc-600 dark:via-zinc-700 dark:to-zinc-800 shadow-inner",
-          )}
-        >
-          <div className={cn("w-20 h-20 rounded-full", isCalling ? "bg-gradient-to-br from-primary/80 to-primary/40" : "bg-gradient-to-br from-zinc-400 to-zinc-600 dark:from-zinc-500 dark:to-zinc-700")} />
-        </div>
-        <p className="text-sm text-muted-foreground mt-6">{isCalling ? "Agent listening…" : "Idle"}</p>
-        <Button size="sm" className="mt-4 gap-1.5" onClick={() => setIsCalling((v) => !v)} variant={isCalling ? "destructive" : "default"}>
-          <MessageCircle className="h-3.5 w-3.5" /> {isCalling ? "End conversation" : "Talk to agent"}
-        </Button>
-      </div>
-      <Separator />
-      <div className="px-5 py-4 space-y-2 text-xs">
-        <div className="flex items-center justify-between"><span className="text-muted-foreground">LLM</span><span className="font-medium">{selected.llm}</span></div>
-        <div className="flex items-center justify-between"><span className="text-muted-foreground">ASR</span><span className="font-medium">{selected.asr}</span></div>
-        <div className="flex items-center justify-between"><span className="text-muted-foreground">TTS</span><span className="font-medium">{selected.tts}</span></div>
-      </div>
-    </aside>
-  )
-}
-
 // ─── first-run gallery view ──────────────────────────────────────────────────
 
 function FirstRunView() {
-  const [selectedId, setSelectedId] = React.useState("appointment-reminder")
+  const [selectedId, setSelectedId] = React.useState("ivr")
   const selected = TEMPLATES.find((t) => t.id === selectedId)!
 
   React.useEffect(() => {
@@ -154,27 +135,54 @@ function FirstRunView() {
   }, [])
 
   return (
-    <main className="flex-1 grid grid-cols-1 gap-6 p-6 lg:grid-cols-[1fr_360px] min-h-0">
-      <section>
+    <div className="flex flex-1 min-h-0">
+      {/* Left: section header + template list */}
+      <main className="flex-1 p-6 overflow-y-auto min-w-0">
         <div className="flex items-center gap-2 mb-4 text-sm">
           <Bot className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">Pre-built by Agora</span>
           <span className="text-xs text-muted-foreground ml-1">— start here, then customize</span>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 max-w-3xl">
           {TEMPLATES.map((tpl) => (
             <TemplateRow
               key={tpl.id}
               tpl={tpl}
               isSelected={selectedId === tpl.id}
-              onSelect={() => { setSelectedId(tpl.id); track(Events.agent_template_selected, { template_id: tpl.id }) }}
-              onTest={() => track(Events.agent_test_started, { template_id: tpl.id, agent_id: "preview" })}
+              onSelect={() => {
+                setSelectedId(tpl.id)
+                track(Events.agent_template_selected, { template_id: tpl.id })
+              }}
+              onTest={() =>
+                track(Events.agent_test_started, {
+                  template_id: tpl.id,
+                  agent_id: "preview",
+                })
+              }
             />
           ))}
         </div>
-      </section>
-      <PlaygroundPanel selected={selected} />
-    </main>
+      </main>
+
+      {/* Right: agent test panel (matches editor) */}
+      <AgentTestPanel
+        title={selected.name}
+        state="Agent Disconnected"
+        spec={{
+          llm: selected.llm,
+          asr: selected.asr,
+          tts: selected.tts,
+          latencyMs: null,
+          ttftMs: null,
+        }}
+        onTest={() =>
+          track(Events.agent_test_started, {
+            template_id: selected.id,
+            agent_id: "preview",
+          })
+        }
+      />
+    </div>
   )
 }
 
@@ -191,7 +199,12 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
         <Button variant="outline" size="sm" className="h-8 gap-1.5">
           <Filter className="h-3.5 w-3.5" /> Filter
         </Button>
-        <Button variant="ghost" size="sm" className="h-8 gap-1.5 ml-auto" onClick={onBrowseTemplates}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 ml-auto"
+          onClick={onBrowseTemplates}
+        >
           <Library className="h-3.5 w-3.5" /> Browse templates
         </Button>
       </div>
@@ -218,17 +231,32 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                         <Bot className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div>
-                        <Link href={`/agents/${agent.id}/edit`} className="font-medium hover:text-primary transition-colors">
+                        <Link
+                          href={`/agents/${agent.id}/edit`}
+                          className="font-medium hover:text-primary transition-colors"
+                        >
                           {agent.name}
                         </Link>
-                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">{agent.description}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                          {agent.description}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant={STATUS_VARIANT[agent.status] ?? "secondary"}>{agent.status}</Badge></TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{agent.model}</TableCell>
-                  <TableCell className="text-right tabular-nums">{agent.calls.toLocaleString()}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{agent.lastModified}</TableCell>
+                  <TableCell>
+                    <Badge variant={STATUS_VARIANT[agent.status] ?? "secondary"}>
+                      {agent.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {agent.model}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {agent.calls.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {agent.lastModified}
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -237,7 +265,9 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild><Link href={`/agents/${agent.id}/edit`}>Edit</Link></DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/agents/${agent.id}/edit`}>Edit</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem>Duplicate</DropdownMenuItem>
                         <DropdownMenuItem>Deploy</DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -274,22 +304,22 @@ export default function AgentsPage() {
   // Wireframe toggle — in production this is "do we have agents in this project?"
   const [showFirstRun, setShowFirstRun] = React.useState(false)
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
-  const router = useRouter()
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
   const selected = TEMPLATES.find((t) => t.id === selectedId)!
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
-        title={showFirstRun ? "Deploy your first AI agent in minutes" : "Agents"}
+        title={
+          showFirstRun ? "Deploy your first AI agent in minutes" : "Agents"
+        }
         description={
           showFirstRun
-            ? "Import your agent OR start with a pre-built template."
+            ? "Import your agent or start with a pre-built template."
             : "5 agents · click any row to edit."
         }
         actions={
           <div className="flex items-center gap-2">
-            {/* Wireframe-only toggle so demos can show both states */}
             <Button
               variant="ghost"
               size="sm"
@@ -297,7 +327,13 @@ export default function AgentsPage() {
               onClick={() => setShowFirstRun((v) => !v)}
               title="Demo toggle: switch between first-run and returning-user views"
             >
-              {showFirstRun ? <><ArrowLeft className="h-3 w-3" /> View list</> : <>View first-run</>}
+              {showFirstRun ? (
+                <>
+                  <ArrowLeft className="h-3 w-3" /> View list
+                </>
+              ) : (
+                <>View first-run</>
+              )}
             </Button>
             <ImportAgentSheet>
               <Button variant="outline" className="gap-1.5">
@@ -306,7 +342,7 @@ export default function AgentsPage() {
             </ImportAgentSheet>
             <Button asChild>
               <Link href="/agents/new/edit">
-                <Plus className="h-4 w-4" /> New agent
+                <Plus className="h-4 w-4" /> Create Blank Agent
               </Link>
             </Button>
           </div>
@@ -328,19 +364,24 @@ export default function AgentsPage() {
               Pre-built agents you can deploy in minutes. Pick one to test or customize.
             </p>
           </SheetHeader>
-          <div className="px-6 pb-6 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-            <div className="space-y-2">
-              {TEMPLATES.map((tpl) => (
-                <TemplateRow
-                  key={tpl.id}
-                  tpl={tpl}
-                  isSelected={selectedId === tpl.id}
-                  onSelect={() => { setSelectedId(tpl.id); track(Events.agent_template_selected, { template_id: tpl.id }) }}
-                  onTest={() => track(Events.agent_test_started, { template_id: tpl.id, agent_id: "preview" })}
-                />
-              ))}
-            </div>
-            <PlaygroundPanel selected={selected} />
+          <div className="px-6 pb-6 space-y-2">
+            {TEMPLATES.map((tpl) => (
+              <TemplateRow
+                key={tpl.id}
+                tpl={tpl}
+                isSelected={selectedId === tpl.id}
+                onSelect={() => {
+                  setSelectedId(tpl.id)
+                  track(Events.agent_template_selected, { template_id: tpl.id })
+                }}
+                onTest={() =>
+                  track(Events.agent_test_started, {
+                    template_id: tpl.id,
+                    agent_id: "preview",
+                  })
+                }
+              />
+            ))}
           </div>
         </SheetContent>
       </Sheet>

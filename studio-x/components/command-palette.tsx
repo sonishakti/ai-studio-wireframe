@@ -75,7 +75,8 @@ export function CommandPalette() {
   const [open, setOpen] = React.useState(false)
   const router = useRouter()
 
-  // ⌘K / Ctrl+K toggle
+  // ⌘K / Ctrl+K toggle + window-event handle so any component (sidebar
+  // Composer / Search items, topbar Composer button) can open the palette.
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey
@@ -87,8 +88,18 @@ export function CommandPalette() {
         })
       }
     }
+    const onOpenEvt = () => {
+      setOpen((prev) => {
+        if (!prev) track(Events.command_palette_opened)
+        return true
+      })
+    }
     window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
+    window.addEventListener("sx:open-command-palette", onOpenEvt as EventListener)
+    return () => {
+      window.removeEventListener("keydown", onKey)
+      window.removeEventListener("sx:open-command-palette", onOpenEvt as EventListener)
+    }
   }, [])
 
   const grouped = React.useMemo(() => {
