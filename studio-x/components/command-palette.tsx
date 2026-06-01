@@ -39,6 +39,8 @@ const COMMANDS: Command[] = [
   { id: "go-integ",      label: "Integrations",             href: "/integrations",                    icon: Puzzle,             group: "Pages" },
   { id: "go-numbers",    label: "Phone Numbers",            href: "/campaigns/phone-numbers",         icon: Phone,              group: "Pages" },
   { id: "go-camp",       label: "Campaigns",                href: "/campaigns",                       icon: Megaphone,          group: "Pages" },
+  { id: "go-calls",      label: "Calls",                    href: "/campaigns/calls",                 icon: PhoneCall,          group: "Pages", keywords: ["call history", "call log", "monitor"] },
+  { id: "go-sessions",   label: "Sessions",                 href: "/realtime-services/sessions",      icon: Radio,              group: "Pages", keywords: ["session history", "rtc", "realtime"] },
   { id: "go-deploy",     label: "Deploy",                   href: "/deploy",                          icon: Activity,           group: "Pages", keywords: ["go live", "publish", "ship"] },
 
   // ── Billing ──────────────────────────────────────────────────────────────

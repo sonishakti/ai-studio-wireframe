@@ -61,14 +61,13 @@ function contextChipFor(pathname: string): string | undefined {
   if (pathname === "/agents") return "Agents"
   if (pathname === "/campaigns") return "Campaigns"
   if (pathname.startsWith("/campaigns/new")) return "New campaign"
-  if (/^\/campaigns\/[^/]+$/.test(pathname)) return "Campaign detail"
+  if (pathname === "/campaigns/calls") return "Calls"
   if (pathname === "/campaigns/phone-numbers") return "Phone Numbers"
-  if (pathname === "/monitor") return "Monitor"
-  if (pathname === "/calls") return "Call History"
-  if (pathname === "/session-history") return "Session History"
+  if (/^\/campaigns\/[^/]+$/.test(pathname)) return "Campaign detail"
+  if (pathname.startsWith("/realtime-services/sessions")) return "Sessions"
+  if (pathname === "/realtime-services") return "Realtime Services"
   if (pathname.startsWith("/project/")) return "Project"
   if (pathname.startsWith("/billing")) return "Billing"
   if (pathname === "/integrations") return "Integrations"
-  if (pathname === "/realtime-services") return "Realtime Services"
   return undefined
 }

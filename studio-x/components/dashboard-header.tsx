@@ -31,6 +31,7 @@ const LABELS: Record<string, string> = {
   create: "New Campaign",
   calls: "Calls",
   monitor: "Monitor",
+  sessions: "Sessions",
   deploy: "Channels", // legacy — kept for any /deploy/* URLs still in transit
   widget: "Web Widget",
   whatsapp: "WhatsApp",

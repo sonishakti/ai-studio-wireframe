@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Info, ExternalLink, Package } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { RealtimeNav } from "@/components/realtime-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -109,7 +109,7 @@ export default function RealtimeServicesPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <PageHeader title="Realtime Services" />
+      <RealtimeNav />
 
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 p-6 min-h-0">
         {/* ─── LEFT: grouped service list ──────────────────────────── */}

@@ -8,9 +8,6 @@ import {
   Library,
   Phone,
   Megaphone,
-  ScatterChart,
-  History,
-  Activity,
   Settings2,
   Radio,
   Key,
@@ -61,14 +58,8 @@ const NAV_BUILD: NavItem[] = [
 ]
 
 const NAV_DEPLOY: NavItem[] = [
-  { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Phone },
   { label: "Campaigns", href: "/campaigns", icon: Megaphone },
-]
-
-const NAV_INSIGHTS: NavItem[] = [
-  { label: "Monitor", href: "/monitor", icon: ScatterChart },
-  { label: "Call History", href: "/calls", icon: History },
-  { label: "Session History", href: "/session-history", icon: Activity },
+  { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Phone },
 ]
 
 const NAV_PROJECT: NavItem[] = [
@@ -186,7 +177,10 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Deploy — Phone Numbers, Campaigns */}
+        {/* Run — Campaigns (with Calls + Phone Numbers tabs), Phone Numbers.
+            Monitoring is campaign-scoped: each campaign owns its Analytics and
+            Calls tabs, and the cross-campaign call log is the Calls tab on the
+            Campaigns hub. No separate "Insights"/"Monitor" silo. */}
         <SidebarGroup>
           <SidebarMenu>
             {NAV_DEPLOY.map((item) => (
@@ -197,18 +191,7 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Insights — Monitor, Call History, Session History */}
-        <SidebarGroup>
-          <SidebarMenu>
-            {NAV_INSIGHTS.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* Project — Settings, Realtime Services, Vendor Credentials */}
+        {/* Project — Settings, Realtime Services (with Sessions tab), Vendor Credentials */}
         <SidebarGroup>
           <SidebarMenu>
             {NAV_PROJECT.map((item) => (
