@@ -14,12 +14,14 @@ import {
   Plus,
   History,
   X,
+  AudioLines,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
+import { ComposerVoiceCall, type VoiceTurn } from "@/components/composer-voice-call"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -89,7 +91,29 @@ export function ComposerChat({
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages)
   const [draft, setDraft] = React.useState("")
   const [isThinking, setIsThinking] = React.useState(false)
+  const [mode, setMode] = React.useState<"text" | "voice">("text")
   const scrollRef = React.useRef<HTMLDivElement>(null)
+
+  const enterVoice = () => setMode("voice")
+
+  const exitVoice = (turns: VoiceTurn[], reason: "ended" | "text") => {
+    setMode("text")
+    if (turns.length > 0) {
+      setMessages((prev) => [
+        ...prev,
+        ...turns.map((t) => ({
+          id: t.id,
+          role: (t.role === "you" ? "user" : "assistant") as ChatRole,
+          text: t.text,
+          at: "from voice",
+        })),
+      ])
+    }
+    toast.success(
+      reason === "ended" ? "Voice session ended" : "Switched to text",
+      { description: turns.length > 0 ? "Transcript saved to the chat." : undefined },
+    )
+  }
 
   // Auto-scroll on new messages
   React.useEffect(() => {
@@ -175,10 +199,14 @@ export function ComposerChat({
         )}
       </header>
 
+      {mode === "voice" ? (
+        <ComposerVoiceCall compact={compact} onExit={exitVoice} />
+      ) : (
+      <>
       {/* Messages / empty state */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5 min-h-0">
         {!hasConversation ? (
-          <EmptyState compact={compact} onPick={(p) => send(p)} />
+          <EmptyState compact={compact} onPick={(p) => send(p)} onStartVoice={enterVoice} />
         ) : (
           <div className={cn("mx-auto space-y-5", compact ? "max-w-none" : "max-w-2xl")}>
             {messages.map((m) => (
@@ -221,7 +249,13 @@ export function ComposerChat({
                 <Button variant="ghost" size="icon" className="h-7 w-7" title="Attach">
                   <Paperclip className="h-3.5 w-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" title="Voice">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  title="Talk to Composer"
+                  onClick={enterVoice}
+                >
                   <Mic className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -242,6 +276,8 @@ export function ComposerChat({
           </div>
         </div>
       </footer>
+      </>
+      )}
     </div>
   )
 }
@@ -251,9 +287,11 @@ export function ComposerChat({
 function EmptyState({
   compact,
   onPick,
+  onStartVoice,
 }: {
   compact: boolean
   onPick: (prompt: string) => void
+  onStartVoice: () => void
 }) {
   return (
     <div
@@ -267,10 +305,28 @@ function EmptyState({
       </div>
       <h2 className="text-lg font-semibold tracking-tight">What are we building?</h2>
       <p className="text-sm text-muted-foreground mt-1 max-w-md">
-        Describe an agent in plain English, or pick a quick start.
+        Describe an agent in plain English, talk it through, or pick a quick start.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6 w-full max-w-xl">
+      {/* Talk-to-Composer CTA — voice-first entry */}
+      <button
+        onClick={onStartVoice}
+        className="group mt-5 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/5 pl-2 pr-4 py-2 hover:bg-primary/10 hover:border-primary/50 transition-colors"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <AudioLines className="h-4 w-4" />
+        </span>
+        <span className="text-sm font-medium">Talk to Composer</span>
+        <span className="text-xs text-muted-foreground">build by voice</span>
+      </button>
+
+      <div className="flex items-center gap-3 my-5 w-full max-w-xs">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs text-muted-foreground">or type</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-xl">
         {QUICK_STARTS.map((q) => {
           const Icon = q.icon
           return (

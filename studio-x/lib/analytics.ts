@@ -71,6 +71,13 @@ export const Events = {
   campaign_channel_added:           "campaign_channel_added",
   campaign_channel_removed:         "campaign_channel_removed",
 
+  // ── Composer voice call ────────────────────────────────────────────────────
+  composer_voice_started:           "composer_voice_started",
+  composer_voice_ended:             "composer_voice_ended",      // { duration_sec, turns }
+  composer_voice_muted:             "composer_voice_muted",      // { muted }
+  composer_voice_debug_toggled:     "composer_voice_debug_toggled",   // { open }
+  composer_voice_captions_toggled:  "composer_voice_captions_toggled", // { on }
+
   // ── Errors & resilience ────────────────────────────────────────────────────
   page_error_rendered:        "page_error_rendered",
   not_found_rendered:         "not_found_rendered",
