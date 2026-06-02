@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { MessageCircle, MessageSquare, Globe, Search, Download } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -107,11 +107,7 @@ export default function ChatHistoryPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <PageHeader
-        title="Chat History"
-        description="View and manage every text conversation — WhatsApp, SMS, and web widget."
-        actions={<Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>}
-      />
+      <MonitorNav action={<Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>} />
 
       <main className="flex-1 p-6 pt-4 space-y-4">
         <div className="flex items-center gap-3 flex-wrap">

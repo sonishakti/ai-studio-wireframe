@@ -10,7 +10,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -58,10 +58,8 @@ export default function MonitorPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <PageHeader
-        title="Monitor"
-        description="Monitor, debug, and optimize your voice agents with comprehensive analytics."
-        actions={
+      <MonitorNav
+        action={
           <Button variant="outline" size="icon" className="h-8 w-8" title="Refresh">
             <RefreshCw className="h-3.5 w-3.5" />
           </Button>

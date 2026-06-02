@@ -65,14 +65,12 @@ const NAV_DEPLOY: NavItem[] = [
   { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Phone },
 ]
 
-// Observe — the call-centre's monitoring surfaces. Global + filterable, so a
-// user can answer "how is everything doing?" and "find any conversation"
-// without first picking a campaign. Per-campaign detail still has its own
-// scoped analytics + call list for the drill-down job.
+// Observe — collapsed to a single Monitor hub. Monitor is the cross-deployment
+// rollup (its own tabs: Overview · Call History · Chat History · Sessions); the
+// primary home for "what happened" is now inside each campaign. One entry keeps
+// the sidebar lean and makes the campaign the deployment surface.
 const NAV_OBSERVE: NavItem[] = [
   { label: "Monitor", href: "/monitor", icon: LineChart },
-  { label: "Call History", href: "/calls", icon: PhoneCall },
-  { label: "Chat History", href: "/chats", icon: MessagesSquare },
 ]
 
 const NAV_PROJECT: NavItem[] = [
@@ -89,6 +87,10 @@ function isItemActive(itemHref: string, pathname: string): boolean {
     if (pathname === "/campaigns") return true
     if (pathname.startsWith("/campaigns/phone-numbers")) return false
     return pathname.startsWith("/campaigns/")
+  }
+  if (itemHref === "/monitor") {
+    // Monitor hub spans Overview (/monitor) + the Call/Chat History tabs.
+    return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/chats")
   }
   return pathname === itemHref || pathname.startsWith(itemHref + "/")
 }

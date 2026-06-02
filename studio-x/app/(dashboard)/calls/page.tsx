@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   PhoneIncoming, PhoneOutgoing, Search, Filter, Download, X, Columns3,
 } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
+import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -151,11 +151,7 @@ export default function CallHistoryPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <PageHeader
-        title="Call History"
-        description="View and manage all your call history across every campaign."
-        actions={<Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>}
-      />
+      <MonitorNav action={<Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>} />
 
       <main className="flex-1 p-6 pt-4 space-y-4">
         {/* Toolbar */}
