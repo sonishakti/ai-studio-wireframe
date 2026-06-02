@@ -1,2 +1,3 @@
 .vercel
 screenshots/.DS_Store
+.claude/launch.json
