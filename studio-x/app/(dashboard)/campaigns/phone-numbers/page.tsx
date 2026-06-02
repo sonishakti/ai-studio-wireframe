@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Plus, Search, Upload, MoreHorizontal } from "lucide-react"
+import { Plus, Search, MoreHorizontal, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { CampaignsNav } from "@/components/campaigns-nav"
+import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { PHONE_NUMBERS, CAMPAIGNS } from "@/lib/campaign-data"
 
 export default function PhoneNumbersPage() {
@@ -73,12 +74,11 @@ export default function PhoneNumbersPage() {
               className="pl-8 h-9 text-sm"
             />
           </div>
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Upload className="h-3.5 w-3.5" /> Import
-          </Button>
-          <Button size="sm" className="gap-1.5">
-            <Plus className="h-4 w-4" /> Buy number
-          </Button>
+          <AddPhoneNumberSheet>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> Add Phone Number
+            </Button>
+          </AddPhoneNumberSheet>
         </div>
 
         <Card>
@@ -97,7 +97,9 @@ export default function PhoneNumbersPage() {
               <TableBody>
                 {rows.map((n) => (
                   <TableRow key={n.id}>
-                    <TableCell className="font-mono text-sm">{n.number}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      <Link href={`/campaigns/phone-numbers/${n.id}`} className="hover:text-primary transition-colors">{n.number}</Link>
+                    </TableCell>
                     <TableCell className="text-sm">{n.label}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{n.vendor}</TableCell>
                     <TableCell>
@@ -140,8 +142,10 @@ export default function PhoneNumbersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/campaigns/phone-numbers/${n.id}`}>Edit configuration</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem>Assign to campaign</DropdownMenuItem>
-                          <DropdownMenuItem>Edit label</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DestructiveActionDialog
                             action="Release"
