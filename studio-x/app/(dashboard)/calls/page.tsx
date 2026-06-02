@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  PhoneIncoming, PhoneOutgoing, Search, Filter, Download, X,
+  PhoneIncoming, PhoneOutgoing, Search, Filter, Download, X, Columns3,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -92,6 +92,20 @@ function transcriptFor(c: CallRow): CallDetail["transcript"] {
   ]
 }
 
+// Optional "structured output" columns the user can surface via Customise View.
+const OPTIONAL_COLUMNS = [
+  { key: "sentiment", label: "Sentiment" },
+  { key: "intent", label: "Intent" },
+  { key: "language", label: "Language" },
+] as const
+type OptColKey = (typeof OPTIONAL_COLUMNS)[number]["key"]
+
+function structuredValue(c: CallRow, key: OptColKey): string {
+  if (key === "sentiment") return c.outcome === "Successful" ? "Positive" : c.outcome === "Failed" ? "Negative" : "Neutral"
+  if (key === "intent") return c.direction === "in" ? "Support request" : "Sales follow-up"
+  return c.from.startsWith("+44") || c.to.startsWith("+44") ? "English (UK)" : "English (US)"
+}
+
 export default function CallHistoryPage() {
   const [query, setQuery] = React.useState("")
   const [direction, setDirection] = React.useState<"all" | "in" | "out">("all")
@@ -100,6 +114,7 @@ export default function CallHistoryPage() {
   const [pageSize, setPageSize] = React.useState(25)
   const [selected, setSelected] = React.useState<CallDetail | null>(null)
   const [sheetOpen, setSheetOpen] = React.useState(false)
+  const [cols, setCols] = React.useState<Set<OptColKey>>(new Set())
 
   React.useEffect(() => {
     track(Events.calls_viewed)
@@ -181,6 +196,22 @@ export default function CallHistoryPage() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Customise View — surface structured-output data points as columns */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5"><Columns3 className="h-3.5 w-3.5" /> Customise View</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>View Structured Outputs</DropdownMenuLabel>
+              <p className="px-2 pb-1.5 text-xs text-muted-foreground">Added data points show up as columns in the table.</p>
+              {OPTIONAL_COLUMNS.map((col) => (
+                <DropdownMenuCheckboxItem key={col.key} checked={cols.has(col.key)} onCheckedChange={() => toggle(cols, setCols, col.key)} onSelect={(e) => e.preventDefault()}>
+                  {col.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Active filter chips */}
@@ -209,6 +240,9 @@ export default function CallHistoryPage() {
                   <TableHead className="text-right">Duration</TableHead>
                   <TableHead>Call Status</TableHead>
                   <TableHead>Call Outcome</TableHead>
+                  {OPTIONAL_COLUMNS.filter((col) => cols.has(col.key)).map((col) => (
+                    <TableHead key={col.key}>{col.label}</TableHead>
+                  ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -232,10 +266,13 @@ export default function CallHistoryPage() {
                     <TableCell className="text-right tabular-nums text-sm">{formatDuration(c.durationSec)}</TableCell>
                     <TableCell><Badge variant={STATUS_VARIANT[c.status]}>{c.status}</Badge></TableCell>
                     <TableCell><Badge variant={OUTCOME_VARIANT[c.outcome]}>{c.outcome}</Badge></TableCell>
+                    {OPTIONAL_COLUMNS.filter((col) => cols.has(col.key)).map((col) => (
+                      <TableCell key={col.key} className="text-sm text-muted-foreground">{structuredValue(c, col.key)}</TableCell>
+                    ))}
                   </TableRow>
                 ))}
                 {visible.length === 0 && (
-                  <TableRow><TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">No calls match your filters.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9 + cols.size} className="text-center text-sm text-muted-foreground py-8">No calls match your filters.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
