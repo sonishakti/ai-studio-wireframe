@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Radio, Search, Download, Filter, CheckCircle2, AlertCircle } from "lucide-react"
+import { Radio, Search, Download, Filter, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { RealtimeNav } from "@/components/realtime-nav"
 
 // ─── synthesize realtime session history ────────────────────────────────────
@@ -42,7 +45,7 @@ const OUTCOME_BADGE: Record<Session["outcome"], { variant: "default" | "secondar
   error: { variant: "destructive", label: "Error" },
 }
 
-const SESSIONS: Session[] = [
+const CURATED_SESSIONS: Session[] = [
   { id: "sess_001", channel: "support-room-1", service: "voice", participants: 2, peakBitrateKbps: 64, duration: 412, region: "us-west-2", outcome: "completed", startedAt: "2m ago" },
   { id: "sess_002", channel: "agent-demo-04", service: "agent", participants: 1, peakBitrateKbps: 32, duration: 188, region: "us-east-1", outcome: "completed", startedAt: "4m ago" },
   { id: "sess_003", channel: "live-event-uk", service: "live-streaming", participants: 142, peakBitrateKbps: 2400, duration: 3601, region: "eu-west-2", outcome: "completed", startedAt: "12m ago" },
@@ -52,6 +55,32 @@ const SESSIONS: Session[] = [
   { id: "sess_007", channel: "agent-test-12", service: "agent", participants: 1, peakBitrateKbps: 32, duration: 8, region: "us-east-1", outcome: "error", startedAt: "1 hr ago" },
   { id: "sess_008", channel: "video-call-003", service: "video", participants: 3, peakBitrateKbps: 2200, duration: 1840, region: "eu-west-2", outcome: "completed", startedAt: "2 hr ago" },
 ]
+
+// Synthesize additional sessions so pagination is meaningful (v0.3.4 polish).
+function genSessions(): Session[] {
+  const services: Session["service"][] = ["voice", "video", "live-streaming", "chat", "agent"]
+  const regions = ["us-west-2", "us-east-1", "eu-west-2", "ap-south-1", "ap-southeast-1"]
+  const outcomes: Session["outcome"][] = ["completed", "completed", "completed", "dropped", "error"]
+  const out: Session[] = []
+  for (let i = 9; i <= 64; i++) {
+    const svc = services[i % services.length]
+    const oc = outcomes[(i * 3) % outcomes.length]
+    out.push({
+      id: `sess_${String(i).padStart(3, "0")}`,
+      channel: `${svc === "live-streaming" ? "live" : svc}-room-${i}`,
+      service: svc,
+      participants: svc === "live-streaming" ? 40 + (i * 7) % 360 : svc === "chat" ? 4 + (i % 18) : 1 + (i % 4),
+      peakBitrateKbps: svc === "chat" ? 0 : svc === "live-streaming" ? 1800 + (i * 53) % 900 : svc === "video" ? 1200 + (i * 37) % 1000 : svc === "voice" ? 64 : 32,
+      duration: oc === "error" ? 4 + (i % 18) : 60 + (i * 97) % 3600,
+      region: regions[i % regions.length],
+      outcome: oc,
+      startedAt: `${i} hr ago`,
+    })
+  }
+  return out
+}
+
+const SESSIONS: Session[] = [...CURATED_SESSIONS, ...genSessions()]
 
 function formatDuration(seconds: number): string {
   if (seconds <= 0) return "—"
@@ -65,6 +94,8 @@ function formatDuration(seconds: number): string {
 export default function SessionsPage() {
   const [query, setQuery] = React.useState("")
   const [service, setService] = React.useState<"all" | Session["service"]>("all")
+  const [pageSize, setPageSize] = React.useState(25)
+  const [page, setPage] = React.useState(1)
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -74,6 +105,13 @@ export default function SessionsPage() {
       return s.channel.toLowerCase().includes(q) || s.id.toLowerCase().includes(q)
     })
   }, [query, service])
+
+  // Reset to page 1 whenever the filtered set or page size changes.
+  React.useEffect(() => { setPage(1) }, [query, service, pageSize])
+
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize))
+  const safePage = Math.min(page, pageCount)
+  const visible = rows.slice((safePage - 1) * pageSize, safePage * pageSize)
 
   const totalSessions = SESSIONS.length
   const completedPct = Math.round(
@@ -178,7 +216,7 @@ export default function SessionsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((s) => {
+                {visible.map((s) => {
                   const o = OUTCOME_BADGE[s.outcome]
                   return (
                     <TableRow key={s.id}>
@@ -214,6 +252,24 @@ export default function SessionsPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
+          <span>Rows per page</span>
+          <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+            <SelectTrigger className="h-8 w-18"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[10, 25, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <span className="tabular-nums">Page {safePage} of {pageCount}</span>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage <= 1} onClick={() => setPage(1)} title="First page"><ChevronsLeft className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} title="Previous page"><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))} title="Next page"><ChevronRight className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage >= pageCount} onClick={() => setPage(pageCount)} title="Last page"><ChevronsRight className="h-4 w-4" /></Button>
+          </div>
+        </div>
       </main>
     </div>
   )
