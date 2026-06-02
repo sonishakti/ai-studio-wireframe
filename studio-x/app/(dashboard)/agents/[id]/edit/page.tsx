@@ -13,6 +13,7 @@ import {
   Trash2,
   Copy,
   ArrowLeft,
+  Megaphone,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +33,7 @@ import {
 import { AgentTestPanel } from "@/components/agent-test-panel"
 import { AgentDeploySheet } from "@/components/agent-deploy-sheet"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
-import { AGENTS } from "@/lib/campaign-data"
+import { AGENTS, CAMPAIGNS } from "@/lib/campaign-data"
 import { toast } from "sonner"
 
 // ─── content presets ────────────────────────────────────────────────────────
@@ -75,6 +76,8 @@ export default function AgentEditorPage({
 
   const agentName = isNew ? "Untitled agent" : agentFromList?.name ?? "Sales Sam"
   const agentLabel = isNew ? "Draft" : agentFromList ? agentFromList.status : "Draft"
+  // Backlink: which campaigns deploy this agent (build → deploy → observe loop).
+  const deployedIn = isNew ? [] : CAMPAIGNS.filter((c) => c.agentId === id)
 
   const [activeTab, setActiveTab] = React.useState("prompt")
   const [preset, setPreset] = React.useState(PROMPT_PRESETS[0].id)
@@ -124,6 +127,20 @@ export default function AgentEditorPage({
                 800ms latency budget
               </span>
             </div>
+            {deployedIn.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground pt-0.5">
+                <span>Deployed in:</span>
+                {deployedIn.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/campaigns/${c.id}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    <Megaphone className="h-3 w-3 text-muted-foreground" /> {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

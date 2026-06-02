@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
   PhoneCall,
   CheckCircle2,
@@ -9,6 +10,7 @@ import {
   RefreshCw,
   TrendingUp,
   TrendingDown,
+  ArrowRight,
 } from "lucide-react"
 import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
@@ -56,6 +58,8 @@ export default function MonitorPage() {
     track(Events.monitor_viewed)
   }, [])
 
+  const [campaignFilter, setCampaignFilter] = React.useState("all")
+
   return (
     <div className="flex flex-col flex-1">
       <MonitorNav
@@ -93,13 +97,18 @@ export default function MonitorPage() {
               <SelectItem value="outbound">Outbound</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="all">
+          <Select value={campaignFilter} onValueChange={setCampaignFilter}>
             <SelectTrigger className="h-9 w-44 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Campaigns</SelectItem>
               {CAMPAIGNS.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
+          {campaignFilter !== "all" && (
+            <Button variant="outline" size="sm" asChild className="gap-1.5">
+              <Link href={`/campaigns/${campaignFilter}`}>Open campaign <ArrowRight className="h-3.5 w-3.5" /></Link>
+            </Button>
+          )}
         </div>
 
         {/* KPI cards */}
