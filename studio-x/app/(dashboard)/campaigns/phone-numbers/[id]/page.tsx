@@ -5,7 +5,7 @@ import { use } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import {
-  ArrowLeft, AlertTriangle, Phone, PhoneForwarded, Megaphone, ClipboardCheck,
+  ArrowLeft, AlertTriangle, Phone, PhoneForwarded, Megaphone, ClipboardCheck, Bot, Unlink,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -30,10 +30,12 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
   if (!number && !isNew) notFound()
 
   const assignedCampaigns = (number?.assignedTo ?? []).map((cid) => CAMPAIGNS.find((c) => c.id === cid)).filter(Boolean)
-  const inUse = assignedCampaigns.length > 0
+  const usedByCampaigns = assignedCampaigns.length > 0
+  const assignedAgent = number?.assignedAgent
 
   // Inbound settings
-  const [agent, setAgent] = React.useState("none")
+  const [agent, setAgent] = React.useState(assignedAgent?.id ?? "none")
+  const [detached, setDetached] = React.useState(false)
   const [recording, setRecording] = React.useState(true)
   const [transcript, setTranscript] = React.useState(true)
   const [transfer, setTransfer] = React.useState(true)
@@ -47,6 +49,18 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
   // Post-call analysis
   const [successEval, setSuccessEval] = React.useState(true)
   const [evalCriteria, setEvalCriteria] = React.useState("")
+
+  // Lock state: numbers used by campaigns are hard-locked (cancel the campaigns
+  // to edit); numbers bound directly to an agent can be unlocked in place by
+  // detaching the agent. Free numbers are fully editable.
+  const usedByAgent = !usedByCampaigns && !!assignedAgent
+  const locked = usedByCampaigns || (usedByAgent && !detached)
+
+  const detachAgent = () => {
+    setDetached(true)
+    setAgent("none")
+    toast.info(`Detached ${assignedAgent?.name ?? "agent"} — you can now edit this number.`)
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -65,18 +79,32 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
 
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
-          {/* In-use lock */}
-          {inUse && (
+          {/* Lock banner — campaigns (hard lock) vs agent (detachable in place) */}
+          {usedByCampaigns && (
             <div className="flex items-start justify-between gap-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
               <div className="flex items-start gap-2.5">
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-sm text-foreground leading-relaxed">
                   This number is being used by {assignedCampaigns.length} campaign{assignedCampaigns.length > 1 ? "s" : ""}.
-                  {" "}To edit the SIP details, pause or cancel the campaign(s) first.
+                  {" "}To edit its details, cancel the campaign{assignedCampaigns.length > 1 ? "s" : ""} to proceed.
                 </p>
               </div>
               <Button variant="outline" size="sm" asChild className="shrink-0">
-                <Link href={`/campaigns/${assignedCampaigns[0]!.id}`}>View campaigns</Link>
+                <Link href={`/campaigns/${assignedCampaigns[0]!.id}`}>View Campaigns</Link>
+              </Button>
+            </div>
+          )}
+          {usedByAgent && !detached && (
+            <div className="flex items-start justify-between gap-4 rounded-lg border border-border bg-muted/50 p-3">
+              <div className="flex items-start gap-2.5">
+                <Bot className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-sm text-foreground leading-relaxed">
+                  This number is being used by an Agent. Detach the assigned agent
+                  {" "}<span className="font-medium">{assignedAgent?.name}</span> if you wish to edit its details.
+                </p>
+              </div>
+              <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={detachAgent}>
+                <Unlink className="h-3.5 w-3.5" /> Detach Assigned Agent
               </Button>
             </div>
           )}
@@ -85,11 +113,11 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
           <Section icon={Phone} title="Phone Number Details">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FieldInput label="Phone Number" value={number?.number ?? ""} disabled mono />
-              <FieldSelect label="Vendor" value={number?.vendor ?? "Twilio"} options={["Twilio", "Vonage", "Bandwidth", "Telnyx"]} disabled={inUse} />
-              <FieldInput label="Display Name" value={number?.label ?? ""} disabled={inUse} />
-              <FieldInput label="SIP Trunk Address" placeholder="agora-us-swym-us.pstn…" disabled={inUse} mono />
-              <FieldInput label="SIP Trunk Username" value="user123" disabled={inUse} mono />
-              <FieldInput label="SIP Trunk Password" value="••••••••••••••••" type="password" disabled={inUse} mono />
+              <FieldSelect label="Vendor" value={number?.vendor ?? "Twilio"} options={["Twilio", "Vonage", "Bandwidth", "Telnyx"]} disabled={locked} />
+              <FieldInput label="Display Name" value={number?.label ?? ""} disabled={locked} />
+              <FieldInput label="SIP Trunk Address" placeholder="agora-us-swym-us.pstn…" disabled={locked} mono />
+              <FieldInput label="SIP Trunk Username" value="user123" disabled={locked} mono />
+              <FieldInput label="SIP Trunk Password" value="••••••••••••••••" type="password" disabled={locked} mono />
             </div>
             <div className="space-y-1.5">
               <Label>Transport Protocol</Label>
@@ -105,8 +133,15 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
           {/* Inbound Settings */}
           <Section icon={PhoneForwarded} title="Inbound Settings">
             <div className="space-y-1.5">
-              <Label>Assign to Agent</Label>
-              <Select value={agent} onValueChange={setAgent}>
+              <div className="flex items-center justify-between gap-2">
+                <Label>Assign to Agent</Label>
+                {assignedAgent && !detached && (
+                  <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={detachAgent}>
+                    <Unlink className="h-3 w-3" /> Detach Assigned Agent
+                  </Button>
+                )}
+              </div>
+              <Select value={agent} onValueChange={setAgent} disabled={locked}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
@@ -168,7 +203,7 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
           </Section>
 
           {/* Assigned campaigns list (when in use) */}
-          {inUse && (
+          {usedByCampaigns && (
             <Card>
               <CardContent className="p-4 space-y-2">
                 <p className="text-sm font-semibold">Used by campaigns</p>

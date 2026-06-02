@@ -63,6 +63,8 @@ export interface PhoneNumber {
   vendor: string
   /** Campaign IDs currently using this number. Empty array = available. */
   assignedTo: string[]
+  /** Set when the number is routed directly to an agent (inbound), not via campaigns. */
+  assignedAgent?: { id: string; name: string }
   status: "active" | "unassigned"
 }
 
@@ -321,6 +323,15 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     vendor: "Twilio",
     assignedTo: [],
     status: "unassigned",
+  },
+  {
+    id: "pn_09",
+    number: "+1 (628) 555-0111",
+    label: "Sales Direct Line",
+    vendor: "Twilio",
+    assignedTo: [],
+    assignedAgent: { id: "agt_sales_qualifier", name: "Sales Qualifier" },
+    status: "active",
   },
 ]
 

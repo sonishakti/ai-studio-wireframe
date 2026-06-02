@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Plus, Search, MoreHorizontal, Phone } from "lucide-react"
+import { Plus, Search, MoreHorizontal, Phone, Bot } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -42,7 +42,7 @@ export default function PhoneNumbersPage() {
     })
   }, [query])
 
-  const assignedCount = PHONE_NUMBERS.filter((n) => n.assignedTo.length > 0).length
+  const assignedCount = PHONE_NUMBERS.filter((n) => n.assignedTo.length > 0 || !!n.assignedAgent).length
   const availableCount = PHONE_NUMBERS.length - assignedCount
 
   return (
@@ -104,7 +104,13 @@ export default function PhoneNumbersPage() {
                     <TableCell className="text-sm text-muted-foreground">{n.vendor}</TableCell>
                     <TableCell>
                       {n.assignedTo.length === 0 ? (
-                        <span className="text-xs text-muted-foreground italic">Available</span>
+                        n.assignedAgent ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs">
+                            <Bot className="h-3 w-3 text-muted-foreground" /> {n.assignedAgent.name}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">Available</span>
+                        )
                       ) : (
                         <div className="flex flex-wrap gap-1">
                           {n.assignedTo.slice(0, 2).map((cid) => {
