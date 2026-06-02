@@ -24,36 +24,36 @@ This is a **funnel rescue project** that happens to require product consolidatio
 5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
 6. `wireframes/app.html` — the wireframe itself (~5000 lines after Billing rebuild)
 
-## Current sidebar (Insights-grouped, 2026-05-27 v3)
+## Current sidebar (LOCKED 2026-06-02 — "new IA, old pages")
 
 ```
-Home
-[flat]    ›  Agents · Realtime Services · Integrations
-Telephony ▾  Phone Numbers · Campaigns                [collapsible]
-Insights  ▾  Monitor · Calls · Usage                  [collapsible — NEW]
-Project   ▾  Project Settings · Project Credentials · Vendor Credentials
+Composer
+[flat]    Agents · Integrations                         ← Build
+[flat]    Campaigns · Phone Numbers                     ← Run (call-centre)
+[flat]    Monitor · Call History · Chat History         ← Observe (global)
+[flat]    Project Settings · Realtime Services · Vendor Credentials
+Search ⌘K
 ```
 
-Changes from v2 (2026-05-27):
-- Calls moved out of Telephony → Insights (it's observational, not deployment)
-- Usage moved out of Project → Insights (it's observational, not config)
-- Monitor moved out of flat top → Insights (joined its siblings)
-- Project group is now purely configuration
+Rendered as flat groups split by dividers — NO uppercase section-label headers
+(Build/Deploy/Observe are mental clusters only). Realtime Services has a
+**Sessions** tab (RTC telemetry). See `HANDOFF-2026-06-02.md` §3 for the full
+locked rationale.
 
-Why: journeys 1–4 ("Did my campaign work?", "Why is my agent slow?",
-"Should I upgrade?", "Show me this month") all cross Monitor + Calls + Usage.
-Forcing them into 3 different sidebar groups made every "what happened?"
-question a 3-destination scavenger hunt. Grouping them together + adding
-in-page cross-link callouts solves the wayfinding problem.
+Key rules (do NOT re-litigate — user gave explicit final direction 2026-06-02):
+- Global **Monitor** = the analytics dashboard. Label is "Monitor", never
+  "Analytics" (collides with the separate Agora Analytics product).
+- Observability is **global + per-campaign (both/and)**: `/monitor`, `/calls`,
+  `/chats` are global + filterable; each campaign also has scoped Analytics +
+  Calls in `/campaigns/[id]`. Not redundant — different jobs.
+- **Chat History** (`/chats`, text channels) ≠ **Session History**
+  (`/realtime-services/sessions`, RTC telemetry). Different personas/products.
+- Reference Figma (`Ai-Agent-Studio`) sidebar is INCONSISTENT across frames —
+  its page *content* is canonical, its sidebar is not.
 
-Routing change: `/telephony/calls` → `/calls` so URL matches the IA group.
-
-Earlier history:
-- Section labels (BUILD/DEPLOY/MONITOR) removed — flat + collapsible instead
-- Realtime Services moved PROJECT → flat peer of Agents (LEARNINGS §10 v2)
-- Call History + Session History → unified "Calls" (All / Telephony / Realtime tabs)
-- "Credentials" → "Vendor Credentials" (LEARNINGS §9 scope-qualifier rule)
-- "Analytics" sidebar label rejected (collides with Agora Analytics product) → "Monitor"
+History (why it churned): Insights group → dissolved to per-campaign → restored
+as Observe (this session, per polished reference designs + "keep every legacy
+feature"). Earlier: section labels removed; "Credentials" → "Vendor Credentials".
 
 - Footer: Search ⌘K · Project chip · Avatar
 - Topbar: Bell · ✦ Ask
