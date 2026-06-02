@@ -13,6 +13,9 @@ import {
   Key,
   Sparkles,
   TextSearch,
+  LineChart,
+  PhoneCall,
+  MessagesSquare,
 } from "lucide-react"
 
 import {
@@ -60,6 +63,16 @@ const NAV_BUILD: NavItem[] = [
 const NAV_DEPLOY: NavItem[] = [
   { label: "Campaigns", href: "/campaigns", icon: Megaphone },
   { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Phone },
+]
+
+// Observe — the call-centre's monitoring surfaces. Global + filterable, so a
+// user can answer "how is everything doing?" and "find any conversation"
+// without first picking a campaign. Per-campaign detail still has its own
+// scoped analytics + call list for the drill-down job.
+const NAV_OBSERVE: NavItem[] = [
+  { label: "Monitor", href: "/monitor", icon: LineChart },
+  { label: "Call History", href: "/calls", icon: PhoneCall },
+  { label: "Chat History", href: "/chats", icon: MessagesSquare },
 ]
 
 const NAV_PROJECT: NavItem[] = [
@@ -177,13 +190,21 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Run — Campaigns (with Calls + Phone Numbers tabs), Phone Numbers.
-            Monitoring is campaign-scoped: each campaign owns its Analytics and
-            Calls tabs, and the cross-campaign call log is the Calls tab on the
-            Campaigns hub. No separate "Insights"/"Monitor" silo. */}
+        {/* Run — the call-centre: Campaigns + Phone Numbers */}
         <SidebarGroup>
           <SidebarMenu>
             {NAV_DEPLOY.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* Observe — global monitoring: Monitor, Call History, Chat History */}
+        <SidebarGroup>
+          <SidebarMenu>
+            {NAV_OBSERVE.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
           </SidebarMenu>
