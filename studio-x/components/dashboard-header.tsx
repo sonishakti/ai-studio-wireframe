@@ -29,7 +29,8 @@ const LABELS: Record<string, string> = {
   "phone-numbers": "Phone Numbers",
   campaigns: "Campaigns",
   create: "New Campaign",
-  calls: "Calls",
+  calls: "Call History",
+  chats: "Chat History",
   monitor: "Monitor",
   sessions: "Sessions",
   deploy: "Channels", // legacy — kept for any /deploy/* URLs still in transit

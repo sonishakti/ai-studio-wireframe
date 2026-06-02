@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { CAMPAIGNS } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
+import { track, Events } from "@/lib/analytics"
 
 // ─── text-channel conversation history ──────────────────────────────────────
 // The text counterpart to Call History — WhatsApp / SMS / web-widget chats.
@@ -90,6 +91,10 @@ export default function ChatHistoryPage() {
   const [channel, setChannel] = React.useState<"all" | ChatChannel>("all")
   const [selected, setSelected] = React.useState<ChatRow | null>(null)
   const [open, setOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    track(Events.chats_viewed)
+  }, [])
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase()

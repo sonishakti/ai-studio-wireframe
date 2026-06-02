@@ -6,7 +6,7 @@ import {
   Bot, Radio, Puzzle, Phone, Megaphone, PhoneCall, Activity, Gauge,
   KeyRound, Shield, SlidersHorizontal, Home, FolderKanban, CreditCard, Store,
   Settings, Code2, HelpCircle, Bell, Search, Plus, ArrowRight,
-  Sparkles,
+  Sparkles, LineChart, MessageSquare,
 } from "lucide-react"
 import {
   CommandDialog,
@@ -39,7 +39,9 @@ const COMMANDS: Command[] = [
   { id: "go-integ",      label: "Integrations",             href: "/integrations",                    icon: Puzzle,             group: "Pages" },
   { id: "go-numbers",    label: "Phone Numbers",            href: "/campaigns/phone-numbers",         icon: Phone,              group: "Pages" },
   { id: "go-camp",       label: "Campaigns",                href: "/campaigns",                       icon: Megaphone,          group: "Pages" },
-  { id: "go-calls",      label: "Calls",                    href: "/campaigns/calls",                 icon: PhoneCall,          group: "Pages", keywords: ["call history", "call log", "monitor"] },
+  { id: "go-monitor",    label: "Monitor",                  href: "/monitor",                         icon: LineChart,          group: "Pages", keywords: ["analytics", "dashboard", "insights", "metrics"] },
+  { id: "go-calls",      label: "Call History",             href: "/calls",                           icon: PhoneCall,          group: "Pages", keywords: ["call history", "call log", "calls"] },
+  { id: "go-chats",      label: "Chat History",             href: "/chats",                           icon: MessageSquare,      group: "Pages", keywords: ["chat history", "messages", "whatsapp", "sms", "conversations"] },
   { id: "go-sessions",   label: "Sessions",                 href: "/realtime-services/sessions",      icon: Radio,              group: "Pages", keywords: ["session history", "rtc", "realtime"] },
   { id: "go-deploy",     label: "Deploy",                   href: "/deploy",                          icon: Activity,           group: "Pages", keywords: ["go live", "publish", "ship"] },
 

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { CAMPAIGNS, AGENTS } from "@/lib/campaign-data"
+import { track, Events } from "@/lib/analytics"
 
 // ─── KPI sparkline data (wireframe) ──────────────────────────────────────────
 
@@ -51,6 +52,10 @@ const TOP_AGENTS = [
 ]
 
 export default function MonitorPage() {
+  React.useEffect(() => {
+    track(Events.monitor_viewed)
+  }, [])
+
   return (
     <div className="flex flex-col flex-1">
       <PageHeader

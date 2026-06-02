@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import { CAMPAIGNS, formatDuration } from "@/lib/campaign-data"
 import { CallDetailSheet, type CallDetail } from "@/components/call-detail-sheet"
+import { track, Events } from "@/lib/analytics"
 
 // ─── synthesize cross-campaign call history ─────────────────────────────────
 
@@ -99,6 +100,10 @@ export default function CallHistoryPage() {
   const [pageSize, setPageSize] = React.useState(25)
   const [selected, setSelected] = React.useState<CallDetail | null>(null)
   const [sheetOpen, setSheetOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    track(Events.calls_viewed)
+  }, [])
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase()
