@@ -77,6 +77,8 @@ export const Events = {
   composer_voice_muted:             "composer_voice_muted",      // { muted }
   composer_voice_debug_toggled:     "composer_voice_debug_toggled",   // { open }
   composer_voice_captions_toggled:  "composer_voice_captions_toggled", // { on }
+  composer_voice_talk_turn:         "composer_voice_talk_turn",       // { turn }
+  composer_doc_attached:            "composer_doc_attached",          // { name, during_call }
 
   // ── Errors & resilience ────────────────────────────────────────────────────
   page_error_rendered:        "page_error_rendered",

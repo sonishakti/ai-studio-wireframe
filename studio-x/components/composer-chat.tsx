@@ -15,13 +15,15 @@ import {
   History,
   X,
   AudioLines,
+  FileText,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import { ComposerVoiceCall, type VoiceTurn } from "@/components/composer-voice-call"
+import { track, Events } from "@/lib/analytics"
+import { useVoiceSession, VoiceCallDock } from "@/components/composer-voice-call"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -31,122 +33,103 @@ export interface ChatMessage {
   id: string
   role: ChatRole
   text: string
-  /** Optional follow-up action chips on assistant messages. */
   actions?: Array<{ label: string; onClick?: () => void }>
-  /** Optional code/config block shown beneath the message. */
   code?: { language: string; body: string }
-  /** Display timestamp. */
+  /** Attached file (wireframe — name + kind only). */
+  attachment?: { name: string }
+  /** How this message was entered. */
+  via?: "voice" | "text"
   at?: string
 }
 
 // ─── Quick-start prompts ─────────────────────────────────────────────────────
 
 const QUICK_STARTS = [
-  {
-    icon: Wand2,
-    label: "Build an agent",
-    prompt: "Help me build a customer support voice agent for an e-commerce store.",
-  },
-  {
-    icon: Wrench,
-    label: "Set up telephony",
-    prompt: "Walk me through buying a phone number and connecting it to my inbound campaign.",
-  },
-  {
-    icon: Bug,
-    label: "Debug latency",
-    prompt: "My Sales Qualifier agent has 1.4s first-token latency. Help me diagnose it.",
-  },
-  {
-    icon: Sparkles,
-    label: "Improve prompt",
-    prompt: "Review my agent's system prompt and suggest improvements.",
-  },
+  { icon: Wand2, label: "Build an agent", prompt: "Help me build a customer support voice agent for an e-commerce store." },
+  { icon: Wrench, label: "Set up telephony", prompt: "Walk me through buying a phone number and connecting it to my inbound campaign." },
+  { icon: Bug, label: "Debug latency", prompt: "My Sales Qualifier agent has 1.4s first-token latency. Help me diagnose it." },
+  { icon: Sparkles, label: "Improve prompt", prompt: "Review my agent's system prompt and suggest improvements." },
 ]
+
+const ATTACH_FILES = ["support-faq.pdf", "product-catalog.csv", "returns-policy.docx", "brand-voice.md"]
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 interface ComposerChatProps {
-  /** Pre-seeded conversation, or empty for blank slate. */
   initialMessages?: ChatMessage[]
-  /** Render in compact mode (used inside slide-over panel). */
   compact?: boolean
-  /** Render the close X (used in slide-over). */
   onClose?: () => void
-  /** Title shown in header. Defaults to "Composer". */
   title?: string
-  /** Context chip shown next to title (e.g., page name when used as panel). */
   contextChip?: string
+  /** Notified when the assistant updates the agent draft (voice or text). */
+  onDraftUpdate?: (note: string) => void
   className?: string
 }
 
 export function ComposerChat({
-  initialMessages = SEED_MESSAGES,
+  initialMessages = [],
   compact = false,
   onClose,
   title = "Composer",
   contextChip,
+  onDraftUpdate,
   className,
 }: ComposerChatProps) {
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages)
   const [draft, setDraft] = React.useState("")
   const [isThinking, setIsThinking] = React.useState(false)
-  const [mode, setMode] = React.useState<"text" | "voice">("text")
+  const attachIdx = React.useRef(0)
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
-  const enterVoice = () => setMode("voice")
+  const pushMessage = React.useCallback((role: ChatRole, text: string) => {
+    setMessages((prev) => [...prev, { id: `m_${Date.now()}_${prev.length}`, role, text, via: "voice", at: "voice" }])
+  }, [])
 
-  const exitVoice = (turns: VoiceTurn[], reason: "ended" | "text") => {
-    setMode("text")
-    if (turns.length > 0) {
-      setMessages((prev) => [
-        ...prev,
-        ...turns.map((t) => ({
-          id: t.id,
-          role: (t.role === "you" ? "user" : "assistant") as ChatRole,
-          text: t.text,
-          at: "from voice",
-        })),
-      ])
-    }
-    toast.success(
-      reason === "ended" ? "Voice session ended" : "Switched to text",
-      { description: turns.length > 0 ? "Transcript saved to the chat." : undefined },
-    )
-  }
+  // Voice session streams spoken turns directly into this same thread.
+  const voice = useVoiceSession({ onMessage: pushMessage, onDraftUpdate })
 
-  // Auto-scroll on new messages
+  // Auto-scroll on new messages / streaming
   React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages, isThinking])
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  }, [messages, isThinking, voice.livePartial])
 
   const send = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
-    const userMsg: ChatMessage = {
-      id: `m_${Date.now()}_u`,
-      role: "user",
-      text: trimmed,
-      at: "just now",
-    }
-    setMessages((prev) => [...prev, userMsg])
+    setMessages((prev) => [...prev, { id: `m_${Date.now()}_u`, role: "user", text: trimmed, via: "text", at: "just now" }])
     setDraft("")
     setIsThinking(true)
-
-    // Simulated assistant reply (wireframe — no real AI wiring)
     window.setTimeout(() => {
-      const reply: ChatMessage = {
-        id: `m_${Date.now()}_a`,
-        role: "assistant",
-        text: assistantReplyFor(trimmed),
-        actions: assistantActionsFor(trimmed),
-        at: "just now",
-      }
-      setMessages((prev) => [...prev, reply])
+      setMessages((prev) => [
+        ...prev,
+        { id: `m_${Date.now()}_a`, role: "assistant", text: assistantReplyFor(trimmed), actions: assistantActionsFor(trimmed), via: "text", at: "just now" },
+      ])
       setIsThinking(false)
     }, 700)
+  }
+
+  const attachDoc = () => {
+    const name = ATTACH_FILES[attachIdx.current % ATTACH_FILES.length]
+    attachIdx.current += 1
+    setMessages((prev) => [
+      ...prev,
+      { id: `m_${Date.now()}_f`, role: "user", text: "", attachment: { name }, via: voice.active ? "voice" : "text", at: "just now" },
+    ])
+    track(Events.composer_doc_attached, { name, during_call: voice.active })
+
+    if (voice.active) {
+      // Composer acknowledges by voice, streamed into the thread.
+      window.setTimeout(() => voice.say(`Got it — I'll use ${name} as context while we build.`), 400)
+    } else {
+      setIsThinking(true)
+      window.setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { id: `m_${Date.now()}_a`, role: "assistant", text: `Thanks — I've added ${name} as context. What should I do with it?`, via: "text", at: "just now" },
+        ])
+        setIsThinking(false)
+      }, 700)
+    }
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -157,6 +140,7 @@ export function ComposerChat({
   }
 
   const hasConversation = messages.length > 0
+  const onCall = voice.phase !== "idle"
 
   return (
     <div className={cn("flex flex-col h-full min-h-0 bg-background", className)}>
@@ -168,14 +152,10 @@ export function ComposerChat({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="text-sm font-semibold truncate">{title}</h1>
-            {contextChip && (
-              <Badge variant="outline" className="text-xs">
-                {contextChip}
-              </Badge>
-            )}
+            {contextChip && <Badge variant="outline" className="text-xs">{contextChip}</Badge>}
           </div>
           <p className="text-xs text-muted-foreground truncate">
-            Build, configure, and debug agents by chatting.
+            Build, configure, and debug agents — by chat or voice.
           </p>
         </div>
         <Button
@@ -183,6 +163,7 @@ export function ComposerChat({
           size="sm"
           className="gap-1.5 text-xs"
           onClick={() => {
+            if (onCall) voice.end()
             setMessages([])
             toast.success("New chat")
           }}
@@ -199,39 +180,36 @@ export function ComposerChat({
         )}
       </header>
 
-      {mode === "voice" ? (
-        <ComposerVoiceCall compact={compact} onExit={exitVoice} />
-      ) : (
-      <>
-      {/* Messages / empty state */}
+      {/* Call dock — slim, persistent; chat stays visible below */}
+      {onCall && <VoiceCallDock session={voice} compact={compact} />}
+
+      {/* Messages / empty state — ALWAYS visible */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5 min-h-0">
-        {!hasConversation ? (
-          <EmptyState compact={compact} onPick={(p) => send(p)} onStartVoice={enterVoice} />
+        {!hasConversation && !onCall ? (
+          <EmptyState compact={compact} onPick={(p) => send(p)} onStartVoice={voice.start} />
         ) : (
           <div className={cn("mx-auto space-y-5", compact ? "max-w-none" : "max-w-2xl")}>
             {messages.map((m) => (
               <MessageBubble key={m.id} message={m} compact={compact} />
             ))}
-            {isThinking && <ThinkingIndicator />}
+            {/* Live streamed Composer caption (voice) */}
+            {voice.livePartial && voice.captionsOn && (
+              <StreamingBubble text={voice.livePartial} compact={compact} />
+            )}
+            {/* Thinking — text path, or voice composer turn with no caption yet */}
+            {(isThinking || (voice.turn === "composer" && !voice.livePartial)) && <ThinkingIndicator />}
           </div>
         )}
       </div>
 
-      {/* Input area */}
+      {/* Input — ALWAYS available (type or attach, even mid-call) */}
       <footer className="border-t border-border px-4 py-3 shrink-0">
         <div className={cn("mx-auto", compact ? "max-w-none" : "max-w-2xl")}>
-          {/* Quick-action chips (only when conversation has started) */}
-          {hasConversation && (
+          {hasConversation && !onCall && (
             <div className="flex flex-wrap gap-1.5 mb-2">
-              <QuickChip onClick={() => send("Show this in the agent editor.")}>
-                Open editor
-              </QuickChip>
-              <QuickChip onClick={() => send("Save this as a campaign draft.")}>
-                Save as campaign
-              </QuickChip>
-              <QuickChip onClick={() => send("Run a test call.")}>
-                Test call
-              </QuickChip>
+              <QuickChip onClick={() => send("Open this in the agent editor.")}>Open editor</QuickChip>
+              <QuickChip onClick={() => send("Save this as a campaign draft.")}>Save as campaign</QuickChip>
+              <QuickChip onClick={() => send("Run a test call.")}>Test call</QuickChip>
             </div>
           )}
 
@@ -240,35 +218,36 @@ export function ComposerChat({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="Ask Composer to build, configure, or debug…"
+              placeholder={onCall ? "Type to add context while you talk…" : "Ask Composer to build, configure, or debug…"}
               rows={2}
               className="border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-sm"
             />
             <div className="flex items-center justify-between px-2 pb-2">
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" title="Attach">
+                <Button variant="ghost" size="icon" className="h-7 w-7" title="Attach a document" onClick={attachDoc}>
                   <Paperclip className="h-3.5 w-3.5" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  title="Talk to Composer"
-                  onClick={enterVoice}
-                >
-                  <Mic className="h-3.5 w-3.5" />
-                </Button>
+                {/* Mic starts voice when idle; the dock owns talk during a call */}
+                {!onCall && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" title="Talk to Composer" onClick={voice.start}>
+                    <Mic className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+                {onCall && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                    </span>
+                    On call
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-xs text-muted-foreground hidden sm:block">
                   <kbd className="font-mono">↵</kbd> send · <kbd className="font-mono">⇧↵</kbd> newline
                 </p>
-                <Button
-                  size="sm"
-                  className="h-7 gap-1.5 text-xs"
-                  disabled={!draft.trim()}
-                  onClick={() => send(draft)}
-                >
+                <Button size="sm" className="h-7 gap-1.5 text-xs" disabled={!draft.trim()} onClick={() => send(draft)}>
                   Send <Send className="h-3 w-3" />
                 </Button>
               </div>
@@ -276,8 +255,6 @@ export function ComposerChat({
           </div>
         </div>
       </footer>
-      </>
-      )}
     </div>
   )
 }
@@ -294,21 +271,16 @@ function EmptyState({
   onStartVoice: () => void
 }) {
   return (
-    <div
-      className={cn(
-        "mx-auto h-full flex flex-col items-center justify-center text-center py-6",
-        compact ? "max-w-none" : "max-w-2xl",
-      )}
-    >
+    <div className={cn("mx-auto h-full flex flex-col items-center justify-center text-center py-6", compact ? "max-w-none" : "max-w-2xl")}>
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 mb-4">
         <Sparkles className="h-6 w-6 text-primary" />
       </div>
       <h2 className="text-lg font-semibold tracking-tight">What are we building?</h2>
       <p className="text-sm text-muted-foreground mt-1 max-w-md">
-        Describe an agent in plain English, talk it through, or pick a quick start.
+        Describe an agent, talk it through, or attach a doc to start from.
       </p>
 
-      {/* Talk-to-Composer CTA — voice-first entry */}
+      {/* Single voice-first CTA — same action as the input mic */}
       <button
         onClick={onStartVoice}
         className="group mt-5 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/5 pl-2 pr-4 py-2 hover:bg-primary/10 hover:border-primary/50 transition-colors"
@@ -354,52 +326,61 @@ function MessageBubble({ message, compact }: { message: ChatMessage; compact: bo
   const isUser = message.role === "user"
   return (
     <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
-      <div
-        className={cn(
-          "flex h-7 w-7 shrink-0 items-center justify-center rounded-md",
-          isUser ? "bg-muted" : "bg-primary/10",
-        )}
-      >
-        {isUser ? (
-          <User className="h-3.5 w-3.5 text-muted-foreground" />
-        ) : (
-          <Bot className="h-3.5 w-3.5 text-primary" />
-        )}
+      <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-md", isUser ? "bg-muted" : "bg-primary/10")}>
+        {isUser ? <User className="h-3.5 w-3.5 text-muted-foreground" /> : <Bot className="h-3.5 w-3.5 text-primary" />}
       </div>
-      <div
-        className={cn(
-          "flex flex-col gap-1.5 min-w-0",
-          isUser ? "items-end" : "items-start",
-          compact ? "max-w-[calc(100%-3rem)]" : "max-w-[85%]",
+      <div className={cn("flex flex-col gap-1.5 min-w-0", isUser ? "items-end" : "items-start", compact ? "max-w-[calc(100%-3rem)]" : "max-w-[85%]")}>
+        {message.attachment && (
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted shrink-0">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{message.attachment.name}</p>
+              <p className="text-xs text-muted-foreground">Attached</p>
+            </div>
+          </div>
         )}
-      >
-        <div
-          className={cn(
-            "rounded-lg px-3 py-2 text-sm whitespace-pre-wrap break-words",
-            isUser
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-foreground",
-          )}
-        >
-          {message.text}
-        </div>
+        {message.text && (
+          <div className={cn("rounded-lg px-3 py-2 text-sm whitespace-pre-wrap break-words", isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}>
+            {message.text}
+          </div>
+        )}
         {message.code && (
-          <pre className="w-full rounded-md border border-border bg-card p-3 text-xs font-mono overflow-x-auto">
-            {message.code.body}
-          </pre>
+          <pre className="w-full rounded-md border border-border bg-card p-3 text-xs font-mono overflow-x-auto">{message.code.body}</pre>
         )}
         {message.actions && message.actions.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-0.5">
             {message.actions.map((a) => (
-              <QuickChip key={a.label} onClick={a.onClick}>
-                {a.label}
-              </QuickChip>
+              <QuickChip key={a.label} onClick={a.onClick}>{a.label}</QuickChip>
             ))}
           </div>
         )}
         {message.at && (
-          <p className="text-xs text-muted-foreground tabular-nums">{message.at}</p>
+          <p className="text-xs text-muted-foreground tabular-nums inline-flex items-center gap-1">
+            {message.via === "voice" && <Mic className="h-2.5 w-2.5" />}
+            {message.at}
+          </p>
         )}
+      </div>
+    </div>
+  )
+}
+
+function StreamingBubble({ text, compact }: { text: string; compact: boolean }) {
+  return (
+    <div className="flex gap-3">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
+        <Bot className="h-3.5 w-3.5 text-primary" />
+      </div>
+      <div className={cn("flex flex-col gap-1.5 min-w-0 items-start", compact ? "max-w-[calc(100%-3rem)]" : "max-w-[85%]")}>
+        <div className="rounded-lg px-3 py-2 text-sm bg-muted text-foreground whitespace-pre-wrap break-words">
+          {text}
+          <span className="inline-block w-1.5 h-4 -mb-0.5 ml-0.5 bg-primary animate-pulse" />
+        </div>
+        <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+          <Mic className="h-2.5 w-2.5" /> speaking…
+        </p>
       </div>
     </div>
   )
@@ -421,21 +402,10 @@ function ThinkingIndicator() {
 }
 
 function Dot({ delay }: { delay: number }) {
-  return (
-    <span
-      className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-pulse"
-      style={{ animationDelay: `${delay}ms` }}
-    />
-  )
+  return <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-pulse" style={{ animationDelay: `${delay}ms` }} />
 }
 
-function QuickChip({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode
-  onClick?: () => void
-}) {
+function QuickChip({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
     <button
       type="button"
@@ -447,9 +417,7 @@ function QuickChip({
   )
 }
 
-// ─── Seed messages + canned replies (wireframe demo) ─────────────────────────
-
-const SEED_MESSAGES: ChatMessage[] = []
+// ─── Canned replies (wireframe demo) ─────────────────────────────────────────
 
 function assistantReplyFor(prompt: string): string {
   const lower = prompt.toLowerCase()
@@ -472,7 +440,7 @@ function assistantActionsFor(prompt: string): ChatMessage["actions"] {
   const lower = prompt.toLowerCase()
   if (lower.includes("latency")) {
     return [
-      { label: "Open Monitor", onClick: () => toast.info("Mock: would navigate to /monitor") },
+      { label: "Open Monitor", onClick: () => toast.info("Mock: would open the campaign's Analytics tab") },
       { label: "Open agent editor", onClick: () => toast.info("Mock: would open editor on Models tab") },
     ]
   }
