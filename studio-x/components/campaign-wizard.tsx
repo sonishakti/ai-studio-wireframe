@@ -125,6 +125,33 @@ const DEFAULT_OUTBOUND: OutboundConfig = {
   contactsCount: 0,
 }
 
+/** Inbound call-handling settings (telephony receive campaigns). */
+interface InboundConfig {
+  greeting: string
+  transferToHuman: boolean
+  transferNumber: string
+  transferCriteria: string
+  endOfConversation: boolean
+  silenceHangup: boolean
+  silenceTimeout: number
+  maxCallDuration: number
+  storeTranscripts: boolean
+  storeRecording: boolean
+}
+
+const DEFAULT_INBOUND: InboundConfig = {
+  greeting: "",
+  transferToHuman: true,
+  transferNumber: "",
+  transferCriteria: "",
+  endOfConversation: true,
+  silenceHangup: true,
+  silenceTimeout: 120,
+  maxCallDuration: 600,
+  storeTranscripts: true,
+  storeRecording: true,
+}
+
 interface Draft {
   type: CampaignType | null
   name: string
@@ -132,6 +159,7 @@ interface Draft {
   selectedChannels: ChannelKind[]
   channelConfig: Partial<Record<ChannelKind, ChannelConfig>>
   outbound: OutboundConfig
+  inbound: InboundConfig
 }
 
 const EMPTY_DRAFT: Draft = {
@@ -141,6 +169,7 @@ const EMPTY_DRAFT: Draft = {
   selectedChannels: [],
   channelConfig: {},
   outbound: DEFAULT_OUTBOUND,
+  inbound: DEFAULT_INBOUND,
 }
 
 // ─── Main wizard ─────────────────────────────────────────────────────────────
@@ -164,8 +193,9 @@ export function CampaignWizard({
       return {
         ...EMPTY_DRAFT,
         ...parsed,
-        // Defend against drafts saved before `outbound` existed.
+        // Defend against drafts saved before `outbound`/`inbound` existed.
         outbound: { ...DEFAULT_OUTBOUND, ...(parsed.outbound ?? {}) },
+        inbound: { ...DEFAULT_INBOUND, ...(parsed.inbound ?? {}) },
         type: initialType ?? parsed.type ?? null,
         agentId: initialAgentId ?? parsed.agentId ?? null,
       }
@@ -508,7 +538,11 @@ function ConfigStep({
   const out = draft.outbound
   const setOut = (patch: Partial<OutboundConfig>) =>
     onChange((d) => ({ ...d, outbound: { ...d.outbound, ...patch } }))
+  const inb = draft.inbound
+  const setInb = (patch: Partial<InboundConfig>) =>
+    onChange((d) => ({ ...d, inbound: { ...d.inbound, ...patch } }))
   const isOutbound = draft.type === "outbound"
+  const isInbound = draft.type === "inbound"
   const hasTelephony = draft.selectedChannels.includes("telephony")
 
   return (
@@ -518,7 +552,7 @@ function ConfigStep({
         <p className="text-sm text-muted-foreground">
           {isOutbound
             ? "Set up the dialing program — schedule, call behaviour, contacts."
-            : "Fill in the basics, then channel-specific settings."}
+            : "Set up the agent, greeting, and how incoming calls are handled."}
         </p>
       </div>
 
@@ -581,7 +615,14 @@ function ConfigStep({
       {isOutbound && <LaunchTimingCard out={out} setOut={setOut} />}
       {isOutbound && hasTelephony && <CallSettingsCard out={out} setOut={setOut} />}
       {isOutbound && hasTelephony && <ContactsCard out={out} setOut={setOut} />}
-      {isOutbound && <TranscriptsRecordingCard out={out} setOut={setOut} />}
+
+      {/* Inbound call handling — parity with the outbound program */}
+      {isInbound && hasTelephony && <InboundGreetingCard inb={inb} setInb={setInb} />}
+      {isInbound && hasTelephony && <InboundCallBehaviorCard inb={inb} setInb={setInb} />}
+
+      {/* Shared — transcripts & recording */}
+      {isOutbound && <TranscriptsRecordingCard storeTranscripts={out.storeTranscripts} storeRecording={out.storeRecording} onPatch={(p) => setOut(p)} />}
+      {isInbound && hasTelephony && <TranscriptsRecordingCard storeTranscripts={inb.storeTranscripts} storeRecording={inb.storeRecording} onPatch={(p) => setInb(p)} />}
 
       <WizardFooter
         onBack={onBack}
@@ -760,11 +801,51 @@ function ContactsCard({ out, setOut }: { out: OutboundConfig; setOut: (p: Partia
   )
 }
 
-function TranscriptsRecordingCard({ out, setOut }: { out: OutboundConfig; setOut: (p: Partial<OutboundConfig>) => void }) {
+function TranscriptsRecordingCard({ storeTranscripts, storeRecording, onPatch }: { storeTranscripts: boolean; storeRecording: boolean; onPatch: (p: { storeTranscripts?: boolean; storeRecording?: boolean }) => void }) {
   return (
     <SectionCard icon={Mic} title="Transcripts & Recording">
-      <ToggleRow label="Store Transcripts" description="Automatically save the conversation text for review." checked={out.storeTranscripts} onChange={(v) => setOut({ storeTranscripts: v })} />
-      <ToggleRow label="Store Call Recording" description="Automatically save the call audio recording for review." checked={out.storeRecording} onChange={(v) => setOut({ storeRecording: v })} />
+      <ToggleRow label="Store Transcripts" description="Automatically save the conversation text for review." checked={storeTranscripts} onChange={(v) => onPatch({ storeTranscripts: v })} />
+      <ToggleRow label="Store Call Recording" description="Automatically save the call audio recording for review." checked={storeRecording} onChange={(v) => onPatch({ storeRecording: v })} />
+    </SectionCard>
+  )
+}
+
+function InboundGreetingCard({ inb, setInb }: { inb: InboundConfig; setInb: (p: Partial<InboundConfig>) => void }) {
+  return (
+    <SectionCard icon={PhoneIncoming} title="Greeting & Routing">
+      <div className="space-y-1.5">
+        <Label>Greeting message</Label>
+        <Textarea placeholder="Thanks for calling Acme Support — how can I help today?" value={inb.greeting} onChange={(e) => setInb({ greeting: e.target.value })} rows={2} />
+        <p className="text-xs text-muted-foreground">What the agent says when it answers an incoming call.</p>
+      </div>
+      <div className="space-y-3 border-t border-border pt-3">
+        <ToggleRow label="Transfer Call to Human" description="Hand off to a human agent when needed or asked for." checked={inb.transferToHuman} onChange={(v) => setInb({ transferToHuman: v })} />
+        {inb.transferToHuman && (
+          <>
+            <div className="space-y-1.5">
+              <Label>Transfer Phone Number</Label>
+              <Input placeholder="+1 (555) 000-0000" value={inb.transferNumber} onChange={(e) => setInb({ transferNumber: e.target.value })} className="font-mono text-sm" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Transfer Criteria</Label>
+              <Textarea placeholder="Describe when calls should be transferred to a human…" value={inb.transferCriteria} onChange={(e) => setInb({ transferCriteria: e.target.value })} rows={2} />
+            </div>
+          </>
+        )}
+      </div>
+    </SectionCard>
+  )
+}
+
+function InboundCallBehaviorCard({ inb, setInb }: { inb: InboundConfig; setInb: (p: Partial<InboundConfig>) => void }) {
+  return (
+    <SectionCard icon={PhoneForwarded} title="Call Behavior">
+      <ToggleRow label="End of conversation" description="Hang up when the conversation concludes naturally." checked={inb.endOfConversation} onChange={(v) => setInb({ endOfConversation: v })} />
+      <ToggleRow label="Silence hangup" description="End the call after a period of caller silence." checked={inb.silenceHangup} onChange={(v) => setInb({ silenceHangup: v })} />
+      {inb.silenceHangup && (
+        <NumberField label="Silence Timeout (seconds)" value={inb.silenceTimeout} onChange={(v) => setInb({ silenceTimeout: v })} hint={`Call ends after ${inb.silenceTimeout}s of no response.`} />
+      )}
+      <NumberField label="Max Call Duration (seconds)" value={inb.maxCallDuration} onChange={(v) => setInb({ maxCallDuration: v })} hint="Maximum length for a conversation." />
     </SectionCard>
   )
 }
