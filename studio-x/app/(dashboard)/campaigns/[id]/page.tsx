@@ -12,11 +12,17 @@ import {
   Play,
   Plus,
   TrendingUp,
+  RefreshCw,
+  Download,
+  PhoneCall,
+  Voicemail,
+  Clock,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table,
@@ -37,6 +43,39 @@ import {
   type Campaign,
   type ChannelKind,
 } from "@/lib/campaign-data"
+import { cn } from "@/lib/utils"
+
+// ─── shared helpers ──────────────────────────────────────────────────────────
+
+function fmtHM(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
+}
+
+function DetailDonut({ segments }: { segments: { label: string; pct: number; stroke: string }[] }) {
+  const r = 38
+  const c = 2 * Math.PI * r
+  const total = segments.reduce((s, x) => s + x.pct, 0) || 100
+  let offset = 0
+  return (
+    <div className="relative shrink-0" style={{ width: 110, height: 110 }}>
+      <svg viewBox="0 0 110 110" className="-rotate-90">
+        <circle cx="55" cy="55" r={r} fill="none" strokeWidth={13} className="stroke-muted" />
+        {segments.map((s) => {
+          const len = (s.pct / total) * c
+          const seg = (
+            <circle key={s.label} cx="55" cy="55" r={r} fill="none" strokeWidth={13} className={s.stroke}
+              strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-offset} />
+          )
+          offset += len
+          return seg
+        })}
+      </svg>
+    </div>
+  )
+}
 
 export default function CampaignDetailPage({
   params,
@@ -61,6 +100,16 @@ export default function CampaignDetailPage({
             <Button variant="ghost" size="sm" onClick={() => router.push("/campaigns")} className="gap-1.5">
               <ArrowLeft className="h-3.5 w-3.5" /> All campaigns
             </Button>
+            {campaign.type === "outbound" && (
+              <>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast.success("Redial drafted", { description: "A new campaign was started from these contacts (mock)." })}>
+                  <RefreshCw className="h-3.5 w-3.5" /> Redial as New Campaign
+                </Button>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast.success("Results exported (mock)")}>
+                  <Download className="h-3.5 w-3.5" /> Download Results
+                </Button>
+              </>
+            )}
             <Button variant="outline" size="sm" className="gap-1.5">
               {isRunning ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
               {isRunning ? "Pause" : "Resume"}
@@ -144,21 +193,78 @@ function OverviewTab({ campaign }: { campaign: Campaign }) {
     },
   ]
 
+  // Derived call results (outbound dialing breakdown — Figma 1284)
+  const m = campaign.metrics
+  const answered = Math.round(m.calls * (m.successRate / 100))
+  const voicemail = Math.round(m.calls * 0.05)
+  const unanswered = Math.max(0, m.calls - answered - voicemail)
+  const totalDurationSec = m.calls * m.avgHandleTimeSec
+  const results = [
+    { label: "Total Calls", value: m.calls.toLocaleString(), icon: PhoneCall },
+    { label: "Total Answered", value: answered.toLocaleString(), icon: PhoneIncoming },
+    { label: "Total Unanswered", value: unanswered.toLocaleString(), icon: PhoneOutgoing },
+    { label: "Voicemail", value: voicemail.toLocaleString(), icon: Voicemail },
+    { label: "Total Call Duration", value: fmtHM(totalDurationSec), icon: Clock },
+  ]
+  const segs = m.calls > 0
+    ? [
+        { label: "Answered", pct: Math.round((answered / m.calls) * 100), stroke: "stroke-emerald-500", dot: "bg-emerald-500" },
+        { label: "Voicemail", pct: Math.round((voicemail / m.calls) * 100), stroke: "stroke-amber-500", dot: "bg-amber-500" },
+        { label: "Not answered", pct: Math.round((unanswered / m.calls) * 100), stroke: "stroke-muted-foreground", dot: "bg-muted-foreground" },
+      ]
+    : []
+
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="p-4 space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {k.label}
-              </p>
-              <p className="text-2xl font-semibold tabular-nums">{k.value}</p>
-              <p className="text-xs text-muted-foreground">{k.sub}</p>
+      {campaign.type === "outbound" && m.calls > 0 ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr]">
+          <Card>
+            <CardContent className="p-5">
+              <p className="text-sm font-semibold mb-3">Call Status Distribution</p>
+              <div className="flex items-center gap-4">
+                <DetailDonut segments={segs} />
+                <div className="flex-1 space-y-1.5">
+                  {segs.map((s) => (
+                    <div key={s.label} className="flex items-center justify-between text-sm">
+                      <span className="inline-flex items-center gap-2">
+                        <span className={cn("h-2 w-2 rounded-full", s.dot)} />{s.label}
+                      </span>
+                      <span className="tabular-nums text-muted-foreground">{s.pct}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 content-start">
+            {results.map((r) => (
+              <Card key={r.label}>
+                <CardContent className="p-4 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground">{r.label}</p>
+                    <r.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <p className="text-2xl font-semibold tabular-nums">{r.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {kpis.map((k) => (
+            <Card key={k.label}>
+              <CardContent className="p-4 space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {k.label}
+                </p>
+                <p className="text-2xl font-semibold tabular-nums">{k.value}</p>
+                <p className="text-xs text-muted-foreground">{k.sub}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {pct !== null && (
         <Card>

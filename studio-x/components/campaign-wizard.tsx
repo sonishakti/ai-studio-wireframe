@@ -14,6 +14,12 @@ import {
   ArrowLeft,
   Info,
   Lock,
+  CalendarClock,
+  PhoneForwarded,
+  Upload,
+  Download,
+  FileText,
+  Mic,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -21,6 +27,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -65,12 +73,65 @@ interface ChannelConfig {
   domains?: string[]
 }
 
+/** Outbound-only call program settings (telephony dialing campaigns). */
+interface OutboundConfig {
+  launchMode: "now" | "schedule"
+  startDate: string
+  timezone: string
+  callWindowStart: string
+  callWindowEnd: string
+  callWindowDays: string
+  // call settings
+  endCall: boolean
+  endOfConversation: boolean
+  voicemailDetection: boolean
+  silenceHangup: boolean
+  silenceTimeout: number
+  maxCallDuration: number
+  ringDuration: number
+  transferToHuman: boolean
+  transferNumber: string
+  transferCriteria: string
+  minInterval: number
+  // transcripts & recording
+  storeTranscripts: boolean
+  storeRecording: boolean
+  // contacts
+  contactsFileName: string | null
+  contactsCount: number
+}
+
+const DEFAULT_OUTBOUND: OutboundConfig = {
+  launchMode: "schedule",
+  startDate: "",
+  timezone: "",
+  callWindowStart: "09:00",
+  callWindowEnd: "18:00",
+  callWindowDays: "Mon–Sun",
+  endCall: true,
+  endOfConversation: false,
+  voicemailDetection: true,
+  silenceHangup: false,
+  silenceTimeout: 120,
+  maxCallDuration: 300,
+  ringDuration: 30,
+  transferToHuman: true,
+  transferNumber: "",
+  transferCriteria: "",
+  minInterval: 1000,
+  storeTranscripts: false,
+  storeRecording: false,
+  contactsFileName: null,
+  contactsCount: 0,
+}
+
 interface Draft {
   type: CampaignType | null
   name: string
   agentId: string | null
   selectedChannels: ChannelKind[]
   channelConfig: Partial<Record<ChannelKind, ChannelConfig>>
+  outbound: OutboundConfig
 }
 
 const EMPTY_DRAFT: Draft = {
@@ -79,6 +140,7 @@ const EMPTY_DRAFT: Draft = {
   agentId: null,
   selectedChannels: [],
   channelConfig: {},
+  outbound: DEFAULT_OUTBOUND,
 }
 
 // ─── Main wizard ─────────────────────────────────────────────────────────────
@@ -98,11 +160,14 @@ export function CampaignWizard({
     }
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY)
-      const parsed = stored ? (JSON.parse(stored) as Draft) : EMPTY_DRAFT
+      const parsed = stored ? (JSON.parse(stored) as Partial<Draft>) : EMPTY_DRAFT
       return {
+        ...EMPTY_DRAFT,
         ...parsed,
-        type: initialType ?? parsed.type,
-        agentId: initialAgentId ?? parsed.agentId,
+        // Defend against drafts saved before `outbound` existed.
+        outbound: { ...DEFAULT_OUTBOUND, ...(parsed.outbound ?? {}) },
+        type: initialType ?? parsed.type ?? null,
+        agentId: initialAgentId ?? parsed.agentId ?? null,
       }
     } catch {
       return { ...EMPTY_DRAFT, type: initialType ?? null, agentId: initialAgentId ?? null }
@@ -440,13 +505,20 @@ function ConfigStep({
   onCreate: () => void
 }) {
   const canCreate = Boolean(draft.name.trim() && (draft.type === "outbound" || draft.agentId))
+  const out = draft.outbound
+  const setOut = (patch: Partial<OutboundConfig>) =>
+    onChange((d) => ({ ...d, outbound: { ...d.outbound, ...patch } }))
+  const isOutbound = draft.type === "outbound"
+  const hasTelephony = draft.selectedChannels.includes("telephony")
 
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-base font-semibold">Configure</h2>
         <p className="text-sm text-muted-foreground">
-          Fill in the basics, then channel-specific settings.
+          {isOutbound
+            ? "Set up the dialing program — schedule, call behaviour, contacts."
+            : "Fill in the basics, then channel-specific settings."}
         </p>
       </div>
 
@@ -505,6 +577,12 @@ function ConfigStep({
         />
       ))}
 
+      {/* Outbound dialing program — the deep call-centre config */}
+      {isOutbound && <LaunchTimingCard out={out} setOut={setOut} />}
+      {isOutbound && hasTelephony && <CallSettingsCard out={out} setOut={setOut} />}
+      {isOutbound && hasTelephony && <ContactsCard out={out} setOut={setOut} />}
+      {isOutbound && <TranscriptsRecordingCard out={out} setOut={setOut} />}
+
       <WizardFooter
         onBack={onBack}
         onContinue={onCreate}
@@ -517,6 +595,177 @@ function ConfigStep({
         }
       />
     </div>
+  )
+}
+
+// ─── Outbound section cards ──────────────────────────────────────────────────
+
+function SectionCard({ icon: Icon, title, children }: { icon: React.ComponentType<{ className?: string }>; title: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold">{title}</h3>
+        </div>
+        {children}
+      </CardContent>
+    </Card>
+  )
+}
+
+function ToggleRow({ label, description, checked, onChange }: { label: string; description?: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div className="space-y-0.5">
+        <p className="text-sm font-medium">{label}</p>
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} className="mt-0.5 shrink-0" />
+    </div>
+  )
+}
+
+function NumberField({ label, value, onChange, hint }: { label: string; value: number; onChange: (v: number) => void; hint?: string }) {
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      <Input type="number" value={value} onChange={(e) => onChange(Number(e.target.value))} className="font-mono text-sm" />
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  )
+}
+
+function LaunchTimingCard({ out, setOut }: { out: OutboundConfig; setOut: (p: Partial<OutboundConfig>) => void }) {
+  return (
+    <SectionCard icon={CalendarClock} title="Launch Timing">
+      <div className="space-y-2">
+        <LaunchOption active={out.launchMode === "now"} onClick={() => setOut({ launchMode: "now" })} title="Launch Campaign Now" desc="Start calling contacts immediately" />
+        <LaunchOption active={out.launchMode === "schedule"} onClick={() => setOut({ launchMode: "schedule" })} title="Schedule for later" desc="Set a specific start time" />
+      </div>
+      {out.launchMode === "schedule" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          <div className="space-y-1.5">
+            <Label>Campaign Start Time</Label>
+            <Input placeholder="DD/MMM/YYYY" value={out.startDate} onChange={(e) => setOut({ startDate: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Timezone</Label>
+            <Select value={out.timezone} onValueChange={(v) => setOut({ timezone: v })}>
+              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="America/Los_Angeles">Pacific (PT)</SelectItem>
+                <SelectItem value="America/New_York">Eastern (ET)</SelectItem>
+                <SelectItem value="Europe/London">London (GMT)</SelectItem>
+                <SelectItem value="Asia/Kolkata">India (IST)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
+      <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2">
+        <span className="text-sm">Call Window</span>
+        <span className="text-sm tabular-nums text-muted-foreground">{out.callWindowStart} – {out.callWindowEnd}, {out.callWindowDays}</span>
+      </div>
+    </SectionCard>
+  )
+}
+
+function LaunchOption({ active, onClick, title, desc }: { active: boolean; onClick: () => void; title: string; desc: string }) {
+  return (
+    <button type="button" onClick={onClick} className={cn("flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors", active ? "border-primary bg-primary/5" : "border-border hover:border-primary/40")}>
+      <span className={cn("flex h-4 w-4 items-center justify-center rounded-full border shrink-0", active ? "border-primary" : "border-muted-foreground/40")}>
+        {active && <span className="h-2 w-2 rounded-full bg-primary" />}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-medium">{title}</span>
+        <span className="block text-xs text-muted-foreground">{desc}</span>
+      </span>
+    </button>
+  )
+}
+
+function CallSettingsCard({ out, setOut }: { out: OutboundConfig; setOut: (p: Partial<OutboundConfig>) => void }) {
+  return (
+    <SectionCard icon={PhoneForwarded} title="Call Settings">
+      <ToggleRow label="End Call" description="Give the agent the ability to end the call with the user." checked={out.endCall} onChange={(v) => setOut({ endCall: v })} />
+      <div className="space-y-3 border-t border-border pt-3">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Hang-up configuration</p>
+        <ToggleRow label="End of conversation" description="Hang up when the conversation naturally ends." checked={out.endOfConversation} onChange={(v) => setOut({ endOfConversation: v })} />
+        <ToggleRow label="Voicemail detection" description="Detect voicemail systems and hang up." checked={out.voicemailDetection} onChange={(v) => setOut({ voicemailDetection: v })} />
+        <ToggleRow label="Silence hangup" description="End the call after a period of silence." checked={out.silenceHangup} onChange={(v) => setOut({ silenceHangup: v })} />
+        {out.silenceHangup && (
+          <NumberField label="Silence Timeout (seconds)" value={out.silenceTimeout} onChange={(v) => setOut({ silenceTimeout: v })} hint={`Call ends after ${out.silenceTimeout}s of no response.`} />
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-3">
+        <NumberField label="Max Call Duration (seconds)" value={out.maxCallDuration} onChange={(v) => setOut({ maxCallDuration: v })} hint="Maximum length for a conversation." />
+        <NumberField label="Ring Duration (seconds)" value={out.ringDuration} onChange={(v) => setOut({ ringDuration: v })} hint="Stop ringing if not connected within this time." />
+      </div>
+      <div className="space-y-3 border-t border-border pt-3">
+        <ToggleRow label="Transfer Call to Human" description="Transfer to a human agent when needed or asked for." checked={out.transferToHuman} onChange={(v) => setOut({ transferToHuman: v })} />
+        {out.transferToHuman && (
+          <>
+            <div className="space-y-1.5">
+              <Label>Transfer Phone Number</Label>
+              <Input placeholder="+1 (555) 000-0000" value={out.transferNumber} onChange={(e) => setOut({ transferNumber: e.target.value })} className="font-mono text-sm" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Transfer Criteria</Label>
+              <Textarea placeholder="Describe when calls should be transferred to a human…" value={out.transferCriteria} onChange={(e) => setOut({ transferCriteria: e.target.value })} rows={2} />
+            </div>
+          </>
+        )}
+      </div>
+      <div className="border-t border-border pt-3">
+        <NumberField label="Minimum interval between calls (ms)" value={out.minInterval} onChange={(v) => setOut({ minInterval: v })} hint={`Dialing one call every ${out.minInterval} ms — ${(1000 / Math.max(1, out.minInterval)).toFixed(2)} call(s)/sec.`} />
+      </div>
+    </SectionCard>
+  )
+}
+
+function ContactsCard({ out, setOut }: { out: OutboundConfig; setOut: (p: Partial<OutboundConfig>) => void }) {
+  const loaded = out.contactsFileName !== null
+  return (
+    <SectionCard icon={FileText} title="Contacts List">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">Upload a CSV of contacts to dial.</p>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => toast.success("Mock: template downloaded")}>
+          <Download className="h-3.5 w-3.5" /> Download Template
+        </Button>
+      </div>
+      {loaded ? (
+        <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{out.contactsFileName}</p>
+              <p className="text-xs text-muted-foreground tabular-nums">{out.contactsCount.toLocaleString()} contacts uploaded</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setOut({ contactsFileName: null, contactsCount: 0 })}>Change File</Button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOut({ contactsFileName: "contacts.csv", contactsCount: 1500 })}
+          className="flex w-full flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-border py-6 hover:border-primary/40 transition-colors"
+        >
+          <Upload className="h-5 w-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Upload contacts CSV</span>
+          <span className="text-xs text-muted-foreground">Phone Number · Name · Dynamic fields</span>
+        </button>
+      )}
+    </SectionCard>
+  )
+}
+
+function TranscriptsRecordingCard({ out, setOut }: { out: OutboundConfig; setOut: (p: Partial<OutboundConfig>) => void }) {
+  return (
+    <SectionCard icon={Mic} title="Transcripts & Recording">
+      <ToggleRow label="Store Transcripts" description="Automatically save the conversation text for review." checked={out.storeTranscripts} onChange={(v) => setOut({ storeTranscripts: v })} />
+      <ToggleRow label="Store Call Recording" description="Automatically save the call audio recording for review." checked={out.storeRecording} onChange={(v) => setOut({ storeRecording: v })} />
+    </SectionCard>
   )
 }
 
