@@ -29,8 +29,8 @@ This is a **funnel rescue project** that happens to require product consolidatio
 ```
 Composer
 [flat]    Agents · Integrations                         ← Build
-[flat]    Campaigns · Phone Numbers                     ← Run (call-centre)
-[flat]    Monitor · Call History · Chat History         ← Observe (global)
+[flat]    Campaigns · Phone Numbers                     ← Deploy (the deployment surfaces)
+[flat]    Monitor                                       ← Observe (hub: Overview · Call History · Chat History · Sessions)
 [flat]    Project Settings · Realtime Services · Vendor Credentials
 Search ⌘K
 ```
@@ -41,19 +41,25 @@ Rendered as flat groups split by dividers — NO uppercase section-label headers
 locked rationale.
 
 Key rules (do NOT re-litigate — user gave explicit final direction 2026-06-02):
-- Global **Monitor** = the analytics dashboard. Label is "Monitor", never
-  "Analytics" (collides with the separate Agora Analytics product).
-- Observability is **global + per-campaign (both/and)**: `/monitor`, `/calls`,
-  `/chats` are global + filterable; each campaign also has scoped Analytics +
-  Calls in `/campaigns/[id]`. Not redundant — different jobs.
+- **Campaign = the deployment surface.** `/campaigns/[id]` is the hub for a
+  deployment — tabs **Overview · Configuration · Monitor · Calls · Chats ·
+  Sessions** — cross-linking to its agent and its phone number(s).
+  Configuration is the editable "reconfigure a live deployment" view.
+- **Observability is campaign-first.** Global **Monitor** is ONE sidebar item: a
+  hub (Overview · Call History · Chat History · Sessions, via `MonitorNav`) that
+  rolls up across deployments and drills into a campaign. The per-campaign scoped
+  tabs are the primary home for "what happened."
+- Label is **"Monitor"**, never "Analytics" (collides with the separate Agora
+  Analytics product).
 - **Chat History** (`/chats`, text channels) ≠ **Session History**
   (`/realtime-services/sessions`, RTC telemetry). Different personas/products.
 - Reference Figma (`Ai-Agent-Studio`) sidebar is INCONSISTENT across frames —
   its page *content* is canonical, its sidebar is not.
 
 History (why it churned): Insights group → dissolved to per-campaign → restored
-as Observe (this session, per polished reference designs + "keep every legacy
-feature"). Earlier: section labels removed; "Credentials" → "Vendor Credentials".
+as a global Observe trio → **collapsed to one Monitor hub + folded into the
+campaign deployment hub (2026-06-02 session 2, per the deploy-an-agent journey)**.
+Earlier: section labels removed; "Credentials" → "Vendor Credentials".
 
 - Footer: Search ⌘K · Project chip · Avatar
 - Topbar: Bell · ✦ Ask
@@ -70,7 +76,7 @@ feature"). Earlier: section labels removed; "Credentials" → "Vendor Credential
 - "Observe" as a section header rejected → use "Monitor".
 - "Console" as a toggle label rejected → use "Real-Time".
 - "Analytics" as a sidebar label rejected → use "Monitor" (Agora Analytics is a separate product).
-- Monitor + Calls + Usage live together under "Insights" group. Don't re-flatten — journeys 1–4 cross all three (see studio-x sidebar comment).
+- Global **Monitor** is a single sidebar item — a hub (Overview · Call History · Chat History · Sessions). Observability also folds into each campaign as scoped tabs. Don't re-split Monitor back into separate flat Call/Chat History sidebar items (2026-06-02 session 2).
 
 ## Open IA tensions (do litigate)
 
