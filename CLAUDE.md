@@ -1,13 +1,13 @@
 # Studio_X — Project memory
 
-> Auto-loaded each session. Full handoff is in `HANDOFF.md`; this file is the 60-second orientation so a fresh chat doesn't re-derive context.
+> Auto-loaded each session. Full handoff is in `HANDOFF-2026-06-02.md` (latest); this file is the 60-second orientation so a fresh chat doesn't re-derive context.
 
 ## Live preview
 
-- **Wireframe (start here):** https://ai-studio-console-redesign.vercel.app/wireframes/app.html
-- Root: https://ai-studio-console-redesign.vercel.app
-- Source: `wireframes/app.html` — vanilla HTML/CSS/JS, no build step — **29 screens, 3634 lines**
-- `git push origin main` → live in ~60s (Vercel auto-deploys from `sonishakti/ai-studio-wireframe` mirror)
+- **App (start here):** https://ai-studio-console-redesign.vercel.app — the live **Next.js app** in `studio-x/`
+- Source: `studio-x/` — Next.js App Router, **59 routes** (grows as pages are added; `pnpm tsc --noEmit` clean, `pnpm next build` green)
+- Legacy: `wireframes/app.html` — the original vanilla HTML wireframe, **superseded by `studio-x/`** (reference only; don't edit for new work)
+- ⚠️ **Vercel git auto-deploy is BROKEN** — after `git push origin main` you MUST run `vercel deploy --prod --yes` manually or the live site goes stale (see `HANDOFF-2026-06-02.md` §2)
 
 ## What this is
 
@@ -17,12 +17,12 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ## Read order
 
-1. `HANDOFF.md` — recent state, commits, open work, gap inventory
+1. `HANDOFF-2026-06-02.md` — latest state, commits, open work (§5), gap inventory
 2. `LEARNINGS.md` — strategic frame, funnel data, personas, hypothesis stack, decision log (paid for in research — **don't re-litigate**)
 3. `references/ia-mapping.md` — Console → Studio 56/56 URL coverage
 4. `references/sitemap.md` — original Agora Console structure
 5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
-6. `wireframes/app.html` — the wireframe itself (~5000 lines after Billing rebuild)
+6. `studio-x/` — the live Next.js app (the wireframe itself); `wireframes/app.html` is the superseded HTML origin
 
 ## Current sidebar (LOCKED 2026-06-02 — "new IA, old pages")
 
@@ -83,20 +83,22 @@ feature"). Earlier: section labels removed; "Credentials" → "Vendor Credential
 
 ## Tech stack
 
-- **Wireframe (current):** vanilla HTML/CSS/JS, CSS variables under shadcn convention, Lucide icons via CDN, Inter via Google Fonts, Light/Dark/System theme. No bundler. Open the HTML, it works.
-- **Path A (future React port):** React + Vite + TanStack Router + shadcn + Tailwind + MSW. Blocked on `AGORA_REGISTRY_TOKEN` for the `@agora/*` private registry.
-- **Prototype that exists:** `studio-x-prototype/` — TanStack Start + Vite + bun. 8 MVP surfaces functional.
+- **Current app (`studio-x/`):** Next.js 16 (App Router) · React 19 · Tailwind v4 · shadcn/ui · oklch design tokens · cyan primary · DM Sans · Lucide icons · Light/Dark/System theme. Build with `pnpm` (`pnpm tsc --noEmit`, `pnpm next build`). **Mock data only — no backend.**
+- **Legacy origin:** `wireframes/app.html` — the original vanilla HTML/CSS/JS wireframe the app was ported from. Superseded; don't edit for new work.
+- **Token parity:** the same `--primary` / `--foreground` / `--ring` CSS variables carry from the legacy wireframe into `studio-x/` unchanged.
 
 ## Where things live
 
 | What | Where |
 |---|---|
-| Wireframe HTML | `wireframes/app.html` |
-| Wireframe CSS | `wireframes/style.css`, `wireframes/app.css` |
-| Wireframe JS | `wireframes/app.js` |
-| Console reference screenshots | `references/console_map/` |
-| Open work checklist | `HANDOFF.md` "What's NOT done" |
+| App routes (pages) | `studio-x/app/(dashboard)/**/page.tsx` |
+| Components | `studio-x/components/` |
+| Mock data + helpers | `studio-x/lib/campaign-data.ts` |
+| Analytics taxonomy | `studio-x/lib/analytics.ts` |
+| Reference screenshots | `screenshots/` (newest), `references/console_map/` |
+| Open work checklist | `HANDOFF-2026-06-02.md` §5 |
 | Reference docs | `references/*.md` |
+| Legacy HTML wireframe | `wireframes/app.html` (superseded) |
 | Recent commits | `git log --oneline -20` |
 
 ## Working rules
@@ -104,7 +106,7 @@ feature"). Earlier: section labels removed; "Credentials" → "Vendor Credential
 - Cite `docs.agora.io/en/` URLs for any Agora-primitive design call.
 - Commits are the truth — docs cite them. If a doc is stale, fix the doc; don't second-guess the wireframe.
 - Keep a decision log entry (LEARNINGS.md §20 pattern) for any non-trivial choice.
-- The wireframe is CSS-token compatible with the future React stack — same `--primary` / `--foreground` / `--ring` variables move over unchanged.
+- `studio-x/` is the source of truth; the legacy `wireframes/app.html` is reference-only. Design tokens only — no hardcoded colors / arbitrary `text-[Npx]`; `buoy drift check` validates.
 
 ## Skills to reach for
 
