@@ -447,7 +447,7 @@ function assistantActionsFor(prompt: string): ChatMessage["actions"] {
   if (lower.includes("phone number") || lower.includes("telephony")) {
     return [
       { label: "Draft campaign", onClick: () => toast.info("Mock: would prefill /campaigns/new") },
-      { label: "Browse numbers", onClick: () => toast.info("Mock: would navigate to /campaigns/phone-numbers") },
+      { label: "Browse numbers", onClick: () => toast.info("Mock: would navigate to /phone-numbers") },
     ]
   }
   if (lower.includes("support") || lower.includes("agent")) {

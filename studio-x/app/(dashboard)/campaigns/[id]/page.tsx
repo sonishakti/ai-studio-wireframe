@@ -453,7 +453,7 @@ function ConfigurationTab({ campaign }: { campaign: Campaign }) {
                         <div key={num} className="flex items-center justify-between text-sm">
                           <span className="font-mono text-muted-foreground">{num}</span>
                           <Link
-                            href={pn ? `/campaigns/phone-numbers/${pn.id}` : "/campaigns/phone-numbers"}
+                            href={pn ? `/phone-numbers/${pn.id}` : "/phone-numbers"}
                             className="text-primary hover:underline inline-flex items-center gap-1 shrink-0"
                           >
                             Manage number <ArrowRight className="h-3 w-3" />

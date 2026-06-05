@@ -62,7 +62,7 @@ const NAV_BUILD: NavItem[] = [
 
 const NAV_DEPLOY: NavItem[] = [
   { label: "Campaigns", href: "/campaigns", icon: Megaphone },
-  { label: "Phone Numbers", href: "/campaigns/phone-numbers", icon: Phone },
+  { label: "Phone Numbers", href: "/phone-numbers", icon: Phone },
 ]
 
 // Observe — collapsed to a single Monitor hub. Monitor is the cross-deployment
@@ -83,9 +83,9 @@ const NAV_PROJECT: NavItem[] = [
 
 function isItemActive(itemHref: string, pathname: string): boolean {
   if (itemHref === "/campaigns") {
-    // Match /campaigns root, /campaigns/new, /campaigns/[id] but NOT /campaigns/phone-numbers
+    // Match /campaigns root, /campaigns/new, /campaigns/[id] but NOT /phone-numbers
     if (pathname === "/campaigns") return true
-    if (pathname.startsWith("/campaigns/phone-numbers")) return false
+    if (pathname.startsWith("/phone-numbers")) return false
     return pathname.startsWith("/campaigns/")
   }
   if (itemHref === "/monitor") {
