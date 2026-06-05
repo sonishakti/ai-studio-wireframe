@@ -14,8 +14,6 @@ import {
   Sparkles,
   TextSearch,
   LineChart,
-  PhoneCall,
-  MessagesSquare,
 } from "lucide-react"
 
 import {
@@ -23,6 +21,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -43,10 +42,12 @@ function openCommandPalette() {
 
 // ─── nav structure ───────────────────────────────────────────────────────────
 //
-// Per the Figma "Design Theme and UI" reference: items + grouping match the
-// Composer / Build / Deploy / Insights / Project clusters, but rendered as
-// flat sections separated by dividers — no uppercase BUILD/DEPLOY/INSIGHTS
-// label headers (per CLAUDE.md "Don't re-litigate" — section labels rejected).
+// 2026-06-05 IA (Vapi-informed, user-directed): three labeled groups rendered
+// with uppercase SidebarGroupLabel headers — BUILD · OBSERVE · MANAGE — with
+// Composer floating above and Search below. This REVERSES the earlier
+// "no section-label headers" / "'Observe' header rejected" calls (CLAUDE.md).
+// Build folds in the whole make-and-launch arc: Agents · Integrations ·
+// Phone Numbers · Campaign.
 
 type NavItem = {
   label: string
@@ -55,25 +56,26 @@ type NavItem = {
   badge?: string
 }
 
+// Build — the authoring workspace. Phone Numbers + Campaign (the deployment
+// surface) sit alongside Agents + Integrations so the full make-and-launch arc
+// lives under one label. "Campaign" is singular: the deployment hub.
 const NAV_BUILD: NavItem[] = [
   { label: "Agents", href: "/agents", icon: Bot },
   { label: "Integrations", href: "/integrations", icon: Library },
-]
-
-const NAV_DEPLOY: NavItem[] = [
-  { label: "Campaigns", href: "/campaigns", icon: Megaphone },
   { label: "Phone Numbers", href: "/phone-numbers", icon: Phone },
+  { label: "Campaign", href: "/campaigns", icon: Megaphone },
 ]
 
-// Observe — collapsed to a single Monitor hub. Monitor is the cross-deployment
-// rollup (its own tabs: Overview · Call History · Chat History · Sessions); the
-// primary home for "what happened" is now inside each campaign. One entry keeps
-// the sidebar lean and makes the campaign the deployment surface.
+// Observe — a single Monitor hub (tabs: Overview · Call History · Chat History ·
+// Sessions, plus an "RTE usage →" outlink to /billing/usage). Sessions = agent
+// conversation runs (Conversational AI), not RTC telemetry.
 const NAV_OBSERVE: NavItem[] = [
   { label: "Monitor", href: "/monitor", icon: LineChart },
 ]
 
-const NAV_PROJECT: NavItem[] = [
+// Manage — project-scoped administration. Account-scoped surfaces (Billing,
+// Extensions, Developer, Help) live in the avatar dropdown / AccountSidebar.
+const NAV_MANAGE: NavItem[] = [
   { label: "Project Settings", href: "/project/settings", icon: Settings2 },
   { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Key },
@@ -181,8 +183,9 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Build — Agents, Integrations */}
+        {/* Build — Agents · Integrations · Phone Numbers · Campaign */}
         <SidebarGroup>
+          <SidebarGroupLabel className="uppercase tracking-wider">Build</SidebarGroupLabel>
           <SidebarMenu>
             {NAV_BUILD.map((item) => (
               <NavLink key={item.href} item={item} />
@@ -190,21 +193,9 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarSeparator />
-
-        {/* Run — the call-centre: Campaigns + Phone Numbers */}
+        {/* Observe — global Monitor hub */}
         <SidebarGroup>
-          <SidebarMenu>
-            {NAV_DEPLOY.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* Observe — global monitoring: Monitor, Call History, Chat History */}
-        <SidebarGroup>
+          <SidebarGroupLabel className="uppercase tracking-wider">Observe</SidebarGroupLabel>
           <SidebarMenu>
             {NAV_OBSERVE.map((item) => (
               <NavLink key={item.href} item={item} />
@@ -212,12 +203,11 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarSeparator />
-
-        {/* Project — Settings, Realtime Services (with Sessions tab), Vendor Credentials */}
+        {/* Manage — project-scoped settings · RT services · vendor keys */}
         <SidebarGroup>
+          <SidebarGroupLabel className="uppercase tracking-wider">Manage</SidebarGroupLabel>
           <SidebarMenu>
-            {NAV_PROJECT.map((item) => (
+            {NAV_MANAGE.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
           </SidebarMenu>

@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Local nav for the global Monitor hub. The sidebar collapsed Monitor /
@@ -45,6 +46,15 @@ export function MonitorNav({ action }: { action?: React.ReactNode }) {
             </Link>
           )
         })}
+        {/* RTE = per-minute usage. Cross-link to the canonical usage page
+            (Realtime Services links here too — single destination, not a dupe). */}
+        <Link
+          href="/billing/usage"
+          className="ml-auto flex items-center gap-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground whitespace-nowrap"
+        >
+          RTE usage
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
       </nav>
     </div>
   )

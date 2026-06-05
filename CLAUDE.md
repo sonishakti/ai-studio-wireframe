@@ -24,21 +24,24 @@ This is a **funnel rescue project** that happens to require product consolidatio
 5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
 6. `studio-x/` — the live Next.js app (the wireframe itself); `wireframes/app.html` is the superseded HTML origin
 
-## Current sidebar (LOCKED 2026-06-02 — "new IA, old pages")
+## Current sidebar (LOCKED 2026-06-05 — labeled groups; Build folds in deploy)
 
 ```
 Composer
-[flat]    Agents · Integrations                         ← Build
-[flat]    Campaigns · Phone Numbers                     ← Deploy (the deployment surfaces)
-[flat]    Monitor                                       ← Observe (hub: Overview · Call History · Chat History · Sessions)
-[flat]    Project Settings · Realtime Services · Vendor Credentials
+BUILD     Agents · Integrations · Phone Numbers · Campaign
+OBSERVE   Monitor   (hub: Overview · Call History · Chat History · Sessions · RTE usage →)
+MANAGE    Project Settings · Realtime Services · Vendor Credentials
 Search ⌘K
 ```
 
-Rendered as flat groups split by dividers — NO uppercase section-label headers
-(Build/Deploy/Observe are mental clusters only). Root `/` → `/agents` (the old
-`/home` overview was removed). See `HANDOFF-2026-06-02.md` §3 for the full
-locked rationale.
+Rendered as three labeled groups with **uppercase `SidebarGroupLabel` headers**
+(BUILD · OBSERVE · MANAGE), Composer floating above and Search below. Build folds
+in the full make-and-launch arc (agent → integrations → number → campaign);
+**"Campaign" is singular** — the deployment surface. Monitor gains an "RTE usage →"
+outlink to `/billing/usage`. Root `/` → `/agents`. **2026-06-05 reversal: section
+labels are BACK, overriding the earlier "no headers" + "'Observe' header rejected"
+locks — per explicit user direction (Vapi-informed).** Prior rationale in
+`HANDOFF-2026-06-02.md` §3.
 
 Key rules (do NOT re-litigate — user gave explicit final direction 2026-06-02):
 - **Campaign = the deployment surface.** `/campaigns/[id]` is the hub for a
@@ -71,7 +74,7 @@ agent **Sessions** moved into Monitor (`/sessions`); **Phone Numbers** promoted 
 top-level; Campaigns list went channel-tabbed**. Decisions grounded in Agora docs
 (RTE = per-minute usage; Agora Analytics = RTC session quality, separate product;
 Conversational AI = agent sessions) + competitor patterns (Vapi/Retell/HighLevel:
-number is first-class, "campaign" = outbound). Earlier: section labels removed;
+number is first-class, "campaign" = outbound). **2026-06-05: section labels re-added (BUILD · OBSERVE · MANAGE) + Phone Numbers/Campaign folded into Build, per user direction.** Earlier: section labels removed;
 "Credentials" → "Vendor Credentials".
 
 - Footer: Search ⌘K · Project chip · Avatar
@@ -86,7 +89,7 @@ number is first-class, "campaign" = outbound). Earlier: section labels removed;
 - `Time on page` / session length / DAU are **rejected** as KPIs.
 - Bare "Credentials" as a nav item is rejected — must be scoped (LEARNINGS §9).
 - "Telemetry" as user-facing label rejected → use "Live activity".
-- "Observe" as a section header rejected → use "Monitor".
+- **2026-06-05 reversal:** BUILD · OBSERVE · MANAGE section labels are back (per user direction); the *item* under OBSERVE stays "Monitor", never "Analytics".
 - "Console" as a toggle label rejected → use "Real-Time".
 - "Analytics" as a sidebar label rejected → use "Monitor" (Agora Analytics is a separate product).
 - Global **Monitor** is a single sidebar item — a hub (Overview · Call History · Chat History · Sessions). Observability also folds into each campaign as scoped tabs. Don't re-split Monitor back into separate flat Call/Chat History sidebar items (2026-06-02 session 2).
