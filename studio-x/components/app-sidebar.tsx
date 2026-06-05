@@ -89,8 +89,8 @@ function isItemActive(itemHref: string, pathname: string): boolean {
     return pathname.startsWith("/campaigns/")
   }
   if (itemHref === "/monitor") {
-    // Monitor hub spans Overview (/monitor) + the Call/Chat History tabs.
-    return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/chats")
+    // Monitor hub spans Overview (/monitor) + Call/Chat History + agent Sessions.
+    return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/chats") || pathname.startsWith("/sessions")
   }
   return pathname === itemHref || pathname.startsWith(itemHref + "/")
 }

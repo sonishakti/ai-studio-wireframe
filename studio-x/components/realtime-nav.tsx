@@ -1,41 +1,27 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-const TABS = [
-  { label: "Services", href: "/realtime-services" },
-  { label: "Sessions", href: "/realtime-services/sessions" },
-]
-
+// Realtime Services = the Agora RTE catalog (Voice/Video/Live/Chat/Signaling…)
+// — human↔human SDK comms. There is no "session" surface here; consumption is
+// *usage*. So no Sessions tab — just a jump to usage. Agent sessions live in
+// the Monitor hub (/sessions).
 export function RealtimeNav() {
-  const pathname = usePathname()
   return (
     <div className="border-b bg-background px-6">
-      <h1 className="text-xl font-semibold tracking-tight pt-4">Realtime Services</h1>
-      <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">
-        {TABS.map((tab) => {
-          const isActive =
-            tab.href === "/realtime-services"
-              ? pathname === "/realtime-services"
-              : pathname === tab.href || pathname.startsWith(tab.href + "/")
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={cn(
-                "px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
-                isActive
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {tab.label}
-            </Link>
-          )
-        })}
-      </nav>
+      <div className="flex items-center justify-between gap-3 py-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Realtime Services</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Enable and configure the Agora RTE services your project uses.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" asChild className="gap-1.5 shrink-0">
+          <Link href="/billing/usage">View usage <ArrowRight className="h-3.5 w-3.5" /></Link>
+        </Button>
+      </div>
     </div>
   )
 }

@@ -893,7 +893,7 @@ function SessionsTab({ campaign }: { campaign: Campaign }) {
           </Table>
         </CardContent>
       </Card>
-      <CrossLink href="/realtime-services/sessions" label="View in Session History" />
+      <CrossLink href="/sessions" label="View in Session History" />
     </div>
   )
 }

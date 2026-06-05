@@ -68,7 +68,7 @@ function contextChipFor(pathname: string): string | undefined {
   if (pathname === "/campaigns/phone-numbers") return "Phone Numbers"
   if (pathname.startsWith("/campaigns/phone-numbers/")) return "Phone Number"
   if (/^\/campaigns\/[^/]+$/.test(pathname)) return "Campaign detail"
-  if (pathname.startsWith("/realtime-services/sessions")) return "Sessions"
+  if (pathname === "/sessions") return "Sessions"
   if (pathname === "/realtime-services") return "Realtime Services"
   if (pathname.startsWith("/project/")) return "Project"
   if (pathname.startsWith("/billing")) return "Billing"

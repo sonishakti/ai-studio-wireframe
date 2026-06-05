@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils"
 // Local nav for the global Monitor hub. The sidebar collapsed Monitor /
 // Call History / Chat History into a single "Monitor" entry; these tabs are
 // the cross-deployment rollup. Each surface is also scoped inside a campaign.
-// "Sessions" bridges to the RTC Session History under Realtime Services.
+// "Sessions" = agent conversation sessions (Conversational AI), not RTC telemetry.
 const TABS = [
   { label: "Overview", href: "/monitor" },
   { label: "Call History", href: "/calls" },
   { label: "Chat History", href: "/chats" },
-  { label: "Sessions", href: "/realtime-services/sessions" },
+  { label: "Sessions", href: "/sessions" },
 ]
 
 export function MonitorNav({ action }: { action?: React.ReactNode }) {

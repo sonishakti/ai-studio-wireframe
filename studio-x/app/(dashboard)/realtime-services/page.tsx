@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Info, ExternalLink, Package } from "lucide-react"
+import Link from "next/link"
+import { Info, ExternalLink, Package, ArrowRight } from "lucide-react"
 import { RealtimeNav } from "@/components/realtime-nav"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -186,13 +187,20 @@ export default function RealtimeServicesPage() {
                 <p className="text-sm text-muted-foreground mt-0.5">{selected.description}</p>
               </div>
             </div>
-            {selected.status === "disabled" ? (
-              <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                Disabled by admin
-              </Badge>
-            ) : (
-              <Switch checked={enabledState} />
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {enabledState && (
+                <Button variant="ghost" size="sm" asChild className="gap-1.5 text-xs">
+                  <Link href="/billing/usage">View usage <ArrowRight className="h-3 w-3" /></Link>
+                </Button>
+              )}
+              {selected.status === "disabled" ? (
+                <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  Disabled by admin
+                </Badge>
+              ) : (
+                <Switch checked={enabledState} />
+              )}
+            </div>
           </div>
 
           {selected.configure && enabledState && (

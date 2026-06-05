@@ -41,7 +41,7 @@ const COMMANDS: Command[] = [
   { id: "go-monitor",    label: "Monitor",                  href: "/monitor",                         icon: LineChart,          group: "Pages", keywords: ["analytics", "dashboard", "insights", "metrics"] },
   { id: "go-calls",      label: "Call History",             href: "/calls",                           icon: PhoneCall,          group: "Pages", keywords: ["call history", "call log", "calls"] },
   { id: "go-chats",      label: "Chat History",             href: "/chats",                           icon: MessageSquare,      group: "Pages", keywords: ["chat history", "messages", "whatsapp", "sms", "conversations"] },
-  { id: "go-sessions",   label: "Sessions",                 href: "/realtime-services/sessions",      icon: Radio,              group: "Pages", keywords: ["session history", "rtc", "realtime"] },
+  { id: "go-sessions",   label: "Sessions",                 href: "/sessions",                        icon: Radio,              group: "Pages", keywords: ["session history", "agent sessions", "conversations"] },
   { id: "go-deploy",     label: "Deploy",                   href: "/deploy",                          icon: Activity,           group: "Pages", keywords: ["go live", "publish", "ship"] },
 
   // ── Billing ──────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
-// Session History is now the Sessions tab inside Realtime Services — it's RTC
-// session telemetry, distinct from campaign call history.
+// Session History → agent Sessions, now in the Monitor hub (Conversational AI
+// conversation runs, not RTC telemetry).
 export default function SessionHistoryLegacyRedirect() {
-  redirect("/realtime-services/sessions")
+  redirect("/sessions")
 }
