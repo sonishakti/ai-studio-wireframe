@@ -34,13 +34,11 @@ export function DeployNav({ action }: { action?: React.ReactNode }) {
   const pathname = usePathname()
   return (
     <div className="border-b bg-background px-6">
-      <div className="flex items-center justify-between gap-3 pt-3">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Deploy
-        </span>
+      <div className="flex items-center justify-between gap-3 pt-4">
+        <h1 className="text-xl font-semibold tracking-tight">Deploy</h1>
         {action}
       </div>
-      <nav className="flex items-center gap-1 mt-2 -mb-px overflow-x-auto">
+      <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">
         {TABS.map((tab) => {
           const active = isTabActive(tab.href, pathname)
           return (

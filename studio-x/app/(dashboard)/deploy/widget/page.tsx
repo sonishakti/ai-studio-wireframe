@@ -5,7 +5,6 @@ import Link from "next/link"
 import {
   Globe, ArrowRight, Copy, Sparkles, Palette, MessageSquare, Mic,
 } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
 import { DeployNav } from "@/components/deploy-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -61,17 +60,14 @@ export default function DeployWidgetPage() {
   return (
     <div className="flex flex-col flex-1">
       <DeployNav />
-      <PageHeader
-        title="Deploy as a Web Widget"
-        description="Add a chat / voice button to your website. Drop one script tag and you're done."
-        actions={
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/deploy"><ArrowRight className="h-3.5 w-3.5 rotate-180" /> All channels</Link>
-          </Button>
-        }
-      />
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 space-y-5">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold">Web Widget</h2>
+          <p className="text-sm text-muted-foreground">
+            Add a chat / voice button to your website. Drop one script tag and you&apos;re done.
+          </p>
+        </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_440px]">
           {/* Config column */}
           <div className="space-y-5">

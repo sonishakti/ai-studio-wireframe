@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
-import { PageHeader } from "@/components/page-header"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { DeployNav } from "@/components/deploy-nav"
 import { PHONE_NUMBERS, CAMPAIGNS } from "@/lib/campaign-data"
@@ -48,10 +47,14 @@ export default function PhoneNumbersPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <DeployNav />
-      <PageHeader
-        title="Phone Numbers"
-        description="SIP numbers, agent assignment, and routing for inbound and outbound."
+      <DeployNav
+        action={
+          <AddPhoneNumberSheet>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> Add Phone Number
+            </Button>
+          </AddPhoneNumberSheet>
+        }
       />
 
       <main className="flex-1 p-6 pt-4">
@@ -79,11 +82,6 @@ export default function PhoneNumbersPage() {
               className="pl-8 h-9 text-sm"
             />
           </div>
-          <AddPhoneNumberSheet>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" /> Add Phone Number
-            </Button>
-          </AddPhoneNumberSheet>
         </div>
 
         <Card>

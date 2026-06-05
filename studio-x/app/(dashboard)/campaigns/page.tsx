@@ -88,40 +88,34 @@ export default function CampaignsPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <DeployNav />
-      {/* Header + channel tabs */}
-      <div className="border-b bg-background px-6">
-        <div className="flex items-center justify-between gap-3 pt-4">
-          <h1 className="text-xl font-semibold tracking-tight">Campaigns</h1>
+      <DeployNav
+        action={
           <Button size="sm" className="gap-1.5" asChild>
             <Link href="/campaigns/new"><Plus className="h-4 w-4" /> New campaign</Link>
           </Button>
-        </div>
-        <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">
-          {CHANNEL_TABS.map((t) => {
-            const count = CAMPAIGNS.filter(t.match).length
-            return (
+        }
+      />
+
+      <main className="flex-1 p-6 pt-4">
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          {/* Channel filter — tier-2 segmented control under the Deploy nav */}
+          <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5 overflow-x-auto">
+            {CHANNEL_TABS.map((t) => (
               <button
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                  "rounded px-2.5 h-7 text-xs font-medium transition-colors whitespace-nowrap",
                   tab === t.key
-                    ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground",
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {t.label}
-                <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
               </button>
-            )
-          })}
-        </nav>
-      </div>
-
-      <main className="flex-1 p-6 pt-4">
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
+            ))}
+          </div>
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input

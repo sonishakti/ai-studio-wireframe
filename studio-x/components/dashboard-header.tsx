@@ -33,11 +33,11 @@ const LABELS: Record<string, string> = {
   chats: "Chat History",
   monitor: "Monitor",
   sessions: "Sessions",
-  deploy: "Channels", // legacy — kept for any /deploy/* URLs still in transit
+  deploy: "Deploy",
   widget: "Web Widget",
   whatsapp: "WhatsApp",
   sms: "SMS",
-  api: "Direct API",
+  api: "API & SDK",
   slack: "Slack",
   test: "Test Playground",
   projects: "Projects",
@@ -91,6 +91,12 @@ export function DashboardHeader() {
   for (const seg of pathname.split("/").filter(Boolean)) {
     acc += `/${seg}`
     if (!isId(seg)) crumbs.push({ label: labelOf(seg), href: acc })
+  }
+
+  // Campaigns + Phone Numbers are Deploy tabs but live at top-level URLs, so
+  // prefix a "Deploy" crumb for a consistent "Deploy › X" trail with the hub.
+  if (["/campaigns", "/phone-numbers"].some((r) => pathname === r || pathname.startsWith(r + "/"))) {
+    crumbs.unshift({ label: "Deploy", href: "/deploy" })
   }
 
   return (

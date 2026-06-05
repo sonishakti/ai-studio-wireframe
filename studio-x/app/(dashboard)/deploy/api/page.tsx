@@ -3,7 +3,6 @@
 import * as React from "react"
 import Link from "next/link"
 import { ArrowRight, Code2, Copy, ExternalLink, Smartphone, Monitor, Cpu } from "lucide-react"
-import { PageHeader } from "@/components/page-header"
 import { DeployNav } from "@/components/deploy-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -97,17 +96,14 @@ export default function DeployApiPage() {
   return (
     <div className="flex flex-col flex-1">
       <DeployNav />
-      <PageHeader
-        title="Deploy via Direct API"
-        description="Embed your agent in your own app. Maximum flexibility, full control over the UI."
-        actions={
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/deploy"><ArrowRight className="h-3.5 w-3.5 rotate-180" /> All channels</Link>
-          </Button>
-        }
-      />
 
       <main className="flex-1 p-6 space-y-5">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold">API &amp; SDK</h2>
+          <p className="text-sm text-muted-foreground">
+            Embed your agent in your own app — maximum flexibility, full control over the UI.
+          </p>
+        </div>
         {/* Platform picker */}
         <Tabs value={platform} onValueChange={(v) => setPlatform(v as typeof platform)}>
           <TabsList>
