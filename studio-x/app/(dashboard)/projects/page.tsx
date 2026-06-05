@@ -89,7 +89,7 @@ export default function ProjectsPage() {
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-2">
-                  <Link href="/home" className="flex items-start gap-3 flex-1 min-w-0 group">
+                  <Link href="/agents" className="flex items-start gap-3 flex-1 min-w-0 group">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
                       <FolderKanban className="h-4 w-4 text-muted-foreground" />
                     </div>

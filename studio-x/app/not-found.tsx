@@ -23,7 +23,7 @@ export default function NotFound() {
 
         <div className="flex items-center justify-center gap-2">
           <Button variant="outline" asChild>
-            <Link href="/home">
+            <Link href="/agents">
               <Home className="h-4 w-4" /> Home
             </Link>
           </Button>

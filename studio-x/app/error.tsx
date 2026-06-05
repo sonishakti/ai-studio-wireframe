@@ -50,7 +50,7 @@ export default function GlobalError({
             <RotateCw className="h-4 w-4" /> Try again
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/home">
+            <Link href="/agents">
               <Home className="h-4 w-4" /> Home
             </Link>
           </Button>

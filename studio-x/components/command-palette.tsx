@@ -33,8 +33,7 @@ type Command = {
 
 const COMMANDS: Command[] = [
   // ── Pages — most common navigation targets ─────────────────────────────────
-  { id: "go-home",       label: "Home",                     href: "/home",                            icon: Home,               group: "Pages", keywords: ["dashboard"] },
-  { id: "go-agents",     label: "Agents",                   href: "/agents",                          icon: Bot,                group: "Pages" },
+  { id: "go-agents",     label: "Agents",                   href: "/agents",                          icon: Bot,                group: "Pages", keywords: ["home", "dashboard"] },
   { id: "go-rtc",        label: "Realtime Services",        href: "/realtime-services",               icon: Radio,              group: "Pages" },
   { id: "go-integ",      label: "Integrations",             href: "/integrations",                    icon: Puzzle,             group: "Pages" },
   { id: "go-numbers",    label: "Phone Numbers",            href: "/campaigns/phone-numbers",         icon: Phone,              group: "Pages" },

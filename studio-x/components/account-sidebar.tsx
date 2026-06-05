@@ -149,7 +149,7 @@ export function AccountSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/home">
+              <Link href="/agents">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                   <ArrowLeft className="h-4 w-4 text-muted-foreground" />
                 </div>
