@@ -36,30 +36,43 @@ Search ⌘K
 ```
 
 Rendered as flat groups split by dividers — NO uppercase section-label headers
-(Build/Deploy/Observe are mental clusters only). Realtime Services has a
-**Sessions** tab (RTC telemetry). See `HANDOFF-2026-06-02.md` §3 for the full
+(Build/Deploy/Observe are mental clusters only). Root `/` → `/agents` (the old
+`/home` overview was removed). See `HANDOFF-2026-06-02.md` §3 for the full
 locked rationale.
 
 Key rules (do NOT re-litigate — user gave explicit final direction 2026-06-02):
 - **Campaign = the deployment surface.** `/campaigns/[id]` is the hub for a
   deployment — tabs **Overview · Configuration · Monitor · Calls · Chats ·
   Sessions** — cross-linking to its agent and its phone number(s).
-  Configuration is the editable "reconfigure a live deployment" view.
-- **Observability is campaign-first.** Global **Monitor** is ONE sidebar item: a
-  hub (Overview · Call History · Chat History · Sessions, via `MonitorNav`) that
-  rolls up across deployments and drills into a campaign. The per-campaign scoped
-  tabs are the primary home for "what happened."
-- Label is **"Monitor"**, never "Analytics" (collides with the separate Agora
-  Analytics product).
-- **Chat History** (`/chats`, text channels) ≠ **Session History**
-  (`/realtime-services/sessions`, RTC telemetry). Different personas/products.
+  Configuration is the editable "reconfigure a live deployment" view. The
+  **Campaigns list is channel-tabbed: All · Inbound · Outbound · WhatsApp · Web**
+  (a campaign can span several; empty tabs offer a configure CTA).
+- **Phone Numbers is a top-level resource** at `/phone-numbers` (NOT under
+  campaigns). The number is first-class; inbound-agent + outbound use attach to it.
+- **Observability is campaign-first.** Global **Monitor** is ONE sidebar item — a
+  hub (Overview · Call History · Chat History · Sessions, via `MonitorNav`).
+  **Sessions = AGENT conversation sessions** (`/sessions`, Conversational AI runs),
+  NOT RTC telemetry. Label is **"Monitor"**, never "Analytics" (collides with the
+  separate Agora Analytics product).
+- **RTE = usage, not sessions.** Realtime Services (`/realtime-services`) is the
+  Agora RTE catalog (Voice/Video/Live/Chat/Signaling = human↔human comms); it has
+  **no Sessions tab** — only "View usage →" CTAs to `/billing/usage`. RTC
+  session-quality telemetry is **Agora Analytics** (a separate product, external).
+- **Chat History** (`/chats`, text-channel agent convos) ≠ **agent Sessions**
+  (`/sessions`, voice/AI conversation runs). Different surfaces — both in Monitor.
 - Reference Figma (`Ai-Agent-Studio`) sidebar is INCONSISTENT across frames —
   its page *content* is canonical, its sidebar is not.
 
 History (why it churned): Insights group → dissolved to per-campaign → restored
-as a global Observe trio → **collapsed to one Monitor hub + folded into the
-campaign deployment hub (2026-06-02 session 2, per the deploy-an-agent journey)**.
-Earlier: section labels removed; "Credentials" → "Vendor Credentials".
+as a global Observe trio → collapsed to one Monitor hub + folded into the campaign
+deployment hub (session 2) → **triage-driven cleanup (session 3): removed `/home`
+(root → `/agents`); RTE reframed as *usage* (no Sessions in Realtime Services);
+agent **Sessions** moved into Monitor (`/sessions`); **Phone Numbers** promoted to
+top-level; Campaigns list went channel-tabbed**. Decisions grounded in Agora docs
+(RTE = per-minute usage; Agora Analytics = RTC session quality, separate product;
+Conversational AI = agent sessions) + competitor patterns (Vapi/Retell/HighLevel:
+number is first-class, "campaign" = outbound). Earlier: section labels removed;
+"Credentials" → "Vendor Credentials".
 
 - Footer: Search ⌘K · Project chip · Avatar
 - Topbar: Bell · ✦ Ask
