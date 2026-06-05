@@ -467,7 +467,8 @@ function ChannelStep({
                   checked={isSelected}
                   disabled={!allowed}
                   onCheckedChange={() => allowed && onToggle(kind)}
-                  className="mt-1"
+                  tabIndex={-1}
+                  className="mt-1 pointer-events-none"
                 />
               </div>
             )
@@ -484,14 +485,22 @@ function ChannelStep({
             }
 
             return (
-              <button
+              <div
                 key={kind}
-                type="button"
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
                 onClick={() => onToggle(kind)}
-                className="text-left"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    onToggle(kind)
+                  }
+                }}
+                className="text-left cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {cardInner}
-              </button>
+              </div>
             )
           })}
         </div>
