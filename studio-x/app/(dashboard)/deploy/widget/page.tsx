@@ -6,6 +6,7 @@ import {
   Globe, ArrowRight, Copy, Sparkles, Palette, MessageSquare, Mic,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { DeployNav } from "@/components/deploy-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -59,6 +60,7 @@ export default function DeployWidgetPage() {
 
   return (
     <div className="flex flex-col flex-1">
+      <DeployNav />
       <PageHeader
         title="Deploy as a Web Widget"
         description="Add a chat / voice button to your website. Drop one script tag and you're done."

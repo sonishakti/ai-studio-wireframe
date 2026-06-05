@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { ArrowRight, Code2, Copy, ExternalLink, Smartphone, Monitor, Cpu } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { DeployNav } from "@/components/deploy-nav"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -95,6 +96,7 @@ export default function DeployApiPage() {
 
   return (
     <div className="flex flex-col flex-1">
+      <DeployNav />
       <PageHeader
         title="Deploy via Direct API"
         description="Embed your agent in your own app. Maximum flexibility, full control over the UI."

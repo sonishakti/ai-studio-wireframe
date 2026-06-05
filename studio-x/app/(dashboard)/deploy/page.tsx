@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/page-header"
 import { DeployChooser, DeployChooserFooter } from "@/components/deploy-chooser"
+import { DeployNav } from "@/components/deploy-nav"
 
 export const metadata = {
   title: "Deploy",
@@ -8,6 +9,7 @@ export const metadata = {
 export default function DeployHubPage() {
   return (
     <div className="flex flex-col flex-1">
+      <DeployNav />
       <PageHeader
         title="Deploy an agent"
         description="Pick how your agent goes live. You can add more channels later."

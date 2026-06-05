@@ -6,8 +6,7 @@ import { usePathname } from "next/navigation"
 import {
   Bot,
   Library,
-  Phone,
-  Megaphone,
+  Rocket,
   Settings2,
   Radio,
   Key,
@@ -56,14 +55,13 @@ type NavItem = {
   badge?: string
 }
 
-// Build — the authoring workspace. Phone Numbers + Campaign (the deployment
-// surface) sit alongside Agents + Integrations so the full make-and-launch arc
-// lives under one label. "Campaign" is singular: the deployment hub.
+// Build — the authoring workspace. "Deploy" is one destination for the whole
+// go-live surface (Overview · Campaigns · Phone Numbers · Web Widget · API & SDK),
+// replacing the old separate Phone Numbers + Campaign items (2026-06-05, Opt 3).
 const NAV_BUILD: NavItem[] = [
   { label: "Agents", href: "/agents", icon: Bot },
   { label: "Integrations", href: "/integrations", icon: Library },
-  { label: "Phone Numbers", href: "/phone-numbers", icon: Phone },
-  { label: "Campaign", href: "/campaigns", icon: Megaphone },
+  { label: "Deploy", href: "/deploy", icon: Rocket },
 ]
 
 // Observe — a single Monitor hub (tabs: Overview · Call History · Chat History ·
@@ -84,11 +82,15 @@ const NAV_MANAGE: NavItem[] = [
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function isItemActive(itemHref: string, pathname: string): boolean {
-  if (itemHref === "/campaigns") {
-    // Match /campaigns root, /campaigns/new, /campaigns/[id] but NOT /phone-numbers
-    if (pathname === "/campaigns") return true
-    if (pathname.startsWith("/phone-numbers")) return false
-    return pathname.startsWith("/campaigns/")
+  if (itemHref === "/deploy") {
+    // Deploy hub spans Overview (/deploy) + the channel pages (/deploy/widget,
+    // /deploy/api) + Campaigns + Phone Numbers.
+    return (
+      pathname === "/deploy" ||
+      pathname.startsWith("/deploy/") ||
+      pathname.startsWith("/campaigns") ||
+      pathname.startsWith("/phone-numbers")
+    )
   }
   if (itemHref === "/monitor") {
     // Monitor hub spans Overview (/monitor) + Call/Chat History + agent Sessions.

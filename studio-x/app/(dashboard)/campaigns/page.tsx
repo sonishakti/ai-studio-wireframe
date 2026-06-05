@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { CampaignChannelBadges } from "@/components/campaign-channel-badges"
+import { DeployNav } from "@/components/deploy-nav"
 import { CAMPAIGNS, STATUS_BADGE, type Campaign } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
 
@@ -87,6 +88,7 @@ export default function CampaignsPage() {
 
   return (
     <div className="flex flex-col flex-1">
+      <DeployNav />
       {/* Header + channel tabs */}
       <div className="border-b bg-background px-6">
         <div className="flex items-center justify-between gap-3 pt-4">

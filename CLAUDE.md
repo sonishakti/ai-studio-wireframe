@@ -28,7 +28,7 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ```
 Composer
-BUILD     Agents · Integrations · Phone Numbers · Campaign
+BUILD     Agents · Integrations · Deploy
 OBSERVE   Monitor   (hub: Overview · Call History · Chat History · Sessions · RTE usage →)
 MANAGE    Project Settings · Realtime Services · Vendor Credentials
 Search ⌘K
@@ -50,8 +50,13 @@ Key rules (do NOT re-litigate — user gave explicit final direction 2026-06-02)
   Configuration is the editable "reconfigure a live deployment" view. The
   **Campaigns list is channel-tabbed: All · Inbound · Outbound · WhatsApp · Web**
   (a campaign can span several; empty tabs offer a configure CTA).
-- **Phone Numbers is a top-level resource** at `/phone-numbers` (NOT under
-  campaigns). The number is first-class; inbound-agent + outbound use attach to it.
+- **Deploy is one hub** (2026-06-05, Opt 3) at `/deploy` — tabs **Overview ·
+  Campaigns · Phone Numbers · Web Widget · API & SDK** (via `DeployNav`). Replaced
+  the separate top-level Phone Numbers + Campaign items, fixing the asymmetry where
+  telephony was the only channel with a top-level home. WhatsApp/SMS/Slack are added
+  *inside* a campaign (the wizard, where `/deploy/{sms,whatsapp,slack}` redirect) —
+  not standalone pages. Phone numbers stay first-class as the **Phone Numbers** tab.
+  "Campaign" = outbound batch; the inbound-copy cleanup is a separate pass.
 - **Observability is campaign-first.** Global **Monitor** is ONE sidebar item — a
   hub (Overview · Call History · Chat History · Sessions, via `MonitorNav`).
   **Sessions = AGENT conversation sessions** (`/sessions`, Conversational AI runs),

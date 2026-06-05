@@ -25,6 +25,7 @@ import {
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { PageHeader } from "@/components/page-header"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
+import { DeployNav } from "@/components/deploy-nav"
 import { PHONE_NUMBERS, CAMPAIGNS } from "@/lib/campaign-data"
 
 export default function PhoneNumbersPage() {
@@ -47,6 +48,7 @@ export default function PhoneNumbersPage() {
 
   return (
     <div className="flex flex-col flex-1">
+      <DeployNav />
       <PageHeader
         title="Phone Numbers"
         description="SIP numbers, agent assignment, and routing for inbound and outbound."
