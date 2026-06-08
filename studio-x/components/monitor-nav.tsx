@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 // the cross-deployment rollup. Each surface is also scoped inside a campaign.
 // "Sessions" = agent conversation sessions (Conversational AI), not RTC telemetry.
 const TABS = [
-  { label: "Overview", href: "/monitor" },
+  { label: "Agents Overview", href: "/monitor" },
   { label: "Call History", href: "/calls" },
   { label: "Chat History", href: "/chats" },
   { label: "Sessions", href: "/sessions" },
@@ -46,14 +46,15 @@ export function MonitorNav({ action }: { action?: React.ReactNode }) {
             </Link>
           )
         })}
-        {/* RTE = per-minute usage. Cross-link to the canonical usage page
-            (Realtime Services links here too — single destination, not a dupe). */}
+        {/* Realtime Services — an inline tab per design 05. RTE telemetry is
+            per-minute usage, which lives in Billing, so this cross-links there
+            (honors the locked IA: RTE = usage, not agent sessions). */}
         <Link
           href="/billing/usage"
-          className="ml-auto flex items-center gap-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground whitespace-nowrap"
+          className="flex items-center gap-1 px-3 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
         >
-          RTE usage
-          <ArrowUpRight className="h-3.5 w-3.5" />
+          Realtime Services
+          <ArrowUpRight className="h-3 w-3 opacity-60" />
         </Link>
       </nav>
     </div>
