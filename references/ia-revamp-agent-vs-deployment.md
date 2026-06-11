@@ -76,7 +76,8 @@ BUILD
       New batch                  /deploy/batch-calls/new
     Phone Numbers                /deploy/phone-numbers       (first-class; was /phone-numbers)
       Number detail              /deploy/phone-numbers/[id]
-    Code                         /deploy/code                (single export surface; iframe = one snippet)
+    Web Widget                   /deploy/web-widget          (App-Builder widget studio: theme · blob · content · modes)
+    Code                         /deploy/code                (export to any stack; SDK matrix)
 
 OBSERVE
   Monitor                        /monitor                    (Overview · Call History · Chat History · Sessions)

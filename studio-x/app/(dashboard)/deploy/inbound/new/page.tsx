@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Rocket, Bot } from "lucide-react"
+import { ArrowLeft, Rocket, Bot, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -118,6 +118,18 @@ export default function NewInboundPage() {
                   </div>
                 )}
               </div>
+
+              {channel === "web" && (
+                <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
+                  <Globe className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground leading-relaxed">
+                    Style the widget — theme, voice blob, modes, and embed snippet — in the{" "}
+                    <Link href={`/deploy/web-widget?agent=${agentId}`} className="underline underline-offset-2 hover:text-primary">
+                      Web Widget builder
+                    </Link>.
+                  </p>
+                </div>
+              )}
 
               {channel === "telephony" && (
                 <div className="space-y-2">

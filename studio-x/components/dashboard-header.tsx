@@ -32,6 +32,7 @@ const LABELS: Record<string, string> = {
   inbound: "Inbound",
   embed: "Embed / Code",
   code: "Code",
+  "web-widget": "Web Widget",
   create: "New Batch",
   calls: "Call History",
   chats: "Chat History",

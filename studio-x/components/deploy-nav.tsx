@@ -18,6 +18,7 @@ const TABS = [
   { label: "Inbound", href: "/deploy/inbound" },
   { label: "Batch Calls", href: "/deploy/batch-calls" },
   { label: "Phone Numbers", href: "/deploy/phone-numbers" },
+  { label: "Web Widget", href: "/deploy/web-widget" },
   { label: "Code", href: "/deploy/code" },
 ]
 
