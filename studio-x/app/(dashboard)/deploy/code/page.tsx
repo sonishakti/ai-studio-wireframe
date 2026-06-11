@@ -183,6 +183,12 @@ export default function DeployCodePage() {
   const [agentId, setAgentId] = React.useState(AGENTS[0].id)
   const [platform, setPlatform] = React.useState<PlatformId>("web")
 
+  // Pre-fill the agent when arriving from the Deploy chooser (?agent=…).
+  React.useEffect(() => {
+    const a = new URLSearchParams(window.location.search).get("agent")
+    if (a && AGENTS.some((x) => x.id === a)) setAgentId(a)
+  }, [])
+
   const snippets = snippetsFor(agentId)
   const s = snippets[platform]
 

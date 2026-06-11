@@ -51,6 +51,12 @@ export default function NewBatchCallPage() {
   const [agentId, setAgentId] = React.useState<string>("")
   const [numberId, setNumberId] = React.useState<string>("pn_05")
 
+  // Pre-fill the agent when arriving from the Deploy chooser (?agent=…).
+  React.useEffect(() => {
+    const a = new URLSearchParams(window.location.search).get("agent")
+    if (a && AGENTS.some((x) => x.id === a)) setAgentId(a)
+  }, [])
+
   // Step 2 — Contacts
   const [file, setFile] = React.useState<typeof MOCK_CSV | null>(null)
 

@@ -31,6 +31,12 @@ export default function NewInboundPage() {
   const router = useRouter()
   const [name, setName] = React.useState("")
   const [agentId, setAgentId] = React.useState<string>("")
+
+  // Pre-fill the agent when arriving from the Deploy chooser (?agent=…).
+  React.useEffect(() => {
+    const a = new URLSearchParams(window.location.search).get("agent")
+    if (a && AGENTS.some((x) => x.id === a)) setAgentId(a)
+  }, [])
   const [channel, setChannel] = React.useState<ChannelKind>("telephony")
   const [numberId, setNumberId] = React.useState<string>("")
   const [prompt, setPrompt] = React.useState(STARTER_PROMPT)
