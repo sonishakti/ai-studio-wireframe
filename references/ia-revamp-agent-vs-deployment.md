@@ -76,7 +76,7 @@ BUILD
       New batch                  /deploy/batch-calls/new
     Phone Numbers                /deploy/phone-numbers       (first-class; was /phone-numbers)
       Number detail              /deploy/phone-numbers/[id]
-    Code                 /deploy/embed               (folds Web Widget + API & SDK)
+    Code                         /deploy/code                (single export surface; iframe = one snippet)
 
 OBSERVE
   Monitor                        /monitor                    (Overview · Call History · Chat History · Sessions)
@@ -106,8 +106,8 @@ MANAGE
 | `/campaigns/calls` | `/deploy/batch-calls/[id]` › Calls tab | fold |
 | `/campaigns/phone-numbers`, `/campaigns/phone-numbers/[id]` | `/deploy/phone-numbers` | legacy dup → redirect |
 | `/phone-numbers`, `/phone-numbers/[id]` | `/deploy/phone-numbers` (+`/[id]`) | moved under Deploy |
-| `/deploy/widget` | `/deploy/embed` › Widget | fold |
-| `/deploy/api` | `/deploy/embed` › API & SDK | fold |
+| `/deploy/widget` | `/deploy/code` | fold |
+| `/deploy/api` | `/deploy/code` | fold |
 | `/deploy/telephony` `/deploy/sms` `/deploy/whatsapp` `/deploy/slack` | create flow (channel chosen inside Inbound/Batch) | redirect |
 | `/telephony/campaigns`, `/telephony/campaigns/create` | `/deploy/batch-calls` | legacy dup → redirect |
 | `/telephony/phone-numbers` | `/deploy/phone-numbers` | legacy dup → redirect |
@@ -131,7 +131,7 @@ MANAGE    Project Settings · Realtime Services · Vendor Credentials
 ```
 
 `app-sidebar.tsx` active-state: `/deploy` lights for `/deploy/*` (now including
-`/deploy/inbound`, `/deploy/batch-calls`, `/deploy/phone-numbers`, `/deploy/embed`).
+`/deploy/inbound`, `/deploy/batch-calls`, `/deploy/phone-numbers`, `/deploy/code`).
 
 ---
 
