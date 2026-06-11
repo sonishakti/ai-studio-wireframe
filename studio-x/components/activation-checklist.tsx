@@ -299,7 +299,7 @@ function CompletionCelebration({ onDismiss }: { onDismiss: () => void }) {
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/campaigns">Open Campaigns</Link>
+          <Link href="/deploy/batch-calls">Open Batch Calls</Link>
         </Button>
         <Button variant="ghost" size="sm" onClick={onDismiss}>
           Dismiss

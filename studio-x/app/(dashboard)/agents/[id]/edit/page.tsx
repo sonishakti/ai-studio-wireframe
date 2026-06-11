@@ -5,18 +5,24 @@ import { use } from "react"
 import Link from "next/link"
 import {
   Rocket,
-  Sparkles,
   Info,
   MoreHorizontal,
-  Clock,
   Hash,
   Trash2,
   Copy,
   ArrowLeft,
-  Megaphone,
+  PhoneIncoming,
+  PhoneOutgoing,
+  Zap,
+  Scale,
+  PiggyBank,
+  BookOpen,
+  Wrench,
+  ArrowUpRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -33,37 +39,35 @@ import {
 import { AgentTestPanel } from "@/components/agent-test-panel"
 import { AgentDeploySheet } from "@/components/agent-deploy-sheet"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
-import { AGENTS, CAMPAIGNS } from "@/lib/campaign-data"
+import {
+  AGENTS,
+  DEPLOYMENTS,
+  STACK_PRESETS,
+  type StackPreset,
+} from "@/lib/campaign-data"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
-// ─── content presets ────────────────────────────────────────────────────────
+// ─── Agent editor — Stack + Persona ONLY (2026-06-11 revamp) ─────────────────
+//
+// The agent is the reusable half: persona, model stack, knowledge, actions.
+// The prompt, custom code, and dynamic variables live on each DEPLOYMENT
+// (inbound or Batch Calls), authored at deploy time. The old Prompt tab and
+// the "{{vars}} must match your CSV" banner are gone from here by design.
+// See references/ia-revamp-agent-vs-deployment.md.
 
-const PROMPT_PRESETS = [
-  { id: "outbound-appointment", label: "Outbound Appointment Reminder" },
-  { id: "inbound-support", label: "Inbound Support" },
-  { id: "sales-qualifier", label: "Sales Qualifier" },
-  { id: "nps-survey", label: "NPS Survey" },
-  { id: "blank", label: "Blank" },
-]
+const PRESET_ICON: Record<StackPreset, React.ComponentType<{ className?: string }>> = {
+  fastest: Zap,
+  balanced: Scale,
+  cheapest: PiggyBank,
+}
 
-const DEFAULT_SYSTEM_PROMPT = `# SYSTEM PROMPT
-Outbound Appointment Reminder Voice Agent
+const TONES = ["Friendly", "Professional", "Neutral", "Playful"]
+const LANGUAGES = ["en-US", "en-GB", "es-ES", "hi-IN", "ja-JP"]
 
-# ROLE
-You are "Alex Morgan", a friendly outbound assistant who helps patients or clients confirm, reschedule, or get details about their upcoming appointment.
-
-Your goal: "Confirm the appointment, answer simple questions, and help reschedule if needed."
-"Never mention you are AI"
-Keep a spoken response under "40-50 words".
-
-# INTERNAL_AGENT_LOGIC (NEVER SPEAK, NEVER REVEAL)
-Write a single prompt for your agent, to control its identity and behaviour.`
-
-const DEFAULT_GREETING = `Hi, this is Alex calling with a reminder about your upcoming appointment on {{appointment_date}} at {{appointment_time}}. Do you have a quick moment to confirm?`
-
-const DEFAULT_FAILURE = `Please hold on a second.`
-
-// ─── page ───────────────────────────────────────────────────────────────────
+const LLM_VENDORS = ["OpenAI", "Anthropic", "Google"]
+const ASR_VENDORS = ["Deepgram", "Whisper", "AssemblyAI"]
+const TTS_VENDORS = ["ElevenLabs", "Azure", "PlayHT"]
 
 export default function AgentEditorPage({
   params,
@@ -71,25 +75,38 @@ export default function AgentEditorPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const agentFromList = AGENTS.find((a) => a.id === id)
+  const agent = AGENTS.find((a) => a.id === id)
   const isNew = id === "new"
 
-  const agentName = isNew ? "Untitled agent" : agentFromList?.name ?? "Sales Sam"
-  const agentLabel = isNew ? "Draft" : agentFromList ? agentFromList.status : "Draft"
-  // Backlink: which campaigns deploy this agent (build → deploy → observe loop).
-  const deployedIn = isNew ? [] : CAMPAIGNS.filter((c) => c.agentId === id)
+  const agentName = isNew ? "Untitled agent" : agent?.name ?? "Sales Sam"
+  const agentLabel = isNew ? "Draft" : agent ? agent.status : "Draft"
+  // Backlinks: which deployments this reusable agent backs (one channel each).
+  const deployedIn = isNew ? [] : DEPLOYMENTS.filter((d) => d.agentId === id)
 
-  const [activeTab, setActiveTab] = React.useState("prompt")
-  const [preset, setPreset] = React.useState(PROMPT_PRESETS[0].id)
-  const [systemPrompt, setSystemPrompt] = React.useState(DEFAULT_SYSTEM_PROMPT)
-  const [greeting, setGreeting] = React.useState(DEFAULT_GREETING)
-  const [failure, setFailure] = React.useState(DEFAULT_FAILURE)
+  // Deploy target — chosen up front so the channel is never an afterthought.
+  const [target, setTarget] = React.useState<"inbound" | "batch">("inbound")
 
-  const handleGeneratePrompt = () => {
-    toast.success("Generating prompt…", {
-      description: "Composer is drafting a prompt based on the selected preset.",
-      icon: <Sparkles className="h-4 w-4" />,
-    })
+  // Persona (the "change personality" tweak)
+  const [personality, setPersonality] = React.useState(agent?.persona.personality ?? "Warm, concise, professional")
+  const [tone, setTone] = React.useState(agent?.persona.tone ?? "Friendly")
+  const [language, setLanguage] = React.useState(agent?.persona.language ?? "en-US")
+  const [brand, setBrand] = React.useState(agent?.persona.brand ?? "")
+
+  // Stack — speed-vs-cost preset first, vendors drill down underneath.
+  const [preset, setPreset] = React.useState<StackPreset>(agent?.stack.preset ?? "balanced")
+  const [llmVendor, setLlmVendor] = React.useState(agent?.stack.llm.vendor ?? STACK_PRESETS.balanced.llm.vendor)
+  const [llmModel, setLlmModel] = React.useState(agent?.stack.llm.model ?? STACK_PRESETS.balanced.llm.model)
+  const [asrVendor, setAsrVendor] = React.useState(agent?.stack.asr.vendor ?? STACK_PRESETS.balanced.asr.vendor)
+  const [ttsVendor, setTtsVendor] = React.useState(agent?.stack.tts.vendor ?? STACK_PRESETS.balanced.tts.vendor)
+
+  const applyPreset = (p: StackPreset) => {
+    setPreset(p)
+    const def = STACK_PRESETS[p]
+    setLlmVendor(def.llm.vendor)
+    setLlmModel(def.llm.model)
+    setAsrVendor(def.asr.vendor)
+    setTtsVendor(def.tts.vendor)
+    toast.success(`${def.label} stack applied`, { description: def.hint })
   }
 
   const handleTestAgent = () => {
@@ -98,9 +115,11 @@ export default function AgentEditorPage({
     })
   }
 
+  const continueHref = target === "inbound" ? "/deploy/inbound/new" : "/deploy/batch-calls/new"
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Page header — agent identity + actions */}
+      {/* Page header — agent identity + deploy target + actions */}
       <header className="border-b bg-background px-6 py-3">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1 min-w-0 flex-1">
@@ -112,15 +131,34 @@ export default function AgentEditorPage({
               >
                 {agentLabel}
               </Badge>
+              {/* Deploy target — picked FIRST, points at the deployment surface */}
+              <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
+                {(
+                  [
+                    { key: "inbound", label: "Inbound", icon: PhoneIncoming },
+                    { key: "batch", label: "Batch Calls", icon: PhoneOutgoing },
+                  ] as const
+                ).map((t) => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => setTarget(t.key)}
+                    className={cn(
+                      "flex items-center gap-1 rounded px-2 h-6 text-xs font-medium transition-colors",
+                      target === t.key
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <t.icon className="h-3 w-3" /> {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1 font-mono">
                 <Hash className="h-3 w-3" />
                 {isNew ? "agt_draft" : id}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                0:00 min
               </span>
               <span className="flex items-center gap-1">
                 <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
@@ -130,13 +168,18 @@ export default function AgentEditorPage({
             {deployedIn.length > 0 && (
               <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground pt-0.5">
                 <span>Deployed in:</span>
-                {deployedIn.map((c) => (
+                {deployedIn.map((d) => (
                   <Link
-                    key={c.id}
-                    href={`/campaigns/${c.id}`}
+                    key={d.id}
+                    href={d.kind === "batch" ? `/deploy/batch-calls/${d.id}` : `/deploy/inbound/${d.id}`}
                     className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-foreground hover:border-primary/40 transition-colors"
                   >
-                    <Megaphone className="h-3 w-3 text-muted-foreground" /> {c.name}
+                    {d.kind === "batch" ? (
+                      <PhoneOutgoing className="h-3 w-3 text-muted-foreground" />
+                    ) : (
+                      <PhoneIncoming className="h-3 w-3 text-muted-foreground" />
+                    )}
+                    {d.name}
                   </Link>
                 ))}
               </div>
@@ -191,139 +234,231 @@ export default function AgentEditorPage({
 
       {/* Body — tabs on left, test panel on right */}
       <div className="flex flex-1 min-h-0">
-        {/* Left side: tabs + content */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
+          <Tabs defaultValue="persona" className="flex flex-col flex-1 min-h-0">
             <div className="border-b px-6 pt-2">
               <TabsList className="bg-transparent border-b-0 -mb-px h-auto p-0 gap-0">
-                <UnderlineTab value="models">Models</UnderlineTab>
-                <UnderlineTab value="prompt">Prompt</UnderlineTab>
-                <UnderlineTab value="advanced">Advanced</UnderlineTab>
+                <UnderlineTab value="persona">Persona</UnderlineTab>
+                <UnderlineTab value="stack">Stack</UnderlineTab>
+                <UnderlineTab value="knowledge">Knowledge</UnderlineTab>
                 <UnderlineTab value="actions">Actions</UnderlineTab>
-                <UnderlineTab value="custom" className="text-muted-foreground">
-                  + Custom Config
-                </UnderlineTab>
               </TabsList>
             </div>
 
-            <TabsContent
-              value="prompt"
-              className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0"
-            >
-              {/* Variable-use toast */}
+            {/* ── Persona — the light "change personality" tweak ──────────── */}
+            <TabsContent value="persona" className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0">
+              {/* Wayfinding: prompts moved to deployments */}
               <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
                 <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-foreground leading-relaxed">
-                  Use{" "}
-                  <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{`{{ }}`}</code>{" "}
-                  for dynamic variables. Variable names should match column names in your CSV file.
+                  Looking for the prompt? It moved to each{" "}
+                  <Link href="/deploy" className="underline underline-offset-2 hover:text-primary">
+                    deployment
+                  </Link>{" "}
+                  — this agent stays reusable across all of them. Dynamic{" "}
+                  <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{`{{variables}}`}</code>{" "}
+                  are auto-detected from the contact CSV in Batch Calls.
                 </p>
               </div>
 
-              {/* System Prompt */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Tone of voice</Label>
+                  <Select value={tone} onValueChange={setTone}>
+                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="personality" className="text-sm font-medium">Personality</Label>
+                <Textarea
+                  id="personality"
+                  value={personality}
+                  onChange={(e) => setPersonality(e.target.value)}
+                  className="min-h-[88px] text-sm"
+                  placeholder="e.g. Warm, patient, solution-first"
+                />
+                <p className="text-xs text-muted-foreground">
+                  How the agent carries itself everywhere it&apos;s deployed — not what it says
+                  on a specific deployment.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brand" className="text-sm font-medium">Brand</Label>
+                <Input
+                  id="brand"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  placeholder="e.g. Acme"
+                  className="max-w-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The company the agent represents. Used in introductions across deployments.
+                </p>
+              </div>
+            </TabsContent>
+
+            {/* ── Stack — speed-vs-cost FIRST, vendors underneath ─────────── */}
+            <TabsContent value="stack" className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0">
               <section className="space-y-3">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="space-y-1">
-                    <Label htmlFor="prompt-preset" className="text-sm font-medium">
-                      System Prompt
-                    </Label>
-                    <Select value={preset} onValueChange={setPreset}>
-                      <SelectTrigger id="prompt-preset" className="h-9 w-60 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
+                <div>
+                  <p className="text-sm font-medium">Optimize for</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Pick a goal — vendors are set for you. Drill into any of them below.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
+                    const def = STACK_PRESETS[p]
+                    const Icon = PRESET_ICON[p]
+                    const selected = preset === p
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => applyPreset(p)}
+                        className={cn(
+                          "flex flex-col gap-2 rounded-lg border p-4 text-left transition-all",
+                          selected
+                            ? "border-primary/60 bg-primary/5 shadow-sm"
+                            : "border-border bg-card hover:border-primary/30",
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-md",
+                            selected ? "bg-primary/15" : "bg-muted",
+                          )}>
+                            <Icon className={cn("h-4 w-4", selected ? "text-primary" : "text-muted-foreground")} />
+                          </div>
+                          {selected && <Badge variant="default" className="text-xs">Selected</Badge>}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">{def.label}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{def.hint}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {def.llm.model} · {def.asr.model} · {def.tts.voice}
+                        </p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium">Vendors</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Manual overrides — changing any of these keeps the preset as a starting point.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">LLM</Label>
+                    <Select value={llmVendor} onValueChange={setLlmVendor}>
+                      <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {PROMPT_PRESETS.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.label}
-                          </SelectItem>
-                        ))}
+                        {LLM_VENDORS.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={llmModel}
+                      onChange={(e) => setLlmModel(e.target.value)}
+                      className="font-mono text-xs h-8"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">ASR</Label>
+                    <Select value={asrVendor} onValueChange={setAsrVendor}>
+                      <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {ASR_VENDORS.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGeneratePrompt}
-                    className="gap-1.5"
-                  >
-                    <Sparkles className="h-3.5 w-3.5" /> Generate prompt
-                  </Button>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">TTS</Label>
+                    <Select value={ttsVendor} onValueChange={setTtsVendor}>
+                      <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TTS_VENDORS.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-
-                <Textarea
-                  value={systemPrompt}
-                  onChange={(e) => setSystemPrompt(e.target.value)}
-                  className="min-h-[260px] font-mono text-xs leading-relaxed"
-                  spellCheck={false}
-                />
                 <p className="text-xs text-muted-foreground">
-                  Write a single prompt for your agent, to control its identity and behaviour.
-                </p>
-              </section>
-
-              {/* Greeting Message */}
-              <section className="space-y-2">
-                <Label htmlFor="greeting" className="text-sm font-medium">
-                  Greeting Message
-                </Label>
-                <Textarea
-                  id="greeting"
-                  value={greeting}
-                  onChange={(e) => setGreeting(e.target.value)}
-                  className="min-h-[120px] text-sm"
-                />
-                <p className="text-xs text-muted-foreground">
-                  The first message the agent will say.
-                </p>
-              </section>
-
-              {/* Failure Message */}
-              <section className="space-y-2">
-                <Label htmlFor="failure" className="text-sm font-medium">
-                  Failure Message
-                </Label>
-                <Textarea
-                  id="failure"
-                  value={failure}
-                  onChange={(e) => setFailure(e.target.value)}
-                  className="min-h-[88px] text-sm"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Said if the agent loses the user, hits a tool error, or can&apos;t recover the
-                  conversation.
+                  Vendor keys live in{" "}
+                  <Link href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
+                    Vendor Credentials
+                  </Link>.
                 </p>
               </section>
             </TabsContent>
 
-            <TabsContent value="models" className="flex-1 px-6 py-5 mt-0">
-              <EmptyPanel title="Models" hint="Pick LLM, ASR and TTS vendors plus their parameters." />
+            {/* ── Knowledge ───────────────────────────────────────────────── */}
+            <TabsContent value="knowledge" className="flex-1 overflow-y-auto px-6 py-5 space-y-4 mt-0">
+              <AttachPanel
+                icon={BookOpen}
+                title="Knowledge bases"
+                attached={agent?.knowledge ?? []}
+                emptyHint="No knowledge attached. The agent answers from the model alone."
+                manageHref="/integrations"
+                manageLabel="Manage in Integrations"
+              />
             </TabsContent>
-            <TabsContent value="advanced" className="flex-1 px-6 py-5 mt-0">
-              <EmptyPanel title="Advanced" hint="Interruption handling, end-of-turn detection, allowlists." />
-            </TabsContent>
-            <TabsContent value="actions" className="flex-1 px-6 py-5 mt-0">
-              <EmptyPanel title="Actions" hint="Tools, function calls, transfer rules, post-call webhooks." />
-            </TabsContent>
-            <TabsContent value="custom" className="flex-1 px-6 py-5 mt-0">
-              <EmptyPanel
-                title="Custom Config"
-                hint="Add a YAML/JSON override for parameters this UI doesn't expose."
+
+            {/* ── Actions ─────────────────────────────────────────────────── */}
+            <TabsContent value="actions" className="flex-1 overflow-y-auto px-6 py-5 space-y-4 mt-0">
+              <AttachPanel
+                icon={Wrench}
+                title="Tools & MCP servers"
+                attached={agent?.actions ?? []}
+                emptyHint="No tools attached. Add MCP servers or connectors so the agent can act."
+                manageHref="/integrations"
+                manageLabel="Manage in Integrations"
               />
             </TabsContent>
           </Tabs>
+
+          {/* Continue into the deployment — prompt/vars are authored there */}
+          <div className="border-t bg-background px-6 py-3 flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              Next: write this {target === "inbound" ? "deployment's" : "batch's"} prompt
+              {target === "batch" && " — variables come from your CSV"}.
+            </p>
+            <Button size="sm" className="gap-1.5" asChild>
+              <Link href={continueHref}>
+                Continue to {target === "inbound" ? "Inbound" : "Batch Calls"}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
         </div>
 
-        {/* Right side: agent test panel */}
         <AgentTestPanel
-          title="Appointment Reminder"
+          title={agentName}
           state="Agent Disconnected"
           spec={{
-            llm: "Open AI",
-            asr: "DeepGram",
-            tts: "ElevenLabs",
-            latencyMs: 500,
-            ttftMs: 23,
+            llm: llmVendor,
+            asr: asrVendor,
+            tts: ttsVendor,
+            latencyMs: preset === "fastest" ? 380 : preset === "balanced" ? 500 : 720,
+            ttftMs: preset === "fastest" ? 18 : preset === "balanced" ? 23 : 41,
           }}
           onTest={handleTestAgent}
         />
@@ -356,11 +491,55 @@ function UnderlineTab({
   )
 }
 
-function EmptyPanel({ title, hint }: { title: string; hint: string }) {
+const ATTACHMENT_LABEL: Record<string, string> = {
+  kb_01: "Product Docs",
+  kb_02: "FAQs v3",
+  kb_03: "Policy Handbook",
+  mcp_01: "CRM Connector",
+  mcp_02: "Calendar API",
+}
+
+function AttachPanel({
+  icon: Icon,
+  title,
+  attached,
+  emptyHint,
+  manageHref,
+  manageLabel,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  attached: string[]
+  emptyHint: string
+  manageHref: string
+  manageLabel: string
+}) {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center gap-2 py-12">
-      <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs text-muted-foreground max-w-sm">{hint}</p>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-medium flex items-center gap-1.5">
+          <Icon className="h-4 w-4 text-muted-foreground" /> {title}
+        </p>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={manageHref}>{manageLabel} →</Link>
+        </Button>
+      </div>
+      {attached.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">{emptyHint}</p>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {attached.map((id) => (
+            <span
+              key={id}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-sm"
+            >
+              {ATTACHMENT_LABEL[id] ?? id}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

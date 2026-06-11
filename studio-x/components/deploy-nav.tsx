@@ -7,24 +7,22 @@ import { cn } from "@/lib/utils"
 
 // ─── Deploy hub nav ───────────────────────────────────────────────────────────
 //
-// Option 3 (2026-06-05, user-directed): one "Deploy" destination replaces the
-// old top-level "Phone Numbers" + "Campaign" sidebar items and unifies every way
-// an agent goes live. Tabs map to the REAL surfaces only — WhatsApp / SMS / Slack
-// are added *inside* a campaign (via the wizard, which is where the old
-// /deploy/{sms,whatsapp,slack} routes redirect), so they surface under Overview +
-// Campaigns rather than as standalone tabs. "Campaign" stays the word for the
-// outbound batch; the inbound-copy cleanup ("inbound campaign" → connection) is a
-// separate pass.
+// 2026-06-11 IA revamp: intent-first, not channel-first. The hub's surfaces are
+// the two deployment intents (Inbound = answer, Batch Calls = outbound CSV
+// dialing), the number inventory, and Embed/Code for non-telephony placement.
+// One deployment = one agent on one channel; the channel is picked inside the
+// intent flow, never as a top-level tab.
+// See references/ia-revamp-agent-vs-deployment.md.
 const TABS = [
   { label: "Overview", href: "/deploy" },
-  { label: "Campaigns", href: "/campaigns" },
-  { label: "Phone Numbers", href: "/phone-numbers" },
-  { label: "Web Widget", href: "/deploy/widget" },
-  { label: "API & SDK", href: "/deploy/api" },
+  { label: "Inbound", href: "/deploy/inbound" },
+  { label: "Batch Calls", href: "/deploy/batch-calls" },
+  { label: "Phone Numbers", href: "/deploy/phone-numbers" },
+  { label: "Embed / Code", href: "/deploy/embed" },
 ]
 
 function isTabActive(href: string, pathname: string): boolean {
-  // Overview only matches the hub root exactly (every channel page lives under
+  // Overview only matches the hub root exactly (every surface lives under
   // /deploy/*, so a prefix match would keep Overview perpetually active).
   if (href === "/deploy") return pathname === "/deploy"
   return pathname === href || pathname.startsWith(href + "/")

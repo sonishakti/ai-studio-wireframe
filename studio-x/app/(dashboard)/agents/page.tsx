@@ -113,7 +113,7 @@ function TemplateRow({
                 href={`/agents/${tpl.id}/edit`}
                 onClick={(e) => e.stopPropagation()}
               >
-                Use this template
+                Start from this
                 <ChevronRight className="h-3 w-3" />
               </Link>
             </Button>
@@ -141,7 +141,7 @@ function FirstRunView() {
         <div className="flex items-center gap-2 mb-4 text-sm">
           <Bot className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">Pre-built by Agora</span>
-          <span className="text-xs text-muted-foreground ml-1">— start here, then customize</span>
+          <span className="text-xs text-muted-foreground ml-1">— a starting point, never a lock-in. Change persona and stack anytime.</span>
         </div>
         <div className="space-y-2 max-w-3xl">
           {TEMPLATES.map((tpl) => (

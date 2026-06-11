@@ -27,8 +27,11 @@ const LABELS: Record<string, string> = {
   integrations: "Integrations",
   telephony: "Telephony",
   "phone-numbers": "Phone Numbers",
-  campaigns: "Campaigns",
-  create: "New Campaign",
+  campaigns: "Batch Calls",
+  "batch-calls": "Batch Calls",
+  inbound: "Inbound",
+  embed: "Embed / Code",
+  create: "New Batch",
   calls: "Call History",
   chats: "Chat History",
   monitor: "Monitor",
@@ -68,9 +71,9 @@ const LABELS: Record<string, string> = {
   "whats-new": "What's New",
 }
 
-/** Skip opaque ID segments like agt_01, cmp_xyz, UUIDs */
+/** Skip opaque ID segments like agt_01, dp_ob_01, UUIDs */
 function isId(seg: string) {
-  return /^[a-z]{2,4}_[a-z0-9]+$/i.test(seg) || /^[0-9a-f-]{36}$/i.test(seg)
+  return /^[a-z]{2,4}(_[a-z0-9]+)+$/i.test(seg) || /^[0-9a-f-]{36}$/i.test(seg)
 }
 
 function labelOf(seg: string) {
@@ -93,11 +96,8 @@ export function DashboardHeader() {
     if (!isId(seg)) crumbs.push({ label: labelOf(seg), href: acc })
   }
 
-  // Campaigns + Phone Numbers are Deploy tabs but live at top-level URLs, so
-  // prefix a "Deploy" crumb for a consistent "Deploy › X" trail with the hub.
-  if (["/campaigns", "/phone-numbers"].some((r) => pathname === r || pathname.startsWith(r + "/"))) {
-    crumbs.unshift({ label: "Deploy", href: "/deploy" })
-  }
+  // Every Deploy surface now lives under /deploy/*, so the trail is already
+  // "Deploy › X" with no special-casing (2026-06-11 intent-first revamp).
 
   return (
     <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">

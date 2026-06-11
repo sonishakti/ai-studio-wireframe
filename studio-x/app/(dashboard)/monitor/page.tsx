@@ -19,7 +19,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { CAMPAIGNS, AGENTS } from "@/lib/campaign-data"
+import { DEPLOYMENTS, AGENTS, getDeployment, deploymentHref } from "@/lib/campaign-data"
 import { track, Events } from "@/lib/analytics"
 
 // ─── KPI sparkline data (wireframe) ──────────────────────────────────────────
@@ -100,13 +100,13 @@ export default function MonitorPage() {
           <Select value={campaignFilter} onValueChange={setCampaignFilter}>
             <SelectTrigger className="h-9 w-44 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Campaigns</SelectItem>
-              {CAMPAIGNS.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              <SelectItem value="all">All deployments</SelectItem>
+              {DEPLOYMENTS.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
           {campaignFilter !== "all" && (
             <Button variant="outline" size="sm" asChild className="gap-1.5">
-              <Link href={`/campaigns/${campaignFilter}`}>Open campaign <ArrowRight className="h-3.5 w-3.5" /></Link>
+              <Link href={getDeployment(campaignFilter) ? deploymentHref(getDeployment(campaignFilter)!) : "/deploy"}>Open deployment <ArrowRight className="h-3.5 w-3.5" /></Link>
             </Button>
           )}
         </div>

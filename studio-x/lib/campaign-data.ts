@@ -1,22 +1,34 @@
 /**
- * Studio_X — Campaign data
- * ─────────────────────────
+ * Studio_X — Deployment + Agent data
+ * ──────────────────────────────────
  *
- * Single source of truth for campaign mocks across the omnichannel hub.
- * A campaign owns one or more channels (telephony, WhatsApp, SMS, web widget).
- * Inbound campaigns are 1:1 — one agent per number/channel. Outbound campaigns
- * are 1:many — multiple campaigns can share a number pool, and the agent is
- * selected dynamically per call batch.
+ * 2026-06-11 IA revamp (see references/ia-revamp-agent-vs-deployment.md):
  *
- * Web widgets are inbound-only by design (users come to the widget).
+ *   • Agent = reusable Stack + Persona. No prompt, no variables.
+ *   • Deployment = one agent on ONE channel. Owns the whole prompt, custom
+ *     code, and dynamic variables. Two kinds:
+ *       - "inbound"  — answers on a number/widget/sender (1 agent ↔ 1 channel)
+ *       - "batch"    — outbound Batch Calls dialing a contact CSV
+ *   • Dynamic variables are auto-detected from the uploaded CSV's columns and
+ *     substituted per row at dial time. No build-time declaration.
+ *
+ * File keeps its historical name to avoid import churn; "campaign" survives
+ * only as the legacy word for what is now a Batch Calls deployment.
  */
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type ChannelKind = "telephony" | "whatsapp" | "sms" | "web"
-export type Direction = "in" | "out"
-export type CampaignType = "inbound" | "outbound"
-export type CampaignStatus =
+
+/** One deployment runs on exactly ONE channel. */
+export type Channel =
+  | { kind: "telephony"; numbers: string[] }
+  | { kind: "whatsapp"; sender: string }
+  | { kind: "sms"; number: string }
+  | { kind: "web"; domains: string[] }
+
+export type DeploymentKind = "inbound" | "batch"
+export type DeploymentStatus =
   | "active"
   | "paused"
   | "in_progress"
@@ -24,36 +36,46 @@ export type CampaignStatus =
   | "completed"
   | "draft"
 
-export type CampaignChannel =
-  | { kind: "telephony"; direction: Direction; numbers: string[] }
-  | { kind: "whatsapp"; direction: Direction; sender: string }
-  | { kind: "sms"; direction: Direction; number: string }
-  | { kind: "web"; direction: "in"; domains: string[] }
+/** Uploaded contact list — its column headers ARE the available {{vars}}. */
+export interface ContactsFile {
+  fileName: string
+  rowCount: number
+  columns: string[]
+}
 
-export interface Campaign {
+export interface Deployment {
   id: string
   name: string
-  type: CampaignType
-  channels: CampaignChannel[]
-  /** Inbound: required (1:1). Outbound: nullable (dynamic per batch). */
-  agentId: string | null
-  agentName: string | null
-  status: CampaignStatus
-  /** Cross-channel rollup. */
+  kind: DeploymentKind
+  channel: Channel
+  /** The reusable Stack+Persona agent backing this deployment. */
+  agentId: string
+  agentName: string
+  status: DeploymentStatus
+
+  // ── Authored per deployment (the environment-specific layer) ──
+  /** The WHOLE system prompt lives here, not on the agent. */
+  prompt: string
+  /** First message — may reference {{vars}} (batch only resolves them). */
+  greeting: string
+  /** Fallback line on tool error / lost user. */
+  failure: string
+  /** Optional per-deployment hooks. */
+  customCode?: string
+
+  // ── Batch (outbound) only ──
+  contacts?: ContactsFile
+  progress?: { completed: number; total: number }
+  startDate?: string
+
+  // ── Inbound only ──
+  ringsPerWeek?: number
+
   metrics: {
-    /** Total conversations across all channels in the lookback window. */
     calls: number
-    /** % success — meaning varies by type (resolved for inbound, dialed-through for outbound). */
     successRate: number
-    /** Average conversation duration in seconds. */
     avgHandleTimeSec: number
   }
-  /** Outbound only — dial-through progress. */
-  progress?: { completed: number; total: number }
-  /** Outbound only — start date label. */
-  startDate?: string
-  /** Inbound only — incoming volume label (rings/week). */
-  ringsPerWeek?: number
 }
 
 export interface PhoneNumber {
@@ -61,36 +83,134 @@ export interface PhoneNumber {
   number: string
   label: string
   vendor: string
-  /** Campaign IDs currently using this number. Empty array = available. */
+  /** Deployment IDs currently using this number. Empty array = available. */
   assignedTo: string[]
-  /** Set when the number is routed directly to an agent (inbound), not via campaigns. */
+  /** Set when the number is routed directly to an agent (inbound), not via a deployment. */
   assignedAgent?: { id: string; name: string }
   status: "active" | "unassigned"
 }
 
-// ─── Channel direction matrix ────────────────────────────────────────────────
-//
-// Web widget is inbound-only. SMS, WhatsApp, Telephony support both directions.
+// ─── Agent = Stack + Persona (reusable, duplicable) ──────────────────────────
 
-export const CHANNEL_DIRECTIONS: Record<ChannelKind, Direction[]> = {
-  telephony: ["in", "out"],
-  whatsapp: ["in", "out"],
-  sms: ["in", "out"],
-  web: ["in"],
+export type StackPreset = "fastest" | "balanced" | "cheapest"
+
+export interface AgentStack {
+  preset: StackPreset
+  modality: "voice" | "voice+video" | "chat"
+  llm: { vendor: string; model: string }
+  asr: { vendor: string; model: string }
+  tts: { vendor: string; voice: string }
 }
 
-export function isChannelAllowedForType(
-  kind: ChannelKind,
-  type: CampaignType,
-): boolean {
-  const dir: Direction = type === "inbound" ? "in" : "out"
-  return CHANNEL_DIRECTIONS[kind].includes(dir)
+export interface AgentPersona {
+  personality: string
+  tone: string
+  language: string
+  brand?: string
+}
+
+export interface Agent {
+  id: string
+  name: string
+  status: "live" | "draft" | "paused"
+  persona: AgentPersona
+  stack: AgentStack
+  /** Attached knowledge bases (Integrations › Knowledge). */
+  knowledge: string[]
+  /** Attached MCP/tool/connector ids (Integrations › MCP/Connectors). */
+  actions: string[]
+}
+
+/** Speed-vs-cost first: each preset writes sensible vendor defaults; every
+ *  field stays individually overridable in the Stack tab. */
+export const STACK_PRESETS: Record<
+  StackPreset,
+  { label: string; hint: string; llm: AgentStack["llm"]; asr: AgentStack["asr"]; tts: AgentStack["tts"] }
+> = {
+  fastest: {
+    label: "Fastest",
+    hint: "Lowest latency — premium vendors",
+    llm: { vendor: "OpenAI", model: "gpt-4o" },
+    asr: { vendor: "Deepgram", model: "nova-3" },
+    tts: { vendor: "ElevenLabs", voice: "rachel" },
+  },
+  balanced: {
+    label: "Balanced",
+    hint: "Good latency at moderate cost",
+    llm: { vendor: "OpenAI", model: "gpt-4o-mini" },
+    asr: { vendor: "Deepgram", model: "nova-2" },
+    tts: { vendor: "ElevenLabs", voice: "turbo" },
+  },
+  cheapest: {
+    label: "Cheapest",
+    hint: "Lowest per-minute cost",
+    llm: { vendor: "Anthropic", model: "claude-haiku" },
+    asr: { vendor: "Whisper", model: "large-v3" },
+    tts: { vendor: "Azure", voice: "en-US-Jenny" },
+  },
+}
+
+function stackFor(preset: StackPreset, modality: AgentStack["modality"] = "voice"): AgentStack {
+  const p = STACK_PRESETS[preset]
+  return { preset, modality, llm: p.llm, asr: p.asr, tts: p.tts }
+}
+
+export const AGENTS: Agent[] = [
+  {
+    id: "agt_support_v2",
+    name: "Support Bot v2",
+    status: "live",
+    persona: { personality: "Warm, patient, solution-first", tone: "Friendly", language: "en-US", brand: "Acme" },
+    stack: stackFor("fastest"),
+    knowledge: ["kb_01", "kb_02"],
+    actions: ["mcp_01"],
+  },
+  {
+    id: "agt_sales_qualifier",
+    name: "Sales Qualifier",
+    status: "draft",
+    persona: { personality: "Curious, concise, never pushy", tone: "Professional", language: "en-US", brand: "Acme" },
+    stack: stackFor("balanced"),
+    knowledge: ["kb_02"],
+    actions: ["mcp_01", "mcp_02"],
+  },
+  {
+    id: "agt_appointment_setter",
+    name: "Appointment Setter",
+    status: "live",
+    persona: { personality: "Efficient, courteous, time-aware", tone: "Friendly", language: "en-US" },
+    stack: stackFor("balanced"),
+    knowledge: [],
+    actions: ["mcp_02"],
+  },
+  {
+    id: "agt_collections",
+    name: "Collections Outreach",
+    status: "paused",
+    persona: { personality: "Calm, firm, compliant", tone: "Professional", language: "en-US" },
+    stack: stackFor("cheapest"),
+    knowledge: ["kb_03"],
+    actions: [],
+  },
+  {
+    id: "agt_survey",
+    name: "Survey Bot",
+    status: "live",
+    persona: { personality: "Brief, neutral, appreciative", tone: "Neutral", language: "en-US" },
+    stack: stackFor("cheapest"),
+    knowledge: [],
+    actions: [],
+  },
+]
+
+export function getAgent(id: string): Agent | undefined {
+  return AGENTS.find((a) => a.id === id)
 }
 
 // ─── Status display ──────────────────────────────────────────────────────────
 
 export const STATUS_BADGE: Record<
-  CampaignStatus,
+  DeploymentStatus,
   { variant: "default" | "secondary" | "outline"; label: string }
 > = {
   active: { variant: "default", label: "Active" },
@@ -101,156 +221,259 @@ export const STATUS_BADGE: Record<
   draft: { variant: "secondary", label: "Draft" },
 }
 
-// ─── Mock campaigns ──────────────────────────────────────────────────────────
+// ─── Mock deployments ────────────────────────────────────────────────────────
 //
-// Migrated from the old INBOUND_CAMPAIGNS + OUTBOUND_CAMPAIGNS arrays. Each
-// legacy row becomes a single-telephony-channel campaign in the new shape so
-// the demo content is preserved while exercising the multi-channel data
-// structure. Two campaigns (cp_ib_04, cp_ob_06) are intentionally multi-channel
-// to demo the omnichannel pattern.
+// One channel per deployment (2026-06-11). The old omnichannel demo rows
+// (Acme Help Center tel+web+wa, Black Friday tel+sms+wa) are split into
+// peer single-channel deployments backed by the same reusable agent.
 
-export const CAMPAIGNS: Campaign[] = [
+const SUPPORT_PROMPT = `# ROLE
+You are a tier-1 support agent for Acme. Resolve common issues, look up
+order status, and escalate to a human when confidence is low.
+
+# CONSTRAINTS
+Keep spoken responses under 40 words. Never promise refunds. Never mention
+you are AI unless asked directly.`
+
+export const DEPLOYMENTS: Deployment[] = [
   // ── Inbound ────────────────────────────────────────────────────────────────
   {
-    id: "cp_ib_01",
+    id: "dp_ib_01",
     name: "Support Hotline",
-    type: "inbound",
-    channels: [
-      { kind: "telephony", direction: "in", numbers: ["+1 (415) 555-0101"] },
-    ],
+    kind: "inbound",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0101"] },
     agentId: "agt_support_v2",
     agentName: "Support Bot v2",
     status: "active",
+    prompt: SUPPORT_PROMPT,
+    greeting: "Thanks for calling Acme support — how can I help today?",
+    failure: "Let me put you through to a teammate.",
     metrics: { calls: 1240, successRate: 78, avgHandleTimeSec: 204 },
     ringsPerWeek: 1240,
   },
   {
-    id: "cp_ib_02",
+    id: "dp_ib_02",
     name: "Sales Front Desk",
-    type: "inbound",
-    channels: [
-      { kind: "telephony", direction: "in", numbers: ["+1 (628) 555-0188"] },
-    ],
+    kind: "inbound",
+    channel: { kind: "telephony", numbers: ["+1 (628) 555-0188"] },
     agentId: "agt_sales_qualifier",
     agentName: "Sales Qualifier",
     status: "active",
+    prompt: `# ROLE
+You answer Acme's sales line. Qualify the caller (team size, use case,
+timeline) and book a demo with an account executive.
+
+# CONSTRAINTS
+Two qualifying questions max before offering the demo. Keep it under 30 words per turn.`,
+    greeting: "Hi, you've reached Acme sales — what brings you in today?",
+    failure: "One moment — connecting you to the sales team.",
     metrics: { calls: 340, successRate: 62, avgHandleTimeSec: 112 },
     ringsPerWeek: 340,
   },
   {
-    id: "cp_ib_03",
+    id: "dp_ib_03",
     name: "UK Support",
-    type: "inbound",
-    channels: [
-      { kind: "telephony", direction: "in", numbers: ["+44 20 7946 0958"] },
-    ],
+    kind: "inbound",
+    channel: { kind: "telephony", numbers: ["+44 20 7946 0958"] },
     agentId: "agt_support_v2",
     agentName: "Support Bot v2",
     status: "paused",
+    prompt: SUPPORT_PROMPT + `\n\n# LOCALE\nUK English. Quote prices in GBP. Office hours are 9:00–17:30 GMT.`,
+    greeting: "Thanks for ringing Acme support — how can I help?",
+    failure: "Bear with me — I'll transfer you to a colleague.",
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     ringsPerWeek: 0,
   },
-  // ── Omnichannel demo (inbound) — phone + web widget + WhatsApp ────────────
   {
-    id: "cp_ib_04",
-    name: "Acme Help Center",
-    type: "inbound",
-    channels: [
-      { kind: "telephony", direction: "in", numbers: ["+1 (800) 555-0199"] },
-      { kind: "web", direction: "in", domains: ["acme.com", "help.acme.com"] },
-      { kind: "whatsapp", direction: "in", sender: "+1 (628) 555-0220" },
-    ],
+    id: "dp_ib_04",
+    name: "Acme Help Line",
+    kind: "inbound",
+    channel: { kind: "telephony", numbers: ["+1 (800) 555-0199"] },
     agentId: "agt_support_v2",
     agentName: "Support Bot v2",
     status: "active",
-    metrics: { calls: 2840, successRate: 81, avgHandleTimeSec: 248 },
-    ringsPerWeek: 1980,
+    prompt: SUPPORT_PROMPT,
+    greeting: "Thanks for calling the Acme help line — what can I do for you?",
+    failure: "Let me get a teammate to pick this up.",
+    metrics: { calls: 1860, successRate: 82, avgHandleTimeSec: 236 },
+    ringsPerWeek: 1320,
+  },
+  {
+    id: "dp_ib_05",
+    name: "Acme Web Chat",
+    kind: "inbound",
+    channel: { kind: "web", domains: ["acme.com", "help.acme.com"] },
+    agentId: "agt_support_v2",
+    agentName: "Support Bot v2",
+    status: "active",
+    prompt: SUPPORT_PROMPT + `\n\n# CHANNEL\nText chat. Short paragraphs, link to help articles where useful.`,
+    greeting: "Hi! I'm Acme's assistant — ask me anything.",
+    failure: "I'll hand this over to a human agent.",
+    metrics: { calls: 760, successRate: 79, avgHandleTimeSec: 188 },
+    ringsPerWeek: 520,
+  },
+  {
+    id: "dp_ib_06",
+    name: "Acme WhatsApp",
+    kind: "inbound",
+    channel: { kind: "whatsapp", sender: "+1 (628) 555-0220" },
+    agentId: "agt_support_v2",
+    agentName: "Support Bot v2",
+    status: "active",
+    prompt: SUPPORT_PROMPT + `\n\n# CHANNEL\nWhatsApp. Casual register, emojis sparingly, one question at a time.`,
+    greeting: "Hey! Acme support here 👋 What can I help with?",
+    failure: "Passing you to a teammate — one sec.",
+    metrics: { calls: 220, successRate: 74, avgHandleTimeSec: 154 },
+    ringsPerWeek: 140,
   },
 
-  // ── Outbound ───────────────────────────────────────────────────────────────
+  // ── Batch Calls (outbound CSV dialing) ─────────────────────────────────────
   {
-    id: "cp_ob_01",
+    id: "dp_ob_01",
     name: "Q2 Win-Back",
-    type: "outbound",
-    channels: [
-      { kind: "telephony", direction: "out", numbers: ["+1 (415) 555-0240"] },
-    ],
+    kind: "batch",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0240"] },
     agentId: "agt_sales_qualifier",
     agentName: "Sales Qualifier",
     status: "in_progress",
+    prompt: `# ROLE
+You are calling lapsed Acme customers to win them back with the Q2 offer.
+
+# CONTEXT (per row)
+Customer: {{name}} at {{company}} — last active {{last_active}}, on the {{previous_plan}} plan.
+
+# CONSTRAINTS
+Lead with the 20% win-back discount. If not interested, thank and end within 15 seconds.`,
+    greeting: "Hi {{name}}, this is Acme — we miss you at {{company}} and have something for you.",
+    failure: "Sorry — let me have someone follow up by email.",
+    contacts: {
+      fileName: "q2-lapsed-customers.csv",
+      rowCount: 5000,
+      columns: ["phone", "name", "company", "last_active", "previous_plan"],
+    },
     metrics: { calls: 3421, successRate: 24, avgHandleTimeSec: 162 },
     progress: { completed: 3421, total: 5000 },
     startDate: "May 20, 2026",
   },
   {
-    id: "cp_ob_02",
+    id: "dp_ob_02",
     name: "Product Launch",
-    type: "outbound",
-    channels: [
-      { kind: "telephony", direction: "out", numbers: ["+1 (415) 555-0240"] },
-    ],
+    kind: "batch",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0240"] },
     agentId: "agt_support_v2",
     agentName: "Support Bot v2",
     status: "scheduled",
+    prompt: `# ROLE
+Announce the Acme 3.0 launch to existing customers and book upgrade walkthroughs.
+
+# CONTEXT (per row)
+Customer: {{name}}, current plan {{plan}}, account owner {{owner_email}}.`,
+    greeting: "Hi {{name}}! Acme 3.0 just launched and your {{plan}} plan gets the new features first.",
+    failure: "I'll send the details to your inbox instead.",
+    contacts: {
+      fileName: "launch-customers.csv",
+      rowCount: 12000,
+      columns: ["phone", "name", "plan", "owner_email"],
+    },
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 12000 },
     startDate: "Jun 1, 2026",
   },
   {
-    id: "cp_ob_03",
+    id: "dp_ob_03",
     name: "Renewal Reminder",
-    type: "outbound",
-    channels: [
-      { kind: "telephony", direction: "out", numbers: ["+1 (415) 555-0240"] },
-    ],
+    kind: "batch",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0240"] },
     agentId: "agt_appointment_setter",
     agentName: "Appointment Setter",
     status: "completed",
+    prompt: `# ROLE
+Remind customers their Acme subscription renews soon and confirm payment details are current.
+
+# CONTEXT (per row)
+{{name}} renews on {{renewal_date}} for {{amount}}.`,
+    greeting: "Hi {{name}}, a quick reminder your Acme plan renews on {{renewal_date}}.",
+    failure: "No problem — we'll email the renewal details.",
+    contacts: {
+      fileName: "renewals-may.csv",
+      rowCount: 2800,
+      columns: ["phone", "name", "renewal_date", "amount"],
+    },
     metrics: { calls: 2800, successRate: 31, avgHandleTimeSec: 145 },
     progress: { completed: 2800, total: 2800 },
     startDate: "May 10, 2026",
   },
   {
-    id: "cp_ob_04",
+    id: "dp_ob_04",
     name: "Collections May",
-    type: "outbound",
-    channels: [
-      { kind: "telephony", direction: "out", numbers: ["+1 (415) 555-0240"] },
-    ],
+    kind: "batch",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0240"] },
     agentId: "agt_collections",
     agentName: "Collections Outreach",
     status: "paused",
+    prompt: `# ROLE
+Politely collect overdue invoices. Offer a payment link or a payment plan.
+
+# CONTEXT (per row)
+{{name}} — invoice {{invoice_id}}, {{days_overdue}} days overdue, balance {{balance}}.
+
+# COMPLIANCE
+Identify the company immediately. Never threaten. Offer the hardship line if asked.`,
+    greeting: "Hello {{name}}, this is Acme billing about invoice {{invoice_id}}.",
+    failure: "I'll have our billing team reach out directly.",
+    contacts: {
+      fileName: "overdue-may.csv",
+      rowCount: 1500,
+      columns: ["phone", "name", "invoice_id", "days_overdue", "balance"],
+    },
     metrics: { calls: 742, successRate: 18, avgHandleTimeSec: 198 },
     progress: { completed: 742, total: 1500 },
     startDate: "May 15, 2026",
   },
   {
-    id: "cp_ob_05",
+    id: "dp_ob_05",
     name: "NPS Survey",
-    type: "outbound",
-    channels: [
-      { kind: "telephony", direction: "out", numbers: ["+1 (415) 555-0240"] },
-    ],
-    agentId: null,
-    agentName: null,
+    kind: "batch",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0240"] },
+    agentId: "agt_survey",
+    agentName: "Survey Bot",
     status: "draft",
+    prompt: `# ROLE
+Run a 2-question NPS survey: score 0–10, then one open follow-up.
+
+# CONTEXT (per row)
+{{name}} used {{product}} most recently.`,
+    greeting: "Hi {{name}}, quick 60-second feedback call about {{product}} — is now okay?",
+    failure: "Thanks anyway — have a great day.",
+    contacts: {
+      fileName: "nps-q2.csv",
+      rowCount: 8000,
+      columns: ["phone", "name", "product"],
+    },
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 8000 },
     startDate: "—",
   },
-  // ── Omnichannel demo (outbound) — phone + SMS + WhatsApp ──────────────────
   {
-    id: "cp_ob_06",
+    id: "dp_ob_06",
     name: "Black Friday Promo",
-    type: "outbound",
-    channels: [
-      { kind: "telephony", direction: "out", numbers: ["+1 (415) 555-0240"] },
-      { kind: "sms", direction: "out", number: "+1 (628) 555-0260" },
-      { kind: "whatsapp", direction: "out", sender: "+1 (628) 555-0220" },
-    ],
+    kind: "batch",
+    channel: { kind: "telephony", numbers: ["+1 (415) 555-0240"] },
     agentId: "agt_sales_qualifier",
     agentName: "Sales Qualifier",
     status: "scheduled",
+    prompt: `# ROLE
+Offer the Black Friday deal ({{discount}} off annual plans) to warm leads.
+
+# CONTEXT (per row)
+{{name}} from {{company}} — interest tag: {{interest}}.`,
+    greeting: "Hi {{name}}! Black Friday came early at Acme — {{discount}} off annual plans.",
+    failure: "I'll text you the offer link instead.",
+    contacts: {
+      fileName: "bf-warm-leads.csv",
+      rowCount: 24000,
+      columns: ["phone", "name", "company", "interest", "discount"],
+    },
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 24000 },
     startDate: "Nov 24, 2026",
@@ -265,7 +488,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     number: "+1 (415) 555-0101",
     label: "Support Line",
     vendor: "Twilio",
-    assignedTo: ["cp_ib_01"],
+    assignedTo: ["dp_ib_01"],
     status: "active",
   },
   {
@@ -273,7 +496,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     number: "+1 (628) 555-0188",
     label: "Sales Inbound",
     vendor: "Twilio",
-    assignedTo: ["cp_ib_02"],
+    assignedTo: ["dp_ib_02"],
     status: "active",
   },
   {
@@ -281,7 +504,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     number: "+44 20 7946 0958",
     label: "UK Support",
     vendor: "Vonage",
-    assignedTo: ["cp_ib_03"],
+    assignedTo: ["dp_ib_03"],
     status: "active",
   },
   {
@@ -289,7 +512,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     number: "+1 (800) 555-0199",
     label: "Toll-Free",
     vendor: "Bandwidth",
-    assignedTo: ["cp_ib_04"],
+    assignedTo: ["dp_ib_04"],
     status: "active",
   },
   {
@@ -297,7 +520,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     number: "+1 (415) 555-0240",
     label: "Outbound Pool",
     vendor: "Twilio",
-    assignedTo: ["cp_ob_01", "cp_ob_02", "cp_ob_03", "cp_ob_04", "cp_ob_06"],
+    assignedTo: ["dp_ob_01", "dp_ob_02", "dp_ob_03", "dp_ob_04", "dp_ob_06"],
     status: "active",
   },
   {
@@ -305,15 +528,15 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     number: "+1 (628) 555-0260",
     label: "SMS Sender",
     vendor: "Twilio",
-    assignedTo: ["cp_ob_06"],
-    status: "active",
+    assignedTo: [],
+    status: "unassigned",
   },
   {
     id: "pn_07",
     number: "+1 (628) 555-0220",
     label: "WhatsApp",
     vendor: "Meta",
-    assignedTo: ["cp_ib_04", "cp_ob_06"],
+    assignedTo: ["dp_ib_06"],
     status: "active",
   },
   {
@@ -337,25 +560,29 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-export function getCampaign(id: string): Campaign | undefined {
-  return CAMPAIGNS.find((c) => c.id === id)
+export function getDeployment(id: string): Deployment | undefined {
+  return DEPLOYMENTS.find((d) => d.id === id)
 }
 
-export function listCampaigns(filter?: {
-  type?: CampaignType
-  channel?: ChannelKind
-  status?: CampaignStatus
-}): Campaign[] {
-  return CAMPAIGNS.filter((c) => {
-    if (filter?.type && c.type !== filter.type) return false
-    if (filter?.channel && !c.channels.some((ch) => ch.kind === filter.channel)) return false
-    if (filter?.status && c.status !== filter.status) return false
+export function listDeployments(filter?: {
+  kind?: DeploymentKind
+  status?: DeploymentStatus
+}): Deployment[] {
+  return DEPLOYMENTS.filter((d) => {
+    if (filter?.kind && d.kind !== filter.kind) return false
+    if (filter?.status && d.status !== filter.status) return false
     return true
   })
 }
 
-export function getChannelKinds(campaign: Campaign): ChannelKind[] {
-  return campaign.channels.map((c) => c.kind)
+/** Canonical detail URL for a deployment (inbound vs Batch Calls surface). */
+export function deploymentHref(d: Pick<Deployment, "id" | "kind">): string {
+  return d.kind === "inbound" ? `/deploy/inbound/${d.id}` : `/deploy/batch-calls/${d.id}`
+}
+
+/** Extract {{vars}} referenced in a prompt/greeting body. */
+export function extractVars(text: string): string[] {
+  return [...new Set([...text.matchAll(/\{\{\s*([\w.]+)\s*\}\}/g)].map((m) => m[1]))]
 }
 
 export function formatDuration(seconds: number): string {
@@ -371,19 +598,3 @@ export const CHANNEL_LABEL: Record<ChannelKind, string> = {
   sms: "SMS",
   web: "Web widget",
 }
-
-// ─── Mock agents (shared with wizard agent picker) ───────────────────────────
-
-export interface AgentRef {
-  id: string
-  name: string
-  status: "live" | "draft" | "paused"
-}
-
-export const AGENTS: AgentRef[] = [
-  { id: "agt_support_v2", name: "Support Bot v2", status: "live" },
-  { id: "agt_sales_qualifier", name: "Sales Qualifier", status: "draft" },
-  { id: "agt_appointment_setter", name: "Appointment Setter", status: "live" },
-  { id: "agt_collections", name: "Collections Outreach", status: "paused" },
-  { id: "agt_survey", name: "Survey Bot", status: "live" },
-]

@@ -83,14 +83,9 @@ const NAV_MANAGE: NavItem[] = [
 
 function isItemActive(itemHref: string, pathname: string): boolean {
   if (itemHref === "/deploy") {
-    // Deploy hub spans Overview (/deploy) + the channel pages (/deploy/widget,
-    // /deploy/api) + Campaigns + Phone Numbers.
-    return (
-      pathname === "/deploy" ||
-      pathname.startsWith("/deploy/") ||
-      pathname.startsWith("/campaigns") ||
-      pathname.startsWith("/phone-numbers")
-    )
+    // Deploy hub: every surface now lives under /deploy/* (Inbound · Batch
+    // Calls · Phone Numbers · Embed/Code — 2026-06-11 intent-first revamp).
+    return pathname === "/deploy" || pathname.startsWith("/deploy/")
   }
   if (itemHref === "/monitor") {
     // Monitor hub spans Overview (/monitor) + Call/Chat History + agent Sessions.

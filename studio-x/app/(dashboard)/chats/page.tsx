@@ -15,7 +15,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
-import { CAMPAIGNS } from "@/lib/campaign-data"
+import { DEPLOYMENTS, getDeployment, deploymentHref } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 
@@ -54,16 +54,16 @@ const STATUSES: ChatStatus[] = ["Resolved", "Transferred", "Active", "Abandoned"
 function generate(): ChatRow[] {
   const rows: ChatRow[] = []
   let n = 1
-  for (const c of CAMPAIGNS) {
+  for (const c of DEPLOYMENTS) {
     // only text-capable channels
-    const textChannels = c.channels.filter((ch) => ch.kind === "whatsapp" || ch.kind === "sms" || ch.kind === "web")
+    const textChannels = [c.channel].filter((ch) => ch.kind === "whatsapp" || ch.kind === "sms" || ch.kind === "web")
     if (textChannels.length === 0) continue
     for (const ch of textChannels) {
       const status = STATUSES[n % STATUSES.length]
       rows.push({
         id: `CHAT${(2000 + n).toString(36).toUpperCase()}`,
         channel: ch.kind as ChatChannel,
-        direction: c.type === "inbound" ? "in" : "out",
+        direction: c.kind === "inbound" ? "in" : "out",
         contact: CONTACTS[n % CONTACTS.length],
         agent: c.agentName ?? "Dynamic Agent",
         campaignId: c.id,
@@ -152,7 +152,7 @@ export default function ChatHistoryPage() {
                       <TableCell className="font-mono text-xs">{c.contact}</TableCell>
                       <TableCell className="text-sm">{c.agent}</TableCell>
                       <TableCell>
-                        <Link href={`/campaigns/${c.campaignId}`} onClick={(e) => e.stopPropagation()} className="text-sm text-primary hover:underline">{c.campaignName}</Link>
+                        <Link href={getDeployment(c.campaignId) ? deploymentHref(getDeployment(c.campaignId)!) : "/deploy"} onClick={(e) => e.stopPropagation()} className="text-sm text-primary hover:underline">{c.campaignName}</Link>
                       </TableCell>
                       <TableCell className="text-right tabular-nums text-sm">{c.messages}</TableCell>
                       <TableCell><Badge variant={STATUS_VARIANT[c.status]}>{c.status}</Badge></TableCell>

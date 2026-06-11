@@ -8,7 +8,7 @@ import { DeployChooser, DeployChooserFooter } from "@/components/deploy-chooser"
 
 /**
  * Right-side drawer that opens from the Deploy button in the agent editor.
- * Shows the same 3-choice chooser as /deploy (Inbound · Outbound · Code) so
+ * Shows the same 3-choice chooser as /deploy (Inbound · Batch Calls · Code) so
  * the mental model is identical regardless of entry point.
  *
  *   <AgentDeploySheet agentId={id}>
@@ -29,8 +29,8 @@ export function AgentDeploySheet({
         <SheetHeader>
           <SheetTitle>Deploy this agent</SheetTitle>
           <SheetDescription>
-            Pick how this agent goes live. You can add more channels later from the
-            campaign it lands in.
+            Pick how this agent goes live — one channel per deployment. The
+            deployment&apos;s prompt and variables are written there.
           </SheetDescription>
         </SheetHeader>
         <div className="px-6 pb-6 space-y-5">

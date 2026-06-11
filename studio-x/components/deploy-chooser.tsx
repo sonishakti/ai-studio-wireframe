@@ -22,9 +22,9 @@ import { track, Events } from "@/lib/analytics"
  *   • /deploy (full-page mode)
  *   • Agent editor's right-side Sheet (in-sheet mode)
  *
- * Inbound  → /campaigns/new?type=inbound
- * Outbound → /campaigns (filtered to outbound)
- * Code     → inline expansion of two sub-paths (Widget embed · REST API)
+ * Inbound     → /deploy/inbound/new (agent answers on one channel)
+ * Batch Calls → /deploy/batch-calls/new (outbound CSV dialing)
+ * Code        → inline expansion of two sub-paths (Widget embed · REST API)
  */
 
 interface DeployChooserProps {
@@ -44,7 +44,7 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
     track(Events.deploy_chooser_viewed, { variant })
   }, [variant])
 
-  const agentParam = agentId ? `&agent=${agentId}` : ""
+  const agentParam = agentId ? `?agent=${agentId}` : ""
 
   const options: Array<{
     id: OptionId
@@ -57,18 +57,18 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
     {
       id: "inbound",
       icon: PhoneIncoming,
-      title: "Inbound calls",
-      description: "Users come to your agent.",
-      bullets: ["Web widget", "Phone number", "WhatsApp", "SMS"],
-      href: `/campaigns/new?type=inbound${agentParam}`,
+      title: "Inbound",
+      description: "Your agent answers.",
+      bullets: ["Phone number", "Web widget", "WhatsApp", "One agent, one channel"],
+      href: `/deploy/inbound/new${agentParam}`,
     },
     {
       id: "outbound",
       icon: PhoneOutgoing,
-      title: "Outbound calls",
-      description: "Your agent reaches out.",
-      bullets: ["Telephony dialing", "SMS broadcast", "WhatsApp"],
-      href: `/campaigns/new?type=outbound${agentParam}`,
+      title: "Batch Calls",
+      description: "Your agent dials a contact list.",
+      bullets: ["Upload a CSV", "Columns become {{variables}}", "Prompt written at launch"],
+      href: `/deploy/batch-calls/new${agentParam}`,
     },
     {
       id: "code",
@@ -163,13 +163,13 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
             icon={Globe}
             title="Embed widget"
             description="Drop a chat widget into your site with one snippet."
-            href="/deploy/widget"
+            href="/deploy/embed/widget"
           />
           <CodeSubOption
             icon={Terminal}
             title="Use REST API"
             description="Server-to-server integration with token auth."
-            href="/deploy/api"
+            href="/deploy/embed/api"
           />
         </div>
       )}
@@ -213,14 +213,14 @@ export function DeployChooserFooter() {
   return (
     <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4 sm:flex-row sm:items-center">
       <div className="flex-1">
-        <p className="text-sm font-medium">Already have a campaign?</p>
+        <p className="text-sm font-medium">Already deployed?</p>
         <p className="text-xs text-muted-foreground">
-          Add another channel to it instead of creating a new one.
+          Reconfigure a live deployment — its prompt and variables live there.
         </p>
       </div>
       <Button variant="outline" size="sm" asChild>
-        <Link href="/campaigns" className="gap-1.5">
-          <Plus className="h-3.5 w-3.5" /> Open Campaigns
+        <Link href="/deploy/batch-calls" className="gap-1.5">
+          <Plus className="h-3.5 w-3.5" /> Open Batch Calls
         </Link>
       </Button>
     </div>

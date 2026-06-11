@@ -20,7 +20,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { CAMPAIGNS, formatDuration } from "@/lib/campaign-data"
+import { DEPLOYMENTS, formatDuration } from "@/lib/campaign-data"
 import { CallDetailSheet, type CallDetail } from "@/components/call-detail-sheet"
 import { track, Events } from "@/lib/analytics"
 
@@ -50,20 +50,20 @@ const OUTCOMES: Outcome[] = ["Successful", "Failed", "Cannot Predict"]
 function generate(): CallRow[] {
   const rows: CallRow[] = []
   let n = 1
-  for (const c of CAMPAIGNS) {
+  for (const c of DEPLOYMENTS) {
     const size = c.metrics.calls === 0 ? 1 : Math.min(6, Math.max(2, Math.round(c.metrics.calls / 400)))
     for (let i = 0; i < size; i++) {
       const status = STATUSES[(n + i) % STATUSES.length]
       const outcome = status === "Answered" || status === "Transferred" ? "Successful" : status === "Voicemail" || status === "Not Connected" ? "Failed" : OUTCOMES[(n + i) % 3]
       rows.push({
         id: `CALL${(1000 + n).toString(36).toUpperCase()}`,
-        direction: c.type === "inbound" ? "in" : "out",
+        direction: c.kind === "inbound" ? "in" : "out",
         timestamp: `${10 + (n % 18)}/12/2025 ${(9 + (i % 9)).toString().padStart(2, "0")}:00`,
         agent: c.agentName ?? "Dynamic Agent",
         campaignId: c.id,
         campaignName: c.name,
-        from: c.type === "inbound" ? CONTACTS[(n + i) % CONTACTS.length] : "+1 (555) 555-0240",
-        to: c.type === "inbound" ? "+1 (555) 555-0101" : CONTACTS[(n + i) % CONTACTS.length],
+        from: c.kind === "inbound" ? CONTACTS[(n + i) % CONTACTS.length] : "+1 (555) 555-0240",
+        to: c.kind === "inbound" ? "+1 (555) 555-0101" : CONTACTS[(n + i) % CONTACTS.length],
         durationSec: status === "Not Connected" ? 0 : 30 + ((n * 37 + i * 53) % 280),
         status,
         outcome,

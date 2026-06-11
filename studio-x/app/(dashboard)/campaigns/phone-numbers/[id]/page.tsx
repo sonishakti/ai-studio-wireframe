@@ -7,5 +7,5 @@ export default async function PhoneNumberLegacyRedirect({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  redirect(`/phone-numbers/${id}`)
+  redirect(`/deploy/phone-numbers/${id}`)
 }

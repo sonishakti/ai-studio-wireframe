@@ -15,7 +15,7 @@ export default function DeployHubPage() {
           <div className="space-y-1">
             <h2 className="text-base font-semibold">Pick how your agent goes live</h2>
             <p className="text-sm text-muted-foreground">
-              Connect your agent to a channel. You can add more anytime.
+              One agent, one channel per deployment — the prompt is written at deploy time.
             </p>
           </div>
           <DeployChooser variant="page" />

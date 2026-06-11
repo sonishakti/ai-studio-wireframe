@@ -152,7 +152,7 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
                   onClick={() => {
                     setOpen(false)
                     toast.success("Opening inbound setup (mock)")
-                    router.push("/phone-numbers/pn_new")
+                    router.push("/deploy/phone-numbers/pn_new")
                   }}
                 />
                 <RouteCard
@@ -161,7 +161,7 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
                   desc="Use this number for outbound campaigns."
                   onClick={() => {
                     setOpen(false)
-                    router.push("/campaigns/new?type=outbound")
+                    router.push("/deploy/batch-calls/new")
                   }}
                 />
               </div>
