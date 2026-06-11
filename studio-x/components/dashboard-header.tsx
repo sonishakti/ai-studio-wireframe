@@ -31,6 +31,7 @@ const LABELS: Record<string, string> = {
   "batch-calls": "Batch Calls",
   inbound: "Inbound",
   embed: "Embed / Code",
+  code: "Code",
   create: "New Batch",
   calls: "Call History",
   chats: "Chat History",

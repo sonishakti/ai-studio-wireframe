@@ -7,8 +7,6 @@ import {
   PhoneOutgoing,
   Code2,
   ArrowRight,
-  Globe,
-  Terminal,
   Plus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -37,8 +35,6 @@ interface DeployChooserProps {
 type OptionId = "inbound" | "outbound" | "code"
 
 export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps) {
-  const [expanded, setExpanded] = React.useState<OptionId | null>(null)
-
   // Fire view event once on mount
   React.useEffect(() => {
     track(Events.deploy_chooser_viewed, { variant })
@@ -73,17 +69,15 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
     {
       id: "code",
       icon: Code2,
-      title: "Code & embed",
-      description: "Self-serve integration.",
-      bullets: ["iFrame widget", "REST API", "Direct SDK"],
+      title: "Code",
+      description: "Export your agent to any stack.",
+      bullets: ["Web · React · iOS · Android", "Flutter · React Native", "cURL · Node · Python · Go", "Copy as iframe"],
+      href: "/deploy/code",
     },
   ]
 
   const handleOptionClick = (id: OptionId) => {
     track(Events.deploy_chooser_option_selected, { option: id })
-    if (id === "code") {
-      setExpanded((curr) => (curr === id ? null : id))
-    }
   }
 
   return (
@@ -96,16 +90,10 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
       >
         {options.map((opt) => {
           const Icon = opt.icon
-          const isCode = opt.id === "code"
-          const isExpanded = expanded === opt.id
 
           const card = (
             <div
-              className={cn(
-                "group relative flex flex-col gap-3 rounded-lg border border-border bg-card p-5 text-left transition-all hover:border-primary/40 hover:shadow-sm",
-                isCode && "cursor-pointer",
-                isExpanded && "border-primary/60 shadow-sm",
-              )}
+              className="group relative flex flex-col gap-3 rounded-lg border border-border bg-card p-5 text-left transition-all hover:border-primary/40 hover:shadow-sm"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10">
@@ -131,19 +119,6 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
             </div>
           )
 
-          if (isCode) {
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => handleOptionClick(opt.id)}
-                className="text-left"
-              >
-                {card}
-              </button>
-            )
-          }
-
           return (
             <Link
               key={opt.id}
@@ -155,53 +130,7 @@ export function DeployChooser({ agentId, variant = "page" }: DeployChooserProps)
           )
         })}
       </div>
-
-      {/* Inline expansion for Code branch */}
-      {expanded === "code" && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <CodeSubOption
-            icon={Globe}
-            title="Embed widget"
-            description="Drop a chat widget into your site with one snippet."
-            href="/deploy/embed/widget"
-          />
-          <CodeSubOption
-            icon={Terminal}
-            title="Use REST API"
-            description="Server-to-server integration with token auth."
-            href="/deploy/embed/api"
-          />
-        </div>
-      )}
     </div>
-  )
-}
-
-function CodeSubOption({
-  icon: Icon,
-  title,
-  description,
-  href,
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  description: string
-  href: string
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-start gap-3 rounded-lg border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-sm"
-    >
-      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted shrink-0">
-        <Icon className="h-4 w-4 text-foreground" />
-      </div>
-      <div className="flex-1 space-y-0.5">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </div>
-      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-    </Link>
   )
 }
 

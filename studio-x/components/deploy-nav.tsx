@@ -18,7 +18,7 @@ const TABS = [
   { label: "Inbound", href: "/deploy/inbound" },
   { label: "Batch Calls", href: "/deploy/batch-calls" },
   { label: "Phone Numbers", href: "/deploy/phone-numbers" },
-  { label: "Embed / Code", href: "/deploy/embed" },
+  { label: "Code", href: "/deploy/code" },
 ]
 
 function isTabActive(href: string, pathname: string): boolean {

@@ -76,7 +76,7 @@ BUILD
       New batch                  /deploy/batch-calls/new
     Phone Numbers                /deploy/phone-numbers       (first-class; was /phone-numbers)
       Number detail              /deploy/phone-numbers/[id]
-    Embed / Code                 /deploy/embed               (folds Web Widget + API & SDK)
+    Code                 /deploy/embed               (folds Web Widget + API & SDK)
 
 OBSERVE
   Monitor                        /monitor                    (Overview · Call History · Chat History · Sessions)
@@ -125,7 +125,7 @@ channel-organized to **intent-organized**, and Phone Numbers folds in as a Deplo
 
 ```
 BUILD     Agents · Integrations · Deploy
-                                  └─ Overview · Inbound · Batch Calls · Phone Numbers · Embed/Code
+                                  └─ Overview · Inbound · Batch Calls · Phone Numbers · Code
 OBSERVE   Monitor
 MANAGE    Project Settings · Realtime Services · Vendor Credentials
 ```
@@ -217,14 +217,14 @@ This removes the "declared in builder, valued at deploy" inversion entirely.
 
 ## 6. Deploy hub
 
-`deploy-nav.tsx` tabs: **Overview · Inbound · Batch Calls · Phone Numbers · Embed/Code.**
+`deploy-nav.tsx` tabs: **Overview · Inbound · Batch Calls · Phone Numbers · Code.**
 
 - **Overview** — entry; pick an agent + intent, or jump to a recent deployment.
 - **Inbound** — answering deployments; **1 agent ↔ 1 number/channel**; owns prompt/code/vars.
 - **Batch Calls** — outbound CSV dialing (the renamed Campaigns); CSV → auto `{{vars}}`.
 - **Phone Numbers** — first-class number inventory (SIP, routing, lock states) — moved
   under Deploy, behavior unchanged.
-- **Embed/Code** — folds today's Web Widget (`/deploy/widget`) + API & SDK
+- **Code** — folds today's Web Widget (`/deploy/widget`) + API & SDK
   (`/deploy/api`) into one "put the agent somewhere non-telephony" tab.
 
 ---
@@ -270,7 +270,7 @@ target points to — keeping the agent purely reusable.
 - `studio-x/app/(dashboard)/agents/page.tsx` — soften the template gallery into
   "start instantly / tweak persona," not a persistent gate.
 - `studio-x/components/deploy-nav.tsx` — retab to **Inbound · Batch Calls · Phone
-  Numbers · Embed/Code**.
+  Numbers · Code**.
 - `studio-x/app/(dashboard)/campaigns/**` + `components/campaign-wizard.tsx` — move to
   `/deploy/batch-calls`; relocate prompt/code/var authoring here; CSV-driven `{{var}}`
   auto-detection; collapse the 3-step wizard's channel step (one channel).
