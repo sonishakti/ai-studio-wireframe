@@ -26,6 +26,15 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ## Current sidebar (LOCKED 2026-06-05 — labeled groups; Build folds in deploy)
 
+> ⚠️ **2026-06-11 — IA REVAMP IN FLIGHT (blueprint signed off, build pending).** The
+> agent splits into **Agent = reusable Stack+Persona** (no prompt/vars) and
+> **Deployment = the whole prompt + custom code + CSV-derived dynamic vars**. Deploy
+> goes **intent-first** (Inbound · Batch Calls · Phone Numbers · Embed/Code), surfaced up
+> front; **Campaigns → Batch Calls**; **one agent ↔ one channel** (multichannel dropped).
+> These **reverse four locks below** — see `references/ia-revamp-agent-vs-deployment.md`
+> and LEARNINGS §20 (2026-06-11). The sidebar/route text in this section reflects the
+> *pre-revamp* state until screens are migrated; the blueprint is the forward truth.
+
 ```
 Composer
 BUILD     Agents · Integrations · Deploy
@@ -88,6 +97,11 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 
 ## Don't re-litigate
 
+- **⚠️ 2026-06-11 reversals (override the matching items below) — see `references/ia-revamp-agent-vs-deployment.md`:**
+  (1) **One agent ↔ one channel** — multichannel orchestration dropped (was "multichannel is the architecture").
+  (2) **Campaigns → Batch Calls** (outbound) — inbound is a peer Deploy surface (was "Campaign = the deployment surface").
+  (3) **Deploy is intent-first** — Inbound · Batch Calls · Phone Numbers · Embed/Code, surfaced up front (was deploy-as-channel-hub).
+  (4) **Prompt + dynamic vars live in the Deployment, not the agent** — Agent = reusable Stack+Persona only; vars auto-detected from CSV columns.
 - Strategic frame is locked (LEARNINGS §3). No new `/strategize` without new evidence.
 - Studio UI is **frozen** — interventions are additive only. Don't restyle, remove, or rename existing Studio flows.
 - Console and Studio share one backend, one Okta cookie, one project record. The seam is **wayfinding**, not auth.

@@ -503,6 +503,7 @@ Next.js App Router · pnpm · i18n (`messages/`) · Playwright e2e · `instrumen
 | 2026-04-25 | Spec phase landed + prototype built end-to-end |
 | 2026-05-03 | 10-concept ideation round for evaluate + publish cliffs |
 | 2026-05-04 | Code-grounded blueprint revision — three-gateway API, 15 extension services, CashInfo polling, B3/B4 resolved, B8–B11 opened |
+| 2026-06-11 | **Agent/Deployment split (Fin.ai-informed)** — Agent = reusable Stack+Persona (no prompt/vars); Deployment = the whole prompt + custom code + CSV-derived dynamic vars. Reverses 4 prior locks: (1) multichannel architecture → **one agent ↔ one channel**; (2) "Campaign = the deployment surface" → **Campaigns renamed Batch Calls** (outbound); (3) deploy-as-channel-hub → **deploy intent-first** (Inbound · Batch Calls · Phone Numbers · Embed/Code), surfaced up front; (4) prompt-in-agent → **prompt-in-deployment**. Create flow agent-first with deploy-target chosen up front. Dynamic vars auto-detected from CSV columns (kills the "declared in builder, valued at deploy" inversion). Stack configured speed-vs-cost first → vendor drill-down. Full blueprint: `references/ia-revamp-agent-vs-deployment.md`. |
 
 ---
 
