@@ -92,8 +92,8 @@ export default function InboundDetailPage({
               spellCheck={false}
             />
             <p className="text-xs text-muted-foreground">
-              Environment-specific instructions for this deployment. The agent&apos;s persona and
-              stack stay reusable — edit those on the{" "}
+              What the agent should do when answering here. Voice and personality come
+              from the{" "}
               <Link href={`/agents/${d.agentId}/edit`} className="underline underline-offset-2 hover:text-foreground">
                 agent
               </Link>.

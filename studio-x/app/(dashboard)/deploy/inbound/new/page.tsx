@@ -163,7 +163,7 @@ export default function NewInboundPage() {
                   spellCheck={false}
                 />
                 <p className="text-xs text-muted-foreground">
-                  The whole prompt lives on this deployment; the agent stays reusable.
+                  What the agent should do when answering here.
                 </p>
               </div>
 

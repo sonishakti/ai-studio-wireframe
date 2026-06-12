@@ -29,8 +29,8 @@ export function AgentDeploySheet({
         <SheetHeader>
           <SheetTitle>Deploy this agent</SheetTitle>
           <SheetDescription>
-            Pick how this agent goes live — one channel per deployment. The
-            deployment&apos;s prompt and variables are written there.
+            Pick how this agent goes live. You&apos;ll write what it says in the
+            next step.
           </SheetDescription>
         </SheetHeader>
         <div className="px-6 pb-6 space-y-5">

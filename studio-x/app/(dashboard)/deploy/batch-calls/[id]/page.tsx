@@ -142,7 +142,7 @@ export default function BatchCallDetailPage({
                     spellCheck={false}
                   />
                   <p className="text-xs text-muted-foreground">
-                    The whole prompt lives on this batch — the agent itself stays reusable.
+                    Applies to this batch only — calls dialed from now on pick up your edits.
                   </p>
                 </section>
 

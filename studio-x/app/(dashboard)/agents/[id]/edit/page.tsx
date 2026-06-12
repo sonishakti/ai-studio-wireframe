@@ -251,13 +251,11 @@ export default function AgentEditorPage({
               <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
                 <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-foreground leading-relaxed">
-                  Looking for the prompt? It moved to each{" "}
+                  Looking for the prompt? Each deployment has its own — open{" "}
                   <Link href="/deploy" className="underline underline-offset-2 hover:text-primary">
-                    deployment
+                    Deploy
                   </Link>{" "}
-                  — this agent stays reusable across all of them. Dynamic{" "}
-                  <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{`{{variables}}`}</code>{" "}
-                  are auto-detected from the contact CSV in Batch Calls.
+                  to edit what this agent says on a number, widget, or batch.
                 </p>
               </div>
 
@@ -292,8 +290,7 @@ export default function AgentEditorPage({
                   placeholder="e.g. Warm, patient, solution-first"
                 />
                 <p className="text-xs text-muted-foreground">
-                  How the agent carries itself everywhere it&apos;s deployed — not what it says
-                  on a specific deployment.
+                  How the agent sounds and behaves — e.g. warm, patient, never pushy.
                 </p>
               </div>
 
@@ -438,8 +435,8 @@ export default function AgentEditorPage({
           {/* Continue into the deployment — prompt/vars are authored there */}
           <div className="border-t bg-background px-6 py-3 flex items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              Next: write this {target === "inbound" ? "deployment's" : "batch's"} prompt
-              {target === "batch" && " — variables come from your CSV"}.
+              Next: write what the agent says on this{" "}
+              {target === "inbound" ? "line" : "batch"}.
             </p>
             <Button size="sm" className="gap-1.5" asChild>
               <Link href={continueHref}>

@@ -295,9 +295,8 @@ export default function WebWidgetBuilderPage() {
                   </Select>
                 </Field>
                 <p className="text-xs text-muted-foreground">
-                  The reusable agent this widget runs. Edit its persona and stack on the{" "}
-                  <Link href={`/agents/${agentId}/edit`} className="underline underline-offset-2 hover:text-foreground">agent</Link>.
-                  The widget&apos;s prompt is this inbound deployment&apos;s prompt.
+                  The agent answering in this widget. Tune its voice and personality on the{" "}
+                  <Link href={`/agents/${agentId}/edit`} className="underline underline-offset-2 hover:text-foreground">agent</Link> page.
                 </p>
               </>
             )}

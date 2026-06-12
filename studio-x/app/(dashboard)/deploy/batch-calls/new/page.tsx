@@ -156,8 +156,8 @@ export default function NewBatchCallPage() {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    The agent brings its reusable persona and stack. The prompt for this batch
-                    comes in step 3.
+                    Voice and personality come from the agent — you&apos;ll write what it
+                    says in step 3.
                   </p>
                 </div>
 

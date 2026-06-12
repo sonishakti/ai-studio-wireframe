@@ -172,7 +172,7 @@ export function DeployChooserFooter() {
       <div className="flex-1">
         <p className="text-sm font-medium">Already deployed?</p>
         <p className="text-xs text-muted-foreground">
-          Reconfigure a live deployment — its prompt and variables live there.
+          Open a live deployment to edit what it says, its contacts, or its schedule.
         </p>
       </div>
       <Button variant="outline" size="sm" asChild>
