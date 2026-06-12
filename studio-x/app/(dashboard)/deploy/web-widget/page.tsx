@@ -3,13 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Info, Palette, Waves, MessageSquareText, Bot, Settings2,
-  Eye, Save, Download, Code2, ChevronDown, Mic, X, MessageSquare,
+  Code2, ChevronDown, Mic, X, MessageSquare, Palette, Type, Settings2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -19,37 +17,18 @@ import { AGENTS } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
-// ─── Web Widget builder (App Builder Console, Figma 540:36057) ───────────────
+// ─── Web Widget — simplified (2026-06-12) ─────────────────────────────────────
 //
-// A 3-pane studio: section nav (left) · live preview (center) · config (right).
-// Configures the embeddable Agora AI widget — theme, voice blob, content, and
-// the agent it runs — then Save / Download Code / Embed. Lives as a Deploy tab
-// so "where do I configure a web-widget deployment?" has a first-class home.
+// Second pass: the first port carried App Builder's *project* concepts
+// ("ACME Customer Support — AI Widget", Product Information, a 6-section left
+// nav). In Studio the widget simply puts AN AGENT on your site, so the agent
+// picker leads (like /deploy/code) and everything else is one config scroll:
+// Appearance · Text · Behavior. Preview left, config right, Embed to finish.
 
-type Section = "product" | "theme" | "blob" | "content" | "agent" | "config"
 type PreviewMode = "collapsed" | "voice" | "chat"
 type InteractionMode = "chat" | "voice" | "voice+chat"
 
-const NAV: { group: string; items: { id: Section; label: string; icon: React.ComponentType<{ className?: string }> }[] }[] = [
-  { group: "General", items: [{ id: "product", label: "Product Information", icon: Info }] },
-  {
-    group: "Branding",
-    items: [
-      { id: "theme", label: "Theme", icon: Palette },
-      { id: "blob", label: "Voice Blob", icon: Waves },
-      { id: "content", label: "Content", icon: MessageSquareText },
-    ],
-  },
-  {
-    group: "App Features",
-    items: [
-      { id: "agent", label: "AI Agent", icon: Bot },
-      { id: "config", label: "Configuration", icon: Settings2 },
-    ],
-  },
-]
-
-// Brand palettes — user-selected colors (data, not app theme tokens).
+// Brand palettes — user-selected widget colors (data, not app theme tokens).
 const PALETTES = [
   { id: "cyan", label: "Agora Cyan", accent: "#3AB7E5" },
   { id: "indigo", label: "Indigo", accent: "#6366F1" },
@@ -60,25 +39,28 @@ const PALETTES = [
 
 const BLOB_STYLES = ["Aura", "Pulse", "Orbit", "Ripple", "Solid"]
 
-export default function WebWidgetBuilderPage() {
-  const [section, setSection] = React.useState<Section>("product")
+export default function WebWidgetPage() {
+  const [agentId, setAgentId] = React.useState(AGENTS[0].id)
   const [mode, setMode] = React.useState<PreviewMode>("voice")
 
-  // ── config state ──
-  const [projectName, setProjectName] = React.useState("ACME Customer Support")
-  const [projectDesc, setProjectDesc] = React.useState("")
+  // ── config (the few things a Studio widget actually needs) ──
   const [interaction, setInteraction] = React.useState<InteractionMode>("voice+chat")
   const [palette, setPalette] = React.useState(PALETTES[0])
   const [blobStyle, setBlobStyle] = React.useState("Aura")
-  const [agentId, setAgentId] = React.useState(AGENTS[0].id)
   const [cta, setCta] = React.useState("Try our Voice AI Agent")
-  const [greeting, setGreeting] = React.useState("Hi there, I'm Agora Agent. How can I help you today?")
+  const [greeting, setGreeting] = React.useState("Hi there! How can I help you today?")
   const [listening, setListening] = React.useState("Agent Listening…")
   const [connecting, setConnecting] = React.useState("Connecting…")
   const [errorMsg, setErrorMsg] = React.useState("An error occurred.")
   const [requireTerms, setRequireTerms] = React.useState(false)
 
-  // Interaction mode constrains which preview modes are available.
+  // Pre-fill the agent when arriving from the Deploy chooser (?agent=…).
+  React.useEffect(() => {
+    const a = new URLSearchParams(window.location.search).get("agent")
+    if (a && AGENTS.some((x) => x.id === a)) setAgentId(a)
+  }, [])
+
+  // Interaction mode constrains which preview modes make sense.
   const allowVoice = interaction !== "chat"
   const allowChat = interaction !== "voice"
   React.useEffect(() => {
@@ -94,25 +76,46 @@ export default function WebWidgetBuilderPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <DeployNav />
+      <DeployNav
+        action={
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/deploy/code?agent=${agentId}`}>Get code →</Link>
+            </Button>
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={() => { navigator.clipboard?.writeText(iframe); toast.success("Embed snippet copied") }}
+            >
+              <Code2 className="h-3.5 w-3.5" /> Embed
+            </Button>
+          </div>
+        }
+      />
 
-      {/* Builder top bar */}
-      <div className="flex items-center justify-between gap-3 border-b bg-background px-4 h-12 shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-sm font-medium truncate">{projectName || "Untitled widget"}</span>
-          <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-            AI Widget
-          </span>
+      {/* Agent + preview-mode row */}
+      <div className="flex items-end justify-between gap-4 border-b bg-background px-6 py-3 flex-wrap">
+        <div className="space-y-1.5 w-64">
+          <Label className="text-sm font-medium">
+            AI Agent <span className="text-destructive">*</span>
+          </Label>
+          <Select value={agentId} onValueChange={setAgentId}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {AGENTS.map((a) => (
+                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Page mode toggle */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Page:</span>
+        <div className="flex items-center gap-2 pb-0.5">
+          <span className="text-xs text-muted-foreground">Preview:</span>
           <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
             {([
               { id: "collapsed", label: "Collapsed", on: true },
-              { id: "voice", label: "Voice Mode", on: allowVoice },
-              { id: "chat", label: "Chat Mode", on: allowChat },
+              { id: "voice", label: "Voice", on: allowVoice },
+              { id: "chat", label: "Chat", on: allowChat },
             ] as const).map((m) => (
               <button
                 key={m.id}
@@ -130,185 +133,82 @@ export default function WebWidgetBuilderPage() {
             ))}
           </div>
         </div>
-
-        <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="icon" className="h-8 w-8" title="Preview"><Eye className="h-4 w-4" /></Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => toast.success("Widget saved")}>
-            <Save className="h-3.5 w-3.5" /> Save
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" asChild>
-            <Link href={`/deploy/code?agent=${agentId}`}><Download className="h-3.5 w-3.5" /> Download Code</Link>
-          </Button>
-          <Button size="sm" className="gap-1.5" onClick={() => { navigator.clipboard?.writeText(iframe); toast.success("Embed snippet copied") }}>
-            <Code2 className="h-3.5 w-3.5" /> Embed
-          </Button>
-        </div>
       </div>
 
-      {/* 3-pane body */}
+      {/* 2-pane: preview + one config scroll */}
       <div className="flex flex-1 min-h-0">
-        {/* Left — section nav */}
-        <nav className="w-56 shrink-0 border-r bg-background overflow-y-auto p-3 space-y-4">
-          {NAV.map((grp) => (
-            <div key={grp.group} className="space-y-1">
-              <p className="px-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{grp.group}</p>
-              {grp.items.map((it) => {
-                const active = section === it.id
-                return (
-                  <button
-                    key={it.id}
-                    type="button"
-                    onClick={() => setSection(it.id)}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
-                      active ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                    )}
-                  >
-                    <it.icon className="h-4 w-4 shrink-0" /> {it.label}
-                  </button>
-                )
-              })}
-            </div>
-          ))}
-        </nav>
-
-        {/* Center — live preview */}
         <div className="flex-1 flex items-center justify-center bg-muted/20 p-8 min-w-0 overflow-auto">
-          <WidgetPreview
-            mode={mode}
-            accent={accent}
-            cta={cta}
-            greeting={greeting}
-            allowChat={allowChat}
-          />
+          <WidgetPreview mode={mode} accent={accent} cta={cta} greeting={greeting} allowChat={allowChat} />
         </div>
 
-        {/* Right — config panel */}
-        <aside className="w-80 shrink-0 border-l bg-background overflow-y-auto">
-          <div className="border-b px-4 py-3">
-            <p className="text-sm font-medium">
-              {section === "product" && "Product information"}
-              {section === "theme" && "Theme"}
-              {section === "blob" && "Customize Voice Blob"}
-              {section === "content" && "Configure Widget Agent"}
-              {section === "agent" && "AI Agent"}
-              {section === "config" && "Configuration"}
-            </p>
-          </div>
-          <div className="p-4 space-y-5">
-            {section === "product" && (
-              <>
-                <Field label="Project Name">
-                  <Input value={projectName} onChange={(e) => setProjectName(e.target.value)} />
-                </Field>
-                <Field label="Project Description">
-                  <Textarea
-                    value={projectDesc}
-                    onChange={(e) => setProjectDesc(e.target.value)}
-                    placeholder="Type your Project Description here."
-                    className="min-h-[88px] text-sm"
+        <aside className="w-80 shrink-0 border-l bg-background overflow-y-auto p-4 space-y-6">
+          {/* Appearance */}
+          <section className="space-y-3">
+            <GroupLabel icon={Palette} label="Appearance" />
+            <Field label="Color">
+              <div className="flex flex-wrap gap-2">
+                {PALETTES.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPalette(p)}
+                    title={p.label}
+                    className={cn(
+                      "h-8 w-12 rounded-md border-2 transition-all",
+                      palette.id === p.id ? "border-foreground scale-105" : "border-transparent",
+                    )}
+                    style={{ backgroundColor: p.accent }}
                   />
-                </Field>
-                <Field label="Interaction Mode">
-                  <Select value={interaction} onValueChange={(v) => setInteraction(v as InteractionMode)}>
-                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="chat">Chat Only</SelectItem>
-                      <SelectItem value="voice">Voice Only</SelectItem>
-                      <SelectItem value="voice+chat">Voice and Chat</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </>
-            )}
+                ))}
+              </div>
+            </Field>
+            <Field label="Voice blob style">
+              <Select value={blobStyle} onValueChange={setBlobStyle}>
+                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {BLOB_STYLES.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          </section>
 
-            {section === "theme" && (
-              <>
-                <Field label="Select a color palette">
-                  <div className="flex flex-wrap gap-2">
-                    {PALETTES.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setPalette(p)}
-                        title={p.label}
-                        className={cn(
-                          "h-8 w-12 rounded-md border-2 transition-all",
-                          palette.id === p.id ? "border-foreground scale-105" : "border-transparent",
-                        )}
-                        style={{ backgroundColor: p.accent }}
-                      />
-                    ))}
-                  </div>
-                </Field>
-                <Accordion label="Add your Branding" />
-                <Accordion label="UI Elements" />
-                <Accordion label="Semantic Colors" />
-              </>
-            )}
+          {/* Text */}
+          <section className="space-y-3">
+            <GroupLabel icon={Type} label="Text" />
+            <Field label="Button label"><Input value={cta} onChange={(e) => setCta(e.target.value)} /></Field>
+            <Field label="Greeting"><Input value={greeting} onChange={(e) => setGreeting(e.target.value)} /></Field>
+            <Field label="Listening status"><Input value={listening} onChange={(e) => setListening(e.target.value)} /></Field>
+            <Field label="Connecting status"><Input value={connecting} onChange={(e) => setConnecting(e.target.value)} /></Field>
+            <Field label="Error message"><Input value={errorMsg} onChange={(e) => setErrorMsg(e.target.value)} /></Field>
+          </section>
 
-            {section === "blob" && (
-              <>
-                <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
-                  <span className="flex-1 rounded bg-primary/10 text-primary text-center text-xs font-medium py-1">Presets</span>
-                  <span className="flex-1 text-center text-xs font-medium text-muted-foreground py-1">Custom</span>
-                </div>
-                <Field label="Blob Style">
-                  <Select value={blobStyle} onValueChange={setBlobStyle}>
-                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {BLOB_STYLES.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <p className="text-xs text-muted-foreground">
-                  The animated orb shown while the agent listens and speaks. Switch to Voice Mode to preview.
-                </p>
-              </>
-            )}
-
-            {section === "content" && (
-              <>
-                <Field label="CTA Label"><Input value={cta} onChange={(e) => setCta(e.target.value)} /></Field>
-                <Field label="Greeting"><Input value={greeting} onChange={(e) => setGreeting(e.target.value)} /></Field>
-                <Field label="Listening Status"><Input value={listening} onChange={(e) => setListening(e.target.value)} /></Field>
-                <Field label="Connecting Status"><Input value={connecting} onChange={(e) => setConnecting(e.target.value)} /></Field>
-                <Field label="Error Message"><Input value={errorMsg} onChange={(e) => setErrorMsg(e.target.value)} /></Field>
-                <div className="flex items-start justify-between gap-3 rounded-md border border-border p-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">Terms and Conditions</p>
-                    <p className="text-xs text-muted-foreground">Require callers to accept terms before call.</p>
-                  </div>
-                  <Switch checked={requireTerms} onCheckedChange={setRequireTerms} />
-                </div>
-              </>
-            )}
-
-            {section === "agent" && (
-              <>
-                <Field label="Agent">
-                  <Select value={agentId} onValueChange={setAgentId}>
-                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {AGENTS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <p className="text-xs text-muted-foreground">
-                  The agent answering in this widget. Tune its voice and personality on the{" "}
-                  <Link href={`/agents/${agentId}/edit`} className="underline underline-offset-2 hover:text-foreground">agent</Link> page.
-                </p>
-              </>
-            )}
-
-            {section === "config" && (
-              <p className="text-xs text-muted-foreground">
-                Advanced: allowed domains, session limits, and rate limiting. Configured per
-                deployment in{" "}
-                <Link href="/deploy/inbound" className="underline underline-offset-2 hover:text-foreground">Inbound</Link>.
-              </p>
-            )}
-          </div>
+          {/* Behavior */}
+          <section className="space-y-3">
+            <GroupLabel icon={Settings2} label="Behavior" />
+            <Field label="Interaction mode">
+              <Select value={interaction} onValueChange={(v) => setInteraction(v as InteractionMode)}>
+                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="chat">Chat Only</SelectItem>
+                  <SelectItem value="voice">Voice Only</SelectItem>
+                  <SelectItem value="voice+chat">Voice and Chat</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <div className="flex items-start justify-between gap-3 rounded-md border border-border p-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Terms and Conditions</p>
+                <p className="text-xs text-muted-foreground">Require visitors to accept terms before talking.</p>
+              </div>
+              <Switch checked={requireTerms} onCheckedChange={setRequireTerms} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Allowed domains and what the agent says are set on the widget&apos;s{" "}
+              <Link href="/deploy/inbound" className="underline underline-offset-2 hover:text-foreground">
+                inbound deployment
+              </Link>.
+            </p>
+          </section>
         </aside>
       </div>
     </div>
@@ -382,20 +282,19 @@ function WidgetPreview({
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
+function GroupLabel({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
+  return (
+    <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+      <Icon className="h-3.5 w-3.5" /> {label}
+    </p>
+  )
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-sm font-medium">{label}</Label>
       {children}
     </div>
-  )
-}
-
-function Accordion({ label }: { label: string }) {
-  return (
-    <button type="button" className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors">
-      <span className="font-medium">{label}</span>
-      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-    </button>
   )
 }
