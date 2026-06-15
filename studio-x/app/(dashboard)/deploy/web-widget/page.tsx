@@ -17,15 +17,15 @@ import { AGENTS } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
-// ─── Web Widget — simplified (2026-06-12) ─────────────────────────────────────
+// ─── Web Widget — config-left, live-preview-right (2026-06-15) ───────────────
 //
-// Second pass: the first port carried App Builder's *project* concepts
-// ("ACME Customer Support — AI Widget", Product Information, a 6-section left
-// nav). In Studio the widget simply puts AN AGENT on your site, so the agent
-// picker leads (like /deploy/code) and everything else is one config scroll:
-// Appearance · Text · Behavior. Preview left, config right, Embed to finish.
+// Third pass, per Figma 04_Deploy_Future_scope (847:17167): config is the main
+// scroll on the left (agent picker leads, like /deploy/code), with a pinned
+// 420px live-preview panel on the right showing the widget exactly as a
+// visitor would see it — glow + agent avatar + greeting + one combined
+// mic/end/chat input bar (the Figma "Chat-InputWidget").
 
-type PreviewMode = "collapsed" | "voice" | "chat"
+type PreviewMode = "collapsed" | "widget"
 type InteractionMode = "chat" | "voice" | "voice+chat"
 
 // Brand palettes — user-selected widget colors (data, not app theme tokens).
@@ -41,14 +41,14 @@ const BLOB_STYLES = ["Aura", "Pulse", "Orbit", "Ripple", "Solid"]
 
 export default function WebWidgetPage() {
   const [agentId, setAgentId] = React.useState(AGENTS[0].id)
-  const [mode, setMode] = React.useState<PreviewMode>("voice")
+  const [mode, setMode] = React.useState<PreviewMode>("widget")
 
   // ── config (the few things a Studio widget actually needs) ──
   const [interaction, setInteraction] = React.useState<InteractionMode>("voice+chat")
   const [palette, setPalette] = React.useState(PALETTES[0])
   const [blobStyle, setBlobStyle] = React.useState("Aura")
   const [cta, setCta] = React.useState("Try our Voice AI Agent")
-  const [greeting, setGreeting] = React.useState("Hi there! How can I help you today?")
+  const [greeting, setGreeting] = React.useState("Hi there, I'm Agora Agent. How can I help you today?")
   const [listening, setListening] = React.useState("Agent Listening…")
   const [connecting, setConnecting] = React.useState("Connecting…")
   const [errorMsg, setErrorMsg] = React.useState("An error occurred.")
@@ -60,13 +60,8 @@ export default function WebWidgetPage() {
     if (a && AGENTS.some((x) => x.id === a)) setAgentId(a)
   }, [])
 
-  // Interaction mode constrains which preview modes make sense.
   const allowVoice = interaction !== "chat"
   const allowChat = interaction !== "voice"
-  React.useEffect(() => {
-    if (mode === "voice" && !allowVoice) setMode(allowChat ? "chat" : "collapsed")
-    if (mode === "chat" && !allowChat) setMode(allowVoice ? "voice" : "collapsed")
-  }, [interaction, mode, allowVoice, allowChat])
 
   const accent = palette.accent
   const iframe = `<iframe
@@ -93,57 +88,26 @@ export default function WebWidgetPage() {
         }
       />
 
-      {/* Agent + preview-mode row */}
-      <div className="flex items-end justify-between gap-4 border-b bg-background px-6 py-3 flex-wrap">
-        <div className="space-y-1.5 w-64">
-          <Label className="text-sm font-medium">
-            AI Agent <span className="text-destructive">*</span>
-          </Label>
-          <Select value={agentId} onValueChange={setAgentId}>
-            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {AGENTS.map((a) => (
-                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2 pb-0.5">
-          <span className="text-xs text-muted-foreground">Preview:</span>
-          <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
-            {([
-              { id: "collapsed", label: "Collapsed", on: true },
-              { id: "voice", label: "Voice", on: allowVoice },
-              { id: "chat", label: "Chat", on: allowChat },
-            ] as const).map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                disabled={!m.on}
-                onClick={() => setMode(m.id)}
-                className={cn(
-                  "rounded px-2.5 h-6 text-xs font-medium transition-colors whitespace-nowrap",
-                  mode === m.id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
-                  !m.on && "opacity-40 cursor-not-allowed",
-                )}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 2-pane: preview + one config scroll */}
+      {/* config (left, main scroll) + live preview (right, pinned) */}
       <div className="flex flex-1 min-h-0">
-        <div className="flex-1 flex items-center justify-center bg-muted/20 p-8 min-w-0 overflow-auto">
-          <WidgetPreview mode={mode} accent={accent} cta={cta} greeting={greeting} allowChat={allowChat} />
-        </div>
+        <div className="flex-1 min-w-0 overflow-y-auto p-6 space-y-6">
+          {/* Agent picker — leads, like /deploy/code */}
+          <div className="space-y-1.5 w-full max-w-[360px]">
+            <Label className="text-sm font-medium">
+              Select Agent <span className="text-destructive">*</span>
+            </Label>
+            <Select value={agentId} onValueChange={setAgentId}>
+              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {AGENTS.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <aside className="w-80 shrink-0 border-l bg-background overflow-y-auto p-4 space-y-6">
           {/* Appearance */}
-          <section className="space-y-3">
+          <section className="space-y-3 max-w-[360px]">
             <GroupLabel icon={Palette} label="Appearance" />
             <Field label="Color">
               <div className="flex flex-wrap gap-2">
@@ -173,7 +137,7 @@ export default function WebWidgetPage() {
           </section>
 
           {/* Text */}
-          <section className="space-y-3">
+          <section className="space-y-3 max-w-[360px]">
             <GroupLabel icon={Type} label="Text" />
             <Field label="Button label"><Input value={cta} onChange={(e) => setCta(e.target.value)} /></Field>
             <Field label="Greeting"><Input value={greeting} onChange={(e) => setGreeting(e.target.value)} /></Field>
@@ -183,7 +147,7 @@ export default function WebWidgetPage() {
           </section>
 
           {/* Behavior */}
-          <section className="space-y-3">
+          <section className="space-y-3 max-w-[360px]">
             <GroupLabel icon={Settings2} label="Behavior" />
             <Field label="Interaction mode">
               <Select value={interaction} onValueChange={(v) => setInteraction(v as InteractionMode)}>
@@ -209,6 +173,34 @@ export default function WebWidgetPage() {
               </Link>.
             </p>
           </section>
+        </div>
+
+        {/* Live preview — pinned right, 420px (Figma 04_Deploy_Future_scope) */}
+        <aside className="hidden lg:flex w-[420px] shrink-0 flex-col border-l bg-muted/20">
+          <div className="flex items-center justify-between border-b px-4 py-3">
+            <span className="text-xs font-medium text-muted-foreground">Live preview</span>
+            <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
+              {([
+                { id: "widget", label: "Widget" },
+                { id: "collapsed", label: "Collapsed" },
+              ] as const).map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setMode(m.id)}
+                  className={cn(
+                    "rounded px-2.5 h-6 text-xs font-medium transition-colors whitespace-nowrap",
+                    mode === m.id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-1 items-center justify-center p-5">
+            <WidgetPreview mode={mode} accent={accent} cta={cta} greeting={greeting} allowVoice={allowVoice} allowChat={allowChat} />
+          </div>
         </aside>
       </div>
     </div>
@@ -218,9 +210,9 @@ export default function WebWidgetPage() {
 // ─── preview ─────────────────────────────────────────────────────────────────
 
 function WidgetPreview({
-  mode, accent, cta, greeting, allowChat,
+  mode, accent, cta, greeting, allowVoice, allowChat,
 }: {
-  mode: PreviewMode; accent: string; cta: string; greeting: string; allowChat: boolean
+  mode: PreviewMode; accent: string; cta: string; greeting: string; allowVoice: boolean; allowChat: boolean
 }) {
   if (mode === "collapsed") {
     return (
@@ -236,44 +228,39 @@ function WidgetPreview({
     )
   }
 
-  if (mode === "chat") {
-    return (
-      <div className="flex w-[360px] flex-col rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
-        <div className="flex items-center gap-2 border-b px-4 py-3">
-          <span className="h-6 w-6 rounded-full" style={{ background: `radial-gradient(circle at 35% 30%, #fff8, ${accent})` }} />
-          <span className="text-sm font-medium">Agora Agent</span>
-        </div>
-        <div className="flex flex-col gap-2 p-4 h-[320px]">
-          <div className="self-start max-w-[80%] rounded-2xl rounded-tl-sm bg-muted px-3 py-2 text-sm">{greeting}</div>
-          <div className="self-end max-w-[80%] rounded-2xl rounded-tr-sm px-3 py-2 text-sm text-white" style={{ backgroundColor: accent }}>
-            What are your support hours?
-          </div>
-        </div>
-        <div className="flex items-center gap-2 border-t px-3 py-2">
-          <div className="flex-1 rounded-full bg-muted px-3 py-2 text-xs text-muted-foreground">Type a message…</div>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full text-white" style={{ backgroundColor: accent }}>
+  // widget — agent glow + greeting + combined Mic/End/Chat input bar
+  return (
+    <div className="relative flex h-[420px] w-[375px] flex-col items-center overflow-hidden rounded-xl border border-border bg-background shadow-xl">
+      <div
+        className="absolute left-1/2 top-[130px] h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
+        style={{ backgroundColor: accent, opacity: 0.35 }}
+      />
+      <div className="flex flex-1 flex-col items-center justify-center gap-5 px-10 text-center">
+        <div
+          className="h-20 w-20 rounded-full"
+          style={{ background: `radial-gradient(circle at 35% 30%, #ffffffcc, ${accent} 60%, #1b1b2b)`, boxShadow: `0 0 32px ${accent}66` }}
+        />
+        <p className="text-base leading-snug text-foreground">{greeting}</p>
+      </div>
+      <div className="flex items-center gap-2 pb-8">
+        {allowVoice && (
+          <span className="flex h-9 items-center gap-2 rounded-full bg-muted px-4">
+            <Mic className="h-4 w-4" />
+            <span className="flex items-end gap-0.5">
+              {[5, 9, 6, 11, 4].map((h, i) => (
+                <span key={i} className="w-0.5 rounded-full bg-foreground/40" style={{ height: `${h}px` }} />
+              ))}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </span>
+        )}
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+          <X className="h-4 w-4" />
+        </span>
+        {allowChat && (
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border">
             <MessageSquare className="h-4 w-4" />
           </span>
-        </div>
-      </div>
-    )
-  }
-
-  // voice
-  return (
-    <div className="flex w-[300px] flex-col items-center gap-5 rounded-2xl border border-border bg-card p-6 shadow-xl">
-      <div
-        className="h-24 w-24 rounded-full"
-        style={{ background: `radial-gradient(circle at 35% 30%, #ffffffcc, ${accent} 60%, #1b1b2b)`, boxShadow: `0 0 32px ${accent}66` }}
-      />
-      <p className="text-center text-sm text-foreground">{greeting}</p>
-      <div className="flex items-center gap-2">
-        <span className="flex items-center gap-1 rounded-full bg-muted px-3 py-1.5">
-          <Mic className="h-4 w-4" /> <ChevronDown className="h-3 w-3" />
-        </span>
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted"><X className="h-4 w-4" /></span>
-        {allowChat && (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted"><MessageSquare className="h-4 w-4" /></span>
         )}
       </div>
     </div>
