@@ -63,7 +63,6 @@ function contextChipFor(pathname: string): string | undefined {
   if (pathname.startsWith("/deploy/batch-calls/new")) return "New batch"
   if (pathname === "/monitor") return "Monitor"
   if (pathname === "/calls") return "Call History"
-  if (pathname === "/chats") return "Chat History"
   if (pathname === "/deploy/inbound") return "Inbound"
   if (pathname === "/deploy/phone-numbers") return "Phone Numbers"
   if (pathname.startsWith("/deploy/phone-numbers/")) return "Phone Number"

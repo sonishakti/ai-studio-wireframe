@@ -64,8 +64,8 @@ const NAV_BUILD: NavItem[] = [
   { label: "Deploy", href: "/deploy", icon: Rocket },
 ]
 
-// Observe — a single Monitor hub (tabs: Overview · Call History · Chat History ·
-// Sessions, plus an "RTE usage →" outlink to /billing/usage). Sessions = agent
+// Observe — a single Monitor hub (tabs: Overview · Call History · Sessions,
+// plus an "RTE usage →" outlink to /billing/usage). Sessions = agent
 // conversation runs (Conversational AI), not RTC telemetry.
 const NAV_OBSERVE: NavItem[] = [
   { label: "Monitor", href: "/monitor", icon: LineChart },
@@ -88,8 +88,8 @@ function isItemActive(itemHref: string, pathname: string): boolean {
     return pathname === "/deploy" || pathname.startsWith("/deploy/")
   }
   if (itemHref === "/monitor") {
-    // Monitor hub spans Overview (/monitor) + Call/Chat History + agent Sessions.
-    return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/chats") || pathname.startsWith("/sessions")
+    // Monitor hub spans Overview (/monitor) + Call History + agent Sessions.
+    return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/sessions")
   }
   return pathname === itemHref || pathname.startsWith(itemHref + "/")
 }

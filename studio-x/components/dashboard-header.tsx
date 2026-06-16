@@ -35,7 +35,6 @@ const LABELS: Record<string, string> = {
   "web-widget": "Web Widget",
   create: "New Batch",
   calls: "Call History",
-  chats: "Chat History",
   monitor: "Monitor",
   sessions: "Sessions",
   deploy: "Deploy",

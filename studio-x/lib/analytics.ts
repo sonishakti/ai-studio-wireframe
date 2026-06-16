@@ -37,7 +37,6 @@ export const Events = {
   // ── Insights (wayfinding the Insights group solves) ────────────────────────
   monitor_viewed:             "monitor_viewed",
   calls_viewed:               "calls_viewed",
-  chats_viewed:               "chats_viewed",
   sessions_viewed:            "sessions_viewed",
   usage_viewed:               "usage_viewed",
   insights_cross_link_clicked:"insights_cross_link_clicked",  // Monitor → Usage etc.

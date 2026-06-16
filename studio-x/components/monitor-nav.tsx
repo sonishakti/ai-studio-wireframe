@@ -7,13 +7,13 @@ import { ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Local nav for the global Monitor hub. The sidebar collapsed Monitor /
-// Call History / Chat History into a single "Monitor" entry; these tabs are
-// the cross-deployment rollup. Each surface is also scoped inside a campaign.
+// Call History into a single "Monitor" entry; these tabs are the
+// cross-deployment rollup. Each surface is also scoped inside a campaign.
 // "Sessions" = agent conversation sessions (Conversational AI), not RTC telemetry.
+// (Chat History removed 2026-06-16 — not approved by product.)
 const TABS = [
   { label: "Agents Overview", href: "/monitor" },
   { label: "Call History", href: "/calls" },
-  { label: "Chat History", href: "/chats" },
   { label: "Sessions", href: "/sessions" },
 ]
 

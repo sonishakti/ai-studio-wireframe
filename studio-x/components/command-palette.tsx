@@ -6,7 +6,7 @@ import {
   Bot, Radio, Puzzle, Phone, Megaphone, PhoneCall, Activity, Gauge,
   KeyRound, Shield, SlidersHorizontal, Home, FolderKanban, CreditCard, Store,
   Settings, Code2, HelpCircle, Bell, Search, Plus, ArrowRight,
-  Sparkles, LineChart, MessageSquare,
+  Sparkles, LineChart,
 } from "lucide-react"
 import {
   CommandDialog,
@@ -40,7 +40,6 @@ const COMMANDS: Command[] = [
   { id: "go-camp",       label: "Batch Calls",              href: "/deploy/batch-calls",                       icon: Megaphone,          group: "Pages" },
   { id: "go-monitor",    label: "Monitor",                  href: "/monitor",                         icon: LineChart,          group: "Pages", keywords: ["analytics", "dashboard", "insights", "metrics"] },
   { id: "go-calls",      label: "Call History",             href: "/calls",                           icon: PhoneCall,          group: "Pages", keywords: ["call history", "call log", "calls"] },
-  { id: "go-chats",      label: "Chat History",             href: "/chats",                           icon: MessageSquare,      group: "Pages", keywords: ["chat history", "messages", "whatsapp", "sms", "conversations"] },
   { id: "go-sessions",   label: "Sessions",                 href: "/sessions",                        icon: Radio,              group: "Pages", keywords: ["session history", "agent sessions", "conversations"] },
   { id: "go-deploy",     label: "Deploy",                   href: "/deploy",                          icon: Activity,           group: "Pages", keywords: ["go live", "publish", "ship"] },
 
