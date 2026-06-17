@@ -37,7 +37,7 @@ const LABELS: Record<string, string> = {
   calls: "Call History",
   monitor: "Monitor",
   sessions: "Sessions",
-  deploy: "Deploy",
+  deploy: "Go Live",
   widget: "Web Widget",
   whatsapp: "WhatsApp",
   sms: "SMS",

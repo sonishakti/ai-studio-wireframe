@@ -1,27 +1,18 @@
-import { DeployChooser, DeployChooserFooter } from "@/components/deploy-chooser"
 import { DeployNav } from "@/components/deploy-nav"
+import { GoLiveHome } from "@/components/go-live-home"
 
 export const metadata = {
-  title: "Deploy",
+  title: "Go Live",
 }
 
+// Hub Overview = the "Go Live" first-run home (2026-06-17 activation realignment):
+// the default agent is already live; the user hears it work, then puts it on
+// real traffic. The believe-then-scale flow lives in <GoLiveHome />.
 export default function DeployHubPage() {
   return (
     <div className="flex flex-col flex-1">
       <DeployNav />
-
-      <main className="flex-1 p-6">
-        <div className="mx-auto w-full max-w-4xl space-y-6">
-          <div className="space-y-1">
-            <h2 className="text-base font-semibold">Pick how your agent goes live</h2>
-            <p className="text-sm text-muted-foreground">
-              Put your agent on a phone number, your website, or your own app.
-            </p>
-          </div>
-          <DeployChooser variant="page" />
-          <DeployChooserFooter />
-        </div>
-      </main>
+      <GoLiveHome />
     </div>
   )
 }

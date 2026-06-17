@@ -19,14 +19,25 @@
 // ─── Event names — single source of truth ────────────────────────────────────
 
 export const Events = {
-  // ── Activation funnel (north star) ─────────────────────────────────────────
+  // ── Activation funnel ──────────────────────────────────────────────────────
+  // 2026-06-17 revenue realignment (LEARNINGS §20): the north star moved OFF
+  // agent_published — publishing an agent earns Agora $0 — and ONTO traffic on a
+  // live deployment. Revenue = minutes consumed → free tier exhausted → paid.
   signup_completed:           "signup_completed",
   project_created:            "project_created",
+  default_agent_provisioned:  "default_agent_provisioned",  // auto-agent live on signup
   agent_template_browsed:     "agent_template_browsed",
   agent_template_selected:    "agent_template_selected",
   agent_created:              "agent_created",
+  agent_intent_selected:      "agent_intent_selected",       // 1-tap "what should it do?" re-skin
+  web_test_call_started:      "web_test_call_started",        // ★ moment of belief (in-browser)
+  web_test_call_ended:        "web_test_call_ended",          // { duration_sec }
+  agent_published:            "agent_published",              // mid-funnel signal (no longer north star)
+  put_to_work_selected:       "put_to_work_selected",         // { channel: inbound|campaign|web }
+  deployment_went_live:       "deployment_went_live",         // ★ NORTH STAR — traffic on a live deployment
+  first_minutes_consumed:     "first_minutes_consumed",       // first billable conversation
+  free_tier_exhausted:        "free_tier_exhausted",          // ★ revenue gate — crossed 300 free min
   agent_test_started:         "agent_test_started",
-  agent_published:            "agent_published",       // ★ NORTH STAR
 
   // ── Telephony deployment ───────────────────────────────────────────────────
   phone_number_imported:      "phone_number_imported",

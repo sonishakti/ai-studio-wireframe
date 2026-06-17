@@ -41,12 +41,15 @@ function openCommandPalette() {
 
 // ─── nav structure ───────────────────────────────────────────────────────────
 //
-// 2026-06-05 IA (Vapi-informed, user-directed): three labeled groups rendered
-// with uppercase SidebarGroupLabel headers — BUILD · OBSERVE · MANAGE — with
-// Composer floating above and Search below. This REVERSES the earlier
-// "no section-label headers" / "'Observe' header rejected" calls (CLAUDE.md).
-// Build folds in the whole make-and-launch arc: Agents · Integrations ·
-// Phone Numbers · Campaign.
+// 2026-06-05 IA: three labeled groups with uppercase SidebarGroupLabel headers —
+// BUILD · OBSERVE · MANAGE — Composer floating above, Search below.
+//
+// 2026-06-17 activation-revenue realignment (LEARNINGS §20): the center of
+// gravity moved from building agents to getting live traffic. "Go Live" is now
+// BUILD #1 and the app root; Agents is DEMOTED to a library beneath it. The agent
+// is the engine, not the entry point — it's auto-provisioned and edited on demand
+// from inside a deployment. Revenue = minutes on a live deployment, not a
+// published artifact.
 
 type NavItem = {
   label: string
@@ -55,13 +58,13 @@ type NavItem = {
   badge?: string
 }
 
-// Build — the authoring workspace. "Deploy" is one destination for the whole
-// go-live surface (Overview · Campaigns · Phone Numbers · Web Widget · API & SDK),
-// replacing the old separate Phone Numbers + Campaign items (2026-06-05, Opt 3).
+// Build — the make-and-launch arc, led by Go Live. "Go Live" is the deploy hub
+// (Overview/first-run home · Inbound · Batch Calls · Phone Numbers · Web Widget ·
+// Code); Agents is the reusable Stack+Persona library; Integrations are KB/MCP.
 const NAV_BUILD: NavItem[] = [
+  { label: "Go Live", href: "/deploy", icon: Rocket },
   { label: "Agents", href: "/agents", icon: Bot },
   { label: "Integrations", href: "/integrations", icon: Library },
-  { label: "Deploy", href: "/deploy", icon: Rocket },
 ]
 
 // Observe — a single Monitor hub (tabs: Overview · Call History · Sessions,
@@ -156,7 +159,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/agents">
+              <Link href="/deploy">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Sparkles className="h-4 w-4" />
                 </div>
@@ -180,7 +183,7 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Build — Agents · Integrations · Phone Numbers · Campaign */}
+        {/* Build — Go Live (lead) · Agents · Integrations */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Build</SidebarGroupLabel>
           <SidebarMenu>

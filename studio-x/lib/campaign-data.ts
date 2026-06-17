@@ -119,6 +119,11 @@ export interface Agent {
   knowledge: string[]
   /** Attached MCP/tool/connector ids (Integrations › MCP/Connectors). */
   actions: string[]
+  /** One-line role descriptor shown on the Go Live home. */
+  role?: string
+  /** Auto-provisioned default agent — exists & live for every new account so the
+   *  user can talk to a working agent before building anything (2026-06-17). */
+  isDefault?: boolean
 }
 
 /** Speed-vs-cost first: each preset writes sensible vendor defaults; every
@@ -156,6 +161,24 @@ function stackFor(preset: StackPreset, modality: AgentStack["modality"] = "voice
 }
 
 export const AGENTS: Agent[] = [
+  // Auto-provisioned on signup — live from minute one. The user talks to THIS
+  // agent before building anything (the moment of belief), then puts it to work
+  // on a channel. Reskinnable in one tap; fully editable later. (2026-06-17)
+  {
+    id: "agt_default",
+    name: "Aria",
+    role: "General assistant",
+    status: "live",
+    isDefault: true,
+    persona: {
+      personality: "Helpful, friendly, and clear — answers questions and gets things done.",
+      tone: "Friendly",
+      language: "en-US",
+    },
+    stack: stackFor("balanced"),
+    knowledge: [],
+    actions: [],
+  },
   {
     id: "agt_support_v2",
     name: "Support Bot v2",
@@ -205,6 +228,35 @@ export const AGENTS: Agent[] = [
 
 export function getAgent(id: string): Agent | undefined {
   return AGENTS.find((a) => a.id === id)
+}
+
+/** The auto-provisioned default agent (Aria) — live for every new account. */
+export function getDefaultAgent(): Agent {
+  return AGENTS.find((a) => a.isDefault) ?? AGENTS[0]
+}
+
+/** Compact "vendor · vendor · vendor" summary of an agent's stack. */
+export function stackSummary(a: Agent): string {
+  return `${a.stack.llm.model} · ${a.stack.asr.model} · ${a.stack.tts.voice}`
+}
+
+// ─── Plan usage (free-tier meter) ────────────────────────────────────────────
+//
+// Agora bills per minute; the free tier is 300 min/month (LEARNINGS §8). The Go
+// Live home surfaces this from minute one: billing health is a retention lever
+// (H5 bill-shock), and the free tier is exactly what a first campaign burns
+// through to reach PAID usage — the revenue gate the activation funnel now ends on.
+
+export interface PlanUsage {
+  plan: string
+  freeMinutesIncluded: number
+  freeMinutesUsed: number
+}
+
+export const PLAN_USAGE: PlanUsage = {
+  plan: "Free",
+  freeMinutesIncluded: 300,
+  freeMinutesUsed: 18,
 }
 
 // ─── Status display ──────────────────────────────────────────────────────────

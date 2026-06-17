@@ -4,6 +4,8 @@
 **Question being answered:** Does the new Studio_X flow actually move users from signup to first production agent faster than the old Console↔Studio split?
 **Baseline:** [LEARNINGS.md §2](../LEARNINGS.md) — current funnel has 93% drop at the Console↔Studio seam (Login → Agent-creation started). North-star: Signup → First Agent Published.
 
+> ⚠️ **Superseded 2026-06-17 (see [LEARNINGS.md §20](../LEARNINGS.md)).** The north star moved off "First Agent Published" (earns Agora $0) onto **First live deployment carrying traffic → first paid usage** — revenue = minutes consumed. Stages S1–S3 below still describe the *belief* moment (now a pre-provisioned default agent talked-to in-browser); the success line now extends past "published" to **Connect → Consume → Convert**. The build lives in `studio-x/components/go-live-home.tsx`.
+
 This is a wireframe. We can't measure literal seconds yet. We can measure **structural cost**: clicks, screens, mode-switches, dead-ends. Those proxies make a falsifiable prediction the live product will then confirm or refute.
 
 ---

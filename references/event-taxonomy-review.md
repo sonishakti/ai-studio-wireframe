@@ -4,6 +4,8 @@
 **Source:** [Notion — Agora AI Agent Studio KPI Strategy](https://www.notion.so/shaktisoni/Agora-AI-Agent-Studio-KPI-Strategy-for-Self-Service-Lead-ROI-350d34ba04f980ad9e17cbb4c3b12aae)
 **Reviewer lens:** Maps onto [measurement-framework.md](measurement-framework.md) and the [LEARNINGS.md](../LEARNINGS.md) baseline (93% drop at Console↔Studio seam, H1 v3 target: published-and-kept-7-days ≥ 60%).
 
+> ⚠️ **Realigned 2026-06-17 (see [LEARNINGS.md §20](../LEARNINGS.md)).** Activation north star moved off `agent_published` onto live traffic. New canonical events (in `studio-x/lib/analytics.ts`): `default_agent_provisioned`, `web_test_call_started` / `web_test_call_ended` (belief), `agent_intent_selected`, `put_to_work_selected`, **`deployment_went_live`** (★ north star), `first_minutes_consumed`, `free_tier_exhausted` (★ revenue gate). `agent_published` is demoted to a mid-funnel signal.
+
 ---
 
 ## TL;DR

@@ -13,7 +13,7 @@
 
 Studio_X = IA + UX wireframe merging **Agora Console** (ops control plane: projects, credentials, billing, usage, extensions) and **Conv AI Studio** (where developers design and publish voice AI agents) into one surface. **Asymmetric merge** — Studio is the chassis, Console grafts in. RTE (voice/video/streaming/chat/signaling) is preserved but no longer the center of gravity.
 
-This is a **funnel rescue project** that happens to require product consolidation. The ~93% drop at the Console↔Studio seam (LEARNINGS §2) is the reason it exists. North-star: Signup → First Agent Published.
+This is a **funnel rescue project** that happens to require product consolidation. The ~93% drop at the Console↔Studio seam (LEARNINGS §2) is the reason it exists. **North-star (2026-06-17 realignment): Signup → First live deployment carrying traffic → first paid usage.** This supersedes the old "Signup → First Agent Published" — publishing an agent earns Agora $0; revenue = minutes consumed on a live deployment. See LEARNINGS §20 (2026-06-17).
 
 ## Read order
 
@@ -26,6 +26,16 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ## Current sidebar (LOCKED 2026-06-05 — labeled groups; Build folds in deploy)
 
+> ⚠️ **2026-06-17 — ACTIVATION-REVENUE REALIGNMENT (built).** Revenue = minutes on a
+> live deployment, not a published agent. Center of gravity moved from "build an agent"
+> to "get live traffic, fast." **"Go Live"** (the deploy hub) is now BUILD #1 and the
+> app root (`/` → `/deploy`); **Agents is demoted** to a reusable library. A **default
+> agent (Aria) is auto-provisioned and live** on signup — the first-run home is *talk to
+> it, then put it to work* (believe-then-scale), **campaign as the flagship channel**.
+> Built in `components/go-live-home.tsx`. Keeps 06-11 intact (Agent/Deployment split;
+> Batch Calls = outbound). See LEARNINGS §20 (2026-06-17). Text below is superseded
+> where it conflicts.
+
 > ⚠️ **2026-06-11 — IA REVAMP IN FLIGHT (blueprint signed off, build pending).** The
 > agent splits into **Agent = reusable Stack+Persona** (no prompt/vars) and
 > **Deployment = the whole prompt + custom code + CSV-derived dynamic vars**. Deploy
@@ -37,7 +47,7 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ```
 Composer
-BUILD     Agents · Integrations · Deploy
+BUILD     Go Live · Agents · Integrations   (2026-06-17: Go Live = deploy hub @ /deploy, now #1 + app root; Agents demoted to a library)
 OBSERVE   Monitor   (hub: Overview · Call History · Chat History · Sessions · RTE usage →)
 MANAGE    Project Settings · Realtime Services · Vendor Credentials
 Search ⌘K
@@ -47,7 +57,7 @@ Rendered as three labeled groups with **uppercase `SidebarGroupLabel` headers**
 (BUILD · OBSERVE · MANAGE), Composer floating above and Search below. Build folds
 in the full make-and-launch arc (agent → integrations → number → campaign);
 **"Campaign" is singular** — the deployment surface. Monitor gains an "RTE usage →"
-outlink to `/billing/usage`. Root `/` → `/agents`. **2026-06-05 reversal: section
+outlink to `/billing/usage`. Root `/` → `/deploy` (2026-06-17; was `/agents`). **2026-06-05 reversal: section
 labels are BACK, overriding the earlier "no headers" + "'Observe' header rejected"
 locks — per explicit user direction (Vapi-informed).** Prior rationale in
 `HANDOFF-2026-06-02.md` §3.
@@ -97,6 +107,11 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 
 ## Don't re-litigate
 
+- **⚠️ 2026-06-17 realignment (overrides conflicting items below) — see LEARNINGS §20:**
+  (1) **North star = First live deployment carrying traffic → first paid usage** (was "First Agent Published"; publishing earns Agora $0). The funnel ended right where revenue starts.
+  (2) **"Go Live" is BUILD #1 and the app root** (`/` → `/deploy`); **Agents is demoted** to a reusable library, never the entry point. The agent is the engine — auto-provisioned, edited on demand from inside a deployment.
+  (3) **A default agent (Aria) is auto-provisioned & live on signup.** First-run = talk-to-it (in-browser, free) → put-it-to-work, **campaign as the flagship channel**. Don't reintroduce a build-an-agent-first wall.
+  Keeps 06-11 intact (Agent = Stack+Persona / Deployment = prompt+vars; Batch Calls = outbound).
 - **⚠️ 2026-06-11 reversals (override the matching items below) — see `references/ia-revamp-agent-vs-deployment.md`:**
   (1) **One agent ↔ one channel** — multichannel orchestration dropped (was "multichannel is the architecture").
   (2) **Campaigns → Batch Calls** (outbound) — inbound is a peer Deploy surface (was "Campaign = the deployment surface").

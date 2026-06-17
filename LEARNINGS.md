@@ -22,7 +22,7 @@ This is not a UX consolidation project. It is a **funnel rescue project** that h
 | Login → agent-creation started | **~93%** (only 686 of ~10,113) | **Console ↔ Studio seam** |
 | Create-Agent opened → published | **77.7%** (153 of 686) | Studio-internal |
 
-**Two of the three biggest leaks sit at the seam between the two products.** That seam *is* the redesign target. North-star metric: **Signup → First Agent Published.** If 10% of the seam leak is recovered, that's ~8,500 more activated accounts per cohort — the business case.
+**Two of the three biggest leaks sit at the seam between the two products.** That seam *is* the redesign target. ~~North-star metric: **Signup → First Agent Published.**~~ **Superseded 2026-06-17 → Signup → First live deployment carrying traffic → first paid usage** (publishing earns $0; revenue = minutes on a live deployment; see §20). If 10% of the seam leak is recovered, that's ~8,500 more activated accounts per cohort — and with the agent pre-provisioned (no build-first wall), each lands one step from billable usage.
 
 ---
 
@@ -424,12 +424,14 @@ State inventory across 5 surfaces. **12 top edge cases** with UI flows specified
 ## 17. Success metrics
 
 ### North star
-- **Signup → First Agent Published** conversion rate (end-to-end across the three leaks)
+- **(2026-06-17) Signup → First live deployment carrying traffic → first paid usage.** Revenue = minutes consumed on a live deployment; "published" earns Agora $0, so it is now a mid-funnel signal, not the success line. See §20 (2026-06-17).
+- ~~Signup → First Agent Published~~ — *superseded; the funnel ended right where revenue starts.*
 
-### Per-stage funnel recovery
+### Per-stage funnel recovery (2026-06-17 reframe: Land→Believe→Connect→Consume→Convert)
 - Signup → Account activated (Leak 1)
-- Login → Create-Agent opened (Leak 2 — the seam)
-- Create-Agent opened → Published (Leak 3)
+- Login → **default agent live + talked-to** (the old seam disappears — the agent is pre-provisioned)
+- Believe → **Connect** (put it on traffic: campaign / number / widget) ← the new activation line
+- Connect → **Consume** (first minutes) → **Convert** (free 300 min exhausted / upgrade) ← the revenue gate
 
 ### Task-level quality
 - Time-to-App-ID
@@ -504,6 +506,7 @@ Next.js App Router · pnpm · i18n (`messages/`) · Playwright e2e · `instrumen
 | 2026-05-03 | 10-concept ideation round for evaluate + publish cliffs |
 | 2026-05-04 | Code-grounded blueprint revision — three-gateway API, 15 extension services, CashInfo polling, B3/B4 resolved, B8–B11 opened |
 | 2026-06-11 | **Agent/Deployment split (Fin.ai-informed)** — Agent = reusable Stack+Persona (no prompt/vars); Deployment = the whole prompt + custom code + CSV-derived dynamic vars. Reverses 4 prior locks: (1) multichannel architecture → **one agent ↔ one channel**; (2) "Campaign = the deployment surface" → **Campaigns renamed Batch Calls** (outbound); (3) deploy-as-channel-hub → **deploy intent-first** (Inbound · Batch Calls · Phone Numbers · Embed/Code), surfaced up front; (4) prompt-in-agent → **prompt-in-deployment**. Create flow agent-first with deploy-target chosen up front. Dynamic vars auto-detected from CSV columns (kills the "declared in builder, valued at deploy" inversion). Stack configured speed-vs-cost first → vendor drill-down. Full blueprint: `references/ia-revamp-agent-vs-deployment.md`. |
+| 2026-06-17 | **Activation-revenue realignment (`/strategize`, new evidence: Agora monetizes usage, not creation).** The north star was measuring the wrong line — it ended at "First Agent Published," which earns Agora $0; revenue = minutes consumed on a *live* deployment. **New north star: Signup → First live deployment carrying traffic → first paid usage.** Funnel reframed Land→Believe→Connect→Consume→Convert→Retain. The sharper revenue argument: the **300 free min/month** mean a single test call is unmonetized, so the UI must drive *volume* — a **batch campaign** burns the free tier fast → paid. Built: (1) **"Go Live" promoted to BUILD #1 + app root** (`/` → `/deploy`); **Agents demoted** to a reusable library (engine, not entry point — edited on demand from a deployment); (2) **default agent "Aria" auto-provisioned & live on signup** (`getDefaultAgent()` in `campaign-data.ts`); (3) **Go Live first-run home** (`components/go-live-home.tsx`) = believe-then-scale: talk to Aria in-browser (<60s, free) + 1-tap intent re-skin → dominant "Put it to work" with **campaign as flagship**, free-minutes meter from minute one. Analytics north star moved off `agent_published` onto `deployment_went_live` / `first_minutes_consumed` / `free_tier_exhausted`. Reverses three of the recommended locks I myself proposed (agent-as-entry-point, publish-as-success, agents-list-as-root); **keeps 06-11 intact** (Agent/Deployment split; Batch Calls = outbound). User-directed; recommendations confirmed. |
 
 ---
 

@@ -34,7 +34,7 @@ export function DeployNav({ action }: { action?: React.ReactNode }) {
   return (
     <div className="border-b bg-background px-6">
       <div className="flex items-center justify-between gap-3 pt-4">
-        <h1 className="text-xl font-semibold tracking-tight">Deploy</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Go Live</h1>
         {action}
       </div>
       <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">

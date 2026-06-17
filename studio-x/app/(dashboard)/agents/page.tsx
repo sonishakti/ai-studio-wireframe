@@ -56,6 +56,7 @@ const TEMPLATES: Template[] = [
 ]
 
 const AGENTS = [
+  { id: "agt_default", name: "Aria",           description: "Your auto-provisioned default — live and ready", status: "live", model: "gpt-4o-mini",      calls: 42,    lastModified: "Provisioned for you" },
   { id: "agt_01", name: "Support Bot v2",      description: "Handles tier-1 support queries via phone", status: "live",   model: "gpt-4o",            calls: 12430, lastModified: "2 hours ago" },
   { id: "agt_03", name: "Appointment Setter",  description: "Schedules appointments and sends confirmations", status: "live",   model: "gpt-4o-mini",       calls: 3270,  lastModified: "5 min ago" },
   { id: "agt_05", name: "Survey Bot",          description: "Post-interaction CSAT surveys",          status: "live",   model: "gpt-4o-mini",       calls: 5601,  lastModified: "1 day ago" },
@@ -316,7 +317,7 @@ export default function AgentsPage() {
         description={
           showFirstRun
             ? "Import your agent or start with a pre-built template."
-            : "5 agents · click any row to edit."
+            : "Reusable agents behind your deployments. Your default is already live — manage extras here."
         }
         actions={
           <div className="flex items-center gap-2">

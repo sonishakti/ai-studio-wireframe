@@ -3,6 +3,15 @@
 > **Status:** Proposal for sign-off. Authored 2026-06-11. Blueprint only — no screens
 > built yet. Supersedes parts of `CLAUDE.md` (see §9 reversals). Source decisions:
 > user direction 2026-06-11 + Fin.ai research + Figma `Agora-Studio-X` hero frames.
+>
+> **2026-06-17 addendum (built, on top of this revamp):** the Agent/Deployment split and
+> Batch-Calls naming below **stand unchanged**. What changed is the *center of gravity* —
+> activation realigned to revenue (minutes on a live deployment, not a published agent).
+> The **Agent is demoted** from entry point to a reusable library (auto-provisioned default
+> "Aria," edited on demand from a deployment); **"Go Live" (this deploy hub) is now BUILD #1
+> and the app root**, and its Overview is a believe-then-scale first-run home
+> (`components/go-live-home.tsx`) with **campaign as the flagship channel**. See LEARNINGS
+> §20 (2026-06-17).
 
 ---
 
