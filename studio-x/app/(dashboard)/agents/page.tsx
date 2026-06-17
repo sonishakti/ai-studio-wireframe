@@ -317,7 +317,7 @@ export default function AgentsPage() {
         description={
           showFirstRun
             ? "Import your agent or start with a pre-built template."
-            : "Reusable agents behind your deployments. Your default is already live — manage extras here."
+            : "Your agents — click any row to edit."
         }
         actions={
           <div className="flex items-center gap-2">

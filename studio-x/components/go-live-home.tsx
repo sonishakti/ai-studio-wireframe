@@ -149,8 +149,7 @@ function FreeMinutesStrip() {
         <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {remaining.toLocaleString()} minutes left this month. Your first campaign turns these into
-        live conversations — that&apos;s when an agent starts earning its keep.
+        {remaining.toLocaleString()} minutes left this month. Calls and conversations use these minutes.
       </p>
     </div>
   )
@@ -257,19 +256,18 @@ function HeroTalk() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          Your agent is live
+          Ready to talk
         </div>
 
         <div className="mt-3 flex items-center gap-2">
           <h2 className="text-2xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
-          <Badge variant="default" className="text-xs">Live</Badge>
+          <Badge variant="default" className="text-xs">Ready</Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{role}</p>
         <p className="mt-1 font-mono text-xs text-muted-foreground">{stackSummary(DEFAULT_AGENT)}</p>
 
         <p className="mt-4 text-sm text-foreground/90">
-          We&apos;ve set up a working agent for you — no build required. Talk to it now, then point it
-          at real traffic.
+          No setup needed — talk to your agent now, then put it to work on calls or your website.
         </p>
 
         <div className="mt-5">
@@ -299,9 +297,9 @@ function HeroTalk() {
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
             {intent ? (
-              <>Aria is set up for <span className="text-foreground">{intent.label.toLowerCase()}</span>. One tap, no rebuild.</>
+              <>Set up for <span className="text-foreground">{intent.label.toLowerCase()}</span>. Change it anytime.</>
             ) : (
-              "Pick one to re-skin Aria instantly — or keep the general assistant."
+              "Pick a job to tailor it — or keep it general."
             )}
           </p>
         </div>
@@ -354,7 +352,7 @@ function HeroTalk() {
 
         {phase === "idle" ? (
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Runs in your browser — no phone number needed. Uses your free minutes.
+            No phone number needed — talk to it right here.
           </p>
         ) : (
           <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -404,7 +402,7 @@ function PutToWork({ agentParam }: { agentParam: string }) {
       <div className="space-y-1">
         <h3 className="text-base font-semibold">Put it to work</h3>
         <p className="text-sm text-muted-foreground">
-          Belief is free. Revenue starts when your agent carries real traffic — point it somewhere.
+          Put it on a calling campaign, a phone number, or your website.
         </p>
       </div>
 
@@ -420,11 +418,10 @@ function PutToWork({ agentParam }: { agentParam: string }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold">Launch a campaign</h4>
-            <Badge variant="secondary" className="text-xs">Fastest to results</Badge>
+            <Badge variant="secondary" className="text-xs">Recommended</Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Dial a list of contacts from a CSV. Hundreds of calls in minutes — the quickest way to
-            put your free minutes to work and reach real customers.
+            Upload a list of contacts and your agent calls each one — hundreds of calls in minutes.
           </p>
         </div>
         <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
