@@ -179,6 +179,17 @@ earns Agora money — is **outsourced to a third-party deploy of a starter repo*
 the user's *actual* agent is an unbuilt "Planned" feature. Our entire strategy is this exact path,
 built first. If leadership remembers one row of this document, it is this one.
 
+> **Second-pass confirmation (we asked their own AI).** We typed the new-user question *"How do I
+> put my agent on a phone number to take real calls?"* into the NG console's built-in assistant. It
+> replied: *"Configure telephony so the number routes inbound calls… **Assign or buy a phone number
+> in the console**, then connect it to the agent… or **look for** the project/telephony setup path
+> for your current console context."* **That flow does not exist** — navigating to
+> `staging-ng-console.agora.io/telephony` returns **"404 — The requested page could not be found."**
+> The console's primary wayfinding tool **hallucinates a telephony product that isn't built**, hedges
+> that it must "look for" the path, and **generated the entire answer twice** (a duplication bug).
+> This is the sharpest single piece of evidence that the experience is assembled feature-by-feature
+> without a grounded user journey.
+
 ### 2.5 Observability / monitoring (seeing what your agent did)
 
 | | Studio_X | NG console |
@@ -467,9 +478,43 @@ Captured live from `staging-ng-console.agora.io` on 2026-06-17. Black-box (UI on
 | A11 | **Capabilities** | Full Agora catalog as toggles (Intelligence · Media · Messaging & Signaling · Collaboration · Infrastructure); "Conversational AI Engine" is one toggle among 13+; cards say "Select a project to configure" even with a project selected. |
 | A12 | **Developers** | `.env` copy/download (App ID/Certificate); API Keys · Webhooks; **Generate Temp Token** UI button (we made temp tokens CLI-only). |
 | A13 | **Global** | Persistent **AI assistant rail** (~20% width) on every page with an identical 4-prompt BUILD/OBSERVE/CONFIGURE/LEARN template; **no ⌘K** command palette; "Loading projects…" persisted across pages. |
+| A14 | **Assistant live test** | Prompt: "How do I put my agent on a phone number to take real calls?" → answer describes a **telephony / buy-a-number-in-console flow that doesn't exist**, hedges ("look for the telephony setup path"), and **duplicated the full answer**. |
+| A15 | **Negative-space check** | `/telephony` → **"404 — The requested page could not be found"** (confirms A14 is a hallucination). Accessibility spot-check of Home via the a11y tree: **multiple icon buttons expose no accessible name** (WCAG 4.1.2). |
 
-*Screenshots of A1–A13 were captured during the walkthrough and are available on request for a slide
+*Screenshots of A1–A15 were captured during the walkthrough and are available on request for a slide
 appendix.*
+
+---
+
+## 9. Re-audit note (second pass) — confidence & limitations
+
+This document was re-audited against its own evidence. The second pass **closed three gaps** and
+**names what it still cannot prove** — stated openly because a benchmarking doc that hides its seams
+isn't trustworthy.
+
+**Closed in the second pass (now first-hand evidence, not inference):**
+1. **Assistant quality** — previously we critiqued only its canned framing copy. We now have a live
+   response that **hallucinates a non-existent telephony flow** (Appendix A14).
+2. **"No telephony surface" was inferred from the sidebar** — now **confirmed** by a direct `/telephony`
+   **404** (A15).
+3. **Accessibility was "not audited"** — a spot-check now records **unlabeled icon buttons** (A15).
+
+**Still open (do not overclaim):**
+- We observed their **empty beta**, never a **populated, in-use** state — so their empty/loading states
+  may improve with real data. Our side is a designed-populated wireframe; the comparison is partly
+  *empty-beta vs. designed-intent*.
+- Neither side's in-browser **test call was actually placed**; latency/quality is unverified for both.
+- The Vercel path was **read, not timed end-to-end**.
+- **Competitor times** (§4) are from prior research, not freshly benchmarked.
+- This is a **single snapshot** of a fast-moving staging beta, and **no mobile/responsive** pass was run
+  on either side.
+
+**The strongest counter-argument, steelmanned:** the NG console may be **deliberately scoped as an
+administrative console for existing RTC customers** who already carry traffic — in which case "no
+activation path" is a *scoping choice*, not a failure. Two things hold even if so: (a) a wayfinding AI
+that invents non-existent pages is a defect under any scope; and (b) Agora's funnel data (§1) says the
+**business problem is activation**, so an admin-first console optimizes the wrong thing. The §7 test
+plan is how we settle this with users rather than argument.
 
 ---
 
