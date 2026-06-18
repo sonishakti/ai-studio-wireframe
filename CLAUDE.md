@@ -1,6 +1,6 @@
 # Studio_X — Project memory
 
-> Auto-loaded each session. Full handoff is in `HANDOFF-2026-06-02.md` (latest); this file is the 60-second orientation so a fresh chat doesn't re-derive context.
+> Auto-loaded each session. Full handoff is in `HANDOFF-2026-06-18.md` (latest — what just shipped + what's next; older: `HANDOFF-2026-06-02.md`); this file is the 60-second orientation so a fresh chat doesn't re-derive context.
 
 ## Live preview
 
@@ -17,7 +17,7 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ## Read order
 
-1. `HANDOFF-2026-06-02.md` — latest state, commits, open work (§5), gap inventory
+1. `HANDOFF-2026-06-18.md` — **latest** state, commits, deploy, the shipped Diagnostics feature + the next slice (§4); `HANDOFF-2026-06-02.md` is the prior one
 2. `LEARNINGS.md` — strategic frame, funnel data, personas, hypothesis stack, decision log (paid for in research — **don't re-litigate**)
 3. `references/ia-mapping.md` — Console → Studio 56/56 URL coverage
 4. `references/sitemap.md` — original Agora Console structure
