@@ -106,19 +106,40 @@ export function GoLiveHome() {
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <div className="mx-auto w-full max-w-5xl space-y-6">
-        <FreeMinutesStrip />
-        <HeroTalk />
+      <div className="mx-auto w-full max-w-5xl space-y-8">
+        <HomeHeader />
+
+        {/* Get started — believe-then-scale: hear the live agent, then deploy it. */}
+        <section className="space-y-3">
+          <SectionHeading
+            title="Get started"
+            hint={`Hear ${DEFAULT_AGENT.name} work, then put it on real traffic — no setup needed.`}
+          />
+          <HeroTalk />
+        </section>
+
         <PutToWork agentParam={agentParam} />
+
         <AlreadyLive />
       </div>
     </main>
   )
 }
 
+// ─── Section heading (shared rhythm across the home) ────────────────────────────
+
+function SectionHeading({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div className="space-y-1">
+      <h2 className="text-base font-semibold">{title}</h2>
+      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
+    </div>
+  )
+}
+
 // ─── Free-minutes meter ─────────────────────────────────────────────────────────
 
-function FreeMinutesStrip() {
+function HomeHeader() {
   const pct = Math.min(
     100,
     Math.round((PLAN_USAGE.freeMinutesUsed / PLAN_USAGE.freeMinutesIncluded) * 100),
@@ -126,31 +147,38 @@ function FreeMinutesStrip() {
   const remaining = PLAN_USAGE.freeMinutesIncluded - PLAN_USAGE.freeMinutesUsed
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="max-w-prose text-sm text-muted-foreground">
+          {DEFAULT_AGENT.name} is live and ready. Hear it work, then put it on real traffic.
+        </p>
+      </div>
+
+      {/* Compact free-minutes meter — ambient from the first screen. */}
+      <div className="w-full shrink-0 rounded-lg border border-border bg-card p-3 sm:w-64">
+        <div className="flex items-center justify-between gap-2">
           <Badge variant="secondary" className="text-xs">{PLAN_USAGE.plan} plan</Badge>
-          <p className="text-sm font-medium">
-            <span className="tabular-nums">{PLAN_USAGE.freeMinutesUsed}</span>
-            {" / "}
-            <span className="tabular-nums">{PLAN_USAGE.freeMinutesIncluded}</span> free minutes used
-          </p>
+          <Button variant="ghost" size="sm" asChild className="-mr-1.5 h-6 gap-1 px-1.5 text-xs">
+            <Link
+              href="/billing/usage"
+              onClick={() => track(Events.quota_warning_clicked, { meter: "free_minutes", pct_used: pct })}
+            >
+              Usage <ArrowRight className="h-3 w-3" />
+            </Link>
+          </Button>
         </div>
-        <Button variant="ghost" size="sm" asChild className="h-7 gap-1 text-xs">
-          <Link
-            href="/billing/usage"
-            onClick={() => track(Events.quota_warning_clicked, { meter: "free_minutes", pct_used: pct })}
-          >
-            View usage <ArrowRight className="h-3 w-3" />
-          </Link>
-        </Button>
+        <p className="mt-2 text-sm font-medium">
+          <span className="tabular-nums">{PLAN_USAGE.freeMinutesUsed}</span>
+          <span className="text-muted-foreground"> / {PLAN_USAGE.freeMinutesIncluded} free min</span>
+        </p>
+        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          {remaining.toLocaleString()} min left this month
+        </p>
       </div>
-      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        {remaining.toLocaleString()} minutes left this month. Calls and conversations use these minutes.
-      </p>
     </div>
   )
 }
@@ -399,12 +427,10 @@ function HeroTalk() {
 function PutToWork({ agentParam }: { agentParam: string }) {
   return (
     <section className="space-y-3">
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold">Put it to work</h3>
-        <p className="text-sm text-muted-foreground">
-          Put it on a calling campaign, a phone number, or your website.
-        </p>
-      </div>
+      <SectionHeading
+        title="Put it to work"
+        hint="Put it on a calling campaign, a phone number, or your website."
+      />
 
       {/* Flagship — outbound campaign (fastest path to paid volume) */}
       <Link
@@ -417,7 +443,7 @@ function PutToWork({ agentParam }: { agentParam: string }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold">Launch a campaign</h4>
+            <h3 className="text-sm font-semibold">Launch a campaign</h3>
             <Badge variant="secondary" className="text-xs">Recommended</Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -471,7 +497,7 @@ function SecondaryChannel({
         <Icon className="h-5 w-5 text-foreground" />
         <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
-      <h4 className="text-sm font-semibold">{title}</h4>
+      <h3 className="text-sm font-semibold">{title}</h3>
       <p className="text-xs text-muted-foreground">{desc}</p>
     </Link>
   )
