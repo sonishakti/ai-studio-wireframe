@@ -20,7 +20,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { DEPLOYMENTS, formatDuration } from "@/lib/campaign-data"
+import { DEPLOYMENTS, formatDuration, getDeployment } from "@/lib/campaign-data"
 import { CallDetailSheet, type CallDetail } from "@/components/call-detail-sheet"
 import { track, Events } from "@/lib/analytics"
 
@@ -145,6 +145,7 @@ export default function CallHistoryPage() {
       id: c.id, type: c.direction === "in" ? "Inbound" : "Outbound", from: c.from, to: c.to,
       campaign: c.campaignName, agent: c.agent, timestamp: c.timestamp, durationSec: c.durationSec,
       outcome: c.outcome, transcript: transcriptFor(c),
+      deploymentId: c.campaignId, agentId: getDeployment(c.campaignId)?.agentId,
     })
     setSheetOpen(true)
   }

@@ -15,6 +15,7 @@ const TABS = [
   { label: "Agents Overview", href: "/monitor" },
   { label: "Call History", href: "/calls" },
   { label: "Sessions", href: "/sessions" },
+  { label: "Diagnostics", href: "/monitor/diagnostics" },
 ]
 
 export function MonitorNav({ action }: { action?: React.ReactNode }) {

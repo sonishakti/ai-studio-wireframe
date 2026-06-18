@@ -52,6 +52,12 @@ export const Events = {
   usage_viewed:               "usage_viewed",
   insights_cross_link_clicked:"insights_cross_link_clicked",  // Monitor → Usage etc.
 
+  // ── Diagnostics (Observe → remediation loop) ───────────────────────────────
+  call_diagnosis_viewed:      "call_diagnosis_viewed",     // { call_id, criticals, warnings }
+  diagnostics_queue_viewed:   "diagnostics_queue_viewed",  // { unhealthy, degraded }
+  remediation_link_clicked:   "remediation_link_clicked",  // ★ did remediation route to a fix?
+  config_drift_detected:      "config_drift_detected",     // { level, id, ran_version, current_version }
+
   // ── Project switching ──────────────────────────────────────────────────────
   project_switcher_opened:    "project_switcher_opened",
   project_switched:           "project_switched",
@@ -108,6 +114,10 @@ export type EventPayloads = {
   project_switched:            { from_project_id: string; to_project_id: string }
   insights_cross_link_clicked: { from: "monitor" | "calls" | "usage"; to: "monitor" | "calls" | "usage" }
   quota_warning_clicked:       { meter: string; pct_used: number }
+  call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
+  diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
+  remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment"; target_id: string; section: string; surface: "call_sheet" | "queue" }
+  config_drift_detected:       { level: "agent" | "deployment"; id: string; ran_version: number; current_version: number }
   command_executed:            { command: string; surface: "palette" | "shortcut" }
   destructive_action_confirmed:{ resource: string; resource_id: string }
   destructive_action_canceled: { resource: string; resource_id: string }

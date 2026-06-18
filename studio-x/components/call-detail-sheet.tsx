@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
-  Copy, PhoneIncoming, PhoneOutgoing, Download, Play, Pause,
+  Copy, PhoneIncoming, PhoneOutgoing, Download, Play, Pause, Wrench, ShieldCheck,
 } from "lucide-react"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -16,6 +17,11 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { getAgent, getDeployment } from "@/lib/campaign-data"
+import { buildSignals, diagnoseCall, healthOf, fixHref, type Issue } from "@/lib/diagnostics"
+import { SeverityBadge } from "@/components/severity-badge"
+import { HealthDot } from "@/components/health-dot"
+import { track, Events } from "@/lib/analytics"
 
 export interface CallTranscriptTurn {
   speaker: "Agent" | "Customer"
@@ -33,6 +39,9 @@ export interface CallDetail {
   durationSec: number
   outcome: "Successful" | "Failed" | "Cannot Predict"
   transcript: CallTranscriptTurn[]
+  /** Deployment + agent this call ran on — lets the Diagnosis tab build fix links. */
+  deploymentId?: string
+  agentId?: string
 }
 
 const OUTCOME_BADGE: Record<CallDetail["outcome"], "default" | "destructive" | "secondary"> = {
@@ -138,6 +147,25 @@ function CallDetailBody({ call }: { call: CallDetail }) {
   const structured = React.useMemo(() => buildStructured(call), [call])
   const events = React.useMemo(() => buildEvents(call), [call])
 
+  // Diagnosis — rule-based, seeded by call id so it's stable. Resolves the
+  // deployment + agent so each issue's "Fix this" can deep-link to the config.
+  const deployment = React.useMemo(() => (call.deploymentId ? getDeployment(call.deploymentId) : undefined), [call])
+  const agent = React.useMemo(
+    () => (call.agentId ? getAgent(call.agentId) : deployment ? getAgent(deployment.agentId) : undefined),
+    [call, deployment],
+  )
+  const issues = React.useMemo(
+    () => diagnoseCall(buildSignals(call.id, { outcome: call.outcome, durationSec: call.durationSec }), { agent, deployment }),
+    [call, agent, deployment],
+  )
+  const health = healthOf(issues)
+  React.useEffect(() => {
+    track(Events.call_diagnosis_viewed, { call_id: call.id, criticals: health.criticals, warnings: health.warnings })
+    const drift = issues.find((i) => i.ruleId === "config_drift")
+    if (drift) track(Events.config_drift_detected, { level: drift.fixTarget.level, id: drift.fixTarget.id, ran_version: 0, current_version: 0 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [call.id])
+
   const avg = React.useMemo(() => {
     const n = latency.length || 1
     const sum = latency.reduce(
@@ -214,8 +242,19 @@ function CallDetailBody({ call }: { call: CallDetail }) {
       <Separator />
 
       {/* Tabs */}
-      <Tabs defaultValue="transcript" className="w-full">
-        <TabsList className="w-full justify-start">
+      <Tabs defaultValue="diagnosis" className="w-full">
+        <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="diagnosis" className="gap-1.5">
+            Diagnosis
+            {issues.length > 0 && (
+              <Badge
+                variant={health.criticals > 0 ? "destructive" : "warning"}
+                className="h-5 px-1.5 text-xs tabular-nums"
+              >
+                {issues.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="transcript">Transcript</TabsTrigger>
           <TabsTrigger value="structured">Structured Output</TabsTrigger>
           <TabsTrigger value="events" className="gap-1.5">
@@ -224,6 +263,32 @@ function CallDetailBody({ call }: { call: CallDetail }) {
           </TabsTrigger>
           <TabsTrigger value="latency">Latency</TabsTrigger>
         </TabsList>
+
+        {/* Diagnosis — rule-based issues + suggested fixes (the remediation atom) */}
+        <TabsContent value="diagnosis" className="mt-3 space-y-2.5">
+          {issues.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-12 text-center">
+              <ShieldCheck className="h-7 w-7 text-primary" />
+              <p className="text-sm font-medium">No issues detected</p>
+              <p className="text-xs text-muted-foreground">This call ran cleanly — no critical or warning signals.</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                <HealthDot status={health.status} />
+                <p className="text-sm font-medium">
+                  {[
+                    health.criticals ? `${health.criticals} critical` : null,
+                    health.warnings ? `${health.warnings} warning${health.warnings > 1 ? "s" : ""}` : null,
+                  ].filter(Boolean).join(" · ")}
+                </p>
+              </div>
+              {issues.map((issue) => (
+                <IssueCard key={issue.id} issue={issue} surface="call_sheet" />
+              ))}
+            </>
+          )}
+        </TabsContent>
 
         {/* Transcript */}
         <TabsContent value="transcript" className="mt-3 space-y-2">
@@ -422,6 +487,47 @@ function Field({
           )}
         </span>
       )}
+    </div>
+  )
+}
+
+/** One diagnosed issue: severity · root cause · suggested fix · deep-link to the
+ *  fix. Reused wherever an issue is shown (the call Diagnosis tab today). */
+export function IssueCard({ issue, surface }: { issue: Issue; surface: "call_sheet" | "queue" }) {
+  return (
+    <div className="rounded-lg border border-border p-3 space-y-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <SeverityBadge severity={issue.severity} />
+          <p className="text-sm font-medium truncate">{issue.title}</p>
+        </div>
+        {issue.turn != null && (
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+            turn {issue.turn}{issue.timestamp ? ` · ${issue.timestamp}` : ""}
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-muted-foreground">{issue.rootCause}</p>
+      <p className="text-xs text-foreground/80">
+        <span className="font-medium">Suggested fix: </span>{issue.suggestedFix}
+      </p>
+      <Button asChild variant="outline" size="sm" className="gap-1.5">
+        <Link
+          href={fixHref(issue.fixTarget)}
+          onClick={() =>
+            track(Events.remediation_link_clicked, {
+              rule_id: issue.ruleId,
+              severity: issue.severity,
+              level: issue.fixTarget.level,
+              target_id: issue.fixTarget.id,
+              section: issue.fixTarget.section,
+              surface,
+            })
+          }
+        >
+          <Wrench className="h-3.5 w-3.5" /> Fix this
+        </Link>
+      </Button>
     </div>
   )
 }

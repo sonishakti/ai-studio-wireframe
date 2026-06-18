@@ -124,7 +124,14 @@ export interface Agent {
   /** Auto-provisioned default agent — exists & live for every new account so the
    *  user can talk to a working agent before building anything (2026-06-17). */
   isDefault?: boolean
+  /** Current published config version. Diagnostics flags "config drift" when a
+   *  call ran an older version than this (defaults to CURRENT_CONFIG_VERSION). */
+  version?: number
 }
+
+/** The config version the console currently publishes. A call that ran an older
+ *  version surfaces a "config drift" diagnosis (Observe › Diagnostics). */
+export const CURRENT_CONFIG_VERSION = 45
 
 /** Speed-vs-cost first: each preset writes sensible vendor defaults; every
  *  field stays individually overridable in the Stack tab. */

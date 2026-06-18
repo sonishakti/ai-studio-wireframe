@@ -36,6 +36,7 @@ const LABELS: Record<string, string> = {
   create: "New Batch",
   calls: "Call History",
   monitor: "Monitor",
+  diagnostics: "Diagnostics",
   sessions: "Sessions",
   deploy: "Go Live",
   widget: "Web Widget",
