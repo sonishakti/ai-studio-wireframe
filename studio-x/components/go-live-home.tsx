@@ -39,15 +39,10 @@ import { track, Events } from "@/lib/analytics"
 /**
  * GoLiveHome — the "Go Live" home (Deploy hub Overview).
  * ────────────────────────────────────────────────────────────────
- * 2026-06-19 — /evaluate-driven simplification. The earlier segmented "test
- * mode" control read like an agent-version switcher (H4) and the card carried
- * three competing action clusters (H8). Now there is ONE clear hero action —
- * talk to Aria in-browser — with phone tests demoted to a quiet secondary line.
- *
- *   START   — Import agent (migrate) · New agent · or just test the live Aria
- *   TEST    — one primary: Talk to Aria; secondary: call my phone / dial a number
- *   ↳ TWEAK — quiet "Tailor it" chips + Edit agent
- *   DEPLOY  — 3 compact channel cards, visible without scrolling
+ * 2026-06-19 — Option E layout (wireframe-driven). The page IS the agent:
+ * Aria is the h1 (identity bar). Below it the two top-level jobs sit side by
+ * side as equal panels — TEST IT (talk + phone tests) and PUT IT LIVE (deploy
+ * channels) — so the whole job-to-be-done is visible in one glance.
  */
 
 // ─── 1-tap intent re-skin ──────────────────────────────────────────────────────
@@ -55,7 +50,6 @@ import { track, Events } from "@/lib/analytics"
 type Intent = {
   id: string
   label: string
-  role: string
   greeting: string
   you: string
   agent: string
@@ -68,7 +62,6 @@ const INTENTS: Intent[] = [
   {
     id: "support",
     label: "Customer support",
-    role: "Customer support agent",
     greeting: "Hi, thanks for reaching out to support — what can I help you sort out today?",
     you: "My order hasn't arrived yet.",
     agent: "I'm sorry about that. I can check the status and arrange a reship or a refund — what's your order number?",
@@ -76,7 +69,6 @@ const INTENTS: Intent[] = [
   {
     id: "appointments",
     label: "Appointment reminders",
-    role: "Appointment reminder agent",
     greeting: "Hi! A quick reminder about your upcoming appointment — is now a good time?",
     you: "Yes, can I move it to Friday?",
     agent: "Of course — I've got Friday at 2:00 or 4:30. Which works better for you?",
@@ -84,7 +76,6 @@ const INTENTS: Intent[] = [
   {
     id: "surveys",
     label: "Surveys & feedback",
-    role: "Survey agent",
     greeting: "Hi! I've got two quick questions about your recent experience — got 60 seconds?",
     you: "Sure, go ahead.",
     agent: "Great — on a scale of 0 to 10, how likely are you to recommend us to a friend?",
@@ -92,7 +83,6 @@ const INTENTS: Intent[] = [
   {
     id: "sales",
     label: "Sales follow-up",
-    role: "Sales follow-up agent",
     greeting: "Hi! Following up on your interest — happy to answer questions or get you set up. What's on your mind?",
     you: "What does pricing look like?",
     agent: "Plans start free with 300 minutes a month, then scale with usage. Want me to size it to your call volume?",
@@ -116,34 +106,49 @@ export function GoLiveHome() {
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <div className="mx-auto w-full max-w-5xl space-y-6">
-        <HomeHeader />
-        <TestAgent />
-        <PutItLive agentParam={agentParam} />
+      <div className="mx-auto w-full max-w-5xl space-y-4">
+        <AriaHeader />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <TestPanel />
+          <DeployPanel agentParam={agentParam} />
+        </div>
         <AlreadyLive />
       </div>
     </main>
   )
 }
 
-// ─── Header — greeting + the three ways to start ────────────────────────────────
+// ─── Aria identity bar — the agent is the page (h1) ─────────────────────────────
 
-function HomeHeader() {
+function AriaHeader() {
+  const est = stackEstimate(DEFAULT_AGENT)
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Welcome back</h1>
-        <p className="text-sm text-muted-foreground">
-          {DEFAULT_AGENT.name} is live — test it, tweak it, then put it live.
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-border bg-card px-5 py-3.5">
+      <span className="relative flex h-2.5 w-2.5 shrink-0">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+      </span>
+      <h1 className="text-xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h1>
+      <Badge variant="default" className="text-xs">Ready</Badge>
+      <span className="text-sm text-muted-foreground">{DEFAULT_AGENT.role ?? "General assistant"}</span>
+      <span className="hidden items-center gap-2 font-mono text-xs text-muted-foreground lg:flex">
+        <span>· {stackSummary(DEFAULT_AGENT)}</span>
+        <span className="inline-flex items-center gap-1"><Gauge className="h-3 w-3" />~{est.latencyMs}ms</span>
+        <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
+      </span>
+
+      <div className="ml-auto flex items-center gap-2">
+        <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground hover:text-foreground">
+          <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+            <Pencil className="h-4 w-4" /> Edit
+          </Link>
+        </Button>
         <ImportAgentSheet>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Upload className="h-4 w-4" /> Import agent
           </Button>
         </ImportAgentSheet>
-        <Button asChild variant="outline" size="sm" className="gap-1.5">
+        <Button variant="outline" size="sm" asChild className="gap-1.5">
           <Link href="/agents/new/edit">
             <Plus className="h-4 w-4" /> New agent
           </Link>
@@ -153,9 +158,9 @@ function HomeHeader() {
   )
 }
 
-// ─── Test the agent — one hero action, phone tests secondary, tweak→deploy hinge ─
+// ─── Test it — one hero action (Talk), phone tests secondary ─────────────────────
 
-function TestAgent() {
+function TestPanel() {
   const [method, setMethod] = React.useState<Method>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
   const [phase, setPhase] = React.useState<Phase>("idle")
@@ -171,9 +176,7 @@ function TestAgent() {
   const tick = React.useRef<number | null>(null)
 
   const intent = INTENTS.find((i) => i.id === intentId) ?? null
-  const role = intent?.role ?? DEFAULT_AGENT.role ?? "General assistant"
   const greeting = intent?.greeting ?? DEFAULT_GREETING
-  const est = stackEstimate(DEFAULT_AGENT)
 
   const after = React.useCallback((ms: number, fn: () => void) => {
     const id = window.setTimeout(fn, ms)
@@ -330,40 +333,20 @@ function TestAgent() {
               : "Listening… tap Talk"
             : "Connected — talk on your phone"
           : method === "talk"
-            ? "Ready when you are"
+            ? "Free, in your browser"
             : method === "getcall"
               ? "We'll ring your phone"
               : "Dial in from your phone"
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
-      {/* Identity strip — one line */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-5 py-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="relative flex h-2 w-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-          </span>
-          <h2 className="text-base font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
-          <Badge variant="default" className="text-xs">Ready</Badge>
-          <span className="truncate text-sm text-muted-foreground">{role}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="hidden items-center gap-2 font-mono text-xs text-muted-foreground sm:flex">
-            <span>{stackSummary(DEFAULT_AGENT)}</span>
-            <span className="inline-flex items-center gap-1"><Gauge className="h-3 w-3" />~{est.latencyMs}ms</span>
-            <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
-          </span>
-          <Button variant="ghost" size="sm" asChild className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground">
-            <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-              <Pencil className="h-3.5 w-3.5" /> Edit
-            </Link>
-          </Button>
-        </div>
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
+      <div className="border-b border-border px-5 py-3">
+        <h2 className="text-sm font-semibold">Test it</h2>
+        <p className="text-xs text-muted-foreground">Hear {DEFAULT_AGENT.name} work before you ship it.</p>
       </div>
 
-      {/* Stage — one centered hero action */}
-      <div className="flex flex-col items-center px-5 py-6 text-center">
+      {/* Stage */}
+      <div className="flex flex-1 flex-col items-center px-5 py-6 text-center">
         <div className="mb-3">
           {connecting ? (
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
@@ -515,7 +498,7 @@ function TestAgent() {
 
         {/* Transcript (talk only) */}
         {method === "talk" && (live || phase === "ended") && lines.length > 0 && (
-          <div className="mt-4 max-h-40 w-full max-w-md space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-left">
+          <div className="mt-4 max-h-40 w-full space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-left">
             {lines.map((l, i) => (
               <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
                 <span
@@ -559,17 +542,17 @@ function TestAgent() {
   )
 }
 
-// ─── Put it live — 3 compact channel cards (above the fold) ──────────────────────
+// ─── Put it live — deploy channels (the second top-level job) ────────────────────
 
-function PutItLive({ agentParam }: { agentParam: string }) {
+function DeployPanel({ agentParam }: { agentParam: string }) {
   return (
-    <section id="deploy" className="scroll-mt-6 space-y-3">
-      <div className="flex items-baseline gap-2">
-        <h2 className="text-base font-semibold">Put it live</h2>
-        <span className="text-sm text-muted-foreground">— pick a channel when it's ready</span>
+    <div id="deploy" className="flex flex-col overflow-hidden rounded-xl border border-border bg-card scroll-mt-6">
+      <div className="border-b border-border px-5 py-3">
+        <h2 className="text-sm font-semibold">Put it live</h2>
+        <p className="text-xs text-muted-foreground">When it's ready, pick a channel.</p>
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <DeployCard
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <DeployRow
           href={`/deploy/batch-calls/new${agentParam}`}
           channel="campaign"
           icon={PhoneOutgoing}
@@ -577,14 +560,14 @@ function PutItLive({ agentParam }: { agentParam: string }) {
           desc="Upload contacts — your agent calls each one."
           recommended
         />
-        <DeployCard
+        <DeployRow
           href={`/deploy/inbound/new${agentParam}`}
           channel="inbound"
           icon={PhoneIncoming}
           title="Answer a number"
           desc="Picks up every inbound call, 24/7."
         />
-        <DeployCard
+        <DeployRow
           href="/deploy/web-widget"
           channel="web"
           icon={Globe}
@@ -592,11 +575,11 @@ function PutItLive({ agentParam }: { agentParam: string }) {
           desc="Click-to-talk widget — no number needed."
         />
       </div>
-    </section>
+    </div>
   )
 }
 
-function DeployCard({
+function DeployRow({
   href,
   channel,
   icon: Icon,
@@ -616,30 +599,28 @@ function DeployCard({
       href={href}
       onClick={() => track(Events.put_to_work_selected, { channel })}
       className={cn(
-        "group flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm",
+        "group flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-sm",
         recommended
           ? "border-primary/40 bg-primary/5 hover:border-primary/60"
           : "border-border bg-card hover:border-primary/40",
       )}
     >
-      <div className="flex items-center justify-between">
-        <div
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg",
-            recommended ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-          )}
-        >
-          <Icon className="h-5 w-5" />
+      <div
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+          recommended ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+        )}
+      >
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold">{title}</h3>
+          {recommended && <Badge variant="secondary" className="text-xs">Recommended</Badge>}
         </div>
-        {recommended && <Badge variant="secondary" className="text-xs">Recommended</Badge>}
+        <p className="text-xs text-muted-foreground">{desc}</p>
       </div>
-      <div>
-        <h3 className="flex items-center gap-1 text-sm font-semibold">
-          {title}
-          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-        </h3>
-        <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
-      </div>
+      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
     </Link>
   )
 }
