@@ -9,7 +9,6 @@ import {
   ArrowRight,
   PhoneOutgoing,
   PhoneIncoming,
-  Globe,
   Pencil,
   Check,
   Zap,
@@ -19,6 +18,7 @@ import {
   RotateCcw,
   Upload,
   Plus,
+  Code2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -39,10 +39,19 @@ import { track, Events } from "@/lib/analytics"
 /**
  * GoLiveHome — the "Go Live" home (Deploy hub Overview).
  * ────────────────────────────────────────────────────────────────
- * 2026-06-19 — Option E layout (wireframe-driven). The page IS the agent:
- * Aria is the h1 (identity bar). Below it the two top-level jobs sit side by
- * side as equal panels — TEST IT (talk + phone tests) and PUT IT LIVE (deploy
- * channels) — so the whole job-to-be-done is visible in one glance.
+ * 2026-06-19 — DEPLOY-FIRST rewrite (workflow-designed, adversarially reviewed).
+ * The user's job here is to START DEPLOYING: "I want my support agent on my
+ * phone number — let's start; the agent's already there, we'll fix it up later."
+ *
+ *   HERO     — 3 deploy-channel cards (Batch calls · Answer a number ★ · Code).
+ *              Every card carries ?agent=Aria, so deploy starts pre-wired.
+ *   SECONDARY— Aria sits below as a quiet "your agent is ready" strip; the test
+ *              + "what should it do?" re-skin stay collapsed until you engage,
+ *              so the channels keep the visual gravity.
+ *
+ * Recommended channel = Answer a phone number (inbound): matches the stated
+ * journey and is the lowest-commitment path to a live, traffic-carrying
+ * deployment. Refinement is always opt-in, never a wall.
  */
 
 // ─── 1-tap intent re-skin ──────────────────────────────────────────────────────
@@ -94,6 +103,7 @@ const INTENTS: Intent[] = [
 type Method = "talk" | "getcall" | "callin"
 type Phase = "idle" | "connecting" | "live" | "ended"
 type Line = { role: "agent" | "you"; text: string }
+type Channel = "campaign" | "inbound" | "web" | "code"
 
 const DEFAULT_AGENT = getDefaultAgent()
 
@@ -106,43 +116,28 @@ export function GoLiveHome() {
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <div className="mx-auto w-full max-w-5xl space-y-4">
-        <AriaHeader />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <TestPanel />
-          <DeployPanel agentParam={agentParam} />
-        </div>
+      <div className="mx-auto w-full max-w-5xl space-y-6">
+        <DeployHeader />
+        <ChannelHero agentParam={agentParam} />
+        <AgentReadyStrip />
         <AlreadyLive />
       </div>
     </main>
   )
 }
 
-// ─── Aria identity bar — the agent is the page (h1) ─────────────────────────────
+// ─── Header — deploy is the headline; agent-origin actions demoted to the side ──
 
-function AriaHeader() {
-  const est = stackEstimate(DEFAULT_AGENT)
+function DeployHeader() {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-border bg-card px-5 py-3.5">
-      <span className="relative flex h-2.5 w-2.5 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-      </span>
-      <h1 className="text-xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h1>
-      <Badge variant="default" className="text-xs">Ready</Badge>
-      <span className="text-sm text-muted-foreground">{DEFAULT_AGENT.role ?? "General assistant"}</span>
-      <span className="hidden items-center gap-2 font-mono text-xs text-muted-foreground lg:flex">
-        <span>· {stackSummary(DEFAULT_AGENT)}</span>
-        <span className="inline-flex items-center gap-1"><Gauge className="h-3 w-3" />~{est.latencyMs}ms</span>
-        <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
-      </span>
-
-      <div className="ml-auto flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground hover:text-foreground">
-          <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-            <Pencil className="h-4 w-4" /> Edit
-          </Link>
-        </Button>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Deploy an AI agent in minutes</h1>
+        <p className="max-w-prose text-sm text-muted-foreground">
+          {DEFAULT_AGENT.name} is live and ready — pick a channel to put it to work. You can refine the agent anytime.
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
         <ImportAgentSheet>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Upload className="h-4 w-4" /> Import agent
@@ -150,7 +145,7 @@ function AriaHeader() {
         </ImportAgentSheet>
         <Button variant="outline" size="sm" asChild className="gap-1.5">
           <Link href="/agents/new/edit">
-            <Plus className="h-4 w-4" /> New agent
+            <Plus className="h-4 w-4" /> Create blank agent
           </Link>
         </Button>
       </div>
@@ -158,9 +153,137 @@ function AriaHeader() {
   )
 }
 
-// ─── Test it — one hero action (Talk), phone tests secondary ─────────────────────
+// ─── Channel hero — THE primary job: pick where to deploy ────────────────────────
 
-function TestPanel() {
+function ChannelHero({ agentParam }: { agentParam: string }) {
+  return (
+    <section id="channels" className="grid scroll-mt-6 grid-cols-1 gap-4 md:grid-cols-3">
+      <ChannelCard
+        href={`/deploy/batch-calls/new${agentParam}`}
+        channel="campaign"
+        icon={PhoneOutgoing}
+        title="Launch batch calls"
+        desc="Upload a list of contacts and your agent calls each one."
+        meta="Outbound"
+      />
+      <ChannelCard
+        href={`/deploy/inbound/new${agentParam}`}
+        channel="inbound"
+        icon={PhoneIncoming}
+        title="Answer a phone number"
+        desc="Your agent picks up every inbound call, 24/7."
+        recommended
+        linkId="deploy-recommended"
+        subLinks={[
+          { label: "Web widget", href: "/deploy/web-widget", channel: "web" },
+          { label: "Phone numbers", href: "/deploy/phone-numbers" },
+        ]}
+      />
+      <ChannelCard
+        href="/deploy/code"
+        channel="code"
+        icon={Code2}
+        title="Code"
+        desc="Export your agent to any stack."
+        meta="cURL · Python · Node"
+        metaMono
+      />
+    </section>
+  )
+}
+
+function ChannelCard({
+  href,
+  channel,
+  icon: Icon,
+  title,
+  desc,
+  recommended,
+  meta,
+  metaMono,
+  subLinks,
+  linkId,
+}: {
+  href: string
+  channel: Channel
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  desc: string
+  recommended?: boolean
+  meta?: string
+  metaMono?: boolean
+  subLinks?: { label: string; href: string; channel?: Channel }[]
+  linkId?: string
+}) {
+  return (
+    <div
+      className={cn(
+        "group relative flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm",
+        recommended
+          ? "border-primary/40 bg-primary/5 hover:border-primary/60"
+          : "border-border bg-card hover:border-primary/40",
+      )}
+    >
+      <div className="flex items-start justify-between">
+        <div
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-lg",
+            recommended ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+        {recommended && (
+          <Badge variant="secondary" className="relative z-10 text-xs">Recommended</Badge>
+        )}
+      </div>
+
+      <div>
+        <h2 className="flex items-center gap-1 text-sm font-semibold">
+          {title}
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
+      </div>
+
+      {/* Plain meta sits UNDER the stretched link (non-interactive). */}
+      {meta && (
+        <p className={cn("mt-auto text-xs text-muted-foreground", metaMono && "font-mono")}>{meta}</p>
+      )}
+
+      {/* Interactive sub-links sit ABOVE the stretched link (z-10) with their own targets. */}
+      {subLinks && (
+        <div className="relative z-10 mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border/60 pt-3 text-xs">
+          {subLinks.map((s, i) => (
+            <React.Fragment key={s.href}>
+              {i > 0 && <span className="text-muted-foreground">·</span>}
+              <Link
+                href={s.href}
+                onClick={() => s.channel && track(Events.put_to_work_selected, { channel: s.channel })}
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                {s.label}
+              </Link>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+
+      {/* Stretched primary link — whole card is the channel target. */}
+      <Link
+        href={href}
+        id={linkId}
+        onClick={() => track(Events.put_to_work_selected, { channel })}
+        aria-label={title}
+        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+    </div>
+  )
+}
+
+// ─── Your agent — quiet, secondary: ready now, refine anytime ────────────────────
+
+function AgentReadyStrip() {
   const [method, setMethod] = React.useState<Method>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
   const [phase, setPhase] = React.useState<Phase>("idle")
@@ -177,6 +300,7 @@ function TestPanel() {
 
   const intent = INTENTS.find((i) => i.id === intentId) ?? null
   const greeting = intent?.greeting ?? DEFAULT_GREETING
+  const est = stackEstimate(DEFAULT_AGENT)
 
   const after = React.useCallback((ms: number, fn: () => void) => {
     const id = window.setTimeout(fn, ms)
@@ -222,8 +346,8 @@ function TestPanel() {
     [after],
   )
 
-  // ── Talk here (in-browser, free) — the primary path ──
   const startTalk = React.useCallback(() => {
+    setMethod("talk")
     setPhase("connecting")
     track(Events.web_test_call_started, { agent_id: DEFAULT_AGENT.id, intent: intentId ?? "general" })
     after(1200, () => {
@@ -253,7 +377,6 @@ function TestPanel() {
     }
   }, [phase, speaking, turns, intent, after, speak])
 
-  // ── Call my phone (outbound: agent → your phone) ──
   const startGetCall = React.useCallback(() => {
     if (digits(phoneNumber).length < 10) {
       setPhoneError("Enter a valid phone number — at least 10 digits.")
@@ -269,7 +392,6 @@ function TestPanel() {
     })
   }, [phoneNumber, after, startTimer])
 
-  // ── Dial a number (inbound: your phone → agent) ──
   const copyNumber = React.useCallback(() => {
     navigator.clipboard?.writeText(TEST_INBOUND_NUMBER).catch(() => {})
     setCopied(true)
@@ -287,7 +409,6 @@ function TestPanel() {
     })
   }, [after, startTimer])
 
-  // ── End (any method) → the test→tweak→deploy hinge ──
   const endTest = React.useCallback(() => {
     cleanup()
     setSpeaking(false)
@@ -311,12 +432,15 @@ function TestPanel() {
   function chooseOutcome(outcome: "tweak" | "deploy") {
     track(Events.test_outcome_selected, { outcome })
     if (outcome === "deploy") {
-      document.getElementById("deploy")?.scrollIntoView({ behavior: "smooth", block: "start" })
+      document.getElementById("channels")?.scrollIntoView({ behavior: "smooth", block: "start" })
+      after(350, () => document.getElementById("deploy-recommended")?.focus())
     }
   }
 
   const connecting = phase === "connecting"
   const live = phase === "live"
+  // Engaged = the test is open. At rest (idle + talk) the strip is a quiet row.
+  const engaged = phase !== "idle" || method !== "talk"
   const liveUsedMin = (PLAN_USAGE.freeMinutesUsed + elapsed / 60).toFixed(1)
 
   const statusText =
@@ -332,296 +456,219 @@ function TestPanel() {
               ? `${DEFAULT_AGENT.name} is speaking`
               : "Listening… tap Talk"
             : "Connected — talk on your phone"
-          : method === "talk"
-            ? "Free, in your browser"
-            : method === "getcall"
-              ? "We'll ring your phone"
-              : "Dial in from your phone"
+          : method === "getcall"
+            ? "We'll ring your phone"
+            : "Dial in from your phone"
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
-      <div className="border-b border-border px-5 py-3">
-        <h2 className="text-sm font-semibold">Test it</h2>
-        <p className="text-xs text-muted-foreground">Hear {DEFAULT_AGENT.name} work before you ship it.</p>
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      {/* Identity row — compact, always visible */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3.5">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Your agent</span>
+        <span className="relative flex h-2 w-2 shrink-0">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+        </span>
+        <h2 className="text-base font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
+        <Badge variant="default" className="text-xs">Ready</Badge>
+        <span className="text-sm text-muted-foreground">{DEFAULT_AGENT.role ?? "General assistant"}</span>
+        <span className="hidden items-center gap-2 font-mono text-xs text-muted-foreground lg:flex">
+          <span>· {stackSummary(DEFAULT_AGENT)}</span>
+          <span className="inline-flex items-center gap-1"><Gauge className="h-3 w-3" />~{est.latencyMs}ms</span>
+          <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
+        </span>
+        <Button variant="ghost" size="sm" asChild className="ml-auto gap-1.5 text-muted-foreground hover:text-foreground">
+          <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+            <Pencil className="h-3.5 w-3.5" /> Edit agent
+          </Link>
+        </Button>
       </div>
 
-      {/* Stage */}
-      <div className="flex flex-1 flex-col items-center px-5 py-6 text-center">
-        <div className="mb-3">
-          {connecting ? (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : (
-            <AgentSphere size={96} active={live && (method !== "talk" || speaking)} />
-          )}
-        </div>
-
-        <p className="text-xs font-medium text-muted-foreground">{statusText}</p>
-
-        {/* idle — talk hero (primary) + phone tests (secondary) */}
-        {phase === "idle" && method === "talk" && (
-          <div className="mt-3 flex flex-col items-center gap-3">
-            <Button size="lg" className="gap-2" onClick={startTalk}>
-              <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Prefer a real call?{" "}
-              <button
-                type="button"
-                onClick={() => selectMethod("getcall")}
-                className="font-medium text-foreground underline-offset-2 hover:underline"
-              >
-                Call my phone
-              </button>{" "}
-              ·{" "}
-              <button
-                type="button"
-                onClick={() => selectMethod("callin")}
-                className="font-medium text-foreground underline-offset-2 hover:underline"
-              >
-                get a test number
-              </button>
-            </p>
-          </div>
-        )}
-
-        {/* idle — call my phone (outbound) */}
-        {phase === "idle" && method === "getcall" && (
-          <div className="mt-3 w-full max-w-xs space-y-2">
-            <div className="flex gap-2">
-              <Input
-                aria-label="Your phone number"
-                value={phoneNumber}
-                onChange={(e) => {
-                  setPhoneNumber(e.target.value)
-                  if (phoneError) setPhoneError(null)
-                }}
-                inputMode="tel"
-                placeholder="+1 (555) 123-4567"
-                aria-invalid={!!phoneError}
-                onKeyDown={(e) => e.key === "Enter" && startGetCall()}
-              />
-              <Button onClick={startGetCall} className="shrink-0 gap-1.5">
-                <PhoneCall className="h-4 w-4" /> Call me
-              </Button>
-            </div>
-            {phoneError && <p className="text-left text-xs text-destructive">{phoneError}</p>}
+      {/* Action zone — quiet at rest, opens the test on demand */}
+      {!engaged ? (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border px-5 py-4">
+          <Button className="gap-2" onClick={startTalk}>
+            <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Free, in your browser. Prefer a real call?{" "}
             <button
               type="button"
-              onClick={() => selectMethod("talk")}
-              className="text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => selectMethod("getcall")}
+              className="font-medium text-foreground underline-offset-2 hover:underline"
             >
-              ← Back
+              Call my phone
+            </button>{" "}
+            ·{" "}
+            <button
+              type="button"
+              onClick={() => selectMethod("callin")}
+              className="font-medium text-foreground underline-offset-2 hover:underline"
+            >
+              get a test number
             </button>
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-3 border-t border-border px-5 py-5 text-center">
+          <div>
+            {connecting ? (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <AgentSphere size={80} active={live && (method !== "talk" || speaking)} />
+            )}
           </div>
-        )}
 
-        {/* idle — dial a number (inbound) */}
-        {phase === "idle" && method === "callin" && (
-          <div className="mt-3 flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-base font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
-              <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
-                {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">Call this sandbox line from your phone — free while testing.</p>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
-                <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
-              </Button>
-              <button
-                type="button"
-                onClick={() => selectMethod("talk")}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
+          <p className="text-xs font-medium text-muted-foreground">{statusText}</p>
+
+          {/* idle — call my phone */}
+          {phase === "idle" && method === "getcall" && (
+            <div className="w-full max-w-xs space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  aria-label="Your phone number"
+                  value={phoneNumber}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value)
+                    if (phoneError) setPhoneError(null)
+                  }}
+                  inputMode="tel"
+                  placeholder="+1 (555) 123-4567"
+                  aria-invalid={!!phoneError}
+                  onKeyDown={(e) => e.key === "Enter" && startGetCall()}
+                />
+                <Button onClick={startGetCall} className="shrink-0 gap-1.5">
+                  <PhoneCall className="h-4 w-4" /> Call me
+                </Button>
+              </div>
+              {phoneError && <p role="alert" className="text-left text-xs text-destructive">{phoneError}</p>}
+              <button type="button" onClick={() => selectMethod("talk")} className="text-xs text-muted-foreground hover:text-foreground">
                 ← Back
               </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* connecting */}
-        {connecting && (
-          <Button size="lg" className="mt-3 gap-2" disabled>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {method === "talk" ? "Connecting…" : method === "getcall" ? "Calling…" : "Connecting…"}
-          </Button>
-        )}
-
-        {/* live */}
-        {live && (
-          <div className="mt-3 flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2">
-              {method === "talk" && (
-                <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
-                  <Mic className="h-3.5 w-3.5" /> Talk
+          {/* idle — dial a number */}
+          {phase === "idle" && method === "callin" && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-base font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
+                <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
+                  {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
                 </Button>
-              )}
-              <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
-                <PhoneOff className="h-3.5 w-3.5" /> End test
-              </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Call this sandbox line from your phone — free while testing.</p>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
+                  <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
+                </Button>
+                <button type="button" onClick={() => selectMethod("talk")} className="text-xs text-muted-foreground hover:text-foreground">
+                  ← Back
+                </button>
+              </div>
             </div>
-            <p className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{method === "talk" ? "Agora RTC" : "On your phone"}</span>
-              <span>·</span>
-              <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
-              <span>·</span>
-              <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
-            </p>
-          </div>
-        )}
+          )}
 
-        {/* ended — the hinge */}
-        {phase === "ended" && (
-          <div className="mt-3 flex flex-col items-center gap-2">
-            <p className="text-sm">
-              <span className="font-semibold">How did that go?</span>{" "}
-              <span className="text-muted-foreground">Put it live, or fine-tune it first.</span>
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
-                Deploy it <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
-                <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-                  <Pencil className="h-3.5 w-3.5" /> Tweak
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
-                <RotateCcw className="h-3.5 w-3.5" /> Test again
-              </Button>
+          {/* connecting */}
+          {connecting && (
+            <Button className="gap-2" disabled>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {method === "talk" ? "Connecting…" : method === "getcall" ? "Calling…" : "Connecting…"}
+            </Button>
+          )}
+
+          {/* live */}
+          {live && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                {method === "talk" && (
+                  <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
+                    <Mic className="h-3.5 w-3.5" /> Talk
+                  </Button>
+                )}
+                <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
+                  <PhoneOff className="h-3.5 w-3.5" /> End test
+                </Button>
+              </div>
+              <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{method === "talk" ? "Agora RTC" : "On your phone"}</span>
+                <span>·</span>
+                <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
+                <span>·</span>
+                <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
+              </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Transcript (talk only) */}
-        {method === "talk" && (live || phase === "ended") && lines.length > 0 && (
-          <div className="mt-4 max-h-40 w-full space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-left">
-            {lines.map((l, i) => (
-              <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
-                <span
+          {/* ended — the hinge back UP to deploy */}
+          {phase === "ended" && (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-sm">
+                <span className="font-semibold">Sounds good?</span>{" "}
+                <span className="text-muted-foreground">Deploy {DEFAULT_AGENT.name}, or fine-tune it first.</span>
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
+                  Deploy it <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
+                  <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+                    <Pencil className="h-3.5 w-3.5" /> Tweak
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
+                  <RotateCcw className="h-3.5 w-3.5" /> Test again
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Transcript (talk only) */}
+          {method === "talk" && (live || phase === "ended") && lines.length > 0 && (
+            <div className="mt-1 max-h-40 w-full max-w-md space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-left">
+              {lines.map((l, i) => (
+                <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
+                  <span
+                    className={cn(
+                      "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
+                      l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                    )}
+                  >
+                    {l.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* What should it do? — re-skin, only while engaged */}
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-2 border-t border-border pt-3">
+            <span className="text-xs font-medium text-muted-foreground">What should it do?</span>
+            {INTENTS.map((i) => {
+              const active = intentId === i.id
+              return (
+                <button
+                  key={i.id}
+                  type="button"
+                  onClick={() => pickIntent(i.id)}
                   className={cn(
-                    "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
-                    l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                    active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                   )}
                 >
-                  {l.text}
-                </span>
-              </div>
-            ))}
+                  {active && <Check className="h-3 w-3" />}
+                  {i.label}
+                </button>
+              )
+            })}
           </div>
-        )}
-      </div>
-
-      {/* Tailor footer — quiet 1-tap re-skin */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-5 py-3">
-        <span className="text-xs font-medium text-muted-foreground">Tailor it:</span>
-        {INTENTS.map((i) => {
-          const active = intentId === i.id
-          return (
-            <button
-              key={i.id}
-              type="button"
-              onClick={() => pickIntent(i.id)}
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-                active
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-              )}
-            >
-              {active && <Check className="h-3 w-3" />}
-              {i.label}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ─── Put it live — deploy channels (the second top-level job) ────────────────────
-
-function DeployPanel({ agentParam }: { agentParam: string }) {
-  return (
-    <div id="deploy" className="flex flex-col overflow-hidden rounded-xl border border-border bg-card scroll-mt-6">
-      <div className="border-b border-border px-5 py-3">
-        <h2 className="text-sm font-semibold">Put it live</h2>
-        <p className="text-xs text-muted-foreground">When it's ready, pick a channel.</p>
-      </div>
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <DeployRow
-          href={`/deploy/batch-calls/new${agentParam}`}
-          channel="campaign"
-          icon={PhoneOutgoing}
-          title="Launch a campaign"
-          desc="Upload contacts — your agent calls each one."
-          recommended
-        />
-        <DeployRow
-          href={`/deploy/inbound/new${agentParam}`}
-          channel="inbound"
-          icon={PhoneIncoming}
-          title="Answer a number"
-          desc="Picks up every inbound call, 24/7."
-        />
-        <DeployRow
-          href="/deploy/web-widget"
-          channel="web"
-          icon={Globe}
-          title="Embed on your site"
-          desc="Click-to-talk widget — no number needed."
-        />
-      </div>
-    </div>
-  )
-}
-
-function DeployRow({
-  href,
-  channel,
-  icon: Icon,
-  title,
-  desc,
-  recommended,
-}: {
-  href: string
-  channel: "campaign" | "inbound" | "web"
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  desc: string
-  recommended?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={() => track(Events.put_to_work_selected, { channel })}
-      className={cn(
-        "group flex items-center gap-3 rounded-lg border p-3 transition-all hover:shadow-sm",
-        recommended
-          ? "border-primary/40 bg-primary/5 hover:border-primary/60"
-          : "border-border bg-card hover:border-primary/40",
-      )}
-    >
-      <div
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-          recommended ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-        )}
-      >
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold">{title}</h3>
-          {recommended && <Badge variant="secondary" className="text-xs">Recommended</Badge>}
         </div>
-        <p className="text-xs text-muted-foreground">{desc}</p>
-      </div>
-      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-    </Link>
+      )}
+    </div>
   )
 }
 
@@ -640,7 +687,9 @@ function AlreadyLive() {
       <div className="flex items-center gap-2 text-sm">
         <Zap className="h-4 w-4 text-muted-foreground" />
         <span className="font-medium tabular-nums">{liveCount}</span>
-        <span className="text-muted-foreground">live deployments ·</span>
+        <span className="text-muted-foreground">
+          live {liveCount === 1 ? "deployment" : "deployments"} ·
+        </span>
         <span className="font-medium tabular-nums">{conversations.toLocaleString()}</span>
         <span className="text-muted-foreground">conversations handled</span>
       </div>
