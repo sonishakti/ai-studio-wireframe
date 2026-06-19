@@ -38,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AvatarUsageRing, FreeMinutesBlock, freeMinutesStats } from "@/components/usage-ring"
 
 // ─── account nav — 6 items, no nesting ──────────────────────────────────────
 //
@@ -92,6 +93,7 @@ function NavLink({ item }: { item: NavItem }) {
 
 function AccountUserMenu() {
   const { setTheme, resolvedTheme } = useTheme()
+  const { pctUsed } = freeMinutesStats()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -99,12 +101,14 @@ function AccountUserMenu() {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src="" alt="User" />
-            <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-sm font-medium">
-              SS
-            </AvatarFallback>
-          </Avatar>
+          <AvatarUsageRing pctUsed={pctUsed} size={38}>
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarImage src="" alt="User" />
+              <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-sm font-medium">
+                SS
+              </AvatarFallback>
+            </Avatar>
+          </AvatarUsageRing>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">Shakti Soni</span>
             <span className="truncate text-xs text-muted-foreground">soni28shakti@gmail.com</span>
@@ -121,6 +125,8 @@ function AccountUserMenu() {
             <p className="text-xs text-muted-foreground truncate">soni28shakti@gmail.com</p>
           </div>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <FreeMinutesBlock />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="gap-2"

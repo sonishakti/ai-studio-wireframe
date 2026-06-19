@@ -164,49 +164,17 @@ function SectionHeading({ step, title, hint }: { step?: number; title: string; h
   )
 }
 
-// ─── Header + free-minutes meter ─────────────────────────────────────────────────
+// ─── Header ──────────────────────────────────────────────────────────────────────
+// Free-minutes meter moved to the account menu + avatar ring (2026-06-19).
 
 function HomeHeader() {
-  const pct = Math.min(
-    100,
-    Math.round((PLAN_USAGE.freeMinutesUsed / PLAN_USAGE.freeMinutesIncluded) * 100),
-  )
-  const remaining = PLAN_USAGE.freeMinutesIncluded - PLAN_USAGE.freeMinutesUsed
-
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-        <p className="max-w-prose text-sm text-muted-foreground">
-          {DEFAULT_AGENT.name} is live and ready. Test it over the web or a real phone, fine-tune
-          it, then put it on real traffic.
-        </p>
-      </div>
-
-      {/* Compact free-minutes meter — ambient from the first screen. */}
-      <div className="w-full shrink-0 rounded-lg border border-border bg-card p-3 sm:w-64">
-        <div className="flex items-center justify-between gap-2">
-          <Badge variant="secondary" className="text-xs">{PLAN_USAGE.plan} plan</Badge>
-          <Button variant="ghost" size="sm" asChild className="-mr-1.5 h-6 gap-1 px-1.5 text-xs">
-            <Link
-              href="/billing/usage"
-              onClick={() => track(Events.quota_warning_clicked, { meter: "free_minutes", pct_used: pct })}
-            >
-              Usage <ArrowRight className="h-3 w-3" />
-            </Link>
-          </Button>
-        </div>
-        <p className="mt-2 text-sm font-medium">
-          <span className="tabular-nums">{PLAN_USAGE.freeMinutesUsed}</span>
-          <span className="text-muted-foreground"> / {PLAN_USAGE.freeMinutesIncluded} free min</span>
-        </p>
-        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-        </div>
-        <p className="mt-1.5 text-xs text-muted-foreground">
-          {remaining.toLocaleString()} min left this month
-        </p>
-      </div>
+    <div className="space-y-1">
+      <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+      <p className="max-w-prose text-sm text-muted-foreground">
+        {DEFAULT_AGENT.name} is live and ready. Test it over the web or a real phone, fine-tune it,
+        then put it on real traffic.
+      </p>
     </div>
   )
 }

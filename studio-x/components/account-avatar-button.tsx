@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { track, Events } from "@/lib/analytics"
+import { AvatarUsageRing, FreeMinutesBlock, freeMinutesStats } from "@/components/usage-ring"
 
 /**
  * Right-side button in the sidebar footer.
@@ -43,6 +44,7 @@ import { track, Events } from "@/lib/analytics"
  */
 export function AccountAvatarButton() {
   const { setTheme, resolvedTheme } = useTheme()
+  const { pctUsed } = freeMinutesStats()
 
   return (
     <DropdownMenu>
@@ -54,12 +56,14 @@ export function AccountAvatarButton() {
               className="!w-9 !h-9 shrink-0 justify-center !p-0"
               onClick={() => track(Events.account_menu_opened)}
             >
-              <Avatar className="h-7 w-7 rounded-lg">
-                <AvatarImage src="" alt="" />
-                <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xs font-medium">
-                  SS
-                </AvatarFallback>
-              </Avatar>
+              <AvatarUsageRing pctUsed={pctUsed} size={34}>
+                <Avatar className="h-7 w-7 rounded-lg">
+                  <AvatarImage src="" alt="" />
+                  <AvatarFallback className="rounded-lg bg-primary text-primary-foreground text-xs font-medium">
+                    SS
+                  </AvatarFallback>
+                </Avatar>
+              </AvatarUsageRing>
               <span className="sr-only">Account menu</span>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -78,7 +82,7 @@ export function AccountAvatarButton() {
 
         <DropdownMenuItem asChild>
           <Link href="/billing" className="gap-2">
-            <CreditCard className="h-4 w-4 text-muted-foreground" /> Billing
+            <CreditCard className="h-4 w-4 text-muted-foreground" /> Usage & Billing
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -109,6 +113,10 @@ export function AccountAvatarButton() {
             <Bell className="h-4 w-4 text-muted-foreground" /> Notifications
           </Link>
         </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <FreeMinutesBlock />
 
         <DropdownMenuSeparator />
 
