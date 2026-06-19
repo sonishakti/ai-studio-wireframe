@@ -31,7 +31,13 @@ const EXAMPLE_CONFIG = `{
 
 // ─── component ───────────────────────────────────────────────────────────────
 
-export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
+export function ImportAgentSheet({
+  children,
+  onImported,
+}: {
+  children: React.ReactNode
+  onImported?: (name: string) => void
+}) {
   const [pasted, setPasted] = React.useState("")
   const [url, setUrl] = React.useState("")
   const [source, setSource] = React.useState<(typeof SOURCES)[number]>("Generic JSON")
@@ -60,9 +66,11 @@ export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
 
   const handleImport = () => {
     track("agent_imported" as never, { source } as never)
+    const name = validation?.agentName ?? "Imported agent"
     toast.success("Agent imported", {
-      description: `${validation?.agentName ?? "New agent"} is ready in your agents list as a draft.`,
+      description: `${name} is ready as a draft — selected here so you can deploy it.`,
     })
+    onImported?.(name)
   }
 
   return (

@@ -30,6 +30,8 @@ export const Events = {
   agent_template_selected:    "agent_template_selected",
   agent_created:              "agent_created",
   agent_intent_selected:      "agent_intent_selected",       // 1-tap "what should it do?" re-skin
+  agent_switched:             "agent_switched",              // { agent_id, from, status } — change deploy target
+  custom_task_entered:        "custom_task_entered",         // { length } — "something else" task (never raw text)
   web_test_call_started:      "web_test_call_started",        // ★ moment of belief (in-browser)
   web_test_call_ended:        "web_test_call_ended",          // { duration_sec }
   phone_test_call_started:    "phone_test_call_started",      // { direction } agent↔your real phone
@@ -123,6 +125,8 @@ export type EventPayloads = {
   phone_test_call_connected:   { direction: "outbound" | "inbound" }
   phone_test_call_ended:       { direction: "outbound" | "inbound"; duration_sec: number }
   test_outcome_selected:       { outcome: "tweak" | "deploy" }
+  agent_switched:              { agent_id: string; from: string; status: "live" | "draft" | "paused" }
+  custom_task_entered:         { length: number }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment"; target_id: string; section: string; surface: "call_sheet" | "queue" }
