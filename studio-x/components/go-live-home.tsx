@@ -9,12 +9,15 @@ import {
   ArrowRight,
   PhoneOutgoing,
   PhoneIncoming,
+  Phone,
+  Globe,
   Pencil,
   Check,
   Zap,
   PhoneCall,
   Copy,
   Gauge,
+  Layers,
   RotateCcw,
   Upload,
   Plus,
@@ -39,19 +42,13 @@ import { track, Events } from "@/lib/analytics"
 /**
  * GoLiveHome — the "Go Live" home (Deploy hub Overview).
  * ────────────────────────────────────────────────────────────────
- * 2026-06-19 — DEPLOY-FIRST rewrite (workflow-designed, adversarially reviewed).
- * The user's job here is to START DEPLOYING: "I want my support agent on my
- * phone number — let's start; the agent's already there, we'll fix it up later."
- *
- *   HERO     — 3 deploy-channel cards (Batch calls · Answer a number ★ · Code).
- *              Every card carries ?agent=Aria, so deploy starts pre-wired.
- *   SECONDARY— Aria sits below as a quiet "your agent is ready" strip; the test
- *              + "what should it do?" re-skin stay collapsed until you engage,
- *              so the channels keep the visual gravity.
- *
- * Recommended channel = Answer a phone number (inbound): matches the stated
- * journey and is the lowest-commitment path to a live, traffic-carrying
- * deployment. Refinement is always opt-in, never a wall.
+ * 2026-06-19 — deploy-first home matching the user's Figma:
+ *   • Title "Deploy an AI agent in minutes".
+ *   • 3 deploy-channel cards up top (Launch batch calls · Answer a phone number ·
+ *     Code), each with icon'd sub-action links — the primary job, front & center.
+ *   • One rich agent card below: orb + identity on the left, "What should it do?"
+ *     re-skin radios on the right, and Talk here · Get a call · Call in test tabs
+ *     with the active method's controls beneath.
  */
 
 // ─── 1-tap intent re-skin ──────────────────────────────────────────────────────
@@ -107,6 +104,12 @@ type Channel = "campaign" | "inbound" | "web" | "code"
 
 const DEFAULT_AGENT = getDefaultAgent()
 
+const TEST_TABS: { id: Method; label: string }[] = [
+  { id: "talk", label: "Talk here" },
+  { id: "getcall", label: "Get a call" },
+  { id: "callin", label: "Call in" },
+]
+
 export function GoLiveHome() {
   const agentParam = `?agent=${DEFAULT_AGENT.id}`
 
@@ -119,24 +122,19 @@ export function GoLiveHome() {
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <DeployHeader />
         <ChannelHero agentParam={agentParam} />
-        <AgentReadyStrip />
+        <AgentCard />
         <AlreadyLive />
       </div>
     </main>
   )
 }
 
-// ─── Header — deploy is the headline; agent-origin actions demoted to the side ──
+// ─── Header — deploy is the headline ────────────────────────────────────────────
 
 function DeployHeader() {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Deploy an AI agent in minutes</h1>
-        <p className="max-w-prose text-sm text-muted-foreground">
-          {DEFAULT_AGENT.name} is live and ready — pick a channel to put it to work. You can refine the agent anytime.
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">Deploy an AI agent in minutes</h1>
       <div className="flex items-center gap-2">
         <ImportAgentSheet>
           <Button variant="outline" size="sm" className="gap-1.5">
@@ -153,7 +151,7 @@ function DeployHeader() {
   )
 }
 
-// ─── Channel hero — THE primary job: pick where to deploy ────────────────────────
+// ─── Channel hero — the primary job: pick where to deploy ────────────────────────
 
 function ChannelHero({ agentParam }: { agentParam: string }) {
   return (
@@ -164,7 +162,7 @@ function ChannelHero({ agentParam }: { agentParam: string }) {
         icon={PhoneOutgoing}
         title="Launch batch calls"
         desc="Upload a list of contacts and your agent calls each one."
-        meta="Outbound"
+        subActions={[{ label: "Batch Calling", icon: Phone, href: `/deploy/batch-calls/new${agentParam}`, channel: "campaign" }]}
       />
       <ChannelCard
         href={`/deploy/inbound/new${agentParam}`}
@@ -172,11 +170,9 @@ function ChannelHero({ agentParam }: { agentParam: string }) {
         icon={PhoneIncoming}
         title="Answer a phone number"
         desc="Your agent picks up every inbound call, 24/7."
-        recommended
-        linkId="deploy-recommended"
-        subLinks={[
-          { label: "Web widget", href: "/deploy/web-widget", channel: "web" },
-          { label: "Phone numbers", href: "/deploy/phone-numbers" },
+        subActions={[
+          { label: "Web Widget", icon: Globe, href: "/deploy/web-widget", channel: "web" },
+          { label: "Phone Number", icon: Phone, href: "/deploy/phone-numbers" },
         ]}
       />
       <ChannelCard
@@ -185,8 +181,11 @@ function ChannelHero({ agentParam }: { agentParam: string }) {
         icon={Code2}
         title="Code"
         desc="Export your agent to any stack."
-        meta="cURL · Python · Node"
-        metaMono
+        subActions={[
+          { label: "cURL", icon: Code2, href: "/deploy/code" },
+          { label: "Python", icon: Code2, href: "/deploy/code" },
+          { label: "Node", icon: Code2, href: "/deploy/code" },
+        ]}
       />
     </section>
   )
@@ -198,81 +197,40 @@ function ChannelCard({
   icon: Icon,
   title,
   desc,
-  recommended,
-  meta,
-  metaMono,
-  subLinks,
-  linkId,
+  subActions,
 }: {
   href: string
   channel: Channel
   icon: React.ComponentType<{ className?: string }>
   title: string
   desc: string
-  recommended?: boolean
-  meta?: string
-  metaMono?: boolean
-  subLinks?: { label: string; href: string; channel?: Channel }[]
-  linkId?: string
+  subActions: { label: string; icon: React.ComponentType<{ className?: string }>; href: string; channel?: Channel }[]
 }) {
   return (
-    <div
-      className={cn(
-        "group relative flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm",
-        recommended
-          ? "border-primary/40 bg-primary/5 hover:border-primary/60"
-          : "border-border bg-card hover:border-primary/40",
-      )}
-    >
-      <div className="flex items-start justify-between">
-        <div
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-lg",
-            recommended ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-        {recommended && (
-          <Badge variant="secondary" className="relative z-10 text-xs">Recommended</Badge>
-        )}
+    <div className="group relative flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm">
+      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-muted text-foreground">
+        <Icon className="h-5 w-5" />
+      </div>
+      <h2 className="mt-4 text-base font-semibold">{title}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+
+      <div className="relative z-10 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-4 text-sm">
+        {subActions.map((s) => (
+          <Link
+            key={s.label}
+            href={s.href}
+            onClick={() => s.channel && track(Events.put_to_work_selected, { channel: s.channel })}
+            className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-primary"
+          >
+            <s.icon className="h-4 w-4 text-muted-foreground" />
+            {s.label}
+          </Link>
+        ))}
       </div>
 
-      <div>
-        <h2 className="flex items-center gap-1 text-sm font-semibold">
-          {title}
-          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
-      </div>
-
-      {/* Plain meta sits UNDER the stretched link (non-interactive). */}
-      {meta && (
-        <p className={cn("mt-auto text-xs text-muted-foreground", metaMono && "font-mono")}>{meta}</p>
-      )}
-
-      {/* Interactive sub-links sit ABOVE the stretched link (z-10) with their own targets. */}
-      {subLinks && (
-        <div className="relative z-10 mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border/60 pt-3 text-xs">
-          {subLinks.map((s, i) => (
-            <React.Fragment key={s.href}>
-              {i > 0 && <span className="text-muted-foreground">·</span>}
-              <Link
-                href={s.href}
-                onClick={() => s.channel && track(Events.put_to_work_selected, { channel: s.channel })}
-                className="font-medium text-foreground underline-offset-2 hover:underline"
-              >
-                {s.label}
-              </Link>
-            </React.Fragment>
-          ))}
-        </div>
-      )}
-
-      {/* Stretched primary link — whole card is the channel target. */}
+      {/* Whole card → the channel's primary route (sub-links sit above via z-10). */}
       <Link
         href={href}
-        id={linkId}
         onClick={() => track(Events.put_to_work_selected, { channel })}
         aria-label={title}
         className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -281,9 +239,9 @@ function ChannelCard({
   )
 }
 
-// ─── Your agent — quiet, secondary: ready now, refine anytime ────────────────────
+// ─── Agent card — orb + identity + "what should it do?" + test tabs ──────────────
 
-function AgentReadyStrip() {
+function AgentCard() {
   const [method, setMethod] = React.useState<Method>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
   const [phase, setPhase] = React.useState<Phase>("idle")
@@ -332,9 +290,10 @@ function AgentReadyStrip() {
     setPhoneError(null)
   }, [cleanup])
 
-  function selectMethod(next: Method) {
+  function switchMethod(next: Method) {
+    if (next === method || phase === "connecting" || phase === "live") return
+    reset()
     setMethod(next)
-    setPhoneError(null)
   }
 
   const speak = React.useCallback(
@@ -347,7 +306,6 @@ function AgentReadyStrip() {
   )
 
   const startTalk = React.useCallback(() => {
-    setMethod("talk")
     setPhase("connecting")
     track(Events.web_test_call_started, { agent_id: DEFAULT_AGENT.id, intent: intentId ?? "general" })
     after(1200, () => {
@@ -433,241 +391,232 @@ function AgentReadyStrip() {
     track(Events.test_outcome_selected, { outcome })
     if (outcome === "deploy") {
       document.getElementById("channels")?.scrollIntoView({ behavior: "smooth", block: "start" })
-      after(350, () => document.getElementById("deploy-recommended")?.focus())
     }
   }
 
   const connecting = phase === "connecting"
   const live = phase === "live"
-  // Engaged = the test is open. At rest (idle + talk) the strip is a quiet row.
-  const engaged = phase !== "idle" || method !== "talk"
   const liveUsedMin = (PLAN_USAGE.freeMinutesUsed + elapsed / 60).toFixed(1)
 
-  const statusText =
-    phase === "ended"
-      ? "Test ended"
-      : connecting
-        ? method === "getcall"
-          ? `Calling ${phoneNumber || "your phone"}…`
-          : "Connecting…"
-        : live
-          ? method === "talk"
-            ? speaking
-              ? `${DEFAULT_AGENT.name} is speaking`
-              : "Listening… tap Talk"
-            : "Connected — talk on your phone"
-          : method === "getcall"
-            ? "We'll ring your phone"
-            : "Dial in from your phone"
+  const statusBadge =
+    phase === "ended" ? "Test ended" : connecting ? "Connecting…" : live ? "Live" : "Ready to talk"
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      {/* Identity row — compact, always visible */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-5 py-3.5">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Your agent</span>
-        <span className="relative flex h-2 w-2 shrink-0">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-        </span>
-        <h2 className="text-base font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
-        <Badge variant="default" className="text-xs">Ready</Badge>
-        <span className="text-sm text-muted-foreground">{DEFAULT_AGENT.role ?? "General assistant"}</span>
-        <span className="hidden items-center gap-2 font-mono text-xs text-muted-foreground lg:flex">
-          <span>· {stackSummary(DEFAULT_AGENT)}</span>
-          <span className="inline-flex items-center gap-1"><Gauge className="h-3 w-3" />~{est.latencyMs}ms</span>
-          <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
-        </span>
-        <Button variant="ghost" size="sm" asChild className="ml-auto gap-1.5 text-muted-foreground hover:text-foreground">
-          <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-            <Pencil className="h-3.5 w-3.5" /> Edit agent
-          </Link>
-        </Button>
-      </div>
-
-      {/* Action zone — quiet at rest, opens the test on demand */}
-      {!engaged ? (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border px-5 py-4">
-          <Button className="gap-2" onClick={startTalk}>
-            <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Free, in your browser. Prefer a real call?{" "}
-            <button
-              type="button"
-              onClick={() => selectMethod("getcall")}
-              className="font-medium text-foreground underline-offset-2 hover:underline"
-            >
-              Call my phone
-            </button>{" "}
-            ·{" "}
-            <button
-              type="button"
-              onClick={() => selectMethod("callin")}
-              className="font-medium text-foreground underline-offset-2 hover:underline"
-            >
-              get a test number
-            </button>
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-3 border-t border-border px-5 py-5 text-center">
-          <div>
+      {/* Top — orb + identity (left) · what should it do (right) */}
+      <div className="flex flex-col gap-6 p-6 md:flex-row md:items-start md:justify-between">
+        <div className="flex items-center gap-5">
+          <div className="shrink-0">
             {connecting ? (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
               </div>
             ) : (
-              <AgentSphere size={80} active={live && (method !== "talk" || speaking)} />
+              <AgentSphere size={128} active={live && (method !== "talk" || speaking)} />
             )}
           </div>
-
-          <p className="text-xs font-medium text-muted-foreground">{statusText}</p>
-
-          {/* idle — call my phone */}
-          {phase === "idle" && method === "getcall" && (
-            <div className="w-full max-w-xs space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  aria-label="Your phone number"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    setPhoneNumber(e.target.value)
-                    if (phoneError) setPhoneError(null)
-                  }}
-                  inputMode="tel"
-                  placeholder="+1 (555) 123-4567"
-                  aria-invalid={!!phoneError}
-                  onKeyDown={(e) => e.key === "Enter" && startGetCall()}
-                />
-                <Button onClick={startGetCall} className="shrink-0 gap-1.5">
-                  <PhoneCall className="h-4 w-4" /> Call me
-                </Button>
-              </div>
-              {phoneError && <p role="alert" className="text-left text-xs text-destructive">{phoneError}</p>}
-              <button type="button" onClick={() => selectMethod("talk")} className="text-xs text-muted-foreground hover:text-foreground">
-                ← Back
-              </button>
+          <div>
+            <Badge variant="outline" className="gap-1.5 text-xs font-medium">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
+              {statusBadge}
+            </Badge>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
+            <p className="text-sm text-muted-foreground">{DEFAULT_AGENT.role ?? "General assistant"}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" />{est.latencyMs}ms</span>
+              <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
+              <span className="inline-flex items-center gap-1"><Layers className="h-3.5 w-3.5" />{stackSummary(DEFAULT_AGENT)}</span>
             </div>
-          )}
+          </div>
+        </div>
 
-          {/* idle — dial a number */}
-          {phase === "idle" && method === "callin" && (
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-base font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
-                <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
-                  {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Call this sandbox line from your phone — free while testing.</p>
-              <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
-                  <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
-                </Button>
-                <button type="button" onClick={() => selectMethod("talk")} className="text-xs text-muted-foreground hover:text-foreground">
-                  ← Back
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* connecting */}
-          {connecting && (
-            <Button className="gap-2" disabled>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {method === "talk" ? "Connecting…" : method === "getcall" ? "Calling…" : "Connecting…"}
-            </Button>
-          )}
-
-          {/* live */}
-          {live && (
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2">
-                {method === "talk" && (
-                  <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
-                    <Mic className="h-3.5 w-3.5" /> Talk
-                  </Button>
-                )}
-                <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
-                  <PhoneOff className="h-3.5 w-3.5" /> End test
-                </Button>
-              </div>
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{method === "talk" ? "Agora RTC" : "On your phone"}</span>
-                <span>·</span>
-                <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
-                <span>·</span>
-                <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
-              </p>
-            </div>
-          )}
-
-          {/* ended — the hinge back UP to deploy */}
-          {phase === "ended" && (
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-sm">
-                <span className="font-semibold">Sounds good?</span>{" "}
-                <span className="text-muted-foreground">Deploy {DEFAULT_AGENT.name}, or fine-tune it first.</span>
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
-                  Deploy it <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
-                  <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-                    <Pencil className="h-3.5 w-3.5" /> Tweak
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
-                  <RotateCcw className="h-3.5 w-3.5" /> Test again
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Transcript (talk only) */}
-          {method === "talk" && (live || phase === "ended") && lines.length > 0 && (
-            <div className="mt-1 max-h-40 w-full max-w-md space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-left">
-              {lines.map((l, i) => (
-                <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
-                  <span
-                    className={cn(
-                      "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
-                      l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-                    )}
-                  >
-                    {l.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* What should it do? — re-skin, only while engaged */}
-          <div className="mt-1 flex flex-wrap items-center justify-center gap-2 border-t border-border pt-3">
-            <span className="text-xs font-medium text-muted-foreground">What should it do?</span>
+        {/* What should it do? — re-skin radios */}
+        <div className="md:w-56 md:shrink-0">
+          <h3 className="text-base font-semibold">What should it do?</h3>
+          <div className="mt-2 space-y-1.5" role="radiogroup" aria-label="What should it do?">
             {INTENTS.map((i) => {
               const active = intentId === i.id
               return (
                 <button
                   key={i.id}
                   type="button"
+                  role="radio"
+                  aria-checked={active}
                   onClick={() => pickIntent(i.id)}
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
-                    active
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                  )}
+                  className="flex w-full items-center gap-2.5 text-left text-sm"
                 >
-                  {active && <Check className="h-3 w-3" />}
-                  {i.label}
+                  <span
+                    className={cn(
+                      "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                      active ? "border-primary" : "border-muted-foreground/40",
+                    )}
+                  >
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                  </span>
+                  <span className={active ? "text-foreground" : "text-muted-foreground"}>{i.label}</span>
                 </button>
               )
             })}
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Test tabs */}
+      <div className="flex border-t border-border">
+        {TEST_TABS.map((t) => {
+          const active = method === t.id
+          return (
+            <button
+              key={t.id}
+              type="button"
+              disabled={connecting || live}
+              onClick={() => switchMethod(t.id)}
+              className={cn(
+                "-mb-px flex-1 border-b-2 px-4 py-3 text-sm font-medium transition-colors disabled:opacity-50",
+                active
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tab content */}
+      <div className="px-6 py-5">
+        {/* idle — talk */}
+        {phase === "idle" && method === "talk" && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Button className="gap-2" onClick={startTalk}>
+              <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
+            </Button>
+            <p className="text-sm text-muted-foreground">Talk to it right here in your browser — uses your free minutes.</p>
+          </div>
+        )}
+
+        {/* idle — get a call */}
+        {phase === "idle" && method === "getcall" && (
+          <div className="max-w-lg space-y-2">
+            <label htmlFor="test-phone" className="text-sm font-medium">Your phone number</label>
+            <div className="flex gap-2">
+              <Input
+                id="test-phone"
+                value={phoneNumber}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value)
+                  if (phoneError) setPhoneError(null)
+                }}
+                inputMode="tel"
+                placeholder="+1 (555) 123-4567"
+                aria-invalid={!!phoneError}
+                onKeyDown={(e) => e.key === "Enter" && startGetCall()}
+              />
+              <Button onClick={startGetCall} className="shrink-0 gap-1.5">
+                <PhoneCall className="h-4 w-4" /> Call me
+              </Button>
+            </div>
+            {phoneError ? (
+              <p role="alert" className="text-sm text-destructive">{phoneError}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {DEFAULT_AGENT.name} rings your phone so you can hear it on a real call. Uses your free minutes.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* idle — call in */}
+        {phase === "idle" && method === "callin" && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Dial this number from your phone</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-mono text-lg font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={copyNumber}>
+                {copied ? <><Check className="h-3.5 w-3.5" /> Copied</> : <><Copy className="h-3.5 w-3.5" /> Copy</>}
+              </Button>
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={simulateCallIn}>
+                <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">It's a sandbox line routed to {DEFAULT_AGENT.name} — free while you're testing.</p>
+          </div>
+        )}
+
+        {/* connecting */}
+        {connecting && (
+          <Button className="gap-2" disabled>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {method === "getcall" ? "Calling your phone…" : "Connecting…"}
+          </Button>
+        )}
+
+        {/* live */}
+        {live && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {method === "talk" && (
+              <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
+                <Mic className="h-3.5 w-3.5" /> Talk
+              </Button>
+            )}
+            <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
+              <PhoneOff className="h-3.5 w-3.5" /> End test
+            </Button>
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{method === "talk" ? "Agora RTC" : "On your phone"}</span>
+              <span>·</span>
+              <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
+              <span>·</span>
+              <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
+            </p>
+          </div>
+        )}
+
+        {/* ended — hinge back up to deploy */}
+        {phase === "ended" && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="text-sm">
+              <span className="font-semibold">Sounds good?</span>{" "}
+              <span className="text-muted-foreground">Deploy {DEFAULT_AGENT.name}, or fine-tune it first.</span>
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
+                Deploy it <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
+                <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+                  <Pencil className="h-3.5 w-3.5" /> Tweak
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
+                <RotateCcw className="h-3.5 w-3.5" /> Test again
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Transcript (talk only) */}
+        {method === "talk" && (live || phase === "ended") && lines.length > 0 && (
+          <div className="mt-4 max-h-44 w-full max-w-lg space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3">
+            {lines.map((l, i) => (
+              <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
+                <span
+                  className={cn(
+                    "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
+                    l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                  )}
+                >
+                  {l.text}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
