@@ -18,12 +18,15 @@ import {
   Copy,
   Gauge,
   RotateCcw,
+  Upload,
+  Plus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import {
   getDefaultAgent,
   stackSummary,
@@ -37,18 +40,14 @@ import { track, Events } from "@/lib/analytics"
 /**
  * GoLiveHome — the "Go Live" home (Deploy hub Overview).
  * ────────────────────────────────────────────────────────────────
- * The agent is auto-provisioned and live. The home walks the new user through
- * the real journey (2026-06-19, journey pass):
+ * 2026-06-19 UX optimization pass (/optimize + /shadcn): lower cognitive load,
+ * deploy above the fold, and three ways to start an agent surfaced up front —
+ * test the auto-provisioned Aria, IMPORT one from a competitor, or build new.
  *
- *   1 · TEST    — call the agent three ways: in-browser, "get a call" (agent
- *                 dials your phone — outbound), or "call in" (you dial a sandbox
- *                 number — inbound). Each is a proper stateful flow.
- *   ↳   TWEAK   — reskin in one tap ("what should it do?") or open the editor.
- *   2 · DEPLOY  — happy with it? put it on a channel (campaign · number · web).
- *
- * The test widget mirrors the two deploy paths: "get a call" → outbound campaign,
- * "call in" → answer-a-number. Believe-then-scale: minutes consumed → free tier
- * exhausted → paid (the meter is visible from minute one).
+ *   START   — Import agent (migrate) · New agent · or just test the live Aria
+ *   TEST    — compact card: Talk here · Get a call · Call in (stateful)
+ *   ↳ TWEAK — quiet "Tailor it" chips + Edit agent
+ *   DEPLOY  — 3 compact channel cards, visible without scrolling
  */
 
 // ─── 1-tap intent re-skin ──────────────────────────────────────────────────────
@@ -117,69 +116,50 @@ const TEST_MODES: { id: Mode; label: string; icon: React.ComponentType<{ classNa
 export function GoLiveHome() {
   const agentParam = `?agent=${DEFAULT_AGENT.id}`
 
-  // Default agent is provisioned & live on arrival — record it once.
   React.useEffect(() => {
     track(Events.default_agent_provisioned, { agent_id: DEFAULT_AGENT.id })
   }, [])
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <div className="mx-auto w-full max-w-5xl space-y-8">
+      <div className="mx-auto w-full max-w-5xl space-y-6">
         <HomeHeader />
-
-        {/* 1 · Test — call the live agent three ways, tweak until it's right. */}
-        <section className="space-y-3">
-          <SectionHeading
-            step={1}
-            title="Test your agent"
-            hint={`Call ${DEFAULT_AGENT.name} over the web or a real phone, then tweak it until it's right.`}
-          />
-          <TestAgent />
-        </section>
-
-        {/* 2 · Deploy — put it on a channel (anchor for the "Deploy it" hinge). */}
-        <PutToWork agentParam={agentParam} />
-
+        <TestAgent />
+        <PutItLive agentParam={agentParam} />
         <AlreadyLive />
       </div>
     </main>
   )
 }
 
-// ─── Section heading (shared rhythm + optional step chip) ────────────────────────
-
-function SectionHeading({ step, title, hint }: { step?: number; title: string; hint?: string }) {
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-2">
-        {step !== undefined && (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold tabular-nums text-primary">
-            {step}
-          </span>
-        )}
-        <h2 className="text-base font-semibold">{title}</h2>
-      </div>
-      {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
-    </div>
-  )
-}
-
-// ─── Header ──────────────────────────────────────────────────────────────────────
-// Free-minutes meter moved to the account menu + avatar ring (2026-06-19).
+// ─── Header — greeting + the three ways to start ────────────────────────────────
 
 function HomeHeader() {
   return (
-    <div className="space-y-1">
-      <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-      <p className="max-w-prose text-sm text-muted-foreground">
-        {DEFAULT_AGENT.name} is live and ready. Test it over the web or a real phone, fine-tune it,
-        then put it on real traffic.
-      </p>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="text-sm text-muted-foreground">
+          {DEFAULT_AGENT.name} is live — test it, tweak it, then put it live.
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <ImportAgentSheet>
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <Upload className="h-4 w-4" /> Import agent
+          </Button>
+        </ImportAgentSheet>
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
+          <Link href="/agents/new/edit">
+            <Plus className="h-4 w-4" /> New agent
+          </Link>
+        </Button>
+      </div>
     </div>
   )
 }
 
-// ─── Test the agent — 3 stateful modes + the test→tweak→deploy hinge ─────────────
+// ─── Test the agent — compact card, 3 stateful modes, tweak→deploy hinge ─────────
 
 function TestAgent() {
   const [mode, setMode] = React.useState<Mode>("talk")
@@ -237,7 +217,6 @@ function TestAgent() {
     setMode(next)
   }
 
-  // Agent "speaks" a line: brief pulse on the orb, then commit to the transcript.
   const speak = React.useCallback(
     (text: string) => {
       setSpeaking(true)
@@ -358,82 +337,40 @@ function TestAgent() {
               : "Listening… tap Talk"
             : "Connected — talk on your phone"
           : mode === "talk"
-            ? "Ready when you are"
+            ? "Talk to it right here, free"
             : mode === "getcall"
-              ? "Enter your number to get a call"
-              : "Call the number to reach it"
+              ? "We'll ring your phone"
+              : "Dial in from your phone"
 
   return (
-    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2">
-      {/* Left — agent identity + 1-tap re-skin (the "tweak") */}
-      <div className="bg-card p-6">
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-          <span className="relative flex h-2 w-2">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      {/* Identity strip — compact, two lines */}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-5 py-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="relative flex h-2 w-2 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          Live · ready to test
-        </div>
-
-        <div className="mt-3 flex items-center gap-2">
-          <h3 className="text-2xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h3>
+          <h2 className="text-base font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
           <Badge variant="default" className="text-xs">Ready</Badge>
+          <span className="truncate text-sm text-muted-foreground">{role}</span>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">{role}</p>
-
-        {/* Stack + speed + cost — the tradeoff, before you commit */}
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="font-mono">{stackSummary(DEFAULT_AGENT)}</span>
-          <span className="inline-flex items-center gap-1">
-            <Gauge className="h-3 w-3" /> ~{est.latencyMs}ms
+        <div className="flex items-center gap-3">
+          <span className="hidden items-center gap-2 font-mono text-xs text-muted-foreground sm:flex">
+            <span>{stackSummary(DEFAULT_AGENT)}</span>
+            <span className="inline-flex items-center gap-1"><Gauge className="h-3 w-3" />~{est.latencyMs}ms</span>
+            <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
           </span>
-          <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
+          <Button variant="ghost" size="sm" asChild className="h-7 gap-1.5 px-2 text-xs text-muted-foreground hover:text-foreground">
+            <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </Link>
+          </Button>
         </div>
-
-        <div className="mt-5">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            What should it do?
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {INTENTS.map((i) => {
-              const active = intentId === i.id
-              return (
-                <button
-                  key={i.id}
-                  type="button"
-                  onClick={() => pickIntent(i.id)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                    active
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                  )}
-                >
-                  {active && <Check className="h-3 w-3" />}
-                  {i.label}
-                </button>
-              )
-            })}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {intent ? (
-              <>Set up for <span className="text-foreground">{intent.label.toLowerCase()}</span>. Change it anytime.</>
-            ) : (
-              "Pick a job to tailor it — or keep it general."
-            )}
-          </p>
-        </div>
-
-        <Button variant="ghost" size="sm" asChild className="mt-5 gap-1.5 px-0 text-xs text-muted-foreground hover:text-foreground">
-          <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-            <Pencil className="h-3.5 w-3.5" /> Edit the full agent
-          </Link>
-        </Button>
       </div>
 
-      {/* Right — the test stage: pick a mode, each a proper stateful flow */}
-      <div className="flex flex-col bg-card/40 p-6">
-        {/* Mode switcher — reveals what each test needs (locked during a call) */}
+      {/* Stage — mode switcher + orb beside controls */}
+      <div className="p-5">
         <div className="inline-flex w-full rounded-lg border border-border bg-background p-1">
           {TEST_MODES.map((m) => {
             const active = mode === m.id
@@ -454,256 +391,252 @@ function TestAgent() {
           })}
         </div>
 
-        <div className="mt-5 flex flex-1 flex-col items-center">
-          <p className="text-center text-xs font-medium text-muted-foreground">{statusText}</p>
-
-          {/* Orb / connecting spinner */}
-          <div className="my-5 flex items-center justify-center">
+        <div className="mt-4 flex items-center gap-5">
+          <div className="shrink-0">
             {connecting ? (
-              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : (
-              <AgentSphere size={128} active={live && (mode !== "talk" || speaking)} />
+              <AgentSphere size={96} active={live && (mode !== "talk" || speaking)} />
             )}
           </div>
 
-          {/* ── idle bodies (mode-specific) ── */}
-          {phase === "idle" && mode === "talk" && (
-            <>
-              <Button size="lg" className="gap-2" onClick={startTalk}>
-                <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
-              </Button>
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                No phone number needed — talk to it right here, free.
-              </p>
-            </>
-          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-muted-foreground">{statusText}</p>
 
-          {phase === "idle" && mode === "getcall" && (
-            <div className="w-full max-w-xs space-y-2">
-              <label htmlFor="test-phone" className="text-xs font-medium text-muted-foreground">
-                Your phone number
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  id="test-phone"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    setPhoneNumber(e.target.value)
-                    if (phoneError) setPhoneError(null)
-                  }}
-                  inputMode="tel"
-                  placeholder="+1 (555) 123-4567"
-                  aria-invalid={!!phoneError}
-                  onKeyDown={(e) => e.key === "Enter" && startGetCall()}
-                />
-                <Button onClick={startGetCall} className="shrink-0 gap-1.5">
-                  <PhoneCall className="h-4 w-4" /> Call me
-                </Button>
-              </div>
-              {phoneError ? (
-                <p className="text-xs text-destructive">{phoneError}</p>
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  {DEFAULT_AGENT.name} rings your phone so you can hear it on a real call. Uses your free minutes.
-                </p>
-              )}
-            </div>
-          )}
-
-          {phase === "idle" && mode === "callin" && (
-            <div className="w-full max-w-xs space-y-3 text-center">
-              <div className="rounded-lg border border-border bg-background p-3">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Dial this number
-                </p>
-                <div className="mt-1.5 flex items-center justify-center gap-2">
-                  <span className="font-mono text-lg font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
-                  <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
-                    {copied ? (
-                      <><Check className="h-3 w-3" /> Copied</>
-                    ) : (
-                      <><Copy className="h-3 w-3" /> Copy</>
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Call this sandbox line from your phone to reach {DEFAULT_AGENT.name} — free while you&apos;re testing.
-              </p>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
-                <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
-              </Button>
-            </div>
-          )}
-
-          {/* ── connecting ── */}
-          {connecting && (
-            <Button size="lg" className="gap-2" disabled>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {mode === "talk" ? "Connecting…" : mode === "getcall" ? "Calling your phone…" : "Connecting your call…"}
-            </Button>
-          )}
-
-          {/* ── live ── */}
-          {live && (
-            <div className="flex items-center gap-2">
-              {mode === "talk" && (
-                <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
-                  <Mic className="h-3.5 w-3.5" /> Talk
+            <div className="mt-2">
+              {/* idle — talk */}
+              {phase === "idle" && mode === "talk" && (
+                <Button className="gap-2" onClick={startTalk}>
+                  <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
                 </Button>
               )}
-              <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
-                <PhoneOff className="h-3.5 w-3.5" /> End test
-              </Button>
-            </div>
-          )}
 
-          {live && (
-            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                </span>
-                {mode === "talk" ? "Agora RTC" : "On your phone"}
-              </span>
-              <span>·</span>
-              <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
-              <span>·</span>
-              <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
-            </div>
-          )}
+              {/* idle — get a call */}
+              {phase === "idle" && mode === "getcall" && (
+                <div className="space-y-1.5">
+                  <div className="flex gap-2">
+                    <Input
+                      aria-label="Your phone number"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        setPhoneNumber(e.target.value)
+                        if (phoneError) setPhoneError(null)
+                      }}
+                      inputMode="tel"
+                      placeholder="+1 (555) 123-4567"
+                      aria-invalid={!!phoneError}
+                      onKeyDown={(e) => e.key === "Enter" && startGetCall()}
+                      className="max-w-[12rem]"
+                    />
+                    <Button onClick={startGetCall} className="shrink-0 gap-1.5">
+                      <PhoneCall className="h-4 w-4" /> Call me
+                    </Button>
+                  </div>
+                  {phoneError && <p className="text-xs text-destructive">{phoneError}</p>}
+                </div>
+              )}
 
-          {/* ── ended → the test→tweak→deploy hinge ── */}
-          {phase === "ended" && (
-            <div className="w-full max-w-xs space-y-3 text-center">
-              <div>
-                <p className="text-sm font-semibold">How did that go?</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Happy with {DEFAULT_AGENT.name}? Put it live — or fine-tune it first.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Button className="w-full gap-1.5" onClick={() => chooseOutcome("deploy")}>
-                  Deploy it <ArrowRight className="h-4 w-4" />
+              {/* idle — call in */}
+              {phase === "idle" && mode === "callin" && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-base font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
+                    <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
+                      {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
+                    </Button>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
+                    <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
+                  </Button>
+                </div>
+              )}
+
+              {/* connecting */}
+              {connecting && (
+                <Button className="gap-2" disabled>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {mode === "talk" ? "Connecting…" : mode === "getcall" ? "Calling…" : "Connecting…"}
                 </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild className="flex-1 gap-1.5" onClick={() => chooseOutcome("tweak")}>
-                    <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-                      <Pencil className="h-3.5 w-3.5" /> Tweak
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 gap-1.5" onClick={reset}>
-                    <RotateCcw className="h-3.5 w-3.5" /> Test again
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* Transcript (talk mode only) */}
-          {mode === "talk" && (live || phase === "ended") && lines.length > 0 && (
-            <div className="mt-5 max-h-44 w-full space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3">
-              {lines.map((l, i) => (
-                <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
-                  <span
-                    className={cn(
-                      "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
-                      l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+              {/* live */}
+              {live && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {mode === "talk" && (
+                      <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
+                        <Mic className="h-3.5 w-3.5" /> Talk
+                      </Button>
                     )}
-                  >
-                    {l.text}
-                  </span>
+                    <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
+                      <PhoneOff className="h-3.5 w-3.5" /> End test
+                    </Button>
+                  </div>
+                  <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{mode === "talk" ? "Agora RTC" : "On your phone"}</span>
+                    <span>·</span>
+                    <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
+                    <span>·</span>
+                    <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
+                  </p>
                 </div>
-              ))}
+              )}
+
+              {/* ended — the hinge */}
+              {phase === "ended" && (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <span className="font-semibold">How did that go?</span>{" "}
+                    <span className="text-muted-foreground">Put it live, or fine-tune it first.</span>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
+                      Deploy it <ArrowRight className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
+                      <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+                        <Pencil className="h-3.5 w-3.5" /> Tweak
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
+                      <RotateCcw className="h-3.5 w-3.5" /> Test again
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
+
+        {/* Transcript (talk only) */}
+        {mode === "talk" && (live || phase === "ended") && lines.length > 0 && (
+          <div className="mt-4 max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3">
+            {lines.map((l, i) => (
+              <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
+                <span
+                  className={cn(
+                    "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
+                    l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                  )}
+                >
+                  {l.text}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Tailor footer — quiet 1-tap re-skin */}
+      <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-5 py-3">
+        <span className="text-xs font-medium text-muted-foreground">Tailor it:</span>
+        {INTENTS.map((i) => {
+          const active = intentId === i.id
+          return (
+            <button
+              key={i.id}
+              type="button"
+              onClick={() => pickIntent(i.id)}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                active
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+              )}
+            >
+              {active && <Check className="h-3 w-3" />}
+              {i.label}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
 }
 
-// ─── 2 · Put it live — the deploy step (anchor target for the "Deploy it" hinge) ──
+// ─── Put it live — 3 compact channel cards (above the fold) ──────────────────────
 
-function PutToWork({ agentParam }: { agentParam: string }) {
+function PutItLive({ agentParam }: { agentParam: string }) {
   return (
-    <section id="deploy" className="space-y-3 scroll-mt-6">
-      <SectionHeading
-        step={2}
-        title="Put it live"
-        hint="Happy with it? Deploy your agent to a calling campaign, a phone number, or your website."
-      />
-
-      {/* Flagship — outbound campaign (fastest path to paid volume) */}
-      <Link
-        href={`/deploy/batch-calls/new${agentParam}`}
-        onClick={() => track(Events.put_to_work_selected, { channel: "campaign" })}
-        className="group flex items-start gap-4 rounded-xl border border-primary/40 bg-primary/5 p-5 transition-all hover:border-primary/60 hover:shadow-sm"
-      >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <PhoneOutgoing className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold">Launch a campaign</h3>
-            <Badge variant="secondary" className="text-xs">Recommended</Badge>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Upload a list of contacts and your agent calls each one — hundreds of calls in minutes.
-          </p>
-        </div>
-        <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
-      </Link>
-
-      {/* Secondary — always-on channels */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <SecondaryChannel
+    <section id="deploy" className="scroll-mt-6 space-y-3">
+      <div className="flex items-baseline gap-2">
+        <h2 className="text-base font-semibold">Put it live</h2>
+        <span className="text-sm text-muted-foreground">— pick a channel when it's ready</span>
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <DeployCard
+          href={`/deploy/batch-calls/new${agentParam}`}
+          channel="campaign"
+          icon={PhoneOutgoing}
+          title="Launch a campaign"
+          desc="Upload contacts — your agent calls each one."
+          recommended
+        />
+        <DeployCard
           href={`/deploy/inbound/new${agentParam}`}
           channel="inbound"
           icon={PhoneIncoming}
-          title="Answer a phone number"
-          desc="Put your agent on a number so it picks up every inbound call, 24/7."
+          title="Answer a number"
+          desc="Picks up every inbound call, 24/7."
         />
-        <SecondaryChannel
+        <DeployCard
           href="/deploy/web-widget"
           channel="web"
           icon={Globe}
           title="Embed on your site"
-          desc="Drop a click-to-talk widget on your website — no phone number needed."
+          desc="Click-to-talk widget — no number needed."
         />
       </div>
     </section>
   )
 }
 
-function SecondaryChannel({
+function DeployCard({
   href,
   channel,
   icon: Icon,
   title,
   desc,
+  recommended,
 }: {
   href: string
-  channel: "inbound" | "web"
+  channel: "campaign" | "inbound" | "web"
   icon: React.ComponentType<{ className?: string }>
   title: string
   desc: string
+  recommended?: boolean
 }) {
   return (
     <Link
       href={href}
       onClick={() => track(Events.put_to_work_selected, { channel })}
-      className="group flex flex-col gap-2 rounded-lg border border-border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-sm"
+      className={cn(
+        "group flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm",
+        recommended
+          ? "border-primary/40 bg-primary/5 hover:border-primary/60"
+          : "border-border bg-card hover:border-primary/40",
+      )}
     >
       <div className="flex items-center justify-between">
-        <Icon className="h-5 w-5 text-foreground" />
-        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        <div
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg",
+            recommended ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+        {recommended && <Badge variant="secondary" className="text-xs">Recommended</Badge>}
       </div>
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <p className="text-xs text-muted-foreground">{desc}</p>
+      <div>
+        <h3 className="flex items-center gap-1 text-sm font-semibold">
+          {title}
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        </h3>
+        <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+      </div>
     </Link>
   )
 }

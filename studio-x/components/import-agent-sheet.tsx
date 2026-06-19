@@ -16,6 +16,8 @@ import { CodeBlock } from "@/components/code-block"
 import { toast } from "sonner"
 import { track } from "@/lib/analytics"
 
+const SOURCES = ["Vapi", "Retell", "ElevenLabs", "Bland", "Generic JSON"] as const
+
 const EXAMPLE_CONFIG = `{
   "name": "Acme Support v3",
   "language": "en-US",
@@ -32,6 +34,7 @@ const EXAMPLE_CONFIG = `{
 export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
   const [pasted, setPasted] = React.useState("")
   const [url, setUrl] = React.useState("")
+  const [source, setSource] = React.useState<(typeof SOURCES)[number]>("Generic JSON")
   const [validation, setValidation] = React.useState<
     { ok: boolean; agentName?: string; warnings?: string[] } | null
   >(null)
@@ -56,7 +59,7 @@ export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
   }
 
   const handleImport = () => {
-    track("agent_imported" as never, { source: "paste" } as never)
+    track("agent_imported" as never, { source } as never)
     toast.success("Agent imported", {
       description: `${validation?.agentName ?? "New agent"} is ready in your agents list as a draft.`,
     })
@@ -69,12 +72,38 @@ export function ImportAgentSheet({ children }: { children: React.ReactNode }) {
         <SheetHeader>
           <SheetTitle>Import an Agent</SheetTitle>
           <SheetDescription>
-            Bring an existing config from another project, a backup, or a teammate's export.
-            We support JSON exports today; YAML support is coming.
+            Migrating from another platform? Bring your agent from Vapi, Retell, ElevenLabs, Bland —
+            or any JSON export. We map voice, model, prompt, and tools to an Agora agent. (YAML soon.)
           </SheetDescription>
         </SheetHeader>
 
         <div className="px-6 space-y-5">
+          {/* Coming from — where the user is migrating from */}
+          <div className="space-y-2">
+            <Label>Coming from</Label>
+            <div className="flex flex-wrap gap-2">
+              {SOURCES.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSource(s)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    source === s
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {source === "Generic JSON"
+                ? "Paste any agent config as JSON below."
+                : `Export your ${source} agent and paste its config below — we'll map it to an Agora agent.`}
+            </p>
+          </div>
+
           <Tabs defaultValue="paste">
             <TabsList className="w-full">
               <TabsTrigger value="paste" className="flex-1 gap-1.5">
