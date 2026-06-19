@@ -32,6 +32,11 @@ export const Events = {
   agent_intent_selected:      "agent_intent_selected",       // 1-tap "what should it do?" re-skin
   web_test_call_started:      "web_test_call_started",        // ★ moment of belief (in-browser)
   web_test_call_ended:        "web_test_call_ended",          // { duration_sec }
+  phone_test_call_started:    "phone_test_call_started",      // { direction } agent↔your real phone
+  phone_test_call_connected:  "phone_test_call_connected",    // { direction }
+  phone_test_call_ended:      "phone_test_call_ended",        // { direction, duration_sec }
+  test_number_copied:         "test_number_copied",           // dial-in sandbox number copied
+  test_outcome_selected:      "test_outcome_selected",        // { outcome } the test→tweak→deploy hinge
   agent_published:            "agent_published",              // mid-funnel signal (no longer north star)
   put_to_work_selected:       "put_to_work_selected",         // { channel: inbound|campaign|web }
   deployment_went_live:       "deployment_went_live",         // ★ NORTH STAR — traffic on a live deployment
@@ -114,6 +119,10 @@ export type EventPayloads = {
   project_switched:            { from_project_id: string; to_project_id: string }
   insights_cross_link_clicked: { from: "monitor" | "calls" | "usage"; to: "monitor" | "calls" | "usage" }
   quota_warning_clicked:       { meter: string; pct_used: number }
+  phone_test_call_started:     { direction: "outbound" | "inbound" }
+  phone_test_call_connected:   { direction: "outbound" | "inbound" }
+  phone_test_call_ended:       { direction: "outbound" | "inbound"; duration_sec: number }
+  test_outcome_selected:       { outcome: "tweak" | "deploy" }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment"; target_id: string; section: string; surface: "call_sheet" | "queue" }

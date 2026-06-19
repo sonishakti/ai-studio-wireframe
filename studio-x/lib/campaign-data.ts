@@ -247,6 +247,24 @@ export function stackSummary(a: Agent): string {
   return `${a.stack.llm.model} · ${a.stack.asr.model} · ${a.stack.tts.voice}`
 }
 
+/** Rough speed + per-minute cost for a stack preset — surfaced on the Go Live
+ *  home so users see the latency/cost tradeoff before they test or deploy.
+ *  Wireframe estimates (Agora bills per minute; vendor pass-through varies). */
+export const STACK_ESTIMATE: Record<StackPreset, { latencyMs: number; costPerMin: number }> = {
+  fastest: { latencyMs: 600, costPerMin: 0.14 },
+  balanced: { latencyMs: 800, costPerMin: 0.1 },
+  cheapest: { latencyMs: 1100, costPerMin: 0.06 },
+}
+
+export function stackEstimate(a: Agent): { latencyMs: number; costPerMin: number } {
+  return STACK_ESTIMATE[a.stack.preset]
+}
+
+/** Sandbox DID for the in-product "call in to test" flow — a free test line
+ *  routed straight to the agent during evaluation (no real number consumed).
+ *  Wireframe value. */
+export const TEST_INBOUND_NUMBER = "+1 (415) 555-0100"
+
 // ─── Plan usage (free-tier meter) ────────────────────────────────────────────
 //
 // Agora bills per minute; the free tier is 300 min/month (LEARNINGS §8). The Go

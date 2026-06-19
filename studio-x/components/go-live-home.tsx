@@ -13,31 +13,42 @@ import {
   Pencil,
   Check,
   Zap,
+  Phone,
+  PhoneCall,
+  Copy,
+  Gauge,
+  RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { AgentSphere } from "@/components/agent-test-panel"
 import {
   getDefaultAgent,
   stackSummary,
+  stackEstimate,
+  TEST_INBOUND_NUMBER,
   PLAN_USAGE,
   DEPLOYMENTS,
 } from "@/lib/campaign-data"
 import { track, Events } from "@/lib/analytics"
 
 /**
- * GoLiveHome — the first-run "Go Live" home (Deploy hub Overview).
+ * GoLiveHome — the "Go Live" home (Deploy hub Overview).
  * ────────────────────────────────────────────────────────────────
- * 2026-06-17 activation-revenue realignment. The agent is already provisioned
- * and live; the user's job is no longer "build an agent" but "hear it work, then
- * put it on real traffic." Believe-then-scale:
+ * The agent is auto-provisioned and live. The home walks the new user through
+ * the real journey (2026-06-19, journey pass):
  *
- *   BELIEVE  — talk to the live default agent in-browser (<60s, free minutes)
- *   SCALE    — "Put it to work" → launch a campaign (flagship) · number · widget
+ *   1 · TEST    — call the agent three ways: in-browser, "get a call" (agent
+ *                 dials your phone — outbound), or "call in" (you dial a sandbox
+ *                 number — inbound). Each is a proper stateful flow.
+ *   ↳   TWEAK   — reskin in one tap ("what should it do?") or open the editor.
+ *   2 · DEPLOY  — happy with it? put it on a channel (campaign · number · web).
  *
- * Revenue lives past the old "published" line: minutes consumed → free tier
- * exhausted → paid. The free-minutes meter is visible from minute one.
+ * The test widget mirrors the two deploy paths: "get a call" → outbound campaign,
+ * "call in" → answer-a-number. Believe-then-scale: minutes consumed → free tier
+ * exhausted → paid (the meter is visible from minute one).
  */
 
 // ─── 1-tap intent re-skin ──────────────────────────────────────────────────────
@@ -89,12 +100,19 @@ const INTENTS: Intent[] = [
   },
 ]
 
-// ─── talk state machine (wireframe — no real ASR/LLM/TTS) ───────────────────────
+// ─── test state machine (wireframe — no real ASR/LLM/TTS/telephony) ─────────────
 
-type Phase = "idle" | "connecting" | "live"
+type Mode = "talk" | "getcall" | "callin"
+type Phase = "idle" | "connecting" | "live" | "ended"
 type Line = { role: "agent" | "you"; text: string }
 
 const DEFAULT_AGENT = getDefaultAgent()
+
+const TEST_MODES: { id: Mode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "talk", label: "Talk here", icon: Mic },
+  { id: "getcall", label: "Get a call", icon: PhoneCall },
+  { id: "callin", label: "Call in", icon: Phone },
+]
 
 export function GoLiveHome() {
   const agentParam = `?agent=${DEFAULT_AGENT.id}`
@@ -109,15 +127,17 @@ export function GoLiveHome() {
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <HomeHeader />
 
-        {/* Get started — believe-then-scale: hear the live agent, then deploy it. */}
+        {/* 1 · Test — call the live agent three ways, tweak until it's right. */}
         <section className="space-y-3">
           <SectionHeading
-            title="Get started"
-            hint={`Hear ${DEFAULT_AGENT.name} work, then put it on real traffic — no setup needed.`}
+            step={1}
+            title="Test your agent"
+            hint={`Call ${DEFAULT_AGENT.name} over the web or a real phone, then tweak it until it's right.`}
           />
-          <HeroTalk />
+          <TestAgent />
         </section>
 
+        {/* 2 · Deploy — put it on a channel (anchor for the "Deploy it" hinge). */}
         <PutToWork agentParam={agentParam} />
 
         <AlreadyLive />
@@ -126,18 +146,25 @@ export function GoLiveHome() {
   )
 }
 
-// ─── Section heading (shared rhythm across the home) ────────────────────────────
+// ─── Section heading (shared rhythm + optional step chip) ────────────────────────
 
-function SectionHeading({ title, hint }: { title: string; hint?: string }) {
+function SectionHeading({ step, title, hint }: { step?: number; title: string; hint?: string }) {
   return (
     <div className="space-y-1">
-      <h2 className="text-base font-semibold">{title}</h2>
+      <div className="flex items-center gap-2">
+        {step !== undefined && (
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold tabular-nums text-primary">
+            {step}
+          </span>
+        )}
+        <h2 className="text-base font-semibold">{title}</h2>
+      </div>
       {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
     </div>
   )
 }
 
-// ─── Free-minutes meter ─────────────────────────────────────────────────────────
+// ─── Header + free-minutes meter ─────────────────────────────────────────────────
 
 function HomeHeader() {
   const pct = Math.min(
@@ -151,7 +178,8 @@ function HomeHeader() {
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
         <p className="max-w-prose text-sm text-muted-foreground">
-          {DEFAULT_AGENT.name} is live and ready. Hear it work, then put it on real traffic.
+          {DEFAULT_AGENT.name} is live and ready. Test it over the web or a real phone, fine-tune
+          it, then put it on real traffic.
         </p>
       </div>
 
@@ -183,15 +211,19 @@ function HomeHeader() {
   )
 }
 
-// ─── Hero: talk to the live default agent ───────────────────────────────────────
+// ─── Test the agent — 3 stateful modes + the test→tweak→deploy hinge ─────────────
 
-function HeroTalk() {
+function TestAgent() {
+  const [mode, setMode] = React.useState<Mode>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
   const [phase, setPhase] = React.useState<Phase>("idle")
   const [speaking, setSpeaking] = React.useState(false)
   const [elapsed, setElapsed] = React.useState(0)
   const [lines, setLines] = React.useState<Line[]>([])
   const [turns, setTurns] = React.useState(0)
+  const [phoneNumber, setPhoneNumber] = React.useState("")
+  const [phoneError, setPhoneError] = React.useState<string | null>(null)
+  const [copied, setCopied] = React.useState(false)
 
   const timers = React.useRef<number[]>([])
   const tick = React.useRef<number | null>(null)
@@ -199,6 +231,7 @@ function HeroTalk() {
   const intent = INTENTS.find((i) => i.id === intentId) ?? null
   const role = intent?.role ?? DEFAULT_AGENT.role ?? "General assistant"
   const greeting = intent?.greeting ?? DEFAULT_GREETING
+  const est = stackEstimate(DEFAULT_AGENT)
 
   const after = React.useCallback((ms: number, fn: () => void) => {
     const id = window.setTimeout(fn, ms)
@@ -216,6 +249,26 @@ function HeroTalk() {
 
   React.useEffect(() => cleanup, [cleanup])
 
+  const startTimer = React.useCallback(() => {
+    tick.current = window.setInterval(() => setElapsed((e) => e + 1), 1000)
+  }, [])
+
+  const reset = React.useCallback(() => {
+    cleanup()
+    setPhase("idle")
+    setSpeaking(false)
+    setElapsed(0)
+    setLines([])
+    setTurns(0)
+    setPhoneError(null)
+  }, [cleanup])
+
+  function switchMode(next: Mode) {
+    if (next === mode) return
+    reset()
+    setMode(next)
+  }
+
   // Agent "speaks" a line: brief pulse on the orb, then commit to the transcript.
   const speak = React.useCallback(
     (text: string) => {
@@ -226,26 +279,16 @@ function HeroTalk() {
     [after],
   )
 
-  const startCall = React.useCallback(() => {
-    if (phase !== "idle") return
+  // ── Talk here (in-browser, free) ──
+  const startTalk = React.useCallback(() => {
     setPhase("connecting")
     track(Events.web_test_call_started, { agent_id: DEFAULT_AGENT.id, intent: intentId ?? "general" })
     after(1200, () => {
       setPhase("live")
-      tick.current = window.setInterval(() => setElapsed((e) => e + 1), 1000)
+      startTimer()
       after(400, () => speak(greeting))
     })
-  }, [phase, intentId, greeting, after, speak])
-
-  const endCall = React.useCallback(() => {
-    cleanup()
-    track(Events.web_test_call_ended, { duration_sec: elapsed })
-    setPhase("idle")
-    setSpeaking(false)
-    setElapsed(0)
-    setLines([])
-    setTurns(0)
-  }, [cleanup, elapsed])
+  }, [intentId, greeting, after, speak, startTimer])
 
   const talk = React.useCallback(() => {
     if (phase !== "live" || speaking) return
@@ -267,36 +310,117 @@ function HeroTalk() {
     }
   }, [phase, speaking, turns, intent, after, speak])
 
+  // ── Get a call (outbound: agent → your phone) ──
+  const startGetCall = React.useCallback(() => {
+    if (digits(phoneNumber).length < 10) {
+      setPhoneError("Enter a valid phone number — at least 10 digits.")
+      return
+    }
+    setPhoneError(null)
+    setPhase("connecting")
+    track(Events.phone_test_call_started, { direction: "outbound" })
+    after(1800, () => {
+      setPhase("live")
+      startTimer()
+      track(Events.phone_test_call_connected, { direction: "outbound" })
+    })
+  }, [phoneNumber, after, startTimer])
+
+  // ── Call in (inbound: your phone → agent) ──
+  const copyNumber = React.useCallback(() => {
+    navigator.clipboard?.writeText(TEST_INBOUND_NUMBER).catch(() => {})
+    setCopied(true)
+    track(Events.test_number_copied)
+    after(1600, () => setCopied(false))
+  }, [after])
+
+  const simulateCallIn = React.useCallback(() => {
+    setPhase("connecting")
+    track(Events.phone_test_call_started, { direction: "inbound" })
+    after(1800, () => {
+      setPhase("live")
+      startTimer()
+      track(Events.phone_test_call_connected, { direction: "inbound" })
+    })
+  }, [after, startTimer])
+
+  // ── End (any mode) → the test→tweak→deploy hinge ──
+  const endTest = React.useCallback(() => {
+    cleanup()
+    setSpeaking(false)
+    if (mode === "talk") {
+      track(Events.web_test_call_ended, { duration_sec: elapsed })
+    } else {
+      track(Events.phone_test_call_ended, {
+        direction: mode === "getcall" ? "outbound" : "inbound",
+        duration_sec: elapsed,
+      })
+    }
+    setPhase("ended")
+  }, [cleanup, mode, elapsed])
+
   function pickIntent(id: string) {
     const next = intentId === id ? null : id
     setIntentId(next)
     if (next) track(Events.agent_intent_selected, { intent: next })
   }
 
+  function chooseOutcome(outcome: "tweak" | "deploy") {
+    track(Events.test_outcome_selected, { outcome })
+    if (outcome === "deploy") {
+      document.getElementById("deploy")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
+
+  const connecting = phase === "connecting"
+  const live = phase === "live"
   const liveUsedMin = (PLAN_USAGE.freeMinutesUsed + elapsed / 60).toFixed(1)
+
+  const statusText =
+    phase === "ended"
+      ? "Test ended"
+      : connecting
+        ? mode === "getcall"
+          ? `Calling ${phoneNumber || "your phone"}…`
+          : "Connecting…"
+        : live
+          ? mode === "talk"
+            ? speaking
+              ? `${DEFAULT_AGENT.name} is speaking`
+              : "Listening… tap Talk"
+            : "Connected — talk on your phone"
+          : mode === "talk"
+            ? "Ready when you are"
+            : mode === "getcall"
+              ? "Enter your number to get a call"
+              : "Call the number to reach it"
 
   return (
     <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-2">
-      {/* Left — identity + intent re-skin */}
+      {/* Left — agent identity + 1-tap re-skin (the "tweak") */}
       <div className="bg-card p-6">
         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          Ready to talk
+          Live · ready to test
         </div>
 
         <div className="mt-3 flex items-center gap-2">
-          <h2 className="text-2xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h2>
+          <h3 className="text-2xl font-semibold tracking-tight">{DEFAULT_AGENT.name}</h3>
           <Badge variant="default" className="text-xs">Ready</Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{role}</p>
-        <p className="mt-1 font-mono text-xs text-muted-foreground">{stackSummary(DEFAULT_AGENT)}</p>
 
-        <p className="mt-4 text-sm text-foreground/90">
-          No setup needed — talk to your agent now, then put it to work on calls or your website.
-        </p>
+        {/* Stack + speed + cost — the tradeoff, before you commit */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span className="font-mono">{stackSummary(DEFAULT_AGENT)}</span>
+          <span className="inline-flex items-center gap-1">
+            <Gauge className="h-3 w-3" /> ~{est.latencyMs}ms
+          </span>
+          <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
+        </div>
 
         <div className="mt-5">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -334,102 +458,215 @@ function HeroTalk() {
 
         <Button variant="ghost" size="sm" asChild className="mt-5 gap-1.5 px-0 text-xs text-muted-foreground hover:text-foreground">
           <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-            <Pencil className="h-3.5 w-3.5" /> Edit the agent
+            <Pencil className="h-3.5 w-3.5" /> Edit the full agent
           </Link>
         </Button>
       </div>
 
-      {/* Right — the orb + talk affordance */}
-      <div className="flex flex-col items-center bg-card/40 p-6">
-        <p className="text-xs font-medium text-muted-foreground">
-          {phase === "connecting" ? "Connecting…" : phase === "live" ? (speaking ? "Aria is speaking" : "Listening… tap to talk") : "Agent ready"}
-        </p>
-
-        <div className="my-5 flex items-center justify-center">
-          {phase === "connecting" ? (
-            <div className="flex h-[132px] w-[132px] items-center justify-center rounded-full bg-primary/10">
-              <Loader2 className="h-7 w-7 animate-spin text-primary" />
-            </div>
-          ) : (
-            <AgentSphere size={132} active={speaking} />
-          )}
+      {/* Right — the test stage: pick a mode, each a proper stateful flow */}
+      <div className="flex flex-col bg-card/40 p-6">
+        {/* Mode switcher — reveals what each test needs (locked during a call) */}
+        <div className="inline-flex w-full rounded-lg border border-border bg-background p-1">
+          {TEST_MODES.map((m) => {
+            const active = mode === m.id
+            return (
+              <button
+                key={m.id}
+                type="button"
+                disabled={connecting || live}
+                onClick={() => switchMode(m.id)}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
+                  active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <m.icon className="h-3.5 w-3.5" /> {m.label}
+              </button>
+            )
+          })}
         </div>
 
-        {phase === "idle" && (
-          <Button size="lg" className="gap-2" onClick={startCall}>
-            <Mic className="h-4 w-4" /> Talk to your agent
-          </Button>
-        )}
+        <div className="mt-5 flex flex-1 flex-col items-center">
+          <p className="text-center text-xs font-medium text-muted-foreground">{statusText}</p>
 
-        {phase === "live" && (
-          <div className="flex items-center gap-2">
-            <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
-              <Mic className="h-3.5 w-3.5" /> Talk
-            </Button>
-            <Button size="sm" variant="destructive" className="gap-1.5" onClick={endCall}>
-              <PhoneOff className="h-3.5 w-3.5" /> End
-            </Button>
-          </div>
-        )}
-
-        {phase === "connecting" && (
-          <Button size="lg" className="gap-2" disabled>
-            <Loader2 className="h-4 w-4 animate-spin" /> Connecting…
-          </Button>
-        )}
-
-        {phase === "idle" ? (
-          <p className="mt-3 text-center text-xs text-muted-foreground">
-            No phone number needed — talk to it right here.
-          </p>
-        ) : (
-          <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              </span>
-              Agora RTC
-            </span>
-            <span>·</span>
-            <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
-            <span>·</span>
-            <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
-          </div>
-        )}
-
-        {/* Transcript */}
-        {lines.length > 0 && (
-          <div className="mt-5 max-h-44 w-full space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3">
-            {lines.map((l, i) => (
-              <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
-                <span
-                  className={cn(
-                    "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
-                    l.role === "you"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground",
-                  )}
-                >
-                  {l.text}
-                </span>
+          {/* Orb / connecting spinner */}
+          <div className="my-5 flex items-center justify-center">
+            {connecting ? (
+              <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
               </div>
-            ))}
+            ) : (
+              <AgentSphere size={128} active={live && (mode !== "talk" || speaking)} />
+            )}
           </div>
-        )}
+
+          {/* ── idle bodies (mode-specific) ── */}
+          {phase === "idle" && mode === "talk" && (
+            <>
+              <Button size="lg" className="gap-2" onClick={startTalk}>
+                <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
+              </Button>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                No phone number needed — talk to it right here, free.
+              </p>
+            </>
+          )}
+
+          {phase === "idle" && mode === "getcall" && (
+            <div className="w-full max-w-xs space-y-2">
+              <label htmlFor="test-phone" className="text-xs font-medium text-muted-foreground">
+                Your phone number
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="test-phone"
+                  value={phoneNumber}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value)
+                    if (phoneError) setPhoneError(null)
+                  }}
+                  inputMode="tel"
+                  placeholder="+1 (555) 123-4567"
+                  aria-invalid={!!phoneError}
+                  onKeyDown={(e) => e.key === "Enter" && startGetCall()}
+                />
+                <Button onClick={startGetCall} className="shrink-0 gap-1.5">
+                  <PhoneCall className="h-4 w-4" /> Call me
+                </Button>
+              </div>
+              {phoneError ? (
+                <p className="text-xs text-destructive">{phoneError}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {DEFAULT_AGENT.name} rings your phone so you can hear it on a real call. Uses your free minutes.
+                </p>
+              )}
+            </div>
+          )}
+
+          {phase === "idle" && mode === "callin" && (
+            <div className="w-full max-w-xs space-y-3 text-center">
+              <div className="rounded-lg border border-border bg-background p-3">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Dial this number
+                </p>
+                <div className="mt-1.5 flex items-center justify-center gap-2">
+                  <span className="font-mono text-lg font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
+                  <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
+                    {copied ? (
+                      <><Check className="h-3 w-3" /> Copied</>
+                    ) : (
+                      <><Copy className="h-3 w-3" /> Copy</>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Call this sandbox line from your phone to reach {DEFAULT_AGENT.name} — free while you&apos;re testing.
+              </p>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
+                <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
+              </Button>
+            </div>
+          )}
+
+          {/* ── connecting ── */}
+          {connecting && (
+            <Button size="lg" className="gap-2" disabled>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {mode === "talk" ? "Connecting…" : mode === "getcall" ? "Calling your phone…" : "Connecting your call…"}
+            </Button>
+          )}
+
+          {/* ── live ── */}
+          {live && (
+            <div className="flex items-center gap-2">
+              {mode === "talk" && (
+                <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
+                  <Mic className="h-3.5 w-3.5" /> Talk
+                </Button>
+              )}
+              <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
+                <PhoneOff className="h-3.5 w-3.5" /> End test
+              </Button>
+            </div>
+          )}
+
+          {live && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                </span>
+                {mode === "talk" ? "Agora RTC" : "On your phone"}
+              </span>
+              <span>·</span>
+              <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
+              <span>·</span>
+              <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
+            </div>
+          )}
+
+          {/* ── ended → the test→tweak→deploy hinge ── */}
+          {phase === "ended" && (
+            <div className="w-full max-w-xs space-y-3 text-center">
+              <div>
+                <p className="text-sm font-semibold">How did that go?</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Happy with {DEFAULT_AGENT.name}? Put it live — or fine-tune it first.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Button className="w-full gap-1.5" onClick={() => chooseOutcome("deploy")}>
+                  Deploy it <ArrowRight className="h-4 w-4" />
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild className="flex-1 gap-1.5" onClick={() => chooseOutcome("tweak")}>
+                    <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+                      <Pencil className="h-3.5 w-3.5" /> Tweak
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="flex-1 gap-1.5" onClick={reset}>
+                    <RotateCcw className="h-3.5 w-3.5" /> Test again
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transcript (talk mode only) */}
+          {mode === "talk" && (live || phase === "ended") && lines.length > 0 && (
+            <div className="mt-5 max-h-44 w-full space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3">
+              {lines.map((l, i) => (
+                <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
+                  <span
+                    className={cn(
+                      "max-w-[85%] rounded-lg px-3 py-1.5 text-xs",
+                      l.role === "you" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+                    )}
+                  >
+                    {l.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-// ─── Put it to work — believe → scale escalation ────────────────────────────────
+// ─── 2 · Put it live — the deploy step (anchor target for the "Deploy it" hinge) ──
 
 function PutToWork({ agentParam }: { agentParam: string }) {
   return (
-    <section className="space-y-3">
+    <section id="deploy" className="space-y-3 scroll-mt-6">
       <SectionHeading
-        title="Put it to work"
-        hint="Put it on a calling campaign, a phone number, or your website."
+        step={2}
+        title="Put it live"
+        hint="Happy with it? Deploy your agent to a calling campaign, a phone number, or your website."
       />
 
       {/* Flagship — outbound campaign (fastest path to paid volume) */}
@@ -535,4 +772,8 @@ function fmtTime(sec: number): string {
   const m = Math.floor(sec / 60)
   const s = sec % 60
   return `${m}:${s.toString().padStart(2, "0")}`
+}
+
+function digits(s: string): string {
+  return s.replace(/\D/g, "")
 }
