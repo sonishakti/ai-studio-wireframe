@@ -13,7 +13,6 @@ import {
   Pencil,
   Check,
   Zap,
-  Phone,
   PhoneCall,
   Copy,
   Gauge,
@@ -40,12 +39,13 @@ import { track, Events } from "@/lib/analytics"
 /**
  * GoLiveHome — the "Go Live" home (Deploy hub Overview).
  * ────────────────────────────────────────────────────────────────
- * 2026-06-19 UX optimization pass (/optimize + /shadcn): lower cognitive load,
- * deploy above the fold, and three ways to start an agent surfaced up front —
- * test the auto-provisioned Aria, IMPORT one from a competitor, or build new.
+ * 2026-06-19 — /evaluate-driven simplification. The earlier segmented "test
+ * mode" control read like an agent-version switcher (H4) and the card carried
+ * three competing action clusters (H8). Now there is ONE clear hero action —
+ * talk to Aria in-browser — with phone tests demoted to a quiet secondary line.
  *
  *   START   — Import agent (migrate) · New agent · or just test the live Aria
- *   TEST    — compact card: Talk here · Get a call · Call in (stateful)
+ *   TEST    — one primary: Talk to Aria; secondary: call my phone / dial a number
  *   ↳ TWEAK — quiet "Tailor it" chips + Edit agent
  *   DEPLOY  — 3 compact channel cards, visible without scrolling
  */
@@ -101,17 +101,11 @@ const INTENTS: Intent[] = [
 
 // ─── test state machine (wireframe — no real ASR/LLM/TTS/telephony) ─────────────
 
-type Mode = "talk" | "getcall" | "callin"
+type Method = "talk" | "getcall" | "callin"
 type Phase = "idle" | "connecting" | "live" | "ended"
 type Line = { role: "agent" | "you"; text: string }
 
 const DEFAULT_AGENT = getDefaultAgent()
-
-const TEST_MODES: { id: Mode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "talk", label: "Talk here", icon: Mic },
-  { id: "getcall", label: "Get a call", icon: PhoneCall },
-  { id: "callin", label: "Call in", icon: Phone },
-]
 
 export function GoLiveHome() {
   const agentParam = `?agent=${DEFAULT_AGENT.id}`
@@ -159,10 +153,10 @@ function HomeHeader() {
   )
 }
 
-// ─── Test the agent — compact card, 3 stateful modes, tweak→deploy hinge ─────────
+// ─── Test the agent — one hero action, phone tests secondary, tweak→deploy hinge ─
 
 function TestAgent() {
-  const [mode, setMode] = React.useState<Mode>("talk")
+  const [method, setMethod] = React.useState<Method>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
   const [phase, setPhase] = React.useState<Phase>("idle")
   const [speaking, setSpeaking] = React.useState(false)
@@ -211,10 +205,9 @@ function TestAgent() {
     setPhoneError(null)
   }, [cleanup])
 
-  function switchMode(next: Mode) {
-    if (next === mode) return
-    reset()
-    setMode(next)
+  function selectMethod(next: Method) {
+    setMethod(next)
+    setPhoneError(null)
   }
 
   const speak = React.useCallback(
@@ -226,7 +219,7 @@ function TestAgent() {
     [after],
   )
 
-  // ── Talk here (in-browser, free) ──
+  // ── Talk here (in-browser, free) — the primary path ──
   const startTalk = React.useCallback(() => {
     setPhase("connecting")
     track(Events.web_test_call_started, { agent_id: DEFAULT_AGENT.id, intent: intentId ?? "general" })
@@ -257,7 +250,7 @@ function TestAgent() {
     }
   }, [phase, speaking, turns, intent, after, speak])
 
-  // ── Get a call (outbound: agent → your phone) ──
+  // ── Call my phone (outbound: agent → your phone) ──
   const startGetCall = React.useCallback(() => {
     if (digits(phoneNumber).length < 10) {
       setPhoneError("Enter a valid phone number — at least 10 digits.")
@@ -273,7 +266,7 @@ function TestAgent() {
     })
   }, [phoneNumber, after, startTimer])
 
-  // ── Call in (inbound: your phone → agent) ──
+  // ── Dial a number (inbound: your phone → agent) ──
   const copyNumber = React.useCallback(() => {
     navigator.clipboard?.writeText(TEST_INBOUND_NUMBER).catch(() => {})
     setCopied(true)
@@ -291,20 +284,20 @@ function TestAgent() {
     })
   }, [after, startTimer])
 
-  // ── End (any mode) → the test→tweak→deploy hinge ──
+  // ── End (any method) → the test→tweak→deploy hinge ──
   const endTest = React.useCallback(() => {
     cleanup()
     setSpeaking(false)
-    if (mode === "talk") {
+    if (method === "talk") {
       track(Events.web_test_call_ended, { duration_sec: elapsed })
     } else {
       track(Events.phone_test_call_ended, {
-        direction: mode === "getcall" ? "outbound" : "inbound",
+        direction: method === "getcall" ? "outbound" : "inbound",
         duration_sec: elapsed,
       })
     }
     setPhase("ended")
-  }, [cleanup, mode, elapsed])
+  }, [cleanup, method, elapsed])
 
   function pickIntent(id: string) {
     const next = intentId === id ? null : id
@@ -327,24 +320,24 @@ function TestAgent() {
     phase === "ended"
       ? "Test ended"
       : connecting
-        ? mode === "getcall"
+        ? method === "getcall"
           ? `Calling ${phoneNumber || "your phone"}…`
           : "Connecting…"
         : live
-          ? mode === "talk"
+          ? method === "talk"
             ? speaking
               ? `${DEFAULT_AGENT.name} is speaking`
               : "Listening… tap Talk"
             : "Connected — talk on your phone"
-          : mode === "talk"
-            ? "Talk to it right here, free"
-            : mode === "getcall"
+          : method === "talk"
+            ? "Ready when you are"
+            : method === "getcall"
               ? "We'll ring your phone"
               : "Dial in from your phone"
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      {/* Identity strip — compact, two lines */}
+      {/* Identity strip — one line */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-5 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="relative flex h-2 w-2 shrink-0">
@@ -369,150 +362,160 @@ function TestAgent() {
         </div>
       </div>
 
-      {/* Stage — mode switcher + orb beside controls */}
-      <div className="p-5">
-        <div className="inline-flex w-full rounded-lg border border-border bg-background p-1">
-          {TEST_MODES.map((m) => {
-            const active = mode === m.id
-            return (
-              <button
-                key={m.id}
-                type="button"
-                disabled={connecting || live}
-                onClick={() => switchMode(m.id)}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors disabled:opacity-50",
-                  active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <m.icon className="h-3.5 w-3.5" /> {m.label}
-              </button>
-            )
-          })}
+      {/* Stage — one centered hero action */}
+      <div className="flex flex-col items-center px-5 py-6 text-center">
+        <div className="mb-3">
+          {connecting ? (
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <AgentSphere size={96} active={live && (method !== "talk" || speaking)} />
+          )}
         </div>
 
-        <div className="mt-4 flex items-center gap-5">
-          <div className="shrink-0">
-            {connecting ? (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <AgentSphere size={96} active={live && (mode !== "talk" || speaking)} />
-            )}
+        <p className="text-xs font-medium text-muted-foreground">{statusText}</p>
+
+        {/* idle — talk hero (primary) + phone tests (secondary) */}
+        {phase === "idle" && method === "talk" && (
+          <div className="mt-3 flex flex-col items-center gap-3">
+            <Button size="lg" className="gap-2" onClick={startTalk}>
+              <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Prefer a real call?{" "}
+              <button
+                type="button"
+                onClick={() => selectMethod("getcall")}
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                Call my phone
+              </button>{" "}
+              ·{" "}
+              <button
+                type="button"
+                onClick={() => selectMethod("callin")}
+                className="font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                get a test number
+              </button>
+            </p>
           </div>
+        )}
 
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">{statusText}</p>
+        {/* idle — call my phone (outbound) */}
+        {phase === "idle" && method === "getcall" && (
+          <div className="mt-3 w-full max-w-xs space-y-2">
+            <div className="flex gap-2">
+              <Input
+                aria-label="Your phone number"
+                value={phoneNumber}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value)
+                  if (phoneError) setPhoneError(null)
+                }}
+                inputMode="tel"
+                placeholder="+1 (555) 123-4567"
+                aria-invalid={!!phoneError}
+                onKeyDown={(e) => e.key === "Enter" && startGetCall()}
+              />
+              <Button onClick={startGetCall} className="shrink-0 gap-1.5">
+                <PhoneCall className="h-4 w-4" /> Call me
+              </Button>
+            </div>
+            {phoneError && <p className="text-left text-xs text-destructive">{phoneError}</p>}
+            <button
+              type="button"
+              onClick={() => selectMethod("talk")}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              ← Back
+            </button>
+          </div>
+        )}
 
-            <div className="mt-2">
-              {/* idle — talk */}
-              {phase === "idle" && mode === "talk" && (
-                <Button className="gap-2" onClick={startTalk}>
-                  <Mic className="h-4 w-4" /> Talk to {DEFAULT_AGENT.name}
-                </Button>
-              )}
-
-              {/* idle — get a call */}
-              {phase === "idle" && mode === "getcall" && (
-                <div className="space-y-1.5">
-                  <div className="flex gap-2">
-                    <Input
-                      aria-label="Your phone number"
-                      value={phoneNumber}
-                      onChange={(e) => {
-                        setPhoneNumber(e.target.value)
-                        if (phoneError) setPhoneError(null)
-                      }}
-                      inputMode="tel"
-                      placeholder="+1 (555) 123-4567"
-                      aria-invalid={!!phoneError}
-                      onKeyDown={(e) => e.key === "Enter" && startGetCall()}
-                      className="max-w-[12rem]"
-                    />
-                    <Button onClick={startGetCall} className="shrink-0 gap-1.5">
-                      <PhoneCall className="h-4 w-4" /> Call me
-                    </Button>
-                  </div>
-                  {phoneError && <p className="text-xs text-destructive">{phoneError}</p>}
-                </div>
-              )}
-
-              {/* idle — call in */}
-              {phase === "idle" && mode === "callin" && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-base font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
-                    <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
-                      {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
-                    </Button>
-                  </div>
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
-                    <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
-                  </Button>
-                </div>
-              )}
-
-              {/* connecting */}
-              {connecting && (
-                <Button className="gap-2" disabled>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {mode === "talk" ? "Connecting…" : mode === "getcall" ? "Calling…" : "Connecting…"}
-                </Button>
-              )}
-
-              {/* live */}
-              {live && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {mode === "talk" && (
-                      <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
-                        <Mic className="h-3.5 w-3.5" /> Talk
-                      </Button>
-                    )}
-                    <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
-                      <PhoneOff className="h-3.5 w-3.5" /> End test
-                    </Button>
-                  </div>
-                  <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{mode === "talk" ? "Agora RTC" : "On your phone"}</span>
-                    <span>·</span>
-                    <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
-                    <span>·</span>
-                    <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
-                  </p>
-                </div>
-              )}
-
-              {/* ended — the hinge */}
-              {phase === "ended" && (
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    <span className="font-semibold">How did that go?</span>{" "}
-                    <span className="text-muted-foreground">Put it live, or fine-tune it first.</span>
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
-                      Deploy it <ArrowRight className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
-                      <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
-                        <Pencil className="h-3.5 w-3.5" /> Tweak
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
-                      <RotateCcw className="h-3.5 w-3.5" /> Test again
-                    </Button>
-                  </div>
-                </div>
-              )}
+        {/* idle — dial a number (inbound) */}
+        {phase === "idle" && method === "callin" && (
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-base font-semibold tabular-nums">{TEST_INBOUND_NUMBER}</span>
+              <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={copyNumber}>
+                {copied ? <><Check className="h-3 w-3" /> Copied</> : <><Copy className="h-3 w-3" /> Copy</>}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Call this sandbox line from your phone — free while testing.</p>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={simulateCallIn}>
+                <PhoneCall className="h-3.5 w-3.5" /> Simulate the call
+              </Button>
+              <button
+                type="button"
+                onClick={() => selectMethod("talk")}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                ← Back
+              </button>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* connecting */}
+        {connecting && (
+          <Button size="lg" className="mt-3 gap-2" disabled>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {method === "talk" ? "Connecting…" : method === "getcall" ? "Calling…" : "Connecting…"}
+          </Button>
+        )}
+
+        {/* live */}
+        {live && (
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2">
+              {method === "talk" && (
+                <Button size="sm" className="gap-1.5" onClick={talk} disabled={speaking}>
+                  <Mic className="h-3.5 w-3.5" /> Talk
+                </Button>
+              )}
+              <Button size="sm" variant="destructive" className="gap-1.5" onClick={endTest}>
+                <PhoneOff className="h-3.5 w-3.5" /> End test
+              </Button>
+            </div>
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{method === "talk" ? "Agora RTC" : "On your phone"}</span>
+              <span>·</span>
+              <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
+              <span>·</span>
+              <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
+            </p>
+          </div>
+        )}
+
+        {/* ended — the hinge */}
+        {phase === "ended" && (
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <p className="text-sm">
+              <span className="font-semibold">How did that go?</span>{" "}
+              <span className="text-muted-foreground">Put it live, or fine-tune it first.</span>
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
+                Deploy it <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
+                <Link href={`/agents/${DEFAULT_AGENT.id}/edit`}>
+                  <Pencil className="h-3.5 w-3.5" /> Tweak
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={reset}>
+                <RotateCcw className="h-3.5 w-3.5" /> Test again
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Transcript (talk only) */}
-        {mode === "talk" && (live || phase === "ended") && lines.length > 0 && (
-          <div className="mt-4 max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3">
+        {method === "talk" && (live || phase === "ended") && lines.length > 0 && (
+          <div className="mt-4 max-h-40 w-full max-w-md space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-left">
             {lines.map((l, i) => (
               <div key={i} className={cn("flex", l.role === "you" ? "justify-end" : "justify-start")}>
                 <span
