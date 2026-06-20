@@ -485,9 +485,9 @@ function AgentCard({
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      {/* Top — orb + identity (left) · what should it do (right) */}
-      <div className="flex flex-col gap-6 p-6 md:flex-row md:items-start md:justify-between">
-        <div className="flex items-center gap-5">
+      {/* Top — orb + identity (left) · the test (right) */}
+      <div className="flex flex-col gap-6 p-6 md:flex-row md:gap-8">
+        <div className="flex items-center gap-5 md:w-1/2 md:shrink-0">
           <div className="shrink-0">
             {connecting ? (
               <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
@@ -565,40 +565,9 @@ function AgentCard({
           </div>
         </div>
 
-        {/* What should it do? — presets + custom */}
-        <div className="md:w-60 md:shrink-0">
-          <h3 className="text-base font-semibold">What should it do?</h3>
-          <div className="mt-2 space-y-1.5" role="radiogroup" aria-label="What should it do?">
-            {INTENTS.map((i) => (
-              <IntentRadio key={i.id} label={i.label} active={intentId === i.id} onClick={() => pickIntent(i.id)} />
-            ))}
-            <div className="my-1.5 h-px bg-border" />
-            <IntentRadio label="Something else…" active={intentId === "custom"} onClick={() => pickIntent("custom")} />
-            {intentId === "custom" && (
-              <div className="pt-1">
-                <Input
-                  ref={customInputRef}
-                  value={customTask}
-                  onChange={(e) => setCustomTask(e.target.value)}
-                  onBlur={commitCustom}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), commitCustom())}
-                  maxLength={120}
-                  aria-label="Describe the task"
-                  aria-describedby="custom-help"
-                  placeholder="e.g. Screen job applicants and book interviews"
-                />
-                <p id="custom-help" className="mt-1 text-xs text-muted-foreground">
-                  We'll prime the test with this — no setup needed.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Test tabs */}
-      <div className="flex items-center border-t border-border">
-        <div className="flex flex-1">
+        {/* Right — the test (tabs + active method) */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex border-b border-border">
           {(["talk", "getcall", "callin"] as Method[]).map((m) => {
             const labels: Record<Method, string> = { talk: "Talk here", getcall: "Get a call", callin: "Call in" }
             const active = method === m
@@ -617,14 +586,8 @@ function AgentCard({
               </button>
             )
           })}
-        </div>
-        <span className="hidden px-4 text-xs text-muted-foreground lg:block">
-          Fastest — hear it in ~10 seconds, in your browser
-        </span>
-      </div>
-
-      {/* Tab content */}
-      <div className="px-6 py-5">
+          </div>
+          <div className="pt-5">
         {phase === "idle" && method === "talk" && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Button className="gap-2" onClick={startTalk}>
@@ -755,6 +718,36 @@ function AgentCard({
             ))}
           </div>
         )}
+          </div>
+        </div>
+      </div>
+
+      {/* What should it do? — full-width row */}
+      <div className="flex flex-col gap-3 border-t border-border px-6 py-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2" role="radiogroup" aria-label="What should it do?">
+          {INTENTS.map((i) => (
+            <IntentRadio key={i.id} label={i.label} active={intentId === i.id} onClick={() => pickIntent(i.id)} />
+          ))}
+          <IntentRadio label="Something else…" active={intentId === "custom"} onClick={() => pickIntent("custom")} />
+        </div>
+        {intentId === "custom" && (
+          <div className="max-w-md">
+            <Input
+              ref={customInputRef}
+              value={customTask}
+              onChange={(e) => setCustomTask(e.target.value)}
+              onBlur={commitCustom}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), commitCustom())}
+              maxLength={120}
+              aria-label="Describe the task"
+              aria-describedby="custom-help"
+              placeholder="e.g. Screen job applicants and book interviews"
+            />
+            <p id="custom-help" className="mt-1 text-xs text-muted-foreground">
+              We&apos;ll prime the test with this — no setup needed.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -782,7 +775,7 @@ function IntentRadio({ label, active, onClick }: { label: string; active: boolea
       role="radio"
       aria-checked={active}
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 text-left text-sm"
+      className="inline-flex items-center gap-2 text-sm"
     >
       <span
         className={cn(

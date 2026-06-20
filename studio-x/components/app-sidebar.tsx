@@ -13,6 +13,12 @@ import {
   Sparkles,
   TextSearch,
   LineChart,
+  Phone,
+  PhoneOutgoing,
+  MessageCircle,
+  Globe,
+  Code2,
+  ChevronDown,
 } from "lucide-react"
 
 import {
@@ -23,10 +29,16 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarSeparator,
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
 
 import { ProjectSwitcher } from "@/components/project-switcher"
@@ -41,15 +53,11 @@ function openCommandPalette() {
 
 // ─── nav structure ───────────────────────────────────────────────────────────
 //
-// 2026-06-05 IA: three labeled groups with uppercase SidebarGroupLabel headers —
-// BUILD · OBSERVE · MANAGE — Composer floating above, Search below.
-//
-// 2026-06-17 activation-revenue realignment (LEARNINGS §20): the center of
-// gravity moved from building agents to getting live traffic. "Go Live" is now
-// BUILD #1 and the app root; Agents is DEMOTED to a library beneath it. The agent
-// is the engine, not the entry point — it's auto-provisioned and edited on demand
-// from inside a deployment. Revenue = minutes on a live deployment, not a
-// published artifact.
+// 2026-06-20 (user Figma): "Deploy" is the top item — an expandable section whose
+// children are the deploy channels (Phone Numbers · Batch Call · WhatsApp · Web
+// Widget · Code), with /deploy itself as the hub home. Below it the labeled
+// groups: BUILD (Agents · Integrations · Composer) · OBSERVE (Monitor) · MANAGE
+// (Vendor Credentials · Realtime Services · Project Settings).
 
 type NavItem = {
   label: string
@@ -58,40 +66,35 @@ type NavItem = {
   badge?: string
 }
 
-// Build — the make-and-launch arc, led by Go Live. "Go Live" is the deploy hub
-// (Overview/first-run home · Inbound · Batch Calls · Phone Numbers · Web Widget ·
-// Code); Agents is the reusable Stack+Persona library; Integrations are KB/MCP.
-const NAV_BUILD: NavItem[] = [
-  { label: "Go Live", href: "/deploy", icon: Rocket },
-  { label: "Agents", href: "/agents", icon: Bot },
-  { label: "Integrations", href: "/integrations", icon: Library },
+// Deploy hub channels — the expandable children under "Deploy".
+const DEPLOY_CHANNELS: NavItem[] = [
+  { label: "Phone Numbers", href: "/deploy/phone-numbers", icon: Phone },
+  { label: "Batch Call", href: "/deploy/batch-calls", icon: PhoneOutgoing },
+  { label: "WhatsApp", href: "/deploy/whatsapp", icon: MessageCircle },
+  { label: "Web Widget", href: "/deploy/web-widget", icon: Globe },
+  { label: "Code", href: "/deploy/code", icon: Code2 },
 ]
 
-// Observe — a single Monitor hub (tabs: Overview · Call History · Sessions,
-// plus an "RTE usage →" outlink to /billing/usage). Sessions = agent
-// conversation runs (Conversational AI), not RTC telemetry.
+const NAV_BUILD: NavItem[] = [
+  { label: "Agents", href: "/agents", icon: Bot },
+  { label: "Integrations", href: "/integrations", icon: Library },
+  { label: "Composer", href: "/composer", icon: Sparkles },
+]
+
 const NAV_OBSERVE: NavItem[] = [
   { label: "Monitor", href: "/monitor", icon: LineChart },
 ]
 
-// Manage — project-scoped administration. Account-scoped surfaces (Billing,
-// Extensions, Developer, Help) live in the avatar dropdown / AccountSidebar.
 const NAV_MANAGE: NavItem[] = [
-  { label: "Project Settings", href: "/project/settings", icon: Settings2 },
-  { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Key },
+  { label: "Realtime Services", href: "/realtime-services", icon: Radio },
+  { label: "Project Settings", href: "/project/settings", icon: Settings2 },
 ]
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function isItemActive(itemHref: string, pathname: string): boolean {
-  if (itemHref === "/deploy") {
-    // Deploy hub: every surface now lives under /deploy/* (Inbound · Batch
-    // Calls · Phone Numbers · Embed/Code — 2026-06-11 intent-first revamp).
-    return pathname === "/deploy" || pathname.startsWith("/deploy/")
-  }
   if (itemHref === "/monitor") {
-    // Monitor hub spans Overview (/monitor) + Call History + agent Sessions.
     return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/sessions")
   }
   return pathname === itemHref || pathname.startsWith(itemHref + "/")
@@ -118,18 +121,44 @@ function NavLink({ item }: { item: NavItem }) {
   )
 }
 
-function ComposerItem() {
+// Deploy — clickable hub (→ /deploy) with an expandable list of channels.
+function DeploySection() {
   const pathname = usePathname()
-  const active = pathname === "/composer"
+  const hubActive = pathname === "/deploy"
+
   return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={active} tooltip="Composer">
-        <Link href="/composer">
-          <Sparkles className="h-4 w-4" />
-          <span>Composer</span>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+    <Collapsible defaultOpen className="group/deploy">
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={hubActive} tooltip="Deploy">
+          <Link href="/deploy">
+            <Rocket className="h-4 w-4" />
+            <span>Deploy</span>
+          </Link>
+        </SidebarMenuButton>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuAction
+            aria-label="Toggle deploy channels"
+            className="transition-transform group-data-[state=open]/deploy:rotate-180"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </SidebarMenuAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {DEPLOY_CHANNELS.map((c) => (
+              <SidebarMenuSubItem key={c.href}>
+                <SidebarMenuSubButton asChild isActive={isItemActive(c.href, pathname)}>
+                  <Link href={c.href}>
+                    <c.icon className="h-4 w-4" />
+                    <span>{c.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
   )
 }
 
@@ -154,36 +183,30 @@ function SearchItem() {
 export function AppSidebar() {
   return (
     <Sidebar variant="inset">
-      {/* Logo / workspace header */}
+      {/* Logo + collapse toggle */}
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/deploy">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Studio_X</span>
-                  <span className="truncate text-xs text-muted-foreground">Agora</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex items-center justify-between gap-2 px-2 py-1">
+          <Link
+            href="/deploy"
+            className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+          >
+            <span className="text-xl font-semibold lowercase tracking-tight">agora</span>
+          </Link>
+          <SidebarTrigger className="text-muted-foreground" />
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Composer — opens command palette */}
+        {/* Deploy — hub + expandable channels */}
         <SidebarGroup>
           <SidebarMenu>
-            <ComposerItem />
+            <DeploySection />
           </SidebarMenu>
         </SidebarGroup>
 
         <SidebarSeparator />
 
-        {/* Build — Go Live (lead) · Agents · Integrations */}
+        {/* Build — Agents · Integrations · Composer */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Build</SidebarGroupLabel>
           <SidebarMenu>
@@ -203,7 +226,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Manage — project-scoped settings · RT services · vendor keys */}
+        {/* Manage — vendor keys · RT services · project settings */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Manage</SidebarGroupLabel>
           <SidebarMenu>
