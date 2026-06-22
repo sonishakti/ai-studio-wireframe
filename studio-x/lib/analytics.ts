@@ -48,6 +48,10 @@ export const Events = {
   free_minutes_warning_250:   "free_minutes_warning_250",    // at-threshold consent, not a silent flip — { used, included }
   first_paid_minute:          "first_paid_minute",           // ★ replaces the deleted suspend→reactivate CAC loop — { agent_id }
 
+  // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
+  defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
+  defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
+
   // ── Telephony deployment ───────────────────────────────────────────────────
   phone_number_imported:      "phone_number_imported",
   phone_number_assigned:      "phone_number_assigned",
