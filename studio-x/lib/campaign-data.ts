@@ -107,6 +107,24 @@ export interface AgentPersona {
   tone: string
   language: string
   brand?: string
+  /** Opening line the agent speaks first. Set when an agent is imported from a
+   *  competitor config (first_message) so the in-browser test plays the user's
+   *  OWN greeting — makes the "we map your prompt" promise audibly true. */
+  firstMessage?: string
+}
+
+/** Parsed shape of a competitor agent config (Vapi/Retell/ElevenLabs/Bland/JSON)
+ *  that the Import sheet hands to the home so the imported agent actually drives
+ *  the test — voice, model, prompt, and first message all carry over. */
+export interface ImportedAgentConfig {
+  name: string
+  systemPrompt?: string
+  firstMessage?: string
+  voice?: string
+  llmModel?: string
+  language?: string
+  tools?: string[]
+  source?: string
 }
 
 export interface Agent {
@@ -276,13 +294,39 @@ export interface PlanUsage {
   plan: string
   freeMinutesIncluded: number
   freeMinutesUsed: number
+  /** At-threshold consent surface — warn here BEFORE the free grant is gone, so
+   *  crossing into PAYG is a one-tap choice, not a silent suspension (the line
+   *  that deletes the old free_minutes_exhausted→account_suspended CAC loop). */
+  warnAtMinutes: number
+  /** Default spend cap (USD/mo) offered when the card is captured, so going PAYG
+   *  can never become bill-shock. User-adjustable; 0 = no cap. */
+  defaultSpendCapUsd: number
 }
 
 export const PLAN_USAGE: PlanUsage = {
   plan: "Free",
   freeMinutesIncluded: 300,
   freeMinutesUsed: 18,
+  warnAtMinutes: 250,
+  defaultSpendCapUsd: 50,
 }
+
+// ─── "Claim your number" provisioning (activation flow, 2026-06-22) ───────────
+//
+// The card attaches to acquiring a NEW Agora number (Twilio pattern — the card
+// buys the resource, not the product). Porting an existing number is the
+// card-free, anti-double-pay path that routes billing to the old carrier.
+
+/** Sample reservable Agora numbers, keyed by area code (wireframe inventory). */
+export const CLAIMABLE_NUMBERS: { areaCode: string; region: string; number: string }[] = [
+  { areaCode: "415", region: "San Francisco, CA", number: "+1 (415) 555-0142" },
+  { areaCode: "212", region: "New York, NY", number: "+1 (212) 555-0188" },
+  { areaCode: "312", region: "Chicago, IL", number: "+1 (312) 555-0164" },
+  { areaCode: "512", region: "Austin, TX", number: "+1 (512) 555-0119" },
+]
+
+/** Carriers we can port an existing number IN from (no Agora card needed). */
+export const PORT_CARRIERS = ["Twilio", "Telnyx", "Vonage", "Bandwidth"] as const
 
 // ─── Status display ──────────────────────────────────────────────────────────
 

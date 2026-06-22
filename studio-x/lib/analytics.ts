@@ -39,6 +39,15 @@ export const Events = {
   agent_test_started:         "agent_test_started",          // ★ moment of belief — { channel, agent_id, intent?, direction? }
   agent_test_ended:           "agent_test_ended",            // { channel, agent_id, duration_sec, direction? }
 
+  // ── "Claim your number" activation (2026-06-22) ────────────────────────────
+  // Card lands at NEW-number provisioning only — never before the aha, never on
+  // web/code, never on a ported number (port routes billing to the old carrier).
+  // The card sits at event ~4 (vs baseline 11) and never gates deployment_went_live.
+  channel_is_telephony_fork:  "channel_is_telephony_fork",   // { is_telephony, channel, agent_id } — proves the gate is resource-specific
+  card_captured:              "card_captured",               // fires ONLY on the new-Agora-number path — { path, agent_id, channel }
+  free_minutes_warning_250:   "free_minutes_warning_250",    // at-threshold consent, not a silent flip — { used, included }
+  first_paid_minute:          "first_paid_minute",           // ★ replaces the deleted suspend→reactivate CAC loop — { agent_id }
+
   // ── Telephony deployment ───────────────────────────────────────────────────
   phone_number_imported:      "phone_number_imported",
   phone_number_assigned:      "phone_number_assigned",
@@ -116,6 +125,10 @@ export type EventPayloads = {
   quota_warning_clicked:       { meter: string; pct_used: number }
   test_outcome_selected:       { outcome: "tweak" | "deploy"; agent_id: string }
   agent_switched:              { to_id: string; status: "live" | "draft" | "paused" }
+  channel_is_telephony_fork:   { is_telephony: boolean; channel: string; agent_id: string }
+  card_captured:               { path: "new_number"; agent_id: string; channel: string }
+  free_minutes_warning_250:    { used: number; included: number }
+  first_paid_minute:           { agent_id: string }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment"; target_id: string; section: string; surface: "call_sheet" | "queue" }

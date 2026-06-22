@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { CodeBlock } from "@/components/code-block"
 import { toast } from "sonner"
 import { track } from "@/lib/analytics"
+import type { ImportedAgentConfig } from "@/lib/campaign-data"
 
 const SOURCES = ["Vapi", "Retell", "ElevenLabs", "Bland", "Generic JSON"] as const
 
@@ -36,13 +37,13 @@ export function ImportAgentSheet({
   onImported,
 }: {
   children: React.ReactNode
-  onImported?: (name: string) => void
+  onImported?: (config: ImportedAgentConfig) => void
 }) {
   const [pasted, setPasted] = React.useState("")
   const [url, setUrl] = React.useState("")
   const [source, setSource] = React.useState<(typeof SOURCES)[number]>("Generic JSON")
   const [validation, setValidation] = React.useState<
-    { ok: boolean; agentName?: string; warnings?: string[] } | null
+    { ok: boolean; config?: ImportedAgentConfig; warnings?: string[] } | null
   >(null)
 
   const handleValidate = () => {
@@ -52,13 +53,25 @@ export function ImportAgentSheet({
         setValidation({ ok: false })
         return
       }
-      setValidation({
-        ok: true,
-        agentName: parsed.name,
-        warnings: parsed.tools?.length
-          ? undefined
-          : ["No tools specified — agent will rely solely on conversation."],
-      })
+      // Map the competitor config → our shape. We carry voice, model, prompt,
+      // first message, language and tools — not just the name — so the imported
+      // agent actually drives the in-browser test (the dev-switch promise).
+      const config: ImportedAgentConfig = {
+        name: String(parsed.name),
+        systemPrompt: parsed.system_prompt ?? parsed.systemPrompt ?? parsed.prompt,
+        firstMessage: parsed.first_message ?? parsed.firstMessage ?? parsed.greeting,
+        voice: typeof parsed.voice === "string" ? parsed.voice : parsed.voice?.voice ?? parsed.tts?.voice,
+        llmModel: parsed.llm?.model ?? parsed.model,
+        language: parsed.language,
+        tools: Array.isArray(parsed.tools)
+          ? parsed.tools.map((t: unknown) => (typeof t === "string" ? t : (t as { name?: string })?.name)).filter(Boolean)
+          : undefined,
+        source,
+      }
+      const warnings: string[] = []
+      if (!config.systemPrompt) warnings.push("No system prompt found — Aria's default behavior will be used until you edit it.")
+      if (!config.tools?.length) warnings.push("No tools specified — agent will rely solely on conversation.")
+      setValidation({ ok: true, config, warnings: warnings.length ? warnings : undefined })
     } catch {
       setValidation({ ok: false })
     }
@@ -66,11 +79,12 @@ export function ImportAgentSheet({
 
   const handleImport = () => {
     track("agent_imported" as never, { source } as never)
-    const name = validation?.agentName ?? "Imported agent"
+    const config = validation?.config
+    if (!config) return
     toast.success("Agent imported", {
-      description: `${name} is ready as a draft — selected here so you can deploy it.`,
+      description: `${config.name} is ready on Agora's bundled stack — selected here so you can talk to it, then deploy.`,
     })
-    onImported?.(name)
+    onImported?.(config)
   }
 
   return (
@@ -208,8 +222,10 @@ export function ImportAgentSheet({
                   <>
                     <p className="font-medium">Ready to import</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Agent <span className="font-medium text-foreground">{validation.agentName}</span> will be
-                      added to this project as a draft.
+                      <span className="font-medium text-foreground">{validation.config?.name}</span>
+                      {validation.config?.voice && <> · voice {validation.config.voice}</>}
+                      {validation.config?.llmModel && <> · {validation.config.llmModel}</>}
+                      {" "}maps onto Agora&apos;s bundled stack — talk to it right after import, free.
                     </p>
                     {validation.warnings?.map((w) => (
                       <Badge key={w} variant="outline" className="text-xs mt-2 font-normal">
