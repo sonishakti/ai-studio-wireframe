@@ -156,8 +156,11 @@ export function ImportAgentSheet({
                   <p className="text-sm font-medium">Drop a .json file here</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Or click to browse — max 1 MB</p>
                 </div>
-                <Button variant="outline" size="sm">Choose file</Button>
+                <Button variant="outline" size="sm" disabled>Choose file</Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                This preview imports via <span className="font-medium text-foreground">Paste JSON</span> — file upload is coming soon.
+              </p>
             </TabsContent>
 
             {/* From URL */}
@@ -172,7 +175,7 @@ export function ImportAgentSheet({
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  The URL must serve a JSON file with public read access.
+                  This preview imports via Paste JSON — fetching from a URL is coming soon.
                 </p>
               </div>
             </TabsContent>

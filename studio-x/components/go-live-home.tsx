@@ -171,7 +171,14 @@ function DeployHeader() {
 function ChannelHero({ agent }: { agent: Agent }) {
   const p = `?agent=${agent.id}`
   return (
-    <section id="channels" className="grid scroll-mt-6 grid-cols-1 gap-4 md:grid-cols-3">
+    <section id="channels" className="scroll-mt-6 space-y-3">
+      {agent.status !== "live" && (
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">{agent.name}</span> isn&apos;t live yet —
+          deploying it to a channel will publish it.
+        </p>
+      )}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <ChannelCard
         href={`/deploy/batch-calls/new${p}`}
         channel="campaign"
@@ -206,6 +213,7 @@ function ChannelHero({ agent }: { agent: Agent }) {
           { label: "Node", icon: Code2, href: "/deploy/code" },
         ]}
       />
+      </div>
     </section>
   )
 }
@@ -428,10 +436,15 @@ function AgentCard({
   }
 
   function copyNumber() {
-    navigator.clipboard?.writeText(TEST_INBOUND_NUMBER).catch(() => {})
-    setCopied(true)
-    track(Events.test_number_copied)
-    after(1600, () => setCopied(false))
+    // Only show "Copied" on a real success — never lie if the clipboard is blocked.
+    navigator.clipboard?.writeText(TEST_INBOUND_NUMBER).then(
+      () => {
+        setCopied(true)
+        track(Events.test_number_copied)
+        after(1600, () => setCopied(false))
+      },
+      () => {},
+    )
   }
 
   function simulateCallIn() {
@@ -462,7 +475,12 @@ function AgentCard({
   function chooseOutcome(outcome: "tweak" | "deploy") {
     track(Events.test_outcome_selected, { outcome })
     if (outcome === "deploy") {
-      document.getElementById("channels")?.scrollIntoView({ behavior: "smooth", block: "start" })
+      // Make the deploy hand-off land: scroll to the channels AND move focus onto
+      // the first one, so the click resolves to a real next action (not a no-op).
+      const el = document.getElementById("channels")
+      const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      el?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+      after(reduce ? 0 : 350, () => el?.querySelector<HTMLElement>("a[href]")?.focus())
     }
   }
 
@@ -491,7 +509,7 @@ function AgentCard({
           <div className="shrink-0">
             {connecting ? (
               <div className="flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                <Loader2 className="h-7 w-7 animate-spin text-primary motion-reduce:animate-none" />
               </div>
             ) : (
               <AgentSphere size={128} active={live && (method !== "talk" || speaking)} />
@@ -502,7 +520,7 @@ function AgentCard({
             <Badge variant="outline" className="gap-1.5 text-xs font-medium">
               {isLive ? (
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60 motion-reduce:animate-none" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
               ) : (
@@ -517,6 +535,7 @@ function AgentCard({
                 <button
                   type="button"
                   disabled={busy}
+                  title={busy ? "End the test to switch agents" : undefined}
                   aria-label={`Change agent — currently ${agent.name}`}
                   className="mt-2 flex max-w-full items-center gap-1.5 rounded-md text-3xl font-semibold tracking-tight transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70"
                 >
@@ -524,10 +543,10 @@ function AgentCard({
                   <ChevronDown className="h-6 w-6 shrink-0 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-[60vh] w-72 overflow-y-auto">
+              <DropdownMenuContent align="start" className="max-h-80 w-72 overflow-y-auto">
                 <DropdownMenuItem asChild>
                   <Link href={`/agents/${agent.id}/edit`}>
-                    <Pencil className="h-4 w-4" /> Edit {agent.name}
+                    <Pencil className="h-4 w-4" /> Edit {shortName(agent.name)}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -576,6 +595,7 @@ function AgentCard({
                 key={m}
                 type="button"
                 disabled={busy}
+                title={busy ? "End the test to switch" : undefined}
                 onClick={() => switchMethod(m)}
                 className={cn(
                   "-mb-px flex-1 border-b-2 px-4 py-3 text-sm font-medium transition-colors disabled:opacity-50",
@@ -591,7 +611,7 @@ function AgentCard({
         {phase === "idle" && method === "talk" && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Button className="gap-2" onClick={startTalk}>
-              <Mic className="h-4 w-4" /> Talk to {agent.name}
+              <Mic className="h-4 w-4" /> Talk to {shortName(agent.name)}
             </Button>
             <p className="text-sm text-muted-foreground">Talk to it right here in your browser — uses your free minutes.</p>
           </div>
@@ -645,7 +665,7 @@ function AgentCard({
 
         {connecting && (
           <Button className="gap-2" disabled>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
             {method === "getcall" ? "Calling your phone…" : "Connecting…"}
           </Button>
         )}
@@ -828,4 +848,8 @@ function fmtTime(sec: number): string {
 
 function digits(s: string): string {
   return s.replace(/\D/g, "")
+}
+
+function shortName(name: string): string {
+  return name.length > 22 ? `${name.slice(0, 21).trimEnd()}…` : name
 }
