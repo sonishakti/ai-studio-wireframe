@@ -282,7 +282,6 @@ function AgentCard({
 }) {
   const [method, setMethod] = React.useState<Method>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
-  const [customTask, setCustomTask] = React.useState("")
   const [phase, setPhase] = React.useState<Phase>("idle")
   const [speaking, setSpeaking] = React.useState(false)
   const [elapsed, setElapsed] = React.useState(0)
@@ -294,8 +293,6 @@ function AgentCard({
 
   const timers = React.useRef<number[]>([])
   const tick = React.useRef<number | null>(null)
-  const customInputRef = React.useRef<HTMLInputElement>(null)
-  const customTracked = React.useRef(false)
 
   const preset = INTENTS.find((i) => i.id === intentId) ?? null
   const est = stackEstimate(agent)
@@ -330,18 +327,11 @@ function AgentCard({
     setPhoneError(null)
   }, [cleanup])
 
-  // Agent changed (switch or import) → reset the test + drop the contextual custom task.
+  // Agent changed (switch or import) → reset the test + drop the preset re-skin.
   React.useEffect(() => {
     reset()
-    setCustomTask("")
-    customTracked.current = false
-    setIntentId((cur) => (cur === "custom" ? null : cur))
+    setIntentId(null)
   }, [agent.id, reset])
-
-  // Focus the custom-task input the moment it's revealed.
-  React.useEffect(() => {
-    if (intentId === "custom") customInputRef.current?.focus()
-  }, [intentId])
 
   function switchMethod(next: Method) {
     if (next === method || phase === "connecting" || phase === "live") return
@@ -353,28 +343,15 @@ function AgentCard({
     if (id === agent.id || phase === "connecting" || phase === "live") return
     const next = agents.find((a) => a.id === id)
     if (!next) return
-    track(Events.agent_switched, { agent_id: id, from: agent.id, status: next.status })
+    track(Events.agent_switched, { to_id: id, status: next.status })
     onSwitch(id)
   }
 
   function pickIntent(id: string) {
-    const next = id === "custom" ? "custom" : intentId === id ? null : id
-    setIntentId(next)
-    if (next && next !== "custom") track(Events.agent_intent_selected, { intent: next })
-  }
-
-  function commitCustom() {
-    const len = customTask.trim().length
-    if (len > 0 && !customTracked.current) {
-      customTracked.current = true
-      track(Events.custom_task_entered, { length: len })
-    }
+    setIntentId((cur) => (cur === id ? null : id))
   }
 
   function currentGreeting() {
-    if (intentId === "custom" && customTask.trim()) {
-      return `Hi! I'm ${agent.name}. I can help with "${customTask.trim().slice(0, 60)}" — want to try?`
-    }
     return preset?.greeting ?? defaultGreeting(agent.name)
   }
 
@@ -391,7 +368,7 @@ function AgentCard({
     if (phase !== "idle") return
     const greeting = currentGreeting() // snapshot at click — mid-call edits don't retro-change it
     setPhase("connecting")
-    track(Events.web_test_call_started, { agent_id: agent.id, intent: intentId ?? "general" })
+    track(Events.agent_test_started, { channel: "web", agent_id: agent.id, intent: intentId ?? "general" })
     after(1200, () => {
       setPhase("live")
       startTimer()
@@ -427,11 +404,10 @@ function AgentCard({
     }
     setPhoneError(null)
     setPhase("connecting")
-    track(Events.phone_test_call_started, { direction: "outbound" })
+    track(Events.agent_test_started, { channel: "phone", direction: "outbound", agent_id: agent.id, intent: intentId ?? "general" })
     after(1800, () => {
       setPhase("live")
       startTimer()
-      track(Events.phone_test_call_connected, { direction: "outbound" })
     })
   }
 
@@ -440,7 +416,6 @@ function AgentCard({
     navigator.clipboard?.writeText(TEST_INBOUND_NUMBER).then(
       () => {
         setCopied(true)
-        track(Events.test_number_copied)
         after(1600, () => setCopied(false))
       },
       () => {},
@@ -450,30 +425,27 @@ function AgentCard({
   function simulateCallIn() {
     if (phase !== "idle") return
     setPhase("connecting")
-    track(Events.phone_test_call_started, { direction: "inbound" })
+    track(Events.agent_test_started, { channel: "phone", direction: "inbound", agent_id: agent.id, intent: intentId ?? "general" })
     after(1800, () => {
       setPhase("live")
       startTimer()
-      track(Events.phone_test_call_connected, { direction: "inbound" })
     })
   }
 
   function endTest() {
     cleanup()
     setSpeaking(false)
-    if (method === "talk") {
-      track(Events.web_test_call_ended, { duration_sec: elapsed })
-    } else {
-      track(Events.phone_test_call_ended, {
-        direction: method === "getcall" ? "outbound" : "inbound",
-        duration_sec: elapsed,
-      })
-    }
+    track(Events.agent_test_ended, {
+      channel: method === "talk" ? "web" : "phone",
+      agent_id: agent.id,
+      duration_sec: elapsed,
+      ...(method !== "talk" && { direction: method === "getcall" ? "outbound" : "inbound" }),
+    })
     setPhase("ended")
   }
 
   function chooseOutcome(outcome: "tweak" | "deploy") {
-    track(Events.test_outcome_selected, { outcome })
+    track(Events.test_outcome_selected, { outcome, agent_id: agent.id })
     if (outcome === "deploy") {
       // Make the deploy hand-off land: scroll to the channels AND move focus onto
       // the first one, so the click resolves to a real next action (not a no-op).
@@ -692,19 +664,10 @@ function AgentCard({
 
         {phase === "ended" && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            {intentId === "custom" && customTask.trim() ? (
-              <p className="text-sm">
-                <span className="font-semibold">Sounds good?</span>{" "}
-                <span className="text-muted-foreground">
-                  Make &ldquo;{customTask.trim().slice(0, 40)}&rdquo; permanent — edit the prompt, then deploy.
-                </span>
-              </p>
-            ) : (
-              <p className="text-sm">
-                <span className="font-semibold">Sounds good?</span>{" "}
-                <span className="text-muted-foreground">Deploy {agent.name}, or fine-tune it first.</span>
-              </p>
-            )}
+            <p className="text-sm">
+              <span className="font-semibold">Sounds good?</span>{" "}
+              <span className="text-muted-foreground">Deploy {agent.name}, or fine-tune it first.</span>
+            </p>
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
                 Deploy it <ArrowRight className="h-4 w-4" />
@@ -742,32 +705,38 @@ function AgentCard({
         </div>
       </div>
 
-      {/* What should it do? — full-width row */}
-      <div className="flex flex-col gap-3 border-t border-border px-6 py-4">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2" role="radiogroup" aria-label="What should it do?">
-          {INTENTS.map((i) => (
-            <IntentRadio key={i.id} label={i.label} active={intentId === i.id} onClick={() => pickIntent(i.id)} />
-          ))}
-          <IntentRadio label="Something else…" active={intentId === "custom"} onClick={() => pickIntent("custom")} />
-        </div>
-        {intentId === "custom" && (
-          <div className="max-w-md">
-            <Input
-              ref={customInputRef}
-              value={customTask}
-              onChange={(e) => setCustomTask(e.target.value)}
-              onBlur={commitCustom}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), commitCustom())}
-              maxLength={120}
-              aria-label="Describe the task"
-              aria-describedby="custom-help"
-              placeholder="e.g. Screen job applicants and book interviews"
-            />
-            <p id="custom-help" className="mt-1 text-xs text-muted-foreground">
-              We&apos;ll prime the test with this — no setup needed.
-            </p>
-          </div>
-        )}
+      {/* Try it as — ephemeral preset re-skin of the test. "Something else" routes to
+          Edit (the editor), where a custom job actually persists. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-2 border-t border-border px-6 py-3.5 text-sm" role="radiogroup" aria-label="Try the agent as">
+        <span className="mr-1 text-muted-foreground">Try it as</span>
+        {INTENTS.map((i) => {
+          const active = intentId === i.id
+          return (
+            <button
+              key={i.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              disabled={busy}
+              onClick={() => pickIntent(i.id)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50",
+                active
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              {i.label}
+            </button>
+          )
+        })}
+        <span className="mx-1 h-4 w-px bg-border" aria-hidden />
+        <Link
+          href={`/agents/${agent.id}/edit#behavior`}
+          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+        >
+          Something else <ArrowRight className="h-3 w-3" />
+        </Link>
       </div>
     </div>
   )
@@ -785,28 +754,6 @@ function AgentMenuItem({ a }: { a: Agent }) {
         {notLive && <Badge variant="outline" className="ml-auto shrink-0 text-xs capitalize">{a.status}</Badge>}
       </div>
     </DropdownMenuRadioItem>
-  )
-}
-
-function IntentRadio({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onClick}
-      className="inline-flex items-center gap-2 text-sm"
-    >
-      <span
-        className={cn(
-          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
-          active ? "border-primary" : "border-muted-foreground/40",
-        )}
-      >
-        {active && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
-      </span>
-      <span className={active ? "text-foreground" : "text-muted-foreground"}>{label}</span>
-    </button>
   )
 }
 
