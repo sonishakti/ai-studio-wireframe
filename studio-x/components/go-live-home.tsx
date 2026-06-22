@@ -9,6 +9,8 @@ import {
   ArrowRight,
   PhoneOutgoing,
   PhoneIncoming,
+  Phone,
+  Globe,
   ArrowLeftRight,
   Pencil,
   Check,
@@ -39,7 +41,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
-import { ClaimNumberSheet } from "@/components/claim-number-sheet"
+import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
+import { FreeMinutesNudge } from "@/components/free-minutes-nudge"
 import {
   getDefaultAgent,
   AGENTS,
@@ -159,6 +162,7 @@ export function GoLiveHome() {
       <div className="mx-auto w-full max-w-5xl space-y-6">
         <DeployHeader />
         <SwitcherRail onImported={handleImported} />
+        <FreeMinutesNudge />
         <ChannelHero agent={agent} />
         <AgentCard
           agent={agent}
@@ -202,96 +206,104 @@ function DeployHeader() {
 // ─── Channel hero — the primary job: pick where to deploy ────────────────────────
 
 function ChannelHero({ agent }: { agent: Agent }) {
+  const p = `?agent=${agent.id}`
   return (
     <section id="channels" className="scroll-mt-6 space-y-3">
       {agent.status !== "live" && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{agent.name}</span> isn&apos;t live yet —
-          claiming a number puts it on the phone. The web widget and code stay free.
+          deploying it to a channel will publish it. Going live is free.
         </p>
       )}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* Telephony — the card lands here, on acquiring a real number */}
-        <ClaimChannelCard
-          agent={agent}
+        <ChannelCard
+          href={`/deploy/inbound/new${p}`}
           channel="inbound"
+          agentId={agent.id}
           icon={PhoneIncoming}
           title="Answer a phone number"
           desc="Your agent picks up every inbound call, 24/7."
+          footer={<SipConnect />}
         />
-        <ClaimChannelCard
-          agent={agent}
+        <ChannelCard
+          href={`/deploy/batch-calls/new${p}`}
           channel="campaign"
+          agentId={agent.id}
           icon={PhoneOutgoing}
           title="Launch batch calls"
           desc="Upload a list of contacts and your agent dials each one."
+          footer={<SipConnect />}
         />
-        {/* Web / code — genuinely card-free */}
-        <CodeChannelCard agentId={agent.id} />
+        <ChannelCard
+          href="/deploy/code"
+          channel="code"
+          agentId={agent.id}
+          icon={Code2}
+          title="Embed in your app"
+          desc="Drop in the web widget or call the API — no number needed."
+          footer={
+            <Link
+              href="/deploy/web-widget"
+              className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-primary"
+            >
+              <Globe className="h-4 w-4 text-muted-foreground" /> Web widget
+            </Link>
+          }
+        />
       </div>
     </section>
   )
 }
 
-// Telephony card — the whole card opens the Claim-a-number sheet (card OR port).
-function ClaimChannelCard({
-  agent,
-  channel,
-  icon: Icon,
-  title,
-  desc,
-}: {
-  agent: Agent
-  channel: "campaign" | "inbound"
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  desc: string
-}) {
+// Bring-your-own number via SIP — Agora doesn't sell or port numbers, so the
+// realistic telephony step is connecting a carrier number (Twilio/Telnyx/…).
+function SipConnect() {
   return (
-    <ClaimNumberSheet agent={agent} channel={channel}>
+    <AddPhoneNumberSheet>
       <button
         type="button"
-        onClick={() => {
-          track(Events.channel_is_telephony_fork, { is_telephony: true, channel, agent_id: agent.id })
-          track(Events.put_to_work_selected, { channel, agent_id: agent.id })
-        }}
-        className="group flex flex-col rounded-xl border border-border bg-card p-5 text-left transition-all hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-primary"
       >
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-muted text-foreground">
-          <Icon className="h-5 w-5" />
-        </div>
-        <h2 className="mt-4 text-base font-semibold">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
-        <div className="mt-4 flex items-center gap-1.5 border-t border-border pt-4 text-sm font-medium text-foreground">
-          <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
-          Get a new number or port your own
-        </div>
+        <Phone className="h-4 w-4 text-muted-foreground" /> Connect your number (SIP)
       </button>
-    </ClaimNumberSheet>
+    </AddPhoneNumberSheet>
   )
 }
 
-// Web / code card — card-free, a plain link to the export surface.
-function CodeChannelCard({ agentId }: { agentId: string }) {
+function ChannelCard({
+  href,
+  channel,
+  agentId,
+  icon: Icon,
+  title,
+  desc,
+  footer,
+}: {
+  href: string
+  channel: "campaign" | "inbound" | "code"
+  agentId: string
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  desc: string
+  footer: React.ReactNode
+}) {
   return (
-    <Link
-      href="/deploy/code"
-      onClick={() => {
-        track(Events.channel_is_telephony_fork, { is_telephony: false, channel: "code", agent_id: agentId })
-        track(Events.put_to_work_selected, { channel: "code", agent_id: agentId })
-      }}
-      aria-label="Embed in your app"
-      className="group flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
+    <div className="group relative flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm">
       <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-muted text-foreground">
-        <Code2 className="h-5 w-5" />
+        <Icon className="h-5 w-5" />
       </div>
-      <h2 className="mt-4 text-base font-semibold">Embed in your app</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Drop in the web widget or call the API — no phone number.</p>
-      <div className="mt-4 flex items-center gap-1.5 border-t border-border pt-4">
-        <Badge variant="secondary" className="text-xs">Free — no number, no card</Badge>
+      <h2 className="mt-4 text-base font-semibold">{title}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+      <div className="relative z-10 mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-4 text-sm">
+        {footer}
       </div>
-    </Link>
+      <Link
+        href={href}
+        onClick={() => track(Events.put_to_work_selected, { channel, agent_id: agentId })}
+        aria-label={title}
+        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+    </div>
   )
 }
 
@@ -491,6 +503,8 @@ function AgentCard({
   const busy = connecting || live
   const isLive = agent.status === "live"
   const liveUsedMin = (PLAN_USAGE.freeMinutesUsed + elapsed / 60).toFixed(1)
+  // Free cap shown in the meter: the ungated 150 until a card unlocks the rest.
+  const freeCap = PLAN_USAGE.cardOnFile ? PLAN_USAGE.freeMinutesIncluded : PLAN_USAGE.freeMinutesUngated
 
   const idleBadge = isLive
     ? "Ready to deploy"
@@ -687,7 +701,7 @@ function AgentCard({
               <span>·</span>
               <span className="font-mono tabular-nums">{fmtTime(elapsed)}</span>
               <span>·</span>
-              <span className="tabular-nums">{liveUsedMin} / {PLAN_USAGE.freeMinutesIncluded} min</span>
+              <span className="tabular-nums">{liveUsedMin} / {freeCap} min</span>
             </p>
           </div>
         )}

@@ -4,15 +4,11 @@ import * as React from "react"
 import Link from "next/link"
 import {
   ArrowRight,
-  ArrowLeftRight,
   Loader2,
   Mic,
   PhoneOff,
   Phone,
-  CreditCard,
-  Lock,
   CheckCircle2,
-  Sparkles,
   FlaskConical,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -22,17 +18,11 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select"
 import { AgentSphere } from "@/components/agent-test-panel"
-import { toast } from "sonner"
+import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { track, Events } from "@/lib/analytics"
 import {
   STACK_PRESETS,
-  CLAIMABLE_NUMBERS,
-  PORT_CARRIERS,
   PLAN_USAGE,
   type ImportedAgentConfig,
 } from "@/lib/campaign-data"
@@ -60,10 +50,6 @@ const EXAMPLE = `{
 
 type Step = "paste" | "cloning" | "live" | "claim" | "done"
 type Line = { role: "agent" | "you"; text: string }
-
-function digits(s: string) {
-  return s.replace(/\D/g, "")
-}
 
 function parseConfig(raw: string, source: string): { ok: boolean; config?: ImportedAgentConfig; error?: string } {
   try {
@@ -280,7 +266,7 @@ function LiveStep({
     setTurns(t + 1)
     const ex = [
       { you: "What can you do?", agent: "Everything your old setup did — I answer calls, qualify leads and book appointments, now on Agora." },
-      { you: "Nice — how do I put you on a number?", agent: "Hit “End & claim a number” and I'll be live on a real line in a moment." },
+      { you: "Nice — how do I get you live?", agent: "Hit “End & go live” — you'll be up in a moment, free." },
     ]
     const pair = ex[Math.min(t, ex.length - 1)]
     setLines((l) => [...l, { role: "you", text: pair.you }])
@@ -311,8 +297,8 @@ function LiveStep({
       </div>
 
       <p className="rounded-lg border border-border bg-muted/40 px-4 py-2.5 text-xs text-muted-foreground">
-        You&apos;re hearing <span className="font-medium text-foreground">your own agent</span> in this browser. Putting it on a
-        real phone number is the next step.
+        You&apos;re hearing <span className="font-medium text-foreground">your own agent</span> in this browser. Going live
+        is one more step — free.
       </p>
 
       {lines.length > 0 && (
@@ -331,14 +317,14 @@ function LiveStep({
           <Mic className="h-3.5 w-3.5" /> Talk
         </Button>
         <Button size="sm" variant="destructive" className="gap-1.5" onClick={end}>
-          <PhoneOff className="h-3.5 w-3.5" /> End &amp; claim a number
+          <PhoneOff className="h-3.5 w-3.5" /> End &amp; go live
         </Button>
       </div>
     </div>
   )
 }
 
-// ─── step 3: claim (account + number) ───────────────────────────────────────
+// ─── step 3: go live (account, card-free) ───────────────────────────────────
 
 function ClaimStep({
   config, agentId, after, onLive,
@@ -349,43 +335,27 @@ function ClaimStep({
   onLive: () => void
 }) {
   const [email, setEmail] = React.useState("")
-  const [tab, setTab] = React.useState<"new" | "port">("new")
-  const [areaCode, setAreaCode] = React.useState(CLAIMABLE_NUMBERS[0].areaCode)
-  const [cardNum, setCardNum] = React.useState("")
-  const [exp, setExp] = React.useState("")
-  const [cvc, setCvc] = React.useState("")
-  const [carrier, setCarrier] = React.useState("")
-  const [portNum, setPortNum] = React.useState("")
   const [busy, setBusy] = React.useState(false)
   const [err, setErr] = React.useState<string | null>(null)
-
-  const reserved = CLAIMABLE_NUMBERS.find((n) => n.areaCode === areaCode) ?? CLAIMABLE_NUMBERS[0]
   const emailOk = /.+@.+\..+/.test(email)
 
   function go() {
     if (!emailOk) { setErr("Enter your email — we'll create your Agora account with it."); return }
-    if (tab === "new") {
-      if (digits(cardNum).length < 12 || digits(exp).length < 3 || digits(cvc).length < 3) {
-        setErr("Enter your card to claim the number."); return
-      }
-      setErr(null); setBusy(true)
-      track(Events.card_captured, { path: "new_number", agent_id: agentId, channel: "inbound" })
-      track(Events.phone_number_assigned, { number: reserved.number, agent_id: agentId, ported: false } as never)
-      after(1200, () => { track(Events.deployment_went_live, { agent_id: agentId, ported: false } as never); setBusy(false); onLive() })
-    } else {
-      if (!carrier) { setErr("Pick the carrier your number is with."); return }
-      if (digits(portNum).length < 10) { setErr("Enter the number to port."); return }
-      setErr(null); setBusy(true)
-      track(Events.phone_number_assigned, { number: portNum, agent_id: agentId, ported: true } as never)
-      after(1200, () => { track(Events.deployment_went_live, { agent_id: agentId, ported: true } as never); setBusy(false); onLive() })
-    }
+    setErr(null); setBusy(true)
+    after(1100, () => {
+      track(Events.deployment_went_live, { agent_id: agentId, channel: "web" } as never)
+      setBusy(false); onLive()
+    })
   }
 
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Put {config.name} on a real number</h2>
-        <p className="mt-1 text-muted-foreground">Your 300 free minutes apply first. Get a new number, or keep your own.</p>
+        <h2 className="text-2xl font-semibold tracking-tight">Go live with {config.name}</h2>
+        <p className="mt-1 text-muted-foreground">
+          Free to start — {PLAN_USAGE.freeMinutesUngated} minutes, no card. We&apos;ll nudge you for a card at
+          {" "}{PLAN_USAGE.freeMinutesUngated} min to unlock the rest.
+        </p>
       </div>
 
       <div className="space-y-1.5">
@@ -394,69 +364,26 @@ function ClaimStep({
         <p className="text-xs text-muted-foreground">We&apos;ll create your Agora account with this email — no separate signup.</p>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => { setTab(v as "new" | "port"); setErr(null) }}>
-        <TabsList className="w-full">
-          <TabsTrigger value="new" className="flex-1 gap-1.5"><Phone className="h-3.5 w-3.5" /> Get a new number</TabsTrigger>
-          <TabsTrigger value="port" className="flex-1 gap-1.5"><ArrowLeftRight className="h-3.5 w-3.5" /> Port your number</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="new" className="space-y-4 pt-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="defect-area">Area code</Label>
-            <Select value={areaCode} onValueChange={setAreaCode}>
-              <SelectTrigger id="defect-area"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CLAIMABLE_NUMBERS.map((n) => <SelectItem key={n.areaCode} value={n.areaCode}>{n.areaCode} — {n.region}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
-            <p className="font-mono text-base font-semibold tabular-nums">{reserved.number}</p>
-            <Badge variant="secondary" className="gap-1 text-xs"><Sparkles className="h-3 w-3" /> Reserved</Badge>
-          </div>
-          <div className="rounded-lg border border-primary/30 bg-primary/[0.04] px-4 py-3 text-sm">
-            <p className="font-medium">$0 today.</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {PLAN_USAGE.freeMinutesIncluded} free minutes first, then pay-as-you-go. We warn you at {PLAN_USAGE.warnAtMinutes} min — never a surprise suspension.
-            </p>
-          </div>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="defect-card">Card number</Label>
-              <Input id="defect-card" value={cardNum} onChange={(e) => { setCardNum(e.target.value); if (err) setErr(null) }} inputMode="numeric" placeholder="1234 5678 9012 3456" autoComplete="cc-number" />
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-1 space-y-1.5"><Label htmlFor="defect-exp">Expiry</Label><Input id="defect-exp" value={exp} onChange={(e) => setExp(e.target.value)} placeholder="MM / YY" autoComplete="cc-exp" /></div>
-              <div className="flex-1 space-y-1.5"><Label htmlFor="defect-cvc">CVC</Label><Input id="defect-cvc" value={cvc} onChange={(e) => setCvc(e.target.value)} placeholder="123" autoComplete="cc-csc" /></div>
-            </div>
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Lock className="h-3 w-3" /> Encrypted by our payment processor. We never store your card.</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="port" className="space-y-4 pt-4">
-          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/[0.05] px-4 py-3 text-sm">
-            <p className="font-medium">Keep your number — no card needed.</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">Billing stays with your carrier until the port completes. No double-pay during cutover.</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="defect-carrier">Current carrier</Label>
-            <Select value={carrier} onValueChange={(v) => { setCarrier(v); if (err) setErr(null) }}>
-              <SelectTrigger id="defect-carrier"><SelectValue placeholder="Select your carrier" /></SelectTrigger>
-              <SelectContent>{PORT_CARRIERS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="defect-portnum">Number to port</Label>
-            <Input id="defect-portnum" value={portNum} onChange={(e) => { setPortNum(e.target.value); if (err) setErr(null) }} inputMode="tel" placeholder="+1 (555) 123-4567" />
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+        <p className="font-medium">Where should {config.name} answer?</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          It goes live on the web instantly. To put it on the phone, connect a number from your carrier
+          (Twilio / Telnyx / …) over SIP — Agora bridges it and you keep the number.
+        </p>
+        <div className="mt-2.5">
+          <AddPhoneNumberSheet>
+            <button type="button" className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground transition-colors hover:text-primary">
+              <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Connect your number (SIP)
+            </button>
+          </AddPhoneNumberSheet>
+        </div>
+      </div>
 
       {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
 
       <Button size="lg" className="w-full gap-1.5" onClick={go} disabled={busy}>
-        {busy ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : tab === "new" ? <CreditCard className="h-4 w-4" /> : <ArrowLeftRight className="h-4 w-4" />}
-        {busy ? "Going live…" : tab === "new" ? "Claim number & go live" : "Port & go live (no card)"}
+        {busy ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ArrowRight className="h-4 w-4" />}
+        {busy ? "Going live…" : "Create account & go live on web"}
       </Button>
     </div>
   )

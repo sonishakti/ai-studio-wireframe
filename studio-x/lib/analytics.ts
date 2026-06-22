@@ -39,13 +39,14 @@ export const Events = {
   agent_test_started:         "agent_test_started",          // ★ moment of belief — { channel, agent_id, intent?, direction? }
   agent_test_ended:           "agent_test_ended",            // { channel, agent_id, duration_sec, direction? }
 
-  // ── "Claim your number" activation (2026-06-22) ────────────────────────────
-  // Card lands at NEW-number provisioning only — never before the aha, never on
-  // web/code, never on a ported number (port routes billing to the old carrier).
-  // The card sits at event ~4 (vs baseline 11) and never gates deployment_went_live.
-  channel_is_telephony_fork:  "channel_is_telephony_fork",   // { is_telephony, channel, agent_id } — proves the gate is resource-specific
-  card_captured:              "card_captured",               // fires ONLY on the new-Agora-number path — { path, agent_id, channel }
-  free_minutes_warning_250:   "free_minutes_warning_250",    // at-threshold consent, not a silent flip — { used, included }
+  // ── Half-tier card nudge (2026-06-22) ──────────────────────────────────────
+  // Agora bills per minute and doesn't sell/port numbers, so the card sits on
+  // USAGE: the free tier is split 150 (no card) + 150 (card unlocks). At 150 min
+  // used we nudge for a card; adding it unlocks the next 150 free AND puts a card
+  // on file BEFORE exhaustion, so usage rolls into PAYG instead of a suspension.
+  free_minutes_halfway:       "free_minutes_halfway",        // ★ the nudge moment — { used, ungated }
+  card_captured:              "card_captured",               // ★ activation — card added at the nudge — { agent_id, at_minute }
+  free_minutes_unlocked:      "free_minutes_unlocked",       // +150 free unlocked by the card — { unlocked, included }
   first_paid_minute:          "first_paid_minute",           // ★ replaces the deleted suspend→reactivate CAC loop — { agent_id }
 
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
@@ -129,9 +130,9 @@ export type EventPayloads = {
   quota_warning_clicked:       { meter: string; pct_used: number }
   test_outcome_selected:       { outcome: "tweak" | "deploy"; agent_id: string }
   agent_switched:              { to_id: string; status: "live" | "draft" | "paused" }
-  channel_is_telephony_fork:   { is_telephony: boolean; channel: string; agent_id: string }
-  card_captured:               { path: "new_number"; agent_id: string; channel: string }
-  free_minutes_warning_250:    { used: number; included: number }
+  free_minutes_halfway:        { used: number; ungated: number }
+  card_captured:               { agent_id: string; at_minute: number }
+  free_minutes_unlocked:       { unlocked: number; included: number }
   first_paid_minute:           { agent_id: string }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }

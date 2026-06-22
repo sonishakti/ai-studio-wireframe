@@ -292,41 +292,30 @@ export const TEST_INBOUND_NUMBER = "+1 (415) 555-0100"
 
 export interface PlanUsage {
   plan: string
+  /** Total free minutes once a card is on file (ungated + the unlocked slice). */
   freeMinutesIncluded: number
   freeMinutesUsed: number
-  /** At-threshold consent surface — warn here BEFORE the free grant is gone, so
-   *  crossing into PAYG is a one-tap choice, not a silent suspension (the line
-   *  that deletes the old free_minutes_exhausted→account_suspended CAC loop). */
-  warnAtMinutes: number
-  /** Default spend cap (USD/mo) offered when the card is captured, so going PAYG
-   *  can never become bill-shock. User-adjustable; 0 = no cap. */
+  /** First slice of free minutes usable with NO card. At this mark we nudge for a
+   *  card, which unlocks the remaining free minutes — so a card is on file BEFORE
+   *  the tier runs out and usage rolls into pay-as-you-go instead of a suspension.
+   *  Agora bills per minute, so the card sits on usage, not on a phone number
+   *  (Agora doesn't sell or port numbers — telephony is bring-your-own via SIP). */
+  freeMinutesUngated: number
+  /** True once a card is on file — unlocks the gated free minutes and lets usage
+   *  roll into PAYG past the free tier (kills the suspend→reactivate CAC loop). */
+  cardOnFile: boolean
+  /** Default spend cap (USD/mo) offered with the card, so PAYG can't bill-shock. */
   defaultSpendCapUsd: number
 }
 
 export const PLAN_USAGE: PlanUsage = {
   plan: "Free",
   freeMinutesIncluded: 300,
-  freeMinutesUsed: 18,
-  warnAtMinutes: 250,
+  freeMinutesUsed: 150,
+  freeMinutesUngated: 150,
+  cardOnFile: false,
   defaultSpendCapUsd: 50,
 }
-
-// ─── "Claim your number" provisioning (activation flow, 2026-06-22) ───────────
-//
-// The card attaches to acquiring a NEW Agora number (Twilio pattern — the card
-// buys the resource, not the product). Porting an existing number is the
-// card-free, anti-double-pay path that routes billing to the old carrier.
-
-/** Sample reservable Agora numbers, keyed by area code (wireframe inventory). */
-export const CLAIMABLE_NUMBERS: { areaCode: string; region: string; number: string }[] = [
-  { areaCode: "415", region: "San Francisco, CA", number: "+1 (415) 555-0142" },
-  { areaCode: "212", region: "New York, NY", number: "+1 (212) 555-0188" },
-  { areaCode: "312", region: "Chicago, IL", number: "+1 (312) 555-0164" },
-  { areaCode: "512", region: "Austin, TX", number: "+1 (512) 555-0119" },
-]
-
-/** Carriers we can port an existing number IN from (no Agora card needed). */
-export const PORT_CARRIERS = ["Twilio", "Telnyx", "Vonage", "Bandwidth"] as const
 
 // ─── Status display ──────────────────────────────────────────────────────────
 
