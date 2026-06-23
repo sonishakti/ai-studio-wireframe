@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowUpRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 // Local nav for the global Monitor hub. The sidebar collapsed Monitor /
@@ -24,7 +25,16 @@ export function MonitorNav({ action }: { action?: React.ReactNode }) {
     <div className="border-b bg-background px-6">
       <div className="flex items-center justify-between gap-3 pt-4">
         <h1 className="text-xl font-semibold tracking-tight">Monitor</h1>
-        {action}
+        <div className="flex items-center gap-2">
+          {/* RTE = per-minute usage (lives in Billing). Not a tab — a quiet
+              wayfinding nudge for anyone hunting for Realtime usage. */}
+          <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground hover:text-foreground">
+            <Link href="/billing/usage">
+              Looking for usage? <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+          {action}
+        </div>
       </div>
       <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">
         {TABS.map((tab) => {
@@ -47,16 +57,6 @@ export function MonitorNav({ action }: { action?: React.ReactNode }) {
             </Link>
           )
         })}
-        {/* Realtime Services — an inline tab per design 05. RTE telemetry is
-            per-minute usage, which lives in Billing, so this cross-links there
-            (honors the locked IA: RTE = usage, not agent sessions). */}
-        <Link
-          href="/billing/usage"
-          className="flex items-center gap-1 px-3 py-2 text-sm font-medium border-b-2 border-transparent text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-        >
-          Realtime Services
-          <ArrowUpRight className="h-3 w-3 opacity-60" />
-        </Link>
       </nav>
     </div>
   )
