@@ -15,13 +15,16 @@ import { cn } from "@/lib/utils"
  * the breadcrumb primitive. The agent identity is anchored to the left.
  */
 
-export type AgentSection = "persona" | "stack" | "knowledge" | "actions" | "deployment"
+export type AgentSection = "persona" | "stack" | "knowledge" | "mcp" | "connectors" | "deployment"
 
+// Names match the Figma design (03_Configure_Integrations): Knowledge Base · MCP
+// · Connectors are distinct modules — not a combined "Actions" bucket.
 export const AGENT_SECTIONS: { id: AgentSection; label: string }[] = [
   { id: "persona", label: "Persona" },
   { id: "stack", label: "Stack" },
-  { id: "knowledge", label: "Knowledge" },
-  { id: "actions", label: "Actions" },
+  { id: "knowledge", label: "Knowledge Base" },
+  { id: "mcp", label: "MCP" },
+  { id: "connectors", label: "Connectors" },
   { id: "deployment", label: "Deployment" },
 ]
 

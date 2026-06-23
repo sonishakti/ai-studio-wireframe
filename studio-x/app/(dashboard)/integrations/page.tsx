@@ -107,7 +107,7 @@ export default function IntegrationsPage() {
               <TabsTrigger value="mcp">MCP</TabsTrigger>
               <TabsTrigger value="connectors">Connectors</TabsTrigger>
               <TabsTrigger value="credentials">Vendor Credentials</TabsTrigger>
-              <TabsTrigger value="channels">Channels</TabsTrigger>
+              <TabsTrigger value="channels">Deployment Channels</TabsTrigger>
             </TabsList>
             <a
               href="#"

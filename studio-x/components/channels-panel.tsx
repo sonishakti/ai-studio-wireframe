@@ -72,7 +72,7 @@ export function ChannelsPanel() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold">Channels</h2>
+          <h2 className="text-sm font-semibold">Deployment Channels</h2>
           <p className="text-xs text-muted-foreground">
             Everywhere your agents answer — phone, WhatsApp, web, batch, and code. Filter by type.
           </p>

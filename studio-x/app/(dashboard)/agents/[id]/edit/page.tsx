@@ -16,6 +16,7 @@ import {
   PiggyBank,
   BookOpen,
   Wrench,
+  Plug,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -88,7 +89,9 @@ export default function AgentEditorPage({
   React.useEffect(() => {
     const map: Record<string, AgentSection> = {
       behavior: "persona", persona: "persona", stack: "stack",
-      knowledge: "knowledge", actions: "actions", deployment: "deployment",
+      knowledge: "knowledge", mcp: "mcp", connectors: "connectors",
+      actions: "mcp", // back-compat: the old combined #actions now lands on MCP
+      deployment: "deployment",
     }
     const s = map[window.location.hash.replace("#", "")]
     if (s) setSection(s)
@@ -97,13 +100,19 @@ export default function AgentEditorPage({
     setSection(s)
     window.history.replaceState(null, "", `#${s}`)
   }
+  // Names match the Figma design: MCP and Connectors are distinct (not a combined
+  // "Actions"). Agent.actions holds tool ids; mcp_* are MCP servers, the rest are
+  // connectors.
+  const mcpAttached = (agent?.actions ?? []).filter((a) => a.startsWith("mcp"))
+  const connectorAttached = (agent?.actions ?? []).filter((a) => !a.startsWith("mcp"))
   const completion: Record<AgentSection, boolean> = isNew
-    ? { persona: false, stack: false, knowledge: false, actions: false, deployment: false }
+    ? { persona: false, stack: false, knowledge: false, mcp: false, connectors: false, deployment: false }
     : {
         persona: true,
         stack: true,
         knowledge: (agent?.knowledge.length ?? 0) > 0,
-        actions: (agent?.actions.length ?? 0) > 0,
+        mcp: mcpAttached.length > 0,
+        connectors: connectorAttached.length > 0,
         deployment: deployedIn.length > 0,
       }
 
@@ -385,13 +394,25 @@ export default function AgentEditorPage({
               />
             </TabsContent>
 
-            {/* ── Actions ─────────────────────────────────────────────────── */}
-            <TabsContent value="actions" className="flex-1 overflow-y-auto px-6 py-5 space-y-4 mt-0">
+            {/* ── MCP — distinct from Connectors, per the design ──────────── */}
+            <TabsContent value="mcp" className="flex-1 overflow-y-auto px-6 py-5 space-y-4 mt-0">
               <AttachPanel
                 icon={Wrench}
-                title="Tools & MCP servers"
-                attached={agent?.actions ?? []}
-                emptyHint="No tools attached. Add MCP servers or connectors so the agent can act."
+                title="MCP servers"
+                attached={mcpAttached}
+                emptyHint="No MCP servers attached. Add one in Integrations so the agent can act."
+                manageHref="/integrations"
+                manageLabel="Manage in Integrations"
+              />
+            </TabsContent>
+
+            {/* ── Connectors ──────────────────────────────────────────────── */}
+            <TabsContent value="connectors" className="flex-1 overflow-y-auto px-6 py-5 space-y-4 mt-0">
+              <AttachPanel
+                icon={Plug}
+                title="Connectors"
+                attached={connectorAttached}
+                emptyHint="No connectors attached. Add Hubspot, Jira, and more in Integrations."
                 manageHref="/integrations"
                 manageLabel="Manage in Integrations"
               />
