@@ -60,6 +60,16 @@ export default function MonitorPage() {
 
   const [campaignFilter, setCampaignFilter] = React.useState("all")
 
+  // "You're live" confirmation — set when arriving straight from a deploy wizard
+  // (?deployed=…). Read window.location.search (not useSearchParams) to avoid a
+  // Suspense boundary — same pattern the deploy wizards use for ?agent=.
+  const [deployed, setDeployed] = React.useState<{ name: string; channel: string; agent: string } | null>(null)
+  React.useEffect(() => {
+    const p = new URLSearchParams(window.location.search)
+    const name = p.get("deployed")
+    if (name) setDeployed({ name, channel: p.get("channel") ?? "", agent: p.get("agent") ?? "" })
+  }, [])
+
   return (
     <div className="flex flex-col flex-1">
       <MonitorNav
@@ -71,6 +81,23 @@ export default function MonitorPage() {
       />
 
       <main className="flex-1 p-6 space-y-5">
+        {deployed && (
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/40 bg-emerald-500/[0.06] px-4 py-3">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">
+                {deployed.agent || "Your agent"} is live{deployed.channel ? ` on ${deployed.channel}` : ""}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                New calls from <span className="font-medium text-foreground">{deployed.name}</span> appear here as they come in.
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" className="shrink-0" onClick={() => setDeployed(null)}>
+              Dismiss
+            </Button>
+          </div>
+        )}
+
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
           <Select defaultValue="7d">

@@ -77,7 +77,10 @@ export default function NewBatchCallPage() {
     toast.success(`"${name}" is ready to dial`, {
       description: `${file?.rowCount.toLocaleString()} contacts · ${columns.length} variables detected.`,
     })
-    router.push("/deploy/batch-calls")
+    // After launch, land on Monitor (where the batch's calls show up) with a
+    // "you're live" banner — not the batch list.
+    const q = new URLSearchParams({ deployed: name, channel: "Batch calls", agent: agent?.name ?? "" })
+    router.push(`/monitor?${q.toString()}`)
   }
 
   return (

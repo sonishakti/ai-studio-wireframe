@@ -52,7 +52,10 @@ export default function NewInboundPage() {
     toast.success(`"${name}" is answering`, {
       description: `${agent?.name} is live on ${CHANNEL_LABEL[channel]}.`,
     })
-    router.push("/deploy/inbound")
+    // After deploy, the user wants to MONITOR it — not land on a list. Land on
+    // Monitor with a "you're live" banner (the deployment carries no traffic yet).
+    const q = new URLSearchParams({ deployed: name, channel: CHANNEL_LABEL[channel], agent: agent?.name ?? "" })
+    router.push(`/monitor?${q.toString()}`)
   }
 
   return (
