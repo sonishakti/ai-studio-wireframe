@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AgentTestPanel } from "@/components/agent-test-panel"
-import { AgentDeploySheet } from "@/components/agent-deploy-sheet"
 import { AgentJourneyBreadcrumb, type AgentSection } from "@/components/agent-journey-breadcrumb"
 import { AgentDeploymentPanel } from "@/components/agent-deployment-panel"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
@@ -165,11 +164,19 @@ export default function AgentEditorPage({
               </Link>
             </Button>
 
-            <AgentDeploySheet agentId={id}>
-              <Button size="sm" className="gap-1.5">
-                <Rocket className="h-3.5 w-3.5" /> Deploy Agent
-              </Button>
-            </AgentDeploySheet>
+            {/* Single deploy surface: the CTA jumps to the Deployment section
+                (the journey's finish line) — no separate chooser sheet, and it
+                never re-asks for the agent. Status-aware label. */}
+            <Button
+              size="sm"
+              className="gap-1.5"
+              disabled={isNew}
+              title={isNew ? "Save this agent to go live." : undefined}
+              onClick={() => jump("deployment")}
+            >
+              <Rocket className="h-3.5 w-3.5" />
+              {deployedIn.length > 0 ? "Manage deployment" : "Go live"}
+            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

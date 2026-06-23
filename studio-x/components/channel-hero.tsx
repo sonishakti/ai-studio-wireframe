@@ -47,7 +47,7 @@ export function ChannelHero({ agent, showNote = true }: { agent: HeroAgent; show
           footer={<SipConnect />}
         />
         <ChannelCard
-          href="/deploy/code"
+          href={`/deploy/code${p}`}
           channel="code"
           agentId={agent.id}
           icon={Code2}

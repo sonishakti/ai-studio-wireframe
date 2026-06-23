@@ -97,9 +97,9 @@ export const Events = {
   cert_secondary_enabled:           "cert_secondary_enabled",
   cert_secondary_disable_requested: "cert_secondary_disable_requested",
 
-  // ── Deploy chooser & campaign creation ────────────────────────────────────
-  deploy_chooser_viewed:            "deploy_chooser_viewed",
-  deploy_chooser_option_selected:   "deploy_chooser_option_selected",
+  // ── Campaign creation ──────────────────────────────────────────────────────
+  // (deploy_chooser_* removed 2026-06-23 — the chooser sheet was deleted; the
+  //  in-editor deploy surface is now the breadcrumb's Deployment section.)
   campaign_wizard_step_completed:   "campaign_wizard_step_completed",
   campaign_channel_added:           "campaign_channel_added",
   campaign_channel_removed:         "campaign_channel_removed",
