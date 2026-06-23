@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
-import { AgentTestPanel } from "@/components/agent-test-panel"
+import { GoLiveHome } from "@/components/go-live-home"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, type StackPreset } from "@/lib/campaign-data"
@@ -161,63 +161,10 @@ function TemplateRow({
 // ─── first-run gallery view ──────────────────────────────────────────────────
 
 function FirstRunView() {
-  const [selectedId, setSelectedId] = React.useState("ivr")
-  const selected = TEMPLATES.find((t) => t.id === selectedId)!
-
-  React.useEffect(() => {
-    track(Events.agent_template_browsed)
-  }, [])
-
-  return (
-    <div className="flex flex-1 min-h-0">
-      {/* Left: section header + template list */}
-      <main className="flex-1 p-6 overflow-y-auto min-w-0">
-        <div className="flex items-center gap-2 mb-4 text-sm">
-          <Bot className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">Pre-built by Agora</span>
-          <span className="text-xs text-muted-foreground ml-1">— a starting point, never a lock-in. Change persona and stack anytime.</span>
-        </div>
-        <div className="space-y-2 max-w-3xl">
-          {TEMPLATES.map((tpl) => (
-            <TemplateRow
-              key={tpl.id}
-              tpl={tpl}
-              isSelected={selectedId === tpl.id}
-              onSelect={() => {
-                setSelectedId(tpl.id)
-                track(Events.agent_template_selected, { template_id: tpl.id })
-              }}
-              onTest={() =>
-                track(Events.agent_test_started, {
-                  template_id: tpl.id,
-                  agent_id: "preview",
-                })
-              }
-            />
-          ))}
-        </div>
-      </main>
-
-      {/* Right: agent test panel (matches editor) */}
-      <AgentTestPanel
-        title={selected.name}
-        state="Agent Disconnected"
-        spec={{
-          llm: selected.llm,
-          asr: selected.asr,
-          tts: selected.tts,
-          latencyMs: null,
-          ttftMs: null,
-        }}
-        onTest={() =>
-          track(Events.agent_test_started, {
-            template_id: selected.id,
-            agent_id: "preview",
-          })
-        }
-      />
-    </div>
-  )
+  // First-run IS the Aria believe-then-scale home (2026-06-23). The old
+  // "Pre-built by Agora" template picker is gone; templates now live in the
+  // Browse-templates sheet (header action). GoLiveHome owns its own state.
+  return <GoLiveHome />
 }
 
 // ─── returning-user list view ────────────────────────────────────────────────
@@ -381,14 +328,10 @@ export default function AgentsPage() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
-        title={
-          showFirstRun ? "Deploy an AI agent in minutes" : "My Agents"
-        }
-        description={
-          showFirstRun
-            ? "Import your agent or start with a pre-built template."
-            : "Your agents — click any row to edit."
-        }
+        // First-run renders GoLiveHome (its own "Deploy an AI agent in minutes"
+        // headline), so suppress the page title here to avoid a double H1.
+        title={showFirstRun ? undefined : "My Agents"}
+        description={showFirstRun ? undefined : "Your agents — click any row to edit."}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -406,6 +349,16 @@ export default function AgentsPage() {
                 <>View first-run</>
               )}
             </Button>
+            {showFirstRun && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setTemplatesOpen(true)}
+              >
+                <Library className="h-4 w-4" /> Browse templates
+              </Button>
+            )}
             <ImportAgentSheet>
               <Button variant="outline" className="gap-1.5">
                 <Upload className="h-4 w-4" /> Import Agent

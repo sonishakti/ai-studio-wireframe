@@ -15,6 +15,8 @@ import {
   Pencil,
   Check,
   Zap,
+  Scale,
+  PiggyBank,
   PhoneCall,
   Copy,
   Gauge,
@@ -48,13 +50,24 @@ import {
   AGENTS,
   stackSummary,
   stackEstimate,
+  stackFor,
+  STACK_PRESETS,
+  STACK_ESTIMATE,
   TEST_INBOUND_NUMBER,
   PLAN_USAGE,
   DEPLOYMENTS,
   type Agent,
   type ImportedAgentConfig,
+  type StackPreset,
 } from "@/lib/campaign-data"
 import { track, Events } from "@/lib/analytics"
+
+// Cost-vs-speed icons — same mapping as the agent editor's Stack tab.
+const STACK_PRESET_ICON: Record<StackPreset, React.ComponentType<{ className?: string }>> = {
+  fastest: Zap,
+  balanced: Scale,
+  cheapest: PiggyBank,
+}
 
 /**
  * GoLiveHome — the "Go Live" home (Deploy hub Overview).
@@ -120,9 +133,20 @@ type Line = { role: "agent" | "you"; text: string }
 export function GoLiveHome() {
   const [selectedAgentId, setSelectedAgentId] = React.useState(() => getDefaultAgent().id)
   const [extraAgents, setExtraAgents] = React.useState<Agent[]>([])
+  // Cost-vs-speed dimension: a first-timer picks fastest/balanced/cheapest from
+  // the switch-agent menu. Mock AGENTS are immutable, so overrides live here
+  // keyed by agent id; the effective agent below reflects the chosen stack live.
+  const [stackOverrides, setStackOverrides] = React.useState<Record<string, StackPreset>>({})
 
   const agents = React.useMemo(() => [...AGENTS, ...extraAgents], [extraAgents])
-  const agent = agents.find((a) => a.id === selectedAgentId) ?? getDefaultAgent()
+  const baseAgent = agents.find((a) => a.id === selectedAgentId) ?? getDefaultAgent()
+  const override = stackOverrides[baseAgent.id]
+  const agent = override ? { ...baseAgent, stack: stackFor(override) } : baseAgent
+
+  function handleStackChange(preset: StackPreset) {
+    setStackOverrides((m) => ({ ...m, [baseAgent.id]: preset }))
+    track(Events.stack_preset_changed, { agent_id: baseAgent.id, preset })
+  }
 
   React.useEffect(() => {
     track(Events.default_agent_provisioned, { agent_id: getDefaultAgent().id })
@@ -169,6 +193,7 @@ export function GoLiveHome() {
           agents={agents}
           onSwitch={setSelectedAgentId}
           onImported={handleImported}
+          onStackChange={handleStackChange}
         />
         <AlreadyLive />
       </div>
@@ -314,11 +339,13 @@ function AgentCard({
   agents,
   onSwitch,
   onImported,
+  onStackChange,
 }: {
   agent: Agent
   agents: Agent[]
   onSwitch: (id: string) => void
   onImported: (config: ImportedAgentConfig) => void
+  onStackChange: (preset: StackPreset) => void
 }) {
   const [method, setMethod] = React.useState<Method>("talk")
   const [intentId, setIntentId] = React.useState<string | null>(null)
@@ -565,6 +592,40 @@ function AgentCard({
                     <Pencil className="h-4 w-4" /> Edit {shortName(agent.name)}
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {/* Stack · speed vs cost — pick the dimension before proceeding */}
+                <DropdownMenuLabel className="flex items-center gap-1.5">
+                  <Gauge className="h-3.5 w-3.5 text-muted-foreground" /> Stack · speed vs cost
+                </DropdownMenuLabel>
+                <div className="grid grid-cols-3 gap-1.5 px-2 pb-1.5" role="radiogroup" aria-label="Stack speed vs cost">
+                  {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
+                    const def = STACK_PRESETS[p]
+                    const e = STACK_ESTIMATE[p]
+                    const Icon = STACK_PRESET_ICON[p]
+                    const selected = agent.stack.preset === p
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        disabled={busy}
+                        title={`${def.label} — ${def.hint}`}
+                        onClick={() => onStackChange(p)}
+                        className={cn(
+                          "flex flex-col items-start gap-1 rounded-lg border p-2 text-left transition-colors disabled:opacity-50",
+                          selected ? "border-primary/60 bg-primary/5" : "border-border hover:border-primary/30",
+                        )}
+                      >
+                        <Icon className={cn("h-3.5 w-3.5", selected ? "text-primary" : "text-muted-foreground")} />
+                        <span className="text-xs font-medium">{def.label}</span>
+                        <span className="font-mono text-xs leading-tight text-muted-foreground tabular-nums">
+                          {e.latencyMs}ms<br />${e.costPerMin.toFixed(2)}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup value={agent.id} onValueChange={handleSwitch}>
                   <DropdownMenuLabel>Switch agent</DropdownMenuLabel>

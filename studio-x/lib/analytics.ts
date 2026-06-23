@@ -30,6 +30,7 @@ export const Events = {
   agent_template_selected:    "agent_template_selected",
   agent_created:              "agent_created",
   agent_switched:             "agent_switched",              // { to_id, status } — change deploy target
+  stack_preset_changed:       "stack_preset_changed",        // { agent_id, preset } — cost-vs-speed dimension picked
   test_outcome_selected:      "test_outcome_selected",        // { outcome, agent_id } the test→deploy hinge
   agent_published:            "agent_published",              // mid-funnel signal (no longer north star)
   put_to_work_selected:       "put_to_work_selected",         // { channel: inbound|campaign|web }
@@ -130,6 +131,7 @@ export type EventPayloads = {
   quota_warning_clicked:       { meter: string; pct_used: number }
   test_outcome_selected:       { outcome: "tweak" | "deploy"; agent_id: string }
   agent_switched:              { to_id: string; status: "live" | "draft" | "paused" }
+  stack_preset_changed:        { agent_id: string; preset: "fastest" | "balanced" | "cheapest" }
   free_minutes_halfway:        { used: number; ungated: number }
   card_captured:               { agent_id: string; at_minute: number }
   free_minutes_unlocked:       { unlocked: number; included: number }

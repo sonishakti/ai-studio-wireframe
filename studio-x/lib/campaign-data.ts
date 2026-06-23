@@ -180,7 +180,7 @@ export const STACK_PRESETS: Record<
   },
 }
 
-function stackFor(preset: StackPreset, modality: AgentStack["modality"] = "voice"): AgentStack {
+export function stackFor(preset: StackPreset, modality: AgentStack["modality"] = "voice"): AgentStack {
   const p = STACK_PRESETS[preset]
   return { preset, modality, llm: p.llm, asr: p.asr, tts: p.tts }
 }
