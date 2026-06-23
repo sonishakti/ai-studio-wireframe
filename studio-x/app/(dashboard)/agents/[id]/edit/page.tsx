@@ -11,21 +11,18 @@ import {
   Trash2,
   Copy,
   ArrowLeft,
-  PhoneIncoming,
-  PhoneOutgoing,
   Zap,
   Scale,
   PiggyBank,
   BookOpen,
   Wrench,
-  ArrowUpRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -38,6 +35,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { AgentTestPanel } from "@/components/agent-test-panel"
 import { AgentDeploySheet } from "@/components/agent-deploy-sheet"
+import { AgentJourneyBreadcrumb, type AgentSection } from "@/components/agent-journey-breadcrumb"
+import { AgentDeploymentPanel } from "@/components/agent-deployment-panel"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import {
   AGENTS,
@@ -83,8 +82,30 @@ export default function AgentEditorPage({
   // Backlinks: which deployments this reusable agent backs (one channel each).
   const deployedIn = isNew ? [] : DEPLOYMENTS.filter((d) => d.agentId === id)
 
-  // Deploy target — chosen up front so the channel is never an afterthought.
-  const [target, setTarget] = React.useState<"inbound" | "batch">("inbound")
+  // Agent experience = a journey breadcrumb (not tabs). The section is controlled
+  // here and mirrored to the URL hash so #behavior / #deployment deep-links work.
+  const [section, setSection] = React.useState<AgentSection>("persona")
+  React.useEffect(() => {
+    const map: Record<string, AgentSection> = {
+      behavior: "persona", persona: "persona", stack: "stack",
+      knowledge: "knowledge", actions: "actions", deployment: "deployment",
+    }
+    const s = map[window.location.hash.replace("#", "")]
+    if (s) setSection(s)
+  }, [])
+  const jump = (s: AgentSection) => {
+    setSection(s)
+    window.history.replaceState(null, "", `#${s}`)
+  }
+  const completion: Record<AgentSection, boolean> = isNew
+    ? { persona: false, stack: false, knowledge: false, actions: false, deployment: false }
+    : {
+        persona: true,
+        stack: true,
+        knowledge: (agent?.knowledge.length ?? 0) > 0,
+        actions: (agent?.actions.length ?? 0) > 0,
+        deployment: deployedIn.length > 0,
+      }
 
   // Persona (the "change personality" tweak)
   const [personality, setPersonality] = React.useState(agent?.persona.personality ?? "Warm, concise, professional")
@@ -115,76 +136,18 @@ export default function AgentEditorPage({
     })
   }
 
-  const continueHref = target === "inbound" ? "/deploy/inbound/new" : "/deploy/batch-calls/new"
-
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Page header — agent identity + deploy target + actions */}
-      <header className="border-b bg-background px-6 py-3">
+      {/* Page header — journey breadcrumb (identity + section nav) + actions */}
+      <header className="border-b bg-background px-6 py-3 space-y-2">
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0 flex-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-lg font-semibold tracking-tight truncate">{agentName}</h1>
-              <Badge
-                variant={agentLabel === "live" ? "default" : "outline"}
-                className="text-xs capitalize"
-              >
-                {agentLabel}
-              </Badge>
-              {/* Deploy target — picked FIRST, points at the deployment surface */}
-              <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
-                {(
-                  [
-                    { key: "inbound", label: "Inbound", icon: PhoneIncoming },
-                    { key: "batch", label: "Batch Calls", icon: PhoneOutgoing },
-                  ] as const
-                ).map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() => setTarget(t.key)}
-                    className={cn(
-                      "flex items-center gap-1 rounded px-2 h-6 text-xs font-medium transition-colors",
-                      target === t.key
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <t.icon className="h-3 w-3" /> {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1 font-mono">
-                <Hash className="h-3 w-3" />
-                {isNew ? "agt_draft" : id}
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
-                800ms latency budget
-              </span>
-            </div>
-            {deployedIn.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground pt-0.5">
-                <span>Deployed in:</span>
-                {deployedIn.map((d) => (
-                  <Link
-                    key={d.id}
-                    href={d.kind === "batch" ? `/deploy/batch-calls/${d.id}` : `/deploy/inbound/${d.id}`}
-                    className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-foreground hover:border-primary/40 transition-colors"
-                  >
-                    {d.kind === "batch" ? (
-                      <PhoneOutgoing className="h-3 w-3 text-muted-foreground" />
-                    ) : (
-                      <PhoneIncoming className="h-3 w-3 text-muted-foreground" />
-                    )}
-                    {d.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+          <AgentJourneyBreadcrumb
+            agentName={agentName}
+            status={agentLabel}
+            active={section}
+            completion={completion}
+            onJump={jump}
+          />
 
           <div className="flex items-center gap-2 shrink-0">
             <Button variant="ghost" size="sm" asChild className="gap-1">
@@ -230,20 +193,23 @@ export default function AgentEditorPage({
             </DropdownMenu>
           </div>
         </div>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 font-mono">
+            <Hash className="h-3 w-3" />
+            {isNew ? "agt_draft" : id}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
+            800ms latency budget
+          </span>
+        </div>
       </header>
 
-      {/* Body — tabs on left, test panel on right */}
+      {/* Body — section content on left, test panel on right. The journey
+          breadcrumb in the header controls which section shows. */}
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-          <Tabs defaultValue="persona" className="flex flex-col flex-1 min-h-0">
-            <div className="border-b px-6 pt-2">
-              <TabsList className="bg-transparent border-b-0 -mb-px h-auto p-0 gap-0">
-                <UnderlineTab value="persona">Persona</UnderlineTab>
-                <UnderlineTab value="stack">Stack</UnderlineTab>
-                <UnderlineTab value="knowledge">Knowledge</UnderlineTab>
-                <UnderlineTab value="actions">Actions</UnderlineTab>
-              </TabsList>
-            </div>
+          <Tabs value={section} onValueChange={(v) => jump(v as AgentSection)} className="flex flex-col flex-1 min-h-0">
 
             {/* ── Persona — the light "change personality" tweak ──────────── */}
             <TabsContent value="persona" className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0">
@@ -430,21 +396,12 @@ export default function AgentEditorPage({
                 manageLabel="Manage in Integrations"
               />
             </TabsContent>
-          </Tabs>
 
-          {/* Continue into the deployment — prompt/vars are authored there */}
-          <div className="border-t bg-background px-6 py-3 flex items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
-              Next: write what the agent says on this{" "}
-              {target === "inbound" ? "line" : "batch"}.
-            </p>
-            <Button size="sm" className="gap-1.5" asChild>
-              <Link href={continueHref}>
-                Continue to {target === "inbound" ? "Inbound" : "Batch Calls"}
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          </div>
+            {/* ── Deployment — where this agent is live + go-live (the finish line) ── */}
+            <TabsContent value="deployment" className="flex-1 overflow-y-auto px-6 py-5 mt-0">
+              <AgentDeploymentPanel id={id} agent={agent} />
+            </TabsContent>
+          </Tabs>
         </div>
 
         <AgentTestPanel
@@ -465,28 +422,6 @@ export default function AgentEditorPage({
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────────
-
-function UnderlineTab({
-  value,
-  children,
-  className,
-}: {
-  value: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <TabsTrigger
-      value={value}
-      className={
-        "rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-sm font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none " +
-        (className ?? "")
-      }
-    >
-      {children}
-    </TabsTrigger>
-  )
-}
 
 const ATTACHMENT_LABEL: Record<string, string> = {
   kb_01: "Product Docs",
