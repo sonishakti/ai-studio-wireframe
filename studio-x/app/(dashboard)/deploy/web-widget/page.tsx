@@ -13,6 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { PageHeader } from "@/components/page-header"
+import { DeployContextBar } from "@/components/deploy-context-bar"
 import { AGENTS } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -71,6 +72,7 @@ export default function WebWidgetPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      <DeployContextBar channelLabel="Web widget" />
       <PageHeader
         title="Web widget"
         actions={

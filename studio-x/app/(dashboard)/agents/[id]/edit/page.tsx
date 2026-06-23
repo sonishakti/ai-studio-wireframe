@@ -235,10 +235,14 @@ export default function AgentEditorPage({
               <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
                 <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <p className="text-xs text-foreground leading-relaxed">
-                  Looking for the prompt? Each deployment has its own — open{" "}
-                  <Link href="/deploy" className="underline underline-offset-2 hover:text-primary">
+                  Looking for the prompt? Each deployment has its own — go to{" "}
+                  <button
+                    type="button"
+                    onClick={() => jump("deployment")}
+                    className="underline underline-offset-2 hover:text-primary"
+                  >
                     Deploy
-                  </Link>{" "}
+                  </button>{" "}
                   to edit what this agent says on a number, widget, or batch.
                 </p>
               </div>

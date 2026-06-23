@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select"
 import { AGENTS, PHONE_NUMBERS, STACK_PRESETS, CHANNEL_LABEL, type ChannelKind } from "@/lib/campaign-data"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
+import { DeployContextBar } from "@/components/deploy-context-bar"
 import { toast } from "sonner"
 
 // New inbound deployment — one agent answers on ONE channel. The
@@ -63,8 +64,11 @@ export default function NewInboundPage() {
     router.push(`/monitor?${q.toString()}`)
   }
 
+  const cancelHref = agentId ? `/agents/${agentId}/edit#deployment` : "/integrations?tab=channels"
+
   return (
     <div className="flex flex-col flex-1">
+      <DeployContextBar channelLabel="New inbound deployment" />
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
           <div className="flex items-center justify-between gap-3">
@@ -73,7 +77,7 @@ export default function NewInboundPage() {
               <p className="text-sm text-muted-foreground">One agent, one channel — live in minutes.</p>
             </div>
             <Button variant="ghost" size="sm" asChild className="gap-1">
-              <Link href="/deploy/inbound"><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
+              <Link href={cancelHref}><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
             </Button>
           </div>
 

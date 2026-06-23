@@ -5,6 +5,7 @@ import Link from "next/link"
 import {
   Code2, Copy, ExternalLink, Smartphone, Monitor, Cpu, Frame, Bot,
 } from "lucide-react"
+import { DeployContextBar } from "@/components/deploy-context-bar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -198,6 +199,7 @@ export default function DeployCodePage() {
 
   return (
     <div className="flex flex-col flex-1">
+      <DeployContextBar channelLabel="Embed code" />
       <main className="flex-1 p-6 space-y-5">
         <div className="space-y-1">
           <h2 className="text-base font-semibold">Code</h2>

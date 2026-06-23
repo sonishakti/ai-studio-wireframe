@@ -25,6 +25,7 @@ import {
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { PageHeader } from "@/components/page-header"
+import { DeployContextBar } from "@/components/deploy-context-bar"
 import { PHONE_NUMBERS, DEPLOYMENTS, deploymentHref } from "@/lib/campaign-data"
 
 export default function PhoneNumbersPage() {
@@ -47,6 +48,7 @@ export default function PhoneNumbersPage() {
 
   return (
     <div className="flex flex-col flex-1">
+      <DeployContextBar channelLabel="Phone numbers" />
       <PageHeader
         title="Phone numbers"
         actions={

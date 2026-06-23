@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { AGENTS, PHONE_NUMBERS, extractVars, STACK_PRESETS } from "@/lib/campaign-data"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
+import { DeployContextBar } from "@/components/deploy-context-bar"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -87,8 +88,11 @@ export default function NewBatchCallPage() {
     router.push(`/monitor?${q.toString()}`)
   }
 
+  const cancelHref = agentId ? `/agents/${agentId}/edit#deployment` : "/integrations?tab=channels"
+
   return (
     <div className="flex flex-col flex-1">
+      <DeployContextBar channelLabel="New batch call" />
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-6">
           {/* Stepper */}
@@ -121,7 +125,7 @@ export default function NewBatchCallPage() {
               ))}
             </div>
             <Button variant="ghost" size="sm" asChild className="gap-1">
-              <Link href="/deploy/batch-calls"><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
+              <Link href={cancelHref}><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
             </Button>
           </div>
 
