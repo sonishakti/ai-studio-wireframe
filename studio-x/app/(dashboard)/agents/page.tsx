@@ -312,7 +312,7 @@ export default function AgentsPage() {
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
         title={
-          showFirstRun ? "Deploy your first AI agent in minutes" : "Agents"
+          showFirstRun ? "Deploy an AI agent in minutes" : "My Agents"
         }
         description={
           showFirstRun

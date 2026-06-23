@@ -6,19 +6,11 @@ import { usePathname } from "next/navigation"
 import {
   Bot,
   Library,
-  Rocket,
   Settings2,
   Radio,
-  Key,
   Sparkles,
   TextSearch,
   LineChart,
-  Phone,
-  PhoneOutgoing,
-  MessageCircle,
-  Globe,
-  Code2,
-  ChevronDown,
 } from "lucide-react"
 
 import {
@@ -29,16 +21,11 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
 
 import { ProjectSwitcher } from "@/components/project-switcher"
@@ -53,11 +40,11 @@ function openCommandPalette() {
 
 // ─── nav structure ───────────────────────────────────────────────────────────
 //
-// 2026-06-20 (user Figma): "Deploy" is the top item — an expandable section whose
-// children are the deploy channels (Phone Numbers · Batch Call · WhatsApp · Web
-// Widget · Code), with /deploy itself as the hub home. Below it the labeled
-// groups: BUILD (Agents · Integrations · Composer) · OBSERVE (Monitor) · MANAGE
-// (Vendor Credentials · Realtime Services · Project Settings).
+// 2026-06-23 agent-unification: "My Agents" is the single home (app root) — it
+// absorbs the old Deploy hub + Agents library. The agent is the unified thing;
+// channels and reusable modules hang off it. Integrations is the modules hub
+// (Knowledge · MCP · Connectors · Vendor Credentials · Channels) — Vendor
+// Credentials moved OUT of Manage; the Deploy channel pages became Channels.
 
 type NavItem = {
   label: string
@@ -66,17 +53,7 @@ type NavItem = {
   badge?: string
 }
 
-// Deploy hub channels — the expandable children under "Deploy".
-const DEPLOY_CHANNELS: NavItem[] = [
-  { label: "Phone Numbers", href: "/deploy/phone-numbers", icon: Phone },
-  { label: "Batch Call", href: "/deploy/batch-calls", icon: PhoneOutgoing },
-  { label: "WhatsApp", href: "/deploy/whatsapp", icon: MessageCircle },
-  { label: "Web Widget", href: "/deploy/web-widget", icon: Globe },
-  { label: "Code", href: "/deploy/code", icon: Code2 },
-]
-
 const NAV_BUILD: NavItem[] = [
-  { label: "Agents", href: "/agents", icon: Bot },
   { label: "Integrations", href: "/integrations", icon: Library },
   { label: "Composer", href: "/composer", icon: Sparkles },
 ]
@@ -86,7 +63,6 @@ const NAV_OBSERVE: NavItem[] = [
 ]
 
 const NAV_MANAGE: NavItem[] = [
-  { label: "Vendor Credentials", href: "/project/vendor-credentials", icon: Key },
   { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Project Settings", href: "/project/settings", icon: Settings2 },
 ]
@@ -94,6 +70,10 @@ const NAV_MANAGE: NavItem[] = [
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function isItemActive(itemHref: string, pathname: string): boolean {
+  if (itemHref === "/agents") {
+    // My Agents is the home — also active at root and on the legacy deploy paths.
+    return pathname === "/agents" || pathname.startsWith("/agents/") || pathname.startsWith("/deploy")
+  }
   if (itemHref === "/monitor") {
     return pathname === "/monitor" || pathname.startsWith("/calls") || pathname.startsWith("/sessions")
   }
@@ -118,47 +98,6 @@ function NavLink({ item }: { item: NavItem }) {
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
-  )
-}
-
-// Deploy — clickable hub (→ /deploy) with an expandable list of channels.
-function DeploySection() {
-  const pathname = usePathname()
-  const hubActive = pathname === "/deploy"
-
-  return (
-    <Collapsible defaultOpen className="group/deploy">
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={hubActive} tooltip="Deploy">
-          <Link href="/deploy">
-            <Rocket className="h-4 w-4" />
-            <span>Deploy</span>
-          </Link>
-        </SidebarMenuButton>
-        <CollapsibleTrigger asChild>
-          <SidebarMenuAction
-            aria-label="Toggle deploy channels"
-            className="transition-transform group-data-[state=open]/deploy:rotate-180"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </SidebarMenuAction>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            {DEPLOY_CHANNELS.map((c) => (
-              <SidebarMenuSubItem key={c.href}>
-                <SidebarMenuSubButton asChild isActive={isItemActive(c.href, pathname)}>
-                  <Link href={c.href}>
-                    <c.icon className="h-4 w-4" />
-                    <span>{c.label}</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </SidebarMenuItem>
-    </Collapsible>
   )
 }
 
@@ -187,7 +126,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center justify-between gap-2 px-2 py-1">
           <Link
-            href="/deploy"
+            href="/agents"
             className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
           >
             <span className="text-xl font-semibold lowercase tracking-tight">agora</span>
@@ -197,16 +136,16 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Deploy — hub + expandable channels */}
+        {/* My Agents — the single home (app root) */}
         <SidebarGroup>
           <SidebarMenu>
-            <DeploySection />
+            <NavLink item={{ label: "My Agents", href: "/agents", icon: Bot }} />
           </SidebarMenu>
         </SidebarGroup>
 
         <SidebarSeparator />
 
-        {/* Build — Agents · Integrations · Composer */}
+        {/* Build — Integrations (modules hub) · Composer */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Build</SidebarGroupLabel>
           <SidebarMenu>
@@ -226,7 +165,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Manage — vendor keys · RT services · project settings */}
+        {/* Manage — RT services · project settings */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Manage</SidebarGroupLabel>
           <SidebarMenu>

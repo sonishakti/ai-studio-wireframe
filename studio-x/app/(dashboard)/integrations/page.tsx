@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { VendorCredentialsPanel } from "@/components/vendor-credentials-panel"
+import { ChannelsPanel } from "@/components/channels-panel"
 import { cn } from "@/lib/utils"
 
 // ─── connector catalog (matches Figma node 90:15477) ─────────────────────────
@@ -104,6 +106,8 @@ export default function IntegrationsPage() {
               <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
               <TabsTrigger value="mcp">MCP</TabsTrigger>
               <TabsTrigger value="connectors">Connectors</TabsTrigger>
+              <TabsTrigger value="credentials">Vendor Credentials</TabsTrigger>
+              <TabsTrigger value="channels">Channels</TabsTrigger>
             </TabsList>
             <a
               href="#"
@@ -192,6 +196,16 @@ export default function IntegrationsPage() {
                 ))}
               </div>
             </div>
+          </TabsContent>
+
+          {/* Vendor Credentials tab (moved out of Manage — 2026-06-23) */}
+          <TabsContent value="credentials">
+            <VendorCredentialsPanel showHeader />
+          </TabsContent>
+
+          {/* Channels tab (renamed from Deploy/Deployment — 2026-06-23) */}
+          <TabsContent value="channels">
+            <ChannelsPanel />
           </TabsContent>
         </Tabs>
       </main>
