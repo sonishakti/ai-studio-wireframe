@@ -7,6 +7,9 @@ import {
   Plus,
   Upload,
   ChevronRight,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
   MoreHorizontal,
   Search,
   Filter,
@@ -34,11 +37,14 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { GoLiveHome } from "@/components/go-live-home"
 import { cn } from "@/lib/utils"
-import { track, Events } from "@/lib/analytics"
+import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, type StackPreset } from "@/lib/campaign-data"
 
 // ─── data ────────────────────────────────────────────────────────────────────
@@ -88,13 +94,13 @@ const CHANNEL_META: Record<AgentChannel, { label: string; icon: React.ComponentT
   none:     { label: "Not deployed", icon: CircleDashed },
 }
 
-const CHANNEL_FILTERS: { id: "all" | AgentChannel; label: string }[] = [
+type AgentStatus = "live" | "draft" | "paused"
+
+const STATUS_FILTERS: { id: "all" | AgentStatus; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "phone", label: "Phone" },
-  { id: "whatsapp", label: "WhatsApp" },
-  { id: "web", label: "Web" },
-  { id: "batch", label: "Batch" },
-  { id: "code", label: "Code" },
+  { id: "live", label: "Live" },
+  { id: "draft", label: "Draft" },
+  { id: "paused", label: "Paused" },
 ]
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline"> = {
@@ -170,48 +176,77 @@ function FirstRunView() {
 // ─── returning-user list view ────────────────────────────────────────────────
 
 function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
-  const [channel, setChannel] = React.useState<"all" | AgentChannel>("all")
-  const rows = channel === "all" ? AGENTS : AGENTS.filter((a) => a.channelType === channel)
+  const [query, setQuery] = React.useState("")
+  const [status, setStatus] = React.useState<"all" | AgentStatus>("all")
+  const [pageSize, setPageSize] = React.useState(10)
+  const [page, setPage] = React.useState(1)
+
+  const rows = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return AGENTS.filter((a) => {
+      if (status !== "all" && a.status !== status) return false
+      if (q && !a.name.toLowerCase().includes(q) && !a.id.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [query, status])
+
+  React.useEffect(() => { setPage(1) }, [query, status, pageSize])
+
+  // Zero-results telemetry — fire only when an actual search returned nothing.
+  React.useEffect(() => {
+    const q = query.trim()
+    if (q && rows.length === 0) track(Events.search_zero_results, { surface: "agents", query: q })
+  }, [query, rows.length])
+
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize))
+  const safePage = Math.min(page, pageCount)
+  const visible = rows.slice((safePage - 1) * pageSize, safePage * pageSize)
 
   return (
     <main className="flex-1 p-6 space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[220px] max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input placeholder="Search agents…" className="pl-8 h-8 text-sm" />
+          <Input
+            placeholder="Search by name or agent ID…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-8 h-9 text-sm"
+          />
         </div>
+
+        {/* Status filter — All / Live / Draft / Paused */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+          {STATUS_FILTERS.map((f) => {
+            const active = status === f.id
+            const count = f.id === "all" ? AGENTS.length : AGENTS.filter((a) => a.status === f.id).length
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setStatus(f.id)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  active
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {f.label} <span className="tabular-nums opacity-60">{count}</span>
+              </button>
+            )
+          })}
+        </div>
+
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 gap-1.5 ml-auto"
+          className="h-9 gap-1.5 ml-auto"
           onClick={onBrowseTemplates}
         >
           <Library className="h-3.5 w-3.5" /> Browse templates
         </Button>
-      </div>
-
-      {/* Channel filter — same behavior as Integrations › Channels */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-        {CHANNEL_FILTERS.map((f) => {
-          const active = channel === f.id
-          const count = f.id === "all" ? AGENTS.length : AGENTS.filter((a) => a.channelType === f.id).length
-          return (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setChannel(f.id)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                active
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {f.label} <span className="tabular-nums opacity-60">{count}</span>
-            </button>
-          )
-        })}
       </div>
 
       <Card>
@@ -219,16 +254,18 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[260px]">Name</TableHead>
+                <TableHead className="w-64">Agent</TableHead>
+                <TableHead>Agent ID</TableHead>
                 <TableHead>Channel</TableHead>
                 <TableHead>Stack</TableHead>
+                <TableHead>Last edited</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Total Calls</TableHead>
-                <TableHead className="w-[48px]" />
+                <TableHead className="text-right">Total calls</TableHead>
+                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((agent) => {
+              {visible.map((agent) => {
                 const ch = CHANNEL_META[agent.channelType]
                 const est = STACK_ESTIMATE[agent.stack]
                 return (
@@ -239,18 +276,28 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           <Bot className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <div>
-                          <Link
-                            href={`/agents/${agent.id}/edit`}
-                            className="font-medium hover:text-primary transition-colors"
-                          >
-                            {agent.name}
-                          </Link>
-                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Link
+                              href={`/agents/${agent.id}/edit`}
+                              className="font-medium hover:text-primary transition-colors"
+                            >
+                              {agent.name}
+                            </Link>
+                            {agent.status === "live" && (
+                              <span
+                                className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary animate-pulse"
+                                title="Live"
+                                aria-label="Live"
+                              />
+                            )}
+                          </span>
+                          <p className="text-xs text-muted-foreground truncate max-w-xs">
                             {agent.description}
                           </p>
                         </div>
                       </div>
                     </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">{agent.id}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         <ch.icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -266,8 +313,11 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                         {STACK_PRESETS[agent.stack].label} · <span className="tabular-nums">${est.costPerMin.toFixed(2)}/min</span>
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {agent.lastModified}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[agent.status] ?? "secondary"}>
+                      <Badge variant={STATUS_VARIANT[agent.status] ?? "secondary"} className="capitalize">
                         {agent.status}
                       </Badge>
                     </TableCell>
@@ -286,7 +336,9 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                             <Link href={`/agents/${agent.id}/edit`}>Edit</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                          <DropdownMenuItem>Deploy</DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/agents/${agent.id}/edit#deployment`}>Deploy</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DestructiveActionDialog
                             action="Delete"
@@ -308,10 +360,36 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                   </TableRow>
                 )
               })}
+              {visible.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-10">
+                    <Bot className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
+                    No agents match {query.trim() ? `“${query.trim()}”` : "this filter"}.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Pagination — same pattern as Sessions */}
+      <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
+        <span>Rows per page</span>
+        <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+          <SelectTrigger className="h-8 w-18"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {[10, 25, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <span className="tabular-nums">Page {safePage} of {pageCount}</span>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage <= 1} onClick={() => setPage(1)} title="First page"><ChevronsLeft className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} title="Previous page"><ChevronLeft className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))} title="Next page"><ChevronRight className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage >= pageCount} onClick={() => setPage(pageCount)} title="Last page"><ChevronsRight className="h-4 w-4" /></Button>
+        </div>
+      </div>
     </main>
   )
 }
@@ -319,6 +397,10 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
 // ─── page ────────────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
+  // The Agents home is the entry of the build→deploy journey — stamp the start so
+  // the wizard can report time-to-live (the <3-min deploy spine).
+  React.useEffect(() => { markBuildStart() }, [])
+
   // Wireframe toggle — in production this is "do we have agents in this project?"
   const [showFirstRun, setShowFirstRun] = React.useState(false)
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
@@ -330,8 +412,8 @@ export default function AgentsPage() {
       <PageHeader
         // First-run renders GoLiveHome (its own "Deploy an AI agent in minutes"
         // headline), so suppress the page title here to avoid a double H1.
-        title={showFirstRun ? undefined : "My Agents"}
-        description={showFirstRun ? undefined : "Your agents — click any row to edit."}
+        title={showFirstRun ? undefined : "Agents"}
+        description={showFirstRun ? undefined : "Create and manage your agents here."}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -366,7 +448,7 @@ export default function AgentsPage() {
             </ImportAgentSheet>
             <Button asChild>
               <Link href="/agents/new/edit">
-                <Plus className="h-4 w-4" /> Create Blank Agent
+                <Plus className="h-4 w-4" /> Create New Agent
               </Link>
             </Button>
           </div>

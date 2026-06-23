@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { ChannelBadge } from "@/components/campaign-channel-badges"
+import { CredentialRiskBanner } from "@/components/credential-risk-banner"
+import { useHashScroll } from "@/components/use-hash-scroll"
 import { getDeployment, STATUS_BADGE } from "@/lib/campaign-data"
 import { toast } from "sonner"
 
@@ -22,6 +24,7 @@ export default function InboundDetailPage({
 }) {
   const { id } = use(params)
   const deployment = getDeployment(id)
+  useHashScroll()
 
   const [prompt, setPrompt] = React.useState(deployment?.prompt ?? "")
   const [greeting, setGreeting] = React.useState(deployment?.greeting ?? "")
@@ -56,7 +59,7 @@ export default function InboundDetailPage({
               <span>/</span>
               <span className="text-foreground">{d.name}</span>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
+            <div id="channel" className="flex items-center gap-3 flex-wrap scroll-mt-20">
               <h1 className="text-lg font-semibold tracking-tight">{d.name}</h1>
               <Badge variant={s.variant}>{s.label}</Badge>
               <ChannelBadge channel={d.channel} withLabel />
@@ -82,7 +85,9 @@ export default function InboundDetailPage({
 
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
-          <section className="space-y-2">
+          <CredentialRiskBanner deploymentId={d.id} agentId={d.agentId} />
+
+          <section id="prompt" className="space-y-2 scroll-mt-20">
             <Label htmlFor="ib-prompt" className="text-sm font-medium">System Prompt</Label>
             <Textarea
               id="ib-prompt"
@@ -100,7 +105,7 @@ export default function InboundDetailPage({
             </p>
           </section>
 
-          <section className="space-y-2">
+          <section id="greeting" className="space-y-2 scroll-mt-20">
             <Label htmlFor="ib-greeting" className="text-sm font-medium">Greeting</Label>
             <Textarea
               id="ib-greeting"
@@ -110,7 +115,7 @@ export default function InboundDetailPage({
             />
           </section>
 
-          <section className="space-y-2">
+          <section id="failure" className="space-y-2 scroll-mt-20">
             <Label htmlFor="ib-failure" className="text-sm font-medium">Failure Message</Label>
             <Textarea
               id="ib-failure"

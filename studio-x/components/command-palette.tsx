@@ -35,20 +35,20 @@ const COMMANDS: Command[] = [
   // ── Pages — most common navigation targets ─────────────────────────────────
   { id: "go-agents",     label: "Agents",                   href: "/agents",                          icon: Bot,                group: "Pages", keywords: ["home", "dashboard"] },
   { id: "go-rtc",        label: "Realtime Services",        href: "/realtime-services",               icon: Radio,              group: "Pages" },
-  { id: "go-integ",      label: "Integrations",             href: "/integrations",                    icon: Puzzle,             group: "Pages" },
+  { id: "go-integ",      label: "Resources",                href: "/integrations",                    icon: Puzzle,             group: "Pages", keywords: ["integrations", "knowledge", "mcp", "connectors", "credentials", "channels"] },
   { id: "go-numbers",    label: "Phone Numbers",            href: "/deploy/phone-numbers",          icon: Phone,              group: "Pages" },
   { id: "go-camp",       label: "Batch Calls",              href: "/deploy/batch-calls",                       icon: Megaphone,          group: "Pages" },
   { id: "go-monitor",    label: "Monitor",                  href: "/monitor",                         icon: LineChart,          group: "Pages", keywords: ["analytics", "dashboard", "insights", "metrics"] },
   { id: "go-calls",      label: "Call History",             href: "/calls",                           icon: PhoneCall,          group: "Pages", keywords: ["call history", "call log", "calls"] },
   { id: "go-sessions",   label: "Sessions",                 href: "/sessions",                        icon: Radio,              group: "Pages", keywords: ["session history", "agent sessions", "conversations"] },
-  { id: "go-deploy",     label: "Deploy",                   href: "/deploy",                          icon: Activity,           group: "Pages", keywords: ["go live", "publish", "ship"] },
+  { id: "go-deploy",     label: "Deployment Channels",      href: "/integrations?tab=channels",       icon: Activity,           group: "Pages", keywords: ["deploy", "go live", "publish", "ship", "channels"] },
 
   // ── Billing ──────────────────────────────────────────────────────────────
   { id: "go-usage",      label: "Usage",                    href: "/billing/usage",                   icon: Gauge,              group: "Billing", keywords: ["consumption", "minutes", "quotas"] },
 
   // ── Project ──────────────────────────────────────────────────────────────
   { id: "go-proj-set",   label: "Project Settings",         href: "/project/settings",                icon: SlidersHorizontal,  group: "Project" },
-  { id: "go-vend-cred",  label: "Vendor Credentials",       href: "/project/vendor-credentials",      icon: Shield,             group: "Project" },
+  { id: "go-vend-cred",  label: "Vendor Credentials",       href: "/integrations?tab=credentials",    icon: Shield,             group: "Project" },
   { id: "go-projects",   label: "View all projects",        href: "/projects",                        icon: FolderKanban,       group: "Project" },
 
   // ── Account ──────────────────────────────────────────────────────────────

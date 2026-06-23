@@ -17,6 +17,7 @@ import {
   BookOpen,
   Wrench,
   Plug,
+  AlertTriangle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +43,7 @@ import {
   AGENTS,
   DEPLOYMENTS,
   STACK_PRESETS,
+  credentialsAtRiskForAgent,
   type StackPreset,
 } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
@@ -81,6 +83,8 @@ export default function AgentEditorPage({
   const agentLabel = isNew ? "Draft" : agent ? agent.status : "Draft"
   // Backlinks: which deployments this reusable agent backs (one channel each).
   const deployedIn = isNew ? [] : DEPLOYMENTS.filter((d) => d.agentId === id)
+  // Expiring vendor keys this agent's stack depends on (surfaced on the Stack step).
+  const credAtRisk = isNew ? [] : credentialsAtRiskForAgent(id)
 
   // Agent experience = a journey breadcrumb (not tabs). The section is controlled
   // here and mirrored to the URL hash so #behavior / #deployment deep-links work.
@@ -164,18 +168,16 @@ export default function AgentEditorPage({
               </Link>
             </Button>
 
-            {/* Single deploy surface: the CTA jumps to the Deployment section
-                (the journey's finish line) — no separate chooser sheet, and it
-                never re-asks for the agent. Status-aware label. */}
+            {/* Single deploy surface: a persistent CTA that jumps to the Deploy
+                step (the journey's finish line) — no separate chooser sheet, and
+                it never re-asks for the agent. */}
             <Button
               size="sm"
               className="gap-1.5"
-              disabled={isNew}
-              title={isNew ? "Save this agent to go live." : undefined}
               onClick={() => jump("deployment")}
             >
               <Rocket className="h-3.5 w-3.5" />
-              {deployedIn.length > 0 ? "Manage deployment" : "Go live"}
+              Deploy Agent
             </Button>
 
             <DropdownMenu>
@@ -293,6 +295,22 @@ export default function AgentEditorPage({
 
             {/* ── Stack — speed-vs-cost FIRST, vendors underneath ─────────── */}
             <TabsContent value="stack" className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0">
+              {credAtRisk.length > 0 && (
+                <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                  <p className="text-xs leading-relaxed">
+                    <span className="font-medium">
+                      This stack uses {credAtRisk.map((c) => c.vendor).join(", ")}, whose key is{" "}
+                      {credAtRisk[0].status === "expired" ? "expired" : "expiring"}.
+                    </span>{" "}
+                    Live deployments on this agent will fail until it&apos;s rotated —{" "}
+                    <Link href="/integrations?tab=credentials" className="underline underline-offset-2 hover:text-foreground">
+                      rotate the key
+                    </Link>
+                    .
+                  </p>
+                </div>
+              )}
               <section className="space-y-3">
                 <div>
                   <p className="text-sm font-medium">Optimize for</p>
@@ -382,7 +400,7 @@ export default function AgentEditorPage({
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Vendor keys live in{" "}
-                  <Link href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
+                  <Link href="/integrations?tab=credentials" className="underline underline-offset-2 hover:text-foreground">
                     Vendor Credentials
                   </Link>.
                 </p>
@@ -396,8 +414,8 @@ export default function AgentEditorPage({
                 title="Knowledge bases"
                 attached={agent?.knowledge ?? []}
                 emptyHint="No knowledge attached. The agent answers from the model alone."
-                manageHref="/integrations"
-                manageLabel="Manage in Integrations"
+                manageHref="/integrations?tab=knowledge"
+                manageLabel="Manage in Resources"
               />
             </TabsContent>
 
@@ -407,9 +425,9 @@ export default function AgentEditorPage({
                 icon={Wrench}
                 title="MCP servers"
                 attached={mcpAttached}
-                emptyHint="No MCP servers attached. Add one in Integrations so the agent can act."
-                manageHref="/integrations"
-                manageLabel="Manage in Integrations"
+                emptyHint="No MCP servers attached. Add one in Resources so the agent can act."
+                manageHref="/integrations?tab=mcp"
+                manageLabel="Manage in Resources"
               />
             </TabsContent>
 
@@ -419,9 +437,9 @@ export default function AgentEditorPage({
                 icon={Plug}
                 title="Connectors"
                 attached={connectorAttached}
-                emptyHint="No connectors attached. Add Hubspot, Jira, and more in Integrations."
-                manageHref="/integrations"
-                manageLabel="Manage in Integrations"
+                emptyHint="No connectors attached. Add Hubspot, Jira, and more in Resources."
+                manageHref="/integrations?tab=connectors"
+                manageLabel="Manage in Resources"
               />
             </TabsContent>
 

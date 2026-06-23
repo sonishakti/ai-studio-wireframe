@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-// Slack deployment was a coming-soon placeholder. Use the campaign wizard.
+// Slack was a coming-soon channel. Channels now live in the inventory.
 export default function DeploySlackLegacyRedirect() {
-  redirect("/deploy/batch-calls/new")
+  redirect("/integrations?tab=channels")
 }

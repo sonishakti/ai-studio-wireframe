@@ -11,24 +11,23 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
+import {
+  VENDOR_CREDENTIALS,
+  expiringCredentials,
+  deploymentsAtRiskFromCredential,
+} from "@/lib/campaign-data"
 
 /**
  * VendorCredentialsPanel — third-party vendor API keys (LLM/TTS/STT/Telephony).
- * Shared body so the same content renders both at /project/vendor-credentials
- * AND as the Vendor Credentials tab inside Integrations (2026-06-23: vendor keys
- * are a reusable module the agent's stack is built from, so they live in the
- * Integrations modules hub).
+ * Shared body so the same content renders both at /integrations?tab=credentials
+ * AND wherever the credentials module is surfaced. Data lives in campaign-data so
+ * the diagnostics engine can flag an expiring key as a critical issue naming the
+ * live deployments it puts at risk (2026-06-24 error-remediation loop).
  */
 
-const VENDORS = [
-  { id: "vc_01", vendor: "OpenAI",     category: "LLM",       name: "Production API Key",       keyHint: "sk-proj-••••••••••••xK3a", status: "valid",    usedBy: 3, added: "Feb 2, 2026" },
-  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Voice API Key",            keyHint: "el_••••••••••••8f2b",      status: "valid",    usedBy: 3, added: "Feb 2, 2026" },
-  { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026" },
-  { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026" },
-  { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026" },
-]
-
 export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: boolean }) {
+  const atRisk = expiringCredentials()
+
   return (
     <div className="space-y-4">
       {showHeader && (
@@ -45,16 +44,35 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
         </div>
       )}
 
-      {/* Expiry warning */}
-      <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-        <CardContent className="py-3 px-4 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-          <p className="text-sm text-amber-700 dark:text-amber-400">
-            <span className="font-medium">1 credential expiring soon.</span> Rotate your Anthropic key before
-            May 31 to avoid service interruption.
-          </p>
-        </CardContent>
-      </Card>
+      {/* Expiry warning — dynamic, and it names the live deployments at risk so
+          the urgency is concrete (this is the same signal the Monitor card and
+          Diagnostics queue surface). */}
+      {atRisk.map((c) => {
+        const deps = deploymentsAtRiskFromCredential(c.vendor)
+        return (
+          <Card key={c.id} className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+            <CardContent className="py-3 px-4 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                <span className="font-medium">
+                  {c.vendor} key {c.status === "expired" ? "has expired" : `expires ${c.expiresOn ?? "soon"}`}.
+                </span>{" "}
+                {deps.length > 0 ? (
+                  <>
+                    Rotate it to keep{" "}
+                    <span className="font-medium">
+                      {deps.map((d) => d.name).join(", ")}
+                    </span>{" "}
+                    running.
+                  </>
+                ) : (
+                  <>Rotate it to avoid service interruption.</>
+                )}
+              </p>
+            </CardContent>
+          </Card>
+        )
+      })}
 
       <Card>
         <CardContent className="p-0">
@@ -72,7 +90,7 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
               </TableRow>
             </TableHeader>
             <TableBody>
-              {VENDORS.map((v) => (
+              {VENDOR_CREDENTIALS.map((v) => (
                 <TableRow key={v.id}>
                   <TableCell className="font-medium">{v.vendor}</TableCell>
                   <TableCell>

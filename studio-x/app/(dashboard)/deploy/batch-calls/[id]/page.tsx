@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { CredentialRiskBanner } from "@/components/credential-risk-banner"
 import { getDeployment, STATUS_BADGE, extractVars } from "@/lib/campaign-data"
 import { toast } from "sonner"
 
@@ -29,6 +30,19 @@ export default function BatchCallDetailPage({
 
   const [prompt, setPrompt] = React.useState(deployment?.prompt ?? "")
   const [greeting, setGreeting] = React.useState(deployment?.greeting ?? "")
+  const [tab, setTab] = React.useState("overview")
+
+  // Hash-aware deep-linking: a fixHref like #prompt must open the Prompt tab
+  // (its content is unmounted while another tab is active) AND scroll to it.
+  React.useEffect(() => {
+    const h = window.location.hash.replace("#", "")
+    if (!h) return
+    if (h === "prompt" || h === "greeting") setTab("prompt")
+    const t = setTimeout(() => {
+      document.getElementById(h)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 60)
+    return () => clearTimeout(t)
+  }, [])
 
   if (!deployment || deployment.kind !== "batch") {
     return (
@@ -63,7 +77,7 @@ export default function BatchCallDetailPage({
               <span>/</span>
               <span className="text-foreground">{d.name}</span>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
+            <div id="channel" className="flex items-center gap-3 flex-wrap scroll-mt-20">
               <h1 className="text-lg font-semibold tracking-tight">{d.name}</h1>
               <Badge variant={s.variant}>{s.label}</Badge>
             </div>
@@ -88,8 +102,10 @@ export default function BatchCallDetailPage({
         </div>
       </header>
 
-      <main className="flex-1 p-6">
-        <Tabs defaultValue="overview">
+      <main className="flex-1 p-6 space-y-4">
+        <CredentialRiskBanner deploymentId={d.id} agentId={d.agentId} />
+
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="prompt">Prompt &amp; Variables</TabsTrigger>
@@ -132,7 +148,7 @@ export default function BatchCallDetailPage({
           <TabsContent value="prompt" className="mt-4">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
               <div className="space-y-5 min-w-0">
-                <section className="space-y-2">
+                <section id="prompt" className="space-y-2 scroll-mt-20">
                   <Label htmlFor="batch-prompt" className="text-sm font-medium">System Prompt</Label>
                   <Textarea
                     id="batch-prompt"
@@ -146,7 +162,7 @@ export default function BatchCallDetailPage({
                   </p>
                 </section>
 
-                <section className="space-y-2">
+                <section id="greeting" className="space-y-2 scroll-mt-20">
                   <Label htmlFor="batch-greeting" className="text-sm font-medium">Greeting</Label>
                   <Textarea
                     id="batch-greeting"

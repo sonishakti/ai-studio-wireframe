@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { DeployNav } from "@/components/deploy-nav"
+import { PageHeader } from "@/components/page-header"
 import { AGENTS } from "@/lib/campaign-data"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -71,8 +71,9 @@ export default function WebWidgetPage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <DeployNav
-        action={
+      <PageHeader
+        title="Web widget"
+        actions={
           <div className="flex items-center gap-1.5">
             <Button variant="outline" size="sm" asChild>
               <Link href={`/deploy/code?agent=${agentId}`}>Get code →</Link>

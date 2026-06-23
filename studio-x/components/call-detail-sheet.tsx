@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Copy, PhoneIncoming, PhoneOutgoing, Download, Play, Pause, Wrench, ShieldCheck,
+  Copy, PhoneIncoming, PhoneOutgoing, Download, Play, Pause, Wrench, ShieldCheck, RefreshCw,
 } from "lucide-react"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -21,7 +21,9 @@ import { getAgent, getDeployment } from "@/lib/campaign-data"
 import { buildSignals, diagnoseCall, healthOf, fixHref, type Issue } from "@/lib/diagnostics"
 import { SeverityBadge } from "@/components/severity-badge"
 import { HealthDot } from "@/components/health-dot"
-import { track, Events } from "@/lib/analytics"
+import {
+  track, Events, remediationKey, recordRemediation, listRemediations, clearRemediation,
+} from "@/lib/analytics"
 
 export interface CallTranscriptTurn {
   speaker: "Agent" | "Customer"
@@ -284,7 +286,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
                 </p>
               </div>
               {issues.map((issue) => (
-                <IssueCard key={issue.id} issue={issue} surface="call_sheet" />
+                <IssueCard key={issue.id} issue={issue} surface="call_sheet" deploymentId={call.deploymentId} />
               ))}
             </>
           )}
@@ -492,8 +494,43 @@ function Field({
 }
 
 /** One diagnosed issue: severity · root cause · suggested fix · deep-link to the
- *  fix. Reused wherever an issue is shown (the call Diagnosis tab today). */
-export function IssueCard({ issue, surface }: { issue: Issue; surface: "call_sheet" | "queue" }) {
+ *  fix, plus the confirm step that closes the loop. Reused on the call Diagnosis
+ *  tab AND the Observe › Diagnostics queue, so rootCause shows in both. */
+export function IssueCard({
+  issue,
+  surface,
+  deploymentId,
+  deploymentName,
+  count,
+}: {
+  issue: Issue
+  surface: "call_sheet" | "queue"
+  deploymentId?: string
+  deploymentName?: string
+  count?: number
+}) {
+  const remKey = remediationKey(issue.ruleId, deploymentId ?? issue.fixTarget.id)
+  const [recheck, setRecheck] = React.useState(false)
+
+  // Confirm step: if the user clicked Fix earlier (persisted) and returns here,
+  // show "re-running checks", then fire remediation_resolved and clear it.
+  React.useEffect(() => {
+    if (!listRemediations().includes(remKey)) return
+    setRecheck(true)
+    const t = setTimeout(() => {
+      track(Events.remediation_resolved, {
+        rule_id: issue.ruleId,
+        level: issue.fixTarget.level,
+        target_id: issue.fixTarget.id,
+        deployment_id: deploymentId,
+      })
+      clearRemediation(remKey)
+      setRecheck(false)
+    }, 2200)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remKey])
+
   return (
     <div className="rounded-lg border border-border p-3 space-y-2">
       <div className="flex items-start justify-between gap-3">
@@ -501,33 +538,47 @@ export function IssueCard({ issue, surface }: { issue: Issue; surface: "call_she
           <SeverityBadge severity={issue.severity} />
           <p className="text-sm font-medium truncate">{issue.title}</p>
         </div>
-        {issue.turn != null && (
+        {issue.turn != null ? (
           <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
             turn {issue.turn}{issue.timestamp ? ` · ${issue.timestamp}` : ""}
           </span>
-        )}
+        ) : count != null && count > 1 ? (
+          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{count}×</span>
+        ) : null}
       </div>
       <p className="text-sm text-muted-foreground">{issue.rootCause}</p>
       <p className="text-xs text-foreground/80">
         <span className="font-medium">Suggested fix: </span>{issue.suggestedFix}
       </p>
-      <Button asChild variant="outline" size="sm" className="gap-1.5">
-        <Link
-          href={fixHref(issue.fixTarget)}
-          onClick={() =>
-            track(Events.remediation_link_clicked, {
-              rule_id: issue.ruleId,
-              severity: issue.severity,
-              level: issue.fixTarget.level,
-              target_id: issue.fixTarget.id,
-              section: issue.fixTarget.section,
-              surface,
-            })
-          }
-        >
-          <Wrench className="h-3.5 w-3.5" /> Fix this
-        </Link>
-      </Button>
+      {deploymentName && (
+        <p className="text-xs text-muted-foreground">
+          Affects <span className="font-medium text-foreground">{deploymentName}</span>
+        </p>
+      )}
+      {recheck ? (
+        <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Marked fixed — re-running checks…
+        </div>
+      ) : (
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
+          <Link
+            href={fixHref(issue.fixTarget)}
+            onClick={() => {
+              track(Events.remediation_link_clicked, {
+                rule_id: issue.ruleId,
+                severity: issue.severity,
+                level: issue.fixTarget.level,
+                target_id: issue.fixTarget.id,
+                section: issue.fixTarget.section,
+                surface,
+              })
+              recordRemediation(remKey)
+            }}
+          >
+            <Wrench className="h-3.5 w-3.5" /> Fix this
+          </Link>
+        </Button>
+      )}
     </div>
   )
 }

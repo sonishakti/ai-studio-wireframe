@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
-// Campaigns → Batch Calls (2026-06-11 revamp): "campaign" specifically meant
-// outbound batch dialing; inbound is a peer surface at /deploy/inbound.
+// Campaigns → Batch Calls, which now lives in the channels inventory
+// (Resources › Deployment Channels). Routed straight there, no redirect chain.
 export default function CampaignsLegacyRedirect() {
-  redirect("/deploy/batch-calls")
+  redirect("/integrations?tab=channels")
 }

@@ -23,6 +23,8 @@
 import {
   CURRENT_CONFIG_VERSION,
   deploymentHref,
+  deploymentsAtRiskFromCredential,
+  expiringCredentials,
   getAgent,
   getDeployment,
   listDeployments,
@@ -36,10 +38,11 @@ export type Severity = "critical" | "warning" | "info"
 export type Health = "healthy" | "degraded" | "unhealthy"
 export type CallOutcome = "Successful" | "Failed" | "Cannot Predict"
 
-/** Where a fix lives — becomes a deep-link in the UI (agent editor / deployment). */
+/** Where a fix lives — becomes a deep-link in the UI (agent editor / deployment /
+ *  vendor credentials). */
 export interface FixTarget {
-  level: "agent" | "deployment"
-  /** Agent id or deployment id. */
+  level: "agent" | "deployment" | "credential"
+  /** Agent id, deployment id, or credential id. */
   id: string
   /** Section anchor on the target page (e.g. "stack", "turn-taking", "prompt"). */
   section: string
@@ -80,11 +83,13 @@ export interface DiagnoseCtx {
   deployment?: Deployment
 }
 
-/** Deep-link to where an issue is fixed: the agent editor or the deployment page. */
+/** Deep-link to where an issue is fixed: the agent editor, the deployment page,
+ *  or the vendor-credentials tab. */
 export function fixHref(target: FixTarget): string {
   if (target.level === "agent") return `/agents/${target.id}/edit#${target.section}`
+  if (target.level === "credential") return "/integrations?tab=credentials"
   const dep = getDeployment(target.id)
-  return dep ? `${deploymentHref(dep)}#${target.section}` : "/deploy"
+  return dep ? `${deploymentHref(dep)}#${target.section}` : "/integrations?tab=channels"
 }
 
 // ─── Deterministic PRNG (same FNV-1a style as call-detail-sheet) ──────────────
@@ -365,12 +370,39 @@ export function aggregateIssues(deploymentId: string): AggregatedIssue[] {
     .sort((a, b) => SEVERITY_WEIGHT[b.issue.severity] * b.count - SEVERITY_WEIGHT[a.issue.severity] * a.count)
 }
 
+/** Expiring/expired vendor credentials, as critical issues — one per live
+ *  deployment the key puts at risk, so remediation NAMES the affected
+ *  deployments and routes to the credentials tab. */
+export function credentialIssues(): AggregatedIssue[] {
+  const out: AggregatedIssue[] = []
+  for (const cred of expiringCredentials()) {
+    const expired = cred.status === "expired"
+    for (const d of deploymentsAtRiskFromCredential(cred.vendor)) {
+      const issue: Issue = {
+        id: `${cred.id}:${d.id}:credential`,
+        ruleId: expired ? "credential_expired" : "credential_expiring",
+        title: expired ? "Vendor credential expired" : "Vendor credential expiring",
+        severity: "critical",
+        rootCause: `${d.name} runs on ${cred.vendor} (${cred.category}), whose key ${
+          expired ? "has expired" : `expires ${cred.expiresOn ?? "soon"}`
+        } — ${expired ? "calls are failing" : "calls will start failing"} until it's rotated.`,
+        suggestedFix: `Rotate the ${cred.vendor} key in Resources › Vendor Credentials.`,
+        fixTarget: { level: "credential", id: cred.id, section: "" },
+      }
+      out.push({ issue, count: 1, deployment: d })
+    }
+  }
+  return out
+}
+
 /** Cross-deployment remediation feed for the Diagnostics queue — every open
- *  issue across deployments that have carried traffic, ranked severity × count. */
+ *  issue across deployments that have carried traffic, plus credential risks,
+ *  ranked severity × count. */
 export function allOpenIssues(): AggregatedIssue[] {
-  return listDeployments()
-    .flatMap((d) => aggregateIssues(d.id))
-    .sort((a, b) => SEVERITY_WEIGHT[b.issue.severity] * b.count - SEVERITY_WEIGHT[a.issue.severity] * a.count)
+  return [
+    ...listDeployments().flatMap((d) => aggregateIssues(d.id)),
+    ...credentialIssues(),
+  ].sort((a, b) => SEVERITY_WEIGHT[b.issue.severity] * b.count - SEVERITY_WEIGHT[a.issue.severity] * a.count)
 }
 
 /** Health roll-up for one deployment (used for header dots + the queue summary). */

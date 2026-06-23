@@ -37,6 +37,8 @@ function digits(s: string) {
 export function FreeMinutesNudge() {
   const { freeMinutesUsed, freeMinutesUngated, freeMinutesIncluded, cardOnFile, defaultSpendCapUsd } = PLAN_USAGE
   const reached = freeMinutesUsed >= freeMinutesUngated
+  // Fully exhausted with no card → new calls are paused (the blocking state).
+  const exhausted = freeMinutesUsed >= freeMinutesIncluded && !cardOnFile
   const [unlocked, setUnlocked] = React.useState(false)
 
   // Fire the nudge-shown event once when the threshold is genuinely reached.
@@ -54,11 +56,42 @@ export function FreeMinutesNudge() {
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/40 bg-emerald-500/[0.06] px-4 py-3">
         <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
         <div className="flex-1 min-w-0 text-sm">
-          <p className="font-medium">150 more free minutes unlocked — card on file.</p>
+          <p className="font-medium">Card on file — deployments keep running.</p>
           <p className="text-xs text-muted-foreground">
             You won&apos;t be suspended at the limit. After your {freeMinutesIncluded} free minutes, usage rolls into
             pay-as-you-go (capped at ${defaultSpendCapUsd}/mo).
           </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Blocking state — all free minutes used and no card, so new calls are paused.
+  if (exhausted) {
+    return (
+      <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3.5">
+        <div className="flex flex-wrap items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-destructive/10">
+            <Lock className="h-5 w-5 text-destructive" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">Free minutes used up — new calls are paused.</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              You&apos;ve used all {freeMinutesIncluded} free minutes. Add a card to resume your deployments —
+              usage rolls into pay-as-you-go, capped at ${defaultSpendCapUsd}/mo.
+            </p>
+            <div className="mt-2.5 flex items-center gap-2">
+              <Progress value={100} className="h-1.5 flex-1" />
+              <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+                {freeMinutesIncluded} / {freeMinutesIncluded} min
+              </span>
+            </div>
+          </div>
+          <AddCardSheet onUnlocked={() => setUnlocked(true)}>
+            <Button size="sm" variant="destructive" className="shrink-0 gap-1.5">
+              <CreditCard className="h-3.5 w-3.5" /> Add a card to resume
+            </Button>
+          </AddCardSheet>
         </div>
       </div>
     )

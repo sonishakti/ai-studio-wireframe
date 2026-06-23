@@ -12,8 +12,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { DeployNav } from "@/components/deploy-nav"
 import { AGENTS, PHONE_NUMBERS, STACK_PRESETS, CHANNEL_LABEL, type ChannelKind } from "@/lib/campaign-data"
+import { track, Events, timeToLiveMs } from "@/lib/analytics"
 import { toast } from "sonner"
 
 // New inbound deployment — one agent answers on ONE channel. The
@@ -52,6 +52,11 @@ export default function NewInboundPage() {
     toast.success(`"${name}" is answering`, {
       description: `${agent?.name} is live on ${CHANNEL_LABEL[channel]}.`,
     })
+    // ★ North star — traffic-ready deployment is live. Report how long the build
+    // → live took (the <3-min deploy spine) when we have a build-start stamp.
+    track(Events.deployment_went_live, { agent_id: agentId, channel })
+    const ms = timeToLiveMs()
+    if (ms != null) track(Events.time_to_live_ms, { ms, agent_id: agentId })
     // After deploy, the user wants to MONITOR it — not land on a list. Land on
     // Monitor with a "you're live" banner (the deployment carries no traffic yet).
     const q = new URLSearchParams({ deployed: name, channel: CHANNEL_LABEL[channel], agent: agent?.name ?? "" })
@@ -60,8 +65,6 @@ export default function NewInboundPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <DeployNav />
-
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
           <div className="flex items-center justify-between gap-3">

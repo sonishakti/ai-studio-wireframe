@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  PhoneIncoming, PhoneOutgoing, Search, Filter, Download, X, Columns3,
+  PhoneIncoming, PhoneOutgoing, Search, Filter, Download, X, Columns3, Stethoscope,
 } from "lucide-react"
 import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { DEPLOYMENTS, formatDuration, getDeployment } from "@/lib/campaign-data"
+import { DEPLOYMENTS, formatDuration, getDeployment, deploymentHref } from "@/lib/campaign-data"
 import { CallDetailSheet, type CallDetail } from "@/components/call-detail-sheet"
 import { track, Events } from "@/lib/analytics"
 
@@ -159,7 +159,7 @@ export default function CallHistoryPage() {
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px] max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input placeholder="Search by Agent ID, campaign or phone number…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-8 h-9 text-sm" />
+            <Input placeholder="Search by agent, deployment or phone number…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-8 h-9 text-sm" />
           </div>
 
           {/* Direction quick filter */}
@@ -231,7 +231,7 @@ export default function CallHistoryPage() {
                   <TableHead>Direction</TableHead>
                   <TableHead>Timestamp</TableHead>
                   <TableHead>Agent</TableHead>
-                  <TableHead>Campaign</TableHead>
+                  <TableHead>Deployment</TableHead>
                   <TableHead>From</TableHead>
                   <TableHead>To</TableHead>
                   <TableHead className="text-right">Duration</TableHead>
@@ -255,14 +255,29 @@ export default function CallHistoryPage() {
                     <TableCell className="text-sm">{c.agent}</TableCell>
                     <TableCell>
                       {c.campaignName === "Dynamic Agent" ? <span className="text-muted-foreground">N/A</span> : (
-                        <Link href={`/campaigns/${c.campaignId}`} onClick={(e) => e.stopPropagation()} className="text-sm text-primary hover:underline">{c.campaignName}</Link>
+                        <Link href={deploymentHref(getDeployment(c.campaignId) ?? { id: c.campaignId, kind: "inbound" })} onClick={(e) => e.stopPropagation()} className="text-sm text-primary hover:underline">{c.campaignName}</Link>
                       )}
                     </TableCell>
                     <TableCell className="font-mono text-xs">{c.from}</TableCell>
                     <TableCell className="font-mono text-xs">{c.to}</TableCell>
                     <TableCell className="text-right tabular-nums text-sm">{formatDuration(c.durationSec)}</TableCell>
                     <TableCell><Badge variant={STATUS_VARIANT[c.status]}>{c.status}</Badge></TableCell>
-                    <TableCell><Badge variant={OUTCOME_VARIANT[c.outcome]}>{c.outcome}</Badge></TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={OUTCOME_VARIANT[c.outcome]}>{c.outcome}</Badge>
+                        {c.outcome === "Failed" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 gap-1 px-1.5 text-xs text-muted-foreground hover:text-foreground"
+                            onClick={(e) => { e.stopPropagation(); openCall(c) }}
+                            title="Diagnose why this call failed"
+                          >
+                            <Stethoscope className="h-3 w-3" /> Why?
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
                     {OPTIONAL_COLUMNS.filter((col) => cols.has(col.key)).map((col) => (
                       <TableCell key={col.key} className="text-sm text-muted-foreground">{structuredValue(c, col.key)}</TableCell>
                     ))}

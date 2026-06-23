@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
-import { DeployNav } from "@/components/deploy-nav"
+import { PageHeader } from "@/components/page-header"
 import { PHONE_NUMBERS, DEPLOYMENTS, deploymentHref } from "@/lib/campaign-data"
 
 export default function PhoneNumbersPage() {
@@ -47,8 +47,9 @@ export default function PhoneNumbersPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <DeployNav
-        action={
+      <PageHeader
+        title="Phone numbers"
+        actions={
           <AddPhoneNumberSheet>
             <Button size="sm" className="gap-1.5">
               <Plus className="h-4 w-4" /> Add Phone Number

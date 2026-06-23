@@ -35,8 +35,9 @@ export default function GlobalError({
           <p className="text-xs font-mono uppercase tracking-wider text-destructive">Error</p>
           <h1 className="text-2xl font-semibold tracking-tight mt-1">Something went wrong</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            We ran into a problem rendering this page. Your data is safe — this is
-            a UI hiccup. Try again, and if it keeps happening let support know.
+            We hit a problem rendering this page. Your live agents and deployments
+            keep running — this is a console-only hiccup, not an outage. Try again,
+            and if it keeps happening, contact support.
           </p>
           {error.digest && (
             <p className="text-xs font-mono text-muted-foreground mt-3">

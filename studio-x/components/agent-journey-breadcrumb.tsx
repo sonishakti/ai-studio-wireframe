@@ -25,7 +25,10 @@ export const AGENT_SECTIONS: { id: AgentSection; label: string }[] = [
   { id: "knowledge", label: "Knowledge Base" },
   { id: "mcp", label: "MCP" },
   { id: "connectors", label: "Connectors" },
-  { id: "deployment", label: "Deployment" },
+  // Label "Deploy" but keep the internal id "deployment" — #deployment deep-links,
+  // jump("deployment") and <TabsContent value="deployment"> + diagnostics anchors
+  // all key off the id; renaming it would need every call site moved in lockstep.
+  { id: "deployment", label: "Deploy" },
 ]
 
 export function AgentJourneyBreadcrumb({

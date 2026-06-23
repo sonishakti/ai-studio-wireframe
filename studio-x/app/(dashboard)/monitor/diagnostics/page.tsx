@@ -2,21 +2,16 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Search, Wrench, ArrowUpRight } from "lucide-react"
+import { Search, ArrowUpRight, ShieldCheck } from "lucide-react"
 import { MonitorNav } from "@/components/monitor-nav"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { SeverityBadge } from "@/components/severity-badge"
 import { HealthDot } from "@/components/health-dot"
+import { IssueCard } from "@/components/call-detail-sheet"
 import { listDeployments, deploymentHref } from "@/lib/campaign-data"
-import { allOpenIssues, deploymentHealth, fixHref } from "@/lib/diagnostics"
+import { allOpenIssues, deploymentHealth } from "@/lib/diagnostics"
 import { track, Events } from "@/lib/analytics"
 
 type SevFilter = "all" | "critical" | "warning"
@@ -59,7 +54,7 @@ export default function DiagnosticsPage() {
 
       <main className="flex-1 p-6 pt-4 space-y-4">
         {/* Summary — deployment health roll-up. The remediation loop closes here:
-            every row routes to the agent/deployment config that fixes it. */}
+            every issue routes to the config that fixes it, then re-checks. */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border bg-card px-4 py-3">
           <p className="text-sm font-medium">Live deployment health</p>
           <HealthDot status="unhealthy" label />
@@ -100,68 +95,35 @@ export default function DiagnosticsPage() {
           </div>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Severity</TableHead>
-                  <TableHead>Issue</TableHead>
-                  <TableHead>Deployment</TableHead>
-                  <TableHead className="text-right">Occurrences</TableHead>
-                  <TableHead className="text-right">Fix</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visible.map((a) => (
-                  <TableRow key={`${a.deployment.id}:${a.issue.ruleId}`}>
-                    <TableCell><SeverityBadge severity={a.issue.severity} /></TableCell>
-                    <TableCell>
-                      <p className="text-sm font-medium">{a.issue.title}</p>
-                      <p className="text-xs text-muted-foreground">{a.issue.suggestedFix}</p>
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        href={deploymentHref(a.deployment)}
-                        className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                      >
-                        <HealthDot status={deploymentHealth(a.deployment.id).status} />
-                        {a.deployment.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums text-sm">{a.count}</TableCell>
-                    <TableCell className="text-right">
-                      <Button asChild variant="outline" size="sm" className="gap-1.5">
-                        <Link
-                          href={fixHref(a.issue.fixTarget)}
-                          onClick={() =>
-                            track(Events.remediation_link_clicked, {
-                              rule_id: a.issue.ruleId,
-                              severity: a.issue.severity,
-                              level: a.issue.fixTarget.level,
-                              target_id: a.issue.fixTarget.id,
-                              section: a.issue.fixTarget.section,
-                              surface: "queue",
-                            })
-                          }
-                        >
-                          <Wrench className="h-3.5 w-3.5" /> Fix
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {visible.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                      All clear — no open issues match.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {/* Issue feed — same IssueCard as the call Diagnosis tab (rootCause +
+            suggested fix + Fix deep-link + the confirm step). */}
+        {visible.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-16 text-center">
+            <ShieldCheck className="h-7 w-7 text-primary" />
+            <p className="text-sm font-medium">All clear</p>
+            <p className="text-xs text-muted-foreground">No open issues match — your live deployments are healthy.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {visible.map((a) => (
+              <div key={`${a.deployment.id}:${a.issue.ruleId}`} className="space-y-1.5">
+                <div className="flex items-center justify-between px-1">
+                  <Link
+                    href={deploymentHref(a.deployment)}
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    <HealthDot status={deploymentHealth(a.deployment.id).status} />
+                    {a.deployment.name}
+                  </Link>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {a.count} occurrence{a.count === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <IssueCard issue={a.issue} surface="queue" deploymentId={a.deployment.id} />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination + cross-link */}
         <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">

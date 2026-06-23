@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge"
 
 import { ProjectSwitcher } from "@/components/project-switcher"
 import { AccountAvatarButton } from "@/components/account-avatar-button"
+import { allOpenIssues } from "@/lib/diagnostics"
 
 /** Open the global command palette from anywhere. */
 function openCommandPalette() {
@@ -40,11 +41,13 @@ function openCommandPalette() {
 
 // ─── nav structure ───────────────────────────────────────────────────────────
 //
-// 2026-06-23 agent-unification: "My Agents" is the single home (app root) — it
-// absorbs the old Deploy hub + Agents library. The agent is the unified thing;
-// channels and reusable modules hang off it. Integrations is the modules hub
-// (Knowledge · MCP · Connectors · Vendor Credentials · Channels) — Vendor
-// Credentials moved OUT of Manage; the Deploy channel pages became Channels.
+// 2026-06-24 full-rebuild IA (5 jobs: build · fix · launch · campaign · fix
+// errors). Agents is the entry point of BUILD (app root) — it absorbs the old
+// Go-Live hub; channels are launched from an agent's hero/Deploy step.
+// Integrations is renamed "Resources" and moves to MANAGE — it's the shared
+// modules inventory (Knowledge · MCP · Connectors · Vendor Credentials ·
+// Deployment Channels), not part of the build path. Monitor (OBSERVE) carries a
+// badge of open critical issues so "fix errors" is visible from the nav.
 
 type NavItem = {
   label: string
@@ -54,7 +57,7 @@ type NavItem = {
 }
 
 const NAV_BUILD: NavItem[] = [
-  { label: "Integrations", href: "/integrations", icon: Library },
+  { label: "Agents", href: "/agents", icon: Bot },
   { label: "Composer", href: "/composer", icon: Sparkles },
 ]
 
@@ -63,6 +66,7 @@ const NAV_OBSERVE: NavItem[] = [
 ]
 
 const NAV_MANAGE: NavItem[] = [
+  { label: "Resources", href: "/integrations", icon: Library },
   { label: "Realtime Services", href: "/realtime-services", icon: Radio },
   { label: "Project Settings", href: "/project/settings", icon: Settings2 },
 ]
@@ -71,7 +75,8 @@ const NAV_MANAGE: NavItem[] = [
 
 function isItemActive(itemHref: string, pathname: string): boolean {
   if (itemHref === "/agents") {
-    // My Agents is the home — also active at root and on the legacy deploy paths.
+    // Agents is the BUILD entry point + app root — also active across the agent
+    // editor and the deploy wizards (which are launched from an agent).
     return pathname === "/agents" || pathname.startsWith("/agents/") || pathname.startsWith("/deploy")
   }
   if (itemHref === "/monitor") {
@@ -120,6 +125,19 @@ function SearchItem() {
 // ─── main export ─────────────────────────────────────────────────────────────
 
 export function AppSidebar() {
+  // Badge "fix errors" onto Monitor: the count of open critical issues across
+  // deployments that have carried traffic. Deterministic (seeded), so it's
+  // hydration-safe to compute on the client.
+  const openCriticals = React.useMemo(
+    () => allOpenIssues().filter((a) => a.issue.severity === "critical").length,
+    [],
+  )
+  const observeItems: NavItem[] = NAV_OBSERVE.map((item) =>
+    item.href === "/monitor" && openCriticals > 0
+      ? { ...item, badge: String(openCriticals) }
+      : item,
+  )
+
   return (
     <Sidebar variant="inset">
       {/* Logo + collapse toggle */}
@@ -136,16 +154,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* My Agents — the single home (app root) */}
-        <SidebarGroup>
-          <SidebarMenu>
-            <NavLink item={{ label: "My Agents", href: "/agents", icon: Bot }} />
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* Build — Integrations (modules hub) · Composer */}
+        {/* Build — Agents (entry point + app root) · Composer */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Build</SidebarGroupLabel>
           <SidebarMenu>
@@ -155,17 +164,17 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Observe — global Monitor hub */}
+        {/* Observe — global Monitor hub (badge = open critical issues) */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Observe</SidebarGroupLabel>
           <SidebarMenu>
-            {NAV_OBSERVE.map((item) => (
+            {observeItems.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Manage — RT services · project settings */}
+        {/* Manage — Resources (modules inventory) · RT services · project settings */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-wider">Manage</SidebarGroupLabel>
           <SidebarMenu>

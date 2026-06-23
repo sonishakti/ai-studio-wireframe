@@ -35,6 +35,7 @@ export const Events = {
   agent_published:            "agent_published",              // mid-funnel signal (no longer north star)
   put_to_work_selected:       "put_to_work_selected",         // { channel: inbound|campaign|web }
   deployment_went_live:       "deployment_went_live",         // ★ NORTH STAR — traffic on a live deployment
+  time_to_live_ms:            "time_to_live_ms",              // ★ <3-min deploy — ms from build start → went live
   first_minutes_consumed:     "first_minutes_consumed",       // first billable conversation
   free_tier_exhausted:        "free_tier_exhausted",          // ★ revenue gate — crossed 300 free min
   agent_test_started:         "agent_test_started",          // ★ moment of belief — { channel, agent_id, intent?, direction? }
@@ -71,6 +72,7 @@ export const Events = {
   call_diagnosis_viewed:      "call_diagnosis_viewed",     // { call_id, criticals, warnings }
   diagnostics_queue_viewed:   "diagnostics_queue_viewed",  // { unhealthy, degraded }
   remediation_link_clicked:   "remediation_link_clicked",  // ★ did remediation route to a fix?
+  remediation_resolved:       "remediation_resolved",      // ★ user marked a fix done → re-running checks
   config_drift_detected:      "config_drift_detected",     // { level, id, ran_version, current_version }
 
   // ── Project switching ──────────────────────────────────────────────────────
@@ -138,8 +140,10 @@ export type EventPayloads = {
   first_paid_minute:           { agent_id: string }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
-  remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment"; target_id: string; section: string; surface: "call_sheet" | "queue" }
-  config_drift_detected:       { level: "agent" | "deployment"; id: string; ran_version: number; current_version: number }
+  remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }
+  remediation_resolved:        { rule_id: string; level: "agent" | "deployment" | "credential"; target_id: string; deployment_id?: string }
+  time_to_live_ms:             { ms: number; agent_id?: string }
+  config_drift_detected:       { level: "agent" | "deployment" | "credential"; id: string; ran_version: number; current_version: number }
   command_executed:            { command: string; surface: "palette" | "shortcut" }
   destructive_action_confirmed:{ resource: string; resource_id: string }
   destructive_action_canceled: { resource: string; resource_id: string }
@@ -203,4 +207,67 @@ export function timeSinceSignup(): number | undefined {
   const raw = window.localStorage.getItem(SIGNUP_KEY)
   if (!raw) return undefined
   return Date.now() - parseInt(raw, 10)
+}
+
+// ─── Time-to-live — the <3-min deploy spine ───────────────────────────────────
+//
+// Stamp when the user starts building (agent editor mount) so deployment_went_live
+// can report ms-to-live. Reset after a deploy so the next build is measured fresh.
+
+const BUILD_START_KEY = "sx:build_start_ts"
+
+/** Mark the start of a build attempt (set once until a deploy clears it). */
+export function markBuildStart(ts = Date.now()) {
+  if (typeof window === "undefined") return
+  if (!window.localStorage.getItem(BUILD_START_KEY)) {
+    window.localStorage.setItem(BUILD_START_KEY, String(ts))
+  }
+}
+
+/** ms since the build started, then clear the stamp so the next build is fresh. */
+export function timeToLiveMs(): number | undefined {
+  if (typeof window === "undefined") return undefined
+  const raw = window.localStorage.getItem(BUILD_START_KEY)
+  if (!raw) return undefined
+  window.localStorage.removeItem(BUILD_START_KEY)
+  return Date.now() - parseInt(raw, 10)
+}
+
+// ─── Remediation confirm — persist "marked fixed" so the queue can re-check ────
+//
+// When a user clicks a Fix link we persist {ruleId, deploymentId} so that on
+// return to the Diagnostics queue the row shows "re-running checks" and then
+// fires remediation_resolved — closing the detect→explain→route→confirm loop.
+
+const REMEDIATION_KEY = "sx:remediations"
+
+/** Stable key for a remediation: which rule, on which target/deployment. */
+export function remediationKey(ruleId: string, deploymentId: string): string {
+  return `${ruleId}::${deploymentId}`
+}
+
+export function recordRemediation(key: string) {
+  if (typeof window === "undefined") return
+  const list = listRemediations()
+  if (!list.includes(key)) {
+    window.localStorage.setItem(REMEDIATION_KEY, JSON.stringify([...list, key]))
+  }
+}
+
+export function listRemediations(): string[] {
+  if (typeof window === "undefined") return []
+  try {
+    const raw = window.localStorage.getItem(REMEDIATION_KEY)
+    return raw ? (JSON.parse(raw) as string[]) : []
+  } catch {
+    return []
+  }
+}
+
+export function clearRemediation(key: string) {
+  if (typeof window === "undefined") return
+  window.localStorage.setItem(
+    REMEDIATION_KEY,
+    JSON.stringify(listRemediations().filter((k) => k !== key)),
+  )
 }

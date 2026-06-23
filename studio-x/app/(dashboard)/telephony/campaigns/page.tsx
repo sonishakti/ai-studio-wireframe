@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-// Telephony is now a channel inside a campaign, not a separate destination.
+// Telephony is a channel in the inventory now, not a separate destination.
 export default function TelephonyCampaignsLegacyRedirect() {
-  redirect("/deploy/batch-calls")
+  redirect("/integrations?tab=channels")
 }

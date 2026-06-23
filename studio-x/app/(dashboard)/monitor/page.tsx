@@ -11,16 +11,26 @@ import {
   TrendingUp,
   TrendingDown,
   ArrowRight,
+  AlertTriangle,
+  ShieldCheck,
+  Wrench,
 } from "lucide-react"
 import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { SeverityBadge } from "@/components/severity-badge"
+import { HealthDot } from "@/components/health-dot"
+import { FreeMinutesNudge } from "@/components/free-minutes-nudge"
 import { cn } from "@/lib/utils"
-import { DEPLOYMENTS, AGENTS, getDeployment, deploymentHref } from "@/lib/campaign-data"
-import { track, Events } from "@/lib/analytics"
+import {
+  DEPLOYMENTS, AGENTS, getDeployment, deploymentHref, listDeployments, STATUS_BADGE,
+} from "@/lib/campaign-data"
+import { allOpenIssues, deploymentHealth, fixHref } from "@/lib/diagnostics"
+import { track, Events, recordRemediation, remediationKey } from "@/lib/analytics"
 
 // ─── KPI sparkline data (wireframe) ──────────────────────────────────────────
 
@@ -70,6 +80,15 @@ export default function MonitorPage() {
     if (name) setDeployed({ name, channel: p.get("channel") ?? "", agent: p.get("agent") ?? "" })
   }, [])
 
+  // Persistent health surface — survives refresh (data-derived, unlike the
+  // transient ?deployed banner). "Needs attention" = the single most severe open
+  // issue; "Live deployments" = everything currently carrying traffic.
+  const topIssue = React.useMemo(() => allOpenIssues()[0], [])
+  const liveDeployments = React.useMemo(
+    () => listDeployments().filter((d) => d.status === "active" || d.status === "in_progress"),
+    [],
+  )
+
   return (
     <div className="flex flex-col flex-1">
       <MonitorNav
@@ -81,6 +100,10 @@ export default function MonitorPage() {
       />
 
       <main className="flex-1 p-6 space-y-5">
+        {/* Usage nudge — surfaces the half-tier card prompt (and the paused state)
+            on Monitor too, not just the Go Live home. Self-hides under threshold. */}
+        <FreeMinutesNudge />
+
         {deployed && (
           <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/40 bg-emerald-500/[0.06] px-4 py-3">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
@@ -96,6 +119,91 @@ export default function MonitorPage() {
               Dismiss
             </Button>
           </div>
+        )}
+
+        {/* Needs attention — the single most severe open issue, with a Fix
+            deep-link. The remediation loop's entry point on Monitor. */}
+        {topIssue ? (
+          <Card className="border-destructive/30">
+            <CardContent className="flex flex-wrap items-start gap-3 p-4">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold">Needs attention</p>
+                  <SeverityBadge severity={topIssue.issue.severity} />
+                </div>
+                <p className="mt-0.5 text-sm">{topIssue.issue.title}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{topIssue.issue.rootCause}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  On{" "}
+                  <Link href={deploymentHref(topIssue.deployment)} className="font-medium text-foreground hover:underline">
+                    {topIssue.deployment.name}
+                  </Link>
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <Button asChild size="sm" variant="outline" className="gap-1.5">
+                  <Link
+                    href={fixHref(topIssue.issue.fixTarget)}
+                    onClick={() => {
+                      track(Events.remediation_link_clicked, {
+                        rule_id: topIssue.issue.ruleId,
+                        severity: topIssue.issue.severity,
+                        level: topIssue.issue.fixTarget.level,
+                        target_id: topIssue.issue.fixTarget.id,
+                        section: topIssue.issue.fixTarget.section,
+                        surface: "monitor",
+                      })
+                      recordRemediation(remediationKey(topIssue.issue.ruleId, topIssue.deployment.id))
+                    }}
+                  >
+                    <Wrench className="h-3.5 w-3.5" /> Fix
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="ghost" className="gap-1.5">
+                  <Link href="/monitor/diagnostics">All issues <ArrowRight className="h-3.5 w-3.5" /></Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-2 p-4">
+              <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+              <p className="text-sm font-medium">All systems healthy</p>
+              <p className="text-xs text-muted-foreground">No open issues across your live deployments.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Live deployments — persistent (survives refresh), unlike the celebratory
+            ?deployed banner. Everything currently carrying traffic, with health. */}
+        {liveDeployments.length > 0 && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-semibold">Live deployments</p>
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {liveDeployments.length} carrying traffic
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {liveDeployments.map((d) => (
+                  <Link
+                    key={d.id}
+                    href={deploymentHref(d)}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm transition-colors hover:border-primary/40"
+                  >
+                    <HealthDot status={deploymentHealth(d.id).status} />
+                    {d.name}
+                    <Badge variant={STATUS_BADGE[d.status].variant} className="text-xs">
+                      {STATUS_BADGE[d.status].label}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Filters */}

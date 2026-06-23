@@ -14,8 +14,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { DeployNav } from "@/components/deploy-nav"
 import { AGENTS, PHONE_NUMBERS, extractVars, STACK_PRESETS } from "@/lib/campaign-data"
+import { track, Events, timeToLiveMs } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -77,6 +77,10 @@ export default function NewBatchCallPage() {
     toast.success(`"${name}" is ready to dial`, {
       description: `${file?.rowCount.toLocaleString()} contacts · ${columns.length} variables detected.`,
     })
+    // ★ North star — the batch deployment is live. Report build → live time.
+    track(Events.deployment_went_live, { agent_id: agentId, channel: "batch" })
+    const ms = timeToLiveMs()
+    if (ms != null) track(Events.time_to_live_ms, { ms, agent_id: agentId })
     // After launch, land on Monitor (where the batch's calls show up) with a
     // "you're live" banner — not the batch list.
     const q = new URLSearchParams({ deployed: name, channel: "Batch calls", agent: agent?.name ?? "" })
@@ -85,8 +89,6 @@ export default function NewBatchCallPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <DeployNav />
-
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-6">
           {/* Stepper */}

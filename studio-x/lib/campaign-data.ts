@@ -708,3 +708,60 @@ export const CHANNEL_LABEL: Record<ChannelKind, string> = {
   sms: "SMS",
   web: "Web widget",
 }
+
+// ─── Vendor credentials (the keys an agent's stack is built from) ─────────────
+//
+// One source of truth so both the Vendor Credentials panel AND the diagnostics
+// engine can read them: an expiring/expired key becomes a critical Issue naming
+// the live deployments it puts at risk (2026-06-24 error-remediation loop).
+
+export type CredentialStatus = "valid" | "expiring" | "expired"
+
+export interface VendorCredential {
+  id: string
+  vendor: string
+  category: "LLM" | "TTS" | "STT" | "Telephony"
+  name: string
+  keyHint: string
+  status: CredentialStatus
+  /** Number of agents whose stack references this vendor (display only). */
+  usedBy: number
+  added: string
+  /** Human date the key lapses — shown when status is expiring/expired. */
+  expiresOn?: string
+}
+
+export const VENDOR_CREDENTIALS: VendorCredential[] = [
+  { id: "vc_01", vendor: "OpenAI",     category: "LLM",       name: "Production API Key",       keyHint: "sk-proj-••••••••••••xK3a", status: "valid",    usedBy: 3, added: "Feb 2, 2026" },
+  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Voice API Key",            keyHint: "el_••••••••••••8f2b",      status: "valid",    usedBy: 3, added: "Feb 2, 2026" },
+  { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026" },
+  { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026" },
+  { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "May 31, 2026" },
+]
+
+/** Does this agent's stack reference the given vendor (LLM/ASR/TTS)? */
+export function agentUsesVendor(a: Agent, vendor: string): boolean {
+  return a.stack.llm.vendor === vendor || a.stack.asr.vendor === vendor || a.stack.tts.vendor === vendor
+}
+
+/** Credentials that are expiring or already expired — the ones worth flagging. */
+export function expiringCredentials(): VendorCredential[] {
+  return VENDOR_CREDENTIALS.filter((c) => c.status === "expiring" || c.status === "expired")
+}
+
+/** Live-ish deployments whose backing agent depends on a vendor — so an expiring
+ *  key for that vendor will interrupt them. Completed batches are excluded
+ *  (they've already run); drafts have no traffic to lose. */
+export function deploymentsAtRiskFromCredential(vendor: string): Deployment[] {
+  const atRiskAgents = new Set(AGENTS.filter((a) => agentUsesVendor(a, vendor)).map((a) => a.id))
+  return DEPLOYMENTS.filter(
+    (d) => atRiskAgents.has(d.agentId) && d.status !== "completed" && d.status !== "draft",
+  )
+}
+
+/** Expiring/expired credentials whose vendor this agent's stack depends on. */
+export function credentialsAtRiskForAgent(agentId: string): VendorCredential[] {
+  const a = getAgent(agentId)
+  if (!a) return []
+  return expiringCredentials().filter((c) => agentUsesVendor(a, c.vendor))
+}
