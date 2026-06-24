@@ -90,19 +90,18 @@ export function AgentWizard({ id }: { id: string }) {
   const statusOf = (m: (typeof meta)[number]): "locked" | "active" | "done" =>
     m.locked ? "locked" : m.complete ? "done" : "active"
 
-  // Continue → open the next unlocked step. Back → previous unlocked step.
-  const advanceFrom = (n: number) => {
-    for (let k = n + 1; k <= 5; k++) if (!meta[k - 1].locked) return setExpandedStep(k)
-    setExpandedStep(0)
-  }
-  const backFrom = (n: number) => {
-    for (let k = n - 1; k >= 1; k--) if (!meta[k - 1].locked) return setExpandedStep(k)
-  }
+  // Any step can be opened to look inside (locked ones are view-only, not hidden).
+  const toggleStep = (n: number) => setExpandedStep((cur) => (cur === n ? 0 : n))
+  const advanceFrom = (n: number) => setExpandedStep(Math.min(n + 1, 5))
+  const backFrom = (n: number) => setExpandedStep(Math.max(n - 1, 1))
   const canContinue = (n: number) =>
     (n === 1 && voiceDone) ||
     (n === 2 && typeDone) ||
     (n === 3 && promptDone) ||
     (n === 4 && configReady)
+  // A locked step explains itself: the immediately-preceding step must be done.
+  const lockedReason = (n: number) =>
+    n >= 2 ? `Finish “${STEP_TITLES[n - 2]}” first to start this step.` : undefined
 
   // ── Mount: time-to-live clock; (new mode) restore + ?artifact + ?dc. ─────────
   React.useEffect(() => {
@@ -158,15 +157,6 @@ export function AgentWizard({ id }: { id: string }) {
     [draft],
     600,
   )
-
-  // ── Guard: if the expanded step became locked (e.g. the user cleared the type),
-  //    snap the cursor back to the first incomplete step. ───────────────────────
-  React.useEffect(() => {
-    if (expandedStep >= 1 && meta[expandedStep - 1]?.locked) {
-      setExpandedStep(firstIncomplete(draft))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft, expandedStep])
 
   // ── Step 1 voice selection — seed the draft + open the next step. ────────────
   const selectVoice = (v: VoiceArtifact) => {
@@ -276,7 +266,7 @@ export function AgentWizard({ id }: { id: string }) {
       <div className="space-y-3">
         <StepSection
           n={1} title={STEP_TITLES[0]} status={statusOf(meta[0])} open={expandedStep === 1}
-          summary={voiceSummary()} onEdit={() => setExpandedStep(1)}
+          summary={voiceSummary()} lockedReason={lockedReason(1)} onToggle={() => toggleStep(1)}
           onContinue={() => advanceFrom(1)} canContinue={canContinue(1)}
         >
           <StepVoice draft={draft} onSelectVoice={selectVoice} />
@@ -284,7 +274,7 @@ export function AgentWizard({ id }: { id: string }) {
 
         <StepSection
           n={2} title={STEP_TITLES[1]} status={statusOf(meta[1])} open={expandedStep === 2}
-          summary={typeSummary()} onEdit={() => setExpandedStep(2)}
+          summary={typeSummary()} lockedReason={lockedReason(2)} onToggle={() => toggleStep(2)}
           onBack={() => backFrom(2)} onContinue={() => advanceFrom(2)} canContinue={canContinue(2)}
         >
           <StepType draft={draft} update={update} />
@@ -292,7 +282,7 @@ export function AgentWizard({ id }: { id: string }) {
 
         <StepSection
           n={3} title={STEP_TITLES[2]} status={statusOf(meta[2])} open={expandedStep === 3}
-          summary={buildSummary()} onEdit={() => setExpandedStep(3)}
+          summary={buildSummary()} lockedReason={lockedReason(3)} onToggle={() => toggleStep(3)}
           onBack={() => backFrom(3)} onContinue={() => advanceFrom(3)} canContinue={canContinue(3)}
         >
           <StepBuild draft={draft} update={update} />
@@ -300,7 +290,7 @@ export function AgentWizard({ id }: { id: string }) {
 
         <StepSection
           n={4} title={STEP_TITLES[3]} status={statusOf(meta[3])} open={expandedStep === 4}
-          summary={configSummary()} onEdit={() => setExpandedStep(4)}
+          summary={configSummary()} lockedReason={lockedReason(4)} onToggle={() => toggleStep(4)}
           onBack={() => backFrom(4)} onContinue={() => advanceFrom(4)} canContinue={canContinue(4)}
         >
           <StepConfigure draft={draft} update={update} />
@@ -308,7 +298,7 @@ export function AgentWizard({ id }: { id: string }) {
 
         <StepSection
           n={5} title={STEP_TITLES[4]} status={statusOf(meta[4])} open={expandedStep === 5}
-          onEdit={() => setExpandedStep(5)} onBack={() => backFrom(5)}
+          lockedReason={lockedReason(5)} onToggle={() => toggleStep(5)} onBack={() => backFrom(5)}
         >
           <StepPublish draft={draft} onPublish={publish} />
         </StepSection>

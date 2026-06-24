@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, Lock, ChevronDown, ArrowLeft, ArrowRight, Pencil } from "lucide-react"
+import { Check, Lock, ChevronDown, ArrowLeft, ArrowRight, Pencil, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
@@ -9,18 +9,16 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
 /**
  * StepSection — one step in the UPFRONT stepped builder.
  *
- * All five sections render at once, stacked. This wrapper is purely
- * presentational chrome around an existing StepX body; the host owns which
- * section is `open` and each section's `status`:
- *   • locked → visible but DIMMED + lock icon + non-interactive (the prior step
- *     isn't done yet) — the core "all steps shown, disabled until unlocked" rule
- *   • active → ring + expanded body + shared Back/Continue footer
- *   • done   → collapsed to a one-line summary; click the header (or Edit) to
- *     re-open and edit in place
+ * All five sections render at once, stacked, and ANY of them can be expanded —
+ * locking is not a secret. Each section's `status`:
+ *   • active → ring + editable body + shared Back/Continue footer
+ *   • done   → collapsed to a one-line summary; expand to edit in place
+ *   • locked → still EXPANDABLE so the user can see what's inside, but the body
+ *     is shown view-only (dimmed + non-interactive) with a short note that it's
+ *     disabled until the previous step is complete. NOT hard pointer-events-none.
  *
- * Open/close is HOST-controlled (not a Radix trigger): only the cursor step is
- * open, and Continue / Edit move the cursor. Radix Collapsible is used only for
- * the animated height transition.
+ * The header is a universal expand/collapse toggle (host updates `expandedStep`).
+ * Radix Collapsible drives the animated height transition only.
  */
 
 export interface StepSectionProps {
@@ -29,10 +27,12 @@ export interface StepSectionProps {
   status: "locked" | "active" | "done"
   /** Body expanded right now (host-controlled via expandedStep). */
   open: boolean
-  /** One-line recap shown when this step is collapsed-done. */
+  /** One-line recap shown when a done step is collapsed. */
   summary?: React.ReactNode
-  /** Re-expand a done step to edit it (host sets expandedStep = n). */
-  onEdit: () => void
+  /** Why a locked step is disabled (shown when the user expands it to explore). */
+  lockedReason?: string
+  /** Toggle this section open/closed (host flips expandedStep). */
+  onToggle: () => void
   onBack?: () => void
   onContinue?: () => void
   canContinue?: boolean
@@ -40,79 +40,75 @@ export interface StepSectionProps {
 }
 
 export function StepSection({
-  n, title, status, open, summary, onEdit, onBack, onContinue, canContinue, children,
+  n, title, status, open, summary, lockedReason, onToggle, onBack, onContinue, canContinue, children,
 }: StepSectionProps) {
   const locked = status === "locked"
   const done = status === "done"
-  const expanded = open && !locked
-  // A collapsed, completed step: clicking its header re-opens it to edit.
-  const headerClickable = done && !expanded
 
   return (
     <Collapsible
-      open={expanded}
+      open={open}
       className={cn(
         "rounded-xl border border-border bg-card/30 transition-colors",
-        expanded && "border-primary/60 bg-card/50 ring-1 ring-primary/40",
-        locked && "pointer-events-none select-none opacity-60",
+        open && !locked && "border-primary/60 bg-card/50 ring-1 ring-primary/40",
+        open && locked && "bg-muted/20",
+        !open && locked && "opacity-75",
       )}
       aria-disabled={locked || undefined}
     >
-      {/* Header */}
-      <div
-        role={headerClickable ? "button" : undefined}
-        tabIndex={headerClickable ? 0 : undefined}
-        onClick={headerClickable ? onEdit : undefined}
-        onKeyDown={
-          headerClickable
-            ? (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
-                  onEdit()
-                }
-              }
-            : undefined
-        }
-        className={cn(
-          "flex items-center gap-3 px-4 py-3.5 sm:px-5",
-          headerClickable && "cursor-pointer rounded-t-xl hover:bg-accent/40",
-        )}
+      {/* Header — a universal toggle: every step can be opened to look inside. */}
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3 rounded-t-xl px-4 py-3.5 text-left transition-colors hover:bg-accent/40 sm:px-5"
       >
         <span
           className={cn(
             "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-            expanded && "border-primary bg-primary text-primary-foreground",
-            done && !expanded && "border-primary bg-primary/10 text-primary",
-            (locked || (!expanded && !done)) && "border-border text-muted-foreground",
+            open && !locked && "border-primary bg-primary text-primary-foreground",
+            done && !open && "border-primary bg-primary/10 text-primary",
+            (locked || (!open && !done)) && "border-border text-muted-foreground",
           )}
         >
-          {locked ? <Lock className="h-3 w-3" /> : done && !expanded ? <Check className="h-3.5 w-3.5" /> : n}
+          {locked ? <Lock className="h-3 w-3" /> : done && !open ? <Check className="h-3.5 w-3.5" /> : n}
         </span>
 
         <div className="min-w-0 flex-1">
           <p className={cn("text-sm font-semibold", locked && "text-muted-foreground")}>{title}</p>
-          {done && !expanded && summary && (
+          {!open && done && summary && (
             <p className="mt-0.5 truncate text-xs text-muted-foreground">{summary}</p>
+          )}
+          {!open && locked && (
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">Disabled — finish the previous step first</p>
           )}
         </div>
 
-        {locked ? (
-          <span className="text-xs font-medium text-muted-foreground">Locked</span>
-        ) : done && !expanded ? (
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+        {locked && <span className="shrink-0 text-xs font-medium text-muted-foreground">Disabled</span>}
+        {done && !open && (
+          <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
             <Pencil className="h-3 w-3" /> Edit
           </span>
-        ) : (
-          <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
         )}
-      </div>
+        <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
 
       {/* Body */}
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
         <div className="border-t border-border px-4 pb-5 pt-5 sm:px-5">
-          {children}
+          {locked && lockedReason && (
+            <div className="mb-4 flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <p className="text-xs leading-relaxed text-muted-foreground">{lockedReason}</p>
+            </div>
+          )}
 
-          {(onBack || onContinue) && (
+          {/* Locked body is visible-but-view-only — explore, don't edit yet. */}
+          <div className={cn(locked && "pointer-events-none select-none opacity-60")}>
+            {children}
+          </div>
+
+          {!locked && (onBack || onContinue) && (
             <div className="mt-6 flex items-center justify-between">
               <Button variant="ghost" className="gap-1.5" disabled={!onBack} onClick={onBack}>
                 <ArrowLeft className="h-4 w-4" /> Back
