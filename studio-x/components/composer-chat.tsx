@@ -134,10 +134,14 @@ export function ComposerChat({
                 },
               ],
         )
+        // Typing is the default build path — populate the draft rail here too,
+        // not just on the voice turn, so keyboard-first users aren't stuck on the
+        // empty state.
+        if (!willFail) onDraftUpdate?.(assistantReplyFor(prompt))
         setIsThinking(false)
       }, 700)
     },
-    [router],
+    [router, onDraftUpdate],
   )
 
   const send = (text: string) => {

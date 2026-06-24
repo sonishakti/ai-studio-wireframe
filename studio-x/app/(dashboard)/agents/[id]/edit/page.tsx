@@ -21,7 +21,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import {
@@ -62,8 +61,17 @@ const PRESET_ICON: Record<StackPreset, React.ComponentType<{ className?: string 
   cheapest: PiggyBank,
 }
 
-const TONES = ["Friendly", "Professional", "Neutral", "Playful"]
-const LANGUAGES = ["en-US", "en-GB", "es-ES", "hi-IN", "ja-JP"]
+// Per-preset latency breakdown for the test panel. e2e MUST equal the existing
+// latencyMs so nothing regresses; asr/llm/tts are the component estimates and
+// bestCase is the achievable floor. ttftMs == llmMs (LLM time-to-first-token).
+const LATENCY_BY_PRESET: Record<
+  StackPreset,
+  { asrMs: number; llmMs: number; ttsMs: number; e2eMs: number; bestMs: number }
+> = {
+  fastest: { asrMs: 90, llmMs: 200, ttsMs: 70, e2eMs: 380, bestMs: 300 },
+  balanced: { asrMs: 130, llmMs: 300, ttsMs: 90, e2eMs: 520, bestMs: 420 },
+  cheapest: { asrMs: 180, llmMs: 480, ttsMs: 120, e2eMs: 780, bestMs: 640 },
+}
 
 const LLM_VENDORS = ["OpenAI", "Anthropic", "Google"]
 const ASR_VENDORS = ["Deepgram", "Whisper", "AssemblyAI"]
@@ -87,10 +95,12 @@ export default function AgentEditorPage({
 
   // Agent experience = a journey breadcrumb (not tabs). The section is controlled
   // here and mirrored to the URL hash so #behavior / #deployment deep-links work.
-  const [section, setSection] = React.useState<AgentSection>("persona")
+  const [section, setSection] = React.useState<AgentSection>("stack")
   React.useEffect(() => {
     const map: Record<string, AgentSection> = {
-      behavior: "persona", persona: "persona", stack: "stack",
+      // Persona is no longer a standalone step — it lives inside Deploy (2026-06-24).
+      // Old #persona / #behavior deep-links land on Deploy where the form now is.
+      behavior: "deployment", persona: "deployment", stack: "stack",
       knowledge: "knowledge", mcp: "mcp", connectors: "connectors",
       actions: "mcp", // back-compat: the old combined #actions now lands on MCP
       deployment: "deployment",
@@ -125,11 +135,8 @@ export default function AgentEditorPage({
         deployment: deployedIn.length > 0,
       }
 
-  // Persona (the "change personality" tweak)
-  const [personality, setPersonality] = React.useState(agent?.persona.personality ?? "Warm, concise, professional")
-  const [tone, setTone] = React.useState(agent?.persona.tone ?? "Friendly")
-  const [language, setLanguage] = React.useState(agent?.persona.language ?? "en-US")
-  const [brand, setBrand] = React.useState(agent?.persona.brand ?? "")
+  // Persona now lives INSIDE the Deploy step (AgentDeploymentPanel owns its
+  // state) — each deployment carries its own voice + prompt (2026-06-24).
 
   // Stack — speed-vs-cost preset first, vendors drill down underneath.
   const [preset, setPreset] = React.useState<StackPreset>(agent?.stack.preset ?? "balanced")
@@ -227,74 +234,6 @@ export default function AgentEditorPage({
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
           <Tabs value={section} onValueChange={(v) => jump(v as AgentSection)} className="flex flex-col flex-1 min-h-0">
-
-            {/* ── Persona — the light "change personality" tweak ──────────── */}
-            <TabsContent value="persona" className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0">
-              {/* Wayfinding: prompts moved to deployments */}
-              <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
-                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <p className="text-xs text-foreground leading-relaxed">
-                  Looking for the prompt? Each deployment has its own — go to{" "}
-                  <button
-                    type="button"
-                    onClick={() => jump("deployment")}
-                    className="underline underline-offset-2 hover:text-primary"
-                  >
-                    Deploy
-                  </button>{" "}
-                  to edit what this agent says on a number, widget, or batch.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Tone of voice</Label>
-                  <Select value={tone} onValueChange={setTone}>
-                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="personality" className="text-sm font-medium">Personality</Label>
-                <Textarea
-                  id="personality"
-                  value={personality}
-                  onChange={(e) => setPersonality(e.target.value)}
-                  className="min-h-[88px] text-sm"
-                  placeholder="e.g. Warm, patient, solution-first"
-                />
-                <p className="text-xs text-muted-foreground">
-                  How the agent sounds and behaves — e.g. warm, patient, never pushy.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="brand" className="text-sm font-medium">Brand</Label>
-                <Input
-                  id="brand"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                  placeholder="e.g. Acme"
-                  className="max-w-sm"
-                />
-                <p className="text-xs text-muted-foreground">
-                  The company the agent represents. Used in introductions across deployments.
-                </p>
-              </div>
-            </TabsContent>
 
             {/* ── Stack — speed-vs-cost FIRST, vendors underneath ─────────── */}
             <TabsContent value="stack" className="flex-1 overflow-y-auto px-6 py-5 space-y-5 mt-0">
@@ -461,9 +400,14 @@ export default function AgentEditorPage({
             asr: asrVendor,
             tts: ttsVendor,
             // A brand-new unsaved draft has never run — show em-dashes, not
-            // measured-looking figures. Saved agents show the stack's estimate.
-            latencyMs: isNew ? null : preset === "fastest" ? 380 : preset === "balanced" ? 500 : 720,
-            ttftMs: isNew ? null : preset === "fastest" ? 18 : preset === "balanced" ? 23 : 41,
+            // measured-looking figures. Saved agents show the stack's per-provider
+            // breakdown (ASR + LLM TTFT + TTS → end-to-end, with a best-case floor).
+            latencyMs: isNew ? null : LATENCY_BY_PRESET[preset].e2eMs,
+            ttftMs: isNew ? null : LATENCY_BY_PRESET[preset].llmMs,
+            asrMs: isNew ? null : LATENCY_BY_PRESET[preset].asrMs,
+            llmMs: isNew ? null : LATENCY_BY_PRESET[preset].llmMs,
+            ttsMs: isNew ? null : LATENCY_BY_PRESET[preset].ttsMs,
+            bestCaseMs: isNew ? null : LATENCY_BY_PRESET[preset].bestMs,
           }}
           onTest={handleTestAgent}
         />

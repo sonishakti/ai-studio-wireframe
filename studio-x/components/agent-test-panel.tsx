@@ -24,6 +24,12 @@ interface AgentSpec {
   latencyMs: number | null
   /** ms. Use null for "not connected yet". */
   ttftMs: number | null
+  /** Per-provider latency breakdown (all ms; null = "not connected yet"). When
+   *  present, the panel renders an ASR/LLM/TTS → end-to-end → best-case block. */
+  asrMs?: number | null
+  llmMs?: number | null
+  ttsMs?: number | null
+  bestCaseMs?: number | null
 }
 
 interface AgentTestPanelProps {
@@ -80,28 +86,73 @@ export function AgentTestPanel({
         <StatRow label="LLM" value={spec.llm} />
         <StatRow label="ASR" value={spec.asr} />
         <StatRow label="TTS" value={spec.tts} />
-        <StatRow
-          label="Est. end-to-end latency"
-          value={spec.latencyMs !== null ? `~${spec.latencyMs} ms` : "—"}
-          mono
-        />
-        <StatRow
-          label="Est. LLM time to first token"
-          value={spec.ttftMs !== null ? `~${spec.ttftMs} ms` : "—"}
-          mono
-        />
+
+        {/* Latency breakdown — per-provider stats roll up to end-to-end, with a
+            best-case floor. Only when the per-provider fields are supplied;
+            otherwise fall back to the two-row estimate. All figures are
+            estimates ("~"). */}
+        {spec.asrMs !== undefined || spec.llmMs !== undefined || spec.ttsMs !== undefined ? (
+          <div className="space-y-3 border-t border-border pt-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Latency breakdown
+            </p>
+            <StatRow label="ASR" value={ms(spec.asrMs)} mono />
+            <StatRow label="LLM (TTFT)" value={ms(spec.llmMs)} mono />
+            <StatRow label="TTS" value={ms(spec.ttsMs)} mono />
+            <div className="border-t border-border pt-3 space-y-3">
+              <StatRow label="End-to-end" value={ms(spec.latencyMs)} mono />
+              <StatRow label="Best case" value={ms(spec.bestCaseMs)} mono muted />
+            </div>
+          </div>
+        ) : (
+          <>
+            <StatRow
+              label="Est. end-to-end latency"
+              value={spec.latencyMs !== null ? `~${spec.latencyMs} ms` : "—"}
+              mono
+            />
+            <StatRow
+              label="Est. LLM time to first token"
+              value={spec.ttftMs !== null ? `~${spec.ttftMs} ms` : "—"}
+              mono
+            />
+          </>
+        )}
       </div>
     </aside>
   )
 }
 
-function StatRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+/** Format an optional latency figure as "~N ms", or an em-dash when unknown. */
+function ms(v: number | null | undefined): string {
+  return v != null ? `~${v} ms` : "—"
+}
+
+function StatRow({
+  label,
+  value,
+  mono = false,
+  muted = false,
+}: {
+  label: string
+  value: string
+  mono?: boolean
+  muted?: boolean
+}) {
   return (
     <div className="flex items-center justify-between gap-2">
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
-      <p className={cn("text-sm shrink-0", mono && "tabular-nums font-mono")}>{value}</p>
+      <p
+        className={cn(
+          "text-sm shrink-0",
+          mono && "tabular-nums font-mono",
+          muted && "text-muted-foreground",
+        )}
+      >
+        {value}
+      </p>
     </div>
   )
 }

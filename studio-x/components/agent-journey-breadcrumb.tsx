@@ -19,8 +19,12 @@ export type AgentSection = "persona" | "stack" | "knowledge" | "mcp" | "connecto
 
 // Names match the Figma design (03_Configure_Integrations): Knowledge Base · MCP
 // · Connectors are distinct modules — not a combined "Actions" bucket.
+//
+// Persona is intentionally NOT a step (2026-06-24): it moved INTO Deploy (each
+// deployment carries its own voice + prompt), so the builder leads with Stack.
+// "persona" stays in the AgentSection type union — other code (the hash map,
+// the completion Record) still references the id.
 export const AGENT_SECTIONS: { id: AgentSection; label: string }[] = [
-  { id: "persona", label: "Persona" },
   { id: "stack", label: "Stack" },
   { id: "knowledge", label: "Knowledge Base" },
   { id: "mcp", label: "MCP" },

@@ -23,9 +23,13 @@ export function HelpNav() {
       <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">
         {TABS.map((tab) => {
           // Exact match or a true sub-path boundary, so `/help/contact` does
-          // NOT prefix-match `/help/contact-sales` (both would highlight).
+          // NOT prefix-match `/help/contact-sales` (both would highlight). The
+          // index tab (`/help`) must match exactly, else it stays active on every
+          // /help/* subpage (two active tabs).
           const isActive =
-            pathname === tab.href || pathname.startsWith(tab.href + "/")
+            tab.href === "/help"
+              ? pathname === "/help"
+              : pathname === tab.href || pathname.startsWith(tab.href + "/")
           return (
             <Link
               key={tab.href}

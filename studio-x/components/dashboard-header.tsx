@@ -116,6 +116,7 @@ const LINKABLE_PATHS = new Set<string>([
   "/deploy",
   "/deploy/phone-numbers",
   "/deploy/batch-calls",
+  "/campaigns",
   "/billing",
   "/billing/usage",
   "/extensions",
