@@ -442,19 +442,21 @@ export default function AgentsPage() {
                 <ChevronLeft className="h-4 w-4" /> Home
               </Button>
             )}
-            <ImportAgentSheet>
-              <Button variant="outline" className="gap-1.5 max-sm:hidden">
-                <Upload className="h-4 w-4" /> Import Agent
-              </Button>
-            </ImportAgentSheet>
-            {/* Home view's create CTA lives in the hero (GoLiveHome); the list
-                view keeps it here in the header. */}
+            {/* On the home, Import + Create live in the lean hero (GoLiveHome);
+                the list view keeps them here in the header. */}
             {!showFirstRun && (
-              <Button asChild>
-                <Link href="/agents/new/edit">
-                  <Plus className="h-4 w-4" /> Create New Agent
-                </Link>
-              </Button>
+              <>
+                <ImportAgentSheet>
+                  <Button variant="outline" className="gap-1.5 max-sm:hidden">
+                    <Upload className="h-4 w-4" /> Import Agent
+                  </Button>
+                </ImportAgentSheet>
+                <Button asChild>
+                  <Link href="/agents/new/edit">
+                    <Plus className="h-4 w-4" /> Create New Agent
+                  </Link>
+                </Button>
+              </>
             )}
           </div>
         }
