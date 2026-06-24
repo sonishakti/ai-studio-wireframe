@@ -28,7 +28,7 @@ export function WizardStepper({
   onNavigate: (n: number) => void
 }) {
   return (
-    <nav aria-label="Creation steps" className="flex gap-1 overflow-x-auto lg:flex-col lg:gap-0.5">
+    <nav aria-label="Creation steps" className="flex gap-1 overflow-x-auto pb-2 snap-x lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
       {items.map((it) => {
         const isActive = active === it.n
         return (
@@ -40,7 +40,7 @@ export function WizardStepper({
             aria-current={isActive ? "step" : undefined}
             className={cn(
               "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
-              "shrink-0 lg:shrink",
+              "shrink-0 snap-start lg:shrink",
               it.locked && "opacity-50",
               isActive ? "bg-accent" : !it.locked && "hover:bg-accent/50",
             )}
@@ -63,8 +63,13 @@ export function WizardStepper({
             </span>
             <span
               className={cn(
-                "whitespace-nowrap text-sm font-medium lg:whitespace-normal",
-                isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
+                // On mobile the rail is a horizontal row of circles — only the
+                // active step shows its label (keeps it compact); the full rail
+                // with every label appears at lg.
+                "whitespace-nowrap text-sm font-medium lg:inline lg:whitespace-normal",
+                isActive
+                  ? "text-foreground"
+                  : "text-muted-foreground group-hover:text-foreground max-lg:hidden",
               )}
             >
               {it.title}

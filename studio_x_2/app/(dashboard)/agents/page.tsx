@@ -14,6 +14,7 @@ import {
   Search,
   Filter,
   Library,
+  List,
   Phone,
   MessageCircle,
   Globe,
@@ -398,12 +399,20 @@ export default function AgentsPage() {
   // the wizard can report time-to-live (the <3-min deploy spine).
   React.useEffect(() => { markBuildStart() }, [])
 
-  // First-run vs returning is data-driven: an account with no agents lands on the
-  // believe-then-scale GoLiveHome; otherwise the managed list. (A real account is
-  // auto-provisioned with Aria, so this is the list in practice.)
-  const showFirstRun = AGENTS.length === 0
+  // Landing (2026-06-24): EVERY user lands on the believe-then-scale GoLiveHome —
+  // talk to Aria, put it to work, or create your own. The managed table is one
+  // click away via "View all agents" (?view=list), which also deep-links + back-navs.
+  const [showFirstRun, setShowFirstRun] = React.useState(true)
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
+
+  React.useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("view") === "list") setShowFirstRun(false)
+  }, [])
+  const switchView = (toList: boolean) => {
+    setShowFirstRun(!toList)
+    window.history.replaceState({}, "", toList ? "/agents?view=list" : "/agents")
+  }
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -414,26 +423,39 @@ export default function AgentsPage() {
         description={showFirstRun ? undefined : "Create and manage your agents here."}
         actions={
           <div className="flex items-center gap-2">
-            {showFirstRun && (
+            {showFirstRun ? (
               <Button
                 variant="ghost"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => setTemplatesOpen(true)}
+                onClick={() => switchView(true)}
               >
-                <Library className="h-4 w-4" /> Browse templates
+                <List className="h-4 w-4" /> View all agents
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => switchView(false)}
+              >
+                <ChevronLeft className="h-4 w-4" /> Home
               </Button>
             )}
             <ImportAgentSheet>
-              <Button variant="outline" className="gap-1.5">
+              <Button variant="outline" className="gap-1.5 max-sm:hidden">
                 <Upload className="h-4 w-4" /> Import Agent
               </Button>
             </ImportAgentSheet>
-            <Button asChild>
-              <Link href="/agents/new/edit">
-                <Plus className="h-4 w-4" /> Create New Agent
-              </Link>
-            </Button>
+            {/* Home view's create CTA lives in the hero (GoLiveHome); the list
+                view keeps it here in the header. */}
+            {!showFirstRun && (
+              <Button asChild>
+                <Link href="/agents/new/edit">
+                  <Plus className="h-4 w-4" /> Create New Agent
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />

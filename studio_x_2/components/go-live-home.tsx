@@ -220,7 +220,21 @@ function SwitcherRail({ onImported }: { onImported: (config: ImportedAgentConfig
 // ─── Header — deploy is the headline ────────────────────────────────────────────
 
 function DeployHeader() {
-  return <h1 className="text-2xl font-semibold tracking-tight">Deploy an AI agent in minutes</h1>
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Deploy an AI agent in minutes</h1>
+        <p className="text-sm text-muted-foreground">
+          Talk to Aria, your ready-made agent, and put it to work — or build your own from scratch.
+        </p>
+      </div>
+      <Button asChild size="lg" className="shrink-0 gap-1.5">
+        <Link href="/agents/new/edit">
+          <Plus className="h-4 w-4" /> Create new agent
+        </Link>
+      </Button>
+    </div>
+  )
 }
 
 // ChannelHero (where-to-deploy cards) lives in components/channel-hero.tsx —
