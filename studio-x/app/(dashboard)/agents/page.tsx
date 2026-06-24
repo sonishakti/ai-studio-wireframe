@@ -78,11 +78,11 @@ const AGENTS: {
   channelType: AgentChannel; channelLabel: string; stack: StackPreset; calls: number; lastModified: string
 }[] = [
   { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default — live and ready", status: "live",   channelType: "phone",    channelLabel: "+1 (628) 555-0188", stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
-  { id: "agt_01", name: "Support Bot v2",       description: "Handles tier-1 support queries via phone",       status: "live",   channelType: "phone",    channelLabel: "+1 (415) 555-0101", stack: "fastest",  calls: 12430, lastModified: "2 hours ago" },
-  { id: "agt_03", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "whatsapp", channelLabel: "Acme WhatsApp",     stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
-  { id: "agt_05", name: "Survey Bot",           description: "Post-interaction CSAT surveys",                  status: "live",   channelType: "web",      channelLabel: "acme.com/help",     stack: "cheapest", calls: 5601,  lastModified: "1 day ago" },
-  { id: "agt_02", name: "Sales Qualifier",      description: "Qualifies inbound leads before transfer",        status: "draft",  channelType: "none",     channelLabel: "Not deployed",      stack: "balanced", calls: 0,     lastModified: "Yesterday" },
-  { id: "agt_04", name: "Collections Outreach", description: "Outbound debt collection",                       status: "paused", channelType: "batch",    channelLabel: "Q2 Collections",    stack: "cheapest", calls: 891,   lastModified: "3 days ago" },
+  { id: "agt_support_v2", name: "Support Bot v2",       description: "Handles tier-1 support queries via phone",       status: "live",   channelType: "phone",    channelLabel: "+1 (415) 555-0101", stack: "fastest",  calls: 12430, lastModified: "2 hours ago" },
+  { id: "agt_appointment_setter", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "whatsapp", channelLabel: "Acme WhatsApp",     stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
+  { id: "agt_survey", name: "Survey Bot",           description: "Post-interaction CSAT surveys",                  status: "live",   channelType: "web",      channelLabel: "acme.com/help",     stack: "cheapest", calls: 5601,  lastModified: "1 day ago" },
+  { id: "agt_sales_qualifier", name: "Sales Qualifier",      description: "Qualifies inbound leads before transfer",        status: "draft",  channelType: "none",     channelLabel: "Not deployed",      stack: "balanced", calls: 0,     lastModified: "Yesterday" },
+  { id: "agt_collections", name: "Collections Outreach", description: "Outbound debt collection",                       status: "paused", channelType: "batch",    channelLabel: "Q2 Collections",    stack: "cheapest", calls: 891,   lastModified: "3 days ago" },
 ]
 
 const CHANNEL_META: Record<AgentChannel, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
