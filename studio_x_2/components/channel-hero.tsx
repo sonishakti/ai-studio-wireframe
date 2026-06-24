@@ -34,12 +34,17 @@ export function ChannelHero({
   const deployHref = (dc: string) => `/agents/${agent.id}/edit?dc=${dc}#deployment`
   return (
     <section id="channels" className="scroll-mt-6 space-y-3">
-      {showNote && agent.status !== "live" && (
+      {/* Explicit framing: the cards below are WHERE this agent deploys — not
+          independent links. Makes the agent → channel relationship obvious. */}
+      <div className="space-y-1">
+        <h2 className="text-base font-semibold tracking-tight">
+          Deploy <span className="text-primary">{agent.name}</span> to a channel
+        </h2>
         <p className="text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{agent.name}</span> isn&apos;t live yet —
-          deploying it to a channel will publish it. Going live is free.
+          Pick where {agent.name} goes live — each card deploys this agent to that channel.
+          {showNote && agent.status !== "live" && " It isn't live yet; deploying publishes it, and going live is free."}
         </p>
-      )}
+      </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <ChannelCard
           href={deployHref("inbound")}

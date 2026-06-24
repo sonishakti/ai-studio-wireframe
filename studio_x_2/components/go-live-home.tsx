@@ -182,7 +182,8 @@ export function GoLiveHome() {
         <DeployHeader />
         <SwitcherRail onImported={handleImported} />
         <FreeMinutesNudge />
-        <ChannelHero agent={agent} />
+        {/* Agent first, THEN where it deploys — the vertical order makes the
+            "Aria deploys to these channels" relationship read top-down. */}
         <AgentCard
           agent={agent}
           agents={agents}
@@ -190,6 +191,7 @@ export function GoLiveHome() {
           onImported={handleImported}
           onStackChange={handleStackChange}
         />
+        <ChannelHero agent={agent} />
         <AlreadyLive />
       </div>
     </main>

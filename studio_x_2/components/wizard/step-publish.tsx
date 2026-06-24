@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { track, Events } from "@/lib/analytics"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
-import { PHONE_NUMBERS } from "@/lib/campaign-data"
-import { publishBlockReason, type AgentDraft } from "@/lib/wizard-draft"
+import { publishBlockReason, channelTarget, type AgentDraft } from "@/lib/wizard-draft"
 
 /**
  * Step 5 — Test & Publish.
@@ -138,19 +137,4 @@ function typeIcon(d: AgentDraft) {
   if (d.type === "code") return Code2
   if (d.type === "inbound" && d.config.inbound?.mode === "web") return Globe
   return PhoneIncoming
-}
-
-/** Human-readable target of the configured channel for the summary line. */
-function channelTarget(d: AgentDraft): string {
-  if (d.type === "inbound") {
-    if (d.config.inbound?.mode === "web") return "Web widget"
-    const n = PHONE_NUMBERS.find((p) => p.id === d.config.inbound?.numberId)
-    return n ? n.number : "No number yet"
-  }
-  if (d.type === "outbound") {
-    const n = PHONE_NUMBERS.find((p) => p.id === d.config.outbound?.numberId)
-    return [n?.number, d.config.outbound?.csvName].filter(Boolean).join(" · ") || "No contacts yet"
-  }
-  if (d.type === "code") return "SDK / API"
-  return "—"
 }

@@ -8,7 +8,7 @@
  * `lib/analytics.ts`.
  */
 
-import { extractVars, type Agent } from "@/lib/campaign-data"
+import { extractVars, PHONE_NUMBERS, type Agent } from "@/lib/campaign-data"
 import { PRESET_VOICES } from "@/lib/voice-artifacts"
 
 export type AgentType = "inbound" | "outbound" | "code"
@@ -154,4 +154,21 @@ export function publishBlockReason(d: AgentDraft): string | null {
 
 export function canPublish(d: AgentDraft): boolean {
   return publishBlockReason(d) === null
+}
+
+/** Human-readable target of the configured channel — the number, "Web widget",
+ *  "SDK / API", or contacts. Shared by Step 5's summary and the stepped
+ *  builder's collapsed Step-4 summary so the two never drift. */
+export function channelTarget(d: AgentDraft): string {
+  if (d.type === "inbound") {
+    if (d.config.inbound?.mode === "web") return "Web widget"
+    const n = PHONE_NUMBERS.find((p) => p.id === d.config.inbound?.numberId)
+    return n ? n.number : "No number yet"
+  }
+  if (d.type === "outbound") {
+    const n = PHONE_NUMBERS.find((p) => p.id === d.config.outbound?.numberId)
+    return [n?.number, d.config.outbound?.csvName].filter(Boolean).join(" · ") || "No contacts yet"
+  }
+  if (d.type === "code") return "SDK / API"
+  return "—"
 }

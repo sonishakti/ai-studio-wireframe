@@ -2,12 +2,12 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ArrowRight, Sparkles, Download } from "lucide-react"
+import { Sparkles, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
-import { WizardStepper, type StepperItem } from "@/components/wizard/wizard-stepper"
+import { StepSection } from "@/components/wizard/step-section"
 import { StepVoice } from "@/components/wizard/step-voice"
 import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
@@ -31,32 +31,38 @@ import {
   saveDraft,
   clearDraft,
   publishBlockReason,
+  channelTarget,
   type AgentDraft,
   type AgentType,
 } from "@/lib/wizard-draft"
 import { toast } from "sonner"
 
 /**
- * AgentWizard — the one creation surface that powers all four entry modes:
- * NEW (`id==="new"`), EDIT (load an existing agent), ONBOARDING and EMPTY-STATE
- * (both just link to `/agents/new/edit`). Five gated steps, one autosaved draft,
- * fastest path to a live agent.
+ * AgentWizard — the one creation surface (new · edit · onboarding · empty-state).
+ *
+ * Presented as an UPFRONT STEPPED WIDGET: all five steps render at once, stacked.
+ * Each later step is VISIBLE but DISABLED (dimmed + lock) until the previous step
+ * is COMPLETE — strictly sequential, so the whole path reads at a glance and the
+ * "fastest time to deploy" is obvious. Finishing a step collapses it to a summary
+ * and opens the next; completed steps can be re-opened to edit in place.
  *
  *   1 Voice → 2 Type → 3 System prompt → 4 Configure → 5 Test & publish
  *
- * Top accelerator: Import a 3rd-party agent → seed a custom Voice → Playground →
- * return here with it selected. Draft autosaves to localStorage and restores on
- * refresh; publishing clears it and lands on Monitor (the north-star handoff).
+ * Draft autosaves to localStorage and restores on refresh (opening the first
+ * incomplete step); publishing clears it and lands on Monitor.
  */
 export function AgentWizard({ id }: { id: string }) {
   const router = useRouter()
   const existing = id !== "new" ? getAgent(id) : undefined
   const isEdit = !!existing
 
-  const [draft, setDraft] = React.useState<AgentDraft>(() =>
-    existing ? agentToDraft(existing) : { ...EMPTY_DRAFT },
+  const initialDraft = React.useMemo<AgentDraft>(
+    () => (existing ? agentToDraft(existing) : { ...EMPTY_DRAFT }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
-  const [active, setActive] = React.useState(1)
+  const [draft, setDraft] = React.useState<AgentDraft>(initialDraft)
+  const [expandedStep, setExpandedStep] = React.useState(() => firstIncomplete(initialDraft))
   const dirty = React.useRef(false)
   const draftRef = React.useRef(draft)
   draftRef.current = draft
@@ -66,54 +72,77 @@ export function AgentWizard({ id }: { id: string }) {
     setDraft((d) => ({ ...d, ...patch }))
   }, [])
 
-  // ── Mount: start the time-to-live clock, then (new mode only) restore a draft,
-  //    apply a returning ?artifact selection, and honor a ?dc channel preselect. ─
+  // ── Step gating — STRICTLY SEQUENTIAL: step N+1 unlocks only when step N is
+  //    complete. This is the "disabled until the previous step is done" rule. ───
+  const voiceDone = draft.voice !== null
+  const typeDone = draft.type !== null
+  const promptDone = draft.systemPrompt.trim().length > 0
+  const configReady = typeDone && publishBlockReason(draft) === null
+
+  const meta = [
+    { n: 1, title: STEP_TITLES[0], locked: false, complete: voiceDone },
+    { n: 2, title: STEP_TITLES[1], locked: !voiceDone, complete: typeDone },
+    { n: 3, title: STEP_TITLES[2], locked: !typeDone, complete: promptDone },
+    { n: 4, title: STEP_TITLES[3], locked: !promptDone, complete: configReady },
+    { n: 5, title: STEP_TITLES[4], locked: !configReady, complete: false },
+  ] as const
+
+  const statusOf = (m: (typeof meta)[number]): "locked" | "active" | "done" =>
+    m.locked ? "locked" : m.complete ? "done" : "active"
+
+  // Continue → open the next unlocked step. Back → previous unlocked step.
+  const advanceFrom = (n: number) => {
+    for (let k = n + 1; k <= 5; k++) if (!meta[k - 1].locked) return setExpandedStep(k)
+    setExpandedStep(0)
+  }
+  const backFrom = (n: number) => {
+    for (let k = n - 1; k >= 1; k--) if (!meta[k - 1].locked) return setExpandedStep(k)
+  }
+  const canContinue = (n: number) =>
+    (n === 1 && voiceDone) ||
+    (n === 2 && typeDone) ||
+    (n === 3 && promptDone) ||
+    (n === 4 && configReady)
+
+  // ── Mount: time-to-live clock; (new mode) restore + ?artifact + ?dc. ─────────
   React.useEffect(() => {
     markBuildStart()
-
     const params = new URLSearchParams(window.location.search)
     const artifactId = params.get("artifact")
     const dc = params.get("dc")
 
-    // Edit mode: the draft is already loaded with every step open. Honor a ?dc
-    // (e.g. a "Deploy via inbound" card from the home) by switching the channel
-    // and jumping straight to Configure.
     if (isEdit) {
       if (dc) {
         const t = dcToType(dc)
         if (t) {
           setDraft((d) => ({ ...d, type: t, config: dcToConfig(dc, d.config) }))
-          setActive(4)
+          setExpandedStep(4) // deploy-from-home → jump to Configure
         }
         window.history.replaceState({}, "", `/agents/${id}/edit`)
       }
       return
     }
 
-    let next = restoreDraft() ?? { ...EMPTY_DRAFT }
-    let jumpTo: number | null = null
+    const restored = restoreDraft()
+    let next = restored ?? { ...EMPTY_DRAFT }
 
     if (artifactId) {
       const v = getVoiceArtifact(artifactId)
       if (v) {
         next = seedFromVoice(next, v)
-        jumpTo = 2
         toast.success(`${v.name} selected`, { description: "Custom voice ready — keep building." })
       }
-    } else if (restoreDraft()) {
+    } else if (restored) {
       toast("Draft restored", { description: "Picked up right where you left off." })
     }
 
     if (dc) {
       const t = dcToType(dc)
-      if (t) {
-        next = { ...next, type: t, config: dcToConfig(dc, next.config) }
-        jumpTo = jumpTo ?? 3
-      }
+      if (t) next = { ...next, type: t, config: dcToConfig(dc, next.config) }
     }
 
     setDraft(next)
-    if (jumpTo) setActive(jumpTo)
+    setExpandedStep(firstIncomplete(next))
     if (artifactId || dc) {
       dirty.current = true
       window.history.replaceState({}, "", "/agents/new/edit")
@@ -121,7 +150,7 @@ export function AgentWizard({ id }: { id: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Autosave (debounced, gated on a dirty flag so restores don't rewrite). ───
+  // ── Autosave (debounced; gated on dirty so restores don't immediately rewrite). ─
   useDebouncedEffect(
     () => {
       if (dirty.current && !isEdit) saveDraft(draftRef.current)
@@ -130,43 +159,27 @@ export function AgentWizard({ id }: { id: string }) {
     600,
   )
 
-  // ── Step gating ──────────────────────────────────────────────────────────────
-  const voiceDone = draft.voice !== null
-  const typeDone = draft.type !== null
-  const promptDone = draft.systemPrompt.trim().length > 0
-  const configReady = typeDone && publishBlockReason(draft) === null
+  // ── Guard: if the expanded step became locked (e.g. the user cleared the type),
+  //    snap the cursor back to the first incomplete step. ───────────────────────
+  React.useEffect(() => {
+    if (expandedStep >= 1 && meta[expandedStep - 1]?.locked) {
+      setExpandedStep(firstIncomplete(draft))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, expandedStep])
 
-  const items: StepperItem[] = [
-    { n: 1, title: STEP_TITLES[0], locked: false, complete: voiceDone },
-    { n: 2, title: STEP_TITLES[1], locked: !voiceDone, complete: typeDone },
-    { n: 3, title: STEP_TITLES[2], locked: !typeDone, complete: typeDone && promptDone },
-    { n: 4, title: STEP_TITLES[3], locked: !typeDone, complete: configReady },
-    { n: 5, title: STEP_TITLES[4], locked: !typeDone, complete: false },
-  ]
-
-  const canAdvance =
-    (active === 1 && voiceDone) ||
-    (active === 2 && typeDone) ||
-    (active === 3 && promptDone) ||
-    active === 4
-
-  const navigate = (n: number) => {
-    if (!items[n - 1].locked) setActive(n)
-  }
-
-  // ── Step 1 voice selection — seed the draft + auto-advance. ──────────────────
+  // ── Step 1 voice selection — seed the draft + open the next step. ────────────
   const selectVoice = (v: VoiceArtifact) => {
     dirty.current = true
     setDraft((d) => seedFromVoice(d, v))
-    setActive(2)
+    setExpandedStep(2)
   }
 
-  // ── Import accelerator — mint a custom voice from the parsed config, then send
-  //    the user to the Playground to finalize it (returns here with ?artifact). ─
+  // ── Import accelerator — mint a custom voice, send to Playground (returns ?artifact). ─
   const onImported = (config: ImportedAgentConfig) => {
-    const id = newVoiceId()
+    const vid = newVoiceId()
     const artifact: VoiceArtifact = {
-      id,
+      id: vid,
       name: config.name,
       kind: "custom",
       tagline: config.source ? `Imported from ${config.source}` : "Imported agent",
@@ -179,8 +192,8 @@ export function AgentWizard({ id }: { id: string }) {
       source: config.source ?? "Import",
     }
     saveVoiceArtifact(artifact)
-    if (dirty.current) saveDraft(draftRef.current) // keep progress for the round-trip
-    router.push(`/agents/playground?artifact=${id}`)
+    if (dirty.current) saveDraft(draftRef.current)
+    router.push(`/agents/playground?artifact=${vid}`)
   }
 
   // ── Publish — the north-star action. ─────────────────────────────────────────
@@ -201,14 +214,31 @@ export function AgentWizard({ id }: { id: string }) {
     })
   }
 
+  // ── Collapsed-step summaries ─────────────────────────────────────────────────
+  const voiceSummary = () => {
+    const v = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
+    return v ? `${v.name} · ${v.tagline}` : undefined
+  }
+  const typeSummary = () =>
+    draft.type ? draft.type[0].toUpperCase() + draft.type.slice(1) : undefined
+  const buildSummary = () => {
+    if (!promptDone) return undefined
+    const parts = ["Prompt set"]
+    if (draft.knowledge.length) parts.push(`${draft.knowledge.length} knowledge`)
+    if (draft.mcp.length) parts.push(`${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""}`)
+    return parts.join(" · ")
+  }
+  const configSummary = () =>
+    draft.type ? `${channelLabel(draft)} · ${channelTarget(draft)}` : undefined
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">
           {isEdit ? `Edit ${existing!.name}` : "Create your agent"}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Five steps to a live agent — saved automatically as you go.
+          Five steps to a live agent — each unlocks as you finish the one before it. Saved automatically.
         </p>
       </header>
 
@@ -242,41 +272,46 @@ export function AgentWizard({ id }: { id: string }) {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-        <div className="lg:sticky lg:top-6 lg:self-start">
-          <WizardStepper items={items} active={active} onNavigate={navigate} />
-        </div>
+      {/* The upfront stack — all five steps visible at once. */}
+      <div className="space-y-3">
+        <StepSection
+          n={1} title={STEP_TITLES[0]} status={statusOf(meta[0])} open={expandedStep === 1}
+          summary={voiceSummary()} onEdit={() => setExpandedStep(1)}
+          onContinue={() => advanceFrom(1)} canContinue={canContinue(1)}
+        >
+          <StepVoice draft={draft} onSelectVoice={selectVoice} />
+        </StepSection>
 
-        <div className="min-w-0 space-y-6">
-          <div className="rounded-xl border border-border bg-card/30 p-5 sm:p-6">
-            {active === 1 && <StepVoice draft={draft} onSelectVoice={selectVoice} />}
-            {active === 2 && <StepType draft={draft} update={update} />}
-            {active === 3 && <StepBuild draft={draft} update={update} />}
-            {active === 4 && <StepConfigure draft={draft} update={update} />}
-            {active === 5 && <StepPublish draft={draft} onPublish={publish} />}
-          </div>
+        <StepSection
+          n={2} title={STEP_TITLES[1]} status={statusOf(meta[1])} open={expandedStep === 2}
+          summary={typeSummary()} onEdit={() => setExpandedStep(2)}
+          onBack={() => backFrom(2)} onContinue={() => advanceFrom(2)} canContinue={canContinue(2)}
+        >
+          <StepType draft={draft} update={update} />
+        </StepSection>
 
-          {/* Footer nav — Publish lives inside Step 5, so hide Continue there. */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              className="gap-1.5"
-              disabled={active === 1}
-              onClick={() => setActive((a) => Math.max(1, a - 1))}
-            >
-              <ArrowLeft className="h-4 w-4" /> Back
-            </Button>
-            {active < 5 && (
-              <Button
-                className="gap-1.5"
-                disabled={!canAdvance}
-                onClick={() => canAdvance && setActive((a) => Math.min(5, a + 1))}
-              >
-                Continue <ArrowRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
+        <StepSection
+          n={3} title={STEP_TITLES[2]} status={statusOf(meta[2])} open={expandedStep === 3}
+          summary={buildSummary()} onEdit={() => setExpandedStep(3)}
+          onBack={() => backFrom(3)} onContinue={() => advanceFrom(3)} canContinue={canContinue(3)}
+        >
+          <StepBuild draft={draft} update={update} />
+        </StepSection>
+
+        <StepSection
+          n={4} title={STEP_TITLES[3]} status={statusOf(meta[3])} open={expandedStep === 4}
+          summary={configSummary()} onEdit={() => setExpandedStep(4)}
+          onBack={() => backFrom(4)} onContinue={() => advanceFrom(4)} canContinue={canContinue(4)}
+        >
+          <StepConfigure draft={draft} update={update} />
+        </StepSection>
+
+        <StepSection
+          n={5} title={STEP_TITLES[4]} status={statusOf(meta[4])} open={expandedStep === 5}
+          onEdit={() => setExpandedStep(5)} onBack={() => backFrom(5)}
+        >
+          <StepPublish draft={draft} onPublish={publish} />
+        </StepSection>
       </div>
     </div>
   )
@@ -284,15 +319,23 @@ export function AgentWizard({ id }: { id: string }) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** The first step whose completion predicate is unmet — the cursor on
+ *  load / restore / edit. (voice→1, type→2, prompt→3, config→4, else 5.) */
+function firstIncomplete(d: AgentDraft): number {
+  if (d.voice === null) return 1
+  if (d.type === null) return 2
+  if (d.systemPrompt.trim() === "") return 3
+  if (publishBlockReason(d)) return 4
+  return 5
+}
+
 /** Seed a draft from a chosen voice, without clobbering user-typed prompt/greeting. */
 function seedFromVoice(d: AgentDraft, v: VoiceArtifact): AgentDraft {
   return {
     ...d,
     voice: { kind: v.kind, id: v.id },
     name: d.name || v.name,
-    systemPrompt: d.systemPrompt.trim()
-      ? d.systemPrompt
-      : v.systemPrompt ?? defaultPromptFor(v),
+    systemPrompt: d.systemPrompt.trim() ? d.systemPrompt : v.systemPrompt ?? defaultPromptFor(v),
     greeting: d.greeting.trim() ? d.greeting : v.firstMessage,
   }
 }
