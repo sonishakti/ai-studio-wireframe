@@ -220,5 +220,61 @@
     "ThemeProvider": ".design-sync/groups/App-components.md",
     "VendorCredentialsPanel": ".design-sync/groups/App-components.md",
     "VoiceCallDock": ".design-sync/groups/App-components.md"
+  },
+  "overrides": {
+    "InputGroup": {
+      "cardMode": "column"
+    },
+    "InputGroupButton": {
+      "cardMode": "column"
+    },
+    "InputGroupText": {
+      "cardMode": "column"
+    },
+    "InputGroupTextarea": {
+      "cardMode": "column"
+    },
+    "Textarea": {
+      "cardMode": "column"
+    },
+    "Tabs": {
+      "cardMode": "column"
+    },
+    "Select": {
+      "cardMode": "single",
+      "primaryStory": "Open"
+    },
+    "SelectGroup": {
+      "cardMode": "single",
+      "primaryStory": "Grouped"
+    },
+    "AlertDialog": {
+      "cardMode": "single",
+      "primaryStory": "Destructive"
+    },
+    "AlertDialogHeader": {
+      "cardMode": "single",
+      "primaryStory": "Header"
+    },
+    "AlertDialogMedia": {
+      "cardMode": "single",
+      "primaryStory": "WithIcon"
+    },
+    "Dialog": {
+      "cardMode": "single",
+      "primaryStory": "Open"
+    },
+    "DropdownMenu": {
+      "cardMode": "single",
+      "primaryStory": "Actions"
+    },
+    "DropdownMenuLabel": {
+      "cardMode": "single",
+      "primaryStory": "Labeled"
+    },
+    "Tooltip": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    }
   }
 }
