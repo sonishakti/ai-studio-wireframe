@@ -18,13 +18,13 @@ re-sync doesn't re-derive it.
   otherwise win.
 - **CSS must be compiled first.** `app/globals.css` is a Tailwind v4 *source*
   (`@import "tailwindcss"`), so utility classes don't exist until compiled.
-  `cfg.buildCmd` = `node .ds-sync/compile-css.mjs` compiles it (via the repo's own
+  `cfg.buildCmd` = `node .design-sync/scripts/compile-css.mjs` compiles it (via the repo's own
   `@tailwindcss/postcss`) to `.design-sync/.cache/ds-tw.css`, which `cfg.cssEntry`
   points at → becomes `_ds_bundle.css`. **Re-run compile-css before every package-build.**
 - **`process` shim (critical).** Because this is a Next.js app, the React 19 dev
   vendor (`process.emit`) and `next/*` code (`process.env.__NEXT_*`, `process.nextTick`)
   reference Node's `process`, which browsers lack → "process is not defined" in every
-  preview. `node .ds-sync/postbuild.mjs ./ds-bundle` injects a no-clobber `process`
+  preview. `node .design-sync/scripts/postbuild.mjs ./ds-bundle` injects a no-clobber `process`
   shim into `_vendor/react.js` and `_ds_bundle.js`. **Run after every `package-build.mjs`**
   (preview-rebuild does NOT regenerate the vendor/bundle, so it doesn't need it).
 - **Fonts:** DM Sans is loaded via `next/font/google` (no shippable `@font-face`), so it's
@@ -40,9 +40,9 @@ re-sync doesn't re-derive it.
 
 ```
 cd studio-x
-node .ds-sync/compile-css.mjs
+node .design-sync/scripts/compile-css.mjs
 node .ds-sync/package-build.mjs --config .design-sync/config.json --node-modules ./node_modules --out ./ds-bundle
-node .ds-sync/postbuild.mjs ./ds-bundle
+node .design-sync/scripts/postbuild.mjs ./ds-bundle
 DS_CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" node .ds-sync/package-validate.mjs ./ds-bundle
 ```
 
@@ -100,7 +100,7 @@ DS_CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 ## Re-sync risks
 - The `process` shim + production-vs-dev React vendor is applied by `postbuild.mjs` AFTER
   each `package-build`. The `resync.mjs` driver runs build internally and will NOT run
-  postbuild — so after a driver run, re-run `node .ds-sync/postbuild.mjs ./ds-bundle` before
+  postbuild — so after a driver run, re-run `node .design-sync/scripts/postbuild.mjs ./ds-bundle` before
   validate/capture/upload, or every card breaks again.
 - `cfg.extraFonts` points into `.ds-sync/node_modules/@fontsource/dm-sans` (gitignored).
   Re-install fontsource on a fresh clone before building.
