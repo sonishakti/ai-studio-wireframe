@@ -63,8 +63,39 @@ DS_CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
   agent-deployment-panel) → they can't render without a Next router → they stay floor cards.
 - Prototypes (`components/prototypes/`) are NOT discovered (untracked, excluded).
 
+## Authoring recipes (proven across all batches)
+
+- **Overlays render via the OPEN state.** Radix root takes `open`/`defaultOpen`. Wrap in a
+  height container (`h-80`/`h-96`/`h-[600px]`) so portal content has room; `fullPage:false`
+  capture at 900×700 catches centered/popper content.
+  - Dialog/AlertDialog: `<Dialog open>`. Sheet: `<Sheet open><SheetContent side="right">` +
+    `modal={false}` so the scroll-lock doesn't fight the capture.
+  - Select: `<Select defaultOpen>` + `<SelectContent position="popper">`.
+  - DropdownMenu: `<DropdownMenu open>` + `<DropdownMenuContent w-56>`.
+  - **Tooltip MUST be wrapped in `<TooltipProvider>`** + `<Tooltip open>`, else blank.
+  - NavigationMenu open: `<NavigationMenu value="x" viewport={false}>` + `<NavigationMenuItem value="x">`
+    (controlled value + inline content; the JS-measured viewport collapses to 0 in static capture).
+  - Collapsible: `defaultOpen`.
+- **Sub-parts are authored as the full parent composition** that features them (TableCell→full
+  table, SheetHeader→full open sheet, SidebarMenuItem→full sidebar, AvatarBadge→avatar w/ badge).
+  Correct, not a hack — they have no meaningful standalone render.
+- **Sidebar requires `<SidebarProvider>`** wrapping `<Sidebar>` (context), inside a fixed-height row.
+- **Sparkline color goes on the component** (`<Sparkline className="text-primary">`), not a wrapper —
+  the svg's own className wins; same for MetricCard/MetricSection chart slots.
+- **AvatarImage offline**: use a `data:image/svg+xml;utf8,<svg…>` literal (encode `#` as `%23`),
+  always paired with an `AvatarFallback`.
+- **Feature components that gate on data/URL**: pick props that surface a non-null state —
+  CredentialRiskBanner needs `agentId="agt_collections"` (cheapest stack → expiring Anthropic key);
+  DeployContextBar reads `window.location.search` so seed `?agent=…` via `window.history.replaceState`
+  at module scope before mount. FreeMinutesNudge/FreeMinutesBlock/ActivationChecklist read mock
+  singletons/localStorage and render their data-default state.
+- Two exports sharing one source file → one preview file (e.g. SecuredModeBanner + SecuredModePill).
+
 ## Known render warns
-(none recorded yet)
+- `! <Name>: no <Name>.tsx … skipped` for a second export covered inside a sibling's preview file
+  (e.g. SecuredModePill is exercised inside SecuredModeBanner.tsx) — EXPECTED, informational.
+- Toggle pressed / ToggleGroupItem selected use a muted-gray bg (`aria-pressed:bg-muted`), not
+  cyan — DS design, graded good.
 
 ## Re-sync risks
 - The `process` shim + production-vs-dev React vendor is applied by `postbuild.mjs` AFTER
@@ -74,3 +105,7 @@ DS_CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 - `cfg.extraFonts` points into `.ds-sync/node_modules/@fontsource/dm-sans` (gitignored).
   Re-install fontsource on a fresh clone before building.
 - The self-symlink and Chrome path are environment-specific (macOS path hardcoded).
+- Some feature previews depend on mock data in `lib/campaign-data.ts` / `lib/diagnostics.ts`:
+  FreeMinutesNudge renders only its "unlock 150 more" state while `PLAN_USAGE` has used==ungated
+  and no card on file; CredentialRiskBanner's preview agentId must map to a stack using an
+  expiring vendor credential. If that mock data changes, re-verify those cards (they can go blank).
