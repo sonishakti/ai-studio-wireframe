@@ -12,6 +12,7 @@ import {
   Globe,
   Upload,
   Check,
+  ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +21,9 @@ import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import {
+  Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger,
+} from "@/components/ui/sheet"
 import { CodeBlock } from "@/components/code-block"
 import { PHONE_NUMBERS, type Agent } from "@/lib/campaign-data"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
@@ -77,8 +81,9 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
   const [language, setLanguage] = React.useState(agent?.persona.language ?? "en-US")
   const [brand, setBrand] = React.useState(agent?.persona.brand ?? "")
 
-  // ── Channel selection ──────────────────────────────────────────────────────
-  const [channel, setChannel] = React.useState<Channel | null>(null)
+  // ── Channel selection — the hero. Default to the most common (inbound) so the
+  // config is immediately in reach; ?dc= overrides it below. ──────────────────
+  const [channel, setChannel] = React.useState<Channel | null>("inbound")
 
   // Preselect a channel when arriving from a channel card (?dc=…), e.g. the home's
   // "Embed in your app" → this Deploy step with the code config already open. Keeps
@@ -106,85 +111,103 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-2xl space-y-8">
       {isUnsaved && (
         <div className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
           <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
           <p className="text-xs text-foreground leading-relaxed">
-            Save this agent first to deploy it. Finish the Stack step, then the channels
-            below unlock.
+            Save this agent first to deploy it. Finish the Stack step, then the channels below unlock.
           </p>
         </div>
       )}
 
-      {/* ── 1. Persona — the agent's voice for this deployment ──────────────── */}
+      {/* ── Persona = WHO the agent is. A settled identity (set once, reused
+          everywhere it deploys), collapsed into a slim summary bar that opens a
+          sheet. Deliberately de-emphasized — it is NOT the deployment. ───────── */}
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+          {(agent?.name ?? "A").charAt(0)}
+        </div>
+        <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">{agent?.name ?? "Your agent"}</span>
+          {` · ${tone} · ${language}${brand ? ` · ${brand}` : ""}`}
+        </p>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="sm" className="shrink-0 gap-1 text-muted-foreground">
+              Edit persona <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-full gap-0 sm:max-w-md">
+            <SheetHeader className="border-b border-border">
+              <SheetTitle>Edit persona</SheetTitle>
+              <SheetDescription>
+                Who the agent is — its voice and identity. Set once, reused everywhere it deploys.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 space-y-5 overflow-y-auto p-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Tone of voice</Label>
+                  <Select value={tone} onValueChange={setTone}>
+                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Language</Label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dp-personality" className="text-sm font-medium">Personality</Label>
+                <Textarea
+                  id="dp-personality"
+                  value={personality}
+                  onChange={(e) => setPersonality(e.target.value)}
+                  className="min-h-[120px] text-sm"
+                  placeholder="e.g. Warm, patient, solution-first"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dp-brand" className="text-sm font-medium">Brand</Label>
+                <Input
+                  id="dp-brand"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  placeholder="e.g. Acme"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The company the agent represents. Used in its introductions.
+                </p>
+              </div>
+            </div>
+            <SheetFooter className="border-t border-border">
+              <SheetClose asChild>
+                <Button className="w-full">Done</Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* ── Channel = WHERE/HOW it goes live. The hero — the action you take on
+          this screen, foregrounded. ────────────────────────────────────────── */}
       <section className="space-y-4">
-        <div>
-          <p className="text-sm font-medium">Persona</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            How the agent sounds on this deployment — its voice, language, and brand.
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold tracking-tight">Choose how it goes live</h2>
+          <p className="text-sm text-muted-foreground">
+            One agent, one channel. Pick where {agent?.name ?? "your agent"} starts taking traffic.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Tone of voice</Label>
-            <Select value={tone} onValueChange={setTone}>
-              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Language</Label>
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dp-personality" className="text-sm font-medium">Personality</Label>
-          <Textarea
-            id="dp-personality"
-            value={personality}
-            onChange={(e) => setPersonality(e.target.value)}
-            className="min-h-[88px] text-sm"
-            placeholder="e.g. Warm, patient, solution-first"
-          />
-          <p className="text-xs text-muted-foreground">
-            How the agent behaves — e.g. warm, patient, never pushy.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dp-brand" className="text-sm font-medium">Brand</Label>
-          <Input
-            id="dp-brand"
-            value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-            placeholder="e.g. Acme"
-            className="max-w-sm"
-          />
-          <p className="text-xs text-muted-foreground">
-            The company the agent represents. Used in its introductions.
-          </p>
-        </div>
-      </section>
-
-      {/* ── 2. Channel chooser ──────────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <div>
-          <p className="text-sm font-medium">Where does it go live?</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Pick a channel — configure and launch it right here. No detours.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {CHANNELS.map((c) => {
             const Icon = c.icon
             const selected = channel === c.id
@@ -195,25 +218,15 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
                 onClick={() => setChannel(c.id)}
                 aria-pressed={selected}
                 className={cn(
-                  "flex items-start gap-3 rounded-lg border p-4 text-left transition-all",
+                  "flex items-center gap-3 rounded-lg border px-3.5 py-3 text-left transition-colors",
                   selected
-                    ? "border-primary/60 bg-primary/5 shadow-sm"
-                    : "border-border bg-card hover:border-primary/30",
+                    ? "border-primary bg-primary/5"
+                    : "border-border bg-card hover:border-foreground/20 hover:bg-accent/40",
                 )}
               >
-                <div className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
-                  selected ? "bg-primary/15 text-primary" : "bg-muted text-foreground",
-                )}>
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold flex items-center gap-1.5">
-                    {c.title}
-                    {selected && <Check className="h-3.5 w-3.5 text-primary" />}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{c.desc}</p>
-                </div>
+                <Icon className={cn("h-5 w-5 shrink-0", selected ? "text-primary" : "text-muted-foreground")} />
+                <span className="flex-1 text-sm font-medium">{c.title}</span>
+                {selected && <Check className="h-4 w-4 shrink-0 text-primary" />}
               </button>
             )
           })}

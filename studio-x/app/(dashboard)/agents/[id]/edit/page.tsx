@@ -36,13 +36,6 @@ import {
 import { AgentTestPanel } from "@/components/agent-test-panel"
 import { AgentJourneyBreadcrumb, type AgentSection } from "@/components/agent-journey-breadcrumb"
 import { AgentDeploymentPanel } from "@/components/agent-deployment-panel"
-// PROTOTYPE (throwaway — delete after a direction wins): 5 deploy-step variants.
-import { DeployVariantA } from "@/components/prototypes/deploy-variant-a"
-import { DeployVariantB } from "@/components/prototypes/deploy-variant-b"
-import { DeployVariantC } from "@/components/prototypes/deploy-variant-c"
-import { DeployVariantD } from "@/components/prototypes/deploy-variant-d"
-import { DeployVariantE } from "@/components/prototypes/deploy-variant-e"
-import { PrototypeSwitcher } from "@/components/prototypes/prototype-switcher"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import {
   AGENTS,
@@ -71,16 +64,6 @@ const PRESET_ICON: Record<StackPreset, React.ComponentType<{ className?: string 
 // Per-preset latency breakdown for the test panel. e2e MUST equal the existing
 // latencyMs so nothing regresses; asr/llm/tts are the component estimates and
 // bestCase is the achievable floor. ttftMs == llmMs (LLM time-to-first-token).
-// PROTOTYPE (throwaway): deploy-step design directions to audit via ?variant=.
-const PROTO_VARIANTS = [
-  { key: "current", label: "Current (live)" },
-  { key: "A", label: "Two-column · Identity | Launch" },
-  { key: "B", label: "Tabs · Persona / Go live" },
-  { key: "C", label: "Identity header + Channel hero" },
-  { key: "D", label: "Stepper · Persona→Channel→Launch" },
-  { key: "E", label: "Left-rail sections" },
-]
-
 const LATENCY_BY_PRESET: Record<
   StackPreset,
   { asrMs: number; llmMs: number; ttsMs: number; e2eMs: number; bestMs: number }
@@ -135,19 +118,6 @@ export default function AgentEditorPage({
   const jump = (s: AgentSection) => {
     setSection(s)
     window.history.replaceState(null, "", `#${s}`)
-  }
-
-  // PROTOTYPE (throwaway): which deploy-step variant to render (?variant=A..E).
-  const [protoVariant, setProtoVariant] = React.useState<string>("current")
-  React.useEffect(() => {
-    setProtoVariant(new URLSearchParams(window.location.search).get("variant") ?? "current")
-  }, [])
-  const setVariant = (k: string) => {
-    setProtoVariant(k)
-    const u = new URL(window.location.href)
-    if (k === "current") u.searchParams.delete("variant")
-    else u.searchParams.set("variant", k)
-    window.history.replaceState(null, "", u.toString())
   }
   // Names match the Figma design: MCP and Connectors are distinct (not a combined
   // "Actions"). Agent.actions holds tool ids; mcp_* are MCP servers, the rest are
@@ -417,12 +387,7 @@ export default function AgentEditorPage({
 
             {/* ── Deployment — where this agent is live + go-live (the finish line) ── */}
             <TabsContent value="deployment" className="flex-1 overflow-y-auto px-6 py-5 mt-0">
-              {protoVariant === "A" ? <DeployVariantA id={id} agent={agent} />
-                : protoVariant === "B" ? <DeployVariantB id={id} agent={agent} />
-                : protoVariant === "C" ? <DeployVariantC id={id} agent={agent} />
-                : protoVariant === "D" ? <DeployVariantD id={id} agent={agent} />
-                : protoVariant === "E" ? <DeployVariantE id={id} agent={agent} />
-                : <AgentDeploymentPanel id={id} agent={agent} />}
+              <AgentDeploymentPanel id={id} agent={agent} />
             </TabsContent>
           </Tabs>
         </div>
@@ -449,10 +414,6 @@ export default function AgentEditorPage({
           onPresetChange={applyPreset}
         />
       </div>
-
-      {section === "deployment" && (
-        <PrototypeSwitcher variants={PROTO_VARIANTS} current={protoVariant} onChange={setVariant} />
-      )}
     </div>
   )
 }
