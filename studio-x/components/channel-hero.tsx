@@ -29,7 +29,9 @@ export function ChannelHero({
    *  can't deploy an agent that doesn't exist yet. */
   disabled?: boolean
 }) {
-  const p = `?agent=${agent.id}`
+  // Deploy IN-CONTEXT: route into the agent's own builder Deploy step with the
+  // channel preselected — never out to a disconnected /deploy/* page (2026-06-24).
+  const deployHref = (dc: string) => `/agents/${agent.id}/edit?dc=${dc}#deployment`
   return (
     <section id="channels" className="scroll-mt-6 space-y-3">
       {showNote && agent.status !== "live" && (
@@ -40,7 +42,7 @@ export function ChannelHero({
       )}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <ChannelCard
-          href={`/deploy/inbound/new${p}`}
+          href={deployHref("inbound")}
           channel="inbound"
           agentId={agent.id}
           icon={PhoneIncoming}
@@ -50,7 +52,7 @@ export function ChannelHero({
           disabled={disabled}
         />
         <ChannelCard
-          href={`/deploy/batch-calls/new${p}`}
+          href={deployHref("batch")}
           channel="campaign"
           agentId={agent.id}
           icon={PhoneOutgoing}
@@ -60,7 +62,7 @@ export function ChannelHero({
           disabled={disabled}
         />
         <ChannelCard
-          href={`/deploy/code${p}`}
+          href={deployHref("code")}
           channel="code"
           agentId={agent.id}
           icon={Code2}
@@ -68,7 +70,7 @@ export function ChannelHero({
           desc="Drop in the web widget or call the API — no number needed."
           footer={
             <Link
-              href="/deploy/web-widget"
+              href={deployHref("web")}
               className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-primary"
             >
               <Globe className="h-4 w-4 text-muted-foreground" /> Web widget

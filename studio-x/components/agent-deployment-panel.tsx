@@ -80,6 +80,16 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
   // ── Channel selection ──────────────────────────────────────────────────────
   const [channel, setChannel] = React.useState<Channel | null>(null)
 
+  // Preselect a channel when arriving from a channel card (?dc=…), e.g. the home's
+  // "Embed in your app" → this Deploy step with the code config already open. Keeps
+  // deploy fully in-context — the user is never routed to a /deploy/* page.
+  React.useEffect(() => {
+    const dc = new URLSearchParams(window.location.search).get("dc")
+    if (dc === "inbound" || dc === "batch" || dc === "code" || dc === "web") {
+      setChannel(dc)
+    }
+  }, [])
+
   // Going live: track the north-star event + time-to-live, then land on Monitor.
   const goLive = (label: string, name: string) => {
     if (isUnsaved) return

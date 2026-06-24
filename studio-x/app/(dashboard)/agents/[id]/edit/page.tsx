@@ -410,6 +410,8 @@ export default function AgentEditorPage({
             bestCaseMs: isNew ? null : LATENCY_BY_PRESET[preset].bestMs,
           }}
           onTest={handleTestAgent}
+          preset={preset}
+          onPresetChange={applyPreset}
         />
       </div>
     </div>

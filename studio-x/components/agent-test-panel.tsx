@@ -4,6 +4,8 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { STACK_PRESETS, type StackPreset } from "@/lib/campaign-data"
 
 /**
  * AgentTestPanel
@@ -43,6 +45,11 @@ interface AgentTestPanelProps {
   onTest?: () => void
   /** Override the Test Agent button label. */
   testLabel?: string
+  /** Current speed-vs-cost preset. When paired with onPresetChange, the panel
+   *  shows a lean "Quick configure" toggle so the agent can be tuned right here. */
+  preset?: StackPreset
+  /** Flip the stack preset from the widget — the stats + latency below update live. */
+  onPresetChange?: (p: StackPreset) => void
   className?: string
 }
 
@@ -52,6 +59,8 @@ export function AgentTestPanel({
   spec,
   onTest,
   testLabel = "Test Agent",
+  preset,
+  onPresetChange,
   className,
 }: AgentTestPanelProps) {
   return (
@@ -81,8 +90,35 @@ export function AgentTestPanel({
         </Button>
       </div>
 
-      {/* Bottom panel — vendor + latency specs */}
+      {/* Bottom panel — quick configure + vendor + latency specs */}
       <div className="border-t border-border px-6 py-6 space-y-3">
+        {/* Quick configure — the leanest knob (speed vs cost) right on the widget;
+            flipping it updates the vendors + latency below live (editor only). */}
+        {onPresetChange && preset && (
+          <div className="space-y-2 pb-3 mb-1 border-b border-border">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Quick configure
+              </p>
+              <span className="text-xs text-muted-foreground">speed vs cost</span>
+            </div>
+            <ToggleGroup
+              type="single"
+              value={preset}
+              onValueChange={(v) => v && onPresetChange(v as StackPreset)}
+              variant="outline"
+              size="sm"
+              className="w-full"
+              aria-label="Stack preset"
+            >
+              <ToggleGroupItem value="fastest" className="flex-1 text-xs">Fastest</ToggleGroupItem>
+              <ToggleGroupItem value="balanced" className="flex-1 text-xs">Balanced</ToggleGroupItem>
+              <ToggleGroupItem value="cheapest" className="flex-1 text-xs">Cheapest</ToggleGroupItem>
+            </ToggleGroup>
+            <p className="text-xs text-muted-foreground">{STACK_PRESETS[preset].hint}</p>
+          </div>
+        )}
+
         <StatRow label="LLM" value={spec.llm} />
         <StatRow label="ASR" value={spec.asr} />
         <StatRow label="TTS" value={spec.tts} />

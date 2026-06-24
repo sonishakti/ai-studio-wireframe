@@ -671,7 +671,7 @@ function AgentCard({
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
-                <Link href={`/deploy/inbound/new?agent=${agent.id}`}>
+                <Link href={`/agents/${agent.id}/edit?dc=inbound#deployment`}>
                   Deploy it <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
