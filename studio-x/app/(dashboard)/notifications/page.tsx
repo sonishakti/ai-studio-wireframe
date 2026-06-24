@@ -1,9 +1,13 @@
-import { Bell, Check, CheckCheck } from "lucide-react"
+"use client"
+
+import * as React from "react"
+import { Bell, CheckCheck } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { toast } from "sonner"
 
 const NOTIFICATIONS = [
   {
@@ -49,10 +53,10 @@ const NOTIFICATIONS = [
 ]
 
 const TYPE_COLORS: Record<string, string> = {
-  campaign: "bg-blue-500/10 text-blue-600",
+  campaign: "bg-primary/10 text-primary",
   error: "bg-destructive/10 text-destructive",
-  usage: "bg-amber-500/10 text-amber-600",
-  product: "bg-emerald-500/10 text-emerald-600",
+  usage: "bg-warning/10 text-warning",
+  product: "bg-success/10 text-success",
 }
 
 function NotificationList({ items }: { items: typeof NOTIFICATIONS }) {
@@ -95,8 +99,15 @@ function NotificationList({ items }: { items: typeof NOTIFICATIONS }) {
 }
 
 export default function NotificationsPage() {
-  const unread = NOTIFICATIONS.filter((n) => !n.read)
-  const all = NOTIFICATIONS
+  const [items, setItems] = React.useState(NOTIFICATIONS)
+  const unread = items.filter((n) => !n.read)
+  const all = items
+
+  const markAllRead = () => {
+    if (unread.length === 0) return
+    setItems((prev) => prev.map((n) => ({ ...n, read: true })))
+    toast.success("All notifications marked as read")
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -105,7 +116,13 @@ export default function NotificationsPage() {
         title="Notifications"
         description="Stay up to date with your agents, campaigns, and account."
         actions={
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={markAllRead}
+            disabled={unread.length === 0}
+          >
             <CheckCheck className="h-4 w-4" /> Mark all read
           </Button>
         }

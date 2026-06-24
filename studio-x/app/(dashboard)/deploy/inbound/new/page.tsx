@@ -15,6 +15,7 @@ import {
 import { AGENTS, PHONE_NUMBERS, STACK_PRESETS, CHANNEL_LABEL, type ChannelKind } from "@/lib/campaign-data"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
 import { DeployContextBar } from "@/components/deploy-context-bar"
+import { PageHeader } from "@/components/page-header"
 import { toast } from "sonner"
 
 // New inbound deployment — one agent answers on ONE channel. The
@@ -64,23 +65,22 @@ export default function NewInboundPage() {
     router.push(`/monitor?${q.toString()}`)
   }
 
-  const cancelHref = agentId ? `/agents/${agentId}/edit#deployment` : "/integrations?tab=channels"
+  const cancelHref = agentId ? `/agents/${agentId}/edit#deployment` : "/deploy/inbound"
 
   return (
     <div className="flex flex-col flex-1">
       <DeployContextBar channelLabel="New inbound deployment" />
+      <PageHeader
+        title="New inbound deployment"
+        description="One agent, one channel — live in minutes."
+        actions={
+          <Button variant="ghost" size="sm" asChild className="gap-1">
+            <Link href={cancelHref}><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
+          </Button>
+        }
+      />
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold">New inbound deployment</h2>
-              <p className="text-sm text-muted-foreground">One agent, one channel — live in minutes.</p>
-            </div>
-            <Button variant="ghost" size="sm" asChild className="gap-1">
-              <Link href={cancelHref}><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
-            </Button>
-          </div>
-
           <Card>
             <CardContent className="p-5 space-y-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -144,16 +144,25 @@ export default function NewInboundPage() {
               {channel === "telephony" && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Answers on</Label>
-                  <Select value={numberId} onValueChange={setNumberId}>
-                    <SelectTrigger className="text-sm">
-                      <SelectValue placeholder="Pick a free number" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {freeNumbers.map((n) => (
-                        <SelectItem key={n.id} value={n.id}>{n.number} — {n.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {freeNumbers.length > 0 ? (
+                    <Select value={numberId} onValueChange={setNumberId}>
+                      <SelectTrigger className="text-sm">
+                        <SelectValue placeholder="Pick a free number" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {freeNumbers.map((n) => (
+                          <SelectItem key={n.id} value={n.id}>{n.number} — {n.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3 rounded-md border border-dashed border-border bg-muted/30 px-3 py-2.5">
+                      <p className="text-xs text-muted-foreground">No free numbers — every number is already assigned.</p>
+                      <Button variant="outline" size="sm" asChild className="shrink-0">
+                        <Link href="/deploy/phone-numbers">Add a number</Link>
+                      </Button>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     Inbound is 1:1 — one agent answers everything on this number.{" "}
                     <Link href="/deploy/phone-numbers" className="underline underline-offset-2 hover:text-foreground">

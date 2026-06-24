@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { PageHeader } from "@/components/page-header"
 import { DeployContextBar } from "@/components/deploy-context-bar"
 import { AGENTS } from "@/lib/campaign-data"
@@ -41,7 +42,8 @@ const PALETTES = [
 const BLOB_STYLES = ["Aura", "Pulse", "Orbit", "Ripple", "Solid"]
 
 export default function WebWidgetPage() {
-  const [agentId, setAgentId] = React.useState(AGENTS[0].id)
+  const hasAgents = AGENTS.length > 0
+  const [agentId, setAgentId] = React.useState(AGENTS[0]?.id ?? "")
   const [mode, setMode] = React.useState<PreviewMode>("widget")
 
   // ── config (the few things a Studio widget actually needs) ──
@@ -69,6 +71,25 @@ export default function WebWidgetPage() {
   src="https://studio.agora.io/embed/${agentId}?token=PUBLIC_TOKEN"
   width="400" height="600" allow="microphone"
 ></iframe>`
+
+  if (!hasAgents) {
+    return (
+      <div className="flex flex-col flex-1">
+        <DeployContextBar channelLabel="Web widget" />
+        <PageHeader title="Web widget" />
+        <main className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
+          <Mic className="h-8 w-8 text-muted-foreground" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Create an agent first</p>
+            <p className="text-sm text-muted-foreground">The widget embeds an agent — you need one before you can style and embed it.</p>
+          </div>
+          <Button size="sm" asChild>
+            <Link href="/agents">Go to Agents</Link>
+          </Button>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -120,6 +141,8 @@ export default function WebWidgetPage() {
                     type="button"
                     onClick={() => setPalette(p)}
                     title={p.label}
+                    aria-label={p.label}
+                    aria-pressed={palette.id === p.id}
                     className={cn(
                       "h-8 w-12 rounded-md border-2 transition-all",
                       palette.id === p.id ? "border-foreground scale-105" : "border-transparent",
@@ -182,24 +205,28 @@ export default function WebWidgetPage() {
         <aside className="hidden lg:flex w-[420px] shrink-0 flex-col border-l bg-muted/20">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <span className="text-xs font-medium text-muted-foreground">Live preview</span>
-            <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
+            <ToggleGroup
+              type="single"
+              value={mode}
+              onValueChange={(v) => { if (v) setMode(v as PreviewMode) }}
+              spacing={0}
+              variant="outline"
+              aria-label="Preview mode"
+            >
               {([
                 { id: "widget", label: "Widget" },
                 { id: "collapsed", label: "Collapsed" },
               ] as const).map((m) => (
-                <button
+                <ToggleGroupItem
                   key={m.id}
-                  type="button"
-                  onClick={() => setMode(m.id)}
-                  className={cn(
-                    "rounded px-2.5 h-6 text-xs font-medium transition-colors whitespace-nowrap",
-                    mode === m.id ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground",
-                  )}
+                  value={m.id}
+                  aria-label={m.label}
+                  className="h-6 px-2.5 text-xs font-medium whitespace-nowrap data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
                 >
                   {m.label}
-                </button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
           </div>
           <div className="flex flex-1 items-center justify-center p-5">
             <WidgetPreview mode={mode} accent={accent} cta={cta} greeting={greeting} allowVoice={allowVoice} allowChat={allowChat} />
@@ -221,7 +248,7 @@ function WidgetPreview({
     return (
       <div className="flex flex-col items-center gap-1.5">
         <div className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-background shadow-lg">
-          <span className="h-5 w-5 rounded-full" style={{ background: `radial-gradient(circle at 35% 30%, #fff6, ${accent})` }} />
+          <span aria-hidden className="h-5 w-5 rounded-full" style={{ background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${accent} 30%, white), ${accent})` }} />
           <span className="text-sm font-medium">{cta}</span>
         </div>
         <p className="text-[10px] text-muted-foreground">
@@ -235,13 +262,15 @@ function WidgetPreview({
   return (
     <div className="relative flex h-[420px] w-[375px] flex-col items-center overflow-hidden rounded-xl border border-border bg-background shadow-xl">
       <div
+        aria-hidden
         className="absolute left-1/2 top-[130px] h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
         style={{ backgroundColor: accent, opacity: 0.35 }}
       />
       <div className="flex flex-1 flex-col items-center justify-center gap-5 px-10 text-center">
         <div
+          aria-hidden
           className="h-20 w-20 rounded-full"
-          style={{ background: `radial-gradient(circle at 35% 30%, #ffffffcc, ${accent} 60%, #1b1b2b)`, boxShadow: `0 0 32px ${accent}66` }}
+          style={{ background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${accent} 15%, white), ${accent} 60%, var(--foreground))`, boxShadow: `0 0 32px ${accent}66` }}
         />
         <p className="text-base leading-snug text-foreground">{greeting}</p>
       </div>

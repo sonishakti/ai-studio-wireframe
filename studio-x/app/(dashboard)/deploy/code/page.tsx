@@ -3,17 +3,18 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Code2, Copy, ExternalLink, Smartphone, Monitor, Cpu, Frame, Bot,
+  Code2, Copy, ArrowRight, Monitor, Cpu, Frame, Bot,
 } from "lucide-react"
 import { DeployContextBar } from "@/components/deploy-context-bar"
+import { PageHeader } from "@/components/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { AGENTS } from "@/lib/campaign-data"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { markActivationStep } from "@/components/activation-checklist"
 
@@ -180,7 +181,8 @@ const iframeSnippet = (agentId: string) =>
 ></iframe>`
 
 export default function DeployCodePage() {
-  const [agentId, setAgentId] = React.useState(AGENTS[0].id)
+  const hasAgents = AGENTS.length > 0
+  const [agentId, setAgentId] = React.useState(AGENTS[0]?.id ?? "")
   const [platform, setPlatform] = React.useState<PlatformId>("web")
 
   // Pre-fill the agent when arriving from the Deploy chooser (?agent=…).
@@ -197,18 +199,36 @@ export default function DeployCodePage() {
     toast.success(what)
   }
 
+  if (!hasAgents) {
+    return (
+      <div className="flex flex-col flex-1">
+        <DeployContextBar channelLabel="Embed code" />
+        <PageHeader
+          title="Code"
+          description="Export your agent to any stack — client SDKs for in-app voice, server SDKs to start and control calls."
+        />
+        <main className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
+          <Bot className="h-8 w-8 text-muted-foreground" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Create an agent first</p>
+            <p className="text-sm text-muted-foreground">Code snippets reference an agent ID — you need an agent before you can export one.</p>
+          </div>
+          <Button size="sm" asChild>
+            <Link href="/agents">Go to Agents</Link>
+          </Button>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col flex-1">
       <DeployContextBar channelLabel="Embed code" />
+      <PageHeader
+        title="Code"
+        description="Export your agent to any stack — client SDKs for in-app voice, server SDKs to start and control calls."
+      />
       <main className="flex-1 p-6 space-y-5">
-        <div className="space-y-1">
-          <h2 className="text-base font-semibold">Code</h2>
-          <p className="text-sm text-muted-foreground">
-            Export your agent to any stack — client SDKs for in-app voice, server SDKs
-            to start and control calls.
-          </p>
-        </div>
-
         {/* Agent + quick actions (Figma 04_Deploy_Future_scope pattern) */}
         <div className="flex items-end gap-3 flex-wrap">
           <div className="space-y-1.5 w-64">
@@ -330,13 +350,13 @@ export default function DeployCodePage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Button variant="outline" size="sm" className="justify-between" asChild>
-              <Link href="/developer/restful-api">REST API reference <ExternalLink className="h-3 w-3" /></Link>
+              <Link href="/developer/restful-api">REST API reference <ArrowRight className="h-3 w-3" /></Link>
             </Button>
             <Button variant="outline" size="sm" className="justify-between" asChild>
-              <Link href="/developer/webhooks">Webhooks <ExternalLink className="h-3 w-3" /></Link>
+              <Link href="/developer/webhooks">Webhooks <ArrowRight className="h-3 w-3" /></Link>
             </Button>
             <Button variant="outline" size="sm" className="justify-between" asChild>
-              <Link href="/developer/toolkit">SDK downloads <ExternalLink className="h-3 w-3" /></Link>
+              <Link href="/developer/toolkit">SDK downloads <ArrowRight className="h-3 w-3" /></Link>
             </Button>
           </CardContent>
         </Card>
@@ -365,23 +385,26 @@ function PlatformGroup({
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground w-64 shrink-0">
         <Icon className="h-3.5 w-3.5" /> {label}
       </span>
-      <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5 overflow-x-auto">
+      <ToggleGroup
+        type="single"
+        value={active}
+        onValueChange={(v) => { if (v) onPick(v as PlatformId) }}
+        spacing={0}
+        variant="outline"
+        aria-label={label}
+        className="overflow-x-auto"
+      >
         {platforms.map((p) => (
-          <button
+          <ToggleGroupItem
             key={p.id}
-            type="button"
-            onClick={() => onPick(p.id)}
-            className={cn(
-              "rounded px-2.5 h-7 text-xs font-medium transition-colors whitespace-nowrap",
-              active === p.id
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground",
-            )}
+            value={p.id}
+            aria-label={p.label}
+            className="h-7 px-2.5 text-xs font-medium whitespace-nowrap data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
           >
             {p.label}
-          </button>
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
     </div>
   )
 }

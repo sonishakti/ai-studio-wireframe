@@ -317,6 +317,15 @@ export const PLAN_USAGE: PlanUsage = {
   defaultSpendCapUsd: 50,
 }
 
+/** Free-minutes summary from the single source of truth (PLAN_USAGE). Pure — lives
+ *  in the lib (not a "use client" component) so server pages can call it too. */
+export function freeMinutesStats() {
+  const { plan, freeMinutesIncluded: included, freeMinutesUsed: used } = PLAN_USAGE
+  const pctUsed = included > 0 ? Math.min(100, Math.round((used / included) * 100)) : 0
+  const remaining = Math.max(0, included - used)
+  return { plan, included, used, pctUsed, remaining }
+}
+
 // ─── Status display ──────────────────────────────────────────────────────────
 
 export const STATUS_BADGE: Record<

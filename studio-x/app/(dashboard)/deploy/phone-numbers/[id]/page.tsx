@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -49,6 +50,8 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
   // Post-call analysis
   const [successEval, setSuccessEval] = React.useState(true)
   const [evalCriteria, setEvalCriteria] = React.useState("")
+  // SIP transport
+  const [transport, setTransport] = React.useState("TCP")
 
   // Lock state: numbers used by campaigns are hard-locked (cancel the campaigns
   // to edit); numbers bound directly to an agent can be unlocked in place by
@@ -66,11 +69,11 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
     <div className="flex flex-col flex-1">
       <PageHeader
         title={number?.number ?? "New Phone Number"}
-        description="Configure your imported SIP number."
+        description={isNew ? "Add the SIP details for your new number." : "Configure your imported SIP number."}
         actions={
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild className="gap-1.5">
-              <Link href="/phone-numbers"><ArrowLeft className="h-3.5 w-3.5" /> Phone Numbers</Link>
+              <Link href="/deploy/phone-numbers"><ArrowLeft className="h-3.5 w-3.5" /> Phone Numbers</Link>
             </Button>
             <Button size="sm" onClick={() => toast.success("Phone number saved (mock)")}>Save</Button>
           </div>
@@ -81,9 +84,9 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
         <div className="mx-auto w-full max-w-3xl space-y-5">
           {/* Lock banner — campaigns (hard lock) vs agent (detachable in place) */}
           {usedByCampaigns && (
-            <div className="flex items-start justify-between gap-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
+            <div className="flex items-start justify-between gap-4 rounded-lg border border-warning/40 bg-warning/5 p-3">
               <div className="flex items-start gap-2.5">
-                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
                 <p className="text-sm text-foreground leading-relaxed">
                   This number is being used by {assignedCampaigns.length} deployment{assignedCampaigns.length > 1 ? "s" : ""}.
                   {" "}To edit its details, pause or delete the deployment{assignedCampaigns.length > 1 ? "s" : ""} to proceed.
@@ -112,20 +115,35 @@ export default function EditPhoneNumberPage({ params }: { params: Promise<{ id: 
           {/* Phone Number Details (SIP) */}
           <Section icon={Phone} title="Phone Number Details">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FieldInput label="Phone Number" value={number?.number ?? ""} disabled mono />
+              <FieldInput label="Phone Number" value={number?.number ?? ""} placeholder={isNew ? "+1 (555) 123-4567" : undefined} disabled={!isNew} mono />
               <FieldSelect label="Vendor" value={number?.vendor ?? "Twilio"} options={["Twilio", "Vonage", "Bandwidth", "Telnyx"]} disabled={locked} />
-              <FieldInput label="Display Name" value={number?.label ?? ""} disabled={locked} />
+              <FieldInput label="Display Name" value={number?.label ?? ""} placeholder={isNew ? "Friendly name for your team" : undefined} disabled={locked} />
               <FieldInput label="SIP Trunk Address" placeholder="agora-us-swym-us.pstn…" disabled={locked} mono />
-              <FieldInput label="SIP Trunk Username" value="user123" disabled={locked} mono />
-              <FieldInput label="SIP Trunk Password" value="••••••••••••••••" type="password" disabled={locked} mono />
+              <FieldInput label="SIP Trunk Username" value={isNew ? "" : "user123"} placeholder={isNew ? "user123" : undefined} disabled={locked} mono />
+              <FieldInput label="SIP Trunk Password" value={isNew ? "" : "••••••••••••••••"} placeholder={isNew ? "••••••••••••" : undefined} type="password" disabled={locked} mono />
             </div>
             <div className="space-y-1.5">
               <Label>Transport Protocol</Label>
-              <div className="flex items-center gap-1 rounded-md border border-border bg-card p-0.5 w-fit">
-                {["TCP", "UDP", "TLS"].map((t, i) => (
-                  <span key={t} className={"rounded px-3 h-7 inline-flex items-center text-xs font-medium " + (i === 0 ? "bg-primary/10 text-primary" : "text-muted-foreground")}>{t}</span>
+              <ToggleGroup
+                type="single"
+                value={transport}
+                onValueChange={(v) => { if (v) setTransport(v) }}
+                spacing={0}
+                variant="outline"
+                disabled={locked}
+                aria-label="Transport protocol"
+              >
+                {["TCP", "UDP", "TLS"].map((t) => (
+                  <ToggleGroupItem
+                    key={t}
+                    value={t}
+                    aria-label={t}
+                    className="h-7 px-3 text-xs font-medium data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
+                  >
+                    {t}
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
               <p className="text-xs text-muted-foreground">Choose the protocol for SIP communication.</p>
             </div>
           </Section>

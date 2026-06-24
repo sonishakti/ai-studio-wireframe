@@ -51,9 +51,12 @@ const DEVELOPER_SECTIONS = [
 
 export default function DeveloperPage() {
   return (
-    <main className="flex-1 p-6 space-y-5">
-      <div className="flex items-center justify-end">
-        <Button variant="outline" className="gap-1.5" asChild>
+    <main className="flex-1 p-6 space-y-6">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Everything you need to build on Studio_X — APIs, webhooks, SDKs, and licensing.
+        </p>
+        <Button variant="outline" className="gap-1.5 shrink-0" asChild>
           <a href="https://docs.agora.io" target="_blank" rel="noreferrer">
             <ExternalLink className="h-4 w-4" /> Open full docs
           </a>
@@ -69,8 +72,8 @@ export default function DeveloperPage() {
                   </div>
                   {s.badge && <Badge variant="secondary">{s.badge}</Badge>}
                 </div>
-                <CardTitle className="text-sm mt-2">{s.title}</CardTitle>
-                <CardDescription className="text-xs">{s.description}</CardDescription>
+                <CardTitle className="text-base mt-2">{s.title}</CardTitle>
+                <CardDescription className="text-sm">{s.description}</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
                 <Button variant="outline" size="sm" className="w-full" asChild>

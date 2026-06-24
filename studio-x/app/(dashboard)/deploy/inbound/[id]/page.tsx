@@ -4,6 +4,7 @@ import * as React from "react"
 import { use } from "react"
 import Link from "next/link"
 import { ArrowLeft, Bot, Save } from "lucide-react"
+import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -51,40 +52,33 @@ export default function InboundDetailPage({
 
   return (
     <div className="flex flex-col flex-1">
-      <header className="border-b bg-background px-6 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Link href="/deploy/inbound" className="hover:text-foreground transition-colors">Inbound</Link>
-              <span>/</span>
-              <span className="text-foreground">{d.name}</span>
-            </div>
-            <div id="channel" className="flex items-center gap-3 flex-wrap scroll-mt-20">
-              <h1 className="text-lg font-semibold tracking-tight">{d.name}</h1>
-              <Badge variant={s.variant}>{s.label}</Badge>
-              <ChannelBadge channel={d.channel} withLabel />
-            </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-0.5">
-              <Link
-                href={`/agents/${d.agentId}/edit`}
-                className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-              >
-                <Bot className="h-3 w-3" /> {d.agentName}
-              </Link>
-              <span className="font-mono">{answersOn}</span>
-              {d.ringsPerWeek !== undefined && d.ringsPerWeek > 0 && (
-                <span className="tabular-nums">{d.ringsPerWeek.toLocaleString()} rings/wk</span>
-              )}
-            </div>
+      <PageHeader
+        title={d.name}
+        actions={
+          <div className="flex items-center gap-2">
+            <Badge variant={s.variant}>{s.label}</Badge>
+            <ChannelBadge channel={d.channel} withLabel />
+            <Button variant="ghost" size="sm" asChild className="gap-1 shrink-0">
+              <Link href="/deploy/inbound"><ArrowLeft className="h-3.5 w-3.5" /> All inbound</Link>
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" asChild className="gap-1 shrink-0">
-            <Link href="/deploy/inbound"><ArrowLeft className="h-3.5 w-3.5" /> All inbound</Link>
-          </Button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
+          <div id="channel" className="flex items-center gap-4 text-xs text-muted-foreground scroll-mt-20">
+            <Link
+              href={`/agents/${d.agentId}/edit`}
+              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              <Bot className="h-3 w-3" /> {d.agentName}
+            </Link>
+            <span className="font-mono">{answersOn}</span>
+            {d.ringsPerWeek !== undefined && d.ringsPerWeek > 0 && (
+              <span className="tabular-nums">{d.ringsPerWeek.toLocaleString()} rings/wk</span>
+            )}
+          </div>
           <CredentialRiskBanner deploymentId={d.id} agentId={d.agentId} />
 
           <section id="prompt" className="space-y-2 scroll-mt-20">
@@ -137,7 +131,7 @@ export default function InboundDetailPage({
               <Save className="h-3.5 w-3.5" /> Save changes
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/calls">View call history →</Link>
+              <Link href={`/calls?deployment=${d.id}`}>View call history →</Link>
             </Button>
           </div>
 

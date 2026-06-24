@@ -3,15 +3,16 @@
 import * as React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, ExternalLink, Plug, Plus } from "lucide-react"
+import { toast } from "sonner"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CatalogCard, type CatalogCardStatus } from "@/components/catalog-card"
 import { VendorCredentialsPanel } from "@/components/vendor-credentials-panel"
 import { ChannelsPanel } from "@/components/channels-panel"
-import { cn } from "@/lib/utils"
 
 // ─── connector catalog (matches Figma node 90:15477) ─────────────────────────
 
@@ -20,8 +21,10 @@ type Connector = {
   name: string
   description: string
   initials: string
+  // Brand chip color — deliberate per-vendor brand palette (not app chrome), the
+  // same contract CatalogCard's `iconColor` documents for initials chips.
   color: string
-  status: "available" | "coming-soon" | "connected"
+  status: CatalogCardStatus
 }
 
 const CONNECTORS: Connector[] = [
@@ -49,40 +52,6 @@ const MCP_SERVERS = [
 const TABS = ["knowledge", "mcp", "connectors", "credentials", "channels"] as const
 type ResourceTab = (typeof TABS)[number]
 const DEFAULT_TAB: ResourceTab = "connectors"
-
-// ─── connector card ──────────────────────────────────────────────────────────
-
-function ConnectorCard({ c }: { c: Connector }) {
-  const isComingSoon = c.status === "coming-soon"
-  return (
-    <Card className="p-4 flex flex-col gap-3 hover:border-foreground/20 transition-colors">
-      <div className="flex items-start justify-between gap-2">
-        <div
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg text-white font-semibold text-sm shrink-0",
-            c.color,
-          )}
-        >
-          {c.initials}
-        </div>
-        {isComingSoon ? (
-          <Badge variant="outline" className="text-xs">
-            Coming Soon
-          </Badge>
-        ) : (
-          <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
-            Connect
-            <ExternalLink className="h-3 w-3" />
-          </Button>
-        )}
-      </div>
-      <div>
-        <p className="text-sm font-semibold">{c.name}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">{c.description}</p>
-      </div>
-    </Card>
-  )
-}
 
 // ─── empty state ────────────────────────────────────────────────────────────
 
@@ -143,7 +112,7 @@ function ResourcesInner() {
             <TabsTrigger value="channels">Deployment Channels</TabsTrigger>
           </TabsList>
           <a
-            href="#"
+            href="mailto:product@agora.io?subject=Integration%20request"
             className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
           >
             Need an integration? Let us know
@@ -157,7 +126,24 @@ function ResourcesInner() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search knowledge bases…" className="pl-9" />
           </div>
-          <div className="rounded-lg border bg-card p-6">
+          {KNOWLEDGE_BASES.length === 0 ? (
+            <div className="rounded-lg border bg-card">
+              <EmptyState
+                icon={Plus}
+                title="No knowledge bases yet"
+                subtitle="Add a knowledge base so your agent can answer from your docs, FAQs, or a crawled site."
+              />
+              <div className="flex justify-center pb-8">
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => toast.info("Mock: Add knowledge base")}
+                >
+                  <Plus className="h-4 w-4" /> Add knowledge base
+                </Button>
+              </div>
+            </div>
+          ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {KNOWLEDGE_BASES.map((kb) => (
                 <Card key={kb.id} className="p-4">
@@ -173,12 +159,17 @@ function ResourcesInner() {
                   </div>
                 </Card>
               ))}
-              <Card className="p-4 border-dashed flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:border-foreground/40 transition-colors">
-                <Plus className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Add KB</span>
-              </Card>
+              <button
+                type="button"
+                onClick={() => toast.info("Mock: Add knowledge base")}
+                aria-label="Add knowledge base"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed bg-card p-4 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="text-xs">Add KB</span>
+              </button>
             </div>
-          </div>
+          )}
         </TabsContent>
 
         {/* MCP tab */}
@@ -187,24 +178,45 @@ function ResourcesInner() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search MCP servers…" className="pl-9" />
           </div>
-          <div className="rounded-lg border bg-card p-6 space-y-2">
-            {MCP_SERVERS.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 rounded-md border bg-background p-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
-                  <Plug className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">{s.name}</p>
-                  <p className="text-xs text-muted-foreground font-mono truncate">{s.url}</p>
-                </div>
-                <Badge variant="secondary" className="text-xs">{s.tools} tools</Badge>
-                <Button variant="outline" size="sm">Configure</Button>
+          {MCP_SERVERS.length === 0 ? (
+            <div className="rounded-lg border bg-card">
+              <EmptyState
+                icon={Plug}
+                title="No MCP servers yet"
+                subtitle="Connect an MCP server to give your agent extra tools — CRM lookups, calendar access, custom APIs."
+              />
+              <div className="flex justify-center pb-8">
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => toast.info("Mock: Add MCP server")}
+                >
+                  <Plus className="h-4 w-4" /> Add MCP server
+                </Button>
               </div>
-            ))}
-            <Button variant="outline" className="w-full gap-1.5">
-              <Plus className="h-4 w-4" /> Add MCP Server
-            </Button>
-          </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {MCP_SERVERS.map((s) => (
+                <div key={s.id} className="flex items-center gap-3 rounded-md border bg-card p-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+                    <Plug className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">{s.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono truncate">{s.url}</p>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">{s.tools} tools</Badge>
+                  <Button variant="outline" size="sm" onClick={() => toast.info(`Mock: Configure ${s.name}`)}>
+                    Configure
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full gap-1.5" onClick={() => toast.info("Mock: Add MCP server")}>
+                <Plus className="h-4 w-4" /> Add MCP Server
+              </Button>
+            </div>
+          )}
         </TabsContent>
 
         {/* Connectors tab (Figma default) */}
@@ -216,19 +228,34 @@ function ResourcesInner() {
             </div>
           </div>
 
-          {/* Empty state + grid (matches Figma) */}
-          <div className="rounded-lg border bg-card p-6">
-            <EmptyState
-              icon={Plug}
-              title="No connectors yet"
-              subtitle="Connect a tool below so your agent can take real actions — look up an order, file a ticket, take a payment."
-            />
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {CONNECTORS.length === 0 ? (
+            <div className="rounded-lg border bg-card">
+              <EmptyState
+                icon={Plug}
+                title="No connectors yet"
+                subtitle="Connect a tool so your agent can take real actions — look up an order, file a ticket, take a payment."
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {CONNECTORS.map((c) => (
-                <ConnectorCard key={c.id} c={c} />
+                <CatalogCard
+                  key={c.id}
+                  name={c.name}
+                  description={c.description}
+                  initials={c.initials}
+                  iconColor={c.color}
+                  status={c.status}
+                  actionLabel="Connect"
+                  onAction={
+                    c.status === "available"
+                      ? () => toast.info(`Mock: Connect ${c.name}`)
+                      : undefined
+                  }
+                />
               ))}
             </div>
-          </div>
+          )}
         </TabsContent>
 
         {/* Vendor Credentials tab */}

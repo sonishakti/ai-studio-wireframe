@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
-  CheckCircle2, ChevronRight, CreditCard, Lock, ArrowLeft, ArrowRight, Sparkles,
+  CheckCircle2, ChevronRight, CreditCard, Lock, ArrowLeft, ArrowRight,
   ShieldCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -71,7 +71,7 @@ export default function UpgradePage() {
   const searchParams = useSearchParams()
   const initialPlan = (searchParams.get("plan") as Plan["id"] | null) ?? "pro"
 
-  const [step, setStep] = React.useState<StepId>(initialPlan ? "plan" : "plan")
+  const [step, setStep] = React.useState<StepId>("plan")
   const [planId, setPlanId] = React.useState<Plan["id"]>(initialPlan)
 
   // Payment fields
@@ -110,13 +110,14 @@ export default function UpgradePage() {
     <main className="flex-1 p-6">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Step indicator */}
-        <nav className="flex items-center gap-2 text-sm">
+        <nav aria-label="Checkout steps" className="flex items-center gap-2 text-sm">
           {STEPS.map((s, i) => {
             const isDone = i < stepIndex || step === "confirm"
             const isCurrent = s.id === step
             return (
               <React.Fragment key={s.id}>
                 <div
+                  aria-current={isCurrent ? "step" : undefined}
                   className={cn(
                     "flex items-center gap-2",
                     isCurrent ? "text-foreground font-medium" : "text-muted-foreground",
@@ -126,7 +127,7 @@ export default function UpgradePage() {
                     className={cn(
                       "flex h-5 w-5 items-center justify-center rounded-full text-xs font-mono tabular-nums",
                       isDone
-                        ? "bg-emerald-500/15 text-emerald-600"
+                        ? "bg-success/15 text-success"
                         : isCurrent
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground",
@@ -179,7 +180,7 @@ export default function UpgradePage() {
                     <ul className="space-y-1.5">
                       {p.highlights.map((h) => (
                         <li key={h} className="flex items-start gap-1.5 text-xs">
-                          <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0 mt-0.5" />
+                          <CheckCircle2 className="h-3 w-3 text-success shrink-0 mt-0.5" />
                           <span>{h}</span>
                         </li>
                       ))}
@@ -347,10 +348,10 @@ export default function UpgradePage() {
 
         {/* ─── Step 4: Confirmation ───────────────────────────────────── */}
         {step === "confirm" && (
-          <Card className="border-emerald-500/40 bg-emerald-500/5">
+          <Card className="border-success/40 bg-success/5">
             <CardContent className="text-center py-12 space-y-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15 mx-auto">
-                <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-success/15 mx-auto">
+                <CheckCircle2 className="h-7 w-7 text-success" />
               </div>
               <div>
                 <h1 className="text-xl font-semibold tracking-tight">You're on {plan.name} 🎉</h1>

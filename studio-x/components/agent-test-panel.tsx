@@ -81,13 +81,13 @@ export function AgentTestPanel({
         <StatRow label="ASR" value={spec.asr} />
         <StatRow label="TTS" value={spec.tts} />
         <StatRow
-          label="Average end-to-end latency"
-          value={spec.latencyMs !== null ? `${spec.latencyMs} ms` : "—"}
+          label="Est. end-to-end latency"
+          value={spec.latencyMs !== null ? `~${spec.latencyMs} ms` : "—"}
           mono
         />
         <StatRow
-          label="Average LLM time to first token"
-          value={spec.ttftMs !== null ? `${spec.ttftMs} ms` : "—"}
+          label="Est. LLM time to first token"
+          value={spec.ttftMs !== null ? `~${spec.ttftMs} ms` : "—"}
           mono
         />
       </div>
@@ -109,6 +109,12 @@ function StatRow({ label, value, mono = false }: { label: string; value: string;
 /**
  * AgentSphere — animated gradient orb representing the agent's state.
  * Pure CSS — no canvas/three.js needed at wireframe altitude.
+ *
+ * ⚠️ DELIBERATE BRAND-ART EXCEPTION to the design-token rule: this is a stylized
+ * 3D specular orb whose depth (inner shadow, dual specular highlights, ambient
+ * halo) can't be expressed with flat semantic tokens. The rgba/oklch literals
+ * here are intentional and reviewed — they are not app chrome. Everything ELSE
+ * in this group uses tokens.
  *
  * Layers (bottom → top):
  *   1. Ambient glow halo (pulses slowly)

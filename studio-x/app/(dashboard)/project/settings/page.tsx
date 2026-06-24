@@ -31,7 +31,12 @@ import {
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 
-const OWNER_EMAIL = "soni28shakti@gmail.com"
+// In production this comes from the project/session record. Kept here as the
+// single source so the disable-cert flow doesn't hardcode an address inline.
+const PROJECT = {
+  id: "prj_123456",
+  ownerEmail: "owner@my-first-project.com",
+}
 const MASKED = "••••••••••••••••"
 
 export default function ProjectSettingsPage() {
@@ -75,14 +80,14 @@ export default function ProjectSettingsPage() {
     setDisableOpen(false)
     track(Events.cert_secondary_disable_requested, { project_id: "prj_123456" })
     toast.info("Confirmation email sent", {
-      description: `Open the link sent to ${OWNER_EMAIL} to finish disabling the secondary certificate.`,
+      description: `Open the link sent to ${PROJECT.ownerEmail} to finish disabling the secondary certificate.`,
       icon: <Mail className="h-4 w-4" />,
     })
   }
 
   return (
     <div className="flex flex-col flex-1">
-      <PageHeader title="Project Settings" />
+      <PageHeader crumbs={[{ label: "Project Settings" }]} title="Project Settings" />
 
       <main className="flex-1 p-6">
         <div className="space-y-5">
@@ -144,15 +149,15 @@ export default function ProjectSettingsPage() {
           <Card className="p-6" id="secured-mode">
             {/* Header row */}
             <div className="flex items-start gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-emerald-500/15">
-                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-success/15">
+                <ShieldCheck className="h-5 w-5 text-success" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-semibold">Security</h2>
                   <Badge
                     variant="outline"
-                    className="text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                    className="text-xs border-success/40 bg-success/10 text-success"
                   >
                     Secured mode active
                   </Badge>
@@ -245,8 +250,8 @@ export default function ProjectSettingsPage() {
 
             {/* Rotation tip */}
             {hasSecondary && (
-              <div className="mt-5 flex items-start gap-2.5 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
-                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <div className="mt-5 flex items-start gap-2.5 rounded-md border border-warning/30 bg-warning/5 p-3">
+                <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">Rotation in progress.</span> Both
                   certificates sign valid tokens right now. Once every service has switched, swap
@@ -292,7 +297,7 @@ export default function ProjectSettingsPage() {
             <Mail className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
               For safety, we&apos;ll email a confirmation link to{" "}
-              <span className="font-medium text-foreground">{OWNER_EMAIL}</span>. The certificate
+              <span className="font-medium text-foreground">{PROJECT.ownerEmail}</span>. The certificate
               stays active until you click the link.
             </p>
           </div>

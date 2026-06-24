@@ -2,16 +2,23 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Download, ArrowRight, AlertTriangle } from "lucide-react"
+import { Download, ArrowRight, AlertTriangle, BarChart3 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
+import { PageHeader } from "@/components/page-header"
+import { freeMinutesStats } from "@/lib/campaign-data"
 
 // ─── metrics ────────────────────────────────────────────────────────────────
 // Migrated from the former /usage page. Lives under Billing now because it's
@@ -72,8 +79,18 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
     gridLines.push(Math.pow(10, p))
   }
 
+  const latestSummary = visMetrics
+    .map((m) => `${m.label}: ${m.series[m.series.length - 1].toLocaleString()} ${m.unit}`)
+    .join("; ")
+
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" role="img" aria-label="Usage trend chart">
+    <>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="w-full h-auto"
+      role="img"
+      aria-label={`Usage trend over ${MONTHS.length} months. Latest values — ${latestSummary || "no series selected"}.`}
+    >
       <g transform={`translate(${padding.left} ${padding.top})`}>
         {gridLines.map((g) => (
           <g key={g}>
@@ -130,6 +147,24 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
         })}
       </g>
     </svg>
+    <table className="sr-only">
+      <caption>Monthly usage by service</caption>
+      <thead>
+        <tr>
+          <th scope="col">Service</th>
+          {MONTHS.map((m) => <th scope="col" key={m}>{m}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {visMetrics.map((m) => (
+          <tr key={m.id}>
+            <th scope="row">{m.label} ({m.unit})</th>
+            {m.series.map((v, i) => <td key={i}>{v.toLocaleString()}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    </>
   )
 }
 
@@ -176,53 +211,72 @@ export default function BillingUsagePage() {
     [perspective],
   )
 
+  const { used } = freeMinutesStats()
+  const hasUsage = used > 0
+
   return (
-    <main className="flex-1 p-6 space-y-5">
+    <>
+      <PageHeader
+        title="Usage"
+        description="Minutes, GB, and quotas consumed by this project."
+      />
+      <main className="flex-1 p-6 space-y-5">
       {/* Toolbar — perspective + period + export */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-base font-semibold">Usage</h2>
-          <p className="text-sm text-muted-foreground">
-            Minutes, GB, and quotas consumed by this project.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-md border bg-background p-0.5">
-            {([
-              { id: "all",   label: "All" },
-              { id: "agent", label: "Agents" },
-              { id: "rte",   label: "RTE" },
-            ] as const).map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setPerspective(p.id)}
-                className={cn(
-                  "h-7 px-2.5 text-xs rounded transition-colors",
-                  perspective === p.id
-                    ? "bg-accent text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-          <Select defaultValue="12m">
-            <SelectTrigger className="h-8 w-40 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="current">Current period</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="12m">Last 12 months</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" className="h-8 gap-1.5">
-            <Download className="h-3.5 w-3.5" /> Export
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-2 flex-wrap">
+        <ToggleGroup
+          type="single"
+          value={perspective}
+          onValueChange={(v) => v && setPerspective(v as Perspective)}
+          aria-label="Usage perspective"
+        >
+          {([
+            { id: "all",   label: "All" },
+            { id: "agent", label: "Agents" },
+            { id: "rte",   label: "RTE" },
+          ] as const).map((p) => (
+            <ToggleGroupItem key={p.id} value={p.id} size="sm" className="text-xs data-[state=on]:bg-accent">
+              {p.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        <Select defaultValue="12m">
+          <SelectTrigger className="h-8 w-40 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="current">Current period</SelectItem>
+            <SelectItem value="30d">Last 30 days</SelectItem>
+            <SelectItem value="90d">Last 90 days</SelectItem>
+            <SelectItem value="12m">Last 12 months</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5"
+          disabled={!hasUsage}
+          onClick={() => toast.info("Mock: exporting usage")}
+        >
+          <Download className="h-3.5 w-3.5" /> Export
+        </Button>
       </div>
+
+      {!hasUsage ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <BarChart3 className="h-10 w-10 text-muted-foreground/60" />
+            <p className="mt-4 text-sm font-medium">No usage yet</p>
+            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+              Usage charts and quota meters fill in once your live deployments start carrying traffic.
+              Put your agent live to start the meter.
+            </p>
+            <Button className="mt-4" size="sm" asChild>
+              <Link href="/deploy">Go live <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+      <>
 
       {/* Top metric cards + chart */}
       <Card>
@@ -234,6 +288,8 @@ export default function BillingUsagePage() {
                 <button
                   key={m.id}
                   onClick={() => setVisible((prev) => ({ ...prev, [m.id]: !prev[m.id] }))}
+                  aria-pressed={isOn}
+                  aria-label={`${isOn ? "Hide" : "Show"} ${m.label} on chart`}
                   className={cn(
                     "shrink-0 text-left min-w-[140px] transition-opacity",
                     isOn ? "opacity-100" : "opacity-40 hover:opacity-70",
@@ -278,12 +334,12 @@ export default function BillingUsagePage() {
               const pct = (m.used / m.limit) * 100
               const isNearLimit = pct >= 75
               return (
-                <Card key={m.label} className={isNearLimit ? "border-amber-500/40" : ""}>
+                <Card key={m.label} className={isNearLimit ? "border-warning/40" : ""}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">{m.label}</p>
                       {isNearLimit && (
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+                        <AlertTriangle className="h-3.5 w-3.5 text-warning" />
                       )}
                     </div>
                     <div className="flex items-baseline gap-1.5 mt-1">
@@ -337,37 +393,40 @@ export default function BillingUsagePage() {
         <TabsContent value="by-service" className="pt-4">
           <Card>
             <CardContent className="p-0">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left">
-                    <th className="py-3 px-6 font-medium text-muted-foreground text-xs uppercase tracking-wider">Service</th>
-                    <th className="py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Usage</th>
-                    <th className="py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Share</th>
-                    <th className="py-3 pr-6 text-right font-medium text-muted-foreground text-xs uppercase tracking-wider">Cost</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {TOP_SERVICES.map((s, i) => (
-                    <tr key={s.service} className={i < TOP_SERVICES.length - 1 ? "border-b" : ""}>
-                      <td className="py-3 px-6 font-medium">{s.service}</td>
-                      <td className="py-3 tabular-nums">{s.usage}</td>
-                      <td className="py-3">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Usage</TableHead>
+                    <TableHead>Share</TableHead>
+                    <TableHead className="text-right">Cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {TOP_SERVICES.map((s) => (
+                    <TableRow key={s.service}>
+                      <TableCell className="font-medium">{s.service}</TableCell>
+                      <TableCell className="tabular-nums">{s.usage}</TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-2 max-w-[200px]">
                           <Progress value={s.share} className="h-1.5 flex-1" />
                           <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">
                             {s.share}%
                           </span>
                         </div>
-                      </td>
-                      <td className="py-3 pr-6 text-right tabular-nums text-muted-foreground">{s.cost}</td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{s.cost}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </main>
+      </>
+      )}
+      </main>
+    </>
   )
 }

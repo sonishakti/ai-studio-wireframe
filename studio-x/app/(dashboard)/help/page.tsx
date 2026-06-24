@@ -1,3 +1,6 @@
+"use client"
+
+import * as React from "react"
 import { HelpCircle, MessageCircle, Ticket, Sparkles, ExternalLink, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -38,15 +41,21 @@ const HELP_LINKS = [
   },
 ]
 
-const POPULAR_ARTICLES = [
-  "How to deploy your first voice agent",
-  "Setting up Twilio as a telephony vendor",
-  "Connecting OpenAI GPT-4o to your agent",
-  "Understanding completion rate and handle time",
-  "Exporting call transcripts",
+const POPULAR_ARTICLES: { title: string; href: string }[] = [
+  { title: "How to deploy your first voice agent", href: "https://docs.agora.io/en/conversational-ai/get-started/quickstart" },
+  { title: "Setting up Twilio as a telephony vendor", href: "https://docs.agora.io/en/conversational-ai/voice-call/sip-twilio" },
+  { title: "Connecting OpenAI GPT-4o to your agent", href: "https://docs.agora.io/en/conversational-ai/models/llm" },
+  { title: "Understanding completion rate and handle time", href: "https://docs.agora.io/en/conversational-ai/best-practices/metrics" },
+  { title: "Exporting call transcripts", href: "https://docs.agora.io/en/conversational-ai/develop/transcript" },
 ]
 
 export default function HelpPage() {
+  const [query, setQuery] = React.useState("")
+  const q = query.trim().toLowerCase()
+  const articles = q
+    ? POPULAR_ARTICLES.filter((a) => a.title.toLowerCase().includes(q))
+    : POPULAR_ARTICLES
+
   return (
 
       <main className="flex-1 p-6 space-y-6">
@@ -54,7 +63,9 @@ export default function HelpPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search docs and articles…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search articles…"
             className="pl-9 h-10"
           />
         </div>
@@ -91,23 +102,35 @@ export default function HelpPage() {
         {/* Popular articles */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Popular Articles</CardTitle>
+            <CardTitle className="text-sm">{q ? "Articles" : "Popular Articles"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-0">
-            {POPULAR_ARTICLES.map((article, i) => (
-              <div key={article}>
-                <a
-                  href="https://docs.agora.io"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-between py-2.5 text-sm hover:text-primary transition-colors"
-                >
-                  <span>{article}</span>
-                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0 ml-2" />
-                </a>
-                {i < POPULAR_ARTICLES.length - 1 && <Separator />}
+            {articles.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-muted-foreground">
+                <Search className="h-6 w-6" />
+                <p className="text-sm">No articles match &ldquo;{query}&rdquo;</p>
+                <Button variant="outline" size="sm" asChild className="gap-1.5">
+                  <a href="https://docs.agora.io" target="_blank" rel="noreferrer">
+                    Search all docs <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </Button>
               </div>
-            ))}
+            ) : (
+              articles.map((article, i) => (
+                <div key={article.href}>
+                  <a
+                    href={article.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between py-2.5 text-sm hover:text-primary transition-colors"
+                  >
+                    <span>{article.title}</span>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0 ml-2" />
+                  </a>
+                  {i < articles.length - 1 && <Separator />}
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
     </main>

@@ -1,6 +1,7 @@
 "use client"
 
-import { Plus, MoreHorizontal, AlertTriangle } from "lucide-react"
+import { Plus, MoreHorizontal, AlertTriangle, KeyRound } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -38,7 +39,7 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
               Third-party API keys your agents&apos; stacks use — LLM, TTS, STT, Telephony.
             </p>
           </div>
-          <Button size="sm" className="gap-1.5">
+          <Button size="sm" className="gap-1.5" onClick={() => toast.info("Mock: Add credential")}>
             <Plus className="h-4 w-4" /> Add Credential
           </Button>
         </div>
@@ -50,10 +51,10 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
       {atRisk.map((c) => {
         const deps = deploymentsAtRiskFromCredential(c.vendor)
         return (
-          <Card key={c.id} className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+          <Card key={c.id} className="border-warning/40 bg-warning/10">
             <CardContent className="py-3 px-4 flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-700 dark:text-amber-400">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+              <p className="text-sm text-warning">
                 <span className="font-medium">
                   {c.vendor} key {c.status === "expired" ? "has expired" : `expires ${c.expiresOn ?? "soon"}`}.
                 </span>{" "}
@@ -90,6 +91,26 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
               </TableRow>
             </TableHeader>
             <TableBody>
+              {VENDOR_CREDENTIALS.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-12 text-center">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <KeyRound className="h-5 w-5 text-muted-foreground" />
+                      <p className="text-sm font-medium">No vendor credentials yet</p>
+                      <p className="text-xs text-muted-foreground max-w-sm">
+                        Add your first LLM, TTS, STT, or telephony key so your agents&apos; stacks can run.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="gap-1.5 mt-2"
+                        onClick={() => toast.info("Mock: Add credential")}
+                      >
+                        <Plus className="h-4 w-4" /> Add Credential
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
               {VENDOR_CREDENTIALS.map((v) => (
                 <TableRow key={v.id}>
                   <TableCell className="font-medium">{v.vendor}</TableCell>
@@ -110,13 +131,13 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Actions for ${v.vendor} — ${v.name}`}>
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Rotate</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => toast.info(`Mock: Edit ${v.vendor} — ${v.name}`)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => toast.info(`Mock: Rotate ${v.vendor} — ${v.name}`)}>Rotate</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DestructiveActionDialog
                           action="Delete"

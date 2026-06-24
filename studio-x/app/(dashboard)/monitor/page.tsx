@@ -14,7 +14,9 @@ import {
   AlertTriangle,
   ShieldCheck,
   Wrench,
+  BarChart3,
 } from "lucide-react"
+import { toast } from "sonner"
 import { MonitorNav } from "@/components/monitor-nav"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -48,11 +50,11 @@ const KPIS = [
 // ─── Call-status distribution ────────────────────────────────────────────────
 
 const STATUS_SEGMENTS = [
-  { label: "Answered", pct: 20, stroke: "stroke-emerald-500", dot: "bg-emerald-500" },
-  { label: "Failed", pct: 24, stroke: "stroke-rose-500", dot: "bg-rose-500" },
-  { label: "Voicemail", pct: 15, stroke: "stroke-violet-500", dot: "bg-violet-500" },
-  { label: "Transferred", pct: 10, stroke: "stroke-amber-500", dot: "bg-amber-500" },
-  { label: "Unanswered", pct: 5, stroke: "stroke-sky-500", dot: "bg-sky-500" },
+  { label: "Answered", pct: 20, stroke: "stroke-success", dot: "bg-success" },
+  { label: "Failed", pct: 24, stroke: "stroke-destructive", dot: "bg-destructive" },
+  { label: "Voicemail", pct: 15, stroke: "stroke-chart-3", dot: "bg-chart-3" },
+  { label: "Transferred", pct: 10, stroke: "stroke-warning", dot: "bg-warning" },
+  { label: "Unanswered", pct: 5, stroke: "stroke-chart-1", dot: "bg-chart-1" },
   { label: "Transfer Failed", pct: 1, stroke: "stroke-muted-foreground", dot: "bg-muted-foreground" },
 ]
 const TOTAL_CALLS = 4000
@@ -89,12 +91,25 @@ export default function MonitorPage() {
     [],
   )
 
+  // Real traffic signal — sum of calls across every deployment. A brand-new
+  // account (auto-provisioned Aria, zero traffic) has 0 here, so we must NOT
+  // show fabricated KPIs / donut / charts. Gate the whole analytics block on it.
+  const totalCalls = React.useMemo(
+    () => DEPLOYMENTS.reduce((sum, d) => sum + d.metrics.calls, 0),
+    [],
+  )
+  const hasTraffic = totalCalls > 0
+
   return (
     <div className="flex flex-col flex-1">
       <MonitorNav
         action={
-          <Button variant="outline" size="icon" className="h-8 w-8" title="Refresh">
+          <Button
+            variant="outline" size="icon" className="h-8 w-8" title="Refresh"
+            onClick={() => toast.info("Mock: refreshing monitor data…")}
+          >
             <RefreshCw className="h-3.5 w-3.5" />
+            <span className="sr-only">Refresh</span>
           </Button>
         }
       />
@@ -105,8 +120,8 @@ export default function MonitorPage() {
         <FreeMinutesNudge />
 
         {deployed && (
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/40 bg-emerald-500/[0.06] px-4 py-3">
-            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-success/40 bg-success/[0.06] px-4 py-3">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">
                 {deployed.agent || "Your agent"} is live{deployed.channel ? ` on ${deployed.channel}` : ""}
@@ -206,6 +221,23 @@ export default function MonitorPage() {
           </Card>
         )}
 
+        {!hasTraffic ? (
+          /* First-run — zero traffic. Don't fabricate KPIs/charts; point forward. */
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+              <BarChart3 className="h-8 w-8 text-muted-foreground" />
+              <p className="text-sm font-medium">No calls yet</p>
+              <p className="max-w-sm text-xs text-muted-foreground">
+                Once your live deployments start carrying traffic, answer rates, call
+                distribution, and per-agent performance will show up here.
+              </p>
+              <Button asChild size="sm" className="mt-1 gap-1.5">
+                <Link href="/deploy">Go to deployments <ArrowRight className="h-3.5 w-3.5" /></Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+        <>
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
           <Select defaultValue="7d">
@@ -257,7 +289,7 @@ export default function MonitorPage() {
                 </div>
                 <p className="text-2xl font-semibold tabular-nums">{k.value}</p>
                 <div className="flex items-center justify-between gap-2">
-                  <span className={cn("inline-flex items-center gap-1 text-xs", k.down ? "text-rose-600" : "text-emerald-600")}>
+                  <span className={cn("inline-flex items-center gap-1 text-xs", k.down ? "text-destructive" : "text-success")}>
                     {k.down ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
                     {k.delta}
                   </span>
@@ -333,6 +365,8 @@ export default function MonitorPage() {
             </div>
           </CardContent>
         </Card>
+        </>
+        )}
       </main>
     </div>
   )
@@ -346,12 +380,12 @@ function Sparkline({ series, up }: { series: number[]; up: boolean }) {
   const range = max - min || 1
   const pts = series.map((v, i) => `${(i / (series.length - 1)) * w},${h - ((v - min) / range) * h}`).join(" ")
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-6 w-18" preserveAspectRatio="none" aria-hidden>
+    <svg viewBox={`0 0 ${w} ${h}`} className="h-6 w-20" preserveAspectRatio="none" aria-hidden>
       <polyline
         points={pts}
         fill="none"
         strokeWidth={1.5}
-        className={up ? "stroke-emerald-500" : "stroke-rose-500"}
+        className={up ? "stroke-success" : "stroke-destructive"}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -372,9 +406,15 @@ function Donut({
   const c = 2 * Math.PI * r
   const total = segments.reduce((s, x) => s + x.pct, 0) || 1
   let offset = 0
+  const summary = segments.map((s) => `${s.label} ${s.pct}%`).join(", ")
   return (
-    <div className="relative shrink-0" style={{ width: 120, height: 120 }}>
-      <svg viewBox="0 0 120 120" className="-rotate-90">
+    <div
+      className="relative shrink-0"
+      style={{ width: 120, height: 120 }}
+      role="img"
+      aria-label={`Call status distribution: ${summary}`}
+    >
+      <svg viewBox="0 0 120 120" className="-rotate-90" aria-hidden>
         <circle cx="60" cy="60" r={r} fill="none" strokeWidth={14} className="stroke-muted" />
         {segments.map((s) => {
           const len = (s.pct / total) * c

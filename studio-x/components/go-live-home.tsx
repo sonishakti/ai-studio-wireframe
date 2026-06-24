@@ -199,21 +199,21 @@ export function GoLiveHome() {
 // ─── Switcher rail — surface the import seam for developers leaving a rival ──────
 
 function SwitcherRail({ onImported }: { onImported: (config: ImportedAgentConfig) => void }) {
+  // Demoted to a single inline link — import is also reachable from the agent
+  // switcher menu, so this stays a lightweight seam, not a competing banner.
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3">
-      <div className="flex items-center gap-2 text-sm">
-        <ArrowLeftRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className="text-muted-foreground">
-          Coming from <span className="font-medium text-foreground">Vapi, Retell, Bland</span> or ElevenLabs?
-          Import your agent — we map the voice, prompt, model and tools.
-        </span>
-      </div>
+    <p className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+      <ArrowLeftRight className="h-4 w-4 shrink-0" />
+      Coming from Vapi, Retell, Bland or ElevenLabs?
       <ImportAgentSheet onImported={onImported}>
-        <Button variant="outline" size="sm" className="shrink-0 gap-1.5">
-          <Upload className="h-3.5 w-3.5" /> Import agent
-        </Button>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 font-medium text-foreground underline-offset-2 transition-colors hover:text-primary hover:underline"
+        >
+          <Upload className="h-3.5 w-3.5" /> Import your agent
+        </button>
       </ImportAgentSheet>
-    </div>
+    </p>
   )
 }
 
@@ -410,12 +410,12 @@ function AgentCard({
   function chooseOutcome(outcome: "tweak" | "deploy") {
     track(Events.test_outcome_selected, { outcome, agent_id: agent.id })
     if (outcome === "deploy") {
-      // Make the deploy hand-off land: scroll to the channels AND move focus onto
-      // the first one, so the click resolves to a real next action (not a no-op).
+      // Progressive enhancement only: scroll the channel cards into view. The
+      // "Deploy it" CTA itself is a real Link (below) so it never dead-ends even
+      // if the section is unmounted/off-screen.
       const el = document.getElementById("channels")
       const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
       el?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
-      after(reduce ? 0 : 350, () => el?.querySelector<HTMLElement>("a[href]")?.focus())
     }
   }
 
@@ -457,8 +457,8 @@ function AgentCard({
             <Badge variant="outline" className="gap-1.5 text-xs font-medium">
               {isLive ? (
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60 motion-reduce:animate-none" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60 motion-reduce:animate-none" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
                 </span>
               ) : (
                 <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
@@ -557,7 +557,7 @@ function AgentCard({
 
         {/* Right — the test (tabs + active method) */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex border-b border-border">
+          <div className="flex border-b border-border" role="tablist" aria-label="How to test the agent">
           {(["talk", "getcall", "callin"] as Method[]).map((m) => {
             const labels: Record<Method, string> = { talk: "Talk here", getcall: "Get a call", callin: "Call in" }
             const active = method === m
@@ -565,6 +565,8 @@ function AgentCard({
               <button
                 key={m}
                 type="button"
+                role="tab"
+                aria-selected={active}
                 disabled={busy}
                 title={busy ? "End the test to switch" : undefined}
                 onClick={() => switchMethod(m)}
@@ -668,8 +670,10 @@ function AgentCard({
               <span className="text-muted-foreground">Deploy {agent.name}, or fine-tune it first.</span>
             </p>
             <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
-                Deploy it <ArrowRight className="h-4 w-4" />
+              <Button size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("deploy")}>
+                <Link href={`/deploy/inbound/new?agent=${agent.id}`}>
+                  Deploy it <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
               <Button variant="outline" size="sm" asChild className="gap-1.5" onClick={() => chooseOutcome("tweak")}>
                 <Link href={`/agents/${agent.id}/edit`}>

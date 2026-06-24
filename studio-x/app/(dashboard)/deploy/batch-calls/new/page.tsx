@@ -17,6 +17,7 @@ import {
 import { AGENTS, PHONE_NUMBERS, extractVars, STACK_PRESETS } from "@/lib/campaign-data"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
 import { DeployContextBar } from "@/components/deploy-context-bar"
+import { PageHeader } from "@/components/page-header"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -88,11 +89,20 @@ export default function NewBatchCallPage() {
     router.push(`/monitor?${q.toString()}`)
   }
 
-  const cancelHref = agentId ? `/agents/${agentId}/edit#deployment` : "/integrations?tab=channels"
+  const cancelHref = agentId ? `/agents/${agentId}/edit#deployment` : "/deploy/batch-calls"
 
   return (
     <div className="flex flex-col flex-1">
       <DeployContextBar channelLabel="New batch call" />
+      <PageHeader
+        title="New batch call"
+        description="CSV first, then the prompt — so your variables exist before you reference them."
+        actions={
+          <Button variant="ghost" size="sm" asChild className="gap-1">
+            <Link href={cancelHref}><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
+          </Button>
+        }
+      />
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-6">
           {/* Stepper */}
@@ -124,9 +134,6 @@ export default function NewBatchCallPage() {
                 </React.Fragment>
               ))}
             </div>
-            <Button variant="ghost" size="sm" asChild className="gap-1">
-              <Link href={cancelHref}><ArrowLeft className="h-3.5 w-3.5" /> Cancel</Link>
-            </Button>
           </div>
 
           {/* ── Step 1: Basics ───────────────────────────────────────────── */}
@@ -192,6 +199,7 @@ export default function NewBatchCallPage() {
                 {!file ? (
                   <button
                     type="button"
+                    aria-label="Upload contact CSV"
                     onClick={() => {
                       setFile(MOCK_CSV)
                       toast.success("contacts.csv uploaded", {
@@ -277,6 +285,8 @@ export default function NewBatchCallPage() {
                       <button
                         key={c}
                         type="button"
+                        aria-label={`Insert ${c} variable`}
+                        aria-pressed={usedVars.includes(c)}
                         onClick={() => setPrompt((p) => p + ` {{${c}}}`)}
                         className={cn(
                           "rounded-md border px-1.5 py-0.5 font-mono text-xs transition-colors",

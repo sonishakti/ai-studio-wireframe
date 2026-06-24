@@ -80,7 +80,7 @@ export function MetricCard({
               <span
                 className={cn(
                   "text-xs font-medium ml-1 tabular-nums",
-                  deltaPositive ? "text-emerald-600" : "text-muted-foreground",
+                  deltaPositive ? "text-success" : "text-muted-foreground",
                 )}
               >
                 {delta}

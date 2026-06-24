@@ -11,6 +11,7 @@ import {
   Loader2,
   ChevronDown,
   Signal,
+  RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -30,13 +31,14 @@ import { toast } from "sonner"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type VoicePhase = "idle" | "connecting" | "active"
+export type VoicePhase = "idle" | "connecting" | "active" | "failed"
 export type VoiceTurnState = "idle" | "you" | "composer"
 
 export interface VoiceSession {
   phase: VoicePhase
   active: boolean
   connecting: boolean
+  failed: boolean
   turn: VoiceTurnState
   muted: boolean
   captionsOn: boolean
@@ -48,6 +50,7 @@ export interface VoiceSession {
   livePartial: string
   metrics: Metrics
   start: () => void
+  retry: () => void
   end: () => void
   toggleMute: () => void
   toggleCaptions: () => void
@@ -106,6 +109,9 @@ export function useVoiceSession({ onMessage, onDraftUpdate }: UseVoiceSessionArg
   const [metrics, setMetrics] = React.useState<Metrics>(BASE_METRICS)
 
   const userIdx = React.useRef(0)
+  // Demo: surface the connection-failure path once per session, then connect on
+  // retry — so the unhappy RTC state is reachable without random flakiness.
+  const failOnce = React.useRef(true)
   const timers = React.useRef<number[]>([])
   const elapsedIv = React.useRef<number | null>(null)
   const metricsIv = React.useRef<number | null>(null)
@@ -156,17 +162,31 @@ export function useVoiceSession({ onMessage, onDraftUpdate }: UseVoiceSessionArg
     [after, onMessage, onDraftUpdate],
   )
 
-  const start = React.useCallback(() => {
-    if (phase !== "idle") return
+  const connect = React.useCallback(() => {
     setPhase("connecting")
-    track(Events.composer_voice_started, {})
     after(1500, () => {
+      if (failOnce.current) {
+        failOnce.current = false
+        setPhase("failed")
+        return
+      }
       setPhase("active")
       elapsedIv.current = window.setInterval(() => setElapsed((e) => e + 1), 1000)
       metricsIv.current = window.setInterval(() => setMetrics(jitterMetrics), 1200)
       after(500, () => say(GREETING))
     })
-  }, [phase, after, say])
+  }, [after, say])
+
+  const start = React.useCallback(() => {
+    if (phase !== "idle") return
+    track(Events.composer_voice_started, {})
+    connect()
+  }, [phase, connect])
+
+  const retry = React.useCallback(() => {
+    if (phase !== "failed") return
+    connect()
+  }, [phase, connect])
 
   const end = React.useCallback(() => {
     stopAll()
@@ -179,6 +199,7 @@ export function useVoiceSession({ onMessage, onDraftUpdate }: UseVoiceSessionArg
     setMuted(false)
     setDebugOpen(false)
     userIdx.current = 0
+    failOnce.current = true
   }, [stopAll, elapsed])
 
   const talk = React.useCallback(() => {
@@ -231,6 +252,7 @@ export function useVoiceSession({ onMessage, onDraftUpdate }: UseVoiceSessionArg
     phase,
     active: phase === "active",
     connecting: phase === "connecting",
+    failed: phase === "failed",
     turn,
     muted,
     captionsOn,
@@ -241,6 +263,7 @@ export function useVoiceSession({ onMessage, onDraftUpdate }: UseVoiceSessionArg
     livePartial,
     metrics,
     start,
+    retry,
     end,
     toggleMute,
     toggleCaptions,
@@ -253,7 +276,46 @@ export function useVoiceSession({ onMessage, onDraftUpdate }: UseVoiceSessionArg
 // ─── Call dock (slim persistent bar) ─────────────────────────────────────────
 
 export function VoiceCallDock({ session, compact = false }: { session: VoiceSession; compact?: boolean }) {
-  const { connecting, turn, muted, captionsOn, debugOpen, listening, level, elapsed, metrics } = session
+  const { connecting, failed, turn, muted, captionsOn, debugOpen, listening, level, elapsed, metrics } = session
+
+  // Connection failed — dedicated unhappy-path bar with retry/end.
+  if (failed) {
+    return (
+      <div className="shrink-0 border-b border-destructive/40 bg-destructive/10" role="alert">
+        <div className="flex items-center gap-3 px-4 py-2.5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/15 shrink-0">
+            <PhoneOff className="h-4 w-4 text-destructive" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">Couldn&apos;t connect</p>
+            <p className="text-xs text-muted-foreground truncate">
+              The voice connection failed. Check your network and try again.
+            </p>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={session.retry}
+              className="flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+              aria-label="Retry connection"
+            >
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+              {!compact && <span>Retry</span>}
+            </button>
+            <button
+              type="button"
+              onClick={session.end}
+              className="flex h-9 items-center gap-1.5 rounded-full bg-muted px-3 text-xs font-medium text-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+              aria-label="Dismiss"
+            >
+              <PhoneOff className="h-3.5 w-3.5" aria-hidden />
+              {!compact && <span>Dismiss</span>}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const status = connecting
     ? "Connecting…"
@@ -286,7 +348,7 @@ export function VoiceCallDock({ session, compact = false }: { session: VoiceSess
         {/* Status + meta */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium truncate">{status}</span>
+            <span className="text-sm font-medium truncate" aria-live="polite">{status}</span>
             {listening && (
               <span className="flex items-end gap-0.5 h-3" aria-hidden>
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -302,8 +364,8 @@ export function VoiceCallDock({ session, compact = false }: { session: VoiceSess
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60 animate-ping" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
               </span>
               Agora RTC
             </span>
@@ -322,11 +384,12 @@ export function VoiceCallDock({ session, compact = false }: { session: VoiceSess
             onClick={session.talk}
             disabled={connecting || muted || turn === "composer"}
             className={cn(
-              "flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed",
+              "flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
               listening
                 ? "bg-primary text-primary-foreground ring-2 ring-primary/30"
                 : "bg-primary/10 text-primary hover:bg-primary/20",
             )}
+            aria-label={listening ? "Send turn" : "Tap to talk"}
             title={listening ? "Send" : "Tap to talk"}
           >
             <Mic className="h-3.5 w-3.5" />
@@ -347,7 +410,8 @@ export function VoiceCallDock({ session, compact = false }: { session: VoiceSess
           <button
             type="button"
             onClick={session.end}
-            className="flex h-9 items-center gap-1.5 rounded-full bg-destructive px-3 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
+            className="flex h-9 items-center gap-1.5 rounded-full bg-destructive px-3 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            aria-label="End conversation"
             title="End conversation"
           >
             <PhoneOff className="h-3.5 w-3.5" />
@@ -380,8 +444,9 @@ function DockIcon({
       type="button"
       onClick={onClick}
       title={title}
+      aria-label={title}
       className={cn(
-        "flex h-9 items-center gap-0.5 rounded-full px-2 transition-colors",
+        "flex h-9 items-center gap-0.5 rounded-full px-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
         danger
           ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
           : active
@@ -395,15 +460,24 @@ function DockIcon({
 }
 
 function SignalBars({ quality }: { quality: 1 | 2 | 3 }) {
+  const label = ["", "poor", "fair", "good"][quality]
   return (
-    <span className="inline-flex items-end gap-0.5 h-3" title={`Connection: ${["", "poor", "fair", "good"][quality]}`}>
-      {[1, 2, 3].map((bar) => (
-        <span
-          key={bar}
-          className={cn("w-0.5 rounded-full", bar <= quality ? "bg-emerald-500" : "bg-muted-foreground/30")}
-          style={{ height: `${bar * 3 + 2}px` }}
-        />
-      ))}
+    <span
+      className="inline-flex items-center gap-1"
+      role="img"
+      aria-label={`Connection: ${label}`}
+      title={`Connection: ${label}`}
+    >
+      <span className="inline-flex items-end gap-0.5 h-3" aria-hidden>
+        {[1, 2, 3].map((bar) => (
+          <span
+            key={bar}
+            className={cn("w-0.5 rounded-full", bar <= quality ? "bg-success" : "bg-muted-foreground/30")}
+            style={{ height: `${bar * 3 + 2}px` }}
+          />
+        ))}
+      </span>
+      <span className="capitalize">{label}</span>
     </span>
   )
 }
@@ -473,7 +547,7 @@ function Stat({ label, value, highlight, warn }: { label: string; value: string;
   return (
     <div className="rounded-md border border-border bg-card px-2.5 py-1.5">
       <p className="text-xs text-muted-foreground truncate">{label}</p>
-      <p className={cn("text-sm font-semibold tabular-nums", highlight && "text-primary", warn && "text-amber-600")}>
+      <p className={cn("text-sm font-semibold tabular-nums", highlight && "text-primary", warn && "text-warning")}>
         {value}
       </p>
     </div>

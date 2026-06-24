@@ -1,8 +1,10 @@
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { AgentPlayground } from "@/components/agent-playground"
+import { getAgent } from "@/lib/campaign-data"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -11,6 +13,9 @@ interface Props {
 export default async function AgentTestPage({ params }: Props) {
   const { id } = await params
   const isNew = id === "new"
+  // A stale deep-link to a deleted/unknown agent must not present a working
+  // playground for an agent that doesn't exist — branch to not-found.
+  if (!isNew && !getAgent(id)) notFound()
   return (
     <div className="flex flex-col flex-1">
       <PageHeader

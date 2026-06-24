@@ -4,7 +4,6 @@ import * as React from "react"
 import { use } from "react"
 import Link from "next/link"
 import {
-  Rocket,
   Info,
   MoreHorizontal,
   Hash,
@@ -96,9 +95,16 @@ export default function AgentEditorPage({
       actions: "mcp", // back-compat: the old combined #actions now lands on MCP
       deployment: "deployment",
     }
-    const s = map[window.location.hash.replace("#", "")]
-    if (s) setSection(s)
-  }, [])
+    const applyHash = () => {
+      const s = map[window.location.hash.replace("#", "")]
+      if (s) setSection(s)
+    }
+    applyHash() // cold load / navigation that mounts with a hash (e.g. row → Deploy)
+    // Also honor hash changes that arrive after mount (in-app links to #deployment
+    // while the editor is already open) so the Deploy deep-link is never a no-op.
+    window.addEventListener("hashchange", applyHash)
+    return () => window.removeEventListener("hashchange", applyHash)
+  }, [id])
   const jump = (s: AgentSection) => {
     setSection(s)
     window.history.replaceState(null, "", `#${s}`)
@@ -150,7 +156,9 @@ export default function AgentEditorPage({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Page header — journey breadcrumb (identity + section nav) + actions */}
+      {/* Editor header — intentional full-bleed exception to PageHeader: the
+          journey breadcrumb IS the header (identity h1 + the section stepper),
+          the same pattern the Deploy wizard's stepper uses. */}
       <header className="border-b bg-background px-6 py-3 space-y-2">
         <div className="flex items-start justify-between gap-4">
           <AgentJourneyBreadcrumb
@@ -168,21 +176,12 @@ export default function AgentEditorPage({
               </Link>
             </Button>
 
-            {/* Single deploy surface: a persistent CTA that jumps to the Deploy
-                step (the journey's finish line) — no separate chooser sheet, and
-                it never re-asks for the agent. */}
-            <Button
-              size="sm"
-              className="gap-1.5"
-              onClick={() => jump("deployment")}
-            >
-              <Rocket className="h-3.5 w-3.5" />
-              Deploy Agent
-            </Button>
+            {/* Deploy is the breadcrumb's finish-line step — no redundant header
+                CTA. The stepper's "Deploy" segment is the single go-live affordance. */}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Agent actions">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -217,7 +216,7 @@ export default function AgentEditorPage({
             {isNew ? "agt_draft" : id}
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-1 w-1 rounded-full bg-muted-foreground/60" />
+            <span className="h-1 w-1 rounded-full bg-muted-foreground/60" aria-hidden />
             800ms latency budget
           </span>
         </div>
@@ -461,8 +460,10 @@ export default function AgentEditorPage({
             llm: llmVendor,
             asr: asrVendor,
             tts: ttsVendor,
-            latencyMs: preset === "fastest" ? 380 : preset === "balanced" ? 500 : 720,
-            ttftMs: preset === "fastest" ? 18 : preset === "balanced" ? 23 : 41,
+            // A brand-new unsaved draft has never run — show em-dashes, not
+            // measured-looking figures. Saved agents show the stack's estimate.
+            latencyMs: isNew ? null : preset === "fastest" ? 380 : preset === "balanced" ? 500 : 720,
+            ttftMs: isNew ? null : preset === "fastest" ? 18 : preset === "balanced" ? 23 : 41,
           }}
           onTest={handleTestAgent}
         />

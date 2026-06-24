@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { PageHeader } from "@/components/page-header"
 import { track, Events } from "@/lib/analytics"
 
 // Recovers the lost Figma sub-views — old AccountSidebar nested "View all
@@ -71,14 +72,12 @@ export default function PlansPage() {
   React.useEffect(() => { track(Events.plan_compared, { product }) }, [product])
 
   return (
-    <main className="flex-1 p-6 space-y-5">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">Choose a Plan</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Each Agora product has its own plans. Pick a product or browse all.
-        </p>
-      </div>
-
+    <>
+      <PageHeader
+        title="Choose a Plan"
+        description="Each Agora product has its own plans. Pick a product or browse all."
+      />
+      <main className="flex-1 p-6 space-y-5">
       {/* Product filter — recovers the lost sub-views */}
       <ToggleGroup
         type="single"
@@ -125,7 +124,7 @@ export default function PlansPage() {
                   <CardContent className="space-y-1.5 pb-4">
                     {plan.features.map((f) => (
                       <div key={f} className="flex items-start gap-2 text-xs">
-                        <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <Check className="h-3.5 w-3.5 text-success shrink-0 mt-0.5" />
                         <span>{f}</span>
                       </div>
                     ))}
@@ -171,6 +170,7 @@ export default function PlansPage() {
           </section>
         ))}
       </div>
-    </main>
+      </main>
+    </>
   )
 }

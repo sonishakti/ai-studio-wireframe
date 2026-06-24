@@ -1,6 +1,7 @@
 "use client"
 
-import { MoreHorizontal, ExternalLink } from "lucide-react"
+import { MoreHorizontal, ExternalLink, Layers } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +12,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
+import { PageHeader } from "@/components/page-header"
 
 const SUBS = [
   { id: "sub_01", product: "Conversational AI Engine", plan: "Pay-as-you-go",  status: "active",   started: "Feb 12, 2026", renews: "Monthly", spend: "$0.00" },
@@ -20,21 +22,24 @@ const SUBS = [
 ]
 
 export default function SubscriptionsPage() {
+  const hasSubs = SUBS.length > 0
+
   return (
-    <main className="flex-1 p-6 space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">Subscriptions</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            All product subscriptions and add-ons active on this account.
-          </p>
-        </div>
-        <Button variant="outline" className="gap-1.5" asChild>
-          <a href="#" target="_blank" rel="noreferrer">
+    <>
+      <PageHeader
+        title="Subscriptions"
+        description="All product subscriptions and add-ons active on this account."
+        actions={
+          <Button
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => toast.info("Mock: opening the Stripe billing portal")}
+          >
             <ExternalLink className="h-4 w-4" /> Manage via Stripe
-          </a>
-        </Button>
-      </div>
+          </Button>
+        }
+      />
+      <main className="flex-1 p-6 space-y-6">
         {/* Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
@@ -68,6 +73,17 @@ export default function SubscriptionsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {!hasSubs && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-12 text-center">
+                      <Layers className="mx-auto h-8 w-8 text-muted-foreground/60" />
+                      <p className="mt-3 text-sm font-medium">No subscriptions yet</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Product subscriptions and add-ons you enable will appear here.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
                 {SUBS.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell className="font-medium">{s.product}</TableCell>
@@ -89,11 +105,11 @@ export default function SubscriptionsPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Subscription actions"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View details</DropdownMenuItem>
-                          <DropdownMenuItem>Change plan</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info(`Mock: ${s.product} details`)}>View details</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info("Mock: change plan")}>Change plan</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DestructiveActionDialog
                             action="Cancel"
@@ -118,6 +134,7 @@ export default function SubscriptionsPage() {
             </Table>
           </CardContent>
         </Card>
-    </main>
+      </main>
+    </>
   )
 }

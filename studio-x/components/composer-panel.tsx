@@ -59,6 +59,7 @@ export function openComposerPanel() {
 function contextChipFor(pathname: string): string | undefined {
   if (pathname.startsWith("/agents/") && pathname.endsWith("/edit")) return "Agent editor"
   if (pathname === "/agents") return "Agents"
+  if (pathname === "/deploy") return "Go Live"
   if (pathname === "/deploy/batch-calls") return "Batch Calls"
   if (pathname.startsWith("/deploy/batch-calls/new")) return "New batch"
   if (pathname === "/monitor") return "Monitor"

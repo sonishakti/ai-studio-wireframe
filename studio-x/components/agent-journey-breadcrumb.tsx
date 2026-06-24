@@ -46,9 +46,11 @@ export function AgentJourneyBreadcrumb({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      {/* Identity anchor — never lose "which agent" */}
+      {/* Identity anchor — never lose "which agent". This is the editor's page
+          heading (the editor is an intentional full-bleed exception to PageHeader:
+          its journey stepper IS the header, like the Deploy wizard's stepper). */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold tracking-tight">{agentName}</span>
+        <h1 className="text-sm font-semibold tracking-tight">{agentName}</h1>
         <Badge variant={status === "live" ? "default" : "outline"} className="text-xs capitalize">
           {status}
         </Badge>

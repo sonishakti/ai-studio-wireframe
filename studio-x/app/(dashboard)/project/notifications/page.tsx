@@ -1,15 +1,29 @@
 "use client"
 
 import * as React from "react"
-import { Bell } from "lucide-react"
+import { toast } from "sonner"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+const CHANNELS: { key: "email" | "inApp" | "slack" | "webhook"; label: string }[] = [
+  { key: "email", label: "Email" },
+  { key: "inApp", label: "In-app" },
+  { key: "slack", label: "Slack" },
+  { key: "webhook", label: "Webhook" },
+]
 
 const CATEGORIES = [
   { id: "campaigns", label: "Campaign events",     desc: "Start, complete, paused, failed", email: true,  inApp: true,  slack: false, webhook: false },
@@ -22,9 +36,16 @@ const CATEGORIES = [
 
 export default function ProjectNotificationsPage() {
   const [prefs, setPrefs] = React.useState(CATEGORIES)
+  const [dirty, setDirty] = React.useState(false)
 
   const update = (id: string, channel: "email" | "inApp" | "slack" | "webhook", value: boolean) => {
     setPrefs((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: value } : p)))
+    setDirty(true)
+  }
+
+  const handleSave = () => {
+    setDirty(false)
+    toast.success("Notification preferences saved")
   }
 
   return (
@@ -32,7 +53,11 @@ export default function ProjectNotificationsPage() {
       <PageHeader
         title="Project Notifications"
         description="Configure who receives what for this project."
-        actions={<Button>Save Changes</Button>}
+        actions={
+          <Button onClick={handleSave} disabled={!dirty}>
+            Save Changes
+          </Button>
+        }
       />
 
       <main className="flex-1 p-6 space-y-5">
@@ -44,31 +69,37 @@ export default function ProjectNotificationsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="py-3 px-6">Category</th>
-                  <th className="py-3 w-20 text-center">Email</th>
-                  <th className="py-3 w-20 text-center">In-app</th>
-                  <th className="py-3 w-20 text-center">Slack</th>
-                  <th className="py-3 w-20 text-center pr-6">Webhook</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prefs.map((p, i) => (
-                  <tr key={p.id} className={i < prefs.length - 1 ? "border-b" : ""}>
-                    <td className="py-3 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead scope="col" className="px-6">Category</TableHead>
+                  {CHANNELS.map((c) => (
+                    <TableHead key={c.key} scope="col" className="w-20 text-center last:pr-6">
+                      {c.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {prefs.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="px-6">
                       <p className="text-sm font-medium">{p.label}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{p.desc}</p>
-                    </td>
-                    <td className="text-center"><Switch checked={p.email}   onCheckedChange={(v) => update(p.id, "email", v)} /></td>
-                    <td className="text-center"><Switch checked={p.inApp}   onCheckedChange={(v) => update(p.id, "inApp", v)} /></td>
-                    <td className="text-center"><Switch checked={p.slack}   onCheckedChange={(v) => update(p.id, "slack", v)} /></td>
-                    <td className="text-center pr-6"><Switch checked={p.webhook} onCheckedChange={(v) => update(p.id, "webhook", v)} /></td>
-                  </tr>
+                    </TableCell>
+                    {CHANNELS.map((c) => (
+                      <TableCell key={c.key} className="text-center last:pr-6">
+                        <Switch
+                          checked={p[c.key]}
+                          onCheckedChange={(v) => update(p.id, c.key, v)}
+                          aria-label={`${p.label} — ${c.label}`}
+                        />
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 

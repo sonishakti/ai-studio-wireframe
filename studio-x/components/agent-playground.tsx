@@ -44,7 +44,7 @@ const ROLLING_METRICS = [
 
 // ─── component ───────────────────────────────────────────────────────────────
 
-type CallState = "idle" | "ringing" | "active" | "ended"
+type CallState = "idle" | "ringing" | "active" | "ended" | "failed"
 
 export function AgentPlayground({ agentId }: { agentId: string }) {
   const [state, setState] = React.useState<CallState>("idle")
@@ -85,11 +85,25 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
     })
   }, [transcript])
 
-  const startCall = () => {
+  const startCall = async () => {
     setTranscript([])
     setElapsed(0)
     setState("ringing")
     track(Events.agent_test_started, { agent_id: agentId })
+    // A test playground needs the mic — if the browser denies it (or has no
+    // mediaDevices), resolve into a real failed state instead of faking a call.
+    try {
+      const stream = await navigator.mediaDevices?.getUserMedia({ audio: true })
+      // Release the track immediately — the wireframe doesn't stream real audio.
+      stream?.getTracks().forEach((t) => t.stop())
+      if (!stream) throw new Error("no mediaDevices")
+    } catch {
+      setState("failed")
+      toast.error("Microphone access denied", {
+        description: "Allow mic access in your browser to run a test call.",
+      })
+      return
+    }
     setTimeout(() => setState("active"), 900)
   }
 
@@ -130,32 +144,39 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
             <div
               className={cn(
                 "relative w-44 h-44 rounded-full flex items-center justify-center transition-all duration-300",
-                state === "idle" && "bg-gradient-to-br from-zinc-300 via-zinc-200 to-zinc-100 dark:from-zinc-600 dark:via-zinc-700 dark:to-zinc-800",
-                state === "ringing" && "bg-gradient-to-br from-amber-400/60 via-amber-300/40 to-transparent shadow-[0_0_80px_-10px_hsl(38_92%_55%/0.5)] animate-pulse",
-                state === "active" && "bg-gradient-to-br from-primary/60 via-primary/30 to-transparent shadow-[0_0_80px_-10px_hsl(var(--primary)/0.5)]",
-                state === "ended" && "bg-gradient-to-br from-emerald-400/40 via-emerald-300/20 to-transparent",
+                state === "idle" && "bg-gradient-to-br from-muted via-muted to-muted/50",
+                state === "ringing" && "bg-gradient-to-br from-warning/60 via-warning/40 to-transparent animate-pulse",
+                state === "active" && "bg-gradient-to-br from-primary/60 via-primary/30 to-transparent",
+                state === "ended" && "bg-gradient-to-br from-success/40 via-success/20 to-transparent",
+                state === "failed" && "bg-gradient-to-br from-destructive/40 via-destructive/20 to-transparent",
               )}
             >
               <div
                 className={cn(
                   "w-28 h-28 rounded-full transition-all",
                   state === "active" && "bg-gradient-to-br from-primary/80 to-primary/40 animate-pulse",
-                  state !== "active" && "bg-gradient-to-br from-zinc-400 to-zinc-600 dark:from-zinc-500 dark:to-zinc-700",
+                  state !== "active" && "bg-gradient-to-br from-muted-foreground/40 to-muted-foreground/70",
                 )}
               />
             </div>
 
-            <div className="text-center">
+            <div className="text-center" aria-live="polite">
               <p className="text-sm font-medium">
                 {state === "idle"   && "Ready to call"}
                 {state === "ringing"&& "Connecting…"}
                 {state === "active" && "Agent listening"}
                 {state === "ended"  && "Call ended"}
+                {state === "failed" && "Microphone blocked"}
               </p>
               {state === "active" && (
                 <p className="text-xs text-muted-foreground tabular-nums mt-1">
                   <Clock className="inline h-3 w-3 mr-1" />
                   {formatMs(elapsed)}
+                </p>
+              )}
+              {state === "failed" && (
+                <p className="text-xs text-muted-foreground mt-1 max-w-[15rem]">
+                  We couldn&apos;t access your microphone. Allow mic access in your browser, then try again.
                 </p>
               )}
             </div>
@@ -193,6 +214,11 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
                   <RotateCw className="h-4 w-4" /> Test again
                 </Button>
               )}
+              {state === "failed" && (
+                <Button size="lg" className="gap-2" onClick={startCall}>
+                  <RotateCw className="h-4 w-4" /> Retry
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -205,7 +231,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
               Live transcript
               {state === "active" && (
                 <Badge variant="default" className="text-xs gap-1 ml-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" aria-hidden />
                   recording
                 </Badge>
               )}

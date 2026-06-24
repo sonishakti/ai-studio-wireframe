@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   CheckCircle2, Eye, EyeOff, PhoneIncoming, Megaphone, ArrowRight, HelpCircle,
 } from "lucide-react"
@@ -93,7 +93,7 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
                 <Field label="Password" required>
                   <div className="relative">
                     <Input type={showPw ? "text" : "password"} placeholder="••••••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="pr-9 font-mono text-sm" />
-                    <button type="button" onClick={() => setShowPw((s) => !s)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    <button type="button" onClick={() => setShowPw((s) => !s)} aria-label={showPw ? "Hide password" : "Show password"} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
                   </div>
@@ -101,14 +101,25 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
               </div>
 
               <Field label="Transport Protocol" required>
-                <div className="flex items-center gap-1 rounded-md border border-border bg-card p-0.5 w-fit">
+                <ToggleGroup
+                  type="single"
+                  value={transport}
+                  onValueChange={(v) => { if (v) setTransport(v as Transport) }}
+                  spacing={0}
+                  variant="outline"
+                  aria-label="Transport protocol"
+                >
                   {(["TCP", "UDP", "TLS"] as Transport[]).map((t) => (
-                    <button key={t} type="button" onClick={() => setTransport(t)}
-                      className={cn("rounded px-3 h-7 text-xs font-medium transition-colors", transport === t ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}>
+                    <ToggleGroupItem
+                      key={t}
+                      value={t}
+                      aria-label={t}
+                      className="h-7 px-3 text-xs font-medium data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
+                    >
                       {t}
-                    </button>
+                    </ToggleGroupItem>
                   ))}
-                </div>
+                </ToggleGroup>
                 <p className="text-xs text-muted-foreground">Choose the protocol for SIP communication.</p>
               </Field>
 
@@ -130,8 +141,8 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
         ) : (
           <>
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-              <div className="flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/5 px-3 py-2.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 px-3 py-2.5">
+                <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                 <p className="text-sm font-medium">Phone number added successfully!</p>
               </div>
 
@@ -151,8 +162,7 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
                   desc="Route incoming calls to an agent."
                   onClick={() => {
                     setOpen(false)
-                    toast.success("Opening inbound setup (mock)")
-                    router.push("/deploy/phone-numbers/pn_new")
+                    router.push("/deploy/inbound/new")
                   }}
                 />
                 <RouteCard
@@ -198,7 +208,7 @@ function Summary({ label, value }: { label: string; value: string }) {
 
 function RouteCard({ icon: Icon, title, desc, onClick }: { icon: React.ComponentType<{ className?: string }>; title: string; desc: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="group flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-sm">
+    <button type="button" onClick={onClick} className="group flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-sm focus-visible:border-primary/40">
       <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted shrink-0">
         <Icon className="h-4 w-4 text-foreground" />
       </div>
@@ -206,7 +216,7 @@ function RouteCard({ icon: Icon, title, desc, onClick }: { icon: React.Component
         <p className="text-sm font-medium">{title}</p>
         <p className="text-xs text-muted-foreground">{desc}</p>
       </div>
-      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
     </button>
   )
 }

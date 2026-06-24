@@ -3,8 +3,7 @@
 import { Plus, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -33,6 +32,22 @@ export default function WebhooksPage() {
         </p>
         <Button size="sm"><Plus className="h-4 w-4" /> Add Endpoint</Button>
       </div>
+        {WEBHOOKS.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <Plus className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">No endpoints yet</p>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  Add an endpoint to receive HTTP POST callbacks for call, campaign, and agent events as they happen.
+                </p>
+              </div>
+              <Button size="sm"><Plus className="h-4 w-4" /> Add Endpoint</Button>
+            </CardContent>
+          </Card>
+        ) : (
         <Card>
           <CardContent className="p-0">
             <Table>
@@ -55,7 +70,10 @@ export default function WebhooksPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <MoreHorizontal className="h-3.5 w-3.5" />
+                            <span className="sr-only">Webhook actions</span>
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>View deliveries</DropdownMenuItem>
@@ -84,6 +102,7 @@ export default function WebhooksPage() {
             </Table>
           </CardContent>
         </Card>
+        )}
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Available Events</CardTitle></CardHeader>
           <CardContent className="flex flex-wrap gap-2">

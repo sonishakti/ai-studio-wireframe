@@ -3,7 +3,6 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 /**
@@ -23,8 +22,8 @@ export type CatalogCardProps = {
   name: string
   /** Subtitle — vendor / category / one-liner */
   description: string
-  /** Where the card links to */
-  href: string
+  /** Where the card links to. Omit when using `onAction` (mock surfaces). */
+  href?: string
   /** Icon component (lucide). For initials/brand letters, use the
    *  `initials` prop instead. */
   icon?: React.ComponentType<{ className?: string }>
@@ -40,12 +39,15 @@ export type CatalogCardProps = {
   meta?: string
   /** Override the action label — default "Open" */
   actionLabel?: string
+  /** When there's no real route yet, pass a handler — the card renders as a
+   *  button (mock surface) instead of a Link. Use ONE of `href` or `onAction`. */
+  onAction?: () => void
 }
 
 const STATUS_STYLES: Record<CatalogCardStatus, string> = {
   available:    "",
-  connected:    "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-  beta:         "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-400",
+  connected:    "border-success/40 bg-success/10 text-success",
+  beta:         "border-primary/40 bg-primary/10 text-primary",
   "coming-soon":"border-muted-foreground/30 bg-muted text-muted-foreground",
 }
 
@@ -67,24 +69,12 @@ export function CatalogCard({
   statusLabel,
   meta,
   actionLabel,
+  onAction,
 }: CatalogCardProps) {
   const isUnavailable = status === "coming-soon"
 
-  return (
-    <Card
-      className={cn(
-        "transition-colors group",
-        isUnavailable
-          ? "opacity-60"
-          : "hover:border-foreground/30 hover:shadow-sm cursor-pointer",
-      )}
-    >
-      <Link
-        href={isUnavailable ? "#" : href}
-        className={isUnavailable ? "pointer-events-none" : "block"}
-        aria-disabled={isUnavailable}
-      >
-        <CardContent className="p-4 flex flex-col gap-3">
+  const body = (
+    <CardContent className="p-4 flex flex-col gap-3">
           {/* Header: icon + status */}
           <div className="flex items-start justify-between gap-2">
             {Icon ? (
@@ -136,7 +126,30 @@ export function CatalogCard({
               </span>
             )}
           </div>
-        </CardContent>
+    </CardContent>
+  )
+
+  // Coming-soon: truly inert — no <a>, so it never lands in the tab order.
+  if (isUnavailable) {
+    return <Card className="transition-colors group opacity-60">{body}</Card>
+  }
+
+  // Mock surface (no real route yet): render as a button that fires onAction.
+  if (onAction) {
+    return (
+      <Card className="transition-colors group hover:border-foreground/30 hover:shadow-sm">
+        <button type="button" onClick={onAction} className="block w-full text-left">
+          {body}
+        </button>
+      </Card>
+    )
+  }
+
+  // Real destination.
+  return (
+    <Card className="transition-colors group hover:border-foreground/30 hover:shadow-sm cursor-pointer">
+      <Link href={href ?? "#"} className="block">
+        {body}
       </Link>
     </Card>
   )

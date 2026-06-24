@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { toast } from "sonner"
 import {
-  Search, Download, Radio, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  Search, Download, Radio, ArrowRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +17,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { MonitorNav } from "@/components/monitor-nav"
-import { AGENTS } from "@/lib/campaign-data"
+import { AGENTS, DEPLOYMENTS } from "@/lib/campaign-data"
 import { track, Events } from "@/lib/analytics"
 
 // Agent sessions = one AI conversation run (Conversational AI Engine join→leave).
@@ -45,8 +47,14 @@ function genSessions(): AgentSession[] {
     "Nov 15, 2025, 04:00 PM", "Nov 10, 2025, 09:00 PM", "Oct 20, 2025, 09:00 AM",
     "Oct 15, 2025, 10:00 AM", "Oct 06, 2025, 02:00 PM",
   ]
+  // Sessions only exist where deployments have carried traffic. A brand-new
+  // zero-traffic account therefore genuinely sees the first-run empty state.
+  const totalCalls = DEPLOYMENTS.reduce((sum, d) => sum + d.metrics.calls, 0)
+  if (totalCalls === 0) return []
+  const count = Math.min(64, Math.max(8, Math.round(totalCalls / 400)))
+
   const out: AgentSession[] = []
-  for (let i = 1; i <= 64; i++) {
+  for (let i = 1; i <= count; i++) {
     const status: SessionStatus = (i * 5) % 7 === 0 ? "Failed" : "Completed"
     const mins = status === "Failed" ? 0 : (i % 5) + 1
     out.push({
@@ -88,13 +96,33 @@ export default function SessionsPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <MonitorNav action={<Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>} />
+      <MonitorNav
+        subtitle="Every agent conversation session across test and live calls."
+        action={
+          <Button
+            variant="outline" size="sm" className="gap-1.5"
+            disabled={SESSIONS.length === 0}
+            onClick={() => toast.info("Mock: exporting sessions to CSV…")}
+          >
+            <Download className="h-3.5 w-3.5" /> Export
+          </Button>
+        }
+      />
 
       <main className="flex-1 p-6 pt-4 space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Every agent conversation session across test and live calls.
-        </p>
-
+        {SESSIONS.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-16 text-center">
+            <Radio className="h-7 w-7 text-muted-foreground" />
+            <p className="text-sm font-medium">No sessions yet</p>
+            <p className="max-w-sm text-xs text-muted-foreground">
+              Talk to Aria or put a deployment live, and every conversation run shows up here.
+            </p>
+            <Button asChild size="sm" className="mt-1 gap-1.5">
+              <Link href="/deploy">Go to deployments <ArrowRight className="h-3.5 w-3.5" /></Link>
+            </Button>
+          </div>
+        ) : (
+        <>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[220px] max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -148,7 +176,7 @@ export default function SessionsPage() {
         <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
           <span>Rows per page</span>
           <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-            <SelectTrigger className="h-8 w-18"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
             <SelectContent>
               {[10, 25, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
             </SelectContent>
@@ -161,6 +189,8 @@ export default function SessionsPage() {
             <Button variant="outline" size="icon" className="h-8 w-8" disabled={safePage >= pageCount} onClick={() => setPage(pageCount)} title="Last page"><ChevronsRight className="h-4 w-4" /></Button>
           </div>
         </div>
+        </>
+        )}
       </main>
     </div>
   )

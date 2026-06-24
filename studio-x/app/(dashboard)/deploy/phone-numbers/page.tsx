@@ -45,6 +45,39 @@ export default function PhoneNumbersPage() {
 
   const assignedCount = PHONE_NUMBERS.filter((n) => n.assignedTo.length > 0 || !!n.assignedAgent).length
   const availableCount = PHONE_NUMBERS.length - assignedCount
+  const hasNumbers = PHONE_NUMBERS.length > 0
+
+  if (!hasNumbers) {
+    return (
+      <div className="flex flex-col flex-1">
+        <DeployContextBar channelLabel="Phone numbers" />
+        <PageHeader
+          title="Phone numbers"
+          actions={
+            <AddPhoneNumberSheet>
+              <Button size="sm" className="gap-1.5">
+                <Plus className="h-4 w-4" /> Add Phone Number
+              </Button>
+            </AddPhoneNumberSheet>
+          }
+        />
+        <main className="flex flex-1 flex-col items-center justify-center gap-3 p-10 text-center">
+          <Phone className="h-8 w-8 text-muted-foreground" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">No phone numbers yet</p>
+            <p className="max-w-sm text-sm text-muted-foreground">
+              Bring a SIP number from your carrier to take inbound calls or run outbound batches.
+            </p>
+          </div>
+          <AddPhoneNumberSheet>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> Add your first number
+            </Button>
+          </AddPhoneNumberSheet>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -104,7 +137,7 @@ export default function PhoneNumbersPage() {
                 {rows.map((n) => (
                   <TableRow key={n.id}>
                     <TableCell className="font-mono text-sm">
-                      <Link href={`/phone-numbers/${n.id}`} className="hover:text-primary transition-colors">{n.number}</Link>
+                      <Link href={`/deploy/phone-numbers/${n.id}`} className="hover:text-primary transition-colors">{n.number}</Link>
                     </TableCell>
                     <TableCell className="text-sm">{n.label}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{n.vendor}</TableCell>
@@ -149,13 +182,13 @@ export default function PhoneNumbersPage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Actions for ${n.number}`}>
                             <MoreHorizontal className="h-3.5 w-3.5" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link href={`/phone-numbers/${n.id}`}>Edit configuration</Link>
+                            <Link href={`/deploy/phone-numbers/${n.id}`}>Edit configuration</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem>Assign to batch</DropdownMenuItem>
                           <DropdownMenuSeparator />

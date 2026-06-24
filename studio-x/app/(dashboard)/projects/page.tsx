@@ -2,9 +2,10 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Plus, Search, FolderKanban, Users, MoreHorizontal, Copy, CheckCircle2,
-  Archive, RotateCcw,
+  Archive, RotateCcw, ArrowRight,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { toast } from "sonner"
+import { track, Events } from "@/lib/analytics"
 
 type Project = {
   id: string; name: string; description: string; appId: string
@@ -36,17 +38,29 @@ const PROJECTS: Project[] = [
 
 // Env shown as a single colored dot + label — quieter than a bordered badge per card.
 const ENV_DOT: Record<string, string> = {
-  production:  "bg-emerald-500",
-  staging:     "bg-amber-500",
-  development: "bg-sky-500",
+  production:  "bg-success",
+  staging:     "bg-warning",
+  development: "bg-primary",
 }
 
 export default function ProjectsPage() {
+  const router = useRouter()
   const [query, setQuery] = React.useState("")
   const [envFilter, setEnvFilter] = React.useState("all")
   const [showArchived, setShowArchived] = React.useState(false)
 
   const archivedCount = PROJECTS.filter((p) => p.status === "archived").length
+
+  // Open a project = switch context (if not already current) then land on the
+  // app root for that project. Mirrors ProjectSwitcher's behaviour.
+  const openProject = (p: Project) => {
+    if (!p.current) {
+      const from = PROJECTS.find((x) => x.current)
+      track(Events.project_switched, { from_project_id: from?.id ?? "", to_project_id: p.id })
+      toast.success(`Switched to ${p.name}`, { description: "Reloading project data…" })
+    }
+    router.push("/agents")
+  }
 
   const filtered = PROJECTS.filter((p) => {
     const q = query.trim().toLowerCase()
@@ -69,7 +83,7 @@ export default function ProjectsPage() {
         title="Projects"
         description="Each project has its own credentials, usage, and quotas."
         actions={
-          <Button>
+          <Button onClick={() => toast.info("Mock: New Project")}>
             <Plus className="h-4 w-4" /> New Project
           </Button>
         }
@@ -134,7 +148,12 @@ export default function ProjectsPage() {
                   <CardContent className="p-4">
                     {/* Header: identity + actions */}
                     <div className="flex items-start justify-between gap-2">
-                      <Link href="/agents" className="flex items-start gap-3 flex-1 min-w-0 group">
+                      <button
+                        type="button"
+                        onClick={() => openProject(p)}
+                        className="flex items-start gap-3 flex-1 min-w-0 group text-left"
+                        aria-label={p.current ? `Open ${p.name}` : `Switch to ${p.name}`}
+                      >
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
                           <FolderKanban className="h-4 w-4 text-muted-foreground" />
                         </div>
@@ -154,7 +173,7 @@ export default function ProjectsPage() {
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">{p.description}</p>
                         </div>
-                      </Link>
+                      </button>
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -163,15 +182,21 @@ export default function ProjectsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Open</DropdownMenuItem>
-                          <DropdownMenuItem>Rename</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => openProject(p)}>
+                            <ArrowRight className="h-3.5 w-3.5" /> Open
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => toast.info(`Mock: Rename "${p.name}"`)}>
+                            Rename
+                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => copyAppId(p.appId)}>
                             <Copy className="h-3.5 w-3.5" /> Copy App ID
                           </DropdownMenuItem>
-                          <DropdownMenuItem>Settings</DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/project/settings">Settings</Link>
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {archived ? (
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => toast.success(`Restored "${p.name}"`)}>
                               <RotateCcw className="h-3.5 w-3.5" /> Restore
                             </DropdownMenuItem>
                           ) : (
@@ -215,13 +240,17 @@ export default function ProjectsPage() {
 
             {/* Add-new card — only when not filtering, so it doesn't masquerade as a result */}
             {!hasFilters && (
-              <Card className="border-dashed flex items-center justify-center cursor-pointer hover:border-foreground/40 transition-colors min-h-[140px]">
+              <button
+                type="button"
+                onClick={() => toast.info("Mock: New Project")}
+                className="rounded-xl border border-dashed flex items-center justify-center cursor-pointer hover:border-foreground/40 transition-colors min-h-40"
+              >
                 <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
                   <Plus className="h-5 w-5" />
                   <span className="text-sm font-medium">New Project</span>
                   <span className="text-xs">Start fresh with new credentials</span>
                 </div>
-              </Card>
+              </button>
             )}
           </div>
         )}
@@ -237,7 +266,7 @@ export default function ProjectsPage() {
               <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                 A project holds your agents, credentials, and usage. Create one to get started.
               </p>
-              <Button className="mt-4">
+              <Button className="mt-4" onClick={() => toast.info("Mock: New Project")}>
                 <Plus className="h-4 w-4" /> New Project
               </Button>
             </CardContent>

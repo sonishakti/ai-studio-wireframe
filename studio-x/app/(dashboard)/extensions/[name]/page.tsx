@@ -20,12 +20,28 @@ import { toast } from "sonner"
 // overview → plan & pricing → projects → installation guide, with a sticky
 // "More info" rail. No tabs.
 
-const EXTENSION_INFO = {
+type ExtensionDetail = {
+  name: string
+  vendor: string
+  description: string
+  initials: string
+  /** Tile background — semantic surface tone, themes correctly. */
+  tone: string
+  version: string
+  updated: string
+  platforms: string[]
+  features: string[]
+  gallery: { label: string; tone: string }[]
+  changelog: { version: string; date: string; text: string }[]
+  install: { title: string; body: string; code: string }[]
+}
+
+const FACE_AR: ExtensionDetail = {
   name: "Face AR Effects",
   vendor: "Deepar.ai",
   description: "Add 3D face masks, filters, background removal and other AR experiences to your app via Agora's Video SDK.",
   initials: "AR",
-  color: "bg-red-700",
+  tone: "bg-primary/15 text-primary",
   version: "1.0.4",
   updated: "2025-10-14",
   platforms: ["Web", "macOS", "iOS"],
@@ -37,38 +53,71 @@ const EXTENSION_INFO = {
     "Low-latency GPU pipeline — <2 ms processing overhead",
   ],
   gallery: [
-    { label: "Face Masks", tone: "bg-violet-500/20 text-violet-700 dark:text-violet-300" },
-    { label: "AR Filters", tone: "bg-sky-500/20 text-sky-700 dark:text-sky-300" },
-    { label: "AI Touch-Up", tone: "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" },
+    { label: "Face Masks", tone: "bg-muted text-muted-foreground" },
+    { label: "AR Filters", tone: "bg-muted text-muted-foreground" },
+    { label: "AI Touch-Up", tone: "bg-muted text-muted-foreground" },
   ],
   changelog: [
     { version: "1.0.4", date: "2025-10-14", text: "Performance improvements; reduced GPU memory footprint by 30%." },
     { version: "1.0.3", date: "2025-08-01", text: "Added virtual background replacement. Fixed crash on Safari 17." },
     { version: "1.0.0", date: "2025-04-12", text: "Initial release." },
   ],
+  install: [
+    {
+      title: "Install the packages",
+      body: "Download and install the extension alongside the Agora RTC SDK:",
+      code: "npm install agora-extension-face-ar agora-rtc-sdk-ng",
+    },
+    {
+      title: "Register the extension",
+      body: "Initialise the SDK in your application and register the extension:",
+      code: `import FaceARExtension from 'agora-extension-face-ar';
+AgoraRTC.registerExtensions([new FaceARExtension()]);`,
+    },
+  ],
 }
 
-const INSTALL_STEPS = [
-  {
-    title: "Install the packages",
-    body: "Download and install the extension alongside the Agora RTC SDK:",
-    code: "npm install agora-extension-face-ar agora-rtc-sdk-ng",
-  },
-  {
-    title: "Register the extension",
-    body: "Initialise the SDK in your application and register the extension:",
-    code: `import FaceARExtension from 'agora-extension-face-ar';
-AgoraRTC.registerExtensions([new FaceARExtension()]);`,
-  },
-]
+// Catalog keyed by route param. Unknown ids fall through to a not-found state.
+// Face AR is the fully-authored fixture; other ids resolve to it as a stand-in
+// so the existing marketplace deep-links still land on a real detail page.
+const EXTENSIONS: Record<string, ExtensionDetail> = {
+  ext_cloud_recording: FACE_AR,
+  ext_active_fence: FACE_AR,
+  ext_spatial_audio: FACE_AR,
+  ext_transcription: FACE_AR,
+  ext_noise_cancel: FACE_AR,
+  ext_sentiment: FACE_AR,
+  "face-ar": FACE_AR,
+}
 
 export default function ExtensionDetailPage({
   params,
 }: {
   params: Promise<{ name: string }>
 }) {
-  use(params)
-  const ext = EXTENSION_INFO
+  const { name } = use(params)
+  const ext = EXTENSIONS[name]
+
+  if (!ext) {
+    return (
+      <div className="flex flex-col flex-1">
+        <PageHeader title="Extension not found" />
+        <main className="flex-1 p-6">
+          <Card>
+            <CardContent className="p-8 text-center space-y-3">
+              <p className="text-sm text-muted-foreground">
+                We couldn&apos;t find an extension matching{" "}
+                <span className="font-mono text-foreground">{name}</span>.
+              </p>
+              <Button asChild>
+                <Link href="/extensions">Back to Marketplace</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    )
+  }
 
   const [projects, setProjects] = React.useState([
     { name: "My first project", enabled: true },
@@ -95,13 +144,13 @@ export default function ExtensionDetailPage({
         description={`by ${ext.vendor}`}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info("Mock: open documentation")}>
               Go to Docs <ExternalLink className="h-3.5 w-3.5 ml-1" />
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info("Mock: open partner website")}>
               Partner Website <ExternalLink className="h-3.5 w-3.5 ml-1" />
             </Button>
-            <Button size="sm" className="gap-1.5">
+            <Button size="sm" className="gap-1.5" onClick={() => toast.success(`${ext.name} downloading for Web`)}>
               <Download className="h-3.5 w-3.5" /> Download for Web
             </Button>
           </div>
@@ -116,13 +165,13 @@ export default function ExtensionDetailPage({
             <Card>
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-white font-semibold shrink-0 ${ext.color}`}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl font-semibold shrink-0 ${ext.tone}`}>
                     {ext.initials}
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed flex-1">{ext.description}</p>
                 </div>
 
-                {/* Gallery strip */}
+                {/* Gallery strip — placeholder previews until real media ships */}
                 <div className="grid grid-cols-3 gap-3">
                   {ext.gallery.map((g) => (
                     <div
@@ -130,6 +179,7 @@ export default function ExtensionDetailPage({
                       className={`flex h-24 items-end rounded-lg p-3 text-sm font-semibold ${g.tone}`}
                     >
                       {g.label}
+                      <span className="sr-only"> (preview placeholder)</span>
                     </div>
                   ))}
                 </div>
@@ -198,7 +248,7 @@ export default function ExtensionDetailPage({
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Installation guide
                 </p>
-                {INSTALL_STEPS.map((step, i) => (
+                {ext.install.map((step, i) => (
                   <div key={step.title} className="space-y-2">
                     <p className="text-sm font-semibold">Step {i + 1} · {step.title}</p>
                     <p className="text-sm text-muted-foreground">{step.body}</p>
@@ -210,6 +260,7 @@ export default function ExtensionDetailPage({
                         onClick={() => copy(step.code)}
                       >
                         <Copy className="h-3 w-3" />
+                        <span className="sr-only">Copy command</span>
                       </Button>
                       <code>{step.code}</code>
                     </div>
@@ -220,6 +271,7 @@ export default function ExtensionDetailPage({
                 <button
                   type="button"
                   onClick={() => setChangelogOpen((v) => !v)}
+                  aria-expanded={changelogOpen}
                   className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2.5 text-sm hover:bg-accent/50 transition-colors"
                 >
                   <span className="font-medium">Changelog</span>

@@ -15,6 +15,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { openComposerPanel } from "@/components/composer-panel"
 
 // ─── segment → human label map ───────────────────────────────────────────────
@@ -96,6 +101,29 @@ const RESOURCE_TAB_LABELS: Record<string, string> = {
   channels: "Deployment Channels",
 }
 
+// Ancestor paths that resolve to a real index route and are safe to link.
+// Anything not listed renders as plain text (a tab-only or virtual segment like
+// /agents/[id]/edit or /project has no standalone page to navigate to).
+const LINKABLE_PATHS = new Set<string>([
+  "/agents",
+  "/composer",
+  "/monitor",
+  "/calls",
+  "/sessions",
+  "/integrations",
+  "/realtime-services",
+  "/project/settings",
+  "/deploy",
+  "/deploy/phone-numbers",
+  "/deploy/batch-calls",
+  "/billing",
+  "/billing/usage",
+  "/extensions",
+  "/developer",
+  "/help",
+  "/projects",
+])
+
 // ─── component ───────────────────────────────────────────────────────────────
 
 export function DashboardHeader() {
@@ -111,26 +139,50 @@ export function DashboardHeader() {
       </React.Suspense>
 
       <div className="ml-auto flex shrink-0 items-center gap-1.5">
-        <Button variant="ghost" size="icon" className="h-8 w-8" title="Help">
-          <CircleHelp className="h-4 w-4" />
-          <span className="sr-only">Help</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="relative h-8 w-8" title="Notifications">
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+              <Link href="/help">
+                <CircleHelp className="h-4 w-4" />
+                <span className="sr-only">Help</span>
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Help</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative h-8 w-8" asChild>
+              <Link href="/notifications">
+                <Bell className="h-4 w-4" />
+                <span
+                  aria-hidden="true"
+                  className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary"
+                />
+                <span className="sr-only">Notifications, unread</span>
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Notifications · unread</TooltipContent>
+        </Tooltip>
         <Separator orientation="vertical" className="h-4 mx-1" />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 gap-1.5 text-xs"
-          onClick={openComposerPanel}
-          title="Composer (⌘J)"
-        >
-          Composer
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-xs"
+              onClick={openComposerPanel}
+            >
+              Composer
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <kbd className="ml-0.5 hidden font-mono text-xs tracking-wider text-muted-foreground sm:inline">
+                ⌘J
+              </kbd>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Open Composer (⌘J)</TooltipContent>
+        </Tooltip>
       </div>
     </header>
   )
@@ -140,12 +192,25 @@ function HeaderBreadcrumb() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  // Build breadcrumb trail from the URL, skipping ID segments
-  const crumbs: { label: string; href: string }[] = []
+  // Build breadcrumb trail from the URL, skipping ID segments. Only segments
+  // whose cumulative path resolves to a real index route are linkable; the rest
+  // render as plain text so we never hand the user a crumb that 404s.
+  const crumbs: { label: string; href?: string }[] = []
+
+  // Call History (/calls), Sessions (/sessions) and Chat History (/chats) are
+  // Monitor children rendered as top-level routes (MonitorNav tabs), so the
+  // sidebar highlights Monitor. Seed a synthetic "Monitor" ancestor so the
+  // breadcrumb agrees with the highlighted nav item.
+  if (["/calls", "/sessions", "/chats"].includes(pathname)) {
+    crumbs.push({ label: "Monitor", href: "/monitor" })
+  }
+
   let acc = ""
   for (const seg of pathname.split("/").filter(Boolean)) {
     acc += `/${seg}`
-    if (!isId(seg)) crumbs.push({ label: labelOf(seg), href: acc })
+    if (!isId(seg)) {
+      crumbs.push({ label: labelOf(seg), href: LINKABLE_PATHS.has(acc) ? acc : undefined })
+    }
   }
 
   // Resources is tab-routed: surface the active tab as the leaf crumb.
@@ -164,9 +229,9 @@ function HeaderBreadcrumb() {
         {crumbs.map((crumb, i) => {
           const isLast = i === crumbs.length - 1
           return (
-            <React.Fragment key={crumb.href}>
+            <React.Fragment key={`${crumb.label}-${i}`}>
               <BreadcrumbItem className="min-w-0">
-                {isLast ? (
+                {isLast || !crumb.href ? (
                   <BreadcrumbPage className="truncate max-w-[200px]">
                     {crumb.label}
                   </BreadcrumbPage>

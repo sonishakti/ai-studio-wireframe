@@ -43,20 +43,20 @@ export function SecuredModeBanner({
   // ───── NOT YET ACTIVATED — high-priority banner ─────────────────────────
   if (!enabled) {
     return (
-      <Card className="border-amber-500/40 bg-amber-500/5">
+      <Card className="border-warning/40 bg-warning/5">
         <CardContent
           className={cn(
             "flex items-center gap-4",
             variant === "full" ? "p-5" : "px-4 py-3",
           )}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 shrink-0">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/15 shrink-0">
+            <AlertTriangle className="h-5 w-5 text-warning" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold">Your project is in test mode</p>
-              <Badge variant="outline" className="text-xs border-amber-500/40 text-amber-700 dark:text-amber-400">
+              <Badge variant="outline" className="text-xs border-warning/40 text-warning">
                 P0
               </Badge>
             </div>
@@ -79,13 +79,13 @@ export function SecuredModeBanner({
   // ───── ENABLED, NOT YET DISMISSED — small confirmation ─────────────────
   if (!confirmDismissed) {
     return (
-      <Card className="border-emerald-500/30 bg-emerald-500/5">
+      <Card className="border-success/30 bg-success/5">
         <CardContent className="flex items-center gap-3 px-4 py-2.5">
-          <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+          <ShieldCheck className="h-4 w-4 text-success shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-xs">
               <span className="font-medium">Secured mode active.</span>
-              <span className="text-muted-foreground"> Tokens are required for SDK authentication. Last verified 2 min ago.</span>
+              <span className="text-muted-foreground"> Tokens are required for SDK authentication.</span>
             </p>
           </div>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" asChild>
@@ -123,8 +123,8 @@ export function SecuredModePill({ enabled }: { enabled: boolean }) {
       className={cn(
         "gap-1 text-xs",
         enabled
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-          : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+          ? "border-success/40 bg-success/10 text-success"
+          : "border-warning/40 bg-warning/10 text-warning",
       )}
     >
       {enabled ? <ShieldCheck className="h-2.5 w-2.5" /> : <Shield className="h-2.5 w-2.5" />}
@@ -140,9 +140,9 @@ export function SecuredModePill({ enabled }: { enabled: boolean }) {
 export function SecuredModeGate({ enabled }: { enabled: boolean }) {
   if (enabled) return null
   return (
-    <Card className="border-amber-500/40 bg-amber-500/5">
+    <Card className="border-warning/40 bg-warning/5">
       <CardContent className="flex items-start gap-3 px-4 py-3">
-        <Shield className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+        <Shield className="h-4 w-4 text-warning shrink-0 mt-0.5" />
         <div className="flex-1 text-xs">
           <p className="font-medium text-foreground">Secured mode required for production traffic</p>
           <p className="text-muted-foreground mt-0.5">

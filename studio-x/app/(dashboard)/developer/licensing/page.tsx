@@ -1,7 +1,8 @@
+import Link from "next/link"
 import { CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 const LICENSES = [
@@ -23,7 +24,9 @@ export default function LicensingPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Current Plan: Free</CardTitle>
-              <Button size="sm">Upgrade to Pro</Button>
+              <Button size="sm" asChild>
+                <Link href="/billing/upgrade">Upgrade to Pro</Link>
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-0">
@@ -31,7 +34,7 @@ export default function LicensingPage() {
               <div key={lic.feature}>
                 <div className="flex items-center gap-3 py-3">
                   {lic.included
-                    ? <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+                    ? <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     : <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />}
                   <div className="flex-1">
                     <p className={`text-sm font-medium ${!lic.included ? "text-muted-foreground" : ""}`}>{lic.feature}</p>

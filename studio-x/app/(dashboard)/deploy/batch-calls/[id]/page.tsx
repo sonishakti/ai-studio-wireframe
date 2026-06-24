@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { PageHeader } from "@/components/page-header"
 import { CredentialRiskBanner } from "@/components/credential-risk-banner"
 import { getDeployment, STATUS_BADGE, extractVars } from "@/lib/campaign-data"
 import { toast } from "sonner"
@@ -67,42 +68,33 @@ export default function BatchCallDetailPage({
 
   return (
     <div className="flex flex-col flex-1">
-      <header className="border-b bg-background px-6 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Link href="/deploy/batch-calls" className="hover:text-foreground transition-colors">
-                Batch Calls
-              </Link>
-              <span>/</span>
-              <span className="text-foreground">{d.name}</span>
-            </div>
-            <div id="channel" className="flex items-center gap-3 flex-wrap scroll-mt-20">
-              <h1 className="text-lg font-semibold tracking-tight">{d.name}</h1>
-              <Badge variant={s.variant}>{s.label}</Badge>
-            </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-0.5">
-              <Link
-                href={`/agents/${d.agentId}/edit`}
-                className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-              >
-                <Bot className="h-3 w-3" /> {d.agentName}
-              </Link>
-              {d.channel.kind === "telephony" && (
-                <span className="inline-flex items-center gap-1 font-mono">
-                  <Phone className="h-3 w-3" /> {d.channel.numbers.join(", ")}
-                </span>
-              )}
-              {d.startDate && <span>Starts {d.startDate}</span>}
-            </div>
+      <PageHeader
+        title={d.name}
+        actions={
+          <div className="flex items-center gap-2">
+            <Badge variant={s.variant}>{s.label}</Badge>
+            <Button variant="ghost" size="sm" asChild className="gap-1 shrink-0">
+              <Link href="/deploy/batch-calls"><ArrowLeft className="h-3.5 w-3.5" /> All batches</Link>
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" asChild className="gap-1 shrink-0">
-            <Link href="/deploy/batch-calls"><ArrowLeft className="h-3.5 w-3.5" /> All batches</Link>
-          </Button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="flex-1 p-6 space-y-4">
+        <div id="channel" className="flex items-center gap-4 text-xs text-muted-foreground scroll-mt-20">
+          <Link
+            href={`/agents/${d.agentId}/edit`}
+            className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+          >
+            <Bot className="h-3 w-3" /> {d.agentName}
+          </Link>
+          {d.channel.kind === "telephony" && (
+            <span className="inline-flex items-center gap-1 font-mono">
+              <Phone className="h-3 w-3" /> {d.channel.numbers.join(", ")}
+            </span>
+          )}
+          {d.startDate && <span>Starts {d.startDate}</span>}
+        </div>
         <CredentialRiskBanner deploymentId={d.id} agentId={d.agentId} />
 
         <Tabs value={tab} onValueChange={setTab}>
@@ -138,7 +130,7 @@ export default function BatchCallDetailPage({
                   Calls from this batch appear in Monitor with the batch filter applied.
                 </p>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/calls">View call history →</Link>
+                  <Link href={`/calls?batch=${d.id}`}>View call history →</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -200,6 +192,8 @@ export default function BatchCallDetailPage({
                         <button
                           key={c}
                           type="button"
+                          aria-label={`Copy ${c} variable`}
+                          aria-pressed={usedVars.includes(c)}
                           onClick={() => {
                             navigator.clipboard?.writeText(`{{${c}}}`)
                             toast.success(`{{${c}}} copied`)
@@ -221,8 +215,8 @@ export default function BatchCallDetailPage({
                       </p>
                     )}
                     {unknownVars.length > 0 && (
-                      <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-2">
-                        <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 p-2">
+                        <Info className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
                         <p className="text-xs leading-relaxed">
                           {unknownVars.map((v) => `{{${v}}}`).join(", ")} not found in the CSV —
                           these resolve empty at dial time.

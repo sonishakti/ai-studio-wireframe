@@ -20,9 +20,11 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DEPLOYMENTS, formatDuration, getDeployment, deploymentHref } from "@/lib/campaign-data"
 import { CallDetailSheet, type CallDetail } from "@/components/call-detail-sheet"
 import { track, Events } from "@/lib/analytics"
+import { toast } from "sonner"
 
 // ─── synthesize cross-campaign call history ─────────────────────────────────
 
@@ -92,6 +94,12 @@ function transcriptFor(c: CallRow): CallDetail["transcript"] {
   ]
 }
 
+// Static table columns — the single source of truth for the empty-row colSpan
+// (header list below must stay in sync with this count).
+const BASE_COLUMNS = [
+  "Direction", "Timestamp", "Agent", "Deployment", "From", "To", "Duration", "Call Status", "Call Outcome",
+] as const
+
 // Optional "structured output" columns the user can surface via Customise View.
 const OPTIONAL_COLUMNS = [
   { key: "sentiment", label: "Sentiment" },
@@ -140,7 +148,7 @@ export default function CallHistoryPage() {
     setter(next)
   }
 
-  const openCall = (c: CallRow) => {
+  const openCall = React.useCallback((c: CallRow) => {
     setSelected({
       id: c.id, type: c.direction === "in" ? "Inbound" : "Outbound", from: c.from, to: c.to,
       campaign: c.campaignName, agent: c.agent, timestamp: c.timestamp, durationSec: c.durationSec,
@@ -148,11 +156,42 @@ export default function CallHistoryPage() {
       deploymentId: c.campaignId, agentId: getDeployment(c.campaignId)?.agentId,
     })
     setSheetOpen(true)
+    // Reflect the open call in the URL so it survives refresh and can be shared.
+    const url = new URL(window.location.href)
+    url.searchParams.set("call", c.id)
+    window.history.replaceState(null, "", url.toString())
+  }, [])
+
+  // Deep-link: open the call named in ?call= on first load (bookmark / shared link).
+  React.useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("call")
+    if (!id) return
+    const c = CALLS.find((x) => x.id === id)
+    if (c) openCall(c)
+  }, [openCall])
+
+  const closeSheet = (o: boolean) => {
+    setSheetOpen(o)
+    if (!o) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete("call")
+      window.history.replaceState(null, "", url.toString())
+    }
   }
 
   return (
     <div className="flex flex-col flex-1">
-      <MonitorNav action={<Button variant="outline" size="sm" className="gap-1.5"><Download className="h-3.5 w-3.5" /> Export</Button>} />
+      <MonitorNav
+        action={
+          <Button
+            variant="outline" size="sm" className="gap-1.5"
+            disabled={rows.length === 0}
+            onClick={() => toast.info(`Mock: exporting ${rows.length} call${rows.length === 1 ? "" : "s"} to CSV…`)}
+          >
+            <Download className="h-3.5 w-3.5" /> Export
+          </Button>
+        }
+      />
 
       <main className="flex-1 p-6 pt-4 space-y-4">
         {/* Toolbar */}
@@ -163,14 +202,20 @@ export default function CallHistoryPage() {
           </div>
 
           {/* Direction quick filter */}
-          <div className="flex items-center gap-1 rounded-md border border-border bg-card p-0.5">
+          <ToggleGroup
+            type="single"
+            value={direction}
+            onValueChange={(v) => v && setDirection(v as "all" | "in" | "out")}
+            aria-label="Filter calls by direction"
+            variant="outline"
+            size="sm"
+          >
             {([["all", "All"], ["in", "Inbound"], ["out", "Outbound"]] as const).map(([v, label]) => (
-              <button key={v} onClick={() => setDirection(v)}
-                className={"rounded px-2.5 h-7 text-xs font-medium transition-colors " + (direction === v ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}>
+              <ToggleGroupItem key={v} value={v} aria-label={label}>
                 {label}
-              </button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
 
           {/* Filter dropdown — dimensions from the reference */}
           <DropdownMenu>
@@ -244,7 +289,20 @@ export default function CallHistoryPage() {
               </TableHeader>
               <TableBody>
                 {visible.map((c) => (
-                  <TableRow key={c.id} className="cursor-pointer" onClick={() => openCall(c)}>
+                  <TableRow
+                    key={c.id}
+                    className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Open call ${c.id}`}
+                    onClick={() => openCall(c)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        openCall(c)
+                      }
+                    }}
+                  >
                     <TableCell>
                       <span className="inline-flex items-center gap-1.5 text-sm">
                         {c.direction === "in" ? <PhoneIncoming className="h-3.5 w-3.5 text-muted-foreground" /> : <PhoneOutgoing className="h-3.5 w-3.5 text-muted-foreground" />}
@@ -284,7 +342,7 @@ export default function CallHistoryPage() {
                   </TableRow>
                 ))}
                 {visible.length === 0 && (
-                  <TableRow><TableCell colSpan={9 + cols.size} className="text-center text-sm text-muted-foreground py-8">No calls match your filters.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={BASE_COLUMNS.length + cols.size} className="text-center text-sm text-muted-foreground py-8">No calls match your filters.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -295,7 +353,7 @@ export default function CallHistoryPage() {
         <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
           <span>Rows per page</span>
           <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-            <SelectTrigger className="h-8 w-18"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
             <SelectContent>
               {[10, 25, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
             </SelectContent>
@@ -304,7 +362,7 @@ export default function CallHistoryPage() {
         </div>
       </main>
 
-      <CallDetailSheet call={selected} open={sheetOpen} onOpenChange={setSheetOpen} />
+      <CallDetailSheet call={selected} open={sheetOpen} onOpenChange={closeSheet} />
     </div>
   )
 }

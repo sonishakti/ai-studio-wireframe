@@ -22,14 +22,15 @@ export function HelpNav() {
       </p>
       <nav className="flex items-center gap-1 mt-4 -mb-px overflow-x-auto">
         {TABS.map((tab) => {
+          // Exact match or a true sub-path boundary, so `/help/contact` does
+          // NOT prefix-match `/help/contact-sales` (both would highlight).
           const isActive =
-            tab.href === "/help"
-              ? pathname === "/help"
-              : pathname.startsWith(tab.href)
+            pathname === tab.href || pathname.startsWith(tab.href + "/")
           return (
             <Link
               key={tab.href}
               href={tab.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
                 isActive

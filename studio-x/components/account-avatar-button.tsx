@@ -82,7 +82,7 @@ export function AccountAvatarButton() {
 
         <DropdownMenuItem asChild>
           <Link href="/billing" className="gap-2">
-            <CreditCard className="h-4 w-4 text-muted-foreground" /> Usage & Billing
+            <CreditCard className="h-4 w-4 text-muted-foreground" /> Billing
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

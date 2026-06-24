@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import {
   Sparkles,
   Send,
@@ -16,6 +17,8 @@ import {
   X,
   AudioLines,
   FileText,
+  AlertCircle,
+  RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -40,6 +43,8 @@ export interface ChatMessage {
   /** How this message was entered. */
   via?: "voice" | "text"
   at?: string
+  /** Assistant turn failed — render the error/retry treatment. */
+  error?: boolean
 }
 
 // ─── Quick-start prompts ─────────────────────────────────────────────────────
@@ -75,10 +80,12 @@ export function ComposerChat({
   onDraftUpdate,
   className,
 }: ComposerChatProps) {
+  const router = useRouter()
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages)
   const [draft, setDraft] = React.useState("")
   const [isThinking, setIsThinking] = React.useState(false)
   const attachIdx = React.useRef(0)
+  const failNext = React.useRef(false)
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
   const pushMessage = React.useCallback((role: ChatRole, text: string) => {
@@ -93,19 +100,55 @@ export function ComposerChat({
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
   }, [messages, isThinking, voice.livePartial])
 
+  // Resolve an assistant turn for a prompt — succeeds, or fails into an
+  // error bubble carrying a Retry action so the unhappy path has a real design.
+  const resolveAssistantTurn = React.useCallback(
+    (prompt: string) => {
+      setIsThinking(true)
+      window.setTimeout(() => {
+        const willFail = failNext.current
+        failNext.current = false
+        setMessages((prev) =>
+          willFail
+            ? [
+                ...prev,
+                {
+                  id: `m_${Date.now()}_e`,
+                  role: "assistant",
+                  text: "Couldn't reach Composer just now. Check your connection and try again.",
+                  error: true,
+                  actions: [{ label: "Retry", onClick: () => resolveAssistantTurn(prompt) }],
+                  via: "text",
+                  at: "just now",
+                },
+              ]
+            : [
+                ...prev,
+                {
+                  id: `m_${Date.now()}_a`,
+                  role: "assistant",
+                  text: assistantReplyFor(prompt),
+                  actions: assistantActionsFor(prompt, router),
+                  via: "text",
+                  at: "just now",
+                },
+              ],
+        )
+        setIsThinking(false)
+      }, 700)
+    },
+    [router],
+  )
+
   const send = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
+    // Wireframe: the first "Retry" after a failure succeeds; a prompt mentioning
+    // offline/error/timeout exercises the failure path so it stays reviewable.
+    failNext.current = /\b(offline|timeout|error|fail)\b/i.test(trimmed)
     setMessages((prev) => [...prev, { id: `m_${Date.now()}_u`, role: "user", text: trimmed, via: "text", at: "just now" }])
     setDraft("")
-    setIsThinking(true)
-    window.setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: `m_${Date.now()}_a`, role: "assistant", text: assistantReplyFor(trimmed), actions: assistantActionsFor(trimmed), via: "text", at: "just now" },
-      ])
-      setIsThinking(false)
-    }, 700)
+    resolveAssistantTurn(trimmed)
   }
 
   const attachDoc = () => {
@@ -170,11 +213,18 @@ export function ComposerChat({
         >
           <Plus className="h-3.5 w-3.5" /> New
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" title="History">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          aria-label="Chat history"
+          title="History"
+          onClick={() => toast.info("Mock: would open chat history")}
+        >
           <History className="h-3.5 w-3.5" />
         </Button>
         {onClose && (
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} title="Close">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} aria-label="Close Composer" title="Close">
             <X className="h-3.5 w-3.5" />
           </Button>
         )}
@@ -224,12 +274,12 @@ export function ComposerChat({
             />
             <div className="flex items-center justify-between px-2 pb-2">
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" title="Attach a document" onClick={attachDoc}>
+                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Attach a document" title="Attach a document" onClick={attachDoc}>
                   <Paperclip className="h-3.5 w-3.5" />
                 </Button>
                 {/* Mic starts voice when idle; the dock owns talk during a call */}
                 {!onCall && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" title="Talk to Composer" onClick={voice.start}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Talk to Composer" title="Talk to Composer" onClick={voice.start}>
                     <Mic className="h-3.5 w-3.5" />
                   </Button>
                 )}
@@ -282,8 +332,9 @@ function EmptyState({
 
       {/* Single voice-first CTA — same action as the input mic */}
       <button
+        type="button"
         onClick={onStartVoice}
-        className="group mt-5 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/5 pl-2 pr-4 py-2 hover:bg-primary/10 hover:border-primary/50 transition-colors"
+        className="group mt-5 inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/5 pl-2 pr-4 py-2 hover:bg-primary/10 hover:border-primary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <AudioLines className="h-4 w-4" />
@@ -304,8 +355,9 @@ function EmptyState({
           return (
             <button
               key={q.label}
+              type="button"
               onClick={() => onPick(q.prompt)}
-              className="flex items-start gap-3 rounded-lg border border-border bg-card p-3 text-left hover:border-primary/40 hover:shadow-sm transition-all"
+              className="flex items-start gap-3 rounded-lg border border-border bg-card p-3 text-left hover:border-primary/40 hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
                 <Icon className="h-3.5 w-3.5 text-foreground" />
@@ -342,8 +394,18 @@ function MessageBubble({ message, compact }: { message: ChatMessage; compact: bo
           </div>
         )}
         {message.text && (
-          <div className={cn("rounded-lg px-3 py-2 text-sm whitespace-pre-wrap break-words", isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground")}>
-            {message.text}
+          <div
+            className={cn(
+              "rounded-lg px-3 py-2 text-sm whitespace-pre-wrap break-words",
+              message.error
+                ? "flex items-start gap-2 border border-destructive/40 bg-destructive/10 text-foreground"
+                : isUser
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground",
+            )}
+          >
+            {message.error && <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" aria-hidden />}
+            <span>{message.text}</span>
           </div>
         )}
         {message.code && (
@@ -352,7 +414,10 @@ function MessageBubble({ message, compact }: { message: ChatMessage; compact: bo
         {message.actions && message.actions.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-0.5">
             {message.actions.map((a) => (
-              <QuickChip key={a.label} onClick={a.onClick}>{a.label}</QuickChip>
+              <QuickChip key={a.label} onClick={a.onClick}>
+                {a.label === "Retry" && <RotateCcw className="h-3 w-3" />}
+                {a.label}
+              </QuickChip>
             ))}
           </div>
         )}
@@ -410,7 +475,7 @@ function QuickChip({ children, onClick }: { children: React.ReactNode; onClick?:
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+      className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
       {children}
     </button>
@@ -436,23 +501,25 @@ function assistantReplyFor(prompt: string): string {
   return "Got it. Tell me more about what should change, or pick a quick action below to take this somewhere."
 }
 
-function assistantActionsFor(prompt: string): ChatMessage["actions"] {
+type AppRouter = ReturnType<typeof useRouter>
+
+function assistantActionsFor(prompt: string, router: AppRouter): ChatMessage["actions"] {
   const lower = prompt.toLowerCase()
   if (lower.includes("latency")) {
     return [
-      { label: "Open Monitor", onClick: () => toast.info("Mock: would open the campaign's Analytics tab") },
-      { label: "Open agent editor", onClick: () => toast.info("Mock: would open editor on Models tab") },
+      { label: "Open Monitor", onClick: () => router.push("/monitor") },
+      { label: "Open agent editor", onClick: () => router.push("/agents/new/edit") },
     ]
   }
   if (lower.includes("phone number") || lower.includes("telephony")) {
     return [
-      { label: "Draft campaign", onClick: () => toast.info("Mock: would prefill /campaigns/new") },
-      { label: "Browse numbers", onClick: () => toast.info("Mock: would navigate to /phone-numbers") },
+      { label: "Draft campaign", onClick: () => router.push("/deploy/batch-calls/new") },
+      { label: "Browse numbers", onClick: () => router.push("/deploy/phone-numbers") },
     ]
   }
   if (lower.includes("support") || lower.includes("agent")) {
     return [
-      { label: "Open in editor", onClick: () => toast.info("Mock: would open /agents/draft/edit") },
+      { label: "Open in editor", onClick: () => router.push("/agents/new/edit") },
       { label: "Change defaults", onClick: () => toast.info("Mock: would open model picker") },
     ]
   }

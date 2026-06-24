@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
+import { Checkbox } from "@/components/ui/checkbox"
 import { track, Events } from "@/lib/analytics"
 import { PLAN_USAGE, getDefaultAgent } from "@/lib/campaign-data"
 
@@ -53,8 +54,8 @@ export function FreeMinutesNudge() {
 
   if (unlocked) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/40 bg-emerald-500/[0.06] px-4 py-3">
-        <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-success/40 bg-success/[0.06] px-4 py-3">
+        <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
         <div className="flex-1 min-w-0 text-sm">
           <p className="font-medium">Card on file — deployments keep running.</p>
           <p className="text-xs text-muted-foreground">
@@ -202,13 +203,18 @@ function AddCardSheet({
               </div>
             </div>
 
-            <label className="flex items-start gap-2.5 rounded-lg border border-border px-3 py-2.5 text-sm">
-              <input type="checkbox" checked={capOn} onChange={(e) => setCapOn(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
+            <Label htmlFor="nudge-cap" className="flex items-start gap-2.5 rounded-lg border border-border px-3 py-2.5 text-sm font-normal">
+              <Checkbox
+                id="nudge-cap"
+                checked={capOn}
+                onCheckedChange={(v) => setCapOn(v === true)}
+                className="mt-0.5"
+              />
               <span>
                 Cap pay-as-you-go at <span className="font-medium tabular-nums">${defaultSpendCapUsd}/mo</span>
                 <span className="block text-xs text-muted-foreground">We pause new calls if you hit the cap — adjustable anytime.</span>
               </span>
-            </label>
+            </Label>
 
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
 

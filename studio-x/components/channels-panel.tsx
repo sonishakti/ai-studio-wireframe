@@ -14,8 +14,8 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
-import { cn } from "@/lib/utils"
 
 /**
  * ChannelsPanel — the Channels overview (2026-06-23: "Deployment" renamed to
@@ -85,27 +85,24 @@ export function ChannelsPanel() {
       </div>
 
       {/* Type filter */}
-      <div className="flex flex-wrap gap-2">
+      <ToggleGroup
+        type="single"
+        value={filter}
+        onValueChange={(v) => { if (v) setFilter(v as "all" | ChannelType) }}
+        variant="outline"
+        size="sm"
+        className="flex-wrap"
+        aria-label="Filter channels by type"
+      >
         {FILTERS.map((f) => {
-          const active = filter === f.id
           const count = f.id === "all" ? CHANNELS.length : CHANNELS.filter((c) => c.type === f.id).length
           return (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setFilter(f.id)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                active
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:text-foreground",
-              )}
-            >
+            <ToggleGroupItem key={f.id} value={f.id} className="rounded-full text-xs">
               {f.label} <span className="tabular-nums opacity-60">{count}</span>
-            </button>
+            </ToggleGroupItem>
           )
         })}
-      </div>
+      </ToggleGroup>
 
       <Card>
         <CardContent className="p-0">
@@ -120,6 +117,20 @@ export function ChannelsPanel() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-10 text-center">
+                    <p className="text-sm font-medium">
+                      {filter === "all"
+                        ? "No channels yet"
+                        : `No ${TYPE_META[filter].label.toLowerCase()} channels yet`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Connect one to put an agent on this channel.
+                    </p>
+                  </TableCell>
+                </TableRow>
+              )}
               {rows.map((c) => {
                 const meta = TYPE_META[c.type]
                 return (
@@ -130,7 +141,9 @@ export function ChannelsPanel() {
                           <meta.icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-medium">{c.label}</div>
+                          <Link href={c.href} className="text-sm font-medium hover:underline">
+                            {c.label}
+                          </Link>
                           <div className="font-mono text-xs text-muted-foreground">{c.identifier}</div>
                         </div>
                       </div>
@@ -150,7 +163,7 @@ export function ChannelsPanel() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Actions for ${c.label}`}>
                             <MoreHorizontal className="h-3.5 w-3.5" />
                           </Button>
                         </DropdownMenuTrigger>

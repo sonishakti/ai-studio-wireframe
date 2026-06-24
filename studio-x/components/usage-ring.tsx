@@ -5,7 +5,8 @@ import Link from "next/link"
 import { Gift } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { PLAN_USAGE } from "@/lib/campaign-data"
+import { Progress } from "@/components/ui/progress"
+import { PLAN_USAGE, freeMinutesStats } from "@/lib/campaign-data"
 import { track, Events } from "@/lib/analytics"
 
 /**
@@ -20,12 +21,9 @@ import { track, Events } from "@/lib/analytics"
  * (climbs toward the cap, like a context meter); the block leads with what's left.
  */
 
-export function freeMinutesStats() {
-  const { plan, freeMinutesIncluded: included, freeMinutesUsed: used } = PLAN_USAGE
-  const pctUsed = included > 0 ? Math.min(100, Math.round((used / included) * 100)) : 0
-  const remaining = Math.max(0, included - used)
-  return { plan, included, used, pctUsed, remaining }
-}
+// Re-exported from the lib so existing `@/components/usage-ring` imports keep
+// working; the definition lives in campaign-data so server pages can call it.
+export { freeMinutesStats }
 
 /** A thin circular progress ring wrapping `children` (the avatar). */
 export function AvatarUsageRing({
@@ -97,9 +95,7 @@ export function FreeMinutesBlock() {
           <span className="text-sm font-medium">Free minutes</span>
           <Badge variant="secondary" className="ml-auto text-xs">{plan}</Badge>
         </div>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary" style={{ width: `${pctUsed}%` }} />
-        </div>
+        <Progress value={pctUsed} className="mt-2 h-1.5" />
         <div className="mt-1.5 flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Remaining</span>
           <span className="font-medium tabular-nums">

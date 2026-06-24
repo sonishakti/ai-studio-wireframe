@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { HealthDot } from "@/components/health-dot"
 import { IssueCard } from "@/components/call-detail-sheet"
 import { listDeployments, deploymentHref } from "@/lib/campaign-data"
@@ -79,20 +80,20 @@ export default function DiagnosticsPage() {
               className="pl-8 h-9 text-sm"
             />
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-border bg-card p-0.5">
+          <ToggleGroup
+            type="single"
+            value={sev}
+            onValueChange={(v) => v && setSev(v as SevFilter)}
+            aria-label="Filter issues by severity"
+            variant="outline"
+            size="sm"
+          >
             {([["all", "All"], ["critical", "Critical"], ["warning", "Warning"]] as const).map(([v, label]) => (
-              <button
-                key={v}
-                onClick={() => setSev(v)}
-                className={
-                  "rounded px-2.5 h-7 text-xs font-medium transition-colors " +
-                  (sev === v ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")
-                }
-              >
+              <ToggleGroupItem key={v} value={v} aria-label={label}>
                 {label}
-              </button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
         </div>
 
         {/* Issue feed — same IssueCard as the call Diagnosis tab (rootCause +
@@ -133,7 +134,7 @@ export default function DiagnosticsPage() {
           <div className="flex items-center gap-3">
             <span>Rows per page</span>
             <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-              <SelectTrigger className="h-8 w-18"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {[10, 25, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
               </SelectContent>

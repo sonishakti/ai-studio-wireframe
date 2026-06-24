@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   FolderKanban, Check, Plus, ArrowRight, ChevronsUpDown,
 } from "lucide-react"
@@ -27,14 +28,23 @@ const PROJECTS = [
 ]
 
 export function ProjectSwitcher() {
-  const current = PROJECTS.find((p) => p.current) ?? PROJECTS[0]
-  const others = PROJECTS.filter((p) => !p.current)
+  const router = useRouter()
+  // Track the active project locally so a switch actually takes effect in the
+  // UI (mock — production would set this from the project/session record).
+  const [activeId, setActiveId] = React.useState(
+    (PROJECTS.find((p) => p.current) ?? PROJECTS[0]).id,
+  )
+  const current = PROJECTS.find((p) => p.id === activeId) ?? PROJECTS[0]
+  const others = PROJECTS.filter((p) => p.id !== current.id)
 
   const handleSwitch = (toId: string, toName: string) => {
     track(Events.project_switched, { from_project_id: current.id, to_project_id: toId })
+    setActiveId(toId)
     toast.success(`Switched to ${toName}`, {
       description: "Reloading project data…",
     })
+    // Refresh server data so the new project's context loads.
+    router.refresh()
   }
 
   return (
@@ -107,9 +117,11 @@ export function ProjectSwitcher() {
             <span className="text-sm">View all projects</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <Plus className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">Create new project</span>
+        <DropdownMenuItem asChild>
+          <Link href="/projects?new=1" className="gap-2">
+            <Plus className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">Create new project</span>
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

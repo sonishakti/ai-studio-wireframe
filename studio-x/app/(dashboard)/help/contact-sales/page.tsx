@@ -81,13 +81,6 @@ export default function ContactSalesPage() {
 
   return (
     <main className="flex-1 p-6 space-y-5">
-      <div>
-        <h2 className="text-lg font-semibold tracking-tight">Talk to Sales</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Tell us about your use case — we'll get back within 1 business day.
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] max-w-6xl">
         <Card>
           <CardHeader>
@@ -170,15 +163,19 @@ export default function ContactSalesPage() {
           <Card>
             <CardHeader><CardTitle className="text-sm">Reach us directly</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <a href="#" className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground">
+              <a href="mailto:sales@agora.io" className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground">
                 <Mail className="h-4 w-4" /> sales@agora.io
               </a>
-              <a href="#" className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground">
+              <a href="tel:+14087186483" className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground">
                 <Phone className="h-4 w-4" /> +1 (408) 718-6483
               </a>
-              <a href="#" className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={() => toast.info("Mock: Book a 30-min intro call")}
+                className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground"
+              >
                 <Calendar className="h-4 w-4" /> Book a 30-min intro call
-              </a>
+              </button>
             </CardContent>
           </Card>
         </div>

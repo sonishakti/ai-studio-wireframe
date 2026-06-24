@@ -1,20 +1,22 @@
+"use client"
+
 import { Download, ExternalLink } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const SDKS = [
-  { name: "Agora Voice SDK (Web)", lang: "JavaScript", version: "4.22.0", href: "#" },
-  { name: "Agora Voice SDK (iOS)", lang: "Swift", version: "4.3.2", href: "#" },
-  { name: "Agora Voice SDK (Android)", lang: "Kotlin", version: "4.3.2", href: "#" },
-  { name: "Studio_X API Client", lang: "TypeScript", version: "0.5.0", href: "#" },
-  { name: "Studio_X API Client", lang: "Python", version: "0.5.0", href: "#" },
+  { name: "Agora Voice SDK (Web)", lang: "JavaScript", version: "4.22.0" },
+  { name: "Agora Voice SDK (iOS)", lang: "Swift", version: "4.3.2" },
+  { name: "Agora Voice SDK (Android)", lang: "Kotlin", version: "4.3.2" },
+  { name: "Studio_X API Client", lang: "TypeScript", version: "0.5.0" },
+  { name: "Studio_X API Client", lang: "Python", version: "0.5.0" },
 ]
 
 const SAMPLES = [
-  { name: "Basic Voice Call", description: "Minimal web SDK integration", href: "#" },
-  { name: "AI Voice Agent Embed", description: "Embed a Studio_X agent in a web page", href: "#" },
-  { name: "Outbound Campaign", description: "Server-side dialing with REST API", href: "#" },
+  { name: "Basic Voice Call", description: "Minimal web SDK integration" },
+  { name: "AI Voice Agent Embed", description: "Embed a Studio_X agent in a web page" },
+  { name: "Outbound Campaign", description: "Server-side dialing with REST API" },
 ]
 
 export default function ToolkitPage() {
@@ -33,7 +35,15 @@ export default function ToolkitPage() {
                     <p className="text-sm font-medium truncate">{sdk.name}</p>
                     <p className="text-xs text-muted-foreground">{sdk.lang} · v{sdk.version}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"><Download className="h-3.5 w-3.5" /></Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    onClick={() => toast.info(`Mock: downloading ${sdk.name} (${sdk.lang})`)}
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span className="sr-only">Download {sdk.name} for {sdk.lang}</span>
+                  </Button>
                 </div>
               ))}
             </CardContent>
@@ -47,7 +57,15 @@ export default function ToolkitPage() {
                     <p className="text-sm font-medium">{s.name}</p>
                     <p className="text-xs text-muted-foreground">{s.description}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"><ExternalLink className="h-3.5 w-3.5" /></Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    onClick={() => toast.info(`Mock: opening sample "${s.name}"`)}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span className="sr-only">Open sample {s.name}</span>
+                  </Button>
                 </div>
               ))}
             </CardContent>

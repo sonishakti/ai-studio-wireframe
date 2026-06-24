@@ -14,7 +14,6 @@ import {
   Search,
   Filter,
   Library,
-  ArrowLeft,
   Phone,
   MessageCircle,
   Globe,
@@ -40,6 +39,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { GoLiveHome } from "@/components/go-live-home"
@@ -121,38 +121,37 @@ function TemplateRow({
   onTest: () => void
 }) {
   return (
-    <button
-      onClick={onSelect}
+    <div
       className={cn(
-        "w-full rounded-lg border bg-card px-4 py-4 text-left transition-all",
+        "rounded-lg border bg-card px-4 py-4 transition-all",
         isSelected
           ? "border-primary/60 shadow-sm ring-1 ring-primary/30"
           : "hover:border-foreground/20 hover:bg-accent/30",
       )}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
+        {/* The title is the select control — a real button, not a wrapper. */}
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-pressed={isSelected}
+          className="flex-1 min-w-0 text-left"
+        >
           <p className="text-sm font-semibold">{tpl.name}</p>
           <p className="text-xs text-muted-foreground mt-0.5">{tpl.description}</p>
-        </div>
+        </button>
         {isSelected && (
           <div className="flex items-center gap-2 shrink-0">
             <Button
               variant="ghost"
               size="sm"
               className="h-8 text-xs"
-              onClick={(e) => {
-                e.stopPropagation()
-                onTest()
-              }}
+              onClick={onTest}
             >
               Test
             </Button>
             <Button size="sm" className="h-8 text-xs gap-1" asChild>
-              <Link
-                href={`/agents/${tpl.id}/edit`}
-                onClick={(e) => e.stopPropagation()}
-              >
+              <Link href={`/agents/${tpl.id}/edit`}>
                 Start from this
                 <ChevronRight className="h-3 w-3" />
               </Link>
@@ -160,7 +159,7 @@ function TemplateRow({
           </div>
         )}
       </div>
-    </button>
+    </div>
   )
 }
 
@@ -218,25 +217,23 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
         {/* Status filter — All / Live / Draft / Paused */}
         <div className="flex flex-wrap items-center gap-2">
           <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-          {STATUS_FILTERS.map((f) => {
-            const active = status === f.id
-            const count = f.id === "all" ? AGENTS.length : AGENTS.filter((a) => a.status === f.id).length
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setStatus(f.id)}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                  active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {f.label} <span className="tabular-nums opacity-60">{count}</span>
-              </button>
-            )
-          })}
+          <ToggleGroup
+            type="single"
+            value={status}
+            onValueChange={(v) => { if (v) setStatus(v as "all" | AgentStatus) }}
+            variant="outline"
+            size="sm"
+            aria-label="Filter agents by status"
+          >
+            {STATUS_FILTERS.map((f) => {
+              const count = f.id === "all" ? AGENTS.length : AGENTS.filter((a) => a.status === f.id).length
+              return (
+                <ToggleGroupItem key={f.id} value={f.id} className="text-xs">
+                  {f.label} <span className="tabular-nums opacity-60">{count}</span>
+                </ToggleGroupItem>
+              )
+            })}
+          </ToggleGroup>
         </div>
 
         <Button
@@ -377,7 +374,7 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
       <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">
         <span>Rows per page</span>
         <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-          <SelectTrigger className="h-8 w-18"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
           <SelectContent>
             {[10, 25, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
           </SelectContent>
@@ -401,11 +398,12 @@ export default function AgentsPage() {
   // the wizard can report time-to-live (the <3-min deploy spine).
   React.useEffect(() => { markBuildStart() }, [])
 
-  // Wireframe toggle — in production this is "do we have agents in this project?"
-  const [showFirstRun, setShowFirstRun] = React.useState(false)
+  // First-run vs returning is data-driven: an account with no agents lands on the
+  // believe-then-scale GoLiveHome; otherwise the managed list. (A real account is
+  // auto-provisioned with Aria, so this is the list in practice.)
+  const showFirstRun = AGENTS.length === 0
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
-  const selected = TEMPLATES.find((t) => t.id === selectedId)!
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -416,21 +414,6 @@ export default function AgentsPage() {
         description={showFirstRun ? undefined : "Create and manage your agents here."}
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1 text-xs text-muted-foreground"
-              onClick={() => setShowFirstRun((v) => !v)}
-              title="Demo toggle: switch between first-run and returning-user views"
-            >
-              {showFirstRun ? (
-                <>
-                  <ArrowLeft className="h-3 w-3" /> View list
-                </>
-              ) : (
-                <>View first-run</>
-              )}
-            </Button>
             {showFirstRun && (
               <Button
                 variant="ghost"

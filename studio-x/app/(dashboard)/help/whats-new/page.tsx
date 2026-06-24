@@ -38,9 +38,9 @@ const RELEASES = [
 ]
 
 const TYPE_COLORS: Record<string, string> = {
-  new: "bg-emerald-500/10 text-emerald-600",
-  improved: "bg-blue-500/10 text-blue-600",
-  fixed: "bg-amber-500/10 text-amber-600",
+  new: "bg-success/10 text-success",
+  improved: "bg-primary/10 text-primary",
+  fixed: "bg-warning/10 text-warning",
 }
 
 export default function WhatsNewPage() {

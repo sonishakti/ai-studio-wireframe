@@ -1,4 +1,9 @@
+"use client"
+
+import * as React from "react"
+import Link from "next/link"
 import { Store, Search, ExternalLink, Check } from "lucide-react"
+import { toast } from "sonner"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,9 +68,6 @@ const EXTENSIONS = [
   },
 ]
 
-const installed = EXTENSIONS.filter((e) => e.installed)
-const available = EXTENSIONS.filter((e) => !e.installed)
-
 function ExtensionCard({ ext }: { ext: typeof EXTENSIONS[0] }) {
   return (
     <Card className="flex flex-col">
@@ -93,9 +95,12 @@ function ExtensionCard({ ext }: { ext: typeof EXTENSIONS[0] }) {
           variant={ext.installed ? "outline" : "default"}
           size="sm"
           className="w-full gap-1.5"
+          asChild
         >
-          {ext.installed ? "Manage" : "Install"}
-          {!ext.installed && <ExternalLink className="h-3.5 w-3.5" />}
+          <Link href={`/extensions/${ext.id}`}>
+            {ext.installed ? "Manage" : "Install"}
+            {!ext.installed && <ExternalLink className="h-3.5 w-3.5" />}
+          </Link>
         </Button>
       </CardContent>
     </Card>
@@ -103,6 +108,19 @@ function ExtensionCard({ ext }: { ext: typeof EXTENSIONS[0] }) {
 }
 
 export default function ExtensionsPage() {
+  const [query, setQuery] = React.useState("")
+  const q = query.trim().toLowerCase()
+
+  const filtered = q
+    ? EXTENSIONS.filter(
+        (e) =>
+          e.name.toLowerCase().includes(q) ||
+          e.vendor.toLowerCase().includes(q) ||
+          e.category.toLowerCase().includes(q),
+      )
+    : EXTENSIONS
+  const installedFiltered = filtered.filter((e) => e.installed)
+
   return (
     <div className="flex flex-col flex-1">
       <PageHeader
@@ -114,30 +132,77 @@ export default function ExtensionsPage() {
       <main className="flex-1 p-6 space-y-4">
         <div className="relative max-w-sm">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input placeholder="Search extensions…" className="pl-8 h-8 text-sm" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search extensions…"
+            className="pl-8 h-8 text-sm"
+          />
         </div>
 
         <Tabs defaultValue="all">
           <TabsList>
-            <TabsTrigger value="all">All ({EXTENSIONS.length})</TabsTrigger>
-            <TabsTrigger value="installed">Installed ({installed.length})</TabsTrigger>
+            <TabsTrigger value="all">All ({filtered.length})</TabsTrigger>
+            <TabsTrigger value="installed">Installed ({installedFiltered.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="all" className="pt-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {EXTENSIONS.map((ext) => (
-                <ExtensionCard key={ext.id} ext={ext} />
-              ))}
-            </div>
+            {filtered.length === 0 ? (
+              <EmptyState query={query} />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((ext) => (
+                  <ExtensionCard key={ext.id} ext={ext} />
+                ))}
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="installed" className="pt-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {installed.map((ext) => (
-                <ExtensionCard key={ext.id} ext={ext} />
-              ))}
-            </div>
+            {installedFiltered.length === 0 ? (
+              <InstalledEmptyState />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {installedFiltered.map((ext) => (
+                  <ExtensionCard key={ext.id} ext={ext} />
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>
     </div>
+  )
+}
+
+function EmptyState({ query }: { query: string }) {
+  return (
+    <Card>
+      <CardContent className="p-10 text-center">
+        <p className="text-sm font-medium">No extensions match “{query}”</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Try a different keyword, or browse all available extensions.
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function InstalledEmptyState() {
+  return (
+    <Card>
+      <CardContent className="p-10 text-center space-y-3">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+          <Store className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <div>
+          <p className="text-sm font-medium">No extensions installed yet</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Add recording, AI, or safety capabilities from the catalog.
+          </p>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => toast.info("Mock: showing all extensions")}>
+          Browse the catalog
+        </Button>
+      </CardContent>
+    </Card>
   )
 }

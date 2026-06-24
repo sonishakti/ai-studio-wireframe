@@ -1,8 +1,8 @@
-import { ExternalLink, Copy } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CodeBlock } from "@/components/code-block"
 import { Separator } from "@/components/ui/separator"
 
 const ENDPOINTS = [
@@ -18,9 +18,9 @@ const ENDPOINTS = [
 ]
 
 const METHOD_COLOR: Record<string, string> = {
-  GET: "bg-blue-500/10 text-blue-600",
-  POST: "bg-emerald-500/10 text-emerald-600",
-  PATCH: "bg-amber-500/10 text-amber-600",
+  GET: "bg-primary/10 text-primary",
+  POST: "bg-success/10 text-success",
+  PATCH: "bg-warning/10 text-warning",
   DELETE: "bg-destructive/10 text-destructive",
 }
 
@@ -44,12 +44,7 @@ export default function RestfulApiPage() {
             <CardDescription>All requests require a Bearer token in the Authorization header.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between rounded-lg bg-muted px-4 py-3 font-mono text-xs">
-              <span className="text-muted-foreground">Authorization: Bearer &lt;YOUR_API_KEY&gt;</span>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <Copy className="h-3 w-3" />
-              </Button>
-            </div>
+            <CodeBlock variant="inline">{"Authorization: Bearer <YOUR_API_KEY>"}</CodeBlock>
           </CardContent>
         </Card>
 

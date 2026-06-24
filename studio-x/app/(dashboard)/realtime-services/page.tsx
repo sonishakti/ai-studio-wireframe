@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 // ─── service catalog ────────────────────────────────────────────────────────
@@ -105,8 +106,22 @@ const GROUP_ORDER: Group[] = ["CORE RTC", "MEDIA SERVICES", "SECURITY & INFRASTR
 export default function RealtimeServicesPage() {
   const [selectedId, setSelectedId] = React.useState("chat")
   const [subToggles, setSubToggles] = React.useState<Record<string, boolean>>({})
+  // Per-service enable overrides so the master Switch is actually controllable.
+  // Seed from the static status; user toggles flip the override.
+  const [enabledOverrides, setEnabledOverrides] = React.useState<Record<string, boolean>>({})
   const selected = SERVICES.find((s) => s.id === selectedId)!
-  const enabledState = selected.status !== "default" && selected.status !== "disabled"
+  const baseEnabled = selected.status !== "default" && selected.status !== "disabled"
+  const enabledState =
+    selected.id in enabledOverrides ? enabledOverrides[selected.id] : baseEnabled
+
+  const handleToggleService = (next: boolean) => {
+    setEnabledOverrides((prev) => ({ ...prev, [selected.id]: next }))
+    toast.success(`${selected.name} ${next ? "enabled" : "disabled"}`, {
+      description: next
+        ? "The service is now provisioned for this project."
+        : "The service will stop emitting usage for this project.",
+    })
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -126,6 +141,10 @@ export default function RealtimeServicesPage() {
                 <nav className="space-y-0.5">
                   {items.map((svc) => {
                     const isSelected = selectedId === svc.id
+                    const isActive =
+                      svc.id in enabledOverrides
+                        ? enabledOverrides[svc.id]
+                        : svc.status === "active"
                     return (
                       <button
                         key={svc.id}
@@ -141,14 +160,22 @@ export default function RealtimeServicesPage() {
                         <span
                           className={cn(
                             "h-1.5 w-1.5 rounded-full shrink-0",
-                            svc.status === "active" ? "bg-primary" : "bg-muted-foreground/40",
+                            isActive ? "bg-primary" : "bg-muted-foreground/40",
                           )}
-                        />
+                        >
+                          <span className="sr-only">
+                            {isActive
+                              ? "Active"
+                              : svc.status === "disabled"
+                                ? "Disabled"
+                                : "Not provisioned"}
+                          </span>
+                        </span>
                         <span className="flex-1 truncate leading-tight">{svc.name}</span>
-                        {svc.status === "active" && (
+                        {isActive && (
                           <Badge
                             variant="outline"
-                            className="shrink-0 h-5 px-1.5 text-xs border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                            className="shrink-0 h-5 px-1.5 text-xs border-success/40 bg-success/10 text-success"
                           >
                             Active
                           </Badge>
@@ -156,7 +183,7 @@ export default function RealtimeServicesPage() {
                         {svc.status === "disabled" && (
                           <Badge
                             variant="outline"
-                            className="shrink-0 h-5 px-1.5 text-xs border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            className="shrink-0 h-5 px-1.5 text-xs border-warning/40 bg-warning/10 text-warning"
                           >
                             Disabled
                           </Badge>
@@ -194,11 +221,15 @@ export default function RealtimeServicesPage() {
                 </Button>
               )}
               {selected.status === "disabled" ? (
-                <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">
                   Disabled by admin
                 </Badge>
               ) : (
-                <Switch checked={enabledState} />
+                <Switch
+                  checked={enabledState}
+                  onCheckedChange={handleToggleService}
+                  aria-label={`${enabledState ? "Disable" : "Enable"} ${selected.name}`}
+                />
               )}
             </div>
           </div>
@@ -279,16 +310,24 @@ export default function RealtimeServicesPage() {
 
           <div className="flex items-center gap-6 px-5 py-4 border-t text-sm flex-wrap">
             {selected.docs?.map((link) => (
-              <a key={link.label} href={link.href} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <button
+                key={link.label}
+                type="button"
+                onClick={() => toast.info(`Mock: open ${link.label}`)}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              >
                 {link.label}
                 <ExternalLink className="h-3 w-3" />
-              </a>
+              </button>
             ))}
-            <a href="#" className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              href="/extensions"
+              className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
               <Package className="h-3.5 w-3.5" />
               Looking for noise suppression or other add-ons?
-              <ExternalLink className="h-3 w-3" />
-            </a>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         </section>
       </main>

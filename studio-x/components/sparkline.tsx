@@ -8,14 +8,17 @@ export function Sparkline({
   data,
   axisLabels,
   height = 56,
-  stroke = "hsl(var(--muted-foreground))",
+  stroke = "currentColor",
   fill = "transparent",
+  className = "text-muted-foreground",
 }: {
   data: number[]
   axisLabels?: string[]
   height?: number
+  /** Defaults to `currentColor` so the line inherits the token-driven text color set via `className`. */
   stroke?: string
   fill?: string
+  className?: string
 }) {
   if (data.length === 0) return null
 
@@ -51,7 +54,7 @@ export function Sparkline({
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
-      className="w-full h-auto"
+      className={`w-full h-auto ${className}`}
       preserveAspectRatio="none"
       aria-hidden
     >

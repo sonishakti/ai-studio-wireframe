@@ -118,8 +118,8 @@ function buildEvents(call: CallDetail): CallEvent[] {
 
 const SERIES = [
   { key: "asr" as const, label: "ASR", bar: "bg-primary", dot: "bg-primary", text: "text-primary" },
-  { key: "llm" as const, label: "LLM", bar: "bg-violet-500", dot: "bg-violet-500", text: "text-violet-500" },
-  { key: "tts" as const, label: "TTS", bar: "bg-amber-500", dot: "bg-amber-500", text: "text-amber-500" },
+  { key: "llm" as const, label: "LLM", bar: "bg-chart-3", dot: "bg-chart-3", text: "text-chart-3" },
+  { key: "tts" as const, label: "TTS", bar: "bg-warning", dot: "bg-warning", text: "text-warning" },
 ]
 
 export function CallDetailSheet({
@@ -177,8 +177,10 @@ function CallDetailBody({ call }: { call: CallDetail }) {
     return { asr: Math.round(sum.asr / n), llm: Math.round(sum.llm / n), tts: Math.round(sum.tts / n), e2e: Math.round(sum.e2e / n) }
   }, [latency])
 
-  // Audio scrubber (mock playback)
-  const total = call.durationSec > 0 ? call.durationSec : 90
+  // Audio scrubber (mock playback). A call that never connected (0s) has no
+  // recording — show a note instead of a fake scrubber.
+  const hasRecording = call.durationSec > 0
+  const total = call.durationSec
   const [pos, setPos] = React.useState(Math.round(total * 0.13))
   const [playing, setPlaying] = React.useState(false)
 
@@ -208,37 +210,43 @@ function CallDetailBody({ call }: { call: CallDetail }) {
       {/* Audio Recording */}
       <div className="space-y-1.5">
         <p className="text-xs text-muted-foreground">Audio Recording</p>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline" size="icon" className="h-8 w-8 shrink-0"
-            onClick={() => setPlaying((p) => !p)}
-            title={playing ? "Pause" : "Play"}
-          >
-            {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            <span className="sr-only">{playing ? "Pause recording" : "Play recording"}</span>
-          </Button>
-          <span className="text-xs tabular-nums text-muted-foreground shrink-0">{fmtTime(pos)} / {fmtTime(total)}</span>
-          <button
-            type="button"
-            className="relative flex-1 h-1.5 rounded-full bg-muted"
-            onClick={(e) => {
-              const r = e.currentTarget.getBoundingClientRect()
-              const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))
-              setPos(Math.round(ratio * total))
-            }}
-            aria-label="Seek recording position"
-          >
-            <span className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${(pos / total) * 100}%` }} />
-          </button>
-          <Button
-            variant="ghost" size="icon" className="h-8 w-8 shrink-0"
-            onClick={() => toast.success("Mock: recording downloaded")}
-            title="Download recording"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="sr-only">Download recording</span>
-          </Button>
-        </div>
+        {hasRecording ? (
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline" size="icon" className="h-8 w-8 shrink-0"
+              onClick={() => setPlaying((p) => !p)}
+              title={playing ? "Pause" : "Play"}
+            >
+              {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              <span className="sr-only">{playing ? "Pause recording" : "Play recording"}</span>
+            </Button>
+            <span className="text-xs tabular-nums text-muted-foreground shrink-0">{fmtTime(pos)} / {fmtTime(total)}</span>
+            <button
+              type="button"
+              className="relative flex-1 h-1.5 rounded-full bg-muted"
+              onClick={(e) => {
+                const r = e.currentTarget.getBoundingClientRect()
+                const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))
+                setPos(Math.round(ratio * total))
+              }}
+              aria-label="Seek recording position"
+            >
+              <span className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${(pos / total) * 100}%` }} />
+            </button>
+            <Button
+              variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+              onClick={() => toast.success("Mock: recording downloaded")}
+              title="Download recording"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="sr-only">Download recording</span>
+            </Button>
+          </div>
+        ) : (
+          <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">
+            No recording for this call — it never connected.
+          </p>
+        )}
       </div>
 
       <Separator />
@@ -328,7 +336,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
             {events.map((e, i) => (
               <div key={i} className="flex items-start gap-3">
                 <span className="text-xs tabular-nums text-muted-foreground w-12 shrink-0 pt-0.5">{e.time}</span>
-                <span className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", e.tone === "warn" ? "bg-amber-500" : "bg-primary")} />
+                <span className={cn("mt-1.5 h-2 w-2 rounded-full shrink-0", e.tone === "warn" ? "bg-warning" : "bg-primary")} />
                 <span className="text-sm">{e.label}</span>
               </div>
             ))}
@@ -485,6 +493,7 @@ function Field({
               title={`Copy ${label}`}
             >
               <Copy className="h-3 w-3" />
+              <span className="sr-only">Copy {label}</span>
             </button>
           )}
         </span>
