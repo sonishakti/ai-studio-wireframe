@@ -1,21 +1,19 @@
 "use client"
 
 import * as React from "react"
+import { ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { STACK_PRESETS, type StackPreset } from "@/lib/campaign-data"
 
 /**
  * AgentTestPanel
  * ──────────────
- * The right-side panel that appears on both the Agent Editor and Agent
- * Landing screens. Top: title badge + central sphere visualization + Test
- * Agent button. Bottom: LLM / ASR / TTS / latency stat panel.
- *
- * Per Figma node 297:8493 (editor) and 299:8796 (landing): 400px wide,
- * stacked top (573h) + bottom (160h).
+ * The right-side preview/test panel on the Agent Editor + Landing screens. It is
+ * READ-ONLY (2026-06-24): it shows what the agent IS — its stack + latency — and
+ * lets you test it, but configuration happens in the builder's Stack/Persona
+ * steps, not here. Top: title + sphere + Test Agent. Bottom: a read-only
+ * LLM/ASR/TTS + latency spec, with a "Configure in Stack →" jump.
  */
 
 interface AgentSpec {
@@ -45,11 +43,8 @@ interface AgentTestPanelProps {
   onTest?: () => void
   /** Override the Test Agent button label. */
   testLabel?: string
-  /** Current speed-vs-cost preset. When paired with onPresetChange, the panel
-   *  shows a lean "Quick configure" toggle so the agent can be tuned right here. */
-  preset?: StackPreset
-  /** Flip the stack preset from the widget — the stats + latency below update live. */
-  onPresetChange?: (p: StackPreset) => void
+  /** Jump to the Stack step to change the spec (the panel itself is read-only). */
+  onConfigure?: () => void
   className?: string
 }
 
@@ -59,8 +54,7 @@ export function AgentTestPanel({
   spec,
   onTest,
   testLabel = "Test Agent",
-  preset,
-  onPresetChange,
+  onConfigure,
   className,
 }: AgentTestPanelProps) {
   return (
@@ -90,32 +84,20 @@ export function AgentTestPanel({
         </Button>
       </div>
 
-      {/* Bottom panel — quick configure + vendor + latency specs */}
+      {/* Bottom panel — READ-ONLY vendor + latency specs. Config lives in Stack. */}
       <div className="border-t border-border px-6 py-6 space-y-3">
-        {/* Quick configure — the leanest knob (speed vs cost) right on the widget;
-            flipping it updates the vendors + latency below live (editor only). */}
-        {onPresetChange && preset && (
-          <div className="space-y-2 pb-3 mb-1 border-b border-border">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Quick configure
-              </p>
-              <span className="text-xs text-muted-foreground">speed vs cost</span>
-            </div>
-            <ToggleGroup
-              type="single"
-              value={preset}
-              onValueChange={(v) => v && onPresetChange(v as StackPreset)}
-              variant="outline"
-              size="sm"
-              className="w-full"
-              aria-label="Stack preset"
+        {onConfigure && (
+          <div className="flex items-center justify-between pb-3 mb-1 border-b border-border">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Stack
+            </p>
+            <button
+              type="button"
+              onClick={onConfigure}
+              className="inline-flex items-center gap-0.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
-              <ToggleGroupItem value="fastest" className="flex-1 text-xs">Fastest</ToggleGroupItem>
-              <ToggleGroupItem value="balanced" className="flex-1 text-xs">Balanced</ToggleGroupItem>
-              <ToggleGroupItem value="cheapest" className="flex-1 text-xs">Cheapest</ToggleGroupItem>
-            </ToggleGroup>
-            <p className="text-xs text-muted-foreground">{STACK_PRESETS[preset].hint}</p>
+              Configure in Stack <ArrowUpRight className="h-3 w-3" />
+            </button>
           </div>
         )}
 

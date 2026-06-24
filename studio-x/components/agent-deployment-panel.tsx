@@ -12,7 +12,6 @@ import {
   Globe,
   Upload,
   Check,
-  ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,9 +20,7 @@ import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import {
-  Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger,
-} from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
 import { CodeBlock } from "@/components/code-block"
 import { PHONE_NUMBERS, type Agent } from "@/lib/campaign-data"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
@@ -72,6 +69,8 @@ const CHANNELS: {
 export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent }) {
   const router = useRouter()
   const isUnsaved = id === "new" || !agent
+  const agentName = agent?.name ?? "the agent"
+  const [editIdentity, setEditIdentity] = React.useState(false)
 
   // ── Persona (moved in from the old standalone first step) ──────────────────
   const [personality, setPersonality] = React.useState(
@@ -121,34 +120,54 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
         </div>
       )}
 
-      {/* ── Persona = WHO the agent is. A settled identity (set once, reused
-          everywhere it deploys), collapsed into a slim summary bar that opens a
-          sheet. Deliberately de-emphasized — it is NOT the deployment. ───────── */}
-      <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-          {(agent?.name ?? "A").charAt(0)}
+      {/* ── Persona = WHO the agent is, MODULAR per deployment (won a 5-prototype
+          audit). The agent's persona is the reusable base; here you override only
+          what this deployment needs — usually just the personality. Tone/language/
+          brand inherit from the agent, editable via "Edit identity". ──────────── */}
+      <section className="space-y-3">
+        <div>
+          <p className="text-sm font-medium">Persona for this deployment</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Inherits {agentName}&apos;s voice — only the personality changes here, unless you edit the identity.
+          </p>
         </div>
-        <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{agent?.name ?? "Your agent"}</span>
-          {` · ${tone} · ${language}${brand ? ` · ${brand}` : ""}`}
-        </p>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="shrink-0 gap-1 text-muted-foreground">
-              Edit persona <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="w-full gap-0 sm:max-w-md">
-            <SheetHeader className="border-b border-border">
-              <SheetTitle>Edit persona</SheetTitle>
-              <SheetDescription>
-                Who the agent is — its voice and identity. Set once, reused everywhere it deploys.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="flex-1 space-y-5 overflow-y-auto p-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Tone of voice</Label>
+
+        <div className="space-y-2">
+          <Label htmlFor="dp-personality" className="text-sm font-medium">Personality for this deployment</Label>
+          <Textarea
+            id="dp-personality"
+            value={personality}
+            onChange={(e) => setPersonality(e.target.value)}
+            className="min-h-[96px] text-sm"
+            placeholder="e.g. Warm, patient, solution-first"
+          />
+          <p className="text-xs text-muted-foreground">
+            Pre-filled from {agentName}. Edit to tailor this deployment.
+          </p>
+        </div>
+
+        <div className="space-y-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-medium text-muted-foreground">Identity from {agentName}</p>
+            <button
+              type="button"
+              onClick={() => setEditIdentity((v) => !v)}
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {editIdentity ? "Done" : "Edit identity"}
+            </button>
+          </div>
+          {!editIdentity ? (
+            <div className="flex flex-wrap gap-1.5">
+              <Badge variant="outline" className="text-xs font-normal">Tone · {tone}</Badge>
+              <Badge variant="outline" className="text-xs font-normal">Language · {language}</Badge>
+              {brand && <Badge variant="outline" className="text-xs font-normal">Brand · {brand}</Badge>}
+            </div>
+          ) : (
+            <div className="space-y-3 pt-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Tone</Label>
                   <Select value={tone} onValueChange={setTone}>
                     <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -156,8 +175,8 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Language</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Language</Label>
                   <Select value={language} onValueChange={setLanguage}>
                     <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -166,37 +185,15 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
                   </Select>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="dp-personality" className="text-sm font-medium">Personality</Label>
-                <Textarea
-                  id="dp-personality"
-                  value={personality}
-                  onChange={(e) => setPersonality(e.target.value)}
-                  className="min-h-[120px] text-sm"
-                  placeholder="e.g. Warm, patient, solution-first"
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Brand</Label>
+                <Input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. Acme" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="dp-brand" className="text-sm font-medium">Brand</Label>
-                <Input
-                  id="dp-brand"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                  placeholder="e.g. Acme"
-                />
-                <p className="text-xs text-muted-foreground">
-                  The company the agent represents. Used in its introductions.
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground">Edits to identity apply to this deployment only.</p>
             </div>
-            <SheetFooter className="border-t border-border">
-              <SheetClose asChild>
-                <Button className="w-full">Done</Button>
-              </SheetClose>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </div>
+          )}
+        </div>
+      </section>
 
       {/* ── Channel = WHERE/HOW it goes live. The hero — the action you take on
           this screen, foregrounded. ────────────────────────────────────────── */}

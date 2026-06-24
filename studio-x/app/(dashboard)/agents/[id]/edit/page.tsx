@@ -19,7 +19,6 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
@@ -41,6 +40,7 @@ import {
   AGENTS,
   DEPLOYMENTS,
   STACK_PRESETS,
+  STACK_ESTIMATE,
   credentialsAtRiskForAgent,
   type StackPreset,
 } from "@/lib/campaign-data"
@@ -119,6 +119,7 @@ export default function AgentEditorPage({
     setSection(s)
     window.history.replaceState(null, "", `#${s}`)
   }
+
   // Names match the Figma design: MCP and Connectors are distinct (not a combined
   // "Actions"). Agent.actions holds tool ids; mcp_* are MCP servers, the rest are
   // connectors.
@@ -253,6 +254,8 @@ export default function AgentEditorPage({
                   </p>
                 </div>
               )}
+              {/* Optimize for — lean metric pills (won a 5-prototype audit): pick a
+                  goal, compare $/min · latency at a glance; vendors drill down below. */}
               <section className="space-y-3">
                 <div>
                   <p className="text-sm font-medium">Optimize for</p>
@@ -260,7 +263,7 @@ export default function AgentEditorPage({
                     Pick a goal — vendors are set for you. Drill into any of them below.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-3 gap-2">
                   {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
                     const def = STACK_PRESETS[p]
                     const Icon = PRESET_ICON[p]
@@ -270,33 +273,26 @@ export default function AgentEditorPage({
                         key={p}
                         type="button"
                         onClick={() => applyPreset(p)}
+                        aria-pressed={selected}
                         className={cn(
-                          "flex flex-col gap-2 rounded-lg border p-4 text-left transition-all",
+                          "flex flex-col gap-1 rounded-lg border px-3 py-2.5 text-left transition-colors",
                           selected
-                            ? "border-primary/60 bg-primary/5 shadow-sm"
-                            : "border-border bg-card hover:border-primary/30",
+                            ? "border-primary bg-primary/5"
+                            : "border-border bg-card hover:border-foreground/20",
                         )}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-md",
-                            selected ? "bg-primary/15" : "bg-muted",
-                          )}>
-                            <Icon className={cn("h-4 w-4", selected ? "text-primary" : "text-muted-foreground")} />
-                          </div>
-                          {selected && <Badge variant="default" className="text-xs">Selected</Badge>}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold">{def.label}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{def.hint}</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground font-mono">
-                          {def.llm.model} · {def.asr.model} · {def.tts.voice}
-                        </p>
+                        <span className="flex items-center gap-1.5">
+                          <Icon className={cn("h-3.5 w-3.5 shrink-0", selected ? "text-primary" : "text-muted-foreground")} />
+                          <span className="text-sm font-medium">{def.label}</span>
+                        </span>
+                        <span className="text-xs tabular-nums text-muted-foreground">
+                          ${STACK_ESTIMATE[p].costPerMin.toFixed(2)}/min · {LATENCY_BY_PRESET[p].e2eMs}ms
+                        </span>
                       </button>
                     )
                   })}
                 </div>
+                <p className="text-xs text-muted-foreground">{STACK_PRESETS[preset].hint}</p>
               </section>
 
               <section className="space-y-3">
@@ -410,8 +406,7 @@ export default function AgentEditorPage({
             bestCaseMs: isNew ? null : LATENCY_BY_PRESET[preset].bestMs,
           }}
           onTest={handleTestAgent}
-          preset={preset}
-          onPresetChange={applyPreset}
+          onConfigure={() => jump("stack")}
         />
       </div>
     </div>
