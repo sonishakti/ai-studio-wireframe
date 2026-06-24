@@ -1,0 +1,15 @@
+{
+  "pkg": "studio-x",
+  "globalName": "StudioX",
+  "shape": "package",
+  "srcDir": "components",
+  "tsconfig": "tsconfig.json",
+  "cssEntry": ".design-sync/.cache/ds-tw.css",
+  "buildCmd": "node .ds-sync/compile-css.mjs",
+  "extraFonts": [
+    ".ds-sync/node_modules/@fontsource/dm-sans/latin-400.css",
+    ".ds-sync/node_modules/@fontsource/dm-sans/latin-500.css",
+    ".ds-sync/node_modules/@fontsource/dm-sans/latin-600.css",
+    ".ds-sync/node_modules/@fontsource/dm-sans/latin-700.css"
+  ]
+}

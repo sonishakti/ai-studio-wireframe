@@ -35,3 +35,10 @@ pnpm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# design-sync (claude.ai/design sync tooling — durable inputs under .design-sync/ stay tracked)
+/.ds-sync
+/ds-bundle
+/.design-sync/.cache
+/.design-sync/learnings
+/.design-sync/node_modules
