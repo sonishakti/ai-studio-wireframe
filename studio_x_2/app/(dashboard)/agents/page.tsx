@@ -14,7 +14,6 @@ import {
   Search,
   Filter,
   Library,
-  List,
   Phone,
   MessageCircle,
   Globe,
@@ -412,18 +411,12 @@ export default function AgentsPage() {
         // headline), so suppress the page title here to avoid a double H1.
         title={showFirstRun ? undefined : "Agents"}
         description={showFirstRun ? undefined : "Create and manage your agents here."}
+        // First-run renders the self-contained GoLiveHome widget (own title +
+        // Create/Import/View-all footer), so PageHeader gets no actions and
+        // collapses to null — no duplicate "View all agents" in the chrome.
         actions={
-          <div className="flex items-center gap-2">
-            {showFirstRun ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => switchView(true)}
-              >
-                <List className="h-4 w-4" /> View all agents
-              </Button>
-            ) : (
+          showFirstRun ? undefined : (
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -432,24 +425,18 @@ export default function AgentsPage() {
               >
                 <ChevronLeft className="h-4 w-4" /> Home
               </Button>
-            )}
-            {/* On the home, Import + Create live in the lean hero (GoLiveHome);
-                the list view keeps them here in the header. */}
-            {!showFirstRun && (
-              <>
-                <ImportAgentSheet>
-                  <Button variant="outline" className="gap-1.5 max-sm:hidden">
-                    <Upload className="h-4 w-4" /> Import Agent
-                  </Button>
-                </ImportAgentSheet>
-                <Button asChild>
-                  <Link href="/agents/new/edit">
-                    <Plus className="h-4 w-4" /> Create New Agent
-                  </Link>
+              <ImportAgentSheet>
+                <Button variant="outline" className="gap-1.5 max-sm:hidden">
+                  <Upload className="h-4 w-4" /> Import Agent
                 </Button>
-              </>
-            )}
-          </div>
+              </ImportAgentSheet>
+              <Button asChild>
+                <Link href="/agents/new/edit">
+                  <Plus className="h-4 w-4" /> Create New Agent
+                </Link>
+              </Button>
+            </div>
+          )
         }
       />
 

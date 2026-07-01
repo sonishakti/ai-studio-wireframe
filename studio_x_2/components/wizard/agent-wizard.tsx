@@ -87,16 +87,17 @@ export function AgentWizard({ id }: { id: string }) {
     const dc = params.get("dc")
     const stepParam = parseInt(params.get("step") ?? "", 10)
     const stepToOpen = stepParam >= 1 && stepParam <= 5 ? stepParam : null
+    // Open the deep-linked step's drawer.
+    const openLater = (n: number) => setOpenStep(n)
 
     if (isEdit) {
       if (dc) {
         const t = dcToType(dc)
         if (t) setDraft((d) => ({ ...d, type: t, config: dcToConfig(dc, d.config) }))
-        setOpenStep(4)
+        openLater(4)
       } else if (stepToOpen) {
-        setOpenStep(stepToOpen)
+        openLater(stepToOpen)
       }
-      if (dc || stepToOpen) window.history.replaceState({}, "", `/agents/${id}/edit`)
       return
     }
 
@@ -117,10 +118,9 @@ export function AgentWizard({ id }: { id: string }) {
       if (t) next = { ...next, type: t, config: dcToConfig(dc, next.config) }
     }
     setDraft(next)
-    if (dc) setOpenStep(4)
-    else if (stepToOpen) setOpenStep(stepToOpen)
+    if (dc) openLater(4)
+    else if (stepToOpen) openLater(stepToOpen)
     if (artifactId || dc) dirty.current = true
-    if (artifactId || dc || stepToOpen) window.history.replaceState({}, "", "/agents/new/edit")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -272,7 +272,14 @@ export function AgentWizard({ id }: { id: string }) {
       </div>
 
       {/* Edit drawer — always fully interactive. */}
-      <Sheet open={openStep != null} onOpenChange={(o) => !o && closeDrawer()}>
+      {/* modal={false}: a modal Radix dialog opened programmatically on mount
+          (the ?step deep-link) trips its focus guard and won't open. Non-modal
+          opens reliably, and lets the checklist stay visible behind the drawer. */}
+      <Sheet
+        modal={false}
+        open={openStep != null}
+        onOpenChange={(o) => !o && closeDrawer()}
+      >
         {/* Roomy drawer — the shadcn default caps a right sheet at max-w-sm (384px),
             which cramps the step forms. Override with a data-[side]-prefixed width so
             it actually wins the specificity fight. */}
