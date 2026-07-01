@@ -47,7 +47,7 @@ export function StepBuild({ draft, update }: StepProps) {
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <span className="text-xs text-muted-foreground">Variables detected:</span>
             {vars.map((v) => (
-              <Badge key={v} variant="secondary" className="font-mono text-[11px]">{`{{${v}}}`}</Badge>
+              <Badge key={v} variant="secondary" className="h-6 px-2 font-mono text-xs">{`{{${v}}}`}</Badge>
             ))}
           </div>
         )}
@@ -112,7 +112,7 @@ function QuickTest({ name, greeting }: { name: string; greeting: string }) {
           <Turn who={agent} text={opener} agent />
           <Turn who="Caller" text="Do you have any availability tomorrow?" />
           <Turn who={agent} text="Let me check that for you — what time of day works best?" agent />
-          <p className="pt-1 text-[11px] text-muted-foreground">Full voice test with the finished agent is in the last step.</p>
+          <p className="pt-1 text-xs text-muted-foreground">Full voice test with the finished agent is in the last step.</p>
         </div>
       )}
     </section>

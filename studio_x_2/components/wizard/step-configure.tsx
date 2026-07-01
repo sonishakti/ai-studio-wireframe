@@ -159,7 +159,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
           <div className="flex flex-wrap gap-1.5 pt-0.5">
             <span className="text-xs text-muted-foreground">Columns:</span>
             {MOCK_CSV_COLUMNS.map((c) => (
-              <Badge key={c} variant="outline" className="font-mono text-[11px] font-normal">{c}</Badge>
+              <Badge key={c} variant="outline" className="h-6 px-2 font-mono text-xs font-medium">{c}</Badge>
             ))}
           </div>
         )}
@@ -183,7 +183,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {missing.map((v) => (
-                  <Badge key={v} variant="outline" className="border-destructive/40 font-mono text-[11px] font-normal text-destructive">{`{{${v}}}`}</Badge>
+                  <Badge key={v} variant="outline" className="h-6 border-destructive/40 px-2 font-mono text-xs font-medium text-destructive">{`{{${v}}}`}</Badge>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">

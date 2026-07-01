@@ -78,16 +78,18 @@ export function StepPublish({
 
           {blockReason && (
             <div className="flex items-start gap-2.5 rounded-md border border-warning/40 bg-warning/5 p-3">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-              <p className="text-xs leading-relaxed text-foreground">{blockReason}</p>
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+              <p className="text-sm leading-relaxed text-foreground">{blockReason}</p>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <Button size="lg" className="w-full gap-2 sm:w-auto" disabled={!!blockReason} onClick={onPublish}>
-              <Rocket className="h-4 w-4" /> Publish &amp; go live
+            {/* No hard lock: Publish is always clickable. If something's unfinished
+                the reason shows above + a toast points to it (never a dead button). */}
+            <Button size="lg" className="w-full gap-2 sm:w-auto" onClick={onPublish}>
+              <Rocket className="h-4 w-4" aria-hidden /> Publish &amp; go live
             </Button>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Publishing makes {agentName} start taking traffic — you&apos;ll land on Monitor to watch it.
             </p>
           </div>
@@ -96,7 +98,7 @@ export function StepPublish({
         {/* Talk to it */}
         <aside className="flex flex-col items-center gap-4 rounded-lg border border-border bg-card/40 p-6">
           <Badge variant="secondary" className="max-w-full truncate px-3 py-1 text-xs">{agentName}</Badge>
-          <p className="text-xs font-medium text-muted-foreground">
+          <p className="text-sm font-medium text-muted-foreground">
             {connected ? "Connected" : "Agent disconnected"}
           </p>
           <AgentSphere size={120} active={connected} />
@@ -104,7 +106,7 @@ export function StepPublish({
             {connected ? "End test" : "Test agent"}
           </Button>
           {draft.greeting && (
-            <p className="line-clamp-3 text-center text-xs text-muted-foreground">
+            <p className="line-clamp-3 text-center text-sm text-muted-foreground">
               Opens with: &ldquo;{draft.greeting}&rdquo;
             </p>
           )}

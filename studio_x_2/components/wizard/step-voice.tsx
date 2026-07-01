@@ -74,19 +74,19 @@ export function StepVoice({
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-semibold">{v.name}</p>
                     {isCustom ? (
-                      <Badge variant="secondary" className="h-5 px-1.5 text-[11px] font-normal">Custom</Badge>
+                      <Badge variant="secondary" className="h-6 px-2 text-xs font-medium">Custom</Badge>
                     ) : (
-                      <Badge variant="outline" className="h-5 gap-1 px-1.5 text-[11px] font-normal text-muted-foreground">
-                        <Lock className="h-2.5 w-2.5" /> Preset
+                      <Badge variant="outline" className="h-6 gap-1 px-2 text-xs font-medium text-muted-foreground">
+                        <Lock className="h-3 w-3" aria-hidden /> Preset
                       </Badge>
                     )}
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">{v.tagline}</p>
+                  <p className="line-clamp-1 text-sm text-muted-foreground">{v.tagline}</p>
                 </div>
                 {selected && <Check className="h-4 w-4 shrink-0 text-primary" />}
               </div>
 
-              <p className="line-clamp-2 text-xs text-muted-foreground/90">
+              <p className="line-clamp-2 text-sm text-muted-foreground">
                 &ldquo;{v.firstMessage}&rdquo;
               </p>
 
@@ -106,13 +106,14 @@ export function StepVoice({
                   <span
                     role="button"
                     tabIndex={0}
+                    aria-label={isCustom ? `Edit ${v.name} in the playground` : `Customize ${v.name} into a new voice`}
                     onClick={goEdit}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") goEdit(e)
                     }}
-                    className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                    className="inline-flex w-fit items-center gap-1 rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
-                    <Pencil className="h-3 w-3" /> {label}
+                    <Pencil className="h-3.5 w-3.5" aria-hidden /> {label}
                   </span>
                 )
               })()}

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Sparkles, Download, Rocket, Check, Lock, Pencil, Info, ChevronRight } from "lucide-react"
+import { Sparkles, Download, Rocket, Check, Pencil, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,13 +33,13 @@ import { toast } from "sonner"
 /**
  * AgentWizard — the unified creation surface (new · edit · onboarding · empty).
  *
- * Presented as a CHECKLIST + EDIT DRAWERS (the "V10" direction, chosen from a
- * 10-option audit). The whole path is visible at a glance — five short rows —
- * which orients a first-time user before they commit (value-first, low anxiety).
- * Each row opens a focused drawer to edit that step; "Save & continue" chains to
- * the next; a sticky bar always shows progress + the one thing blocking publish.
- * Steps unlock in order but are never hard-locked — a locked row still opens,
- * view-only, and says exactly what to finish first. Draft autosaves + restores.
+ * A CHECKLIST + EDIT DRAWERS. The whole path is visible at a glance; each row
+ * opens a focused drawer to edit that step. NOTHING IS LOCKED — every step is
+ * openable and fully editable at any time (the user needs full visibility).
+ * Completion only drives the ✓ + the progress count + a "Start here" nudge on
+ * the suggested next step. Publish is a HINT, not a gate: the reason is shown,
+ * the button still works. Deep-links: `?step=N` opens a step, `?dc=` presets a
+ * channel + opens Configure, `?artifact=` selects a custom voice. Draft autosaves.
  */
 export function AgentWizard({ id }: { id: string }) {
   const router = useRouter()
@@ -63,53 +63,40 @@ export function AgentWizard({ id }: { id: string }) {
     setDraft((d) => ({ ...d, ...patch }))
   }, [])
 
-  // ── Sequential gating (each step unlocks when the previous is COMPLETE) ──────
+  // ── Step completion — for the ✓, the progress count, and the "Start here"
+  //    nudge ONLY. It never gates access: every step is always openable/editable.
   const voiceDone = draft.voice !== null
   const typeDone = draft.type !== null
   const promptDone = draft.systemPrompt.trim().length > 0
   const configReady = typeDone && publishBlockReason(draft) === null
+  const isDone = (n: number) =>
+    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : n === 4 ? configReady : false
+  const completeCount = [1, 2, 3, 4, 5].filter(isDone).length
 
-  const meta = [
-    { n: 1, locked: false, complete: voiceDone },
-    { n: 2, locked: !voiceDone, complete: typeDone },
-    { n: 3, locked: !typeDone, complete: promptDone },
-    { n: 4, locked: !promptDone, complete: configReady },
-    { n: 5, locked: !configReady, complete: false },
-  ] as const
-  const statusOf = (n: number): "locked" | "active" | "done" => {
-    const m = meta[n - 1]
-    return m.locked ? "locked" : m.complete ? "done" : "active"
-  }
-  const completeCount = meta.filter((m) => m.complete).length
-  const canContinue = (n: number) =>
-    (n === 1 && voiceDone) || (n === 2 && typeDone) || (n === 3 && promptDone) || (n === 4 && configReady)
-  const lockedReason = (n: number) =>
-    n >= 2 ? `Finish “${STEP_TITLES[n - 2]}” first to start this step.` : undefined
-
-  // Row detail line: summary when done, guidance otherwise.
+  // Row detail line: the summary when done, otherwise a short nudge. Never "locked".
   const rowDetail = (n: number): string => {
-    const st = statusOf(n)
-    if (st === "locked") return "Finish the previous step first"
-    if (st === "done") return stepSummary(n) ?? "Done"
-    return n === firstIncomplete(draft) ? "Start here — about a minute" : "Ready when you are"
+    if (isDone(n)) return stepSummary(n) ?? "Done"
+    return n === firstIncomplete(draft) ? "Start here — about a minute" : "Tap to open"
   }
 
-  // ── Mount: time-to-live clock; (new mode) restore + ?artifact + ?dc. ─────────
+  // ── Mount: time-to-live clock; restore + ?artifact + ?dc + ?step deep-links. ──
   React.useEffect(() => {
     markBuildStart()
     const params = new URLSearchParams(window.location.search)
     const artifactId = params.get("artifact")
     const dc = params.get("dc")
+    const stepParam = parseInt(params.get("step") ?? "", 10)
+    const stepToOpen = stepParam >= 1 && stepParam <= 5 ? stepParam : null
 
     if (isEdit) {
       if (dc) {
         const t = dcToType(dc)
-        if (t) {
-          setDraft((d) => ({ ...d, type: t, config: dcToConfig(dc, d.config) }))
-          setOpenStep(4)
-        }
-        window.history.replaceState({}, "", `/agents/${id}/edit`)
+        if (t) setDraft((d) => ({ ...d, type: t, config: dcToConfig(dc, d.config) }))
+        setOpenStep(4)
+      } else if (stepToOpen) {
+        setOpenStep(stepToOpen)
       }
+      if (dc || stepToOpen) window.history.replaceState({}, "", `/agents/${id}/edit`)
       return
     }
 
@@ -131,10 +118,9 @@ export function AgentWizard({ id }: { id: string }) {
     }
     setDraft(next)
     if (dc) setOpenStep(4)
-    if (artifactId || dc) {
-      dirty.current = true
-      window.history.replaceState({}, "", "/agents/new/edit")
-    }
+    else if (stepToOpen) setOpenStep(stepToOpen)
+    if (artifactId || dc) dirty.current = true
+    if (artifactId || dc || stepToOpen) window.history.replaceState({}, "", "/agents/new/edit")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -169,7 +155,7 @@ export function AgentWizard({ id }: { id: string }) {
 
   const publish = () => {
     const reason = publishBlockReason(draftRef.current)
-    if (reason) { toast.error("Not ready to publish", { description: reason }); return }
+    if (reason) { toast.error("A couple of things to finish first", { description: reason }); return }
     const agentId = draft.agentId ?? `agt_${Date.now().toString(36)}`
     clearDraft()
     publishDeployment({
@@ -197,35 +183,34 @@ export function AgentWizard({ id }: { id: string }) {
   }
 
   const blockReason = publishBlockReason(draft)
-  const drawerLocked = openStep != null && statusOf(openStep) === "locked"
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-2xl space-y-6 px-4 py-6 pb-24 sm:px-6">
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">
           {isEdit ? `Edit ${existing!.name}` : "Create your agent"}
         </h1>
         <p className="text-sm text-muted-foreground">
           {isEdit
-            ? "Update any step — changes save automatically."
-            : "Five quick steps to a live agent. Work down the checklist — each opens a short form and saves as you go."}
+            ? "Open any step to edit it — changes save automatically."
+            : "Five short steps to a live agent. Open any step, in any order — it all saves as you go."}
         </p>
       </header>
 
       {!isEdit && (
-        <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
             <div>
               <p className="text-sm font-medium">Already have an agent elsewhere?</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Import a Vapi / Retell / ElevenLabs config — we map it to a custom voice you can tune, then drop you back here with it selected.
               </p>
             </div>
           </div>
           <ImportAgentSheet onImported={onImported}>
             <Button variant="outline" size="sm" className="shrink-0 gap-1.5">
-              <Download className="h-3.5 w-3.5" /> Import your agent
+              <Download className="h-4 w-4" aria-hidden /> Import your agent
             </Button>
           </ImportAgentSheet>
         </div>
@@ -236,93 +221,83 @@ export function AgentWizard({ id }: { id: string }) {
         <Input id="wz-name" value={draft.name} onChange={(e) => update({ name: e.target.value })} placeholder="e.g. Acme Support" />
       </div>
 
-      {/* Checklist */}
+      {/* Checklist — every row opens; nothing is locked. */}
       <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
         {[1, 2, 3, 4, 5].map((n) => {
-          const st = statusOf(n)
-          const isActive = st === "active" && n === firstIncomplete(draft)
+          const done = isDone(n)
+          const isActive = !done && n === firstIncomplete(draft)
           return (
             <button
               key={n}
               type="button"
               onClick={() => openRow(n)}
+              aria-current={isActive ? "step" : undefined}
               className={cn(
-                "flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/40",
+                "flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-accent/40",
                 isActive && "bg-primary/5",
               )}
             >
               <span className={cn(
                 "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                st === "done" && "border-primary bg-primary/10 text-primary",
+                done && "border-primary bg-primary/10 text-primary",
                 isActive && "border-primary bg-primary text-primary-foreground",
-                st === "locked" && "border-border text-muted-foreground",
-                st === "active" && !isActive && "border-border text-muted-foreground",
+                !done && !isActive && "border-border text-muted-foreground",
               )}>
-                {st === "done" ? <Check className="h-3.5 w-3.5" /> : st === "locked" ? <Lock className="h-3 w-3" /> : n}
+                {done ? <Check className="h-4 w-4" aria-hidden /> : n}
               </span>
               <div className="min-w-0 flex-1">
-                <p className={cn("text-sm font-medium", st === "locked" && "text-muted-foreground")}>{STEP_TITLES[n - 1]}</p>
-                <p className="truncate text-xs text-muted-foreground">{rowDetail(n)}</p>
+                <p className="text-sm font-semibold">{STEP_TITLES[n - 1]}</p>
+                <p className="line-clamp-1 text-sm text-muted-foreground">{rowDetail(n)}</p>
               </div>
-              <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground">
-                {st === "done" ? (<><Pencil className="h-3 w-3" /> Edit</>) : st === "locked" ? "View" : isActive ? "Start" : "Open"}
-                <ChevronRight className="h-3.5 w-3.5" />
+              <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80">
+                {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : isActive ? "Start" : "Open"}
+                <ChevronRight className="h-4 w-4" aria-hidden />
               </span>
             </button>
           )
         })}
       </div>
 
-      {/* Sticky progress + publish */}
+      {/* Sticky progress + publish (publish is a hint, not a lock). */}
       <div className="sticky bottom-4 z-30">
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur">
           <div className="min-w-0">
-            <p className="text-sm font-medium">{completeCount} of 5 complete</p>
-            <p className="truncate text-xs text-muted-foreground">{blockReason ?? "Ready to go live 🎉"}</p>
+            <p className="text-sm font-semibold">{completeCount} of 5 complete</p>
+            <p className="line-clamp-2 text-sm text-muted-foreground">{blockReason ?? "Everything's set — ready to go live 🎉"}</p>
           </div>
           <Button className="shrink-0 gap-1.5" onClick={() => setOpenStep(5)}>
-            <Rocket className="h-4 w-4" /> Test &amp; publish
+            <Rocket className="h-4 w-4" aria-hidden /> Test &amp; publish
           </Button>
         </div>
       </div>
 
-      {/* Edit drawer */}
+      {/* Edit drawer — always fully interactive. */}
       <Sheet open={openStep != null} onOpenChange={(o) => !o && closeDrawer()}>
-        <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
+        <SheetContent side="right" aria-modal className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
           {openStep != null && (
             <>
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
                 <SheetTitle className="text-base">{STEP_TITLES[openStep - 1]}</SheetTitle>
-                <p className="text-xs text-muted-foreground">Step {openStep} of 5</p>
+                <p className="text-sm text-muted-foreground">Step {openStep} of 5</p>
               </SheetHeader>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                {drawerLocked && (
-                  <div className="mb-4 flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      {lockedReason(openStep)} You can look, but finish the earlier steps to edit this.
-                    </p>
-                  </div>
-                )}
-                <div className={cn(drawerLocked && "pointer-events-none select-none opacity-60")}>
-                  {openStep === 1 && <StepVoice draft={draft} onSelectVoice={selectVoice} />}
-                  {openStep === 2 && <StepType draft={draft} update={update} />}
-                  {openStep === 3 && <StepBuild draft={draft} update={update} />}
-                  {openStep === 4 && <StepConfigure draft={draft} update={update} />}
-                  {openStep === 5 && <StepPublish draft={draft} onPublish={publish} />}
-                </div>
+                {openStep === 1 && <StepVoice draft={draft} onSelectVoice={selectVoice} />}
+                {openStep === 2 && <StepType draft={draft} update={update} />}
+                {openStep === 3 && <StepBuild draft={draft} update={update} />}
+                {openStep === 4 && <StepConfigure draft={draft} update={update} />}
+                {openStep === 5 && <StepPublish draft={draft} onPublish={publish} />}
               </div>
 
-              {!drawerLocked && openStep < 5 && (
+              {openStep < 5 && (
                 <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3">
                   <Button variant="ghost" className="gap-1.5" disabled={openStep === 1} onClick={() => backFrom(openStep)}>
                     Back
                   </Button>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" onClick={closeDrawer}>Save &amp; close</Button>
-                    <Button className="gap-1.5" disabled={!canContinue(openStep)} onClick={() => advanceFrom(openStep)}>
-                      Save &amp; continue <ChevronRight className="h-4 w-4" />
+                    <Button className="gap-1.5" onClick={() => advanceFrom(openStep)}>
+                      Save &amp; continue <ChevronRight className="h-4 w-4" aria-hidden />
                     </Button>
                   </div>
                 </div>
@@ -337,6 +312,8 @@ export function AgentWizard({ id }: { id: string }) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** The first step whose completion predicate is unmet — used only for the
+ *  "Start here" nudge + restore cursor. Not a gate. */
 function firstIncomplete(d: AgentDraft): number {
   if (d.voice === null) return 1
   if (d.type === null) return 2

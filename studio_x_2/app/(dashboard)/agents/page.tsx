@@ -164,15 +164,6 @@ function TemplateRow({
   )
 }
 
-// ─── first-run gallery view ──────────────────────────────────────────────────
-
-function FirstRunView() {
-  // First-run IS the Aria believe-then-scale home (2026-06-23). The old
-  // "Pre-built by Agora" template picker is gone; templates now live in the
-  // Browse-templates sheet (header action). GoLiveHome owns its own state.
-  return <GoLiveHome />
-}
-
 // ─── returning-user list view ────────────────────────────────────────────────
 
 function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
@@ -230,7 +221,7 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
               const count = f.id === "all" ? AGENTS.length : AGENTS.filter((a) => a.status === f.id).length
               return (
                 <ToggleGroupItem key={f.id} value={f.id} className="text-xs">
-                  {f.label} <span className="tabular-nums opacity-60">{count}</span>
+                  {f.label} <span className="tabular-nums text-muted-foreground">{count}</span>
                 </ToggleGroupItem>
               )
             })}
@@ -289,13 +280,13 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                               />
                             )}
                           </span>
-                          <p className="text-xs text-muted-foreground truncate max-w-xs">
+                          <p className="line-clamp-2 max-w-xs text-sm text-muted-foreground">
                             {agent.description}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{agent.id}</TableCell>
+                    <TableCell className="font-mono text-sm text-foreground/80" title={agent.id}>{agent.id}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         <ch.icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -463,7 +454,7 @@ export default function AgentsPage() {
       />
 
       {showFirstRun ? (
-        <FirstRunView />
+        <GoLiveHome onViewAll={() => switchView(true)} />
       ) : (
         <ListView onBrowseTemplates={() => setTemplatesOpen(true)} />
       )}
