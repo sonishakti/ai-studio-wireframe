@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Plug, Plus, X, Check } from "lucide-react"
+import { BookOpen, Plug, Plus, X, Check, Play, MessageSquare } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -84,6 +84,48 @@ export function StepBuild({ draft, update }: StepProps) {
           manageLabel="Add MCP connector"
         />
       </div>
+
+      <QuickTest name={draft.name} greeting={draft.greeting} />
+    </div>
+  )
+}
+
+// ─── Quick test — hear the opening + a sample reply without leaving the step ───
+
+function QuickTest({ name, greeting }: { name: string; greeting: string }) {
+  const [ran, setRan] = React.useState(false)
+  const agent = name || "Your agent"
+  const opener = greeting.trim() || "Hi, thanks for reaching out — how can I help?"
+  return (
+    <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Quick test</p>
+          <p className="text-xs text-muted-foreground">Hear how it opens and a sample reply — no setup needed.</p>
+        </div>
+        <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => setRan(true)}>
+          <Play className="h-3.5 w-3.5" /> {ran ? "Run again" : "Run a sample turn"}
+        </Button>
+      </div>
+      {ran && (
+        <div className="space-y-2 rounded-md border border-border bg-muted/20 p-3">
+          <Turn who={agent} text={opener} agent />
+          <Turn who="Caller" text="Do you have any availability tomorrow?" />
+          <Turn who={agent} text="Let me check that for you — what time of day works best?" agent />
+          <p className="pt-1 text-[11px] text-muted-foreground">Full voice test with the finished agent is in the last step.</p>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function Turn({ who, text, agent = false }: { who: string; text: string; agent?: boolean }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className={cn("mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full", agent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+        <MessageSquare className="h-3 w-3" />
+      </span>
+      <p className="text-xs leading-relaxed"><span className="font-medium">{who}:</span> <span className="text-muted-foreground">{text}</span></p>
     </div>
   )
 }

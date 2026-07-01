@@ -15,10 +15,11 @@ import type { AgentDraft } from "@/lib/wizard-draft"
 /**
  * Step 1 — Choose your Voice.
  *
- * Preset voices are IMMUTABLE (selectable, never edited). Custom voices are
- * built in the Playground (or seeded from an Import) and can be edited. Choosing
- * any voice unlocks Step 2. "Create custom voice" (replacing the old "Edit Aria")
- * and a custom's "Edit" both route to the Playground.
+ * Preset voices are IMMUTABLE (selectable). "Customize" forks a preset into a
+ * new editable custom in the Playground (?from=) — this is the spec's "Edit Aria
+ * → custom artifact". Custom voices edit in place (?artifact=). "Create custom
+ * voice" starts a blank one. All routes return here with the artifact selected.
+ * Choosing any voice unlocks Step 2.
  */
 export function StepVoice({
   draft,
@@ -89,25 +90,32 @@ export function StepVoice({
                 &ldquo;{v.firstMessage}&rdquo;
               </p>
 
-              {isCustom && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    router.push(`/agents/playground?artifact=${v.id}`)
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation()
-                      router.push(`/agents/playground?artifact=${v.id}`)
-                    }
-                  }}
-                  className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Pencil className="h-3 w-3" /> Edit in playground
-                </span>
-              )}
+              {/* Presets are immutable — "Customize" forks a copy into the
+                  Playground (?from=). Customs edit in place (?artifact=). Both
+                  return here with the resulting artifact selected. */}
+              {(() => {
+                const href = isCustom
+                  ? `/agents/playground?artifact=${v.id}`
+                  : `/agents/playground?from=${v.id}`
+                const label = isCustom ? "Edit in playground" : "Customize"
+                const goEdit = (e: React.SyntheticEvent) => {
+                  e.stopPropagation()
+                  router.push(href)
+                }
+                return (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={goEdit}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") goEdit(e)
+                    }}
+                    className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Pencil className="h-3 w-3" /> {label}
+                  </span>
+                )
+              })()}
             </button>
           )
         })}

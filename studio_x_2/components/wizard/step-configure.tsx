@@ -194,6 +194,8 @@ function OutboundConfigure({ draft, update }: StepProps) {
         )
       )}
 
+      <OutboundSettings />
+
       <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
         <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
         <p className="text-xs text-muted-foreground">
@@ -203,6 +205,51 @@ function OutboundConfigure({ draft, update }: StepProps) {
         </p>
       </div>
     </ConfigCard>
+  )
+}
+
+// Other outbound settings — call window, concurrency, retries (wireframe mock).
+function OutboundSettings() {
+  const [win, setWin] = React.useState("business")
+  const [concurrency, setConcurrency] = React.useState("10")
+  const [retries, setRetries] = React.useState("1")
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">Other settings</Label>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Call window</Label>
+          <Select value={win} onValueChange={setWin}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="business">Business hours (9–5)</SelectItem>
+              <SelectItem value="extended">Extended (8–8)</SelectItem>
+              <SelectItem value="anytime">Anytime</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Max concurrent</Label>
+          <Select value={concurrency} onValueChange={setConcurrency}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {["5", "10", "25", "50"].map((c) => <SelectItem key={c} value={c}>{c} calls</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
+          <Select value={retries} onValueChange={setRetries}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0">Don&apos;t retry</SelectItem>
+              <SelectItem value="1">Once</SelectItem>
+              <SelectItem value="2">Twice</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
   )
 }
 

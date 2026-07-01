@@ -45,10 +45,13 @@ export default function PlaygroundPage() {
   const [systemPrompt, setSystemPrompt] = React.useState<string | undefined>()
   const [speaking, setSpeaking] = React.useState(false)
 
-  // Load an existing custom (edit / returning import) or mint a fresh id.
+  // Three ways in: ?artifact= edits an existing custom in place; ?from= forks a
+  // preset into a NEW editable custom (the spec's "Edit Aria → custom artifact");
+  // otherwise start a blank one.
   React.useEffect(() => {
-    const artifactId = new URLSearchParams(window.location.search).get("artifact")
-    const existing = artifactId ? getVoiceArtifact(artifactId) : undefined
+    const params = new URLSearchParams(window.location.search)
+    const existing = params.get("artifact") ? getVoiceArtifact(params.get("artifact")!) : undefined
+    const forkOf = params.get("from") ? getVoiceArtifact(params.get("from")!) : undefined
     if (existing) {
       idRef.current = existing.id
       setName(existing.name)
@@ -60,6 +63,17 @@ export default function PlaygroundPage() {
       setFirstMessage(existing.firstMessage)
       setSource(existing.source)
       setSystemPrompt(existing.systemPrompt)
+    } else if (forkOf) {
+      idRef.current = newVoiceId()
+      setName(`${forkOf.name} (custom)`)
+      setTagline(forkOf.tagline)
+      setPersonality(forkOf.personality)
+      setTone(forkOf.tone)
+      setLanguage(forkOf.language)
+      setTtsVoice(forkOf.ttsVoice)
+      setFirstMessage(forkOf.firstMessage)
+      setSource(`Customized from ${forkOf.name}`)
+      setSystemPrompt(forkOf.systemPrompt)
     } else {
       idRef.current = newVoiceId()
       setName("My custom voice")
