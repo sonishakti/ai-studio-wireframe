@@ -14,14 +14,11 @@ import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 
 /**
- * GoLiveHome — the first-run LANDING page as an ONBOARDING SHORTCUT WIDGET
- * (2026-06-24, chosen from a widget-shape audit: "finish-your-agent journey").
- *
- * A first-time user lands here and immediately sees WHAT TO DO to get their
- * ready-made agent (Aria) live: the agent up top, then the five journey steps as
- * shortcuts that deep-link straight into the builder at that step
- * (`/agents/agt_default/edit?step=N`). It doubles as the create-new-agent entry
- * (+ Create · Import · View all agents). Legibility-first — no tiny/dimmed text.
+ * GoLiveHome — the first-run LANDING page as an ONBOARDING SHORTCUT WIDGET, in a
+ * LEFT / RIGHT layout (2026-06-24): the ready-made agent (Aria) on the LEFT, and
+ * "Get Aria live" — the five journey steps as deep-link shortcuts — on the RIGHT.
+ * Each shortcut opens the builder at that step (`/agents/agt_default/edit?step=N`).
+ * Doubles as the create-new-agent list. Stacks to one column on small screens.
  */
 
 const STEPS: { n: number; label: string; hint: string; isDone: (a: ReturnType<typeof getDefaultAgent>) => boolean }[] = [
@@ -57,24 +54,30 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
   const editStep = (n: number) => `/agents/${agent.id}/edit?step=${n}`
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 sm:px-6">
-      {/* Aria identity */}
-      <section className="rounded-xl border border-border bg-card p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <AgentSphere size={76} active={talking} />
-          <div className="min-w-0 flex-1 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-lg font-semibold tracking-tight">{agent.name}</h1>
-              <Badge variant="secondary">{talking ? "Connected" : "Ready to deploy"}</Badge>
+    <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+      <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+        {/* LEFT — the ready-made agent */}
+        <section className="flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <AgentSphere size={104} active={talking} />
+            <div className="space-y-1">
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-xl font-semibold tracking-tight">{agent.name}</h1>
+                <Badge variant="secondary">{talking ? "Connected" : "Ready to deploy"}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">{agent.role ?? "Your ready-made agent"}</p>
             </div>
-            <p className="text-sm text-muted-foreground">{agent.role ?? "Your ready-made agent"}</p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-0.5 text-sm text-muted-foreground">
-              <span className="font-mono">{stackSummary(agent)}</span>
+          </div>
+
+          <div className="mt-5 space-y-2 border-t border-border pt-4">
+            <p className="break-words font-mono text-sm text-muted-foreground">{stackSummary(agent)}</p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1"><DollarSign className="h-3.5 w-3.5" aria-hidden />{est.costPerMin.toFixed(2)}/min</span>
               <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" aria-hidden />{est.latencyMs}ms</span>
             </div>
           </div>
-          <div className="flex shrink-0 gap-2">
+
+          <div className="mt-5 flex flex-col gap-2">
             {talking ? (
               <Button variant="destructive" className="gap-1.5" onClick={toggleTalk}>
                 <PhoneOff className="h-4 w-4" aria-hidden /> End call
@@ -85,49 +88,49 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
               </Button>
             )}
             <Button variant="outline" className="gap-1.5" asChild>
-              <Link href={`/agents/${agent.id}/edit`}><Pencil className="h-4 w-4" aria-hidden /> Edit</Link>
+              <Link href={`/agents/${agent.id}/edit`}><Pencil className="h-4 w-4" aria-hidden /> Edit agent</Link>
             </Button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Journey shortcuts — each deep-links into the builder at that step */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-semibold tracking-tight">Get {agent.name} live</h2>
-          <span className="text-sm text-muted-foreground">{doneCount} of {STEPS.length} done</span>
-        </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={doneCount} aria-valuemin={0} aria-valuemax={STEPS.length}>
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(doneCount / STEPS.length) * 100}%` }} />
-        </div>
-        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
-          {STEPS.map((s) => {
-            const done = s.isDone(agent)
-            return (
-              <Link
-                key={s.n}
-                href={editStep(s.n)}
-                className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40"
-              >
-                <span className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                  done ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
-                )}>
-                  {done ? <Check className="h-4 w-4" aria-hidden /> : s.n}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">{s.label}</p>
-                  <p className="line-clamp-1 text-sm text-muted-foreground">{done ? "Done — open to edit" : s.hint}</p>
-                </div>
-                <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80">
-                  {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : "Set up"}
-                  <ChevronRight className="h-4 w-4" aria-hidden />
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
+        {/* RIGHT — get it live */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-semibold tracking-tight">Get {agent.name} live</h2>
+            <span className="text-sm text-muted-foreground">{doneCount} of {STEPS.length} done</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={doneCount} aria-valuemin={0} aria-valuemax={STEPS.length}>
+            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(doneCount / STEPS.length) * 100}%` }} />
+          </div>
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+            {STEPS.map((s) => {
+              const done = s.isDone(agent)
+              return (
+                <Link
+                  key={s.n}
+                  href={editStep(s.n)}
+                  className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40"
+                >
+                  <span className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold",
+                    done ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
+                  )}>
+                    {done ? <Check className="h-4 w-4" aria-hidden /> : s.n}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold">{s.label}</p>
+                    <p className="line-clamp-1 text-sm text-muted-foreground">{done ? "Done — open to edit" : s.hint}</p>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80">
+                    {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : "Set up"}
+                    <ChevronRight className="h-4 w-4" aria-hidden />
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      </div>
 
       {/* Doubles as create / import / list */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">

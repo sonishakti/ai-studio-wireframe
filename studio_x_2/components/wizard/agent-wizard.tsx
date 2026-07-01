@@ -273,7 +273,10 @@ export function AgentWizard({ id }: { id: string }) {
 
       {/* Edit drawer — always fully interactive. */}
       <Sheet open={openStep != null} onOpenChange={(o) => !o && closeDrawer()}>
-        <SheetContent side="right" aria-modal className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
+        {/* Roomy drawer — the shadcn default caps a right sheet at max-w-sm (384px),
+            which cramps the step forms. Override with a data-[side]-prefixed width so
+            it actually wins the specificity fight. */}
+        <SheetContent side="right" aria-modal className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-3xl">
           {openStep != null && (
             <>
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
