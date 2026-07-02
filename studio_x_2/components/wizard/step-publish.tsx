@@ -32,7 +32,7 @@ export function StepPublish({
 }) {
   const [connected, setConnected] = React.useState(false)
   const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
-  const agentName = draft.name || voice?.name || "Your agent"
+  const agentName = draft.name || voice?.name || "your agent"
   const blocks = publishBlocks(draft)
 
   const toggleTest = () => {
@@ -65,7 +65,7 @@ export function StepPublish({
                 {voice && <span className="text-muted-foreground"> · {voice.tagline}</span>}
               </SummaryRow>
               <SummaryRow icon={typeIcon(draft)} label="Type">
-                <span className="capitalize">{draft.type ?? "Not set yet"}</span>
+                {draft.type ? <span className="capitalize">{draft.type}</span> : "Not set yet"}
                 {draft.type && <span className="text-muted-foreground"> · {channelTarget(draft)}</span>}
               </SummaryRow>
               {(draft.knowledge.length > 0 || draft.mcp.length > 0) && (
