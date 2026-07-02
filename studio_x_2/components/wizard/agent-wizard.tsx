@@ -19,7 +19,7 @@ import { STEP_TITLES } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, stackSummary, stackEstimate, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackSummary, stackEstimate, stackLatencyBreakdown, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -244,6 +244,7 @@ export function AgentWizard({
   const cardStatus = isEdit ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1) : "Draft"
   const cardStack = isEdit ? stackSummary(existing!) : undefined
   const cardEst = isEdit ? stackEstimate(existing!) : undefined
+  const cardLatency = isEdit ? stackLatencyBreakdown(existing!) : undefined
   const toggleTest = () => {
     if (testing) track(Events.agent_test_ended, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new", duration_sec: 30 })
     else track(Events.agent_test_started, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new" })
@@ -313,6 +314,7 @@ export function AgentWizard({
           stack={cardStack}
           costPerMin={cardEst?.costPerMin}
           latencyMs={cardEst?.latencyMs}
+          latencyBreakdown={cardLatency}
           talking={testing}
           onToggleTalk={toggleTest}
           talkLabel={`Talk to ${draft.name || "your agent"}`}

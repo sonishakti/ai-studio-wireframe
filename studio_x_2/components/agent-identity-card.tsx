@@ -1,11 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Mic, PhoneOff, DollarSign, Gauge } from "lucide-react"
+import { Mic, PhoneOff, DollarSign, Gauge, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { type StackLatencyBreakdown } from "@/lib/campaign-data"
 
 /**
  * AgentIdentityCard — the shared "here's your agent" panel.
@@ -25,6 +26,7 @@ export function AgentIdentityCard({
   stack,
   costPerMin,
   latencyMs,
+  latencyBreakdown,
   talking,
   onToggleTalk,
   talkLabel,
@@ -42,6 +44,9 @@ export function AgentIdentityCard({
   stack?: string
   costPerMin?: number
   latencyMs?: number
+  /** When provided, the latency stat expands to an ASR/LLM/TTS → end-to-end →
+   *  best-case breakdown. */
+  latencyBreakdown?: StackLatencyBreakdown
   talking: boolean
   onToggleTalk: () => void
   talkLabel?: string
@@ -52,6 +57,7 @@ export function AgentIdentityCard({
 }) {
   const displayName = name || namePlaceholder
   const hasStats = !!stack || costPerMin != null || latencyMs != null
+  const [showLatency, setShowLatency] = React.useState(false)
 
   return (
     <section className={cn("flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6", className)}>
@@ -80,13 +86,36 @@ export function AgentIdentityCard({
         <div className="mt-5 space-y-2 border-t border-border pt-4">
           {stack && <p className="break-words font-mono text-sm text-muted-foreground">{stack}</p>}
           {(costPerMin != null || latencyMs != null) && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               {costPerMin != null && (
                 <span className="inline-flex items-center gap-1"><DollarSign className="h-3.5 w-3.5" aria-hidden />{costPerMin.toFixed(2)}/min</span>
               )}
-              {latencyMs != null && (
-                <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms</span>
-              )}
+              {latencyMs != null &&
+                (latencyBreakdown ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowLatency((v) => !v)}
+                    aria-expanded={showLatency}
+                    className="inline-flex items-center gap-1 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
+                    <ChevronDown className={cn("h-3 w-3 transition-transform", showLatency && "rotate-180")} aria-hidden />
+                  </button>
+                ) : (
+                  <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms</span>
+                ))}
+            </div>
+          )}
+
+          {latencyBreakdown && showLatency && (
+            <div className="rounded-md border border-border bg-muted/40 p-3 text-left">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Latency breakdown</p>
+              <LatencyRow label="ASR" value={latencyBreakdown.asrMs} />
+              <LatencyRow label="LLM (TTFT)" value={latencyBreakdown.llmMs} />
+              <LatencyRow label="TTS" value={latencyBreakdown.ttsMs} />
+              <div className="my-2 border-t border-border" />
+              <LatencyRow label="End-to-end" value={latencyBreakdown.latencyMs} strong />
+              <LatencyRow label="Best case" value={latencyBreakdown.bestCaseMs} muted />
             </div>
           )}
         </div>
@@ -105,5 +134,23 @@ export function AgentIdentityCard({
         {secondary}
       </div>
     </section>
+  )
+}
+
+function LatencyRow({
+  label, value, strong = false, muted = false,
+}: {
+  label: string
+  value: number
+  strong?: boolean
+  muted?: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between py-0.5 text-xs">
+      <span className={muted ? "text-muted-foreground" : "text-foreground/80"}>{label}</span>
+      <span className={cn("font-mono tabular-nums", strong ? "font-medium text-foreground" : muted ? "text-muted-foreground" : "text-foreground/80")}>
+        ~{value} ms
+      </span>
+    </div>
   )
 }

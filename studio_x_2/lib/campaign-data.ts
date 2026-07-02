@@ -278,6 +278,39 @@ export function stackEstimate(a: Agent): { latencyMs: number; costPerMin: number
   return STACK_ESTIMATE[a.stack.preset]
 }
 
+/** Per-provider latency contribution (ms) + the best-case (warm-path) floor for
+ *  each stack preset. ASR + LLM(TTFT) + TTS roll up (with turn-taking / network
+ *  overhead) to the end-to-end `STACK_ESTIMATE.latencyMs`; `bestCaseMs` is the
+ *  optimistic end-to-end when every hop is warm. Wireframe estimates. */
+export const STACK_LATENCY: Record<
+  StackPreset,
+  { asrMs: number; llmMs: number; ttsMs: number; bestCaseMs: number }
+> = {
+  fastest: { asrMs: 90, llmMs: 260, ttsMs: 140, bestCaseMs: 470 },
+  balanced: { asrMs: 130, llmMs: 360, ttsMs: 190, bestCaseMs: 620 },
+  cheapest: { asrMs: 190, llmMs: 540, ttsMs: 250, bestCaseMs: 870 },
+}
+
+export interface StackLatencyBreakdown {
+  /** Speech-to-text finalization. */
+  asrMs: number
+  /** LLM time-to-first-token. */
+  llmMs: number
+  /** Text-to-speech first audio chunk. */
+  ttsMs: number
+  /** Typical end-to-end (from STACK_ESTIMATE). */
+  latencyMs: number
+  /** Optimistic end-to-end when every hop is warm. */
+  bestCaseMs: number
+}
+
+/** Per-provider latency breakdown for an agent's stack — ASR/LLM/TTS + the
+ *  end-to-end total and a best-case floor. Powers the card's latency popover. */
+export function stackLatencyBreakdown(a: Agent): StackLatencyBreakdown {
+  const l = STACK_LATENCY[a.stack.preset]
+  return { ...l, latencyMs: STACK_ESTIMATE[a.stack.preset].latencyMs }
+}
+
 /** Sandbox DID for the in-product "call in to test" flow — a free test line
  *  routed straight to the agent during evaluation (no real number consumed).
  *  Wireframe value. */
