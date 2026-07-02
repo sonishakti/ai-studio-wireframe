@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Sparkles, Download, Rocket, Check, Pencil, ChevronRight } from "lucide-react"
+import { Sparkles, Download, Rocket, Check, Pencil, ChevronRight, List, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,7 +40,19 @@ import { toast } from "sonner"
  * the button still works. Deep-links: `?step=N` opens a step, `?dc=` presets a
  * channel + opens Configure, `?artifact=` selects a custom voice. Draft autosaves.
  */
-export function AgentWizard({ id }: { id: string }) {
+export function AgentWizard({
+  id,
+  landing,
+  onViewAll,
+  onCreateNew,
+}: {
+  id: string
+  /** Rendered inline on /agents (not the standalone edit route) — show the
+   *  first-run chrome (import banner + inviting heading + view-all/create). */
+  landing?: boolean
+  onViewAll?: () => void
+  onCreateNew?: () => void
+}) {
   const router = useRouter()
   const existing = id !== "new" ? getAgent(id) : undefined
   const isEdit = !!existing
@@ -242,18 +254,36 @@ export function AgentWizard({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 pb-24 sm:px-6">
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">
-          {isEdit ? "Edit your agent" : "Create your agent"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {isEdit
-            ? "Open any step to edit it — changes save automatically."
-            : "Five short steps to a live agent. Open any step, in any order — it all saves as you go."}
-        </p>
-      </header>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <header className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight">
+            {landing ? "Deploy an AI agent in minutes" : isEdit ? "Edit your agent" : "Create your agent"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {landing
+              ? "Talk to your ready-made agent, set it up, and put it live — all on this page."
+              : isEdit
+              ? "Open any step to edit it — changes save automatically."
+              : "Five short steps to a live agent. Open any step, in any order — it all saves as you go."}
+          </p>
+        </header>
+        {(onViewAll || onCreateNew) && (
+          <div className="flex shrink-0 items-center gap-2">
+            {onViewAll && (
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={onViewAll}>
+                <List className="h-4 w-4" aria-hidden /> View all agents
+              </Button>
+            )}
+            {onCreateNew && (
+              <Button size="sm" className="gap-1.5" onClick={onCreateNew}>
+                <Plus className="h-4 w-4" aria-hidden /> Create new agent
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
 
-      {!isEdit && (
+      {(!isEdit || landing) && (
         <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />

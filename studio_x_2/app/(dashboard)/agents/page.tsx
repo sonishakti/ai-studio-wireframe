@@ -42,7 +42,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
-import { GoLiveHome } from "@/components/go-live-home"
+import { AgentWizard } from "@/components/wizard/agent-wizard"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, type StackPreset } from "@/lib/campaign-data"
@@ -389,59 +389,62 @@ export default function AgentsPage() {
   // the wizard can report time-to-live (the <3-min deploy spine).
   React.useEffect(() => { markBuildStart() }, [])
 
-  // Landing (2026-06-24): EVERY user lands on the believe-then-scale GoLiveHome —
-  // talk to Aria, put it to work, or create your own. The managed table is one
-  // click away via "View all agents" (?view=list), which also deep-links + back-navs.
-  const [showFirstRun, setShowFirstRun] = React.useState(true)
+  // Manual toggle only (2026-07-02): the builder IS the landing — pre-loaded with
+  // Aria, configured & deployed seamlessly on THIS page (no route jumps). "View
+  // all agents" flips to the managed list (the returning/pro surface); "Create
+  // new agent" opens a BLANK builder inline. Editing an existing agent from the
+  // list is the only deliberate navigation (→ /agents/[id]/edit).
+  const [view, setView] = React.useState<"builder" | "list">("builder")
+  const [builderId, setBuilderId] = React.useState("agt_default")
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
 
   React.useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("view") === "list") setShowFirstRun(false)
+    if (new URLSearchParams(window.location.search).get("view") === "list") setView("list")
   }, [])
-  const switchView = (toList: boolean) => {
-    setShowFirstRun(!toList)
+  const showList = (toList: boolean) => {
+    setView(toList ? "list" : "builder")
     window.history.replaceState({}, "", toList ? "/agents?view=list" : "/agents")
   }
+  const startBlank = () => {
+    setBuilderId("new")
+    setView("builder")
+    window.history.replaceState({}, "", "/agents")
+  }
+  const isBuilder = view === "builder"
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <PageHeader
-        // First-run renders GoLiveHome (its own "Deploy an AI agent in minutes"
-        // headline), so suppress the page title here to avoid a double H1.
-        title={showFirstRun ? undefined : "Agents"}
-        description={showFirstRun ? undefined : "Create and manage your agents here."}
-        // First-run renders the self-contained GoLiveHome widget (own title +
-        // Create/Import/View-all footer), so PageHeader gets no actions and
-        // collapses to null — no duplicate "View all agents" in the chrome.
+        // The builder is a self-contained widget (own heading + view-all/create
+        // chrome), so suppress the PageHeader in builder view — it only carries
+        // the title + actions for the managed list.
+        title={isBuilder ? undefined : "Agents"}
+        description={isBuilder ? undefined : "Create and manage your agents here."}
         actions={
-          showFirstRun ? undefined : (
+          isBuilder ? undefined : (
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => switchView(false)}
-              >
-                <ChevronLeft className="h-4 w-4" /> Home
-              </Button>
               <ImportAgentSheet>
                 <Button variant="outline" className="gap-1.5 max-sm:hidden">
                   <Upload className="h-4 w-4" /> Import Agent
                 </Button>
               </ImportAgentSheet>
-              <Button asChild>
-                <Link href="/agents/new/edit">
-                  <Plus className="h-4 w-4" /> Create New Agent
-                </Link>
+              <Button className="gap-1.5" onClick={startBlank}>
+                <Plus className="h-4 w-4" /> Create New Agent
               </Button>
             </div>
           )
         }
       />
 
-      {showFirstRun ? (
-        <GoLiveHome onViewAll={() => switchView(true)} />
+      {isBuilder ? (
+        <AgentWizard
+          key={builderId}
+          id={builderId}
+          landing={builderId === "agt_default"}
+          onViewAll={() => showList(true)}
+          onCreateNew={builderId === "agt_default" ? startBlank : undefined}
+        />
       ) : (
         <ListView onBrowseTemplates={() => setTemplatesOpen(true)} />
       )}
