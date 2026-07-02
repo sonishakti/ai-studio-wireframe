@@ -4,13 +4,12 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  Mic, PhoneOff, Plus, Upload, Pencil, Gauge, DollarSign, List,
+  Plus, Upload, Pencil, List,
   AudioLines, Route, FileText, Settings2, Rocket, SlidersHorizontal, History,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { AgentSphere } from "@/components/agent-test-panel"
+import { AgentIdentityCard } from "@/components/agent-identity-card"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { getDefaultAgent, stackSummary, stackEstimate, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { hasDraft, restoreDraft, saveDraft, clearDraft, firstIncompleteStep } from "@/lib/wizard-draft"
@@ -156,42 +155,23 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
       )}
 
       <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-        {/* LEFT — the ready-made agent (unchanged) */}
-        <section className="flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <AgentSphere size={104} active={talking} />
-            <div className="space-y-1">
-              <div className="flex items-center justify-center gap-2">
-                <h2 className="text-xl font-semibold tracking-tight">{agent.name}</h2>
-                <Badge variant="secondary">{talking ? "Connected" : "Ready to deploy"}</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">{agent.role ?? "Your ready-made agent"}</p>
-            </div>
-          </div>
-
-          <div className="mt-5 space-y-2 border-t border-border pt-4">
-            <p className="break-words font-mono text-sm text-muted-foreground">{stackSummary(agent)}</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1"><DollarSign className="h-3.5 w-3.5" aria-hidden />{est.costPerMin.toFixed(2)}/min</span>
-              <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" aria-hidden />{est.latencyMs}ms</span>
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-2">
-            {talking ? (
-              <Button variant="destructive" className="gap-1.5" onClick={toggleTalk}>
-                <PhoneOff className="h-4 w-4" aria-hidden /> End call
-              </Button>
-            ) : (
-              <Button className="gap-1.5" onClick={toggleTalk}>
-                <Mic className="h-4 w-4" aria-hidden /> Talk to {agent.name}
-              </Button>
-            )}
+        {/* LEFT — the ready-made agent (shared card; identical in the builder) */}
+        <AgentIdentityCard
+          name={agent.name}
+          status={talking ? "Connected" : "Ready to deploy"}
+          subtitle={agent.role ?? "Your ready-made agent"}
+          stack={stackSummary(agent)}
+          costPerMin={est.costPerMin}
+          latencyMs={est.latencyMs}
+          talking={talking}
+          onToggleTalk={toggleTalk}
+          talkLabel={`Talk to ${agent.name}`}
+          secondary={
             <Button variant="outline" className="gap-1.5" asChild>
               <Link href={`/agents/${agent.id}/edit`}><Pencil className="h-4 w-4" aria-hidden /> Edit agent</Link>
             </Button>
-          </div>
-        </section>
+          }
+        />
 
         {/* RIGHT — the creation steps as an icon-led card list (Figma 1912-65355) */}
         <section className="overflow-hidden rounded-xl border border-border">

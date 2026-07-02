@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation"
 import { Sparkles, Download, Rocket, Check, Pencil, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
+import { AgentIdentityCard } from "@/components/agent-identity-card"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { StepVoice } from "@/components/wizard/step-voice"
 import { StepType } from "@/components/wizard/step-type"
@@ -19,8 +18,8 @@ import { StepPublish } from "@/components/wizard/step-publish"
 import { STEP_TITLES } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
-import { markBuildStart } from "@/lib/analytics"
-import { getAgent, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { markBuildStart, track, Events } from "@/lib/analytics"
+import { getAgent, stackSummary, stackEstimate, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -54,6 +53,8 @@ export function AgentWizard({ id }: { id: string }) {
   const [draft, setDraft] = React.useState<AgentDraft>(initialDraft)
   // null = checklist overview; 1..5 = that step's drawer is open.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
+  // The left identity card's "Talk to it" toggle (mock test, mirrors the home).
+  const [testing, setTesting] = React.useState(false)
   const dirty = React.useRef(false)
   const draftRef = React.useRef(draft)
   draftRef.current = draft
@@ -225,13 +226,25 @@ export function AgentWizard({ id }: { id: string }) {
     return undefined
   }
 
+  // ── Left identity card (shared component — keeps the agent present, same as
+  //    the Agents home, so it never "goes missing" when you enter the builder). ──
+  const cardVoice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
+  const cardStatus = isEdit ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1) : "Draft"
+  const cardStack = isEdit ? stackSummary(existing!) : undefined
+  const cardEst = isEdit ? stackEstimate(existing!) : undefined
+  const toggleTest = () => {
+    if (testing) track(Events.agent_test_ended, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new", duration_sec: 30 })
+    else track(Events.agent_test_started, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new" })
+    setTesting((t) => !t)
+  }
+
   const blockReason = publishBlockReason(draft)
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-6 pb-24 sm:px-6">
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 pb-24 sm:px-6">
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">
-          {isEdit ? `Edit ${existing!.name}` : "Create your agent"}
+          {isEdit ? "Edit your agent" : "Create your agent"}
         </h1>
         <p className="text-sm text-muted-foreground">
           {isEdit
@@ -259,13 +272,27 @@ export function AgentWizard({ id }: { id: string }) {
         </div>
       )}
 
-      <div className="max-w-sm space-y-1.5">
-        <Label htmlFor="wz-name" className="text-sm font-medium">Agent name</Label>
-        <Input id="wz-name" value={draft.name} onChange={(e) => update({ name: e.target.value })} placeholder="e.g. Acme Support" />
-      </div>
+      <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+        {/* LEFT — the agent stays present (shared card, identical to the home). */}
+        <AgentIdentityCard
+          name={draft.name}
+          namePlaceholder={isEdit ? existing!.name : "Your new agent"}
+          onNameChange={(v) => update({ name: v })}
+          status={cardStatus}
+          subtitle={cardVoice ? cardVoice.name : "Pick a voice to start"}
+          stack={cardStack}
+          costPerMin={cardEst?.costPerMin}
+          latencyMs={cardEst?.latencyMs}
+          talking={testing}
+          onToggleTalk={toggleTest}
+          talkLabel={`Talk to ${draft.name || "your agent"}`}
+          endLabel="End test"
+        />
 
-      {/* Checklist — every row opens; nothing is locked. */}
-      <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+        {/* RIGHT — the build steps */}
+        <div className="space-y-6">
+          {/* Checklist — every row opens; nothing is locked. */}
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
         {[1, 2, 3, 4, 5].map((n) => {
           const done = isDone(n)
           const isActive = !done && n === firstIncomplete(draft)
@@ -311,6 +338,8 @@ export function AgentWizard({ id }: { id: string }) {
           <Button className="shrink-0 gap-1.5" onClick={() => setOpenStep(5)}>
             <Rocket className="h-4 w-4" aria-hidden /> Test &amp; publish
           </Button>
+        </div>
+      </div>
         </div>
       </div>
 
