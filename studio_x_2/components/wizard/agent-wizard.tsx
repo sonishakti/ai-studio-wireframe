@@ -279,7 +279,7 @@ export function AgentWizard({ id }: { id: string }) {
           namePlaceholder={isEdit ? existing!.name : "Your new agent"}
           onNameChange={(v) => update({ name: v })}
           status={cardStatus}
-          subtitle={cardVoice ? cardVoice.name : "Pick a voice to start"}
+          subtitle={isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
           stack={cardStack}
           costPerMin={cardEst?.costPerMin}
           latencyMs={cardEst?.latencyMs}
