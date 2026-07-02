@@ -3,7 +3,10 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Mic, PhoneOff, Plus, Upload, Check, ChevronRight, Pencil, Gauge, DollarSign, List } from "lucide-react"
+import {
+  Mic, PhoneOff, Plus, Upload, Pencil, Gauge, DollarSign, List,
+  AudioLines, Route, FileText, Settings2, Rocket, SlidersHorizontal,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,20 +17,26 @@ import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 
 /**
- * GoLiveHome — the first-run LANDING page as an ONBOARDING SHORTCUT WIDGET, in a
- * LEFT / RIGHT layout (2026-06-24): the ready-made agent (Aria) on the LEFT, and
- * "Get Aria live" — the five journey steps as deep-link shortcuts — on the RIGHT.
- * Each shortcut opens the builder at that step (`/agents/agt_default/edit?step=N`).
- * Doubles as the create-new-agent list. Stacks to one column on small screens.
+ * GoLiveHome — the first-run LANDING page as an ONBOARDING SHORTCUT WIDGET.
+ *
+ * LEFT (unchanged): the ready-made agent, Aria — talk to it or edit it.
+ * RIGHT (2026-07-02, matched to Figma node 1912-65355): an icon-led 5-card
+ * list of the creation steps; each card deep-links into the builder at that
+ * step (`?step=N`). The channel row carries inline intent pills that deep-link
+ * to the channel-preset builder (`?dc=`). Above the two columns: an import
+ * accelerator banner + the "Deploy an AI agent in minutes" heading + create.
+ * Labels follow the /organize + /clarify locks (not the Figma's older wording):
+ * "Choose how it runs" (4 intents incl. Web), "System prompt", "Test & publish".
  */
 
-const STEPS: { n: number; label: string; hint: string; isDone: (a: ReturnType<typeof getDefaultAgent>) => boolean }[] = [
-  { n: 1, label: "Choose your voice", hint: "Voice & personality", isDone: (a) => !!a.stack?.tts?.voice },
-  { n: 2, label: "Select agent type", hint: "Inbound · Outbound · Code", isDone: () => false },
-  { n: 3, label: "System prompt & connectors", hint: "Behavior, knowledge, tools", isDone: (a) => !!a.persona?.personality },
-  { n: 4, label: "Configure deployment", hint: "Phone · web · code", isDone: () => false },
-  { n: 5, label: "Test & publish", hint: "Take it live", isDone: () => false },
-]
+// The four channel intents (locked: 4 flat peers — Web promoted out of Inbound).
+// Each deep-links to the builder's channel-preset handler (`?dc=`).
+const INTENTS = [
+  { id: "inbound", label: "Inbound", dc: "inbound" },
+  { id: "web", label: "Web", dc: "web" },
+  { id: "outbound", label: "Outbound", dc: "batch" },
+  { id: "code", label: "Code", dc: "code" },
+] as const
 
 export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
   const router = useRouter()
@@ -50,19 +59,60 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
     router.push("/agents/new/edit")
   }
 
-  const doneCount = STEPS.filter((s) => s.isDone(agent)).length
   const editStep = (n: number) => `/agents/${agent.id}/edit?step=${n}`
+  const voice = stackSummary(agent).split("·").pop()?.trim()
+  const voiceSub = voice ? voice.charAt(0).toUpperCase() + voice.slice(1) : "Warm, natural voice"
+  // Aria ships inbound-on-phone → mark "Inbound" as the active intent pill.
+  const activeIntent = "inbound"
+
+  const ROWS = [
+    { n: 1, Icon: AudioLines, label: "Choose your voice", sub: voiceSub },
+    { n: 2, Icon: Route, label: "Choose how it runs", sub: "How your agent connects", pills: true },
+    { n: 3, Icon: FileText, label: "System prompt", sub: "Behavior · connectors" },
+    { n: 4, Icon: Settings2, label: "Configure", sub: "Attach number · upload contacts" },
+    { n: 5, Icon: Rocket, label: "Test & publish", sub: "Take it live" },
+  ] as const
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+      {/* Import accelerator — meet developers migrating from another platform */}
+      <div className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border bg-card px-5 py-4 sm:flex-row sm:items-center">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Coming from Vapi, Retell, Bland or ElevenLabs?</p>
+          <p className="text-sm text-muted-foreground">Import your agent — we&rsquo;ll map the voice, system prompt, model and tools in seconds.</p>
+        </div>
+        <ImportAgentSheet onImported={onImported}>
+          <Button variant="outline" className="shrink-0 gap-1.5">
+            <Upload className="h-4 w-4" aria-hidden /> Import agent
+          </Button>
+        </ImportAgentSheet>
+      </div>
+
+      {/* Page heading + primary actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold tracking-tight">Deploy an AI agent in minutes</h1>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" className="gap-1.5" onClick={onViewAll} asChild={!onViewAll}>
+            {onViewAll ? (
+              <span><List className="h-4 w-4" aria-hidden /> View all agents</span>
+            ) : (
+              <Link href="/agents?view=list"><List className="h-4 w-4" aria-hidden /> View all agents</Link>
+            )}
+          </Button>
+          <Button asChild className="gap-1.5">
+            <Link href="/agents/new/edit"><Plus className="h-4 w-4" aria-hidden /> Create new agent</Link>
+          </Button>
+        </div>
+      </div>
+
       <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-        {/* LEFT — the ready-made agent */}
+        {/* LEFT — the ready-made agent (unchanged) */}
         <section className="flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6">
           <div className="flex flex-col items-center gap-3 text-center">
             <AgentSphere size={104} active={talking} />
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-2">
-                <h1 className="text-xl font-semibold tracking-tight">{agent.name}</h1>
+                <h2 className="text-xl font-semibold tracking-tight">{agent.name}</h2>
                 <Badge variant="secondary">{talking ? "Connected" : "Ready to deploy"}</Badge>
               </div>
               <p className="text-sm text-muted-foreground">{agent.role ?? "Your ready-made agent"}</p>
@@ -93,64 +143,55 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
           </div>
         </section>
 
-        {/* RIGHT — get it live */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold tracking-tight">Get {agent.name} live</h2>
-            <span className="text-sm text-muted-foreground">{doneCount} of {STEPS.length} done</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={doneCount} aria-valuemin={0} aria-valuemax={STEPS.length}>
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(doneCount / STEPS.length) * 100}%` }} />
-          </div>
-          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
-            {STEPS.map((s) => {
-              const done = s.isDone(agent)
-              return (
-                <Link
-                  key={s.n}
-                  href={editStep(s.n)}
-                  className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40"
-                >
-                  <span className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold",
-                    done ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground",
-                  )}>
-                    {done ? <Check className="h-4 w-4" aria-hidden /> : s.n}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{s.label}</p>
-                    <p className="line-clamp-1 text-sm text-muted-foreground">{done ? "Done — open to edit" : s.hint}</p>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80">
-                    {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : "Set up"}
-                    <ChevronRight className="h-4 w-4" aria-hidden />
-                  </span>
-                </Link>
-              )
-            })}
-          </div>
-        </section>
-      </div>
+        {/* RIGHT — the creation steps as an icon-led card list (Figma 1912-65355) */}
+        <section className="overflow-hidden rounded-xl border border-border">
+          {ROWS.map((row, i) => (
+            <div
+              key={row.n}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3.5",
+                i > 0 && "border-t border-border",
+              )}
+            >
+              <Link href={editStep(row.n)} className="group flex min-w-0 flex-1 items-center gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:text-foreground">
+                  <row.Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold">{row.label}</p>
+                  <p className="text-xs text-muted-foreground">{row.sub}</p>
+                </div>
+              </Link>
 
-      {/* Doubles as create / import / list */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Button asChild className="gap-1.5">
-            <Link href="/agents/new/edit"><Plus className="h-4 w-4" aria-hidden /> Create new agent</Link>
-          </Button>
-          <ImportAgentSheet onImported={onImported}>
-            <Button variant="outline" className="gap-1.5">
-              <Upload className="h-4 w-4" aria-hidden /> Import
-            </Button>
-          </ImportAgentSheet>
-        </div>
-        <Button variant="ghost" className="gap-1.5" onClick={onViewAll} asChild={!onViewAll}>
-          {onViewAll ? (
-            <span><List className="h-4 w-4" aria-hidden /> View all agents</span>
-          ) : (
-            <Link href="/agents?view=list"><List className="h-4 w-4" aria-hidden /> View all agents</Link>
-          )}
-        </Button>
+              {"pills" in row && row.pills ? (
+                <div className="flex flex-wrap items-center justify-end gap-1.5">
+                  {INTENTS.map((it) => (
+                    <Link
+                      key={it.id}
+                      href={`/agents/${agent.id}/edit?dc=${it.dc}`}
+                      className={cn(
+                        "rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                        it.id === activeIntent
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                      )}
+                    >
+                      {it.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Link
+                  href={editStep(row.n)}
+                  aria-label={`Open ${row.label}`}
+                  className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                </Link>
+              )}
+            </div>
+          ))}
+        </section>
       </div>
     </main>
   )
