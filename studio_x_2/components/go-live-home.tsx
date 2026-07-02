@@ -94,7 +94,7 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" className="gap-1.5" onClick={onViewAll} asChild={!onViewAll}>
             {onViewAll ? (
-              <span><List className="h-4 w-4" aria-hidden /> View all agents</span>
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap"><List className="h-4 w-4" aria-hidden /> View all agents</span>
             ) : (
               <Link href="/agents?view=list"><List className="h-4 w-4" aria-hidden /> View all agents</Link>
             )}
