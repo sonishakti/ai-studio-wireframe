@@ -701,7 +701,9 @@ export function deploymentHref(d: Pick<Deployment, "id" | "kind">): string {
 
 /** Extract {{vars}} referenced in a prompt/greeting body. */
 export function extractVars(text: string): string[] {
-  return [...new Set([...text.matchAll(/\{\{\s*([\w.]+)\s*\}\}/g)].map((m) => m[1]))]
+  // Unicode-aware: \w is ASCII-only, so {{société}}/{{名前}} would slip through
+  // undetected and get read aloud literally. \p{L}\p{N} catches any-language vars.
+  return [...new Set([...text.matchAll(/\{\{\s*([\p{L}\p{N}_.]+)\s*\}\}/gu)].map((m) => m[1]))]
 }
 
 // ─── Resource catalogs (Knowledge / MCP) ─────────────────────────────────────

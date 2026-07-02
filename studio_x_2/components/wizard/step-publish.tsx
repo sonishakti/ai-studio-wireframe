@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, AlertTriangle, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2 } from "lucide-react"
+import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { track, Events } from "@/lib/analytics"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
-import { publishBlockReason, channelTarget, type AgentDraft } from "@/lib/wizard-draft"
+import { publishBlocks, channelTarget, type AgentDraft } from "@/lib/wizard-draft"
 
 /**
  * Step 5 — Test & Publish.
@@ -23,14 +23,17 @@ import { publishBlockReason, channelTarget, type AgentDraft } from "@/lib/wizard
 export function StepPublish({
   draft,
   onPublish,
+  onFix,
 }: {
   draft: AgentDraft
   onPublish: () => void
+  /** Jump to the step whose drawer fixes a publish blocker. */
+  onFix: (step: number) => void
 }) {
   const [connected, setConnected] = React.useState(false)
   const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
   const agentName = draft.name || voice?.name || "Your agent"
-  const blockReason = publishBlockReason(draft)
+  const blocks = publishBlocks(draft)
 
   const toggleTest = () => {
     if (connected) {
@@ -55,15 +58,15 @@ export function StepPublish({
         {/* Summary + publish */}
         <div className="space-y-4">
           <section className="space-y-3 rounded-lg border border-border bg-card p-5">
-            <p className="text-sm font-semibold">Ready to go live</p>
+            <p className="text-sm font-semibold">Ready to publish</p>
             <dl className="space-y-2.5 text-sm">
               <SummaryRow icon={AudioLines} label="Voice">
-                {voice?.name ?? "—"}
+                {voice?.name ?? "Not set yet"}
                 {voice && <span className="text-muted-foreground"> · {voice.tagline}</span>}
               </SummaryRow>
               <SummaryRow icon={typeIcon(draft)} label="Type">
-                <span className="capitalize">{draft.type ?? "—"}</span>
-                <span className="text-muted-foreground"> · {channelTarget(draft)}</span>
+                <span className="capitalize">{draft.type ?? "Not set yet"}</span>
+                {draft.type && <span className="text-muted-foreground"> · {channelTarget(draft)}</span>}
               </SummaryRow>
               {(draft.knowledge.length > 0 || draft.mcp.length > 0) && (
                 <SummaryRow icon={Code2} label="Attached">
@@ -76,18 +79,38 @@ export function StepPublish({
             </dl>
           </section>
 
-          {blockReason && (
-            <div className="flex items-start gap-2.5 rounded-md border border-warning/40 bg-warning/5 p-3">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-              <p className="text-sm leading-relaxed text-foreground">{blockReason}</p>
+          {blocks.length > 0 && (
+            <div className="space-y-2.5 rounded-md border border-warning/40 bg-warning/5 p-3.5">
+              <p className="text-sm leading-relaxed text-foreground">
+                <span className="font-medium">You&apos;re at the last step.</span>{" "}
+                A few things still need input before you can publish {agentName}.
+              </p>
+              <ul className="space-y-1.5">
+                {blocks.map((b) => (
+                  <li
+                    key={b.reason}
+                    className="flex items-center justify-between gap-3 rounded-md border border-border bg-background/50 px-3 py-2"
+                  >
+                    <span className="text-sm text-foreground">{b.reason}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 shrink-0 gap-1 text-primary hover:text-primary"
+                      onClick={() => onFix(b.step)}
+                    >
+                      {b.action} <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
           <div className="space-y-1.5">
             {/* No hard lock: Publish is always clickable. If something's unfinished
-                the reason shows above + a toast points to it (never a dead button). */}
+                the ramp above lists each fix; a toast still points to the first. */}
             <Button size="lg" className="w-full gap-2 sm:w-auto" onClick={onPublish}>
-              <Rocket className="h-4 w-4" aria-hidden /> Publish &amp; go live
+              <Rocket className="h-4 w-4" aria-hidden /> Publish agent
             </Button>
             <p className="text-sm text-muted-foreground">
               Publishing makes {agentName} start taking traffic — you&apos;ll land on Monitor to watch it.

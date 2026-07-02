@@ -131,25 +131,54 @@ export function outboundMissingVars(d: AgentDraft): string[] {
   return required.filter((v) => !MOCK_CSV_COLUMNS.includes(v))
 }
 
-/** Why Publish is blocked, or null when the draft is ready to go live. */
-export function publishBlockReason(d: AgentDraft): string | null {
-  if (!d.voice) return "Choose a voice first."
-  if (!d.type) return "Pick an agent type first."
-  if (!d.systemPrompt.trim()) return "Add a system prompt."
+export interface PublishBlock {
+  /** Plain-language reason this isn't ready. */
+  reason: string
+  /** The step (1–5) whose drawer fixes it. */
+  step: number
+  /** Verb+noun for the "Fix this" button (e.g. "Pick a voice"). */
+  action: string
+}
+
+/** Every unmet requirement between the draft and a live agent, in step order.
+ *  Drives Step 5's "Fix this →" ramp; `publishBlockReason` returns just the first. */
+export function publishBlocks(d: AgentDraft): PublishBlock[] {
+  const blocks: PublishBlock[] = []
+  if (!d.voice) blocks.push({ reason: "Choose a voice first.", step: 1, action: "Pick a voice" })
+  if (!d.type) blocks.push({ reason: "Pick an agent type first.", step: 2, action: "Choose type" })
+  if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 3, action: "Write the prompt" })
 
   if (d.type === "outbound") {
-    if (!d.config.outbound?.numberId) return "Attach a caller-ID phone number."
-    if (!d.config.outbound?.csvName) return "Upload a contacts CSV."
-    const missing = outboundMissingVars(d)
-    if (missing.length)
-      return `Your CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`
+    if (!d.config.outbound?.numberId) blocks.push({ reason: "Attach a caller-ID phone number.", step: 4, action: "Set up calls" })
+    if (!d.config.outbound?.csvName) blocks.push({ reason: "Upload a contacts CSV.", step: 4, action: "Add contacts" })
+    else {
+      const missing = outboundMissingVars(d)
+      if (missing.length) blocks.push({
+        reason: `Your contacts CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`,
+        step: 3, action: "Edit prompt",
+      })
+    }
   }
 
-  if (d.type === "inbound" && d.config.inbound?.mode === "phone" && !d.config.inbound?.numberId) {
-    return "Attach a phone number for the agent to answer."
+  if (d.type === "inbound" && (d.config.inbound?.mode ?? "phone") === "phone" && !d.config.inbound?.numberId) {
+    blocks.push({ reason: "Attach a phone number for the agent to answer.", step: 4, action: "Set up the channel" })
   }
 
-  return null
+  return blocks
+}
+
+/** The first reason Publish is blocked, or null when the draft is ready. */
+export function publishBlockReason(d: AgentDraft): string | null {
+  return publishBlocks(d)[0]?.reason ?? null
+}
+
+/** The first step (1–5) still needing input — for "resume at step N" affordances. */
+export function firstIncompleteStep(d: AgentDraft): number {
+  if (!d.voice) return 1
+  if (!d.type) return 2
+  if (!d.systemPrompt.trim()) return 3
+  if (publishBlockReason(d)) return 4
+  return 5
 }
 
 export function canPublish(d: AgentDraft): boolean {

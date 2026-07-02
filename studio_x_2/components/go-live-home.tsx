@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   Mic, PhoneOff, Plus, Upload, Pencil, Gauge, DollarSign, List,
-  AudioLines, Route, FileText, Settings2, Rocket, SlidersHorizontal,
+  AudioLines, Route, FileText, Settings2, Rocket, SlidersHorizontal, History,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { getDefaultAgent, stackSummary, stackEstimate, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { hasDraft, restoreDraft, saveDraft, clearDraft, firstIncompleteStep } from "@/lib/wizard-draft"
+import { STEP_TITLES } from "@/components/wizard/types"
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 
@@ -57,6 +59,33 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
   const onImported = (_config: ImportedAgentConfig) => {
     toast.success("Agent imported", { description: "Opening it in the builder…" })
     router.push("/agents/new/edit")
+  }
+
+  // Surface an unfinished draft so a returning user resumes it, instead of only
+  // rediscovering it by clicking Create new agent.
+  const [draftInfo, setDraftInfo] = React.useState<{ step: number; title: string } | null>(null)
+  React.useEffect(() => {
+    if (!hasDraft()) return
+    const d = restoreDraft()
+    if (!d) return
+    const step = firstIncompleteStep(d)
+    setDraftInfo({ step, title: STEP_TITLES[step - 1] })
+  }, [])
+  const discardDraft = () => {
+    const cached = restoreDraft()
+    clearDraft()
+    setDraftInfo(null)
+    toast("Draft discarded", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          if (!cached) return
+          saveDraft(cached)
+          const step = firstIncompleteStep(cached)
+          setDraftInfo({ step, title: STEP_TITLES[step - 1] })
+        },
+      },
+    })
   }
 
   const editStep = (n: number) => `/agents/${agent.id}/edit?step=${n}`
@@ -104,6 +133,27 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
           </Button>
         </div>
       </div>
+
+      {/* Unfinished draft — resume where you left off */}
+      {draftInfo && (
+        <div className="flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <History className="h-4 w-4" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Unfinished agent draft</p>
+              <p className="text-sm text-muted-foreground">You left off at Step {draftInfo.step}: {draftInfo.title}.</p>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button size="sm" asChild>
+              <Link href="/agents/new/edit">Resume draft</Link>
+            </Button>
+            <Button size="sm" variant="ghost" onClick={discardDraft}>Discard</Button>
+          </div>
+        </div>
+      )}
 
       <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
         {/* LEFT — the ready-made agent (unchanged) */}

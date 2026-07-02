@@ -42,7 +42,7 @@ export function StepConfigure({ draft, update }: StepProps) {
         <h2 className="text-lg font-semibold tracking-tight">Configure</h2>
         <p className="text-sm text-muted-foreground">
           {draft.type === "inbound" && "Choose how callers reach your agent."}
-          {draft.type === "outbound" && "Attach a caller-ID number and your contact list."}
+          {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
           {draft.type === "code" && "Drop the agent into your own app."}
         </p>
       </header>
@@ -171,7 +171,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
           <div className="flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
             <p className="text-xs leading-relaxed text-foreground">
-              All prompt variables are covered by your CSV columns. Ready to launch.
+              All prompt variables are covered by your CSV columns. Ready to publish.
             </p>
           </div>
         ) : (
@@ -179,7 +179,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
             <div className="space-y-1.5">
               <p className="text-xs font-medium text-foreground">
-                Your CSV is missing {missing.length} variable{missing.length > 1 ? "s" : ""} the prompt uses
+                Your contacts CSV is missing {missing.length} variable{missing.length > 1 ? "s" : ""}:
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {missing.map((v) => (
@@ -187,7 +187,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Add a matching column to your CSV, or remove the variable from the System prompt step. Publish is blocked until they match.
+                Fix it either way: add these as columns to your contacts CSV, or remove them from the system prompt. Publish stays blocked until they match.
               </p>
             </div>
           </div>

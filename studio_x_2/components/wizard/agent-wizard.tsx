@@ -63,6 +63,45 @@ export function AgentWizard({ id }: { id: string }) {
     setDraft((d) => ({ ...d, ...patch }))
   }, [])
 
+  // Intent switch (Step 2): stash the departing branch's config instead of
+  // silently dropping it — otherwise an old CSV/number leaks into publish and
+  // dials real contacts on the wrong channel. Undo restores it.
+  const typeStash = React.useRef<{ type: AgentType; config: AgentDraft["config"] } | null>(null)
+  const restoreTypeStash = React.useCallback(() => {
+    const s = typeStash.current
+    if (!s) return
+    dirty.current = true
+    setDraft((d) => ({ ...d, type: s.type, config: { ...d.config, ...s.config } }))
+    typeStash.current = null
+  }, [])
+  const selectType = React.useCallback((next: AgentType) => {
+    const d = draftRef.current
+    if (d.type === next) return
+    dirty.current = true
+    const departing = d.type
+    const hasData =
+      departing === "outbound" ? !!(d.config.outbound?.numberId || d.config.outbound?.csvName)
+      : departing === "inbound" ? !!d.config.inbound?.numberId
+      : departing === "code" ? !!d.config.code?.added
+      : false
+    if (departing && hasData) {
+      typeStash.current = { type: departing, config: { [departing]: d.config[departing] } as AgentDraft["config"] }
+      const nextConfig = { ...d.config }
+      delete nextConfig[departing]
+      setDraft({ ...d, type: next, config: nextConfig })
+      const nameOf = (t: AgentType) => (t === "outbound" ? "Outbound" : t === "code" ? "Code" : "Inbound")
+      const detail =
+        departing === "outbound" ? "contacts CSV and caller-ID number"
+        : departing === "inbound" ? "phone number" : "code setup"
+      toast(`Switched to ${nameOf(next)}`, {
+        description: `Your ${nameOf(departing)} setup — ${detail} — was set aside, not deleted.`,
+        action: { label: "Undo", onClick: restoreTypeStash },
+      })
+    } else {
+      setDraft({ ...d, type: next })
+    }
+  }, [restoreTypeStash])
+
   // ── Step completion — for the ✓, the progress count, and the "Start here"
   //    nudge ONLY. It never gates access: every step is always openable/editable.
   const voiceDone = draft.voice !== null
@@ -153,15 +192,19 @@ export function AgentWizard({ id }: { id: string }) {
     router.push(`/agents/playground?artifact=${vid}`)
   }
 
+  const publishingRef = React.useRef(false)
   const publish = () => {
+    if (publishingRef.current) return // guard: double-click must not double-publish
     const reason = publishBlockReason(draftRef.current)
     if (reason) { toast.error("A couple of things to finish first", { description: reason }); return }
+    publishingRef.current = true
     const agentId = draft.agentId ?? `agt_${Date.now().toString(36)}`
-    clearDraft()
     publishDeployment({
       router, agentId, agentName: draft.name || "Your agent",
       channel: channelLabel(draft), name: draft.name || "Deployment",
     })
+    // Clear only a NEW-agent draft — never wipe the shared slot while editing.
+    if (!isEdit) clearDraft()
   }
 
   // ── Collapsed-row summaries ──────────────────────────────────────────────────
@@ -263,7 +306,7 @@ export function AgentWizard({ id }: { id: string }) {
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur">
           <div className="min-w-0">
             <p className="text-sm font-semibold">{completeCount} of 5 complete</p>
-            <p className="line-clamp-2 text-sm text-muted-foreground">{blockReason ?? "Everything's set — ready to go live 🎉"}</p>
+            <p className="line-clamp-2 text-sm text-muted-foreground">{blockReason ?? "Everything's set — ready to publish."}</p>
           </div>
           <Button className="shrink-0 gap-1.5" onClick={() => setOpenStep(5)}>
             <Rocket className="h-4 w-4" aria-hidden /> Test &amp; publish
@@ -293,10 +336,10 @@ export function AgentWizard({ id }: { id: string }) {
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
                 {openStep === 1 && <StepVoice draft={draft} onSelectVoice={selectVoice} />}
-                {openStep === 2 && <StepType draft={draft} update={update} />}
+                {openStep === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
                 {openStep === 3 && <StepBuild draft={draft} update={update} />}
                 {openStep === 4 && <StepConfigure draft={draft} update={update} />}
-                {openStep === 5 && <StepPublish draft={draft} onPublish={publish} />}
+                {openStep === 5 && <StepPublish draft={draft} onPublish={publish} onFix={(n) => setOpenStep(n)} />}
               </div>
 
               {openStep < 5 && (
