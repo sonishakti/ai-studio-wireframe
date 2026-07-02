@@ -98,7 +98,7 @@ export function GoLiveHome({ onViewAll }: { onViewAll?: () => void }) {
     { n: 2, Icon: Route, label: "Choose how it runs", sub: "How your agent connects", pills: true },
     { n: 3, Icon: FileText, label: "System prompt", sub: "Behavior · connectors" },
     { n: 4, Icon: Settings2, label: "Configure", sub: "Attach number · upload contacts" },
-    { n: 5, Icon: Rocket, label: "Test & publish", sub: "Take it live" },
+    { n: 5, Icon: Rocket, label: "Deploy", sub: "Take it live" },
   ] as const
 
   return (

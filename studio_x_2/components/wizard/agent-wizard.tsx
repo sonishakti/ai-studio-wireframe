@@ -333,10 +333,10 @@ export function AgentWizard({ id }: { id: string }) {
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur">
           <div className="min-w-0">
             <p className="text-sm font-semibold">{completeCount} of 5 complete</p>
-            <p className="line-clamp-2 text-sm text-muted-foreground">{blockReason ?? "Everything's set — ready to publish."}</p>
+            <p className="line-clamp-2 text-sm text-muted-foreground">{blockReason ?? "Everything's set — ready to deploy."}</p>
           </div>
           <Button className="shrink-0 gap-1.5" onClick={() => setOpenStep(5)}>
-            <Rocket className="h-4 w-4" aria-hidden /> Test &amp; publish
+            <Rocket className="h-4 w-4" aria-hidden /> Deploy
           </Button>
         </div>
       </div>

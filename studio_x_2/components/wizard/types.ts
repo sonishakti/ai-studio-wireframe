@@ -12,5 +12,5 @@ export const STEP_TITLES = [
   "Select agent type",
   "System prompt",
   "Configure",
-  "Test & publish",
+  "Deploy",
 ] as const
