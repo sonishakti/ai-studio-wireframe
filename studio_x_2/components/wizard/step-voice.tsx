@@ -10,6 +10,7 @@ import {
   PRESET_VOICES,
   type VoiceArtifact,
 } from "@/lib/voice-artifacts"
+import { StackConfig } from "@/components/wizard/stack-config"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /**
@@ -23,9 +24,11 @@ import type { AgentDraft } from "@/lib/wizard-draft"
  */
 export function StepVoice({
   draft,
+  update,
   onSelectVoice,
 }: {
   draft: AgentDraft
+  update: (patch: Partial<AgentDraft>) => void
   onSelectVoice: (v: VoiceArtifact) => void
 }) {
   const router = useRouter()
@@ -40,7 +43,7 @@ export function StepVoice({
       <header className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">Choose your voice</h2>
         <p className="text-sm text-muted-foreground">
-          Pick a ready-made voice or build your own. This sets how your agent sounds and its starting personality — you can fine-tune the rest next.
+          Pick a ready-made voice or build your own. This sets how your agent sounds and its starting personality — the models behind it are below.
         </p>
       </header>
 
@@ -133,6 +136,11 @@ export function StepVoice({
           <span className="text-sm font-medium">Create custom voice</span>
           <span className="text-xs text-muted-foreground">Design one in the playground</span>
         </button>
+      </div>
+
+      {/* The models behind the voice — STT/LLM/TTS cascade or one realtime model. */}
+      <div className="border-t border-border pt-5">
+        <StackConfig draft={draft} update={update} />
       </div>
     </div>
   )

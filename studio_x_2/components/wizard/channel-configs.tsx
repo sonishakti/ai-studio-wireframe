@@ -43,8 +43,9 @@ export const CHANNELS: {
   desc: string
   icon: React.ComponentType<{ className?: string }>
 }[] = [
-  { id: "inbound", label: "Inbound", title: "Answer a phone number", desc: "Your agent picks up every inbound call, 24/7.", icon: PhoneIncoming },
+  // Batch leads — campaign is the flagship channel (LEARNINGS §20, 2026-06-17).
   { id: "batch", label: "Batch calls", title: "Launch batch calls", desc: "Upload a contact list and your agent dials each one.", icon: PhoneOutgoing },
+  { id: "inbound", label: "Inbound", title: "Answer a phone number", desc: "Your agent picks up every inbound call, 24/7.", icon: PhoneIncoming },
   { id: "code", label: "Embed", title: "Embed in your app", desc: "Drop in the SDK or call the API — no number needed.", icon: Code2 },
   { id: "web", label: "Web widget", title: "Web widget", desc: "A floating chat/voice widget for your website.", icon: Globe },
 ]

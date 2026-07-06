@@ -47,7 +47,7 @@ export function StepPublish({
             {voice && <span className="text-muted-foreground"> · {voice.tagline}</span>}
           </SummaryRow>
           <SummaryRow icon={typeIcon(draft)} label="Type">
-            {draft.type ? <span className="capitalize">{draft.type}</span> : "Not set yet"}
+            {draft.type ? (draft.type === "outbound" ? "Batch calls" : draft.type === "code" ? "Code" : "Inbound") : "Not set yet"}
             {draft.type && <span className="text-muted-foreground"> · {channelTarget(draft)}</span>}
           </SummaryRow>
           {(draft.knowledge.length > 0 || draft.mcp.length > 0) && (

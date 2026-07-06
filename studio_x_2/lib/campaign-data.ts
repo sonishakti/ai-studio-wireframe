@@ -97,6 +97,11 @@ export type StackPreset = "fastest" | "balanced" | "cheapest"
 export interface AgentStack {
   preset: StackPreset
   modality: "voice" | "voice+video" | "chat"
+  /** Pipeline shape: the classic STT→LLM→TTS cascade (default) or a single
+   *  multimodal realtime model that handles speech in and out. */
+  pipeline?: "stt-llm-tts" | "mllm"
+  /** Spoken language the STT listens for (BCP-47-ish label, wireframe). */
+  language?: string
   llm: { vendor: string; model: string }
   asr: { vendor: string; model: string }
   tts: { vendor: string; voice: string }
@@ -276,6 +281,13 @@ export const STACK_ESTIMATE: Record<StackPreset, { latencyMs: number; costPerMin
 
 export function stackEstimate(a: Agent): { latencyMs: number; costPerMin: number } {
   return STACK_ESTIMATE[a.stack.preset]
+}
+
+/** Estimate for the MLLM (single realtime multimodal model) pipeline — no
+ *  per-provider breakdown; one hop replaces the cascade. Wireframe estimate. */
+export const MLLM_ESTIMATE: { latencyMs: number; costPerMin: number } = {
+  latencyMs: 550,
+  costPerMin: 0.15,
 }
 
 /** Per-provider latency contribution (ms) + the best-case (warm-path) floor for

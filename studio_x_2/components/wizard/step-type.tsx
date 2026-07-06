@@ -7,8 +7,9 @@ import type { StepProps } from "@/components/wizard/types"
 import type { AgentType } from "@/lib/wizard-draft"
 
 /**
- * Step 2 — Select agent type. Inbound · Outbound · Code. The choice branches
- * Step 4 (Configure) and unlocks Steps 3–5.
+ * Step 2 — Select agent type. Batch calls · Inbound · Code — batch leads because
+ * campaign is the flagship channel (LEARNINGS §20, 2026-06-17). The choice
+ * branches Step 4 (Configure) and unlocks Steps 3–5.
  */
 
 const TYPES: {
@@ -18,16 +19,16 @@ const TYPES: {
   icon: React.ComponentType<{ className?: string }>
 }[] = [
   {
+    id: "outbound",
+    title: "Batch calls",
+    desc: "Your agent dials a contact list. Upload a CSV and it calls each one with dynamic variables.",
+    icon: PhoneOutgoing,
+  },
+  {
     id: "inbound",
     title: "Inbound",
     desc: "Your agent answers — on a phone number, 24/7, or as a web widget on your site.",
     icon: PhoneIncoming,
-  },
-  {
-    id: "outbound",
-    title: "Outbound",
-    desc: "Your agent dials a contact list. Upload a CSV and it calls each one with dynamic variables.",
-    icon: PhoneOutgoing,
   },
   {
     id: "code",

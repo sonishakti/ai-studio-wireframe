@@ -79,14 +79,14 @@ const USER_LINES = [
 ]
 
 const COMPOSER_LINES = [
-  "Got it — a customer-support voice agent for e-commerce. I'll start it on gpt-4o with DeepGram for speech and an ElevenLabs voice. What should it sound like?",
+  "Got it — a customer-support voice agent for e-commerce. I'll start it on gpt-4o with Deepgram for speech and an ElevenLabs voice. What should it sound like?",
   "Warm and concise — done. I capped responses around 50 words so it stays snappy on a call.",
   "Added two tools: order lookup by phone, and start-a-return. They're showing in the draft on the right.",
   "Nice — I added a transfer-to-human fallback when sentiment turns negative. Want me to open it in the editor?",
 ]
 
 const DRAFT_NOTES = [
-  "Set model to gpt-4o + DeepGram + ElevenLabs",
+  "Set model to gpt-4o + Deepgram + ElevenLabs",
   "Tone: warm · response cap 50 words",
   "Added tools: Order lookup, Start return",
   "Added guardrail: transfer to human on negative sentiment",
@@ -526,7 +526,7 @@ function DebugPanel({ metrics, compact }: { metrics: Metrics; compact: boolean }
         <div className={cn("grid gap-2", compact ? "grid-cols-2" : "grid-cols-4")}>
           <Stat label="End-to-end" value={`${metrics.e2e} ms`} highlight />
           <Stat label="LLM TTFT" value={`${metrics.ttft} ms`} />
-          <Stat label="ASR (DeepGram)" value={`${metrics.asr} ms`} />
+          <Stat label="STT (Deepgram)" value={`${metrics.asr} ms`} />
           <Stat label="TTS (ElevenLabs)" value={`${metrics.tts} ms`} />
         </div>
       </div>

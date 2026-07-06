@@ -8,7 +8,9 @@ export interface StepProps {
 }
 
 export const STEP_TITLES = [
-  "Choose your voice",
+  // "Voice & models" — the drawer holds the persona picker AND the model stack;
+  // calling it just "voice" would mislabel the LLM/STT config (review finding 7).
+  "Voice & models",
   "Select agent type",
   "System prompt",
   "Configure",

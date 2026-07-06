@@ -298,7 +298,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label: "LLM",  value: state === "active" ? "184 ms" : "—" },
-                { label: "ASR",  value: state === "active" ? "92 ms"  : "—" },
+                { label: "STT",  value: state === "active" ? "92 ms"  : "—" },
                 { label: "TTS",  value: state === "active" ? "210 ms" : "—" },
               ].map((m) => (
                 <div key={m.label}>

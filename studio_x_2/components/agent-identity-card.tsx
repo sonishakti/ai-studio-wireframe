@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Mic, PhoneOff, DollarSign, Gauge, ChevronDown } from "lucide-react"
+import { Mic, PhoneOff, DollarSign, Gauge, ChevronDown, Copy, Check } from "lucide-react"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +24,7 @@ export function AgentIdentityCard({
   onNameChange,
   status,
   subtitle,
+  agentId,
   stack,
   costPerMin,
   latencyMs,
@@ -40,6 +42,8 @@ export function AgentIdentityCard({
   onNameChange?: (value: string) => void
   status: string
   subtitle?: string
+  /** Published agent id — renders as a copyable chip (absent for new drafts). */
+  agentId?: string
   /** Mono stack line, e.g. "gpt-4o-mini · nova-2 · turbo". */
   stack?: string
   costPerMin?: number
@@ -56,8 +60,20 @@ export function AgentIdentityCard({
   className?: string
 }) {
   const displayName = name || namePlaceholder
-  const hasStats = !!stack || costPerMin != null || latencyMs != null
+  const hasStats = !!agentId || !!stack || costPerMin != null || latencyMs != null
   const [showLatency, setShowLatency] = React.useState(false)
+  const [copied, setCopied] = React.useState(false)
+  const copyId = async () => {
+    if (!agentId) return
+    try {
+      await navigator.clipboard.writeText(agentId)
+      setCopied(true)
+      toast.success("Agent ID copied", { description: agentId })
+      window.setTimeout(() => setCopied(false), 1600)
+    } catch {
+      toast.error("Couldn't copy — select it manually.")
+    }
+  }
 
   return (
     <section className={cn("flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6", className)}>
@@ -84,6 +100,19 @@ export function AgentIdentityCard({
 
       {hasStats && (
         <div className="mt-5 space-y-2 border-t border-border pt-4">
+          {agentId && (
+            <button
+              type="button"
+              onClick={copyId}
+              aria-label={`Copy agent ID ${agentId}`}
+              className="inline-flex items-center gap-1.5 rounded-md font-mono text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              # {agentId}
+              {copied
+                ? <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
+                : <Copy className="h-3.5 w-3.5" aria-hidden />}
+            </button>
+          )}
           {stack && <p className="break-words font-mono text-sm text-muted-foreground">{stack}</p>}
           {(costPerMin != null || latencyMs != null) && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -110,7 +139,7 @@ export function AgentIdentityCard({
           {latencyBreakdown && showLatency && (
             <div className="rounded-md border border-border bg-muted/40 p-3 text-left">
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Latency breakdown</p>
-              <LatencyRow label="ASR" value={latencyBreakdown.asrMs} />
+              <LatencyRow label="STT" value={latencyBreakdown.asrMs} />
               <LatencyRow label="LLM (TTFT)" value={latencyBreakdown.llmMs} />
               <LatencyRow label="TTS" value={latencyBreakdown.ttsMs} />
               <div className="my-2 border-t border-border" />

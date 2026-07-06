@@ -9,6 +9,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
+import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { StepVoice } from "@/components/wizard/step-voice"
 import { StepType } from "@/components/wizard/step-type"
@@ -19,7 +20,7 @@ import { STEP_TITLES } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, stackSummary, stackEstimate, stackLatencyBreakdown, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, STACK_ESTIMATE, STACK_LATENCY, MLLM_ESTIMATE, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -102,7 +103,7 @@ export function AgentWizard({
       const nextConfig = { ...d.config }
       delete nextConfig[departing]
       setDraft({ ...d, type: next, config: nextConfig })
-      const nameOf = (t: AgentType) => (t === "outbound" ? "Outbound" : t === "code" ? "Code" : "Inbound")
+      const nameOf = typeLabel
       const detail =
         departing === "outbound" ? "contacts CSV and caller-ID number"
         : departing === "inbound" ? "phone number" : "code setup"
@@ -224,9 +225,12 @@ export function AgentWizard({
   function stepSummary(n: number): string | undefined {
     if (n === 1) {
       const v = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
-      return v ? `${v.name} · ${v.tagline}` : undefined
+      const models = draft.stack.pipeline === "mllm"
+        ? `${draft.stack.llm.model} (realtime)`
+        : `${draft.stack.llm.model} · ${draft.stack.asr.model}`
+      return v ? `${v.name} · ${models}` : undefined
     }
-    if (n === 2) return draft.type ? draft.type[0].toUpperCase() + draft.type.slice(1) : undefined
+    if (n === 2) return draft.type ? typeLabel(draft.type) : undefined
     if (n === 3) {
       if (!promptDone) return undefined
       const parts = ["Prompt set"]
@@ -242,9 +246,18 @@ export function AgentWizard({
   //    the Agents home, so it never "goes missing" when you enter the builder). ──
   const cardVoice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
   const cardStatus = isEdit ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1) : "Draft"
-  const cardStack = isEdit ? stackSummary(existing!) : undefined
-  const cardEst = isEdit ? stackEstimate(existing!) : undefined
-  const cardLatency = isEdit ? stackLatencyBreakdown(existing!) : undefined
+  // Stats come from the DRAFT's stack (not the saved agent) so the card's
+  // $/min + latency move live as the Step-1 stack config changes — and new
+  // drafts show numbers from first paint (balanced default).
+  const mllm = draft.stack.pipeline === "mllm"
+  const cardStack = mllm
+    ? `${draft.stack.llm.model} · realtime`
+    : `${draft.stack.llm.model} · ${draft.stack.asr.model} · ${draft.stack.tts.voice}`
+  const cardEst = mllm ? MLLM_ESTIMATE : STACK_ESTIMATE[draft.stack.preset]
+  // No per-provider breakdown for a single-model pipeline.
+  const cardLatency = mllm
+    ? undefined
+    : { ...STACK_LATENCY[draft.stack.preset], latencyMs: STACK_ESTIMATE[draft.stack.preset].latencyMs }
   const toggleTest = () => {
     if (testing) track(Events.agent_test_ended, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new", duration_sec: 30 })
     else track(Events.agent_test_started, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new" })
@@ -268,8 +281,10 @@ export function AgentWizard({
               : "Five short steps to a live agent. Open any step, in any order — it all saves as you go."}
           </p>
         </header>
-        {(onViewAll || onCreateNew) && (
+        {(onViewAll || onCreateNew || isEdit) && (
           <div className="flex shrink-0 items-center gap-2">
+            {/* Escape hatch for power users — the whole config as JSON. */}
+            {isEdit && <CustomConfigDrawer draft={draft} />}
             {onViewAll && (
               <Button variant="ghost" size="sm" className="gap-1.5" onClick={onViewAll}>
                 <List className="h-4 w-4" aria-hidden /> View all agents
@@ -291,7 +306,7 @@ export function AgentWizard({
             <div>
               <p className="text-sm font-medium">Already have an agent elsewhere?</p>
               <p className="text-sm text-muted-foreground">
-                Import a Vapi / Retell / ElevenLabs config — we map it to a custom voice you can tune, then drop you back here with it selected.
+                Import a Vapi, Retell, Bland, or ElevenLabs config — we map it to a custom voice you can tune, then drop you back here with it selected.
               </p>
             </div>
           </div>
@@ -309,6 +324,7 @@ export function AgentWizard({
           name={draft.name}
           namePlaceholder={isEdit ? existing!.name : "Your new agent"}
           onNameChange={(v) => update({ name: v })}
+          agentId={draft.agentId}
           status={cardStatus}
           subtitle={isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
           stack={cardStack}
@@ -329,33 +345,75 @@ export function AgentWizard({
           const done = isDone(n)
           const isActive = !done && n === firstIncomplete(draft)
           return (
-            <button
+            // A div (not one big <button>) so row 2 can host the inline intent
+            // control without nesting interactive elements.
+            <div
               key={n}
-              type="button"
-              onClick={() => openRow(n)}
-              aria-current={isActive ? "step" : undefined}
               className={cn(
-                "flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                "flex w-full items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40",
                 isActive && "bg-primary/5",
               )}
             >
-              <span className={cn(
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                done && "border-primary bg-primary/10 text-primary",
-                isActive && "border-primary bg-primary text-primary-foreground",
-                !done && !isActive && "border-border text-muted-foreground",
-              )}>
-                {done ? <Check className="h-4 w-4" aria-hidden /> : n}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">{STEP_TITLES[n - 1]}</p>
-                <p className="line-clamp-1 text-sm text-muted-foreground">{rowDetail(n)}</p>
-              </div>
-              <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80">
+              <button
+                type="button"
+                onClick={() => openRow(n)}
+                aria-current={isActive ? "step" : undefined}
+                className="flex min-w-0 flex-1 items-center gap-3 text-left"
+              >
+                <span className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
+                  done && "border-primary bg-primary/10 text-primary",
+                  isActive && "border-primary bg-primary text-primary-foreground",
+                  !done && !isActive && "border-border text-muted-foreground",
+                )}>
+                  {done ? <Check className="h-4 w-4" aria-hidden /> : n}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold">{STEP_TITLES[n - 1]}</span>
+                  <span className="line-clamp-1 block text-sm text-muted-foreground">{rowDetail(n)}</span>
+                </span>
+              </button>
+              {/* Row 2 — switch the intent without opening the drawer (design
+                  parity: the segmented control lives on the row itself). Routed
+                  through selectType so channel data gets the stash + undo toast. */}
+              {n === 2 && (
+                <div
+                  role="radiogroup"
+                  aria-label="Agent type"
+                  className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5 md:flex"
+                >
+                  {(["outbound", "inbound", "code"] as const).map((t) => {
+                    const selected = draft.type === t
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => selectType(t)}
+                        className={cn(
+                          "rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          selected
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {typeLabel(t)}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => openRow(n)}
+                aria-label={`Open step ${n}: ${STEP_TITLES[n - 1]}`}
+                className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80"
+              >
                 {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : isActive ? "Start" : "Open"}
                 <ChevronRight className="h-4 w-4" aria-hidden />
-              </span>
-            </button>
+              </button>
+            </div>
           )
         })}
       </div>
@@ -396,7 +454,7 @@ export function AgentWizard({
               </SheetHeader>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                {openStep === 1 && <StepVoice draft={draft} onSelectVoice={selectVoice} />}
+                {openStep === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                 {openStep === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
                 {openStep === 3 && <StepBuild draft={draft} update={update} />}
                 {openStep === 4 && <StepConfigure draft={draft} update={update} />}
@@ -465,6 +523,12 @@ function dcToConfig(dc: string, config: AgentDraft["config"]): AgentDraft["confi
   if (dc === "batch") return { ...config, outbound: { ...config.outbound } }
   if (dc === "code") return { ...config, code: {} }
   return config
+}
+
+/** Display name for an agent type — "Batch calls" is the locked term for
+ *  outbound (LEARNINGS §20); never surface raw "outbound" to the user. */
+function typeLabel(t: AgentType): string {
+  return t === "outbound" ? "Batch calls" : t === "code" ? "Code" : "Inbound"
 }
 
 function channelLabel(d: AgentDraft): string {

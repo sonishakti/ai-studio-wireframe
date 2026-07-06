@@ -8,7 +8,7 @@
  * `lib/analytics.ts`.
  */
 
-import { extractVars, PHONE_NUMBERS, type Agent } from "@/lib/campaign-data"
+import { extractVars, stackFor, PHONE_NUMBERS, type Agent, type AgentStack } from "@/lib/campaign-data"
 import { PRESET_VOICES } from "@/lib/voice-artifacts"
 
 export type AgentType = "inbound" | "outbound" | "code"
@@ -30,6 +30,9 @@ export interface AgentDraft {
   voice: VoiceRef | null
   /** Step 2 — gates Steps 3–5. */
   type: AgentType | null
+  /** Step 1 (Voice & models) — the model stack behind the voice. Defaults to the
+   *  balanced preset so cost/latency estimates exist from first paint. */
+  stack: AgentStack
   /** Step 3. */
   systemPrompt: string
   greeting: string
@@ -47,6 +50,7 @@ export const EMPTY_DRAFT: AgentDraft = {
   name: "",
   voice: null,
   type: null,
+  stack: { ...stackFor("balanced"), pipeline: "stt-llm-tts", language: "English" },
   systemPrompt: "",
   greeting: "",
   knowledge: [],
@@ -104,6 +108,7 @@ export function agentToDraft(agent: Agent): AgentDraft {
     name: agent.name,
     voice: { kind: "preset", id: voiceMatch.id },
     type: "inbound",
+    stack: { pipeline: "stt-llm-tts", language: "English", ...agent.stack },
     systemPrompt: agent.persona.personality,
     greeting: agent.persona.firstMessage ?? "Hi, thanks for calling — how can I help you today?",
     knowledge: [...agent.knowledge],

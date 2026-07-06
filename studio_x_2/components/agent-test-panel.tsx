@@ -102,7 +102,7 @@ export function AgentTestPanel({
         )}
 
         <StatRow label="LLM" value={spec.llm} />
-        <StatRow label="ASR" value={spec.asr} />
+        <StatRow label="STT" value={spec.asr} />
         <StatRow label="TTS" value={spec.tts} />
 
         {/* Latency breakdown — per-provider stats roll up to end-to-end, with a
@@ -114,7 +114,7 @@ export function AgentTestPanel({
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Latency breakdown
             </p>
-            <StatRow label="ASR" value={ms(spec.asrMs)} mono />
+            <StatRow label="STT" value={ms(spec.asrMs)} mono />
             <StatRow label="LLM (TTFT)" value={ms(spec.llmMs)} mono />
             <StatRow label="TTS" value={ms(spec.ttsMs)} mono />
             <div className="border-t border-border pt-3 space-y-3">

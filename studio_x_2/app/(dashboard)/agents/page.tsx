@@ -61,12 +61,12 @@ type Template = {
 const TEMPLATES: Template[] = [
   // Blank goes first — most users won't use a template, they'll start from
   // scratch. Templates are sales-led; blank is product-led.
-  { id: "blank",                name: "Blank agent",           description: "Start from scratch. Define your own prompt, voice, and tools.", llm: "Open AI",   asr: "DeepGram", tts: "ElevenLabs" },
-  { id: "appointment-reminder", name: "Appointment Reminder", description: "Automatically call customers to remind them of upcoming appointments", llm: "Open AI", asr: "DeepGram", tts: "ElevenLabs" },
-  { id: "nps-survey",           name: "NPS Survey",            description: "Gather customer feedback through voice surveys",                       llm: "Open AI",   asr: "DeepGram", tts: "ElevenLabs" },
-  { id: "ivr",                  name: "Interactive Voice Response (IVR)", description: "Route callers to the right department automatically",       llm: "Anthropic", asr: "DeepGram", tts: "ElevenLabs" },
-  { id: "payment-reminder",     name: "Payment Reminder",      description: "Follow up with customers about pending payments",                      llm: "Open AI",   asr: "DeepGram", tts: "ElevenLabs" },
-  { id: "ecommerce",            name: "Customer service for e-commerce", description: "Triage support and refund requests for online retail",        llm: "Open AI",   asr: "DeepGram", tts: "ElevenLabs" },
+  { id: "blank",                name: "Blank agent",           description: "Start from scratch. Define your own prompt, voice, and tools.", llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "appointment-reminder", name: "Appointment Reminder", description: "Automatically call customers to remind them of upcoming appointments", llm: "OpenAI", asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "nps-survey",           name: "NPS Survey",            description: "Gather customer feedback through voice surveys",                       llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "ivr",                  name: "Interactive Voice Response (IVR)", description: "Route callers to the right department automatically",       llm: "Anthropic", asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "payment-reminder",     name: "Payment Reminder",      description: "Follow up with customers about pending payments",                      llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "ecommerce",            name: "Customer service for e-commerce", description: "Triage support and refund requests for online retail",        llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
 ]
 
 // Each agent owns ONE channel (2026-06-23 model; duplicate to add another) and

@@ -128,7 +128,7 @@ function AgentDraftRail({
 
             <Section title="Models">
               <Row label="LLM" value="gpt-4o" />
-              <Row label="ASR" value="DeepGram streaming" />
+              <Row label="STT" value="Deepgram streaming" />
               <Row label="TTS" value="ElevenLabs" />
             </Section>
 

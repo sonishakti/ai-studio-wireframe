@@ -491,7 +491,7 @@ function QuickChip({ children, onClick }: { children: React.ReactNode; onClick?:
 function assistantReplyFor(prompt: string): string {
   const lower = prompt.toLowerCase()
   if (lower.includes("latency")) {
-    return "First-token latency above 1s usually means ASR streaming isn't enabled or the LLM model is too large. Check the Models tab — switch DeepGram to streaming mode, and try gpt-4o-mini for faster TTFT. I can open the agent editor at that tab if you'd like."
+    return "First-token latency above 1s usually means STT streaming isn't enabled or the LLM model is too large. Check the Models tab — switch Deepgram to streaming mode, and try gpt-4o-mini for faster TTFT. I can open the agent editor at that tab if you'd like."
   }
   if (lower.includes("phone number") || lower.includes("telephony")) {
     return "Got it. To connect a number to an inbound campaign: 1) Go to Phone Numbers → Buy number, pick a region. 2) Create or open the campaign, add the Telephony channel. 3) Pick your agent. Want me to draft the campaign for you?"
@@ -500,7 +500,7 @@ function assistantReplyFor(prompt: string): string {
     return "Strong system prompts have four parts: ROLE, GOAL, CONSTRAINTS, and FAILURE FALLBACK. Want me to refactor your current prompt into that structure?"
   }
   if (lower.includes("support") || lower.includes("agent")) {
-    return "I'll draft a customer-support voice agent. Defaults: gpt-4o + DeepGram streaming + ElevenLabs voice. The system prompt will cover order lookup, returns, and escalation. Confirm or tweak the defaults and I'll open it in the editor."
+    return "I'll draft a customer-support voice agent. Defaults: gpt-4o + Deepgram streaming + ElevenLabs voice. The system prompt will cover order lookup, returns, and escalation. Confirm or tweak the defaults and I'll open it in the editor."
   }
   return "Got it. Tell me more about what should change, or pick a quick action below to take this somewhere."
 }

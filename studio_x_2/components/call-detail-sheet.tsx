@@ -117,7 +117,7 @@ function buildEvents(call: CallDetail): CallEvent[] {
 }
 
 const SERIES = [
-  { key: "asr" as const, label: "ASR", bar: "bg-primary", dot: "bg-primary", text: "text-primary" },
+  { key: "asr" as const, label: "STT", bar: "bg-primary", dot: "bg-primary", text: "text-primary" },
   { key: "llm" as const, label: "LLM", bar: "bg-chart-3", dot: "bg-chart-3", text: "text-chart-3" },
   { key: "tts" as const, label: "TTS", bar: "bg-warning", dot: "bg-warning", text: "text-warning" },
 ]
@@ -349,7 +349,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
             <p className="text-sm font-semibold mb-2">Average Latency</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <LatCard label="Total (E2E)" value={avg.e2e} />
-              <LatCard label="ASR (TTFW)" value={avg.asr} />
+              <LatCard label="STT (TTFW)" value={avg.asr} />
               <LatCard label="LLM (TTFT)" value={avg.llm} />
               <LatCard label="TTS (TTFA)" value={avg.tts} />
             </div>
@@ -375,7 +375,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Turn</TableHead>
-                  <TableHead className="text-right">ASR</TableHead>
+                  <TableHead className="text-right">STT</TableHead>
                   <TableHead className="text-right">LLM</TableHead>
                   <TableHead className="text-right">TTS</TableHead>
                   <TableHead className="text-right">Total (E2E)</TableHead>
