@@ -52,6 +52,9 @@ export default function PlaygroundPage() {
     const params = new URLSearchParams(window.location.search)
     const existing = params.get("artifact") ? getVoiceArtifact(params.get("artifact")!) : undefined
     const forkOf = params.get("from") ? getVoiceArtifact(params.get("from")!) : undefined
+    // The builder that sent us here — exits return to IT, not to a fresh
+    // create flow (re-eval #3: editing Aria then saving must land back on Aria).
+    setOriginAgent(params.get("agent"))
     if (existing) {
       idRef.current = existing.id
       setName(existing.name)
@@ -83,6 +86,13 @@ export default function PlaygroundPage() {
     }
   }, [])
 
+  const [originAgent, setOriginAgent] = React.useState<string | null>(null)
+  /** The originating builder's route ("new" or an agent id). */
+  const originHref = (suffix: string) =>
+    !originAgent || originAgent === "new"
+      ? `/agents/new/edit${suffix}`
+      : `/agents/${originAgent}/edit${suffix}`
+
   const create = () => {
     const artifact: VoiceArtifact = {
       id: idRef.current,
@@ -99,7 +109,7 @@ export default function PlaygroundPage() {
     }
     saveVoiceArtifact(artifact)
     toast.success(`${artifact.name} created`, { description: "Selected in your agent." })
-    router.push(`/agents/new/edit?artifact=${artifact.id}`)
+    router.push(originHref(`?artifact=${artifact.id}`))
   }
 
   const playSample = () => {
@@ -115,7 +125,7 @@ export default function PlaygroundPage() {
           variant="ghost"
           size="sm"
           className="gap-1.5 text-muted-foreground"
-          onClick={() => router.push("/agents/new/edit?step=1")}
+          onClick={() => router.push(originHref("?step=1"))}
         >
           <ArrowLeft className="h-4 w-4" /> Back to your agent — Voice &amp; models
         </Button>
@@ -212,7 +222,7 @@ export default function PlaygroundPage() {
       </div>
 
       <div className="flex items-center justify-end gap-2 border-t border-border pt-4">
-        <Button variant="ghost" onClick={() => router.push("/agents/new/edit")}>Cancel</Button>
+        <Button variant="ghost" onClick={() => router.push(originHref(""))}>Cancel</Button>
         <Button className="gap-1.5" onClick={create}>
           <Sparkles className="h-4 w-4" /> Create your custom voice
         </Button>

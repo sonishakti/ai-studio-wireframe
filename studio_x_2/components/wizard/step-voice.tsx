@@ -49,7 +49,7 @@ export function StepVoice({
               give it a stable, always-visible door (heuristic-eval #9). */}
           <button
             type="button"
-            onClick={() => router.push("/agents/playground")}
+            onClick={() => router.push(`/agents/playground?agent=${draft.agentId ?? "new"}`)}
             className="shrink-0 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Voice playground →
@@ -98,6 +98,7 @@ export function StepVoice({
                         className="h-6 gap-1 px-2 text-xs font-medium text-muted-foreground"
                       >
                         <Lock className="h-3 w-3" aria-hidden /> Preset
+                        <span className="sr-only">— ready-made voice; use Customize to make an editable copy</span>
                       </Badge>
                     )}
                   </div>
@@ -114,9 +115,10 @@ export function StepVoice({
                   Playground (?from=). Customs edit in place (?artifact=). Both
                   return here with the resulting artifact selected. */}
               {(() => {
+                const origin = draft.agentId ?? "new"
                 const href = isCustom
-                  ? `/agents/playground?artifact=${v.id}`
-                  : `/agents/playground?from=${v.id}`
+                  ? `/agents/playground?artifact=${v.id}&agent=${origin}`
+                  : `/agents/playground?from=${v.id}&agent=${origin}`
                 const label = isCustom ? "Edit in playground" : "Customize"
                 const goEdit = (e: React.SyntheticEvent) => {
                   e.stopPropagation()
@@ -144,7 +146,7 @@ export function StepVoice({
         {/* Create custom voice — replaces the old "Edit Aria". */}
         <button
           type="button"
-          onClick={() => router.push("/agents/playground")}
+          onClick={() => router.push(`/agents/playground?agent=${draft.agentId ?? "new"}`)}
           className="flex min-h-[7rem] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card/40 p-4 text-center transition-colors hover:border-primary/50 hover:bg-accent/40"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">

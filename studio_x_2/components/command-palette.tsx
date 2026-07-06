@@ -29,6 +29,15 @@ type Command = {
   onSelect?: () => void
   /** Keywords for fuzzy matching */
   keywords?: string[]
+  /** Wizard drawer to open. Dispatched as a cancelable window event first — a
+   *  mounted wizard consumes it in place (a same-route ?step push never
+   *  re-fires its mount parser, and from /agents/[id]/edit navigating away
+   *  would retarget the wrong agent — re-eval #2). `href` stays the fallback
+   *  when no wizard is listening. */
+  wizardStep?: number
+  /** Dispatch this cancelable window event; navigate to href only if nothing
+   *  consumed it (e.g. open the config drawer's Get-code in place). */
+  windowEvent?: string
 }
 
 const COMMANDS: Command[] = [
@@ -70,14 +79,15 @@ const COMMANDS: Command[] = [
 
   // ── Agent settings — deep links into the wizard drawers, so the palette can
   //    find IN-DRAWER features, not just pages (heuristic-eval #10). ─────────
-  { id: "ag-voice",      label: "Change voice, models, or language", href: "/agents?step=1",          icon: Bot,                group: "Agent settings", keywords: ["voice", "language", "spoken", "stt", "llm", "tts", "model", "preset", "persona", "multimodal", "mllm"] },
-  { id: "ag-type",       label: "Change agent type",        href: "/agents?step=2",                   icon: Bot,                group: "Agent settings", keywords: ["batch calls", "inbound", "outbound", "code", "sdk", "type", "channel"] },
-  { id: "ag-prompt",     label: "Edit prompt, greeting, knowledge & connectors", href: "/agents?step=3", icon: Bot,             group: "Agent settings", keywords: ["system prompt", "greeting", "knowledge base", "mcp", "connector", "crm", "tools", "behavior"] },
-  { id: "ag-channel",    label: "Set up the channel — number, CSV, widget, SDK", href: "/agents?step=4", icon: Phone,           group: "Agent settings", keywords: ["phone number", "contacts", "csv", "caller id", "web widget", "embed", "snippet", "call window", "retries", "concurrency"] },
-  { id: "ag-deploy",     label: "Review & deploy the agent", href: "/agents?step=5",                  icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "test", "review"] },
+  { id: "ag-voice",      label: "Change voice, models, or language", href: "/agents?step=1", wizardStep: 1, icon: Bot,          group: "Agent settings", keywords: ["voice", "language", "spoken", "stt", "llm", "tts", "model", "preset", "persona", "multimodal", "mllm"] },
+  { id: "ag-type",       label: "Change agent type",        href: "/agents?step=2", wizardStep: 2,    icon: Bot,                group: "Agent settings", keywords: ["batch calls", "inbound", "outbound", "code", "sdk", "type", "channel"] },
+  { id: "ag-prompt",     label: "Edit prompt, greeting, knowledge & connectors", href: "/agents?step=3", wizardStep: 3, icon: Bot, group: "Agent settings", keywords: ["system prompt", "greeting", "knowledge base", "mcp", "connector", "crm", "tools", "behavior"] },
+  { id: "ag-channel",    label: "Set up the channel — number, CSV, widget, SDK", href: "/agents?step=4", wizardStep: 4, icon: Phone, group: "Agent settings", keywords: ["phone number", "contacts", "csv", "caller id", "web widget", "call window", "retries", "concurrency"] },
+  { id: "ag-deploy",     label: "Review & deploy the agent", href: "/agents?step=5", wizardStep: 5,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "test", "review"] },
+  { id: "ag-getcode",    label: "Get code — SDK & widget snippets (read-only)", href: "/agents", windowEvent: "sx:open-config-drawer", icon: Code2, group: "Agent settings", keywords: ["embed", "snippet", "sdk", "widget code", "copy code", "api", "json", "config"] },
 
   // ── Actions ──────────────────────────────────────────────────────────────
-  { id: "new-agent",     label: "Create a new agent",       href: "/agents/new/edit",                 icon: Plus,               group: "Actions", keywords: ["create", "new"] },
+  { id: "new-agent",     label: "Create a new agent",       href: "/agents/new/edit?blank=1",         icon: Plus,               group: "Actions", keywords: ["create", "new", "blank"] },
   { id: "browse-tpl",    label: "Browse agent templates",   href: "/agents?view=list&templates=1",    icon: Sparkles,           group: "Actions", keywords: ["template", "starter", "ivr", "survey", "reminder", "example"] },
   { id: "playground",    label: "Voice playground — design a custom voice", href: "/agents/playground", icon: Sparkles,         group: "Actions", keywords: ["voice", "tts", "playground", "custom voice", "clone", "persona"] },
   { id: "new-camp",      label: "Create a new batch call",  href: "/deploy/batch-calls/new",                   icon: Plus,               group: "Actions", keywords: ["create"] },
@@ -128,9 +138,19 @@ export function CommandPalette() {
     setOpen(false)
     if (cmd.onSelect) {
       cmd.onSelect()
-    } else if (cmd.href) {
-      router.push(cmd.href)
+      return
     }
+    // Event-first: a mounted consumer (wizard drawer / config drawer) handles
+    // it in place and preventDefault()s; dispatchEvent then returns false and
+    // we skip navigation. Otherwise fall through to the href.
+    const eventName = cmd.wizardStep != null ? "sx:open-wizard-step" : cmd.windowEvent
+    if (eventName) {
+      const handled = !window.dispatchEvent(
+        new CustomEvent(eventName, { detail: cmd.wizardStep, cancelable: true }),
+      )
+      if (handled) return
+    }
+    if (cmd.href) router.push(cmd.href)
   }
 
   return (

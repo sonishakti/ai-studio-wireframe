@@ -54,6 +54,9 @@ import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset } from
 // wizard's ?template= seeding so "Start from this" actually carries them.
 type Template = (typeof AGENT_TEMPLATES)[number]
 
+// ⚠ channelType/channelLabel MUST mirror lib/campaign-data.ts Agent.channel —
+// the builder hydrates from THAT record; a list cell claiming a channel the
+// builder can't show is heuristic-eval #2 all over again (re-eval #5).
 // Each agent owns ONE channel (2026-06-23 model; duplicate to add another) and
 // one stack preset (the cost-vs-speed dimension). channelType drives the filter.
 type AgentChannel = "phone" | "whatsapp" | "web" | "batch" | "code" | "none"
@@ -64,7 +67,7 @@ const AGENTS: {
 }[] = [
   { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default — live and ready", status: "live",   channelType: "phone",    channelLabel: "+1 (628) 555-0188", stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
   { id: "agt_support_v2", name: "Support Bot v2",       description: "Handles tier-1 support queries via phone",       status: "live",   channelType: "phone",    channelLabel: "+1 (415) 555-0101", stack: "fastest",  calls: 12430, lastModified: "2 hours ago" },
-  { id: "agt_appointment_setter", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "whatsapp", channelLabel: "Acme WhatsApp",     stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
+  { id: "agt_appointment_setter", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "web",      channelLabel: "acme.com/booking",  stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
   { id: "agt_survey", name: "Survey Bot",           description: "Post-interaction CSAT surveys",                  status: "live",   channelType: "web",      channelLabel: "acme.com/help",     stack: "cheapest", calls: 5601,  lastModified: "1 day ago" },
   { id: "agt_sales_qualifier", name: "Sales Qualifier",      description: "Qualifies inbound leads before transfer",        status: "draft",  channelType: "none",     channelLabel: "Not deployed",      stack: "balanced", calls: 0,     lastModified: "Yesterday" },
   { id: "agt_collections", name: "Collections Outreach", description: "Outbound debt collection",                       status: "paused", channelType: "batch",    channelLabel: "Q2 Collections",    stack: "cheapest", calls: 891,   lastModified: "3 days ago" },
@@ -408,7 +411,8 @@ export default function AgentsPage() {
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
   const startBlank = () => {
     setBuilderId("new")
-    router.push("/agents")
+    // ?blank=1 → the wizard skips the draft restore; "blank" means blank (#4).
+    router.push("/agents?blank=1")
   }
   const isBuilder = view === "builder"
 

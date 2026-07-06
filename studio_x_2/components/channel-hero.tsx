@@ -31,7 +31,7 @@ export function ChannelHero({
 }) {
   // Deploy IN-CONTEXT: route into the agent's own builder Deploy step with the
   // channel preselected — never out to a disconnected /deploy/* page (2026-06-24).
-  const deployHref = (dc: string) => `/agents/${agent.id}/edit?dc=${dc}#deployment`
+  const deployHref = (dc: string) => `/agents/${agent.id}/edit?dc=${dc}`
   return (
     <section id="channels" className="scroll-mt-6 space-y-3">
       {/* Explicit framing: the cards below are WHERE this agent deploys — not

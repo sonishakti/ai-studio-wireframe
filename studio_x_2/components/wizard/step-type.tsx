@@ -32,7 +32,7 @@ const TYPES: {
   },
   {
     id: "code",
-    title: "Code",
+    title: typeLabel("code"),
     desc: "Run the agent inside your own app via the SDK or API — no phone number required.",
     icon: Code2,
   },

@@ -27,6 +27,17 @@ export function CustomConfigDrawer({
 }) {
   const [open, setOpen] = React.useState(false)
 
+  // ⌘K "Get code" opens this drawer in place when it's mounted (cancelable
+  // window event; the palette only navigates when nothing consumes it).
+  React.useEffect(() => {
+    const onOpen = (e: Event) => {
+      e.preventDefault()
+      setOpen(true)
+    }
+    window.addEventListener("sx:open-config-drawer", onOpen)
+    return () => window.removeEventListener("sx:open-config-drawer", onOpen)
+  }, [])
+
   // Voice lookup hits localStorage and stringify walks the whole draft —
   // skip both for the (usual) closed state.
   const json = React.useMemo(() => {

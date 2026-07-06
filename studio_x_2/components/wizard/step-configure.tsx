@@ -82,9 +82,17 @@ function InboundConfigure({
   draft, update, agentId,
 }: StepProps & { agentId: string }) {
   const mode: InboundMode = draft.config.inbound?.mode ?? "phone"
-  const available = PHONE_NUMBERS.filter((n) => n.status === "unassigned")
-  const setMode = (m: InboundMode) =>
+  // The agent's CURRENT number must always be listable/selectable — a live
+  // agent's number is status "active" and a pure unassigned filter renders the
+  // Select as an empty placeholder under summaries that name it (re-eval #1).
+  const currentId = draft.config.inbound?.numberId
+  const available = PHONE_NUMBERS.filter((n) => n.status === "unassigned" || n.id === currentId)
+  const setMode = (m: InboundMode) => {
     update({ config: { ...draft.config, inbound: { ...draft.config.inbound, mode: m } } })
+    if (m === "web" && currentId) {
+      toast("Switched to Web widget", { description: "Your phone number stays attached — switch back any time." })
+    }
+  }
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, inbound: { mode, numberId } } })
 
@@ -116,7 +124,7 @@ function InboundConfigure({
               </SelectTrigger>
               <SelectContent>
                 {available.map((n) => (
-                  <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}</SelectItem>
+                  <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === currentId ? " · current" : ""}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -135,8 +143,9 @@ function InboundConfigure({
 // ─── Outbound — caller-ID + contacts CSV with {{var}} validation ──────────────
 
 function OutboundConfigure({ draft, update }: StepProps) {
-  const available = PHONE_NUMBERS.filter((n) => n.status === "unassigned")
   const out = draft.config.outbound
+  // Same rule as inbound: the attached caller-ID must stay visible/selectable.
+  const available = PHONE_NUMBERS.filter((n) => n.status === "unassigned" || n.id === out?.numberId)
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
   const attachCsv = () => {
@@ -159,7 +168,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
           </SelectTrigger>
           <SelectContent>
             {available.map((n) => (
-              <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}</SelectItem>
+              <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === out?.numberId ? " · current" : ""}</SelectItem>
             ))}
           </SelectContent>
         </Select>

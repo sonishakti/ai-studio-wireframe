@@ -134,32 +134,54 @@ export function AgentWizard({
   const voiceDone = draft.voice !== null
   const typeDone = draft.type !== null
   const promptDone = draft.systemPrompt.trim().length > 0
+  // Row 4's ✓ reflects STEP-4 facts only — an attached number must show even
+  // while the prompt is still empty (re-eval #18); whole-draft readiness stays
+  // the sticky bar's job via publishBlockReason.
+  const step4Done =
+    typeDone &&
+    (draft.type === "outbound"
+      ? !!(draft.config.outbound?.numberId && draft.config.outbound?.csvName)
+      : draft.type === "inbound" && (draft.config.inbound?.mode ?? "phone") === "phone"
+      ? !!draft.config.inbound?.numberId
+      : true)
   const configReady = typeDone && publishBlockReason(draft) === null
   // Step 5 is deployment itself: ✓ only when the agent is actually live —
   // "4 of 5 complete" next to "Everything's set" was a contradiction (#13).
   const isLive = isEdit && existing!.status === "live"
   const isDone = (n: number) =>
-    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : n === 4 ? configReady : isLive
+    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : n === 4 ? step4Done : isLive
   const setupCount = [1, 2, 3, 4].filter(isDone).length
 
-  // Row detail line — ALWAYS informative (heuristic-eval #1): the value summary
-  // once done, otherwise the step's content manifest. Never "Tap to open".
+  // Row detail line — ALWAYS informative (heuristic-eval #1): summaries are
+  // recognition data, not a completion reward, so prefer real values whenever
+  // they exist, ✓ or not; fall back to the step's content manifest.
   const rowDetail = (n: number): string => {
-    if (isDone(n)) return stepSummary(n) ?? stepManifest(n, draft)
+    const summary = stepSummary(n)
+    if (summary) return summary
     if (n === 5 && configReady) return "Everything's set — review and go live"
     return stepManifest(n, draft)
   }
 
-  // ── Mount: time-to-live clock; restore + ?artifact + ?dc + ?step deep-links. ──
+  // ── Mount: time-to-live clock; restore + ?artifact/?dc/?step/?template/?blank ──
   React.useEffect(() => {
-    markBuildStart()
     const params = new URLSearchParams(window.location.search)
+    // Mounted only for the commit that ?view=list is about to replace — do
+    // NOTHING (no toast, no restore, no analytics stamp): a stray "Resuming
+    // unsaved edits" toast over the list had a destructive Discard (re-eval #7).
+    if (params.get("view") === "list") return
+    markBuildStart()
     const artifactId = params.get("artifact")
     const dc = params.get("dc")
     const stepParam = parseInt(params.get("step") ?? "", 10)
     const stepToOpen = stepParam >= 1 && stepParam <= 5 ? stepParam : null
     // Open the deep-linked step's drawer.
     const openLater = (n: number) => setOpenStep(n)
+    // One-shot params must not survive into a refresh (re-eval #4).
+    const stripParam = (key: string) => {
+      const url = new URL(window.location.href)
+      url.searchParams.delete(key)
+      window.history.replaceState({}, "", url)
+    }
 
     if (isEdit) {
       // Unsaved edits survive a refresh via the per-agent slot (#6) —
@@ -178,9 +200,25 @@ export function AgentWizard({
           },
         })
       }
+      // A voice built in the playground applies to THIS agent too (re-eval #3).
+      if (artifactId) {
+        const v = getVoiceArtifact(artifactId)
+        if (v) {
+          setDraft((d) => seedFromVoice(unsaved ?? d, v))
+          dirty.current = true
+          toast.success(`${v.name} selected`, { description: `Voice updated on ${existing!.name}.` })
+          stripParam("artifact")
+        }
+      }
       if (dc) {
+        // Route through the stash/undo machinery — a deep link must not flip a
+        // live agent's channel more silently than the UI would (re-eval #17).
         const t = dcToType(dc)
-        if (t) setDraft((d) => ({ ...d, type: t, config: dcToConfig(dc, d.config) }))
+        if (t) {
+          selectType(t)
+          if (dc === "web") setDraft((d) => ({ ...d, config: dcToConfig(dc, d.config) }))
+          dirty.current = true
+        }
         openLater(4)
       } else if (stepToOpen) {
         openLater(stepToOpen)
@@ -188,16 +226,42 @@ export function AgentWizard({
       return
     }
 
-    // Template seeding (?template=) takes priority over the stale-draft
-    // restore — "Start from this" must actually carry the template (#5).
+    // ?blank=1 — an explicitly blank builder ("Create new agent") must not
+    // resurrect the previous draft (re-eval #4). The saved slot is left intact.
+    if (params.get("blank") === "1") {
+      setDraft({ ...EMPTY_DRAFT })
+      stripParam("blank")
+      if (stepToOpen) openLater(stepToOpen)
+      return
+    }
+
+    // Template seeding (?template=) — but NEVER clobber real work: a saved
+    // draft with content wins, with a "Reset to template" way back (re-eval #4).
     const templateId = params.get("template")
     const tpl = templateId ? AGENT_TEMPLATES.find((t) => t.id === templateId) : undefined
     if (tpl) {
-      setDraft(templateToDraft(tpl))
-      dirty.current = true
-      toast.success(`Started from ${tpl.name}`, {
-        description: "Name, prompt, and greeting are pre-filled — tweak anything.",
-      })
+      stripParam("template") // refresh falls through to the normal restore path
+      const saved = restoreDraft()
+      const savedHasWork = saved && (saved.name.trim() || saved.systemPrompt.trim() || saved.voice)
+      if (savedHasWork) {
+        setDraft(saved)
+        toast("Resumed your draft", {
+          description: `You have unsaved work — kept it instead of starting from ${tpl.name}.`,
+          action: {
+            label: "Reset to template",
+            onClick: () => {
+              dirty.current = true
+              setDraft(templateToDraft(tpl))
+            },
+          },
+        })
+      } else {
+        setDraft(templateToDraft(tpl))
+        dirty.current = true
+        toast.success(`Started from ${tpl.name}`, {
+          description: "Name, prompt, and greeting are pre-filled — tweak anything.",
+        })
+      }
       if (stepToOpen) openLater(stepToOpen)
       return
     }
@@ -225,6 +289,23 @@ export function AgentWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // ⌘K "Agent settings" commands open drawers via this event when a wizard is
+  // already mounted — a same-route ?step push never re-fires the mount parser,
+  // so the palette was inert exactly on /agents (re-eval #2). Refs keep the
+  // listener stable while openRow stays fresh.
+  const openRowRef = React.useRef<(n: number) => void>(() => {})
+  React.useEffect(() => {
+    const onOpenStep = (e: Event) => {
+      const n = (e as CustomEvent<number>).detail
+      if (typeof n === "number" && n >= 1 && n <= 5) {
+        e.preventDefault()
+        openRowRef.current(n)
+      }
+    }
+    window.addEventListener("sx:open-wizard-step", onOpenStep)
+    return () => window.removeEventListener("sx:open-wizard-step", onOpenStep)
+  }, [])
+
   // Autosave BOTH modes (edit gets a per-agent slot) + drive the status chip.
   useDebouncedEffect(() => {
     if (!dirty.current) return
@@ -248,7 +329,15 @@ export function AgentWizard({
     setOpenStep(n)
     syncStepParam(n)
   }
+  openRowRef.current = openRow
   const closeDrawer = () => { setOpenStep(null); syncStepParam(null) }
+  // Deep-link/refresh opens bypass openRow — capture a baseline anyway so
+  // "Undo changes" is never a silent no-op (re-eval #6); reset on close so the
+  // next open re-captures.
+  React.useEffect(() => {
+    if (openStep != null && openSnapshot.current == null) openSnapshot.current = draftRef.current
+    if (openStep == null) openSnapshot.current = null
+  }, [openStep])
   const advanceFrom = (n: number) => {
     openSnapshot.current = draftRef.current
     const next = n < 5 ? n + 1 : null
@@ -262,10 +351,15 @@ export function AgentWizard({
     syncStepParam(prev)
   }
   const undoDrawerChanges = () => {
-    if (!openSnapshot.current) return
+    const snap = openSnapshot.current
+    if (!snap) return
     dirty.current = true
-    setDraft(openSnapshot.current)
-    toast("Changes undone", { description: "This step is back to how it was when you opened it." })
+    // The sheet is non-modal, so the card's name field and the row-2 type
+    // toggle stay editable behind it — preserve those (re-eval #14), and drop
+    // any stale type stash so a later restore can't reapply old config.
+    setDraft((d) => ({ ...snap, name: d.name, type: d.type }))
+    typeStash.current = null
+    toast("Changes undone", { description: "Everything changed in this drawer since opening it was reverted (name and type kept)." })
   }
 
   // Picking a voice seeds the draft + chains to the type step.
@@ -286,7 +380,9 @@ export function AgentWizard({
       systemPrompt: config.systemPrompt, source: config.source ?? "Import",
     })
     if (dirty.current) saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
-    router.push(`/agents/playground?artifact=${vid}`)
+    // Thread the ORIGIN agent so the playground round-trip returns here, not
+    // to a fresh create builder (re-eval #3).
+    router.push(`/agents/playground?artifact=${vid}&agent=${draft.agentId ?? "new"}`)
   }
 
   const publishingRef = React.useRef(false)
@@ -295,6 +391,9 @@ export function AgentWizard({
     const reason = publishBlockReason(draftRef.current)
     if (reason) { toast.error("A couple of things to finish first", { description: reason }); return }
     publishingRef.current = true
+    // Disarm any pending debounced autosave BEFORE clearing the slot — a save
+    // firing mid-navigation would resurrect the consumed draft (re-eval #16).
+    dirty.current = false
     const agentId = draft.agentId ?? `agt_${Date.now().toString(36)}`
     publishDeployment({
       router, agentId, agentName: draft.name || "Your agent",
@@ -324,7 +423,7 @@ export function AgentWizard({
     }
     if (n === 4) {
       if (!draft.type) return undefined
-      const parts = [`${channelLabel(draft)} · ${channelTarget(draft)}`]
+      const parts = [channelLine(draft)]
       const out = draft.config.outbound
       if (draft.type === "outbound" && (out?.callWindow || out?.maxConcurrent || out?.retries != null)) {
         const win = out.callWindow === "extended" ? "8–8" : out.callWindow === "anytime" ? "anytime" : "9–5"
@@ -434,7 +533,7 @@ export function AgentWizard({
           // WHERE the agent takes traffic — visible on the always-present card,
           // not just inside the Step-4 drawer (heuristic-eval #11).
           channel={draft.type ? {
-            label: `${channelLabel(draft)} · ${channelTarget(draft)}`,
+            label: channelLine(draft),
             onClick: () => openRow(4),
           } : undefined}
           talking={testing}
@@ -482,9 +581,10 @@ export function AgentWizard({
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2 text-sm font-semibold">
                     {stepTitle(n, draft)}
+                    {/* The last step never carries a first-step nudge (re-eval #10). */}
                     {isActive && (
                       <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        Start here · ~1 min
+                        {n === 5 ? "Ready to deploy" : "Start here · ~1 min"}
                       </span>
                     )}
                   </span>
@@ -679,4 +779,12 @@ function channelLabel(d: AgentDraft): string {
   if (d.type === "code") return "Code / SDK"
   if (d.type === "inbound" && d.config.inbound?.mode === "web") return "Web widget"
   return "Inbound"
+}
+
+/** "label · target" — deduped when they coincide (web mode returns
+ *  "Web widget" for both; "Web widget · Web widget" read as a bug, re-eval #15). */
+function channelLine(d: AgentDraft): string {
+  const label = channelLabel(d)
+  const target = channelTarget(d)
+  return label === target ? label : `${label} · ${target}`
 }

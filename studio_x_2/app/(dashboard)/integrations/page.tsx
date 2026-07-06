@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, ExternalLink, Plug, Plus } from "lucide-react"
 import { toast } from "sonner"
@@ -122,6 +123,15 @@ function ResourcesInner() {
 
         {/* Knowledge Base tab */}
         <TabsContent value="knowledge" className="space-y-4">
+          {/* Reciprocity with the builder: attaching happens in an agent's
+              Prompt & tools step — say so HERE, where users land hunting for
+              it (heuristic-eval walkthrough T3 / re-eval #8). */}
+          <p className="text-sm text-muted-foreground">
+            Attach these to an agent from its{" "}
+            <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
+              Prompt &amp; tools step →
+            </Link>
+          </p>
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search knowledge bases…" className="pl-9" />
@@ -174,6 +184,15 @@ function ResourcesInner() {
 
         {/* MCP tab */}
         <TabsContent value="mcp" className="space-y-4">
+          {/* Reciprocity with the builder: attaching happens in an agent's
+              Prompt & tools step — say so HERE, where users land hunting for
+              it (heuristic-eval walkthrough T3 / re-eval #8). */}
+          <p className="text-sm text-muted-foreground">
+            Attach these to an agent from its{" "}
+            <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
+              Prompt &amp; tools step →
+            </Link>
+          </p>
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search MCP servers…" className="pl-9" />
