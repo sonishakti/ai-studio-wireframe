@@ -25,9 +25,9 @@ export function StepBuild({ draft, update }: StepProps) {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">System prompt</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Prompt &amp; tools</h2>
         <p className="text-sm text-muted-foreground">
-          Tell {draft.name || "your agent"} how to behave. Saved automatically as you type — refresh and your draft is still here.
+          Tell {draft.name || "your agent"} how to behave — and give it knowledge and connectors. Saved automatically as you type.
         </p>
       </header>
 

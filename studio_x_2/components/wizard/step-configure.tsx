@@ -19,9 +19,11 @@ import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
   MOCK_CSV_COLUMNS,
   outboundMissingVars,
+  typeLabel,
+  type AgentType,
   type InboundMode,
 } from "@/lib/wizard-draft"
-import type { StepProps } from "@/components/wizard/types"
+import { stepTitle, type StepProps } from "@/components/wizard/types"
 
 /**
  * Step 4 — Configure. Branches on `draft.type`:
@@ -38,14 +40,34 @@ export function StepConfigure({ draft, update }: StepProps) {
 
   return (
     <div className="space-y-5">
+      {/* Heading mirrors the row/sheet title (stepTitle) so the drawer never
+          says "Configure" while the checklist says "Connect a phone number". */}
       <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Configure</h2>
+        <h2 className="text-lg font-semibold tracking-tight">{stepTitle(4, draft)}</h2>
         <p className="text-sm text-muted-foreground">
           {draft.type === "inbound" && "Choose how callers reach your agent."}
           {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
           {draft.type === "code" && "Drop the agent into your own app."}
+          {!draft.type && "What you set up here depends on how the agent runs — pick that first."}
         </p>
       </header>
+
+      {/* No type yet → never an empty drawer: choose it right here. */}
+      {!draft.type && (
+        <div className="space-y-3 rounded-lg border border-dashed border-border bg-muted/20 p-4">
+          <p className="text-sm font-medium">How will your agent run?</p>
+          <div className="flex flex-wrap gap-2">
+            {(["outbound", "inbound", "code"] as AgentType[]).map((t) => (
+              <Button key={t} variant="outline" size="sm" onClick={() => update({ type: t })}>
+                {typeLabel(t)}
+              </Button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Batch calls dial a contact list · Inbound answers a number or web widget · Code / SDK runs inside your app.
+          </p>
+        </div>
+      )}
 
       {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
       {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
