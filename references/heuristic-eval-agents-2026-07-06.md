@@ -241,3 +241,29 @@ Change: latency chip gets `aria-label` + shadcn Tooltip ("Estimated response lat
 Acceptance: every interactive icon-only affordance on the card has an accessible name; a hover reveals what the chevron does before clicking; no unexplained acronym remains in the breakdown panel.
 
 Coverage check: #1(S1) #2(S3) #3(S2) #4(S6+S7) #5(S7) #6(S10) #7(S9) #8(S8) #9(S6+S17) #10(S6) #11(S4) #12(S12) #13(S5) #14(S11) #15(S15) #16(S15) #17(S12) #18(S13) #19(S14) #20(S11) #21(S16) #23(S18) #24(S19) — all 23 confirmed findings mapped. Slices 1–8 are the recognition-over-recall core; ship them first as they directly resolve the P0 complaint and all four failed walkthrough tasks. Per project rules: commit + push each slice and run `vercel deploy --prod --yes` manually (git auto-deploy is broken).
+---
+
+# Post-fix addendum (2026-07-06, end of day)
+
+**Loop closed after three rounds.** Status of the original complaint ("recall over
+recognition — I must remember which panel holds which feature"): **resolved**.
+
+| Round | Commit(s) | What happened |
+|---|---|---|
+| 1 — Fix all 23 | `25a3994` | 19 slices: row content manifests, scope-honest titles, truthful live-agent hydration (Agent.channel), card channel line, step-5 tri-state, ⌘K feature index, template seeding, Builder\|All-agents switch, edit-mode autosave + save chip, ?step URL mirroring, View config (JSON) + Get code, Done/Next-step footers + Undo, one channel vocabulary, substantive summaries, corrected signposts, playground links, Monitor badge semantics, tooltips |
+| 1.5 — Walkthrough residuals | `54764b8`, `d617628` | Step-4 drawer never empty (inline type chooser; headings mirror stepTitle); minimalist pass (banner → one line, chevron rows, single view switch) |
+| 2 — Re-evaluation | `c2c2224` | 24-agent verification pass confirmed **18 residuals (4 P1 · 4 P2 · 10 P3)** — all fixed same day. Highlights: number pickers now include the agent's current (active) number; ⌘K drawer commands work in place via a cancelable window event (and no longer retarget the wrong agent); the playground round-trip returns to the originating agent; template seeding can no longer clobber saved work and "blank" is blank; the two AGENTS mocks were re-aligned (WhatsApp claim removed); Undo works on deep-linked drawers and preserves behind-sheet edits; Resources tabs link back to Prompt & tools. |
+
+**Exit check:** no P0/P1 findings remain open; all 41 defect items across both
+evaluations are closed and deployed. The six cognitive-walkthrough tasks that
+failed (T1–T4, T6) now pass by code trace: language is named on row 1 and in ⌘K;
+the live number is on the card, row 4, sticky bar, AND selectable in the drawer;
+connectors are named on row 3 with a reciprocal link from Resources; snippets are
+copyable read-only via View config → Get code (⌘K: "Get code"); templates are one
+click from the landing and actually seed the builder.
+
+Remaining known limitations (accepted, not defects): channel truth lives in two
+mock arrays kept aligned by convention (full derivation deferred); the one-frame
+builder flash on a hard load of `?view=list` (side-effect-free now); WhatsApp is
+not representable as a channel by design (one agent ↔ one channel, phone/web/
+batch/code).
