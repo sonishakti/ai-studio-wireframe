@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Mic, PhoneOff, DollarSign, Gauge, ChevronDown, Copy, Check } from "lucide-react"
+import { Mic, PhoneOff, DollarSign, Gauge, ChevronDown, Copy, Check, Radio } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { type StackLatencyBreakdown } from "@/lib/campaign-data"
@@ -29,6 +30,7 @@ export function AgentIdentityCard({
   costPerMin,
   latencyMs,
   latencyBreakdown,
+  channel,
   talking,
   onToggleTalk,
   talkLabel,
@@ -48,9 +50,12 @@ export function AgentIdentityCard({
   stack?: string
   costPerMin?: number
   latencyMs?: number
-  /** When provided, the latency stat expands to an ASR/LLM/TTS → end-to-end →
+  /** When provided, the latency stat expands to an STT/LLM/TTS → end-to-end →
    *  best-case breakdown. */
   latencyBreakdown?: StackLatencyBreakdown
+  /** WHERE the agent takes traffic ("Inbound · +1 (628) 555-0188") — always
+   *  visible on the card, clicking jumps to the channel step. */
+  channel?: { label: string; onClick: () => void }
   talking: boolean
   onToggleTalk: () => void
   talkLabel?: string
@@ -60,7 +65,7 @@ export function AgentIdentityCard({
   className?: string
 }) {
   const displayName = name || namePlaceholder
-  const hasStats = !!agentId || !!stack || costPerMin != null || latencyMs != null
+  const hasStats = !!agentId || !!stack || costPerMin != null || latencyMs != null || !!channel
   const [showLatency, setShowLatency] = React.useState(false)
   const { copied, copy } = useCopyFeedback()
   const copyId = () => {
@@ -106,6 +111,17 @@ export function AgentIdentityCard({
             </button>
           )}
           {stack && <p className="break-words font-mono text-sm text-muted-foreground">{stack}</p>}
+          {channel && (
+            <button
+              type="button"
+              onClick={channel.onClick}
+              aria-label={`Channel: ${channel.label} — open channel setup`}
+              className="inline-flex max-w-full items-center gap-1.5 rounded-md text-left text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Radio className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{channel.label}</span>
+            </button>
+          )}
           {(costPerMin != null || latencyMs != null) && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               {costPerMin != null && (
@@ -113,15 +129,22 @@ export function AgentIdentityCard({
               )}
               {latencyMs != null &&
                 (latencyBreakdown ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowLatency((v) => !v)}
-                    aria-expanded={showLatency}
-                    className="inline-flex items-center gap-1 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
-                    <ChevronDown className={cn("h-3 w-3 transition-transform", showLatency && "rotate-180")} aria-hidden />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => setShowLatency((v) => !v)}
+                        aria-expanded={showLatency}
+                        aria-label={`Estimated response latency ${latencyMs} milliseconds — toggle the per-stage breakdown`}
+                        className="inline-flex items-center gap-1 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
+                        <span className="text-xs">breakdown</span>
+                        <ChevronDown className={cn("h-3 w-3 transition-transform", showLatency && "rotate-180")} aria-hidden />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Estimated response latency — click for the STT / LLM / TTS breakdown</TooltipContent>
+                  </Tooltip>
                 ) : (
                   <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms</span>
                 ))}
@@ -132,7 +155,7 @@ export function AgentIdentityCard({
             <div className="rounded-md border border-border bg-muted/40 p-3 text-left">
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Latency breakdown</p>
               <LatencyRow label="STT" value={latencyBreakdown.asrMs} />
-              <LatencyRow label="LLM (TTFT)" value={latencyBreakdown.llmMs} />
+              <LatencyRow label="LLM (time to first token)" value={latencyBreakdown.llmMs} />
               <LatencyRow label="TTS" value={latencyBreakdown.ttsMs} />
               <div className="my-2 border-t border-border" />
               <LatencyRow label="End-to-end" value={latencyBreakdown.latencyMs} strong />

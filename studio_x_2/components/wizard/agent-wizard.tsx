@@ -17,16 +17,16 @@ import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
-import { STEP_TITLES } from "@/components/wizard/types"
+import { STEP_TITLES, stepTitle, stepManifest } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
 import {
-  EMPTY_DRAFT, agentToDraft, restoreDraft, saveDraft, clearDraft,
+  EMPTY_DRAFT, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
   publishBlockReason, channelTarget, typeLabel, type AgentDraft, type AgentType,
 } from "@/lib/wizard-draft"
 import { toast } from "sonner"
@@ -47,6 +47,7 @@ export function AgentWizard({
   landing,
   onViewAll,
   onCreateNew,
+  onBrowseTemplates,
 }: {
   id: string
   /** Rendered inline on /agents (not the standalone edit route) — show the
@@ -54,6 +55,9 @@ export function AgentWizard({
   landing?: boolean
   onViewAll?: () => void
   onCreateNew?: () => void
+  /** Opens the starter-templates sheet — templates must be reachable from the
+   *  default landing, not just the list view (heuristic-eval #4). */
+  onBrowseTemplates?: () => void
 }) {
   const router = useRouter()
   const existing = id !== "new" ? getAgent(id) : undefined
@@ -69,12 +73,16 @@ export function AgentWizard({
   const [openStep, setOpenStep] = React.useState<number | null>(null)
   // The left identity card's "Talk to it" toggle (mock test, mirrors the home).
   const [testing, setTesting] = React.useState(false)
+  // Visible autosave status — "the copy promises autosave, so show it working"
+  // (heuristic-eval #6). idle → saving (on change) → saved (after the write).
+  const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved">("idle")
   const dirty = React.useRef(false)
   const draftRef = React.useRef(draft)
   draftRef.current = draft
 
   const update = React.useCallback((patch: Partial<AgentDraft>) => {
     dirty.current = true
+    setSaveState("saving")
     setDraft((d) => ({ ...d, ...patch }))
   }, [])
 
@@ -129,14 +137,19 @@ export function AgentWizard({
   const typeDone = draft.type !== null
   const promptDone = draft.systemPrompt.trim().length > 0
   const configReady = typeDone && publishBlockReason(draft) === null
+  // Step 5 is deployment itself: ✓ only when the agent is actually live —
+  // "4 of 5 complete" next to "Everything's set" was a contradiction (#13).
+  const isLive = isEdit && existing!.status === "live"
   const isDone = (n: number) =>
-    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : n === 4 ? configReady : false
-  const completeCount = [1, 2, 3, 4, 5].filter(isDone).length
+    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : n === 4 ? configReady : isLive
+  const setupCount = [1, 2, 3, 4].filter(isDone).length
 
-  // Row detail line: the summary when done, otherwise a short nudge. Never "locked".
+  // Row detail line — ALWAYS informative (heuristic-eval #1): the value summary
+  // once done, otherwise the step's content manifest. Never "Tap to open".
   const rowDetail = (n: number): string => {
-    if (isDone(n)) return stepSummary(n) ?? "Done"
-    return n === firstIncomplete(draft) ? "Start here — about a minute" : "Tap to open"
+    if (isDone(n)) return stepSummary(n) ?? stepManifest(n, draft)
+    if (n === 5 && configReady) return "Everything's set — review and go live"
+    return stepManifest(n, draft)
   }
 
   // ── Mount: time-to-live clock; restore + ?artifact + ?dc + ?step deep-links. ──
@@ -151,6 +164,22 @@ export function AgentWizard({
     const openLater = (n: number) => setOpenStep(n)
 
     if (isEdit) {
+      // Unsaved edits survive a refresh via the per-agent slot (#6) —
+      // offer a way back to the saved agent rather than silently resuming.
+      const unsaved = restoreDraft(existing!.id)
+      if (unsaved) {
+        setDraft(unsaved)
+        toast("Resuming unsaved edits", {
+          description: `${existing!.name} has changes that were never deployed.`,
+          action: {
+            label: "Discard",
+            onClick: () => {
+              clearDraft(existing!.id)
+              setDraft(agentToDraft(existing!))
+            },
+          },
+        })
+      }
       if (dc) {
         const t = dcToType(dc)
         if (t) setDraft((d) => ({ ...d, type: t, config: dcToConfig(dc, d.config) }))
@@ -158,6 +187,20 @@ export function AgentWizard({
       } else if (stepToOpen) {
         openLater(stepToOpen)
       }
+      return
+    }
+
+    // Template seeding (?template=) takes priority over the stale-draft
+    // restore — "Start from this" must actually carry the template (#5).
+    const templateId = params.get("template")
+    const tpl = templateId ? AGENT_TEMPLATES.find((t) => t.id === templateId) : undefined
+    if (tpl) {
+      setDraft(templateToDraft(tpl))
+      dirty.current = true
+      toast.success(`Started from ${tpl.name}`, {
+        description: "Name, prompt, and greeting are pre-filled — tweak anything.",
+      })
+      if (stepToOpen) openLater(stepToOpen)
       return
     }
 
@@ -184,13 +227,48 @@ export function AgentWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useDebouncedEffect(() => { if (dirty.current && !isEdit) saveDraft(draftRef.current) }, [draft], 600)
+  // Autosave BOTH modes (edit gets a per-agent slot) + drive the status chip.
+  useDebouncedEffect(() => {
+    if (!dirty.current) return
+    saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
+    setSaveState("saved")
+  }, [draft], 600)
 
-  // ── Drawer navigation ────────────────────────────────────────────────────────
-  const openRow = (n: number) => setOpenStep(n)
-  const closeDrawer = () => setOpenStep(null)
-  const advanceFrom = (n: number) => setOpenStep(n < 5 ? n + 1 : null)
-  const backFrom = (n: number) => setOpenStep(Math.max(1, n - 1))
+  // ── Drawer navigation — mirrored into the URL (?step=N via replaceState, so
+  //    refresh restores the open drawer and the link is shareable, while Back
+  //    still exits the page predictably — heuristic-eval #20). A snapshot taken
+  //    on open powers the footer's "Undo changes" (#18).
+  const openSnapshot = React.useRef<AgentDraft | null>(null)
+  const syncStepParam = (n: number | null) => {
+    const url = new URL(window.location.href)
+    if (n == null) url.searchParams.delete("step")
+    else url.searchParams.set("step", String(n))
+    window.history.replaceState({}, "", url)
+  }
+  const openRow = (n: number) => {
+    openSnapshot.current = draftRef.current
+    setOpenStep(n)
+    syncStepParam(n)
+  }
+  const closeDrawer = () => { setOpenStep(null); syncStepParam(null) }
+  const advanceFrom = (n: number) => {
+    openSnapshot.current = draftRef.current
+    const next = n < 5 ? n + 1 : null
+    setOpenStep(next)
+    syncStepParam(next)
+  }
+  const backFrom = (n: number) => {
+    openSnapshot.current = draftRef.current
+    const prev = Math.max(1, n - 1)
+    setOpenStep(prev)
+    syncStepParam(prev)
+  }
+  const undoDrawerChanges = () => {
+    if (!openSnapshot.current) return
+    dirty.current = true
+    setDraft(openSnapshot.current)
+    toast("Changes undone", { description: "This step is back to how it was when you opened it." })
+  }
 
   // Picking a voice seeds the draft + chains to the type step.
   const selectVoice = (v: VoiceArtifact) => {
@@ -209,7 +287,7 @@ export function AgentWizard({
       ttsVoice: config.voice ?? "rachel", firstMessage: config.firstMessage ?? "Hi, how can I help you today?",
       systemPrompt: config.systemPrompt, source: config.source ?? "Import",
     })
-    if (dirty.current) saveDraft(draftRef.current)
+    if (dirty.current) saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
     router.push(`/agents/playground?artifact=${vid}`)
   }
 
@@ -224,24 +302,39 @@ export function AgentWizard({
       router, agentId, agentName: draft.name || "Your agent",
       channel: channelLabel(draft), name: draft.name || "Deployment",
     })
-    // Clear only a NEW-agent draft — never wipe the shared slot while editing.
-    if (!isEdit) clearDraft()
+    // Deploying consumes the working copy — clear whichever slot this was.
+    clearDraft(isEdit ? draft.agentId : undefined)
   }
 
-  // ── Collapsed-row summaries ──────────────────────────────────────────────────
+  // ── Collapsed-row summaries — VALUES, not booleans (heuristic-eval #15/#16) ──
   function stepSummary(n: number): string | undefined {
     if (n === 1) {
-      return cardVoice ? `${cardVoice.name} · ${stackLine(draft.stack)}` : undefined
+      // Full line = preset + models + language, so those settings have a
+      // visible home outside the drawer.
+      return cardVoice ? `${cardVoice.name} · ${stackLine(draft.stack, { full: true })}` : undefined
     }
     if (n === 2) return draft.type ? typeLabel(draft.type) : undefined
     if (n === 3) {
       if (!promptDone) return undefined
-      const parts = ["Prompt set"]
-      if (draft.knowledge.length) parts.push(`${draft.knowledge.length} knowledge`)
-      if (draft.mcp.length) parts.push(`${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""}`)
+      const chars = draft.systemPrompt.trim().length
+      return [
+        `Prompt · ${chars} chars`,
+        draft.greeting.trim() ? "Greeting set" : "No greeting",
+        `${draft.knowledge.length} knowledge`,
+        `${draft.mcp.length} connector${draft.mcp.length === 1 ? "" : "s"}`,
+      ].join(" · ")
+    }
+    if (n === 4) {
+      if (!draft.type) return undefined
+      const parts = [`${channelLabel(draft)} · ${channelTarget(draft)}`]
+      const out = draft.config.outbound
+      if (draft.type === "outbound" && (out?.callWindow || out?.maxConcurrent || out?.retries != null)) {
+        const win = out.callWindow === "extended" ? "8–8" : out.callWindow === "anytime" ? "anytime" : "9–5"
+        parts.push(`${win} · ${out.maxConcurrent ?? 10} lines · retry ×${out.retries ?? 1}`)
+      }
       return parts.join(" · ")
     }
-    if (n === 4) return draft.type ? `${channelLabel(draft)} · ${channelTarget(draft)}` : undefined
+    if (n === 5 && isLive) return `Deployed · live on ${channelTarget(draft)}`
     return undefined
   }
 
@@ -284,10 +377,10 @@ export function AgentWizard({
               : "Five short steps to a live agent. Open any step, in any order — it all saves as you go."}
           </p>
         </header>
-        {(onViewAll || onCreateNew || isEdit) && (
-          <div className="flex shrink-0 items-center gap-2">
-            {/* Escape hatch for power users — the whole config as JSON. */}
-            {isEdit && <CustomConfigDrawer draft={draft} />}
+        <div className="flex shrink-0 items-center gap-2">
+            {/* The whole agent on one read-only surface — available in every
+                mode, with per-section jump links into the editing steps. */}
+            <CustomConfigDrawer draft={draft} onEditStep={openRow} />
             {onViewAll && (
               <Button variant="ghost" size="sm" className="gap-1.5" onClick={onViewAll}>
                 <List className="h-4 w-4" aria-hidden /> View all agents
@@ -299,7 +392,6 @@ export function AgentWizard({
               </Button>
             )}
           </div>
-        )}
       </div>
 
       {(!isEdit || landing) && (
@@ -313,11 +405,18 @@ export function AgentWizard({
               </p>
             </div>
           </div>
-          <ImportAgentSheet onImported={onImported}>
-            <Button variant="outline" size="sm" className="shrink-0 gap-1.5">
-              <Download className="h-4 w-4" aria-hidden /> Import your agent
-            </Button>
-          </ImportAgentSheet>
+          <div className="flex shrink-0 items-center gap-2">
+            {onBrowseTemplates && (
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={onBrowseTemplates}>
+                <List className="h-4 w-4" aria-hidden /> Start from a template
+              </Button>
+            )}
+            <ImportAgentSheet onImported={onImported}>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Download className="h-4 w-4" aria-hidden /> Import your agent
+              </Button>
+            </ImportAgentSheet>
+          </div>
         </div>
       )}
 
@@ -334,6 +433,12 @@ export function AgentWizard({
           costPerMin={cardEst?.costPerMin}
           latencyMs={cardEst?.latencyMs}
           latencyBreakdown={cardLatency}
+          // WHERE the agent takes traffic — visible on the always-present card,
+          // not just inside the Step-4 drawer (heuristic-eval #11).
+          channel={draft.type ? {
+            label: `${channelLabel(draft)} · ${channelTarget(draft)}`,
+            onClick: () => openRow(4),
+          } : undefined}
           talking={testing}
           onToggleTalk={toggleTest}
           talkLabel={`Talk to ${draft.name || "your agent"}`}
@@ -377,7 +482,14 @@ export function AgentWizard({
                   {done ? <Check className="h-4 w-4" aria-hidden /> : n}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{STEP_TITLES[n - 1]}</span>
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    {stepTitle(n, draft)}
+                    {isActive && (
+                      <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                        Start here · ~1 min
+                      </span>
+                    )}
+                  </span>
                   <span className="line-clamp-1 block text-sm text-muted-foreground">{rowDetail(n)}</span>
                 </span>
               </button>
@@ -407,7 +519,7 @@ export function AgentWizard({
               <button
                 type="button"
                 onClick={() => openRow(n)}
-                aria-label={`Open step ${n}: ${STEP_TITLES[n - 1]}`}
+                aria-label={`Open step ${n}: ${stepTitle(n, draft)}`}
                 className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80"
               >
                 {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : isActive ? "Start" : "Open"}
@@ -418,16 +530,33 @@ export function AgentWizard({
         })}
       </div>
 
-      {/* Sticky progress + publish (publish is a hint, not a lock). */}
+      {/* Sticky progress + publish (publish is a hint, not a lock). A LIVE
+          agent shows its real state — never "attach a number" contradicting
+          the Live badge (heuristic-eval #2/#13). */}
       <div className="sticky bottom-4 z-30">
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur">
           <div className="min-w-0">
-            <p className="text-sm font-semibold">{completeCount} of 5 complete</p>
-            <p className="line-clamp-2 text-sm text-muted-foreground">{blockReason ?? "Everything's set — ready to deploy."}</p>
+            <p className="text-sm font-semibold">
+              {isLive
+                ? `Live on ${channelTarget(draft)}`
+                : `${setupCount} of 4 set up${setupCount === 4 ? " — ready to deploy" : ""}`}
+            </p>
+            <p className="line-clamp-2 text-sm text-muted-foreground">
+              {isLive
+                ? "Edit any step — changes go out when you redeploy."
+                : blockReason ?? "Everything's set — review Step 5 and go live."}
+            </p>
           </div>
-          <Button className="shrink-0 gap-1.5" onClick={() => setOpenStep(5)}>
-            <Rocket className="h-4 w-4" aria-hidden /> Deploy
-          </Button>
+          <div className="flex shrink-0 items-center gap-3">
+            {saveState !== "idle" && (
+              <span className="text-xs text-muted-foreground" role="status" aria-live="polite">
+                {saveState === "saving" ? "Saving…" : "Saved"}
+              </span>
+            )}
+            <Button className="gap-1.5" onClick={() => openRow(5)}>
+              <Rocket className="h-4 w-4" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
+            </Button>
+          </div>
         </div>
       </div>
         </div>
@@ -449,8 +578,8 @@ export function AgentWizard({
           {openStep != null && (
             <>
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-                <SheetTitle className="text-base">{STEP_TITLES[openStep - 1]}</SheetTitle>
-                <p className="text-sm text-muted-foreground">Step {openStep} of 5</p>
+                <SheetTitle className="text-base">{stepTitle(openStep, draft)}</SheetTitle>
+                <p className="text-sm text-muted-foreground">Step {openStep} of 5 · {stepManifest(openStep, draft)}</p>
               </SheetHeader>
 
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
@@ -458,22 +587,38 @@ export function AgentWizard({
                 {openStep === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
                 {openStep === 3 && <StepBuild draft={draft} update={update} />}
                 {openStep === 4 && <StepConfigure draft={draft} update={update} />}
-                {openStep === 5 && <StepPublish draft={draft} onPublish={publish} onFix={(n) => setOpenStep(n)} />}
+                {openStep === 5 && (
+                  <StepPublish
+                    draft={draft}
+                    onPublish={publish}
+                    onFix={(n) => openRow(n)}
+                    talking={testing}
+                    onToggleTalk={toggleTest}
+                  />
+                )}
               </div>
 
-              {openStep < 5 && (
-                <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3">
+              {/* One footer for ALL steps (step 5 included — it had no exit but
+                  X/Esc, #18). Labels promise exactly what happens: changes are
+                  already autosaved, so "Done", not a fictional "Save". */}
+              <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3">
+                <div className="flex items-center gap-1">
                   <Button variant="ghost" className="gap-1.5" disabled={openStep === 1} onClick={() => backFrom(openStep)}>
                     Back
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={closeDrawer}>Save &amp; close</Button>
-                    <Button className="gap-1.5" onClick={() => advanceFrom(openStep)}>
-                      Save &amp; continue <ChevronRight className="h-4 w-4" aria-hidden />
-                    </Button>
-                  </div>
+                  <Button variant="ghost" className="text-muted-foreground" onClick={undoDrawerChanges}>
+                    Undo changes
+                  </Button>
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={closeDrawer}>Done</Button>
+                  {openStep < 5 && (
+                    <Button className="gap-1.5" onClick={() => advanceFrom(openStep)}>
+                      Next step <ChevronRight className="h-4 w-4" aria-hidden />
+                    </Button>
+                  )}
+                </div>
+              </div>
             </>
           )}
         </SheetContent>
@@ -530,7 +675,9 @@ function dcToConfig(dc: string, config: AgentDraft["config"]): AgentDraft["confi
 
 function channelLabel(d: AgentDraft): string {
   if (d.type === "outbound") return "Batch calls"
-  if (d.type === "code") return "Embed"
+  // One vocabulary: "Code / SDK" everywhere (heuristic-eval #19) — "embed" is
+  // reserved for the web widget's copy.
+  if (d.type === "code") return "Code / SDK"
   if (d.type === "inbound" && d.config.inbound?.mode === "web") return "Web widget"
   return "Inbound"
 }

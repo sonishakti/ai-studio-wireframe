@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   Bot,
   Plus,
@@ -45,29 +46,13 @@ import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { AgentWizard } from "@/components/wizard/agent-wizard"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
-import { STACK_PRESETS, STACK_ESTIMATE, type StackPreset } from "@/lib/campaign-data"
+import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset } from "@/lib/campaign-data"
 
 // ─── data ────────────────────────────────────────────────────────────────────
 
-type Template = {
-  id: string
-  name: string
-  description: string
-  llm: string
-  asr: string
-  tts: string
-}
-
-const TEMPLATES: Template[] = [
-  // Blank goes first — most users won't use a template, they'll start from
-  // scratch. Templates are sales-led; blank is product-led.
-  { id: "blank",                name: "Blank agent",           description: "Start from scratch. Define your own prompt, voice, and tools.", llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "appointment-reminder", name: "Appointment Reminder", description: "Automatically call customers to remind them of upcoming appointments", llm: "OpenAI", asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "nps-survey",           name: "NPS Survey",            description: "Gather customer feedback through voice surveys",                       llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "ivr",                  name: "Interactive Voice Response (IVR)", description: "Route callers to the right department automatically",       llm: "Anthropic", asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "payment-reminder",     name: "Payment Reminder",      description: "Follow up with customers about pending payments",                      llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "ecommerce",            name: "Customer service for e-commerce", description: "Triage support and refund requests for online retail",        llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-]
+// Templates now live in lib/campaign-data (AGENT_TEMPLATES) — shared with the
+// wizard's ?template= seeding so "Start from this" actually carries them.
+type Template = (typeof AGENT_TEMPLATES)[number]
 
 // Each agent owns ONE channel (2026-06-23 model; duplicate to add another) and
 // one stack preset (the cost-vs-speed dimension). channelType drives the filter.
@@ -150,8 +135,10 @@ function TemplateRow({
             >
               Test
             </Button>
+            {/* ?template= actually seeds the wizard — the old /agents/{tpl.id}/edit
+                link silently missed getAgent() and discarded the template (#5). */}
             <Button size="sm" className="h-8 text-xs gap-1" asChild>
-              <Link href={`/agents/${tpl.id}/edit`}>
+              <Link href={`/agents/new/edit?template=${tpl.id}`}>
                 Start from this
                 <ChevronRight className="h-3 w-3" />
               </Link>
@@ -325,7 +312,9 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           </DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/agents/${agent.id}/edit#deployment`}>Deploy</Link>
+                            {/* ?step=5 opens the Deploy drawer — the old #deployment
+                                anchor was consumed by nothing (#14). */}
+                            <Link href={`/agents/${agent.id}/edit?step=5`}>Deploy</Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DestructiveActionDialog
@@ -384,37 +373,65 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
 
 // ─── page ────────────────────────────────────────────────────────────────────
 
+/** Syncs URL params → page state from inside its own Suspense boundary, so
+ *  useSearchParams' CSR bail-out de-opts only this empty node — the page
+ *  itself still fully SSRs with the builder default. */
+function ParamsSync({ onParams }: { onParams: (p: URLSearchParams) => void }) {
+  const params = useSearchParams()
+  React.useEffect(() => {
+    onParams(new URLSearchParams(params.toString()))
+  }, [params, onParams])
+  return null
+}
+
 export default function AgentsPage() {
   // The Agents home is the entry of the build→deploy journey — stamp the start so
   // the wizard can report time-to-live (the <3-min deploy spine).
   React.useEffect(() => { markBuildStart() }, [])
 
-  // Manual toggle only (2026-07-02): the builder IS the landing — pre-loaded with
-  // Aria, configured & deployed seamlessly on THIS page (no route jumps). "View
-  // all agents" flips to the managed list (the returning/pro surface); "Create
-  // new agent" opens a BLANK builder inline. Editing an existing agent from the
-  // list is the only deliberate navigation (→ /agents/[id]/edit).
+  // The view FOLLOWS the URL (?view=list) via real navigation — Back works and
+  // the segmented control below always shows which surface you're on (#8).
+  // "Create new agent" opens a BLANK builder inline; editing an existing agent
+  // from the list is the only route jump (→ /agents/[id]/edit).
+  const router = useRouter()
   const [view, setView] = React.useState<"builder" | "list">("builder")
   const [builderId, setBuilderId] = React.useState("agt_default")
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
 
-  React.useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("view") === "list") setView("list")
+  const onParams = React.useCallback((p: URLSearchParams) => {
+    setView(p.get("view") === "list" ? "list" : "builder")
+    // ⌘K / deep links can open the templates sheet directly (?templates=1).
+    if (p.get("templates") === "1") setTemplatesOpen(true)
   }, [])
-  const showList = (toList: boolean) => {
-    setView(toList ? "list" : "builder")
-    window.history.replaceState({}, "", toList ? "/agents?view=list" : "/agents")
-  }
+
+  const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
   const startBlank = () => {
     setBuilderId("new")
-    setView("builder")
-    window.history.replaceState({}, "", "/agents")
+    router.push("/agents")
   }
   const isBuilder = view === "builder"
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      <React.Suspense fallback={null}>
+        <ParamsSync onParams={onParams} />
+      </React.Suspense>
+      {/* Persistent mode switch — you can always SEE which of the two /agents
+          surfaces you're on, and get back (#8). */}
+      <div className="flex items-center justify-between border-b border-border px-6 py-2">
+        <ToggleGroup
+          type="single"
+          value={view}
+          onValueChange={(v) => v && showList(v === "list")}
+          variant="outline"
+          size="sm"
+          aria-label="Agents view"
+        >
+          <ToggleGroupItem value="builder" className="text-xs">Builder</ToggleGroupItem>
+          <ToggleGroupItem value="list" className="text-xs">All agents</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
       <PageHeader
         // The builder is a self-contained widget (own heading + view-all/create
         // chrome), so suppress the PageHeader in builder view — it only carries
@@ -444,6 +461,7 @@ export default function AgentsPage() {
           landing={builderId === "agt_default"}
           onViewAll={() => showList(true)}
           onCreateNew={builderId === "agt_default" ? startBlank : undefined}
+          onBrowseTemplates={() => setTemplatesOpen(true)}
         />
       ) : (
         <ListView onBrowseTemplates={() => setTemplatesOpen(true)} />
@@ -459,7 +477,7 @@ export default function AgentsPage() {
             </p>
           </SheetHeader>
           <div className="px-6 pb-6 space-y-2">
-            {TEMPLATES.map((tpl) => (
+            {AGENT_TEMPLATES.map((tpl) => (
               <TemplateRow
                 key={tpl.id}
                 tpl={tpl}

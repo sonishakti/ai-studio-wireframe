@@ -132,10 +132,26 @@ export interface ImportedAgentConfig {
   source?: string
 }
 
+/** How a deployed agent takes traffic — mirrors the wizard's type + Step-4
+ *  config so edit mode can hydrate the TRUE channel instead of fabricating
+ *  one (heuristic-eval 2026-07-06 finding #2). */
+export interface AgentChannel {
+  type: "inbound" | "outbound" | "code"
+  /** Inbound only: phone line or embedded web widget. */
+  mode?: "phone" | "web"
+  /** PHONE_NUMBERS id the agent answers (inbound) or dials from (outbound). */
+  numberId?: string
+  /** Outbound only: the attached contacts CSV. */
+  csvName?: string
+}
+
 export interface Agent {
   id: string
   name: string
   status: "live" | "draft" | "paused"
+  /** The channel this agent is (or was last) deployed on. Absent = never
+   *  configured — the wizard leaves Step 2 honestly incomplete. */
+  channel?: AgentChannel
   persona: AgentPersona
   stack: AgentStack
   /** Attached knowledge bases (Integrations › Knowledge). */
@@ -228,6 +244,9 @@ export const AGENTS: Agent[] = [
     role: "General assistant",
     status: "live",
     isDefault: true,
+    // Live on the provisioned number from minute one — the list view's
+    // Channel column and the builder checklist read this same record.
+    channel: { type: "inbound", mode: "phone", numberId: "pn_02" },
     persona: {
       personality: "Helpful, friendly, and clear — answers questions and gets things done.",
       tone: "Friendly",
@@ -241,6 +260,7 @@ export const AGENTS: Agent[] = [
     id: "agt_support_v2",
     name: "Support Bot v2",
     status: "live",
+    channel: { type: "inbound", mode: "phone", numberId: "pn_01" },
     persona: { personality: "Warm, patient, solution-first", tone: "Friendly", language: "en-US", brand: "Acme" },
     stack: stackFor("fastest"),
     knowledge: ["kb_01", "kb_02"],
@@ -259,6 +279,7 @@ export const AGENTS: Agent[] = [
     id: "agt_appointment_setter",
     name: "Appointment Setter",
     status: "live",
+    channel: { type: "inbound", mode: "web" },
     persona: { personality: "Efficient, courteous, time-aware", tone: "Friendly", language: "en-US" },
     stack: stackFor("balanced"),
     knowledge: [],
@@ -268,6 +289,7 @@ export const AGENTS: Agent[] = [
     id: "agt_collections",
     name: "Collections Outreach",
     status: "paused",
+    channel: { type: "outbound", numberId: "pn_05", csvName: "q2-collections.csv" },
     persona: { personality: "Calm, firm, compliant", tone: "Professional", language: "en-US" },
     stack: stackFor("cheapest"),
     knowledge: ["kb_03"],
@@ -277,12 +299,26 @@ export const AGENTS: Agent[] = [
     id: "agt_survey",
     name: "Survey Bot",
     status: "live",
+    channel: { type: "inbound", mode: "web" },
     persona: { personality: "Brief, neutral, appreciative", tone: "Neutral", language: "en-US" },
     stack: stackFor("cheapest"),
     knowledge: [],
     actions: [],
   },
 ]
+
+/** Starter templates — shared by the list view's Browse sheet, the builder's
+ *  "Start from a template" entry, and the wizard's ?template= seeding. */
+export const AGENT_TEMPLATES = [
+  // Blank goes first — most users won't use a template, they'll start from
+  // scratch. Templates are sales-led; blank is product-led.
+  { id: "blank",                name: "Blank agent",           description: "Start from scratch. Define your own prompt, voice, and tools.", llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "appointment-reminder", name: "Appointment Reminder", description: "Automatically call customers to remind them of upcoming appointments", llm: "OpenAI", asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "nps-survey",           name: "NPS Survey",            description: "Gather customer feedback through voice surveys",                       llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "ivr",                  name: "Interactive Voice Response (IVR)", description: "Route callers to the right department automatically",       llm: "Anthropic", asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "payment-reminder",     name: "Payment Reminder",      description: "Follow up with customers about pending payments",                      llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+  { id: "ecommerce",            name: "Customer service for e-commerce", description: "Triage support and refund requests for online retail",        llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
+] as const
 
 export function getAgent(id: string): Agent | undefined {
   return AGENTS.find((a) => a.id === id)
@@ -295,10 +331,16 @@ export function getDefaultAgent(): Agent {
 
 /** Compact mono summary of a stack — "llm · stt · voice", or "llm · realtime"
  *  for the single-model MLLM pipeline. One format for the identity card, the
- *  step-row subtitle, and the agents list, so they never drift. */
-export function stackLine(s: AgentStack): string {
-  if (s.pipeline === "mllm") return `${s.llm.model} · realtime`
-  return `${s.llm.model} · ${s.asr.model} · ${s.tts.voice}`
+ *  step-row subtitle, and the agents list, so they never drift.
+ *  `full` prepends the preset and appends the spoken language so those two
+ *  settings have a visible home outside the drawer (heuristic-eval #16). */
+export function stackLine(s: AgentStack, opts?: { full?: boolean }): string {
+  const core = s.pipeline === "mllm"
+    ? `${s.llm.model} · realtime`
+    : `${s.llm.model} · ${s.asr.model} · ${s.tts.voice}`
+  if (!opts?.full) return core
+  const preset = s.pipeline === "mllm" ? undefined : STACK_PRESETS[s.preset].label
+  return [preset, core, s.language ?? "English"].filter(Boolean).join(" · ")
 }
 
 /** Compact "vendor · vendor · vendor" summary of an agent's stack. */

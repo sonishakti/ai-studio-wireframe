@@ -112,7 +112,7 @@ function QuickTest({ name, greeting }: { name: string; greeting: string }) {
           <Turn who={agent} text={opener} agent />
           <Turn who="Caller" text="Do you have any availability tomorrow?" />
           <Turn who={agent} text="Let me check that for you — what time of day works best?" agent />
-          <p className="pt-1 text-xs text-muted-foreground">Full voice test with the finished agent is in the last step.</p>
+          <p className="pt-1 text-xs text-muted-foreground">Full voice test: use &ldquo;Talk to your agent&rdquo; on the agent card, any time.</p>
         </div>
       )}
     </section>

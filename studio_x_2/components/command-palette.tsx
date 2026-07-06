@@ -68,8 +68,18 @@ const COMMANDS: Command[] = [
   { id: "go-tickets",    label: "My Tickets",               href: "/help/tickets",                    icon: HelpCircle,         group: "Help" },
   { id: "go-notif",      label: "Notifications",            href: "/notifications",                   icon: Bell,               group: "Help" },
 
+  // ── Agent settings — deep links into the wizard drawers, so the palette can
+  //    find IN-DRAWER features, not just pages (heuristic-eval #10). ─────────
+  { id: "ag-voice",      label: "Change voice, models, or language", href: "/agents?step=1",          icon: Bot,                group: "Agent settings", keywords: ["voice", "language", "spoken", "stt", "llm", "tts", "model", "preset", "persona", "multimodal", "mllm"] },
+  { id: "ag-type",       label: "Change agent type",        href: "/agents?step=2",                   icon: Bot,                group: "Agent settings", keywords: ["batch calls", "inbound", "outbound", "code", "sdk", "type", "channel"] },
+  { id: "ag-prompt",     label: "Edit prompt, greeting, knowledge & connectors", href: "/agents?step=3", icon: Bot,             group: "Agent settings", keywords: ["system prompt", "greeting", "knowledge base", "mcp", "connector", "crm", "tools", "behavior"] },
+  { id: "ag-channel",    label: "Set up the channel — number, CSV, widget, SDK", href: "/agents?step=4", icon: Phone,           group: "Agent settings", keywords: ["phone number", "contacts", "csv", "caller id", "web widget", "embed", "snippet", "call window", "retries", "concurrency"] },
+  { id: "ag-deploy",     label: "Review & deploy the agent", href: "/agents?step=5",                  icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "test", "review"] },
+
   // ── Actions ──────────────────────────────────────────────────────────────
   { id: "new-agent",     label: "Create a new agent",       href: "/agents/new/edit",                 icon: Plus,               group: "Actions", keywords: ["create", "new"] },
+  { id: "browse-tpl",    label: "Browse agent templates",   href: "/agents?view=list&templates=1",    icon: Sparkles,           group: "Actions", keywords: ["template", "starter", "ivr", "survey", "reminder", "example"] },
+  { id: "playground",    label: "Voice playground — design a custom voice", href: "/agents/playground", icon: Sparkles,         group: "Actions", keywords: ["voice", "tts", "playground", "custom voice", "clone", "persona"] },
   { id: "new-camp",      label: "Create a new batch call",  href: "/deploy/batch-calls/new",                   icon: Plus,               group: "Actions", keywords: ["create"] },
 ]
 

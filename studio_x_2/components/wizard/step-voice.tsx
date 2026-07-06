@@ -43,7 +43,18 @@ export function StepVoice({
       {/* Section heading (sized like StackConfig's) — the drawer's SheetTitle
           "Voice & models" is the screen heading; this labels the persona half. */}
       <header className="space-y-1">
-        <h3 className="text-sm font-semibold">Choose your voice</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">Choose your voice</h3>
+          {/* The playground is otherwise reachable only via per-voice links —
+              give it a stable, always-visible door (heuristic-eval #9). */}
+          <button
+            type="button"
+            onClick={() => router.push("/agents/playground")}
+            className="shrink-0 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Voice playground →
+          </button>
+        </div>
         <p className="text-sm text-muted-foreground">
           Pick a ready-made voice or build your own. This sets how your agent sounds and its starting personality — the models behind it are below.
         </p>
@@ -81,7 +92,11 @@ export function StepVoice({
                     {isCustom ? (
                       <Badge variant="secondary" className="h-6 px-2 text-xs font-medium">Custom</Badge>
                     ) : (
-                      <Badge variant="outline" className="h-6 gap-1 px-2 text-xs font-medium text-muted-foreground">
+                      <Badge
+                        variant="outline"
+                        title="Ready-made voice — use Customize to make an editable copy"
+                        className="h-6 gap-1 px-2 text-xs font-medium text-muted-foreground"
+                      >
                         <Lock className="h-3 w-3" aria-hidden /> Preset
                       </Badge>
                     )}

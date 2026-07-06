@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2 } from "lucide-react"
+import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Mic, PhoneOff, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { publishBlocks, channelTarget, typeLabel, type AgentDraft } from "@/lib/wizard-draft"
+import { stackLine } from "@/lib/campaign-data"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 
 /**
@@ -20,11 +21,17 @@ export function StepPublish({
   draft,
   onPublish,
   onFix,
+  talking,
+  onToggleTalk,
 }: {
   draft: AgentDraft
   onPublish: () => void
   /** Jump to the step whose drawer fixes a blocker. */
   onFix: (step: number) => void
+  /** Mirror of the identity card's Talk toggle — the card can be occluded by
+   *  this drawer on small screens, so testing must work from HERE too (#21). */
+  talking: boolean
+  onToggleTalk: () => void
 }) {
   const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
   const agentName = draft.name || voice?.name || "your agent"
@@ -35,9 +42,19 @@ export function StepPublish({
       <header className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">Deploy</h2>
         <p className="text-sm text-muted-foreground">
-          Review {agentName}, then deploy it. You can talk to it any time from the panel on the left.
+          Review {agentName}, then deploy it. Talk to it any time — right here or from the agent card.
         </p>
       </header>
+
+      {talking ? (
+        <Button variant="destructive" size="sm" className="gap-1.5" onClick={onToggleTalk}>
+          <PhoneOff className="h-4 w-4" aria-hidden /> End test
+        </Button>
+      ) : (
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={onToggleTalk}>
+          <Mic className="h-4 w-4" aria-hidden /> Talk to {agentName}
+        </Button>
+      )}
 
       <section className="space-y-3 rounded-lg border border-border bg-card p-5">
         <p className="text-sm font-semibold">Ready to deploy</p>
@@ -45,6 +62,9 @@ export function StepPublish({
           <SummaryRow icon={AudioLines} label="Voice">
             {voice?.name ?? "Not set yet"}
             {voice && <span className="text-muted-foreground"> · {voice.tagline}</span>}
+          </SummaryRow>
+          <SummaryRow icon={Layers} label="Models">
+            {stackLine(draft.stack, { full: true })}
           </SummaryRow>
           <SummaryRow icon={typeIcon(draft)} label="Type">
             {draft.type ? typeLabel(draft.type) : "Not set yet"}

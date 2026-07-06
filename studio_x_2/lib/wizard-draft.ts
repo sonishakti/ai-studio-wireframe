@@ -41,7 +41,15 @@ export interface AgentDraft {
   /** Step 4 — channel config, branched by `type`. */
   config: {
     inbound?: { mode: InboundMode; numberId?: string }
-    outbound?: { numberId?: string; csvName?: string | null }
+    outbound?: {
+      numberId?: string
+      csvName?: string | null
+      /** Batch settings — in the draft (not drawer-local state) so they
+       *  survive close/reopen and show up in summaries + the config JSON. */
+      callWindow?: "business" | "extended" | "anytime"
+      maxConcurrent?: number
+      retries?: number
+    }
     code?: { added?: boolean }
   }
 }
@@ -52,9 +60,11 @@ export interface AgentDraft {
 export const STACK_DEFAULTS = { pipeline: "stt-llm-tts", language: "English" } as const
 
 /** Display name for an agent type — "Batch calls" is the locked term for
- *  outbound (LEARNINGS §20); never surface raw "outbound" to the user. */
+ *  outbound (LEARNINGS §20) and "Code / SDK" is the one name for the code
+ *  channel everywhere (heuristic-eval finding #19); never surface raw
+ *  "outbound" or a bare "Embed" to the user. */
 export function typeLabel(t: AgentType): string {
-  return t === "outbound" ? "Batch calls" : t === "code" ? "Code" : "Inbound"
+  return t === "outbound" ? "Batch calls" : t === "code" ? "Code / SDK" : "Inbound"
 }
 
 export const EMPTY_DRAFT: AgentDraft = {
@@ -70,22 +80,29 @@ export const EMPTY_DRAFT: AgentDraft = {
 }
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
+//
+// One slot per agent: new drafts share the historical `sx:agent_draft` key;
+// edit mode gets `sx:agent_draft:<id>` so unsaved edits to a live agent
+// survive a refresh too (heuristic-eval finding #6) without ever colliding
+// with the new-agent draft.
 
 const DRAFT_KEY = "sx:agent_draft"
 
-export function saveDraft(d: AgentDraft) {
+const keyFor = (agentId?: string) => (agentId ? `${DRAFT_KEY}:${agentId}` : DRAFT_KEY)
+
+export function saveDraft(d: AgentDraft, agentId?: string) {
   if (typeof window === "undefined") return
   try {
-    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(d))
+    window.localStorage.setItem(keyFor(agentId), JSON.stringify(d))
   } catch {
     /* ignore quota / serialization errors — wireframe only */
   }
 }
 
-export function restoreDraft(): AgentDraft | null {
+export function restoreDraft(agentId?: string): AgentDraft | null {
   if (typeof window === "undefined") return null
   try {
-    const raw = window.localStorage.getItem(DRAFT_KEY)
+    const raw = window.localStorage.getItem(keyFor(agentId))
     if (!raw) return null
     // Merge over EMPTY_DRAFT so older/partial drafts gain any new fields.
     return { ...EMPTY_DRAFT, ...(JSON.parse(raw) as Partial<AgentDraft>) }
@@ -94,37 +111,73 @@ export function restoreDraft(): AgentDraft | null {
   }
 }
 
-export function clearDraft() {
+export function clearDraft(agentId?: string) {
   if (typeof window === "undefined") return
-  window.localStorage.removeItem(DRAFT_KEY)
+  window.localStorage.removeItem(keyFor(agentId))
 }
 
-export function hasDraft(): boolean {
+export function hasDraft(agentId?: string): boolean {
   if (typeof window === "undefined") return false
-  return window.localStorage.getItem(DRAFT_KEY) != null
+  return window.localStorage.getItem(keyFor(agentId)) != null
 }
 
 // ─── Edit mode — load an existing agent into a complete (all-steps-open) draft ─
 
-/** Map a saved Agent into a draft. The agent doesn't store a single channel, so
- *  we default `type` to "inbound" (the user can change it); everything else is
- *  seeded from the agent so Edit reopens the same flow already filled in. */
+/** Map a saved Agent into a draft — hydrating the TRUE channel from
+ *  `agent.channel` (never fabricating one: an agent with no channel opens with
+ *  Step 2 honestly incomplete, so the checklist can't contradict the Live
+ *  badge — heuristic-eval 2026-07-06 finding #2). */
 export function agentToDraft(agent: Agent): AgentDraft {
   // Match a preset voice by its TTS voice; fall back to the first preset.
   const voiceMatch =
     PRESET_VOICES.find((v) => v.ttsVoice === agent.stack.tts.voice) ?? PRESET_VOICES[0]
 
+  const ch = agent.channel
+  const type: AgentType | null = ch?.type ?? null
+  const config: AgentDraft["config"] =
+    ch?.type === "inbound"
+      ? { inbound: { mode: ch.mode ?? "phone", numberId: ch.numberId } }
+      : ch?.type === "outbound"
+      ? { outbound: { numberId: ch.numberId, csvName: ch.csvName ?? null } }
+      : ch?.type === "code"
+      ? { code: { added: true } }
+      : {}
+
   return {
     agentId: agent.id,
     name: agent.name,
     voice: { kind: "preset", id: voiceMatch.id },
-    type: "inbound",
+    type,
     stack: { ...STACK_DEFAULTS, ...agent.stack },
     systemPrompt: agent.persona.personality,
     greeting: agent.persona.firstMessage ?? "Hi, thanks for calling — how can I help you today?",
     knowledge: [...agent.knowledge],
     mcp: [...agent.actions],
-    config: { inbound: { mode: "phone" } },
+    config,
+  }
+}
+
+// ─── Template seeding — "Start from this" must actually carry the template ────
+
+export interface AgentTemplate {
+  id: string
+  name: string
+  description: string
+}
+
+/** Seed a fresh draft from a starter template (name + a working prompt +
+ *  greeting). Used by the `?template=` deep link so the template CTA never
+ *  silently falls back to a stale draft (heuristic-eval finding #5). */
+export function templateToDraft(tpl: AgentTemplate): AgentDraft {
+  return {
+    ...EMPTY_DRAFT,
+    name: tpl.name === "Blank agent" ? "" : tpl.name,
+    voice: { kind: "preset", id: PRESET_VOICES[0].id },
+    systemPrompt:
+      tpl.id === "blank"
+        ? ""
+        : `You are ${tpl.name}, a voice agent. ${tpl.description}.\n\nBe concise and helpful. Greet the caller, do your job, and escalate to a human if asked.`,
+    greeting: tpl.id === "blank" ? "" : `Hi! This is ${tpl.name} from Acme — do you have a quick moment?`,
   }
 }
 

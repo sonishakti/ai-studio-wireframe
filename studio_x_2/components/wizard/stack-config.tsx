@@ -100,7 +100,7 @@ export function StackConfig({ draft, update }: StepProps) {
 
   const languageSelect = (
     <div className="space-y-1.5">
-      <Label className="text-xs text-muted-foreground">Language</Label>
+      <Label className="text-xs text-muted-foreground">Spoken language</Label>
       <Select value={stack.language ?? "English"} onValueChange={(language) => patch({ language })}>
         <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
         <SelectContent>
@@ -118,6 +118,10 @@ export function StackConfig({ draft, update }: StepProps) {
           A preset is all you need — open the dropdowns only if you want a specific provider.
         </p>
       </header>
+
+      {/* Language first — it's a user-facing agent trait, not a model detail,
+          and was previously buried below the model grid (heuristic-eval #16). */}
+      <div className="sm:max-w-xs">{languageSelect}</div>
 
       {/* Pipeline shape — ToggleGroup for real radio keyboard semantics. */}
       <ToggleGroup
@@ -166,25 +170,22 @@ export function StackConfig({ draft, update }: StepProps) {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
-              <Select
-                value={`${stack.asr.vendor}/${stack.asr.model}`}
-                onValueChange={(id) => {
-                  const o = STACK_CATALOG.stt.find((x) => `${x.vendor}/${x.model}` === id)
-                  if (o) patch({ asr: { vendor: o.vendor, model: o.model } })
-                }}
-              >
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {STACK_CATALOG.stt.map((o) => (
-                    <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {languageSelect}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
+            <Select
+              value={`${stack.asr.vendor}/${stack.asr.model}`}
+              onValueChange={(id) => {
+                const o = STACK_CATALOG.stt.find((x) => `${x.vendor}/${x.model}` === id)
+                if (o) patch({ asr: { vendor: o.vendor, model: o.model } })
+              }}
+            >
+              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {STACK_CATALOG.stt.map((o) => (
+                  <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-1.5">
@@ -236,25 +237,22 @@ export function StackConfig({ draft, update }: StepProps) {
           </div>
         </>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Realtime model</Label>
-            <Select
-              value={`${stack.llm.vendor}/${stack.llm.model}`}
-              onValueChange={(id) => {
-                const o = STACK_CATALOG.mllm.find((x) => `${x.vendor}/${x.model}` === id)
-                if (o) patch({ llm: { vendor: o.vendor, model: o.model } })
-              }}
-            >
-              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STACK_CATALOG.mllm.map((o) => (
-                  <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {languageSelect}
+        <div className="space-y-1.5 sm:max-w-xs">
+          <Label className="text-xs text-muted-foreground">Realtime model</Label>
+          <Select
+            value={`${stack.llm.vendor}/${stack.llm.model}`}
+            onValueChange={(id) => {
+              const o = STACK_CATALOG.mllm.find((x) => `${x.vendor}/${x.model}` === id)
+              if (o) patch({ llm: { vendor: o.vendor, model: o.model } })
+            }}
+          >
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {STACK_CATALOG.mllm.map((o) => (
+                <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
 

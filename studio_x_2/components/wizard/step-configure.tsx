@@ -194,7 +194,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
         )
       )}
 
-      <OutboundSettings />
+      <OutboundSettings draft={draft} update={update} />
 
       <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
         <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -208,18 +208,23 @@ function OutboundConfigure({ draft, update }: StepProps) {
   )
 }
 
-// Other outbound settings — call window, concurrency, retries (wireframe mock).
-function OutboundSettings() {
-  const [win, setWin] = React.useState("business")
-  const [concurrency, setConcurrency] = React.useState("10")
-  const [retries, setRetries] = React.useState("1")
+// Other outbound settings — call window, concurrency, retries. Stored on the
+// DRAFT (not drawer-local state) so they survive close/reopen and appear in
+// the row summary, review, and config JSON (heuristic-eval finding #7).
+function OutboundSettings({ draft, update }: StepProps) {
+  const out = draft.config.outbound
+  const patch = (p: Partial<NonNullable<typeof out>>) =>
+    update({ config: { ...draft.config, outbound: { ...out, ...p } } })
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium">Other settings</Label>
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Call window</Label>
-          <Select value={win} onValueChange={setWin}>
+          <Select
+            value={out?.callWindow ?? "business"}
+            onValueChange={(v) => patch({ callWindow: v as "business" | "extended" | "anytime" })}
+          >
             <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="business">Business hours (9–5)</SelectItem>
@@ -230,7 +235,10 @@ function OutboundSettings() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Max concurrent</Label>
-          <Select value={concurrency} onValueChange={setConcurrency}>
+          <Select
+            value={String(out?.maxConcurrent ?? 10)}
+            onValueChange={(v) => patch({ maxConcurrent: Number(v) })}
+          >
             <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               {["5", "10", "25", "50"].map((c) => <SelectItem key={c} value={c}>{c} calls</SelectItem>)}
@@ -239,7 +247,10 @@ function OutboundSettings() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
-          <Select value={retries} onValueChange={setRetries}>
+          <Select
+            value={String(out?.retries ?? 1)}
+            onValueChange={(v) => patch({ retries: Number(v) })}
+          >
             <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="0">Don&apos;t retry</SelectItem>

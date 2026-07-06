@@ -96,7 +96,14 @@ function NavLink({ item }: { item: NavItem }) {
           <item.icon className="h-4 w-4" />
           <span>{item.label}</span>
           {item.badge && (
-            <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0">
+            // Severity, not notifications: destructive styling + a label so the
+            // number explains itself (heuristic-eval #23).
+            <Badge
+              variant="destructive"
+              title={`${item.badge} open critical issues — see Monitor › Diagnostics`}
+              aria-label={`${item.badge} open critical issues — see Monitor Diagnostics`}
+              className="ml-auto text-xs px-1.5 py-0"
+            >
               {item.badge}
             </Badge>
           )}

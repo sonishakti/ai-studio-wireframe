@@ -115,9 +115,9 @@ export default function PlaygroundPage() {
           variant="ghost"
           size="sm"
           className="gap-1.5 text-muted-foreground"
-          onClick={() => router.push("/agents/new/edit")}
+          onClick={() => router.push("/agents/new/edit?step=1")}
         >
-          <ArrowLeft className="h-4 w-4" /> Back to creation
+          <ArrowLeft className="h-4 w-4" /> Back to your agent — Voice &amp; models
         </Button>
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
