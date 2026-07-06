@@ -459,7 +459,6 @@ export default function AgentsPage() {
           key={builderId}
           id={builderId}
           landing={builderId === "agt_default"}
-          onViewAll={() => showList(true)}
           onCreateNew={builderId === "agt_default" ? startBlank : undefined}
           onBrowseTemplates={() => setTemplatesOpen(true)}
         />

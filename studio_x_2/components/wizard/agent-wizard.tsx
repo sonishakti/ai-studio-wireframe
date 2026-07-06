@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Sparkles, Download, Rocket, Check, Pencil, ChevronRight, List, Plus } from "lucide-react"
+import { Rocket, Check, ChevronRight, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -45,15 +45,13 @@ import { toast } from "sonner"
 export function AgentWizard({
   id,
   landing,
-  onViewAll,
   onCreateNew,
   onBrowseTemplates,
 }: {
   id: string
   /** Rendered inline on /agents (not the standalone edit route) — show the
-   *  first-run chrome (import banner + inviting heading + view-all/create). */
+   *  first-run chrome (secondary-starts line + inviting heading + create). */
   landing?: boolean
-  onViewAll?: () => void
   onCreateNew?: () => void
   /** Opens the starter-templates sheet — templates must be reachable from the
    *  default landing, not just the list view (heuristic-eval #4). */
@@ -379,45 +377,45 @@ export function AgentWizard({
         </header>
         <div className="flex shrink-0 items-center gap-2">
             {/* The whole agent on one read-only surface — available in every
-                mode, with per-section jump links into the editing steps. */}
+                mode, with per-section jump links into the editing steps.
+                (No "View all agents" button here — the page's Builder | All
+                agents switch already owns that.) */}
             <CustomConfigDrawer draft={draft} onEditStep={openRow} />
-            {onViewAll && (
-              <Button variant="ghost" size="sm" className="gap-1.5" onClick={onViewAll}>
-                <List className="h-4 w-4" aria-hidden /> View all agents
-              </Button>
-            )}
             {onCreateNew && (
-              <Button size="sm" className="gap-1.5" onClick={onCreateNew}>
-                <Plus className="h-4 w-4" aria-hidden /> Create new agent
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={onCreateNew}>
+                <Plus className="h-4 w-4" aria-hidden /> New agent
               </Button>
             )}
           </div>
       </div>
 
+      {/* Secondary starts stay one quiet line — never a banner competing with
+          the H1. Both paths remain one click away. */}
       {(!isEdit || landing) && (
-        <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-            <div>
-              <p className="text-sm font-medium">Already have an agent elsewhere?</p>
-              <p className="text-sm text-muted-foreground">
-                Import a Vapi, Retell, Bland, or ElevenLabs config — we map it to a custom voice you can tune, then drop you back here with it selected.
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {onBrowseTemplates && (
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={onBrowseTemplates}>
-                <List className="h-4 w-4" aria-hidden /> Start from a template
-              </Button>
-            )}
-            <ImportAgentSheet onImported={onImported}>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <Download className="h-4 w-4" aria-hidden /> Import your agent
-              </Button>
-            </ImportAgentSheet>
-          </div>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Starting differently?{" "}
+          {onBrowseTemplates && (
+            <>
+              <button
+                type="button"
+                onClick={onBrowseTemplates}
+                className="rounded font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Start from a template
+              </button>
+              {" · "}
+            </>
+          )}
+          <ImportAgentSheet onImported={onImported}>
+            <button
+              type="button"
+              className="rounded font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Import your agent
+            </button>
+          </ImportAgentSheet>{" "}
+          — Vapi, Retell, Bland, and ElevenLabs configs map automatically.
+        </p>
       )}
 
       <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -463,7 +461,7 @@ export function AgentWizard({
               key={n}
               onClick={() => openRow(n)}
               className={cn(
-                "flex w-full cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40",
+                "group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40",
                 isActive && "bg-primary/5",
               )}
             >
@@ -516,13 +514,14 @@ export function AgentWizard({
                   </ToggleGroup>
                 </span>
               )}
+              {/* The row itself is the affordance — a quiet chevron, not a
+                  repeated Edit/Open label on every line. */}
               <button
                 type="button"
                 onClick={() => openRow(n)}
-                aria-label={`Open step ${n}: ${stepTitle(n, draft)}`}
-                className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-foreground/80"
+                aria-label={`${done ? "Edit" : "Open"} step ${n}: ${stepTitle(n, draft)}`}
+                className="shrink-0 rounded text-muted-foreground transition-colors group-hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {done ? (<><Pencil className="h-3.5 w-3.5" aria-hidden /> Edit</>) : isActive ? "Start" : "Open"}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </button>
             </div>
@@ -603,17 +602,17 @@ export function AgentWizard({
                   already autosaved, so "Done", not a fictional "Save". */}
               <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3">
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" className="gap-1.5" disabled={openStep === 1} onClick={() => backFrom(openStep)}>
+                  <Button variant="ghost" size="sm" disabled={openStep === 1} onClick={() => backFrom(openStep)}>
                     Back
                   </Button>
-                  <Button variant="ghost" className="text-muted-foreground" onClick={undoDrawerChanges}>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={undoDrawerChanges}>
                     Undo changes
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" onClick={closeDrawer}>Done</Button>
+                  <Button variant="outline" size="sm" onClick={closeDrawer}>Done</Button>
                   {openStep < 5 && (
-                    <Button className="gap-1.5" onClick={() => advanceFrom(openStep)}>
+                    <Button size="sm" className="gap-1.5" onClick={() => advanceFrom(openStep)}>
                       Next step <ChevronRight className="h-4 w-4" aria-hidden />
                     </Button>
                   )}
