@@ -17,11 +17,11 @@ import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
-import { STEP_TITLES, stepTitle, stepManifest } from "@/components/wizard/types"
+import { STEP_TITLES, STEP_GROUPS, STEP_ICONS, stepTitle, stepManifest } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, STACK_PRESETS, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -527,6 +527,7 @@ export function AgentWizard({
           status={cardStatus}
           subtitle={isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
           stack={cardStack}
+          language={`${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`}
           costPerMin={cardEst?.costPerMin}
           latencyMs={cardEst?.latencyMs}
           latencyBreakdown={cardLatency}
@@ -544,96 +545,123 @@ export function AgentWizard({
 
         {/* RIGHT — the build steps */}
         <div className="space-y-6">
-          {/* Checklist — every row opens; nothing is locked. */}
-          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
-        {[1, 2, 3, 4, 5].map((n) => {
-          const done = isDone(n)
-          const isActive = !done && n === firstIncomplete(draft)
-          return (
-            // A div (not one big <button>) so row 2 can host the inline intent
-            // control without nesting interactive elements. The div still takes
-            // clicks so the whole hover-highlighted row opens the step (real
-            // buttons inside carry the keyboard/AT semantics; their clicks
-            // bubble here to the same idempotent openRow).
-            // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-            <div
-              key={n}
-              onClick={() => openRow(n)}
-              className={cn(
-                "group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40",
-                isActive && "bg-primary/5",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => openRow(n)}
-                aria-current={isActive ? "step" : undefined}
-                className="flex min-w-0 flex-1 items-center gap-3 text-left"
-              >
-                <span className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                  done && "border-primary bg-primary/10 text-primary",
-                  isActive && "border-primary bg-primary text-primary-foreground",
-                  !done && !isActive && "border-border text-muted-foreground",
-                )}>
-                  {done ? <Check className="h-4 w-4" aria-hidden /> : n}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2 text-sm font-semibold">
-                    {stepTitle(n, draft)}
-                    {/* The last step never carries a first-step nudge (re-eval #10). */}
-                    {isActive && (
-                      <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        {n === 5 ? "Ready to deploy" : "Start here · ~1 min"}
-                      </span>
-                    )}
-                  </span>
-                  <span className="line-clamp-1 block text-sm text-muted-foreground">{rowDetail(n)}</span>
-                </span>
-              </button>
-              {/* Row 2 — switch the intent without opening the drawer (design
-                  parity: the segmented control lives on the row itself). Routed
-                  through selectType so channel data gets the stash + undo toast.
-                  ToggleGroup = real roving-tabindex/arrow-key radio semantics. */}
-              {n === 2 && (
-                // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-                <span className="hidden shrink-0 md:block" onClick={(e) => e.stopPropagation()}>
-                  <ToggleGroup
-                    type="single"
-                    value={draft.type ?? ""}
-                    onValueChange={(v) => v && selectType(v as AgentType)}
-                    variant="outline"
-                    size="sm"
-                    aria-label="Agent type"
-                  >
-                    {(["outbound", "inbound", "code"] as const).map((t) => (
-                      <ToggleGroupItem key={t} value={t} className="text-xs">
-                        {typeLabel(t)}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </span>
-              )}
-              {/* The row itself is the affordance — a quiet chevron, not a
-                  repeated Edit/Open label on every line. */}
-              <button
-                type="button"
-                onClick={() => openRow(n)}
-                aria-label={`${done ? "Edit" : "Open"} step ${n}: ${stepTitle(n, draft)}`}
-                className="shrink-0 rounded text-muted-foreground transition-colors group-hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          )
-        })}
-      </div>
+          {/* Checklist — chunked into two labeled groups (variant-audit winner
+              V2, 2026-07-06): "Your agent" = what it is, "How it goes live" =
+              where it runs. Every row opens; nothing is locked. Canonical step
+              ids 1-5 (drawers, ?step=N, Back/Next) are unchanged — only the
+              visual grouping differs, so rows show ✓ or their step ICON, never
+              digits that would read out of order. */}
+          {STEP_GROUPS.map((group) => (
+            <section key={group.label} className="space-y-2">
+              <h2 className="px-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {group.label}
+              </h2>
+              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+                {group.steps.map((n) => {
+                  const done = isDone(n)
+                  const isActive = !done && n === firstIncomplete(draft)
+                  const Icon = STEP_ICONS[n]
+                  const summary = stepSummary(n)
+                  return (
+                    // A div (not one big <button>) so row 2 can host the inline
+                    // intent control without nesting interactive elements. The
+                    // div still takes clicks so the whole hover-highlighted row
+                    // opens the step (real buttons inside carry keyboard/AT
+                    // semantics; their clicks bubble to the same idempotent
+                    // openRow).
+                    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+                    <div
+                      key={n}
+                      onClick={() => openRow(n)}
+                      className={cn(
+                        "group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40",
+                        isActive && "bg-primary/5",
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => openRow(n)}
+                        aria-current={isActive ? "step" : undefined}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      >
+                        <span className={cn(
+                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
+                          done && "border-primary bg-primary/10 text-primary",
+                          isActive && "border-primary bg-primary text-primary-foreground",
+                          !done && !isActive && "border-border text-muted-foreground",
+                        )}>
+                          {done ? <Check className="h-4 w-4" aria-hidden /> : <Icon className="h-4 w-4" aria-hidden />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2 text-sm font-semibold">
+                            {stepTitle(n, draft)}
+                            {/* The last step never carries a first-step nudge (re-eval #10). */}
+                            {isActive && (
+                              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                {n === 5 ? "Ready to deploy" : "Start here · ~1 min"}
+                              </span>
+                            )}
+                          </span>
+                          {/* Value line when set; the content manifest stays
+                              visible UNDERNEATH it (recognition data never
+                              hides behind completion — audit harvest from V5). */}
+                          {summary ? (
+                            <>
+                              <span className="line-clamp-1 block text-sm text-foreground/90">{summary}</span>
+                              <span className="line-clamp-1 block text-xs text-muted-foreground/70">{stepManifest(n, draft)}</span>
+                            </>
+                          ) : (
+                            <span className="line-clamp-1 block text-sm text-muted-foreground">{rowDetail(n)}</span>
+                          )}
+                        </span>
+                      </button>
+                      {/* Row 2 — switch the intent without opening the drawer.
+                          Routed through selectType so channel data gets the
+                          stash + undo toast. ToggleGroup = real radio semantics. */}
+                      {n === 2 && (
+                        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+                        <span className="hidden shrink-0 md:block" onClick={(e) => e.stopPropagation()}>
+                          <ToggleGroup
+                            type="single"
+                            value={draft.type ?? ""}
+                            onValueChange={(v) => v && selectType(v as AgentType)}
+                            variant="outline"
+                            size="sm"
+                            aria-label="Agent type"
+                          >
+                            {(["outbound", "inbound", "code"] as const).map((t) => (
+                              <ToggleGroupItem key={t} value={t} className="text-xs">
+                                {typeLabel(t)}
+                              </ToggleGroupItem>
+                            ))}
+                          </ToggleGroup>
+                        </span>
+                      )}
+                      {/* The row itself is the affordance — a quiet chevron. */}
+                      <button
+                        type="button"
+                        onClick={() => openRow(n)}
+                        aria-label={`${done ? "Edit" : "Open"} step ${n}: ${stepTitle(n, draft)}`}
+                        className="shrink-0 rounded text-muted-foreground transition-colors group-hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <ChevronRight className="h-4 w-4" aria-hidden />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
 
       {/* Sticky progress + publish (publish is a hint, not a lock). A LIVE
           agent shows its real state — never "attach a number" contradicting
-          the Live badge (heuristic-eval #2/#13). */}
+          the Live badge (heuristic-eval #2/#13); live gets a quiet success
+          accent (variant-audit harvest, tokens only). */}
       <div className="sticky bottom-4 z-30">
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur">
+        <div className={cn(
+          "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 shadow-sm backdrop-blur",
+          isLive ? "border-success/40 bg-success/10" : "border-border bg-card/95",
+        )}>
           <div className="min-w-0">
             <p className="text-sm font-semibold">
               {isLive

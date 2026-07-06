@@ -1,3 +1,5 @@
+import type * as React from "react"
+import { AudioLines, Waypoints, FileText, Phone, Rocket } from "lucide-react"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /** Shared contract every wizard step receives. `update` shallow-merges a patch
@@ -18,6 +20,25 @@ export const STEP_TITLES = [
   "Connect a channel",
   "Deploy",
 ] as const
+
+/** The checklist's two chunks (variant-audit winner, 2026-07-06): "Your agent"
+ *  = what it is; "How it goes live" = where it runs. Two labeled groups of 2-3
+ *  beat one flat list of 5 for digestion; canonical step ids 1-5 are UNCHANGED
+ *  (drawers, ?step=N, Back/Next all keep the original order). */
+export const STEP_GROUPS = [
+  { label: "Your agent", steps: [1, 3] },
+  { label: "How it goes live", steps: [2, 4, 5] },
+] as const
+
+/** Row glyph for not-done rows — grouping breaks digit contiguity (1,3 / 2,4,5),
+ *  so rows show an icon (or ✓ when done) instead of a number. */
+export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string }>> = {
+  1: AudioLines,
+  2: Waypoints,
+  3: FileText,
+  4: Phone,
+  5: Rocket,
+}
 
 /** Row title — static except Step 4, which names the chosen destination once
  *  the type is picked ("Connect a channel" → "Set up batch calls"). The row

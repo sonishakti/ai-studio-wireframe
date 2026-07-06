@@ -27,6 +27,7 @@ export function AgentIdentityCard({
   subtitle,
   agentId,
   stack,
+  language,
   costPerMin,
   latencyMs,
   latencyBreakdown,
@@ -48,6 +49,8 @@ export function AgentIdentityCard({
   agentId?: string
   /** Mono stack line, e.g. "gpt-4o-mini · nova-2 · turbo". */
   stack?: string
+  /** Spoken language (+ preset), e.g. "English · Balanced". */
+  language?: string
   costPerMin?: number
   latencyMs?: number
   /** When provided, the latency stat expands to an STT/LLM/TTS → end-to-end →
@@ -96,59 +99,79 @@ export function AgentIdentityCard({
       </div>
 
       {hasStats && (
-        <div className="mt-5 space-y-2 border-t border-border pt-4">
+        // Labeled fast-facts <dl> (variant-audit harvest: V3's label:value
+        // anatomy) — every number gets a NAMED home; no unlabeled mono runs.
+        <dl className="mt-5 space-y-1.5 border-t border-border pt-4">
           {agentId && (
-            <button
-              type="button"
-              onClick={copyId}
-              aria-label={`Copy agent ID ${agentId}`}
-              className="inline-flex items-center gap-1.5 rounded-md font-mono text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              # {agentId}
-              {copied
-                ? <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
-                : <Copy className="h-3.5 w-3.5" aria-hidden />}
-            </button>
+            <FactRow label="ID">
+              <button
+                type="button"
+                onClick={copyId}
+                aria-label={`Copy agent ID ${agentId}`}
+                className="inline-flex items-center gap-1.5 rounded-md font-mono text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {agentId}
+                {copied
+                  ? <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
+                  : <Copy className="h-3.5 w-3.5" aria-hidden />}
+              </button>
+            </FactRow>
           )}
-          {stack && <p className="break-words font-mono text-sm text-muted-foreground">{stack}</p>}
+          {stack && (
+            <FactRow label="Models">
+              <span className="break-words font-mono text-sm text-muted-foreground">{stack}</span>
+            </FactRow>
+          )}
+          {language && (
+            <FactRow label="Language">
+              <span className="text-sm text-muted-foreground">{language}</span>
+            </FactRow>
+          )}
           {channel && (
-            <button
-              type="button"
-              onClick={channel.onClick}
-              aria-label={`Channel: ${channel.label} — open channel setup`}
-              className="inline-flex max-w-full items-center gap-1.5 rounded-md text-left text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Radio className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              <span className="truncate">{channel.label}</span>
-            </button>
+            <FactRow label="Channel">
+              <button
+                type="button"
+                onClick={channel.onClick}
+                aria-label={`Channel: ${channel.label} — open channel setup`}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-md text-left text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Radio className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <span className="truncate">{channel.label}</span>
+              </button>
+            </FactRow>
           )}
-          {(costPerMin != null || latencyMs != null) && (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              {costPerMin != null && (
-                <span className="inline-flex items-center gap-1"><DollarSign className="h-3.5 w-3.5" aria-hidden />{costPerMin.toFixed(2)}/min</span>
+          {costPerMin != null && (
+            <FactRow label="Cost">
+              <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <DollarSign className="h-3.5 w-3.5" aria-hidden />{costPerMin.toFixed(2)}/min
+              </span>
+            </FactRow>
+          )}
+          {latencyMs != null && (
+            <FactRow label="Latency">
+              {latencyBreakdown ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => setShowLatency((v) => !v)}
+                      aria-expanded={showLatency}
+                      aria-label={`Estimated response latency ${latencyMs} milliseconds — toggle the per-stage breakdown`}
+                      className="inline-flex items-center gap-1 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
+                      <span className="text-xs">breakdown</span>
+                      <ChevronDown className={cn("h-3 w-3 transition-transform", showLatency && "rotate-180")} aria-hidden />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Estimated response latency — click for the STT / LLM / TTS breakdown</TooltipContent>
+                </Tooltip>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                  <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
+                </span>
               )}
-              {latencyMs != null &&
-                (latencyBreakdown ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() => setShowLatency((v) => !v)}
-                        aria-expanded={showLatency}
-                        aria-label={`Estimated response latency ${latencyMs} milliseconds — toggle the per-stage breakdown`}
-                        className="inline-flex items-center gap-1 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
-                        <span className="text-xs">breakdown</span>
-                        <ChevronDown className={cn("h-3 w-3 transition-transform", showLatency && "rotate-180")} aria-hidden />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>Estimated response latency — click for the STT / LLM / TTS breakdown</TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <span className="inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms</span>
-                ))}
-            </div>
+            </FactRow>
           )}
 
           {latencyBreakdown && showLatency && (
@@ -162,7 +185,7 @@ export function AgentIdentityCard({
               <LatencyRow label="Best case" value={latencyBreakdown.bestCaseMs} muted />
             </div>
           )}
-        </div>
+        </dl>
       )}
 
       <div className="mt-5 flex flex-col gap-2">
@@ -178,6 +201,16 @@ export function AgentIdentityCard({
         {secondary}
       </div>
     </section>
+  )
+}
+
+/** One labeled fast-fact row — quiet fixed-width label, prominent value. */
+function FactRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <dt className="w-20 shrink-0 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">{label}</dt>
+      <dd className="min-w-0">{children}</dd>
+    </div>
   )
 }
 
