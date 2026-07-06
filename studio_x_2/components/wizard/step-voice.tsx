@@ -40,8 +40,10 @@ export function StepVoice({
 
   return (
     <div className="space-y-5">
+      {/* Section heading (sized like StackConfig's) — the drawer's SheetTitle
+          "Voice & models" is the screen heading; this labels the persona half. */}
       <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Choose your voice</h2>
+        <h3 className="text-sm font-semibold">Choose your voice</h3>
         <p className="text-sm text-muted-foreground">
           Pick a ready-made voice or build your own. This sets how your agent sounds and its starting personality — the models behind it are below.
         </p>

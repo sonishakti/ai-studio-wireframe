@@ -190,6 +190,34 @@ export function stackFor(preset: StackPreset, modality: AgentStack["modality"] =
   return { preset, modality, llm: p.llm, asr: p.asr, tts: p.tts }
 }
 
+/** The provider/model options the stack configurator offers — colocated with
+ *  STACK_PRESETS so presets can never write a value the dropdowns don't list.
+ *  Agora Conversational AI Engine lets you bring your own STT/LLM/TTS vendors
+ *  (or one multimodal realtime model): see
+ *  https://docs.agora.io/en/conversational-ai/overview/product-overview
+ *  Wireframe catalog; voices must cover every PRESET_VOICES ttsVoice. */
+export const STACK_CATALOG = {
+  stt: [
+    { vendor: "Deepgram", model: "nova-3", label: "Deepgram Nova-3" },
+    { vendor: "Deepgram", model: "nova-2", label: "Deepgram Nova-2" },
+    { vendor: "Whisper", model: "large-v3", label: "OpenAI Whisper large-v3" },
+  ],
+  llm: [
+    { vendor: "OpenAI", model: "gpt-4o", label: "OpenAI GPT-4o" },
+    { vendor: "OpenAI", model: "gpt-4o-mini", label: "OpenAI GPT-4o mini" },
+    { vendor: "Anthropic", model: "claude-haiku", label: "Anthropic Claude Haiku" },
+  ],
+  mllm: [
+    { vendor: "OpenAI", model: "gpt-4o-realtime", label: "OpenAI GPT-4o Realtime" },
+    { vendor: "Google", model: "gemini-2.0-flash-live", label: "Gemini 2.0 Flash Live" },
+  ],
+  tts: [
+    { vendor: "ElevenLabs", label: "ElevenLabs", voices: ["rachel", "turbo", "blake", "adam", "bella", "josh"] },
+    { vendor: "Azure", label: "Azure Neural", voices: ["en-US-Jenny", "en-US-Guy"] },
+  ],
+  languages: ["English", "Spanish", "French", "German", "Hindi", "Mandarin"],
+} as const
+
 export const AGENTS: Agent[] = [
   // Auto-provisioned on signup — live from minute one. The user talks to THIS
   // agent before building anything (the moment of belief), then puts it to work
@@ -265,9 +293,17 @@ export function getDefaultAgent(): Agent {
   return AGENTS.find((a) => a.isDefault) ?? AGENTS[0]
 }
 
+/** Compact mono summary of a stack — "llm · stt · voice", or "llm · realtime"
+ *  for the single-model MLLM pipeline. One format for the identity card, the
+ *  step-row subtitle, and the agents list, so they never drift. */
+export function stackLine(s: AgentStack): string {
+  if (s.pipeline === "mllm") return `${s.llm.model} · realtime`
+  return `${s.llm.model} · ${s.asr.model} · ${s.tts.voice}`
+}
+
 /** Compact "vendor · vendor · vendor" summary of an agent's stack. */
 export function stackSummary(a: Agent): string {
-  return `${a.stack.llm.model} · ${a.stack.asr.model} · ${a.stack.tts.voice}`
+  return stackLine(a.stack)
 }
 
 /** Rough speed + per-minute cost for a stack preset — surfaced on the Go Live
@@ -279,8 +315,15 @@ export const STACK_ESTIMATE: Record<StackPreset, { latencyMs: number; costPerMin
   cheapest: { latencyMs: 1100, costPerMin: 0.06 },
 }
 
+/** Estimate for any stack — preset-based for the cascade, MLLM_ESTIMATE for the
+ *  single-model pipeline. Per-slot overrides keep the preset's numbers (the
+ *  wireframe has no per-model tables); callers should present them as "~". */
+export function stackEstimateFor(s: AgentStack): { latencyMs: number; costPerMin: number } {
+  return s.pipeline === "mllm" ? MLLM_ESTIMATE : STACK_ESTIMATE[s.preset]
+}
+
 export function stackEstimate(a: Agent): { latencyMs: number; costPerMin: number } {
-  return STACK_ESTIMATE[a.stack.preset]
+  return stackEstimateFor(a.stack)
 }
 
 /** Estimate for the MLLM (single realtime multimodal model) pipeline — no
@@ -316,11 +359,17 @@ export interface StackLatencyBreakdown {
   bestCaseMs: number
 }
 
-/** Per-provider latency breakdown for an agent's stack — ASR/LLM/TTS + the
- *  end-to-end total and a best-case floor. Powers the card's latency popover. */
+/** Per-provider latency breakdown for a stack preset — STT/LLM/TTS + the
+ *  end-to-end total and a best-case floor. The one roll-up rule; both the
+ *  agent-shaped helper below and the wizard card call this. */
+export function presetLatencyBreakdown(preset: StackPreset): StackLatencyBreakdown {
+  return { ...STACK_LATENCY[preset], latencyMs: STACK_ESTIMATE[preset].latencyMs }
+}
+
+/** Per-provider latency breakdown for an agent's stack. Powers the card's
+ *  latency popover. */
 export function stackLatencyBreakdown(a: Agent): StackLatencyBreakdown {
-  const l = STACK_LATENCY[a.stack.preset]
-  return { ...l, latencyMs: STACK_ESTIMATE[a.stack.preset].latencyMs }
+  return presetLatencyBreakdown(a.stack.preset)
 }
 
 /** Sandbox DID for the in-product "call in to test" flow — a free test line

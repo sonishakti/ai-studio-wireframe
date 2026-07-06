@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Code2, Copy, Check } from "lucide-react"
-import { toast } from "sonner"
+import { Code2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet"
+import { CodeBlock } from "@/components/code-block"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 import { channelTarget, type AgentDraft } from "@/lib/wizard-draft"
 
@@ -15,42 +15,38 @@ import { channelTarget, type AgentDraft } from "@/lib/wizard-draft"
  *
  * Power users get the agent's full JSON — everything the wizard steps set,
  * assembled from the live draft — to eyeball, copy into the API, or diff.
- * Read-only at wireframe altitude; the copy button is the whole workflow.
+ * The config is only assembled while the sheet is OPEN (it re-renders with
+ * every draft keystroke otherwise), and the body is the standard CodeBlock,
+ * which brings the copy button.
  */
 export function CustomConfigDrawer({ draft }: { draft: AgentDraft }) {
-  const [copied, setCopied] = React.useState(false)
+  const [open, setOpen] = React.useState(false)
 
-  const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
-  const config = {
-    agent_id: draft.agentId ?? "unpublished",
-    name: draft.name || "Untitled agent",
-    voice: voice
-      ? { id: voice.id, name: voice.name, tts_voice: voice.ttsVoice, language: voice.language }
-      : null,
-    stack: draft.stack,
-    type: draft.type,
-    channel_target: draft.type ? channelTarget(draft) : null,
-    system_prompt: draft.systemPrompt,
-    greeting: draft.greeting,
-    knowledge: draft.knowledge,
-    connectors: draft.mcp,
-    config: draft.config,
-  }
-  const json = JSON.stringify(config, null, 2)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(json)
-      setCopied(true)
-      toast.success("Config copied as JSON")
-      window.setTimeout(() => setCopied(false), 1600)
-    } catch {
-      toast.error("Couldn't copy — select it manually.")
+  // Voice lookup hits localStorage and stringify walks the whole draft —
+  // skip both for the (usual) closed state.
+  const json = React.useMemo(() => {
+    if (!open) return ""
+    const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
+    const config = {
+      agent_id: draft.agentId ?? "unpublished",
+      name: draft.name || "Untitled agent",
+      voice: voice
+        ? { id: voice.id, name: voice.name, tts_voice: voice.ttsVoice, language: voice.language }
+        : null,
+      stack: draft.stack,
+      type: draft.type,
+      channel_target: draft.type ? channelTarget(draft) : null,
+      system_prompt: draft.systemPrompt,
+      greeting: draft.greeting,
+      knowledge: draft.knowledge,
+      connectors: draft.mcp,
+      config: draft.config,
     }
-  }
+    return JSON.stringify(config, null, 2)
+  }, [open, draft])
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-1.5">
           <Code2 className="h-4 w-4" aria-hidden /> Custom config
@@ -64,17 +60,7 @@ export function CustomConfigDrawer({ draft }: { draft: AgentDraft }) {
           </p>
         </SheetHeader>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-xs leading-relaxed text-foreground/90">
-            {json}
-          </pre>
-        </div>
-        <div className="shrink-0 border-t border-border px-5 py-3">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={copy}>
-            {copied
-              ? <Check className="h-3.5 w-3.5 text-primary" aria-hidden />
-              : <Copy className="h-3.5 w-3.5" aria-hidden />}
-            Copy JSON
-          </Button>
+          <CodeBlock language="json" filename="agent-config.json">{json}</CodeBlock>
         </div>
       </SheetContent>
     </Sheet>

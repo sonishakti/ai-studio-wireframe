@@ -2,11 +2,11 @@
 
 import * as React from "react"
 import { Mic, PhoneOff, DollarSign, Gauge, ChevronDown, Copy, Check } from "lucide-react"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { type StackLatencyBreakdown } from "@/lib/campaign-data"
 
 /**
@@ -62,17 +62,9 @@ export function AgentIdentityCard({
   const displayName = name || namePlaceholder
   const hasStats = !!agentId || !!stack || costPerMin != null || latencyMs != null
   const [showLatency, setShowLatency] = React.useState(false)
-  const [copied, setCopied] = React.useState(false)
-  const copyId = async () => {
-    if (!agentId) return
-    try {
-      await navigator.clipboard.writeText(agentId)
-      setCopied(true)
-      toast.success("Agent ID copied", { description: agentId })
-      window.setTimeout(() => setCopied(false), 1600)
-    } catch {
-      toast.error("Couldn't copy — select it manually.")
-    }
+  const { copied, copy } = useCopyFeedback()
+  const copyId = () => {
+    if (agentId) void copy(agentId, "Agent ID copied", agentId)
   }
 
   return (

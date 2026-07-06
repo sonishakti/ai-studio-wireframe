@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { publishBlocks, channelTarget, type AgentDraft } from "@/lib/wizard-draft"
+import { publishBlocks, channelTarget, typeLabel, type AgentDraft } from "@/lib/wizard-draft"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 
 /**
@@ -47,7 +47,7 @@ export function StepPublish({
             {voice && <span className="text-muted-foreground"> · {voice.tagline}</span>}
           </SummaryRow>
           <SummaryRow icon={typeIcon(draft)} label="Type">
-            {draft.type ? (draft.type === "outbound" ? "Batch calls" : draft.type === "code" ? "Code" : "Inbound") : "Not set yet"}
+            {draft.type ? typeLabel(draft.type) : "Not set yet"}
             {draft.type && <span className="text-muted-foreground"> · {channelTarget(draft)}</span>}
           </SummaryRow>
           {(draft.knowledge.length > 0 || draft.mcp.length > 0) && (

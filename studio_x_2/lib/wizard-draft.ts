@@ -46,11 +46,22 @@ export interface AgentDraft {
   }
 }
 
+/** One source for the stack's non-preset defaults — spread by both new drafts
+ *  and agentToDraft so the two entry paths can't open with different Step-1
+ *  defaults. */
+export const STACK_DEFAULTS = { pipeline: "stt-llm-tts", language: "English" } as const
+
+/** Display name for an agent type — "Batch calls" is the locked term for
+ *  outbound (LEARNINGS §20); never surface raw "outbound" to the user. */
+export function typeLabel(t: AgentType): string {
+  return t === "outbound" ? "Batch calls" : t === "code" ? "Code" : "Inbound"
+}
+
 export const EMPTY_DRAFT: AgentDraft = {
   name: "",
   voice: null,
   type: null,
-  stack: { ...stackFor("balanced"), pipeline: "stt-llm-tts", language: "English" },
+  stack: { ...stackFor("balanced"), ...STACK_DEFAULTS },
   systemPrompt: "",
   greeting: "",
   knowledge: [],
@@ -108,7 +119,7 @@ export function agentToDraft(agent: Agent): AgentDraft {
     name: agent.name,
     voice: { kind: "preset", id: voiceMatch.id },
     type: "inbound",
-    stack: { pipeline: "stt-llm-tts", language: "English", ...agent.stack },
+    stack: { ...STACK_DEFAULTS, ...agent.stack },
     systemPrompt: agent.persona.personality,
     greeting: agent.persona.firstMessage ?? "Hi, thanks for calling — how can I help you today?",
     knowledge: [...agent.knowledge],

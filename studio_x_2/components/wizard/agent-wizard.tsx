@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
@@ -20,13 +21,13 @@ import { STEP_TITLES } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, STACK_ESTIMATE, STACK_LATENCY, MLLM_ESTIMATE, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
 import {
   EMPTY_DRAFT, agentToDraft, restoreDraft, saveDraft, clearDraft,
-  publishBlockReason, channelTarget, type AgentDraft, type AgentType,
+  publishBlockReason, channelTarget, typeLabel, type AgentDraft, type AgentType,
 } from "@/lib/wizard-draft"
 import { toast } from "sonner"
 
@@ -91,6 +92,12 @@ export function AgentWizard({
   const selectType = React.useCallback((next: AgentType) => {
     const d = draftRef.current
     if (d.type === next) return
+    // Flipping back to the type whose config we set aside restores it — the
+    // "set aside, not deleted" promise must not depend on the transient toast.
+    if (typeStash.current?.type === next) {
+      restoreTypeStash()
+      return
+    }
     dirty.current = true
     const departing = d.type
     const hasData =
@@ -224,11 +231,7 @@ export function AgentWizard({
   // ── Collapsed-row summaries ──────────────────────────────────────────────────
   function stepSummary(n: number): string | undefined {
     if (n === 1) {
-      const v = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
-      const models = draft.stack.pipeline === "mllm"
-        ? `${draft.stack.llm.model} (realtime)`
-        : `${draft.stack.llm.model} · ${draft.stack.asr.model}`
-      return v ? `${v.name} · ${models}` : undefined
+      return cardVoice ? `${cardVoice.name} · ${stackLine(draft.stack)}` : undefined
     }
     if (n === 2) return draft.type ? typeLabel(draft.type) : undefined
     if (n === 3) {
@@ -244,20 +247,20 @@ export function AgentWizard({
 
   // ── Left identity card (shared component — keeps the agent present, same as
   //    the Agents home, so it never "goes missing" when you enter the builder). ──
-  const cardVoice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
+  // One voice lookup per id change — getVoiceArtifact reads localStorage, and
+  // this value is needed by the card subtitle AND the Step-1 row summary.
+  const cardVoice = React.useMemo(
+    () => (draft.voice ? getVoiceArtifact(draft.voice.id) : undefined),
+    [draft.voice],
+  )
   const cardStatus = isEdit ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1) : "Draft"
   // Stats come from the DRAFT's stack (not the saved agent) so the card's
   // $/min + latency move live as the Step-1 stack config changes — and new
   // drafts show numbers from first paint (balanced default).
-  const mllm = draft.stack.pipeline === "mllm"
-  const cardStack = mllm
-    ? `${draft.stack.llm.model} · realtime`
-    : `${draft.stack.llm.model} · ${draft.stack.asr.model} · ${draft.stack.tts.voice}`
-  const cardEst = mllm ? MLLM_ESTIMATE : STACK_ESTIMATE[draft.stack.preset]
+  const cardStack = stackLine(draft.stack)
+  const cardEst = stackEstimateFor(draft.stack)
   // No per-provider breakdown for a single-model pipeline.
-  const cardLatency = mllm
-    ? undefined
-    : { ...STACK_LATENCY[draft.stack.preset], latencyMs: STACK_ESTIMATE[draft.stack.preset].latencyMs }
+  const cardLatency = draft.stack.pipeline === "mllm" ? undefined : presetLatencyBreakdown(draft.stack.preset)
   const toggleTest = () => {
     if (testing) track(Events.agent_test_ended, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new", duration_sec: 30 })
     else track(Events.agent_test_started, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new" })
@@ -346,11 +349,16 @@ export function AgentWizard({
           const isActive = !done && n === firstIncomplete(draft)
           return (
             // A div (not one big <button>) so row 2 can host the inline intent
-            // control without nesting interactive elements.
+            // control without nesting interactive elements. The div still takes
+            // clicks so the whole hover-highlighted row opens the step (real
+            // buttons inside carry the keyboard/AT semantics; their clicks
+            // bubble here to the same idempotent openRow).
+            // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
             <div
               key={n}
+              onClick={() => openRow(n)}
               className={cn(
-                "flex w-full items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40",
+                "flex w-full cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-accent/40",
                 isActive && "bg-primary/5",
               )}
             >
@@ -375,34 +383,26 @@ export function AgentWizard({
               </button>
               {/* Row 2 — switch the intent without opening the drawer (design
                   parity: the segmented control lives on the row itself). Routed
-                  through selectType so channel data gets the stash + undo toast. */}
+                  through selectType so channel data gets the stash + undo toast.
+                  ToggleGroup = real roving-tabindex/arrow-key radio semantics. */}
               {n === 2 && (
-                <div
-                  role="radiogroup"
-                  aria-label="Agent type"
-                  className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5 md:flex"
-                >
-                  {(["outbound", "inbound", "code"] as const).map((t) => {
-                    const selected = draft.type === t
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        role="radio"
-                        aria-checked={selected}
-                        onClick={() => selectType(t)}
-                        className={cn(
-                          "rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          selected
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground",
-                        )}
-                      >
+                // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+                <span className="hidden shrink-0 md:block" onClick={(e) => e.stopPropagation()}>
+                  <ToggleGroup
+                    type="single"
+                    value={draft.type ?? ""}
+                    onValueChange={(v) => v && selectType(v as AgentType)}
+                    variant="outline"
+                    size="sm"
+                    aria-label="Agent type"
+                  >
+                    {(["outbound", "inbound", "code"] as const).map((t) => (
+                      <ToggleGroupItem key={t} value={t} className="text-xs">
                         {typeLabel(t)}
-                      </button>
-                    )
-                  })}
-                </div>
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </span>
               )}
               <button
                 type="button"
@@ -499,6 +499,9 @@ function seedFromVoice(d: AgentDraft, v: VoiceArtifact): AgentDraft {
     ...d,
     voice: { kind: v.kind, id: v.id },
     name: d.name || v.name,
+    // The persona IS the TTS voice — keep the stack in lockstep so the card,
+    // the Voice dropdown, and the exported config all name the same voice.
+    stack: { ...d.stack, tts: { ...d.stack.tts, voice: v.ttsVoice } },
     systemPrompt: d.systemPrompt.trim() ? d.systemPrompt : v.systemPrompt ?? defaultPromptFor(v),
     greeting: d.greeting.trim() ? d.greeting : v.firstMessage,
   }
@@ -523,12 +526,6 @@ function dcToConfig(dc: string, config: AgentDraft["config"]): AgentDraft["confi
   if (dc === "batch") return { ...config, outbound: { ...config.outbound } }
   if (dc === "code") return { ...config, code: {} }
   return config
-}
-
-/** Display name for an agent type — "Batch calls" is the locked term for
- *  outbound (LEARNINGS §20); never surface raw "outbound" to the user. */
-function typeLabel(t: AgentType): string {
-  return t === "outbound" ? "Batch calls" : t === "code" ? "Code" : "Inbound"
 }
 
 function channelLabel(d: AgentDraft): string {

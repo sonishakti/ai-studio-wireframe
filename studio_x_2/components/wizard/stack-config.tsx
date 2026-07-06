@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Check, Zap } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Zap } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
-  STACK_PRESETS, STACK_ESTIMATE, MLLM_ESTIMATE, stackFor,
+  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor,
   type StackPreset, type AgentStack,
 } from "@/lib/campaign-data"
 import type { StepProps } from "@/components/wizard/types"
@@ -17,37 +17,19 @@ import type { StepProps } from "@/components/wizard/types"
  * StackConfig — the model stack behind the voice (Step 1's second half).
  *
  * Two pipeline shapes: the classic STT→LLM→TTS cascade (per-slot provider
- * dropdowns) or a single multimodal realtime model (MLLM). Presets write
- * sensible vendor defaults; every slot stays individually overridable.
- * Estimates ($/min · latency) come from the preset (marked "~") and feed the
- * identity card live, so swapping Balanced → Fastest visibly moves the numbers.
+ * dropdowns) or a single multimodal realtime model (MLLM) — Agora's
+ * Conversational AI Engine supports both (bring-your-own vendors):
+ * https://docs.agora.io/en/conversational-ai/overview/product-overview
+ *
+ * Presets write sensible vendor defaults; every slot stays individually
+ * overridable. Estimates are PRESET-based (no per-model tables at wireframe
+ * altitude): overriding a slot un-highlights the preset chips and the footer
+ * says the numbers approximate the preset — never a false "live" claim.
+ * Options come from STACK_CATALOG (colocated with STACK_PRESETS) so a preset
+ * can never write a value the dropdowns don't list.
  */
 
 type Pipeline = NonNullable<AgentStack["pipeline"]>
-
-const STT_OPTIONS = [
-  { id: "Deepgram/nova-3", vendor: "Deepgram", model: "nova-3", label: "Deepgram Nova-3" },
-  { id: "Deepgram/nova-2", vendor: "Deepgram", model: "nova-2", label: "Deepgram Nova-2" },
-  { id: "Whisper/large-v3", vendor: "Whisper", model: "large-v3", label: "OpenAI Whisper large-v3" },
-]
-
-const LLM_OPTIONS = [
-  { id: "OpenAI/gpt-4o", vendor: "OpenAI", model: "gpt-4o", label: "OpenAI GPT-4o" },
-  { id: "OpenAI/gpt-4o-mini", vendor: "OpenAI", model: "gpt-4o-mini", label: "OpenAI GPT-4o mini" },
-  { id: "Anthropic/claude-haiku", vendor: "Anthropic", model: "claude-haiku", label: "Anthropic Claude Haiku" },
-]
-
-const MLLM_OPTIONS = [
-  { id: "OpenAI/gpt-4o-realtime", vendor: "OpenAI", model: "gpt-4o-realtime", label: "OpenAI GPT-4o Realtime" },
-  { id: "Gemini/2.0-flash-live", vendor: "Google", model: "gemini-2.0-flash-live", label: "Gemini 2.0 Flash Live" },
-]
-
-const TTS_VENDORS = [
-  { vendor: "ElevenLabs", label: "ElevenLabs", voices: ["rachel", "turbo", "blake"] },
-  { vendor: "Azure", label: "Azure Neural", voices: ["en-US-Jenny", "en-US-Guy"] },
-]
-
-const LANGUAGES = ["English", "Spanish", "French", "German", "Hindi", "Mandarin"]
 
 const PIPELINES: { id: Pipeline; title: string; desc: string }[] = [
   { id: "stt-llm-tts", title: "STT · LLM · TTS", desc: "Configure each stage of the cascade yourself." },
@@ -55,17 +37,78 @@ const PIPELINES: { id: Pipeline; title: string; desc: string }[] = [
   { id: "mllm", title: "Multimodal LLM", desc: "One model handles speech in and out. Lower latency, fewer knobs." },
 ]
 
+const isMllmModel = (llm: AgentStack["llm"]) =>
+  STACK_CATALOG.mllm.some((o) => o.vendor === llm.vendor && o.model === llm.model)
+
+/** Slots (voice excluded — personas legitimately change it) differ from the
+ *  preset's writes → the chip un-highlights and estimates read as approximate. */
+const divergedFromPreset = (s: AgentStack) => {
+  const p = STACK_PRESETS[s.preset]
+  return (
+    s.llm.vendor !== p.llm.vendor || s.llm.model !== p.llm.model ||
+    s.asr.vendor !== p.asr.vendor || s.asr.model !== p.asr.model ||
+    s.tts.vendor !== p.tts.vendor
+  )
+}
+
 export function StackConfig({ draft, update }: StepProps) {
   const stack = draft.stack
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
-  const est = pipeline === "mllm" ? MLLM_ESTIMATE : STACK_ESTIMATE[stack.preset]
+  const est = stackEstimateFor(stack)
+  const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
 
   const patch = (s: Partial<AgentStack>) => update({ stack: { ...stack, ...s } })
 
-  const setPreset = (preset: StackPreset) =>
-    update({ stack: { ...stackFor(preset), pipeline, language: stack.language } })
+  // Switching shape must keep the LLM slot coherent: entering MLLM writes a
+  // realtime model (never a display-only fallback), leaving it restores the
+  // preset's cascade model — otherwise card/summary/JSON contradict the UI.
+  const setPipeline = (p: Pipeline) => {
+    if (p === pipeline) return
+    if (p === "mllm") {
+      patch({
+        pipeline: p,
+        llm: isMllmModel(stack.llm)
+          ? stack.llm
+          : { vendor: STACK_CATALOG.mllm[0].vendor, model: STACK_CATALOG.mllm[0].model },
+      })
+    } else {
+      patch({
+        pipeline: p,
+        llm: isMllmModel(stack.llm) ? STACK_PRESETS[stack.preset].llm : stack.llm,
+      })
+    }
+  }
 
-  const ttsVendor = TTS_VENDORS.find((v) => v.vendor === stack.tts.vendor) ?? TTS_VENDORS[0]
+  // Preset rewrites the slots but never the modality or language the draft
+  // already carries.
+  const setPreset = (preset: StackPreset) =>
+    update({
+      stack: {
+        ...stackFor(preset, stack.modality),
+        pipeline,
+        language: stack.language,
+      },
+    })
+
+  const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
+  // A custom/imported voice may not be in the catalog — include it so the
+  // Select never renders blank.
+  const vendorVoices = ttsVendor.voices as readonly string[]
+  const voiceOptions = vendorVoices.includes(stack.tts.voice)
+    ? [...vendorVoices]
+    : [stack.tts.voice, ...vendorVoices]
+
+  const languageSelect = (
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">Language</Label>
+      <Select value={stack.language ?? "English"} onValueChange={(language) => patch({ language })}>
+        <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
+  )
 
   return (
     <section className="space-y-4">
@@ -76,63 +119,49 @@ export function StackConfig({ draft, update }: StepProps) {
         </p>
       </header>
 
-      {/* Pipeline shape */}
-      <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Pipeline">
-        {PIPELINES.map((p) => {
-          const selected = pipeline === p.id
-          return (
-            <button
-              key={p.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => patch({ pipeline: p.id })}
-              className={cn(
-                "flex items-start justify-between gap-2 rounded-lg border p-3 text-left transition-colors",
-                selected
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border bg-card hover:border-foreground/20 hover:bg-accent/40",
-              )}
-            >
-              <span>
-                <span className="block text-sm font-medium">{p.title}</span>
-                <span className="block text-xs leading-relaxed text-muted-foreground">{p.desc}</span>
-              </span>
-              {selected && <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden />}
-            </button>
-          )
-        })}
-      </div>
+      {/* Pipeline shape — ToggleGroup for real radio keyboard semantics. */}
+      <ToggleGroup
+        type="single"
+        value={pipeline}
+        onValueChange={(v) => v && setPipeline(v as Pipeline)}
+        className="grid gap-2 sm:grid-cols-2"
+        aria-label="Pipeline"
+      >
+        {PIPELINES.map((p) => (
+          <ToggleGroupItem
+            key={p.id}
+            value={p.id}
+            className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          >
+            <span className="text-sm font-medium">{p.title}</span>
+            <span className="text-xs font-normal leading-relaxed text-muted-foreground">{p.desc}</span>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
 
       {pipeline === "stt-llm-tts" ? (
         <>
           {/* Speed/cost preset */}
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Preset</Label>
-            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Stack preset">
-              {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
-                const selected = stack.preset === p
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    onClick={() => setPreset(p)}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
-                      selected
-                        ? "border-primary bg-primary/10 font-medium text-primary"
-                        : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground",
-                    )}
-                  >
+            <div className="flex flex-wrap items-center gap-2">
+              <ToggleGroup
+                type="single"
+                value={diverged ? "" : stack.preset}
+                onValueChange={(v) => v && setPreset(v as StackPreset)}
+                variant="outline"
+                size="sm"
+                aria-label="Stack preset"
+              >
+                {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => (
+                  <ToggleGroupItem key={p} value={p} className="gap-1.5 text-sm">
                     <Zap className="h-3.5 w-3.5" aria-hidden />
                     {STACK_PRESETS[p].label}
-                  </button>
-                )
-              })}
-              <span className="self-center text-xs text-muted-foreground">
-                {STACK_PRESETS[stack.preset].hint}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+              <span className="text-xs text-muted-foreground">
+                {diverged ? "Custom mix" : STACK_PRESETS[stack.preset].hint}
               </span>
             </div>
           </div>
@@ -143,25 +172,19 @@ export function StackConfig({ draft, update }: StepProps) {
               <Select
                 value={`${stack.asr.vendor}/${stack.asr.model}`}
                 onValueChange={(id) => {
-                  const o = STT_OPTIONS.find((x) => x.id === id)
+                  const o = STACK_CATALOG.stt.find((x) => `${x.vendor}/${x.model}` === id)
                   if (o) patch({ asr: { vendor: o.vendor, model: o.model } })
                 }}
               >
                 <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {STT_OPTIONS.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                  {STACK_CATALOG.stt.map((o) => (
+                    <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Language</Label>
-              <Select value={stack.language ?? "English"} onValueChange={(language) => patch({ language })}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {languageSelect}
           </div>
 
           <div className="space-y-1.5">
@@ -169,13 +192,15 @@ export function StackConfig({ draft, update }: StepProps) {
             <Select
               value={`${stack.llm.vendor}/${stack.llm.model}`}
               onValueChange={(id) => {
-                const o = LLM_OPTIONS.find((x) => x.id === id)
+                const o = STACK_CATALOG.llm.find((x) => `${x.vendor}/${x.model}` === id)
                 if (o) patch({ llm: { vendor: o.vendor, model: o.model } })
               }}
             >
               <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {LLM_OPTIONS.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                {STACK_CATALOG.llm.map((o) => (
+                  <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -186,13 +211,13 @@ export function StackConfig({ draft, update }: StepProps) {
               <Select
                 value={ttsVendor.vendor}
                 onValueChange={(vendor) => {
-                  const v = TTS_VENDORS.find((x) => x.vendor === vendor)
+                  const v = STACK_CATALOG.tts.find((x) => x.vendor === vendor)
                   if (v) patch({ tts: { vendor: v.vendor, voice: v.voices[0] } })
                 }}
               >
                 <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {TTS_VENDORS.map((v) => <SelectItem key={v.vendor} value={v.vendor}>{v.label}</SelectItem>)}
+                  {STACK_CATALOG.tts.map((v) => <SelectItem key={v.vendor} value={v.vendor}>{v.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -204,7 +229,7 @@ export function StackConfig({ draft, update }: StepProps) {
               >
                 <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {ttsVendor.voices.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  {voiceOptions.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -215,32 +240,30 @@ export function StackConfig({ draft, update }: StepProps) {
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Realtime model</Label>
             <Select
-              value={MLLM_OPTIONS.find((o) => o.model === stack.llm.model)?.id ?? MLLM_OPTIONS[0].id}
+              value={`${stack.llm.vendor}/${stack.llm.model}`}
               onValueChange={(id) => {
-                const o = MLLM_OPTIONS.find((x) => x.id === id)
+                const o = STACK_CATALOG.mllm.find((x) => `${x.vendor}/${x.model}` === id)
                 if (o) patch({ llm: { vendor: o.vendor, model: o.model } })
               }}
             >
               <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {MLLM_OPTIONS.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                {STACK_CATALOG.mllm.map((o) => (
+                  <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Language</Label>
-            <Select value={stack.language ?? "English"} onValueChange={(language) => patch({ language })}>
-              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          {languageSelect}
         </div>
       )}
 
       <p className="text-xs text-muted-foreground">
-        Estimated ~{est.latencyMs} ms end-to-end · ~${est.costPerMin.toFixed(2)}/min — the card on the left updates as you change this.
+        {pipeline === "mllm"
+          ? `Estimated ~${est.latencyMs} ms end-to-end · ~$${est.costPerMin.toFixed(2)}/min for a realtime model — the card on the left follows this.`
+          : diverged
+          ? `Estimates approximate the ${STACK_PRESETS[stack.preset].label} preset (~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min) — your custom mix may differ.`
+          : `Estimated ~${est.latencyMs} ms end-to-end · ~$${est.costPerMin.toFixed(2)}/min — the card on the left follows the preset.`}
       </p>
     </section>
   )

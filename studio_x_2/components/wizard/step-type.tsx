@@ -4,7 +4,7 @@ import * as React from "react"
 import { PhoneIncoming, PhoneOutgoing, Code2, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { StepProps } from "@/components/wizard/types"
-import type { AgentType } from "@/lib/wizard-draft"
+import { typeLabel, type AgentType } from "@/lib/wizard-draft"
 
 /**
  * Step 2 — Select agent type. Batch calls · Inbound · Code — batch leads because
@@ -20,13 +20,13 @@ const TYPES: {
 }[] = [
   {
     id: "outbound",
-    title: "Batch calls",
+    title: typeLabel("outbound"),
     desc: "Your agent dials a contact list. Upload a CSV and it calls each one with dynamic variables.",
     icon: PhoneOutgoing,
   },
   {
     id: "inbound",
-    title: "Inbound",
+    title: typeLabel("inbound"),
     desc: "Your agent answers — on a phone number, 24/7, or as a web widget on your site.",
     icon: PhoneIncoming,
   },
