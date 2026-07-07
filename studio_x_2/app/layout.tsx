@@ -12,7 +12,7 @@ const fontSans = Instrument_Sans({ subsets: ["latin"], variable: "--font-sans" }
 const fontMono = Space_Mono({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
-  title: "Studio_X — Agora",
+  title: "Studio_X · Agora",
   description: "Design and publish voice AI agents",
 }
 

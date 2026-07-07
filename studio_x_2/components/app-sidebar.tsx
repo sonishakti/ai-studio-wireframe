@@ -100,8 +100,8 @@ function NavLink({ item }: { item: NavItem }) {
             // number explains itself (heuristic-eval #23).
             <Badge
               variant="destructive"
-              title={`${item.badge} open critical issues — see Monitor › Diagnostics`}
-              aria-label={`${item.badge} open critical issues — see Monitor Diagnostics`}
+              title={`${item.badge} open critical issues. See Monitor › Diagnostics`}
+              aria-label={`${item.badge} open critical issues. See Monitor Diagnostics`}
               className="ml-auto text-xs px-1.5 py-0"
             >
               {item.badge}
