@@ -22,6 +22,48 @@ export interface VoiceRef {
 /** Inbound sub-mode (Step 4.1): a phone number, or an embeddable web widget. */
 export type InboundMode = "phone" | "web"
 
+// ─── Optional depth: Advanced (voice behaviour) + Analysis (post-call) ─────────
+// Both are OPTIONAL on the draft: absent = untouched, render from DEFAULT_*.
+// Only written once the user changes something, so clean drafts stay lean.
+
+/** Advanced voice-interaction tuning (Figma "Advanced" tab, 2026-07-07). */
+export interface AdvancedConfig {
+  turnDetection: { enabled: boolean; preset: "responsive" | "balanced" | "patient" | "custom"; threshold: number }
+  startOfSpeech: { enabled: boolean; mode: "vad" | "keyword"; keywords: string[]; interruptMs: number; prefixPaddingMs: number }
+  endOfSpeech: { enabled: boolean; mode: "vad" | "semantic"; silenceMs: number; maxWaitMs: number }
+  attentionLocking: { enabled: boolean; mode: "speaker" | "passthrough" }
+  filterWords: { enabled: boolean; patterns: string; responseWaitMs: number }
+  history: { maxMessages: number }
+}
+
+export const DEFAULT_ADVANCED: AdvancedConfig = {
+  turnDetection: { enabled: true, preset: "balanced", threshold: 50 },
+  startOfSpeech: { enabled: true, mode: "vad", keywords: [], interruptMs: 300, prefixPaddingMs: 120 },
+  endOfSpeech: { enabled: true, mode: "vad", silenceMs: 500, maxWaitMs: 8000 },
+  attentionLocking: { enabled: false, mode: "speaker" },
+  filterWords: { enabled: false, patterns: "", responseWaitMs: 400 },
+  history: { maxMessages: 20 },
+}
+
+/** A structured-output field the agent extracts from a call (Figma "Call
+ *  Analysis" data points, 2026-07-07). */
+export type DataPointType = "text" | "number" | "boolean" | "enum"
+export interface DataPoint {
+  id: string
+  name: string
+  type: DataPointType
+  description: string
+  /** Enum only — the allowed values for this data point. */
+  allowedValues?: string[]
+}
+export interface AnalysisConfig {
+  /** Record + transcribe calls (required before data points can be extracted). */
+  transcribe: boolean
+  dataPoints: DataPoint[]
+}
+
+export const DEFAULT_ANALYSIS: AnalysisConfig = { transcribe: true, dataPoints: [] }
+
 export interface AgentDraft {
   /** Set when editing an existing agent; absent for a brand-new draft. */
   agentId?: string
@@ -38,6 +80,11 @@ export interface AgentDraft {
   greeting: string
   knowledge: string[]
   mcp: string[]
+  /** Step 3 Actions — attached third-party Connector ids (F6). */
+  connectors: string[]
+  /** Optional depth — absent until the user opens the section (F1 / F8). */
+  advanced?: AdvancedConfig
+  analysis?: AnalysisConfig
   /** Step 4 — channel config, branched by `type`. */
   config: {
     inbound?: { mode: InboundMode; numberId?: string }
@@ -76,6 +123,7 @@ export const EMPTY_DRAFT: AgentDraft = {
   greeting: "",
   knowledge: [],
   mcp: [],
+  connectors: [],
   config: {},
 }
 
@@ -153,6 +201,7 @@ export function agentToDraft(agent: Agent): AgentDraft {
     greeting: agent.persona.firstMessage ?? "Hi, thanks for calling. How can I help you today?",
     knowledge: [...agent.knowledge],
     mcp: [...agent.actions],
+    connectors: [...(agent.connectors ?? [])],
     config,
   }
 }

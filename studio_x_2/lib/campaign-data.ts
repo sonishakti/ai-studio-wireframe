@@ -156,8 +156,10 @@ export interface Agent {
   stack: AgentStack
   /** Attached knowledge bases (Integrations › Knowledge). */
   knowledge: string[]
-  /** Attached MCP/tool/connector ids (Integrations › MCP/Connectors). */
+  /** Attached MCP/tool server ids (Integrations › MCP). */
   actions: string[]
+  /** Attached third-party Connector ids (Integrations › Connectors). */
+  connectors?: string[]
   /** One-line role descriptor shown on the Go Live home. */
   role?: string
   /** Auto-provisioned default agent — exists & live for every new account so the
@@ -871,6 +873,29 @@ export interface McpServer {
 export const MCP_SERVERS: McpServer[] = [
   { id: "mcp_01", name: "CRM Connector", url: "https://mcp.acme.com/crm", tools: 8 },
   { id: "mcp_02", name: "Calendar API", url: "https://mcp.acme.com/calendar", tools: 5 },
+]
+
+/** Third-party OAuth apps ("Connectors") — the canonical catalog shared by the
+ *  Resources › Connectors tab AND the agent builder's Actions hub. A connector
+ *  must be `connected` at the project level before an agent can attach it.
+ *  Wireframe: "connected" is mocked (no real OAuth). */
+export interface Connector {
+  id: string
+  name: string
+  category: string
+  description: string
+  /** Short brand initials for the CatalogCard chip when no logo. */
+  initials: string
+  status: "connected" | "available" | "coming-soon"
+}
+
+export const CONNECTORS: Connector[] = [
+  { id: "conn_hubspot", name: "HubSpot", category: "CRM", description: "Sync contacts and log deals in your CRM.", initials: "HS", status: "available" },
+  { id: "conn_salesforce", name: "Salesforce", category: "CRM", description: "Read and update leads and opportunities.", initials: "SF", status: "available" },
+  { id: "conn_gcal", name: "Google Calendar", category: "Scheduling", description: "Check availability and book meetings.", initials: "GC", status: "available" },
+  { id: "conn_zendesk", name: "Zendesk", category: "Support", description: "Open and track support tickets automatically.", initials: "ZD", status: "available" },
+  { id: "conn_slack", name: "Slack", category: "Messaging", description: "Post updates and alerts to a channel.", initials: "SL", status: "available" },
+  { id: "conn_stripe", name: "Stripe", category: "Payments", description: "Take payments and check order status.", initials: "ST", status: "coming-soon" },
 ]
 
 export function formatDuration(seconds: number): string {

@@ -558,11 +558,13 @@ export function AgentWizard({
     if (n === 3) {
       if (!promptDone) return undefined
       const chars = draft.systemPrompt.trim().length
+      // Actions counted distinctly now that KB / MCP / connectors are separate
+      // (F6, 2026-07-07) — the old summary called every MCP a "connector".
+      const attached = draft.knowledge.length + draft.mcp.length + draft.connectors.length
       return [
         `Prompt · ${chars} chars`,
         draft.greeting.trim() ? "Greeting set" : "No greeting",
-        `${draft.knowledge.length} knowledge`,
-        `${draft.mcp.length} connector${draft.mcp.length === 1 ? "" : "s"}`,
+        `${attached} action${attached === 1 ? "" : "s"} attached`,
       ].join(" · ")
     }
     if (n === 4) {

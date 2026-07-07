@@ -11,42 +11,16 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CatalogCard, type CatalogCardStatus } from "@/components/catalog-card"
+import { CatalogCard } from "@/components/catalog-card"
 import { VendorCredentialsPanel } from "@/components/vendor-credentials-panel"
 import { ChannelsPanel } from "@/components/channels-panel"
-
-// ─── connector catalog (matches Figma node 90:15477) ─────────────────────────
-
-type Connector = {
-  id: string
-  name: string
-  description: string
-  initials: string
-  // Brand chip color — deliberate per-vendor brand palette (not app chrome), the
-  // same contract CatalogCard's `iconColor` documents for initials chips.
-  color: string
-  status: CatalogCardStatus
-}
-
-const CONNECTORS: Connector[] = [
-  { id: "hubspot", name: "Hubspot",  description: "Sync contacts and log deals in your CRM",        initials: "H",  color: "bg-orange-500", status: "available"   },
-  { id: "airtable", name: "Airtable", description: "Read and update records in your base",           initials: "A", color: "bg-yellow-500", status: "available"   },
-  { id: "jira",    name: "Jira",     description: "File and update issues from a conversation",      initials: "J", color: "bg-blue-500",   status: "available"   },
-  { id: "paypal",  name: "Paypal",   description: "Take payments and check order status",            initials: "P", color: "bg-sky-500",    status: "coming-soon" },
-  { id: "whatsapp",name: "Whatsapp", description: "Reply to customers on WhatsApp Business",         initials: "W", color: "bg-green-500",  status: "coming-soon" },
-  { id: "zendesk", name: "Zendesk",  description: "Open and track support tickets automatically",    initials: "Z", color: "bg-emerald-600",status: "coming-soon" },
-]
-
-const KNOWLEDGE_BASES = [
-  { id: "kb_01", name: "Product Docs", source: "Upload", chunks: 1240, status: "ready" },
-  { id: "kb_02", name: "FAQs v3", source: "Upload", chunks: 320, status: "ready" },
-  { id: "kb_03", name: "Policy Handbook", source: "URL Crawl", chunks: 0, status: "indexing" },
-]
-
-const MCP_SERVERS = [
-  { id: "mcp_01", name: "CRM Connector", url: "https://mcp.acme.com/crm", tools: 8 },
-  { id: "mcp_02", name: "Calendar API", url: "https://mcp.acme.com/calendar", tools: 5 },
-]
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog"
+// Canonical catalogs — shared with the agent builder's Actions hub so the two
+// never drift (2026-07-07 canonicalization).
+import { CONNECTORS, KNOWLEDGE_BASES, MCP_SERVERS, type Connector } from "@/lib/campaign-data"
+import { effectiveConnectorStatus, setConnectorConnected } from "@/lib/agent-resources"
 
 // Resources is tab-routed (?tab=…), so deep links and the header breadcrumb stay
 // in sync. Order matches the tab list left-to-right.
@@ -99,6 +73,27 @@ function ResourcesInner() {
   const setTab = (value: string) => {
     router.replace(`/integrations?tab=${value}`, { scroll: false })
   }
+
+  // Connected-connector state lives in localStorage. Read only after mount
+  // (avoids a hydration mismatch); `rev` re-derives statuses after connect.
+  const [mounted, setMounted] = React.useState(false)
+  const [rev, setRev] = React.useState(0)
+  React.useEffect(() => { setMounted(true) }, [])
+  const [connecting, setConnecting] = React.useState<Connector | null>(null)
+  const statusOf = (c: Connector): Connector["status"] =>
+    mounted ? effectiveConnectorStatus(c) : c.status
+  const authorize = (c: Connector) => {
+    setConnectorConnected(c.id, true)
+    setConnecting(null)
+    setRev((r) => r + 1)
+    toast.success(`${c.name} connected`, { description: "Attach it to an agent from Prompt & tools." })
+  }
+  const disconnect = (c: Connector) => {
+    setConnectorConnected(c.id, false)
+    setRev((r) => r + 1)
+    toast(`${c.name} disconnected`)
+  }
+  void rev
 
   return (
     <ResourcesShell>
@@ -257,24 +252,44 @@ function ResourcesInner() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {CONNECTORS.map((c) => (
-                <CatalogCard
-                  key={c.id}
-                  name={c.name}
-                  description={c.description}
-                  initials={c.initials}
-                  iconColor={c.color}
-                  status={c.status}
-                  actionLabel="Connect"
-                  onAction={
-                    c.status === "available"
-                      ? () => toast.info(`Mock: Connect ${c.name}`)
+              {CONNECTORS.map((c) => {
+                const status = statusOf(c)
+                return (
+                  <CatalogCard
+                    key={c.id}
+                    name={c.name}
+                    description={c.description}
+                    initials={c.initials}
+                    status={status}
+                    actionLabel={status === "connected" ? "Disconnect" : "Connect"}
+                    onAction={
+                      status === "connected" ? () => disconnect(c)
+                      : status === "available" ? () => setConnecting(c)
                       : undefined
-                  }
-                />
-              ))}
+                    }
+                  />
+                )
+              })}
             </div>
           )}
+
+          {/* Mock OAuth — no real sign-in (wireframe). */}
+          <Dialog open={!!connecting} onOpenChange={(o) => !o && setConnecting(null)}>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Connect {connecting?.name}</DialogTitle>
+                <DialogDescription>
+                  You&apos;ll be sent to {connecting?.name} to authorize access, then returned here.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setConnecting(null)}>Cancel</Button>
+                <Button onClick={() => connecting && authorize(connecting)}>
+                  Authorize {connecting?.name}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* Vendor Credentials tab */}
