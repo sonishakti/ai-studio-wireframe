@@ -505,6 +505,18 @@ export function AgentWizard({
     })
   }
 
+  // Apply an edited-JSON patch from the Custom config drawer (F4). Snapshot
+  // first so a bad paste is one Undo away.
+  const applyConfigPatch = (patch: Partial<AgentDraft>) => {
+    const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
+    dirty.current = true
+    setDraft((d) => ({ ...d, ...patch }))
+    toast.success("Config applied", {
+      description: "Your JSON edits are in the draft.",
+      action: { label: "Undo", onClick: () => { dirty.current = true; setDraft(before) } },
+    })
+  }
+
   // Picking a voice seeds the draft. No jump: on the one-pager the next step
   // is already visible right below.
   const selectVoice = (v: VoiceArtifact) => {
@@ -633,7 +645,7 @@ export function AgentWizard({
         <div className="flex shrink-0 items-center gap-2">
             {/* The whole agent on one read-only surface, with per-section jump
                 links into the editing steps. */}
-            <CustomConfigDrawer draft={draft} onEditStep={openRow} />
+            <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} />
             {onCreateNew && (
               <Button variant="outline" size="sm" className="gap-1.5" onClick={onCreateNew}>
                 <Plus className="h-4 w-4" aria-hidden /> New agent
