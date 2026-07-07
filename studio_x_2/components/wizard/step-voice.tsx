@@ -2,11 +2,13 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Pencil } from "lucide-react"
+import { Plus, Pencil, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { VoiceBrowser } from "@/components/wizard/voice-browser"
 import {
   allVoices,
   PRESET_VOICES,
@@ -44,6 +46,7 @@ export function StepVoice({
 
   const selected = draft.voice ? voices.find((v) => v.id === draft.voice!.id) : undefined
   const origin = draft.agentId ?? "new"
+  const [browserOpen, setBrowserOpen] = React.useState(false)
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
   // Hand the agent's current engine to the Playground so customizing starts
   // from where it runs today, then navigate (stack-move review, 2026-07-07).
@@ -61,32 +64,38 @@ export function StepVoice({
         </p>
       </header>
 
+      {/* Browse the full catalog (F5) — filters, traits, sample, voice IDs. */}
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Voice</Label>
-        <Select
-          value={draft.voice?.id ?? ""}
-          onValueChange={(id) => {
-            const v = voices.find((x) => x.id === id)
-            if (v) onSelectVoice(v)
-          }}
+        <button
+          type="button"
+          onClick={() => setBrowserOpen(true)}
+          aria-label="Browse voices"
+          className={cn(
+            "flex w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          )}
         >
-          <SelectTrigger className="w-full text-sm" aria-label="Voice">
-            <SelectValue placeholder="Pick a voice" />
-          </SelectTrigger>
-          <SelectContent>
-            {voices.map((v) => (
-              <SelectItem key={v.id} value={v.id} textValue={v.name}>
-                <span className="flex min-w-0 items-baseline gap-2">
-                  <span className="font-medium">{v.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {v.tagline}{v.kind === "custom" ? " · Custom" : ""}
-                  </span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {selected ? (
+            <span className="flex min-w-0 items-baseline gap-2">
+              <span className="font-medium">{selected.name}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {selected.tagline}{selected.kind === "custom" ? " · Custom" : ""}
+              </span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Browse voices</span>
+          )}
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+        </button>
       </div>
+
+      <VoiceBrowser
+        open={browserOpen}
+        onOpenChange={setBrowserOpen}
+        voices={voices}
+        selectedId={draft.voice?.id}
+        onSelect={onSelectVoice}
+      />
 
       {selected ? (
         <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">

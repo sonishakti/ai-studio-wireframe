@@ -17,14 +17,14 @@ import { stackFor, type AgentStack } from "@/lib/campaign-data"
 
 export type VoiceKind = "preset" | "custom"
 
-/** A preset voice's canonical engine: the balanced cascade on ElevenLabs with
- *  the preset's own TTS voice, so vendor + voice are always coherent (a preset
+/** A preset voice's canonical engine: the balanced cascade with the preset's
+ *  own TTS vendor + voice, so vendor + voice are always coherent (a preset
  *  voice can never present as "Azure + rachel"). */
-const presetStack = (ttsVoice: string): AgentStack => ({
+const presetStack = (ttsVoice: string, vendor = "ElevenLabs"): AgentStack => ({
   ...stackFor("balanced"),
   pipeline: "stt-llm-tts",
   language: "English",
-  tts: { vendor: "ElevenLabs", voice: ttsVoice },
+  tts: { vendor, voice: ttsVoice },
 })
 
 export interface VoiceArtifact {
@@ -50,61 +50,51 @@ export interface VoiceArtifact {
    *  saved before this change may lack one → the Playground falls back to the
    *  balanced default. */
   stack?: AgentStack
+  // ── Browser metadata (F5 voice browser) — presets carry these for filtering. ──
+  /** Voice provider shown as a tab in the browser (our real TTS vendors). */
+  provider?: "ElevenLabs" | "Azure"
+  gender?: "Male" | "Female" | "Neutral"
+  accent?: string
+  /** Best-fit use, e.g. "Support", "Sales", "Narration". */
+  voiceType?: string
+  /** Short descriptor chips shown in the browser row. */
+  traits?: string[]
+  /** Display voice id, e.g. "11labs-rachel". */
+  voiceId?: string
   /** Where a custom voice came from — "Playground" or an import source. */
   source?: string
 }
 
 // ─── Preset catalog (immutable) ───────────────────────────────────────────────
 
+/** Compact factory — keeps the (now larger) catalog readable. */
+const V = (o: {
+  id: string; name: string; tagline: string; personality: string; tone: string
+  ttsVoice: string; firstMessage: string; provider?: VoiceArtifact["provider"]
+  gender: VoiceArtifact["gender"]; accent: string; voiceType: string; traits: string[]; voiceId: string
+}): VoiceArtifact => ({
+  id: o.id, name: o.name, kind: "preset", tagline: o.tagline, personality: o.personality,
+  tone: o.tone, language: "en-US", ttsVoice: o.ttsVoice, firstMessage: o.firstMessage,
+  stack: presetStack(o.ttsVoice, o.provider ?? "ElevenLabs"),
+  provider: o.provider ?? "ElevenLabs", gender: o.gender, accent: o.accent,
+  voiceType: o.voiceType, traits: o.traits, voiceId: o.voiceId,
+})
+
 export const PRESET_VOICES: VoiceArtifact[] = [
-  {
-    id: "voice_aria",
-    name: "Aria",
-    kind: "preset",
-    tagline: "Warm, concise support generalist",
-    personality: "Warm, concise, and professional. Solves first, escalates only when needed.",
-    tone: "Friendly",
-    language: "en-US",
-    ttsVoice: "rachel",
-    firstMessage: "Hi, thanks for calling. How can I help you today?",
-    stack: presetStack("rachel"),
-  },
-  {
-    id: "voice_nova",
-    name: "Nova",
-    kind: "preset",
-    tagline: "Crisp, persuasive sales voice",
-    personality: "Confident and persuasive. Drives toward a clear next step, respects a no.",
-    tone: "Professional",
-    language: "en-US",
-    ttsVoice: "adam",
-    firstMessage: "Hi! This is a quick call about your account. Do you have a moment?",
-    stack: presetStack("adam"),
-  },
-  {
-    id: "voice_sage",
-    name: "Sage",
-    kind: "preset",
-    tagline: "Calm, patient, careful with detail",
-    personality: "Calm, patient, and reassuring. Explains clearly and never rushes the caller.",
-    tone: "Neutral",
-    language: "en-US",
-    ttsVoice: "bella",
-    firstMessage: "Hello, you've reached support. Take your time. What can I help with?",
-    stack: presetStack("bella"),
-  },
-  {
-    id: "voice_max",
-    name: "Max",
-    kind: "preset",
-    tagline: "Upbeat, energetic qualifier",
-    personality: "Upbeat and energetic. Quickly qualifies intent and keeps momentum.",
-    tone: "Playful",
-    language: "en-US",
-    ttsVoice: "josh",
-    firstMessage: "Hey there! Thanks for reaching out. What brings you in today?",
-    stack: presetStack("josh"),
-  },
+  V({ id: "voice_aria", name: "Aria", tagline: "Warm, concise support generalist", personality: "Warm, concise, and professional. Solves first, escalates only when needed.", tone: "Friendly", ttsVoice: "rachel", firstMessage: "Hi, thanks for calling. How can I help you today?", gender: "Female", accent: "American", voiceType: "Support", traits: ["Warm", "Clear"], voiceId: "11labs-rachel" }),
+  V({ id: "voice_nova", name: "Nova", tagline: "Crisp, persuasive sales voice", personality: "Confident and persuasive. Drives toward a clear next step, respects a no.", tone: "Professional", ttsVoice: "adam", firstMessage: "Hi! This is a quick call about your account. Do you have a moment?", gender: "Male", accent: "American", voiceType: "Sales", traits: ["Confident", "Crisp"], voiceId: "11labs-adam" }),
+  V({ id: "voice_sage", name: "Sage", tagline: "Calm, patient, careful with detail", personality: "Calm, patient, and reassuring. Explains clearly and never rushes the caller.", tone: "Neutral", ttsVoice: "bella", firstMessage: "Hello, you've reached support. Take your time. What can I help with?", gender: "Female", accent: "American", voiceType: "Support", traits: ["Calm", "Patient"], voiceId: "11labs-bella" }),
+  V({ id: "voice_max", name: "Max", tagline: "Upbeat, energetic qualifier", personality: "Upbeat and energetic. Quickly qualifies intent and keeps momentum.", tone: "Playful", ttsVoice: "josh", firstMessage: "Hey there! Thanks for reaching out. What brings you in today?", gender: "Male", accent: "American", voiceType: "Sales", traits: ["Upbeat", "Energetic"], voiceId: "11labs-josh" }),
+  V({ id: "voice_ivy", name: "Ivy", tagline: "Bright, friendly receptionist", personality: "Bright and welcoming. Greets warmly and routes callers quickly.", tone: "Friendly", ttsVoice: "rachel", firstMessage: "Hi! Thanks for calling. Who would you like to reach?", gender: "Female", accent: "British", voiceType: "Reception", traits: ["Bright", "Friendly"], voiceId: "11labs-ivy" }),
+  V({ id: "voice_theo", name: "Theo", tagline: "Measured, trustworthy narrator", personality: "Measured and articulate. Great for explanations and read-outs.", tone: "Neutral", ttsVoice: "blake", firstMessage: "Hello. Let me walk you through this step by step.", gender: "Male", accent: "British", voiceType: "Narration", traits: ["Measured", "Articulate"], voiceId: "11labs-theo" }),
+  V({ id: "voice_luna", name: "Luna", tagline: "Soft, empathetic care voice", personality: "Soft and empathetic. Reassures anxious callers and listens well.", tone: "Friendly", ttsVoice: "turbo", firstMessage: "Hi, I'm here to help. Tell me what's going on.", gender: "Female", accent: "American", voiceType: "Healthcare", traits: ["Empathetic", "Soft"], voiceId: "11labs-luna" }),
+  V({ id: "voice_rex", name: "Rex", tagline: "Direct, no-nonsense operator", personality: "Direct and efficient. Gets to the point and resolves fast.", tone: "Professional", ttsVoice: "adam", firstMessage: "Support here. What can I fix for you?", gender: "Male", accent: "American", voiceType: "Support", traits: ["Direct", "Fast"], voiceId: "11labs-rex" }),
+  V({ id: "voice_mia", name: "Mia", tagline: "Playful, gen-Z friendly", personality: "Playful and casual. Keeps it light and human.", tone: "Playful", ttsVoice: "bella", firstMessage: "Heyy! What's up, how can I help?", gender: "Female", accent: "Australian", voiceType: "Reception", traits: ["Playful", "Casual"], voiceId: "11labs-mia" }),
+  V({ id: "voice_owen", name: "Owen", tagline: "Confident closer", personality: "Confident and warm. Builds rapport and closes with clarity.", tone: "Professional", ttsVoice: "josh", firstMessage: "Hi, glad I caught you. Got two minutes?", gender: "Male", accent: "American", voiceType: "Sales", traits: ["Confident", "Warm"], voiceId: "11labs-owen" }),
+  V({ id: "voice_zoe", name: "Zoe", tagline: "Neutral, professional assistant", personality: "Neutral and professional. Clear and dependable across tasks.", tone: "Neutral", ttsVoice: "rachel", firstMessage: "Hello, how can I assist you today?", gender: "Female", accent: "Canadian", voiceType: "Assistant", traits: ["Neutral", "Clear"], voiceId: "11labs-zoe" }),
+  V({ id: "voice_kai", name: "Kai", tagline: "Youthful tech-support voice", personality: "Curious and helpful. Explains tech simply, never condescending.", tone: "Friendly", ttsVoice: "blake", firstMessage: "Hi! Let's get this sorted. What's happening?", gender: "Male", accent: "American", voiceType: "Support", traits: ["Helpful", "Youthful"], voiceId: "11labs-kai" }),
+  V({ id: "voice_jenny", name: "Jenny", tagline: "Azure neural, natural read", personality: "Natural and even-toned. A dependable default for any flow.", tone: "Neutral", ttsVoice: "en-US-Jenny", firstMessage: "Hi, thanks for calling. How can I help?", provider: "Azure", gender: "Female", accent: "American", voiceType: "Assistant", traits: ["Natural", "Even"], voiceId: "azure-jenny" }),
+  V({ id: "voice_guy", name: "Guy", tagline: "Azure neural, steady baritone", personality: "Steady and clear. Good for confirmations and read-backs.", tone: "Professional", ttsVoice: "en-US-Guy", firstMessage: "Hello. I can help you with that.", provider: "Azure", gender: "Male", accent: "American", voiceType: "Assistant", traits: ["Steady", "Clear"], voiceId: "azure-guy" }),
 ]
 
 export function getPresetVoice(id: string): VoiceArtifact | undefined {
