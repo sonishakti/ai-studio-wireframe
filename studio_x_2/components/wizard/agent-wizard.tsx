@@ -468,7 +468,7 @@ export function AgentWizard({
     // Deep-clone: the baseline must never share references with the live draft.
     update(JSON.parse(JSON.stringify(slice)) as Partial<AgentDraft>)
     toast("Step reset", {
-      description: isLive ? "Restored this step's live values." : "Cleared this step's changes.",
+      description: "Restored this step's live values.",
     })
   }
 
@@ -781,16 +781,15 @@ export function AgentWizard({
                     )}>
                       {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Icon className="h-3.5 w-3.5" aria-hidden />}
                     </span>
+                    {/* No Done/Pending/Edited badges (owner calls, 2026-07-07):
+                        the check circle already carries the state; pending
+                        edits surface once, in the deploy block's status line. */}
                     <h2 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h2>
-                    {/* No "Edited" tag (owner call, 2026-07-07): pending edits
-                        surface once, in the deploy block's status line. */}
-                    {done ? (
-                      <Badge variant="outline" className="shrink-0 border-success/40 bg-success/10 text-success">Done</Badge>
-                    ) : (
-                      <Badge variant="outline" className="shrink-0 text-muted-foreground">Pending</Badge>
-                    )}
                   </div>
-                  {n < 5 && (
+                  {/* LIVE agents only: with autosave there is no Save/Cancel,
+                      so this is the one way back to the deployed config after
+                      an accidental edit. Drafts have nothing to revert TO. */}
+                  {isLive && n < 5 && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -798,7 +797,7 @@ export function AgentWizard({
                       disabled={!stepDirty(n)}
                       onClick={() => resetStep(n)}
                     >
-                      <Undo2 className="h-3.5 w-3.5" aria-hidden /> {isLive ? "Reset to live" : "Reset"}
+                      <Undo2 className="h-3.5 w-3.5" aria-hidden /> Reset to live
                     </Button>
                   )}
                 </header>
