@@ -66,3 +66,26 @@ Edited chips + honest deploy copy + Saved chip, Reset to live reverts +
 disables), fresh blank draft (0 of 5, manifests, "Choose a voice."), preset
 cards, dropdown voice picker. Deployed + prod-verified (one-pager markers
 live, em-dash count on /agents = 0).
+
+## Residual-audit round (same day, commit `faaafaf`)
+
+Fresh-eyes audit (3 lenses x 6 findings, adversarially verified; 17 confirmed,
+one reproduced in jsdom) + live walkthrough. All high/medium findings fixed:
+deep-link scroll self-cancellation, resetStep(2) orphaning channel config,
+typeStash single-slot overwrite, edit-mode ?dc= clobbering restored edits via
+a stale ref, ghost "Resuming unsaved edits" after Reset to live, template
+seeds lost to an immediate wizard remount on the standalone route (seeds now
+persist synchronously), xl two-column crush at 1280-1440 (moved to 2xl + capped
+at 4K), sub-lg strip alignment + tappable step dots, one progress fraction,
+honest rail Talk button, Estimate row on the Deploy review, import-sheet
+em dashes. Dynamic client routes (/agents/[id]/edit·test, /deploy/
+phone-numbers/[id], /extensions/[name]) now pre-generate mock ids and build
+static. Skipped consciously: touch tooltips for rail recaps, hugging section
+card width (uniform edge kept).
+
+⚠️ Verification gotcha discovered: Chrome (via the MCP automation) DEFERS
+React hydration in background tabs and in occluded windows — pages serve SSR
+HTML but never become interactive until visible. This mimics "the route is
+broken" perfectly (no console errors, chunks load). Always verify hydration
+in the FOCUSED tab of a VISIBLE window, and wait for an interactivity signal,
+not a fixed delay.
