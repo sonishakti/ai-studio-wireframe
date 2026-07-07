@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Check, Mic, Plus, Undo2, SlidersHorizontal, ChevronDown } from "lucide-react"
+import { Rocket, Check, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +17,7 @@ import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { StepVoice } from "@/components/wizard/step-voice"
 import { StepAdvanced } from "@/components/wizard/step-advanced"
+import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
@@ -794,16 +795,22 @@ export function AgentWizard({
           {/* Optional depth — power-user sections, not part of "N of 5". */}
           <div className="space-y-0.5">
             <p className="px-2.5 pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground/70">Optional</p>
-            <button
-              type="button"
-              onClick={() => openOptional("advanced")}
-              className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40"
-            >
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
-                <SlidersHorizontal className="h-3 w-3" aria-hidden />
-              </span>
-              <span className="text-sm font-medium">Advanced</span>
-            </button>
+            {([
+              { key: "advanced" as const, label: "Advanced", icon: SlidersHorizontal },
+              { key: "analysis" as const, label: "Analysis", icon: ListChecks },
+            ]).map((o) => (
+              <button
+                key={o.key}
+                type="button"
+                onClick={() => openOptional(o.key)}
+                className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40"
+              >
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
+                  <o.icon className="h-3 w-3" aria-hidden />
+                </span>
+                <span className="text-sm font-medium">{o.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Deploy state — honest about pending edits (audit fix: every
@@ -917,6 +924,21 @@ export function AgentWizard({
               value={draft.advanced}
               onChange={(advanced) => update({ advanced })}
               realtime={draft.stack.pipeline === "mllm"}
+            />
+          </OptionalSection>
+
+          {/* Optional depth: Analysis / structured outputs (F8). */}
+          <OptionalSection
+            id="wizard-opt-analysis"
+            icon={ListChecks}
+            title="Analysis"
+            summary="Transcription · structured data points"
+            open={optOpen.analysis}
+            onOpenChange={(o) => setOptOpen((s) => ({ ...s, analysis: o }))}
+          >
+            <StepAnalysis
+              value={draft.analysis}
+              onChange={(analysis) => update({ analysis })}
             />
           </OptionalSection>
         </div>
