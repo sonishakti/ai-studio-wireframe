@@ -46,6 +46,38 @@ export const STEPS: StepInfo[] = [
   { n: 5, title: "Deploy", value: "Deployed · live on +1 (628) 555-0188", manifest: "Review everything · Go live", done: true },
 ]
 
+/** Per-step configuration fields — the RIGHT card renders these upfront so
+ *  the selected step's config is always visible (master-detail direction). */
+export const STEP_FIELDS: Record<number, { label: string; value: string }[]> = {
+  1: [
+    { label: "Persona", value: "Aria (preset)" },
+    { label: "Pipeline", value: "STT · LLM · TTS" },
+    { label: "Preset", value: "Balanced" },
+    { label: "STT", value: "Deepgram Nova-2" },
+    { label: "LLM", value: "OpenAI GPT-4o mini" },
+    { label: "TTS · Voice", value: "ElevenLabs · turbo" },
+    { label: "Language", value: "English" },
+  ],
+  2: [
+    { label: "Type", value: "Inbound" },
+    { label: "Options", value: "Batch calls · Inbound · Code / SDK" },
+  ],
+  3: [
+    { label: "System prompt", value: "Helpful, friendly, and clear — answers questions and gets things done." },
+    { label: "Greeting", value: "Hi, thanks for calling — how can I help you today?" },
+    { label: "Knowledge", value: "0 attached" },
+    { label: "Connectors", value: "0 attached" },
+  ],
+  4: [
+    { label: "Mode", value: "Phone number" },
+    { label: "Number", value: "+1 (628) 555-0188" },
+  ],
+  5: [
+    { label: "Status", value: "Deployed · live on +1 (628) 555-0188" },
+    { label: "Checklist", value: "Everything's set — redeploy to push changes" },
+  ],
+}
+
 export const DEPLOY_STATE = {
   headline: "Live on +1 (628) 555-0188",
   sub: "Edit any step — changes go out when you redeploy.",
