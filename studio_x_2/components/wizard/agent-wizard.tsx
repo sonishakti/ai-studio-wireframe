@@ -6,6 +6,7 @@ import { Rocket, Check, Mic, Plus, Undo2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
@@ -459,6 +460,11 @@ export function AgentWizard({
   const resetStep = (n: number) => {
     const base = baseline.current
     if (!base) return
+    // Snapshot what's being wiped: reset is one click and must offer a way
+    // back (owner call, 2026-07-07).
+    const before = JSON.parse(JSON.stringify(
+      n === 2 ? { type: draftRef.current.type, config: draftRef.current.config } : stepSlice(draftRef.current, n),
+    )) as Partial<AgentDraft>
     dirty.current = true
     // Type and channel setup are coupled: restoring the type WITHOUT the
     // baseline config would bring back an inbound agent with its number gone
@@ -467,8 +473,35 @@ export function AgentWizard({
     if (n === 2) typeStash.current = {}
     // Deep-clone: the baseline must never share references with the live draft.
     update(JSON.parse(JSON.stringify(slice)) as Partial<AgentDraft>)
-    toast("Step reset", {
-      description: "Restored this step's live values.",
+    toast("Step reset to the live version", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          dirty.current = true
+          update(before)
+        },
+      },
+    })
+  }
+
+  // Whole-agent discard: reverting three edited steps must not take three
+  // clicks. Lives in the deploy block, only when something is pending.
+  const discardEdits = () => {
+    const base = baseline.current
+    if (!base) return
+    const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
+    dirty.current = true
+    typeStash.current = {}
+    setDraft(JSON.parse(JSON.stringify(base)) as AgentDraft)
+    toast("Edits discarded", {
+      description: "Back to the live configuration.",
+      action: {
+        label: "Undo",
+        onClick: () => {
+          dirty.current = true
+          setDraft(before)
+        },
+      },
     })
   }
 
@@ -752,6 +785,13 @@ export function AgentWizard({
             <Button className="w-full gap-1.5" onClick={publish}>
               <Rocket className="h-4 w-4" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
             </Button>
+            {/* One action to walk away from ALL pending edits (owner call,
+                2026-07-07) — shown only when something is actually pending. */}
+            {isLive && anyEdited && (
+              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
+                Discard edits
+              </Button>
+            )}
             {saveState !== "idle" && (
               <p className="text-center text-xs text-muted-foreground" role="status" aria-live="polite">
                 {saveState === "saving" ? "Saving…" : "Saved"}
@@ -790,15 +830,20 @@ export function AgentWizard({
                       so this is the one way back to the deployed config after
                       an accidental edit. Drafts have nothing to revert TO. */}
                   {isLive && n < 5 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0 gap-1.5 text-muted-foreground"
-                      disabled={!stepDirty(n)}
-                      onClick={() => resetStep(n)}
-                    >
-                      <Undo2 className="h-3.5 w-3.5" aria-hidden /> Reset to live
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0 gap-1.5 text-muted-foreground"
+                          disabled={!stepDirty(n)}
+                          onClick={() => resetStep(n)}
+                        >
+                          <Undo2 className="h-3.5 w-3.5" aria-hidden /> Reset to live
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Reset this step to the live version</TooltipContent>
+                    </Tooltip>
                   )}
                 </header>
                 <div className={cn("px-5 py-5", n !== 1 && n !== 3 && "[&>*]:max-w-4xl")}>
