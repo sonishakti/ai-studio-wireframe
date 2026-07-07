@@ -46,7 +46,7 @@ export const CHANNELS: {
   // Batch leads — campaign is the flagship channel (LEARNINGS §20, 2026-06-17).
   { id: "batch", label: "Batch calls", title: "Launch batch calls", desc: "Upload a contact list and your agent dials each one.", icon: PhoneOutgoing },
   { id: "inbound", label: "Inbound", title: "Answer a phone number", desc: "Your agent picks up every inbound call, 24/7.", icon: PhoneIncoming },
-  { id: "code", label: "Code / SDK", title: "Add to your app", desc: "Drop in the SDK or call the API — no number needed.", icon: Code2 },
+  { id: "code", label: "Code / SDK", title: "Add to your app", desc: "Drop in the SDK or call the API. No number needed.", icon: Code2 },
   { id: "web", label: "Web widget", title: "Web widget", desc: "A floating chat/voice widget for your website.", icon: Globe },
 ]
 
@@ -129,7 +129,7 @@ export function InboundConfig({
   const [name, setName] = React.useState("")
   const [number, setNumber] = React.useState(available[0]?.id ?? "")
   const [greeting, setGreeting] = React.useState(
-    "Hi, thanks for calling — how can I help you today?",
+    "Hi, thanks for calling. How can I help you today?",
   )
   const [prompt, setPrompt] = React.useState(
     "You answer inbound calls. Be concise, helpful, and route to a human if asked.",
@@ -162,7 +162,7 @@ export function InboundConfig({
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          No number free? Agora routes your own carrier number — connect one via SIP.
+          No number free? Agora routes your own carrier number. Connect one via SIP.
         </p>
       </div>
 
@@ -205,7 +205,7 @@ export function BatchConfig({
   const [name, setName] = React.useState("")
   const [file, setFile] = React.useState<string | null>(null)
   const [greeting, setGreeting] = React.useState(
-    "Hi, this is a quick call from Acme — do you have a moment?",
+    "Hi, this is a quick call from Acme. Do you have a moment?",
   )
   const [prompt, setPrompt] = React.useState(
     "You make outbound calls to the uploaded contacts. Be brief and respect a no.",
@@ -241,7 +241,7 @@ export function BatchConfig({
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          Columns become dynamic variables your agent can use — name, account, etc.
+          Columns become dynamic variables your agent can use: name, account, etc.
         </p>
       </div>
 
@@ -289,7 +289,7 @@ await client.connect()`
   return (
     <ConfigCard title="Embed in your app">
       <p className="text-sm text-muted-foreground">
-        Install the SDK and connect to this agent. No phone number needed — it runs
+        Install the SDK and connect to this agent. No phone number needed. It runs
         wherever your app does.
       </p>
       <CodeBlock language="typescript" filename="agent.ts">
@@ -337,7 +337,7 @@ export function WebWidgetConfig({ agentId }: { agentId: string }) {
       </div>
       <p className="text-sm text-muted-foreground">
         Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
-        any page — the floating widget appears, wired to this agent.
+        any page. The floating widget appears, wired to this agent.
       </p>
       <CodeBlock language="html" filename="index.html">
         {snippet}

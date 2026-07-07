@@ -23,7 +23,7 @@ import {
   type AgentType,
   type InboundMode,
 } from "@/lib/wizard-draft"
-import { stepTitle, type StepProps } from "@/components/wizard/types"
+import { type StepProps } from "@/components/wizard/types"
 
 /**
  * Step 4 — Configure. Branches on `draft.type`:
@@ -40,17 +40,13 @@ export function StepConfigure({ draft, update }: StepProps) {
 
   return (
     <div className="space-y-5">
-      {/* Heading mirrors the row/sheet title (stepTitle) so the drawer never
-          says "Configure" while the checklist says "Connect a phone number". */}
-      <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">{stepTitle(4, draft)}</h2>
-        <p className="text-sm text-muted-foreground">
-          {draft.type === "inbound" && "Choose how callers reach your agent."}
-          {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
-          {draft.type === "code" && "Drop the agent into your own app."}
-          {!draft.type && "What you set up here depends on how the agent runs — pick that first."}
-        </p>
-      </header>
+      {/* No inner h2: the section header above already carries stepTitle(4). */}
+      <p className="text-sm text-muted-foreground">
+        {draft.type === "inbound" && "Choose how callers reach your agent."}
+        {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
+        {draft.type === "code" && "Drop the agent into your own app."}
+        {!draft.type && "What you set up here depends on how the agent runs. Pick that first."}
+      </p>
 
       {/* No type yet → never an empty drawer: choose it right here. */}
       {!draft.type && (
@@ -90,7 +86,7 @@ function InboundConfigure({
   const setMode = (m: InboundMode) => {
     update({ config: { ...draft.config, inbound: { ...draft.config.inbound, mode: m } } })
     if (m === "web" && currentId) {
-      toast("Switched to Web widget", { description: "Your phone number stays attached — switch back any time." })
+      toast("Switched to Web widget", { description: "Your phone number stays attached. Switch back any time." })
     }
   }
   const setNumber = (numberId: string) =>
@@ -129,7 +125,7 @@ function InboundConfigure({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              No number free? Agora routes your own carrier number — connect one via SIP in Resources › Numbers.
+              No number free? Agora routes your own carrier number. Connect one via SIP in Resources › Numbers.
             </p>
           </div>
         </ConfigCard>
@@ -218,7 +214,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Fix it either way: add these as columns to your contacts CSV, or remove them from the system prompt. Deploy stays blocked until they match.
+                Add these columns to your contacts CSV, or remove them from the system prompt. Deploy stays blocked until they match.
               </p>
             </div>
           </div>
@@ -316,7 +312,7 @@ await client.stop()`
     <div className="space-y-4">
       <ConfigCard title="Add to your app">
         <p className="text-sm text-muted-foreground">
-          Install the SDK, then drop the agent into any Agora channel. No phone number needed — it runs wherever your app does.
+          Install the SDK, then drop the agent into any Agora channel. No phone number needed. It runs wherever your app does.
         </p>
         <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
         <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
@@ -324,7 +320,7 @@ await client.stop()`
 
       <ConfigCard title="Stop the agent">
         <p className="text-sm text-muted-foreground">
-          End the session when you&apos;re done — releases the channel and stops billing for it.
+          End the session when you&apos;re done. This releases the channel and stops billing for it.
         </p>
         <CodeBlock language="typescript" filename="stop.ts">{stop}</CodeBlock>
       </ConfigCard>

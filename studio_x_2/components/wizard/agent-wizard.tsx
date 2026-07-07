@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Check, ChevronRight, ChevronLeft, Mic, Plus } from "lucide-react"
+import { Rocket, Check, Mic, Plus, Undo2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -35,17 +35,19 @@ import { toast } from "sonner"
 /**
  * AgentWizard — the unified creation surface (new · edit · onboarding · empty).
  *
- * A CHECKLIST + EDIT DRAWERS. The whole path is visible at a glance; each row
- * opens a focused drawer to edit that step. NOTHING IS LOCKED — every step is
- * openable and fully editable at any time (the user needs full visibility).
- * Completion only drives the ✓ + the progress count + a "Start here" nudge on
- * the suggested next step. Publish is a HINT, not a gate: the reason is shown,
- * the button still works. Deep-links: `?step=N` opens a step, `?dc=` presets a
- * channel + opens Configure, `?artifact=` selects a custom voice. Draft autosaves.
+ * A SCROLL-SPY ONE-PAGER (composition winner C5, 2026-07-07): all five steps
+ * render open in the main column; a sticky rail holds the agent lockup, the
+ * step list (spy-highlighted, with value recaps), and the live deploy state.
+ * NOTHING IS LOCKED — every field is editable at any time, zero clicks to
+ * reach any of it. Publish is a HINT, not a gate: the reason is shown, the
+ * button still works. Deep-links: `?step=N` scrolls to a section, `?dc=`
+ * presets a channel + scrolls to Configure, `?artifact=` selects a custom
+ * voice. Draft autosaves; live agents get per-section "Reset to live".
  */
 export function AgentWizard({
   id,
   landing,
+  blank,
   onCreateNew,
   onBrowseTemplates,
 }: {
@@ -53,6 +55,11 @@ export function AgentWizard({
   /** Rendered inline on /agents (not the standalone edit route) — show the
    *  first-run chrome (secondary-starts line + inviting heading + create). */
   landing?: boolean
+  /** Start truly blank, skipping the draft restore. A PROP (not just ?blank=1)
+   *  because "New agent" remounts this component in the same tick as its
+   *  router.push — the mount effect would read the OLD URL and resurrect a
+   *  stale draft (race found in the 2026-07-07 walkthrough). */
+  blank?: boolean
   onCreateNew?: () => void
   /** Opens the starter-templates sheet — templates must be reachable from the
    *  default landing, not just the list view (heuristic-eval #4). */
@@ -136,7 +143,7 @@ export function AgentWizard({
         departing === "outbound" ? "contacts CSV and caller-ID number"
         : departing === "inbound" ? "phone number" : "code setup"
       toast(`Switched to ${nameOf(next)}`, {
-        description: `Your ${nameOf(departing)} setup — ${detail} — was set aside, not deleted.`,
+        description: `Your ${nameOf(departing)} setup (${detail}) was set aside, not deleted.`,
         action: { label: "Undo", onClick: restoreTypeStash },
       })
     } else {
@@ -173,7 +180,7 @@ export function AgentWizard({
   const rowDetail = (n: number): string => {
     const summary = stepSummary(n)
     if (summary) return summary
-    if (n === 5 && configReady) return "Everything's set — review and go live"
+    if (n === 5 && configReady) return "Review your agent and go live"
     return stepManifest(n, draft)
   }
 
@@ -189,8 +196,11 @@ export function AgentWizard({
     const dc = params.get("dc")
     const stepParam = parseInt(params.get("step") ?? "", 10)
     const stepToOpen = stepParam >= 1 && stepParam <= 5 ? stepParam : null
-    // Open the deep-linked step's drawer.
-    const openLater = (n: number) => setOpenStep(n)
+    // Highlight + scroll to the deep-linked step once sections have painted.
+    const openLater = (n: number) => {
+      setOpenStep(n)
+      pendingScroll.current = n
+    }
     // One-shot params must not survive into a refresh (re-eval #4).
     const stripParam = (key: string) => {
       const url = new URL(window.location.href)
@@ -199,14 +209,14 @@ export function AgentWizard({
     }
 
     if (isEdit) {
+      // Reset baseline for a saved agent = its DEPLOYED config ("Reset to
+      // live"), even when unsaved edits are restored on top.
+      baseline.current = agentToDraft(existing!)
       // Unsaved edits survive a refresh via the per-agent slot (#6) —
       // offer a way back to the saved agent rather than silently resuming.
       const unsaved = restoreDraft(existing!.id)
       if (unsaved) {
         setDraft(unsaved)
-        // Undo baseline = the restored draft, NOT the pristine agent — one
-        // "Undo changes" click must never wipe work that survived a refresh.
-        openSnapshot.current = unsaved
         toast("Resuming unsaved edits", {
           description: `${existing!.name} has changes that were never deployed.`,
           action: {
@@ -246,8 +256,9 @@ export function AgentWizard({
 
     // ?blank=1 — an explicitly blank builder ("Create new agent") must not
     // resurrect the previous draft (re-eval #4). The saved slot is left intact.
-    if (params.get("blank") === "1") {
+    if (blank || params.get("blank") === "1") {
       setDraft({ ...EMPTY_DRAFT })
+      baseline.current = { ...EMPTY_DRAFT }
       stripParam("blank")
       if (stepToOpen) openLater(stepToOpen)
       return
@@ -263,8 +274,9 @@ export function AgentWizard({
       const savedHasWork = saved && (saved.name.trim() || saved.systemPrompt.trim() || saved.voice)
       if (savedHasWork) {
         setDraft(saved)
+        baseline.current = saved
         toast("Resumed your draft", {
-          description: `You have unsaved work — kept it instead of starting from ${tpl.name}.`,
+          description: `Kept your unsaved work instead of starting from ${tpl.name}.`,
           action: {
             label: "Reset to template",
             onClick: () => {
@@ -274,10 +286,12 @@ export function AgentWizard({
           },
         })
       } else {
-        setDraft(templateToDraft(tpl))
+        const seeded = templateToDraft(tpl)
+        setDraft(seeded)
+        baseline.current = seeded
         dirty.current = true
         toast.success(`Started from ${tpl.name}`, {
-          description: "Name, prompt, and greeting are pre-filled — tweak anything.",
+          description: "Name, prompt, and greeting are pre-filled. Tweak anything.",
         })
       }
       if (stepToOpen) openLater(stepToOpen)
@@ -290,12 +304,12 @@ export function AgentWizard({
       const v = getVoiceArtifact(artifactId)
       if (v) {
         next = seedFromVoice(next, v)
-        toast.success(`${v.name} selected`, { description: "Custom voice ready — keep building." })
+        toast.success(`${v.name} selected`, { description: "Custom voice ready. Keep building." })
       }
     } else if (restored) {
       const at = firstIncomplete(restored)
-      toast("Draft restored", { description: `Picked up at Step ${at} — ${STEP_TITLES[at - 1]}.` })
-      // Land the selection where the work stopped (the default locked on
+      toast("Draft restored", { description: `Picked up at Step ${at}: ${STEP_TITLES[at - 1]}.` })
+      // Land the highlight where the work stopped (the default locked on
       // first render was computed from the empty draft).
       if (!stepToOpen && !dc) openLater(at)
     }
@@ -304,9 +318,9 @@ export function AgentWizard({
       if (t) next = { ...next, type: t, config: dcToConfig(dc, next.config) }
     }
     setDraft(next)
-    // Undo baseline = what we just landed with — never the pre-restore empty
-    // draft (one "Undo changes" click must not erase restored work).
-    openSnapshot.current = next
+    // Reset baseline = what this visit landed with, never the pre-restore
+    // empty draft (one Reset click must not erase restored work).
+    baseline.current = next
     if (dc) openLater(4)
     else if (stepToOpen) openLater(stepToOpen)
     if (artifactId || dc) dirty.current = true
@@ -337,58 +351,98 @@ export function AgentWizard({
     setSaveState("saved")
   }, [draft], 600)
 
-  // ── Step selection — mirrored into the URL (?step=N via replaceState, so
-  //    refresh restores the selection and the link is shareable, while Back
-  //    still exits the page predictably — heuristic-eval #20). A snapshot taken
-  //    on each selection change powers the footer's "Undo changes" (#18).
-  const openSnapshot = React.useRef<AgentDraft | null>(null)
+  // ── Step navigation — one-pager (2026-07-07): every section is always open;
+  //    "opening" a step means scrolling it into view. ?step=N mirrors explicit
+  //    navigation only (spy-driven highlight changes stay out of the URL).
   const syncStepParam = (n: number | null) => {
     const url = new URL(window.location.href)
     if (n == null) url.searchParams.delete("step")
     else url.searchParams.set("step", String(n))
     window.history.replaceState({}, "", url)
   }
+  const scrollToStep = (n: number) => {
+    document.getElementById(`wizard-step-${n}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+  // While a chosen scroll glides, the spy would re-highlight every section it
+  // passes — mute it for the ride so the clicked step stays selected.
+  const spyMutedUntil = React.useRef(0)
+  const muteSpy = (ms: number) => { spyMutedUntil.current = Date.now() + ms }
   const openRow = (n: number) => {
-    openSnapshot.current = draftRef.current
+    // Set the highlight FIRST: on a short page (everything in one fold, the
+    // 4K case) nothing scrolls, so the click must still give feedback.
     setOpenStep(n)
     syncStepParam(n)
+    muteSpy(800)
+    scrollToStep(n)
   }
   openRowRef.current = openRow
-  // The default selection (and deep links via openLater) bypass openRow —
-  // capture a baseline anyway so "Undo changes" is never a silent no-op
-  // (re-eval #6). Never reset: the right card always shows a step now.
+  // Deep links land before sections paint — scroll after mount settles.
+  const pendingScroll = React.useRef<number | null>(null)
   React.useEffect(() => {
-    if (openSnapshot.current == null) openSnapshot.current = draftRef.current
+    if (pendingScroll.current == null) return
+    const n = pendingScroll.current
+    pendingScroll.current = null
+    muteSpy(1200)
+    const t = setTimeout(() => scrollToStep(n), 80)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openStep])
-  const advanceFrom = (n: number) => {
-    openSnapshot.current = draftRef.current
-    const next = Math.min(5, n + 1)
-    setOpenStep(next)
-    syncStepParam(next)
+
+  // Scroll-spy: the rail highlights the section under the reading line.
+  React.useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (Date.now() < spyMutedUntil.current) return
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible[0]) {
+          const n = Number(visible[0].target.id.replace("wizard-step-", ""))
+          if (n >= 1 && n <= 5) setOpenStep(n)
+        }
+      },
+      { rootMargin: "-15% 0px -65% 0px" },
+    )
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`wizard-step-${i}`)
+      if (el) obs.observe(el)
+    }
+    return () => obs.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── Per-section reset — against a stable baseline: the DEPLOYED config for
+  //    a live agent ("Reset to live"), or the state this visit started from
+  //    for a new draft. Set once by the mount effect. Buttons disable when the
+  //    section is clean, so reset is never a silent no-op or a surprise wipe.
+  const baseline = React.useRef<AgentDraft | null>(null)
+  const stepSlice = (d: AgentDraft, n: number) =>
+    n === 1 ? { voice: d.voice, stack: d.stack }
+    : n === 2 ? { type: d.type }
+    : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, knowledge: d.knowledge, mcp: d.mcp }
+    : { config: d.config }
+  const stepDirty = (n: number) => {
+    const base = baseline.current
+    if (!base) return false
+    return JSON.stringify(stepSlice(draft, n)) !== JSON.stringify(stepSlice(base, n))
   }
-  const backFrom = (n: number) => {
-    openSnapshot.current = draftRef.current
-    const prev = Math.max(1, n - 1)
-    setOpenStep(prev)
-    syncStepParam(prev)
-  }
-  const undoDrawerChanges = () => {
-    const snap = openSnapshot.current
-    if (!snap) return
+  const resetStep = (n: number) => {
+    const base = baseline.current
+    if (!base) return
     dirty.current = true
-    // The header name field stays editable outside the step card — preserve
-    // name + type (re-eval #14), and drop any stale type stash so a later
-    // restore can't reapply old config.
-    setDraft((d) => ({ ...snap, name: d.name, type: d.type }))
-    typeStash.current = null
-    toast("Changes undone", { description: "Everything changed on this step since you selected it was reverted (name and type kept)." })
+    if (n === 2) typeStash.current = null
+    // Deep-clone: the baseline must never share references with the live draft.
+    update(JSON.parse(JSON.stringify(stepSlice(base, n))) as Partial<AgentDraft>)
+    toast("Step reset", {
+      description: isLive ? "Restored this step's live values." : "Cleared this step's changes.",
+    })
   }
 
-  // Picking a voice seeds the draft + chains to the type step.
+  // Picking a voice seeds the draft. No jump: on the one-pager the next step
+  // is already visible right below.
   const selectVoice = (v: VoiceArtifact) => {
     dirty.current = true
     setDraft((d) => seedFromVoice(d, v))
-    setOpenStep(2)
   }
 
   const onImported = (config: ImportedAgentConfig) => {
@@ -411,7 +465,7 @@ export function AgentWizard({
   const publish = () => {
     if (publishingRef.current) return // guard: double-click must not double-publish
     const reason = publishBlockReason(draftRef.current)
-    if (reason) { toast.error("A couple of things to finish first", { description: reason }); return }
+    if (reason) { toast.error("Not ready to deploy yet", { description: reason }); return }
     publishingRef.current = true
     // Disarm any pending debounced autosave BEFORE clearing the slot — a save
     // firing mid-navigation would resurrect the consumed draft (re-eval #16).
@@ -480,9 +534,20 @@ export function AgentWizard({
   }
 
   const blockReason = publishBlockReason(draft)
+  const doneCount = [1, 2, 3, 4, 5].filter(isDone).length
+  // Honest deploy-state line: a live agent with pending edits says so (the
+  // missing dirty signal was the top finding in every operator audit run).
+  const anyEdited = isLive && [1, 2, 3, 4].some(stepDirty)
+  const deploySub = isLive
+    ? anyEdited
+      ? "Edits are not live yet. Redeploy to apply."
+      : "Changes apply on your next redeploy."
+    : blockReason ?? "Review Step 5 and go live."
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 pb-24 sm:px-6">
+    // data-fluid opts out of the layout's 1536px cap: the builder uses the
+    // whole viewport (composition-concept winner C5, 2026-07-07).
+    <div data-fluid className="w-full space-y-6 px-4 py-8 pb-16 sm:px-6 xl:px-10 2xl:px-14">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <header className="space-y-1">
           <h1 className="text-xl font-semibold tracking-tight">
@@ -490,17 +555,15 @@ export function AgentWizard({
           </h1>
           <p className="text-sm text-muted-foreground">
             {landing
-              ? "Talk to your ready-made agent, set it up, and put it live — all on this page."
+              ? "Talk to your ready-made agent, set it up, and put it live."
               : isEdit
-              ? "Open any step to edit it — changes save automatically."
-              : "Five short steps to a live agent. Open any step, in any order — it all saves as you go."}
+              ? "Edit anything below. Changes save automatically."
+              : "Five steps to a live agent, in any order. Changes save automatically."}
           </p>
         </header>
         <div className="flex shrink-0 items-center gap-2">
-            {/* The whole agent on one read-only surface — available in every
-                mode, with per-section jump links into the editing steps.
-                (No "View all agents" button here — the page's Builder | All
-                agents switch already owns that.) */}
+            {/* The whole agent on one read-only surface, with per-section jump
+                links into the editing steps. */}
             <CustomConfigDrawer draft={draft} onEditStep={openRow} />
             {onCreateNew && (
               <Button variant="outline" size="sm" className="gap-1.5" onClick={onCreateNew}>
@@ -510,7 +573,7 @@ export function AgentWizard({
           </div>
       </div>
 
-      {/* Secondary starts stay one quiet line — never a banner competing with
+      {/* Secondary starts stay one quiet line, never a banner competing with
           the H1. Both paths remain one click away. */}
       {(!isEdit || landing) && (
         <p className="text-sm text-muted-foreground">
@@ -534,54 +597,63 @@ export function AgentWizard({
             >
               Import your agent
             </button>
-          </ImportAgentSheet>{" "}
-          — Vapi, Retell, Bland, and ElevenLabs configs map automatically.
+          </ImportAgentSheet>
+          . Vapi, Retell, Bland, and ElevenLabs configs map automatically.
         </p>
       )}
 
-      {/* Slim identity strip — the agent's face stays present, but details and
-          testing live in the on-demand panel (master-detail direction,
-          2026-07-07: the page belongs to the steps + their config). */}
-      <div className="flex items-center gap-3">
-        <AgentSphere size={36} active={testing} />
-        <input
-          value={draft.name}
-          onChange={(e) => update({ name: e.target.value })}
-          placeholder={isEdit ? existing!.name : "Your new agent"}
-          aria-label="Agent name"
-          className="min-w-0 max-w-56 rounded-md bg-transparent px-1 text-base font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
-        />
-        <Badge variant="secondary" className="shrink-0">{cardStatus}</Badge>
-        <span className="hidden truncate text-sm text-muted-foreground sm:block">
-          {isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
-        </span>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Button
-            variant={testing ? "destructive" : "outline"}
-            size="sm"
-            className="gap-1.5"
-            onClick={() => setTalkOpen(true)}
-          >
-            <Mic className="h-4 w-4" aria-hidden /> Talk to {draft.name || "your agent"}
-          </Button>
-        </div>
+      {/* Below lg the rail stacks above the sections and scrolls away, so a
+          slim sticky strip keeps progress + deploy in the fold (C2 harvest). */}
+      <div className="sticky top-14 z-30 -mx-4 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+        <p className="min-w-0 truncate text-sm">
+          <span className="font-medium">{doneCount} of 5 done</span>
+          <span className="text-muted-foreground"> · {deploySub}</span>
+        </p>
+        <Button size="sm" className="shrink-0 gap-1.5" onClick={publish}>
+          <Rocket className="h-3.5 w-3.5" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
+        </Button>
       </div>
 
-      {/* MASTER-DETAIL — two page-level cards (variant-audit round 2 winner
-          P10, 2026-07-07): left = the five steps as ONE unbroken sequence with
-          done/pending states; right = the SELECTED step's real form, upfront.
-          No drawers for config; ?step=N now means selection. */}
-      <div className="grid items-start gap-4 grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]">
-        {/* LEFT card — build steps */}
-        <section className="min-w-0 rounded-xl border border-border bg-card">
-          <header className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-semibold">Build steps</h2>
-            <span className="text-xs text-muted-foreground">{setupCount + (isLive ? 1 : 0)} of 5 done</span>
-          </header>
-          <div className="divide-y divide-border">
+      {/* ONE-PAGER (composition winner C5 "scroll-spy", 2026-07-07): every step
+          renders open in the main column; the sticky rail is agent lockup +
+          scroll-spy step list (with value recaps) + live deploy state. Zero
+          clicks to reach any field; ?step=N scrolls to its section. */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)] 2xl:gap-8">
+        <aside className="min-w-0 space-y-5 lg:sticky lg:top-16 lg:self-start">
+          {/* Agent lockup */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <AgentSphere size={44} active={testing} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    value={draft.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                    placeholder={isEdit ? existing!.name : "Name your agent"}
+                    aria-label="Agent name"
+                    className="min-w-0 flex-1 rounded-md bg-transparent px-1 text-base font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
+                  />
+                  <Badge variant="secondary" className="shrink-0">{cardStatus}</Badge>
+                </div>
+                <p className="truncate px-1 text-sm text-muted-foreground">
+                  {isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant={testing ? "destructive" : "outline"}
+              size="sm"
+              className="w-full gap-1.5"
+              onClick={() => setTalkOpen(true)}
+            >
+              <Mic className="h-4 w-4" aria-hidden /> Talk to {draft.name || "your agent"}
+            </Button>
+          </div>
+
+          {/* Scroll-spy step list — recaps make it a recognition map (C3 harvest). */}
+          <nav aria-label="Build steps" className="space-y-0.5">
             {[1, 2, 3, 4, 5].map((n) => {
               const done = isDone(n)
-              const isSelected = n === selected
               const Icon = STEP_ICONS[n]
               const detail = rowDetail(n)
               return (
@@ -589,130 +661,117 @@ export function AgentWizard({
                   key={n}
                   type="button"
                   onClick={() => openRow(n)}
-                  aria-current={isSelected ? "step" : undefined}
+                  aria-current={n === selected ? "step" : undefined}
                   className={cn(
-                    "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/40",
-                    isSelected && "bg-accent/50",
+                    "flex w-full items-start gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
+                    n === selected && "bg-accent/60",
                   )}
                 >
                   <span className={cn(
-                    "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
-                    done && "border-success/40 bg-success/10 text-success",
-                    !done && isSelected && "border-primary bg-primary/10 text-primary",
-                    !done && !isSelected && "border-border text-muted-foreground",
+                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                    done ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground",
                   )}>
-                    {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Icon className="h-3.5 w-3.5" aria-hidden />}
+                    {done ? <Check className="h-3 w-3" aria-hidden /> : <Icon className="h-3 w-3" aria-hidden />}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium">{stepTitle(n, draft)}</span>
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                      {stepTitle(n, draft)}
+                      {isLive && n < 5 && stepDirty(n) && (
+                        <span className="shrink-0 rounded-full border border-border px-1.5 text-xs font-normal text-muted-foreground">Edited</span>
+                      )}
+                    </span>
                     <span className="line-clamp-1 block text-xs text-muted-foreground" title={detail}>{detail}</span>
                   </span>
-                  <span
-                    role="img"
-                    aria-label={done ? "Done" : "Pending"}
-                    className={cn(
-                      "mt-2 h-1.5 w-1.5 shrink-0 rounded-full",
-                      done ? "bg-success" : "ring-1 ring-border",
-                    )}
-                  />
                 </button>
               )
             })}
-          </div>
-        </section>
+          </nav>
 
-        {/* RIGHT card — the selected step's configuration, always upfront */}
-        <section className="min-w-0 rounded-xl border border-border bg-card">
-          <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
-            {/* In-card breadcrumb: progress lives where you read. */}
-            <p className="min-w-0 truncate text-sm">
-              <span className="font-semibold">{stepTitle(selected, draft)}</span>
-              <span className="text-muted-foreground"> · Step {selected} of 5 · </span>
-              {isDone(selected) ? (
-                <span className="inline-flex items-center gap-1 text-success"><Check className="h-3.5 w-3.5" aria-hidden /> Done</span>
-              ) : (
-                <span className="text-muted-foreground">Pending</span>
-              )}
-            </p>
-            <span className="flex shrink-0 items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7" disabled={selected === 1} aria-label="Previous step" onClick={() => backFrom(selected)}>
-                <ChevronLeft className="h-4 w-4" aria-hidden />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" disabled={selected === 5} aria-label="Next step" onClick={() => advanceFrom(selected)}>
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Button>
-            </span>
-          </header>
-
-          <div className="px-5 py-5">
-            {selected === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
-            {selected === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
-            {selected === 3 && <StepBuild draft={draft} update={update} />}
-            {selected === 4 && <StepConfigure draft={draft} update={update} />}
-            {selected === 5 && (
-              <StepPublish
-                draft={draft}
-                onPublish={publish}
-                onFix={(n) => openRow(n)}
-                talking={testing}
-                onToggleTalk={toggleTest}
-              />
-            )}
-          </div>
-
-          <footer className="flex items-center justify-between gap-3 border-t border-border px-5 py-3">
-            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={undoDrawerChanges}>
-              Undo changes
-            </Button>
-            {selected < 5 ? (
-              <div className="flex min-w-0 items-center gap-3">
-                <p className="line-clamp-1 hidden text-xs text-muted-foreground md:block" title={stepManifest(selected + 1, draft)}>
-                  Up next: {stepTitle(selected + 1, draft)} — {stepManifest(selected + 1, draft)}
-                </p>
-                <Button size="sm" className="shrink-0 gap-1.5" onClick={() => advanceFrom(selected)}>
-                  Continue <ChevronRight className="h-4 w-4" aria-hidden />
-                </Button>
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                {isLive ? "Redeploy pushes your edits to the live agent." : "Deploying starts real traffic — watch it on Monitor."}
+          {/* Deploy state — honest about pending edits (audit fix: every
+              operator run flagged the missing dirty signal). */}
+          <div className={cn(
+            "space-y-2.5 rounded-lg border p-3",
+            isLive ? "border-success/40 bg-success/10" : "border-border bg-card",
+          )}>
+            <p className="text-xs text-muted-foreground">{doneCount} of 5 done</p>
+            <div>
+              <p className="text-sm font-semibold">
+                {isLive ? `Live on ${channelTarget(draft)}` : `${setupCount} of 4 set up`}
               </p>
-            )}
-          </footer>
-        </section>
-      </div>
-
-      {/* Sticky progress + publish (publish is a hint, not a lock). A LIVE
-          agent shows its real state — never "attach a number" contradicting
-          the Live badge (heuristic-eval #2/#13); live gets a quiet success
-          accent (variant-audit harvest, tokens only). */}
-      <div className="sticky bottom-4 z-30">
-        <div className={cn(
-          "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 shadow-sm backdrop-blur",
-          isLive ? "border-success/40 bg-success/10" : "border-border bg-card/95",
-        )}>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">
-              {isLive
-                ? `Live on ${channelTarget(draft)}`
-                : `${setupCount} of 4 set up${setupCount === 4 ? " — ready to deploy" : ""}`}
-            </p>
-            <p className="line-clamp-2 text-sm text-muted-foreground">
-              {isLive
-                ? "Edit any step — changes go out when you redeploy."
-                : blockReason ?? "Everything's set — review Step 5 and go live."}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            {saveState !== "idle" && (
-              <span className="text-xs text-muted-foreground" role="status" aria-live="polite">
-                {saveState === "saving" ? "Saving…" : "Saved"}
-              </span>
-            )}
-            <Button className="gap-1.5" onClick={() => openRow(5)}>
+              <p className="text-xs text-muted-foreground">{deploySub}</p>
+            </div>
+            <Button className="w-full gap-1.5" onClick={publish}>
               <Rocket className="h-4 w-4" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
             </Button>
+            {saveState !== "idle" && (
+              <p className="text-center text-xs text-muted-foreground" role="status" aria-live="polite">
+                {saveState === "saving" ? "Saving…" : "Saved"}
+              </p>
+            )}
           </div>
+        </aside>
+
+        {/* All five steps, open. Sections cap their content width so 4K shows
+            structure, not 900px inputs (audit width-discipline fix). */}
+        <div className="min-w-0 space-y-4">
+          {[1, 2, 3, 4, 5].map((n) => {
+            const done = isDone(n)
+            const Icon = STEP_ICONS[n]
+            const edited = isLive && n < 5 && stepDirty(n)
+            return (
+              <section
+                key={n}
+                id={`wizard-step-${n}`}
+                aria-labelledby={`wizard-step-${n}-title`}
+                className="scroll-mt-24 rounded-xl border border-border bg-card"
+              >
+                <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span className={cn(
+                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
+                      done ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground",
+                    )}>
+                      {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Icon className="h-3.5 w-3.5" aria-hidden />}
+                    </span>
+                    <h2 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h2>
+                    {edited ? (
+                      <Badge variant="outline" className="shrink-0 text-muted-foreground">Edited</Badge>
+                    ) : done ? (
+                      <Badge variant="outline" className="shrink-0 border-success/40 bg-success/10 text-success">Done</Badge>
+                    ) : (
+                      <Badge variant="outline" className="shrink-0 text-muted-foreground">Pending</Badge>
+                    )}
+                  </div>
+                  {n < 5 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0 gap-1.5 text-muted-foreground"
+                      disabled={!stepDirty(n)}
+                      onClick={() => resetStep(n)}
+                    >
+                      <Undo2 className="h-3.5 w-3.5" aria-hidden /> {isLive ? "Reset to live" : "Reset"}
+                    </Button>
+                  )}
+                </header>
+                <div className={cn("px-5 py-5", n !== 1 && n !== 3 && "[&>*]:max-w-4xl")}>
+                  {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
+                  {n === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
+                  {n === 3 && <StepBuild draft={draft} update={update} />}
+                  {n === 4 && <StepConfigure draft={draft} update={update} />}
+                  {n === 5 && (
+                    <StepPublish
+                      draft={draft}
+                      onPublish={publish}
+                      onFix={(m) => openRow(m)}
+                      talking={testing}
+                      onToggleTalk={toggleTest}
+                    />
+                  )}
+                </div>
+              </section>
+            )
+          })}
         </div>
       </div>
 

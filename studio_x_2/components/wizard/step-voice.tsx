@@ -2,9 +2,11 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Check, Plus, Pencil, AudioLines, Lock } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import { Plus, Pencil } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import {
   allVoices,
   PRESET_VOICES,
@@ -14,13 +16,15 @@ import { StackConfig } from "@/components/wizard/stack-config"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /**
- * Step 1 — Choose your Voice.
+ * Step 1 — Voice & models.
  *
- * Preset voices are IMMUTABLE (selectable). "Customize" forks a preset into a
- * new editable custom in the Playground (?from=) — this is the spec's "Edit Aria
- * → custom artifact". Custom voices edit in place (?artifact=). "Create custom
- * voice" starts a blank one. All routes return here with the artifact selected.
- * Choosing any voice unlocks Step 2.
+ * The voice picker is a compact Select (2026-07-07 directive: "what
+ * differentiates them? It can be a simple dropdown") — each option carries the
+ * persona's differentiator (tagline), and the selected voice previews its
+ * opening line below. Presets are IMMUTABLE: "Customize" forks a copy into the
+ * Playground (?from=); customs edit in place (?artifact=). Both routes return
+ * here with the artifact selected. The model stack (preset-first) sits beside
+ * it at xl widths.
  */
 export function StepVoice({
   draft,
@@ -38,129 +42,95 @@ export function StepVoice({
     setVoices(allVoices())
   }, [])
 
+  const selected = draft.voice ? voices.find((v) => v.id === draft.voice!.id) : undefined
+  const origin = draft.agentId ?? "new"
+
   return (
-    <div className="space-y-5">
-      {/* Section heading (sized like StackConfig's) — the drawer's SheetTitle
-          "Voice & models" is the screen heading; this labels the persona half. */}
-      <header className="space-y-1">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold">Choose your voice</h3>
-          {/* The playground is otherwise reachable only via per-voice links —
-              give it a stable, always-visible door (heuristic-eval #9). */}
-          <button
-            type="button"
-            onClick={() => router.push(`/agents/playground?agent=${draft.agentId ?? "new"}`)}
-            className="shrink-0 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Voice playground →
-          </button>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Pick a ready-made voice or build your own. This sets how your agent sounds and its starting personality — the models behind it are below.
-        </p>
-      </header>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        {voices.map((v) => {
-          const selected = draft.voice?.id === v.id
-          const isCustom = v.kind === "custom"
-          return (
+    <div className="grid gap-x-10 gap-y-6 xl:grid-cols-2">
+      {/* Voice persona */}
+      <section className="min-w-0 space-y-4">
+        <header className="space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold">Voice</h3>
             <button
-              key={v.id}
               type="button"
-              onClick={() => onSelectVoice(v)}
-              aria-pressed={selected}
-              className={cn(
-                "group relative flex flex-col gap-2 rounded-lg border p-4 text-left transition-colors",
-                selected
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "border-border bg-card hover:border-foreground/20 hover:bg-accent/40",
-              )}
+              onClick={() => router.push(`/agents/playground?agent=${origin}`)}
+              className="shrink-0 rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <div className="flex items-center gap-2.5">
-                <span
-                  className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-                    selected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  <AudioLines className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold">{v.name}</p>
-                    {isCustom ? (
-                      <Badge variant="secondary" className="h-6 px-2 text-xs font-medium">Custom</Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        title="Ready-made voice — use Customize to make an editable copy"
-                        className="h-6 gap-1 px-2 text-xs font-medium text-muted-foreground"
-                      >
-                        <Lock className="h-3 w-3" aria-hidden /> Preset
-                        <span className="sr-only">— ready-made voice; use Customize to make an editable copy</span>
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="line-clamp-1 text-sm text-muted-foreground">{v.tagline}</p>
-                </div>
-                {selected && <Check className="h-4 w-4 shrink-0 text-primary" />}
-              </div>
-
-              <p className="line-clamp-2 text-sm text-muted-foreground">
-                &ldquo;{v.firstMessage}&rdquo;
-              </p>
-
-              {/* Presets are immutable — "Customize" forks a copy into the
-                  Playground (?from=). Customs edit in place (?artifact=). Both
-                  return here with the resulting artifact selected. */}
-              {(() => {
-                const origin = draft.agentId ?? "new"
-                const href = isCustom
-                  ? `/agents/playground?artifact=${v.id}&agent=${origin}`
-                  : `/agents/playground?from=${v.id}&agent=${origin}`
-                const label = isCustom ? "Edit in playground" : "Customize"
-                const goEdit = (e: React.SyntheticEvent) => {
-                  e.stopPropagation()
-                  router.push(href)
-                }
-                return (
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={isCustom ? `Edit ${v.name} in the playground` : `Customize ${v.name} into a new voice`}
-                    onClick={goEdit}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") goEdit(e)
-                    }}
-                    className="inline-flex w-fit items-center gap-1 rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    <Pencil className="h-3.5 w-3.5" aria-hidden /> {label}
-                  </span>
-                )
-              })()}
+              Voice playground →
             </button>
-          )
-        })}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            How your agent sounds and its starting personality.
+          </p>
+        </header>
 
-        {/* Create custom voice — replaces the old "Edit Aria". */}
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Voice</Label>
+          <Select
+            value={draft.voice?.id ?? ""}
+            onValueChange={(id) => {
+              const v = voices.find((x) => x.id === id)
+              if (v) onSelectVoice(v)
+            }}
+          >
+            <SelectTrigger className="w-full max-w-md text-sm" aria-label="Voice">
+              <SelectValue placeholder="Pick a voice" />
+            </SelectTrigger>
+            <SelectContent>
+              {voices.map((v) => (
+                <SelectItem key={v.id} value={v.id} textValue={v.name}>
+                  <span className="flex min-w-0 items-baseline gap-2">
+                    <span className="font-medium">{v.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {v.tagline}{v.kind === "custom" ? " · Custom" : ""}
+                    </span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {selected ? (
+          <div className="max-w-md space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+            <p className="text-sm text-muted-foreground">
+              Says: &ldquo;{selected.firstMessage}&rdquo;
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  selected.kind === "custom"
+                    ? `/agents/playground?artifact=${selected.id}&agent=${origin}`
+                    : `/agents/playground?from=${selected.id}&agent=${origin}`,
+                )
+              }
+              className="inline-flex items-center gap-1 rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Pencil className="h-3.5 w-3.5" aria-hidden />
+              {selected.kind === "custom" ? "Edit in playground" : "Customize this voice"}
+            </button>
+          </div>
+        ) : (
+          <p className="max-w-md text-sm text-muted-foreground">
+            Each voice is a ready-made persona: tone, opening line, and starting prompt.
+          </p>
+        )}
+
         <button
           type="button"
-          onClick={() => router.push(`/agents/playground?agent=${draft.agentId ?? "new"}`)}
-          className="flex min-h-[7rem] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card/40 p-4 text-center transition-colors hover:border-primary/50 hover:bg-accent/40"
+          onClick={() => router.push(`/agents/playground?agent=${origin}`)}
+          className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <Plus className="h-4 w-4" />
-          </span>
-          <span className="text-sm font-medium">Create custom voice</span>
-          <span className="text-xs text-muted-foreground">Design one in the playground</span>
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
         </button>
-      </div>
+      </section>
 
-      {/* The models behind the voice — STT/LLM/TTS cascade or one realtime model. */}
-      <div className="border-t border-border pt-5">
+      {/* The models behind the voice — preset-first. */}
+      <section className="min-w-0 border-t border-border pt-5 xl:border-l xl:border-t-0 xl:pl-10 xl:pt-0">
         <StackConfig draft={draft} update={update} />
-      </div>
+      </section>
     </div>
   )
 }

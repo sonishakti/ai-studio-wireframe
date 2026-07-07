@@ -39,12 +39,10 @@ export function StepPublish({
 
   return (
     <div className="space-y-5">
-      <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Deploy</h2>
-        <p className="text-sm text-muted-foreground">
-          Review {agentName}, then deploy it. Talk to it any time — right here or from the agent card.
-        </p>
-      </header>
+      {/* No inner h2: the section header above already names this step. */}
+      <p className="text-sm text-muted-foreground">
+        Review {agentName}, then deploy it. Talk to it any time, here or from the sidebar.
+      </p>
 
       {talking ? (
         <Button variant="destructive" size="sm" className="gap-1.5" onClick={onToggleTalk}>
@@ -57,7 +55,7 @@ export function StepPublish({
       )}
 
       <section className="space-y-3 rounded-lg border border-border bg-card p-5">
-        <p className="text-sm font-semibold">Ready to deploy</p>
+        <p className="text-sm font-semibold">Deployment summary</p>
         <dl className="space-y-2.5 text-sm">
           <SummaryRow icon={AudioLines} label="Voice">
             {voice?.name ?? "Not set yet"}
@@ -75,7 +73,7 @@ export function StepPublish({
               {[
                 draft.knowledge.length ? `${draft.knowledge.length} knowledge` : null,
                 draft.mcp.length ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""}` : null,
-              ].filter(Boolean).join(" · ") || "—"}
+              ].filter(Boolean).join(" · ") || "None"}
             </SummaryRow>
           )}
         </dl>
@@ -84,7 +82,6 @@ export function StepPublish({
       {blocks.length > 0 && (
         <div className="space-y-2.5 rounded-md border border-warning/40 bg-warning/5 p-3.5">
           <p className="text-sm leading-relaxed text-foreground">
-            <span className="font-medium">You&apos;re at the last step.</span>{" "}
             A few things still need input before you can deploy {agentName}.
           </p>
           <ul className="space-y-1.5">
@@ -115,7 +112,7 @@ export function StepPublish({
           <Rocket className="h-4 w-4" aria-hidden /> Deploy agent
         </Button>
         <p className="text-sm text-muted-foreground">
-          Deploying makes {agentName} start taking traffic — you&apos;ll land on Monitor to watch it.
+          Deploying starts real traffic for {agentName}. You&apos;ll land on Monitor to watch it.
         </p>
       </div>
     </div>

@@ -59,7 +59,7 @@ export function stepManifest(n: number, draft: AgentDraft): string {
       return draft.config.inbound?.mode === "web"
         ? "Widget title · Greeting · Embed snippet"
         : "Phone number · Web widget option"
-    return "Channel setup — pick a type first"
+    return "Channel setup · pick a type first"
   }
   return "Review everything · Go live"
 }

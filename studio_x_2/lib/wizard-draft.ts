@@ -150,7 +150,7 @@ export function agentToDraft(agent: Agent): AgentDraft {
     type,
     stack: { ...STACK_DEFAULTS, ...agent.stack },
     systemPrompt: agent.persona.personality,
-    greeting: agent.persona.firstMessage ?? "Hi, thanks for calling — how can I help you today?",
+    greeting: agent.persona.firstMessage ?? "Hi, thanks for calling. How can I help you today?",
     knowledge: [...agent.knowledge],
     mcp: [...agent.actions],
     config,
@@ -177,7 +177,7 @@ export function templateToDraft(tpl: AgentTemplate): AgentDraft {
       tpl.id === "blank"
         ? ""
         : `You are ${tpl.name}, a voice agent. ${tpl.description}.\n\nBe concise and helpful. Greet the caller, do your job, and escalate to a human if asked.`,
-    greeting: tpl.id === "blank" ? "" : `Hi! This is ${tpl.name} from Acme — do you have a quick moment?`,
+    greeting: tpl.id === "blank" ? "" : `Hi! This is ${tpl.name} from Acme. Do you have a quick moment?`,
   }
 }
 
@@ -213,8 +213,8 @@ export interface PublishBlock {
  *  Drives Step 5's "Fix this →" ramp; `publishBlockReason` returns just the first. */
 export function publishBlocks(d: AgentDraft): PublishBlock[] {
   const blocks: PublishBlock[] = []
-  if (!d.voice) blocks.push({ reason: "Choose a voice first.", step: 1, action: "Pick a voice" })
-  if (!d.type) blocks.push({ reason: "Pick an agent type first.", step: 2, action: "Choose type" })
+  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
+  if (!d.type) blocks.push({ reason: "Choose an agent type.", step: 2, action: "Choose type" })
   if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 3, action: "Write the prompt" })
 
   if (d.type === "outbound") {
@@ -268,5 +268,5 @@ export function channelTarget(d: AgentDraft): string {
     return [n?.number, d.config.outbound?.csvName].filter(Boolean).join(" · ") || "No contacts yet"
   }
   if (d.type === "code") return "SDK / API"
-  return "—"
+  return "Not set"
 }

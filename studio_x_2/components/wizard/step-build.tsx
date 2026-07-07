@@ -23,69 +23,73 @@ export function StepBuild({ draft, update }: StepProps) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Prompt &amp; tools</h2>
-        <p className="text-sm text-muted-foreground">
-          Tell {draft.name || "your agent"} how to behave — and give it knowledge and connectors. Saved automatically as you type.
-        </p>
-      </header>
+    <div className="space-y-5">
+      {/* No inner h2: the section header above already names this step. */}
+      <p className="text-sm text-muted-foreground">
+        Tell {draft.name || "your agent"} how to behave and give it knowledge and connectors. Saves automatically as you type.
+      </p>
 
-      <div className="space-y-2">
-        <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
-        <Textarea
-          id="wz-prompt"
-          value={draft.systemPrompt}
-          onChange={(e) => update({ systemPrompt: e.target.value })}
-          className="min-h-[180px] font-mono text-sm leading-relaxed"
-          placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
-        />
-        <p className="text-xs text-muted-foreground">
-          Wrap dynamic values in <code className="font-mono">{"{{double_braces}}"}</code> — for Outbound, these map to your CSV columns.
-        </p>
-        {vars.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-xs text-muted-foreground">Variables detected:</span>
-            {vars.map((v) => (
-              <Badge key={v} variant="secondary" className="h-6 px-2 font-mono text-xs">{`{{${v}}}`}</Badge>
-            ))}
+      {/* Prompt owns the left column at xl; greeting + tools + test dock right
+          (width-discipline: structure on big screens, one column on small). */}
+      <div className="grid gap-x-10 gap-y-5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
+          <Textarea
+            id="wz-prompt"
+            value={draft.systemPrompt}
+            onChange={(e) => update({ systemPrompt: e.target.value })}
+            className="min-h-[180px] font-mono text-sm leading-relaxed xl:min-h-[260px]"
+            placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
+          />
+          <p className="text-xs text-muted-foreground">
+            Wrap dynamic values in <code className="font-mono">{"{{double_braces}}"}</code>. For Batch calls, they map to your CSV columns.
+          </p>
+          {vars.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span className="text-xs text-muted-foreground">Variables detected:</span>
+              {vars.map((v) => (
+                <Badge key={v} variant="secondary" className="h-6 px-2 font-mono text-xs">{`{{${v}}}`}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting</Label>
+            <Textarea
+              id="wz-greeting"
+              value={draft.greeting}
+              onChange={(e) => update({ greeting: e.target.value })}
+              className="min-h-[72px] text-sm"
+              placeholder="The first line your agent speaks, e.g. Hi, thanks for calling Acme, how can I help?"
+            />
           </div>
-        )}
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting</Label>
-        <Textarea
-          id="wz-greeting"
-          value={draft.greeting}
-          onChange={(e) => update({ greeting: e.target.value })}
-          className="min-h-[72px] text-sm"
-          placeholder="The first line your agent speaks — e.g. Hi, thanks for calling Acme, how can I help?"
-        />
-      </div>
+          <div className="grid gap-4">
+            <AttachField
+              icon={BookOpen}
+              title="Knowledge base"
+              description="Ground answers in your docs."
+              items={KNOWLEDGE_BASES.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
+              selectedIds={draft.knowledge}
+              onChange={(knowledge) => update({ knowledge })}
+              manageLabel="Add knowledge base"
+            />
+            <AttachField
+              icon={Plug}
+              title="MCP connector"
+              description="Give it tools: CRM, calendar, APIs."
+              items={MCP_SERVERS.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools` }))}
+              selectedIds={draft.mcp}
+              onChange={(mcp) => update({ mcp })}
+              manageLabel="Add MCP connector"
+            />
+          </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AttachField
-          icon={BookOpen}
-          title="Knowledge base"
-          description="Ground answers in your docs."
-          items={KNOWLEDGE_BASES.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
-          selectedIds={draft.knowledge}
-          onChange={(knowledge) => update({ knowledge })}
-          manageLabel="Add knowledge base"
-        />
-        <AttachField
-          icon={Plug}
-          title="MCP connector"
-          description="Give it tools — CRM, calendar, APIs."
-          items={MCP_SERVERS.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools` }))}
-          selectedIds={draft.mcp}
-          onChange={(mcp) => update({ mcp })}
-          manageLabel="Add MCP connector"
-        />
+          <QuickTest name={draft.name} greeting={draft.greeting} />
+        </div>
       </div>
-
-      <QuickTest name={draft.name} greeting={draft.greeting} />
     </div>
   )
 }
@@ -95,13 +99,13 @@ export function StepBuild({ draft, update }: StepProps) {
 function QuickTest({ name, greeting }: { name: string; greeting: string }) {
   const [ran, setRan] = React.useState(false)
   const agent = name || "Your agent"
-  const opener = greeting.trim() || "Hi, thanks for reaching out — how can I help?"
+  const opener = greeting.trim() || "Hi, thanks for reaching out. How can I help?"
   return (
     <section className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-semibold">Quick test</p>
-          <p className="text-xs text-muted-foreground">Hear how it opens and a sample reply — no setup needed.</p>
+          <p className="text-xs text-muted-foreground">Hear how it opens and a sample reply.</p>
         </div>
         <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => setRan(true)}>
           <Play className="h-3.5 w-3.5" /> {ran ? "Run again" : "Run a sample turn"}
@@ -111,8 +115,8 @@ function QuickTest({ name, greeting }: { name: string; greeting: string }) {
         <div className="space-y-2 rounded-md border border-border bg-muted/20 p-3">
           <Turn who={agent} text={opener} agent />
           <Turn who="Caller" text="Do you have any availability tomorrow?" />
-          <Turn who={agent} text="Let me check that for you — what time of day works best?" agent />
-          <p className="pt-1 text-xs text-muted-foreground">Full voice test: use &ldquo;Talk to your agent&rdquo; on the agent card, any time.</p>
+          <Turn who={agent} text="Let me check that for you. What time of day works best?" agent />
+          <p className="pt-1 text-xs text-muted-foreground">Full voice test: use &ldquo;Talk to your agent&rdquo; in the sidebar.</p>
         </div>
       )}
     </section>

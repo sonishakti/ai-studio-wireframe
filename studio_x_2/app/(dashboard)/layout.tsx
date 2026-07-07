@@ -26,8 +26,10 @@ export default function DashboardLayout({
             stretch unreadably on 4K displays
           - Pages may still narrow themselves with `max-w-3xl` etc. when the
             content is genuinely reading-width (release notes, license lists)
+          - Pages whose root carries [data-fluid] opt OUT of the cap and use
+            the whole viewport (the agent builder on large monitors)
         */}
-        <div className="flex flex-col flex-1 w-full max-w-screen-2xl mx-auto">
+        <div className="flex flex-col flex-1 w-full max-w-screen-2xl mx-auto has-[[data-fluid]]:max-w-none">
           {children}
         </div>
       </SidebarInset>

@@ -27,13 +27,13 @@ const TYPES: {
   {
     id: "inbound",
     title: typeLabel("inbound"),
-    desc: "Your agent answers — on a phone number, 24/7, or as a web widget on your site.",
+    desc: "Your agent answers on a phone number, 24/7, or as a web widget on your site.",
     icon: PhoneIncoming,
   },
   {
     id: "code",
     title: typeLabel("code"),
-    desc: "Run the agent inside your own app via the SDK or API — no phone number required.",
+    desc: "Run the agent inside your own app via the SDK or API. No phone number required.",
     icon: Code2,
   },
 ]
@@ -41,12 +41,10 @@ const TYPES: {
 export function StepType({ draft, update }: StepProps) {
   return (
     <div className="space-y-5">
-      <header className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">Select agent type</h2>
-        <p className="text-sm text-muted-foreground">
-          How will {draft.name || "your agent"} reach people? This shapes what you configure before going live.
-        </p>
-      </header>
+      {/* No inner h2: the section header above already names this step. */}
+      <p className="text-sm text-muted-foreground">
+        How will {draft.name || "your agent"} reach people? This shapes what you configure before going live.
+      </p>
 
       <div className="grid gap-3 sm:grid-cols-3">
         {TYPES.map((t) => {

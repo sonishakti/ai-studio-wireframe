@@ -95,7 +95,7 @@ await client.joinChannel({ channel: "support-room" })`
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
           <SheetTitle className="text-base">View config (JSON)</SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Read-only — edit via the steps or the API. Everything the steps set, in one place.
+            Read-only. Edit via the steps or the API.
           </p>
         </SheetHeader>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
@@ -120,7 +120,7 @@ await client.joinChannel({ channel: "support-room" })`
           <section className="space-y-2">
             <p className="text-sm font-semibold">Get code</p>
             <p className="text-sm text-muted-foreground">
-              For reference — copying these never changes how your agent is deployed.
+              For reference only. Copying these doesn&apos;t change your deployment.
             </p>
             <CodeBlock language="typescript" filename="sdk.ts">{sdkSnippet}</CodeBlock>
             <CodeBlock language="html" filename="widget.html">{widgetSnippet}</CodeBlock>

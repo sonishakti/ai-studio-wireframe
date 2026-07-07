@@ -180,7 +180,7 @@ export const STACK_PRESETS: Record<
 > = {
   fastest: {
     label: "Fastest",
-    hint: "Lowest latency — premium vendors",
+    hint: "Lowest latency, premium vendors",
     llm: { vendor: "OpenAI", model: "gpt-4o" },
     asr: { vendor: "Deepgram", model: "nova-3" },
     tts: { vendor: "ElevenLabs", voice: "rachel" },
@@ -248,7 +248,7 @@ export const AGENTS: Agent[] = [
     // Channel column and the builder checklist read this same record.
     channel: { type: "inbound", mode: "phone", numberId: "pn_02" },
     persona: {
-      personality: "Helpful, friendly, and clear — answers questions and gets things done.",
+      personality: "Helpful, friendly, and clear. Answers questions and gets things done.",
       tone: "Friendly",
       language: "en-US",
     },
@@ -501,7 +501,7 @@ export const DEPLOYMENTS: Deployment[] = [
     agentName: "Support Bot v2",
     status: "active",
     prompt: SUPPORT_PROMPT,
-    greeting: "Thanks for calling Acme support — how can I help today?",
+    greeting: "Thanks for calling Acme support. How can I help today?",
     failure: "Let me put you through to a teammate.",
     metrics: { calls: 1240, successRate: 78, avgHandleTimeSec: 204 },
     ringsPerWeek: 1240,
@@ -520,8 +520,8 @@ timeline) and book a demo with an account executive.
 
 # CONSTRAINTS
 Two qualifying questions max before offering the demo. Keep it under 30 words per turn.`,
-    greeting: "Hi, you've reached Acme sales — what brings you in today?",
-    failure: "One moment — connecting you to the sales team.",
+    greeting: "Hi, you've reached Acme sales. What brings you in today?",
+    failure: "One moment, connecting you to the sales team.",
     metrics: { calls: 340, successRate: 62, avgHandleTimeSec: 112 },
     ringsPerWeek: 340,
   },
@@ -534,8 +534,8 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     agentName: "Support Bot v2",
     status: "paused",
     prompt: SUPPORT_PROMPT + `\n\n# LOCALE\nUK English. Quote prices in GBP. Office hours are 9:00–17:30 GMT.`,
-    greeting: "Thanks for ringing Acme support — how can I help?",
-    failure: "Bear with me — I'll transfer you to a colleague.",
+    greeting: "Thanks for ringing Acme support. How can I help?",
+    failure: "Bear with me, I'll transfer you to a colleague.",
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     ringsPerWeek: 0,
   },
@@ -548,7 +548,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     agentName: "Support Bot v2",
     status: "active",
     prompt: SUPPORT_PROMPT,
-    greeting: "Thanks for calling the Acme help line — what can I do for you?",
+    greeting: "Thanks for calling the Acme help line. What can I do for you?",
     failure: "Let me get a teammate to pick this up.",
     metrics: { calls: 1860, successRate: 82, avgHandleTimeSec: 236 },
     ringsPerWeek: 1320,
@@ -562,7 +562,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     agentName: "Support Bot v2",
     status: "active",
     prompt: SUPPORT_PROMPT + `\n\n# CHANNEL\nText chat. Short paragraphs, link to help articles where useful.`,
-    greeting: "Hi! I'm Acme's assistant — ask me anything.",
+    greeting: "Hi! I'm Acme's assistant. Ask me anything.",
     failure: "I'll hand this over to a human agent.",
     metrics: { calls: 760, successRate: 79, avgHandleTimeSec: 188 },
     ringsPerWeek: 520,
@@ -577,7 +577,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     status: "active",
     prompt: SUPPORT_PROMPT + `\n\n# CHANNEL\nWhatsApp. Casual register, emojis sparingly, one question at a time.`,
     greeting: "Hey! Acme support here 👋 What can I help with?",
-    failure: "Passing you to a teammate — one sec.",
+    failure: "Passing you to a teammate, one sec.",
     metrics: { calls: 220, successRate: 74, avgHandleTimeSec: 154 },
     ringsPerWeek: 140,
   },
@@ -599,8 +599,8 @@ Customer: {{name}} at {{company}} — last active {{last_active}}, on the {{prev
 
 # CONSTRAINTS
 Lead with the 20% win-back discount. If not interested, thank and end within 15 seconds.`,
-    greeting: "Hi {{name}}, this is Acme — we miss you at {{company}} and have something for you.",
-    failure: "Sorry — let me have someone follow up by email.",
+    greeting: "Hi {{name}}, this is Acme. We miss you at {{company}} and have something for you.",
+    failure: "Sorry, let me have someone follow up by email.",
     contacts: {
       fileName: "q2-lapsed-customers.csv",
       rowCount: 5000,
@@ -648,7 +648,7 @@ Remind customers their Acme subscription renews soon and confirm payment details
 # CONTEXT (per row)
 {{name}} renews on {{renewal_date}} for {{amount}}.`,
     greeting: "Hi {{name}}, a quick reminder your Acme plan renews on {{renewal_date}}.",
-    failure: "No problem — we'll email the renewal details.",
+    failure: "No problem, we'll email the renewal details.",
     contacts: {
       fileName: "renewals-may.csv",
       rowCount: 2800,
@@ -698,8 +698,8 @@ Run a 2-question NPS survey: score 0–10, then one open follow-up.
 
 # CONTEXT (per row)
 {{name}} used {{product}} most recently.`,
-    greeting: "Hi {{name}}, quick 60-second feedback call about {{product}} — is now okay?",
-    failure: "Thanks anyway — have a great day.",
+    greeting: "Hi {{name}}, quick 60-second feedback call about {{product}}. Is now okay?",
+    failure: "Thanks anyway, have a great day.",
     contacts: {
       fileName: "nps-q2.csv",
       rowCount: 8000,
@@ -722,7 +722,7 @@ Offer the Black Friday deal ({{discount}} off annual plans) to warm leads.
 
 # CONTEXT (per row)
 {{name}} from {{company}} — interest tag: {{interest}}.`,
-    greeting: "Hi {{name}}! Black Friday came early at Acme — {{discount}} off annual plans.",
+    greeting: "Hi {{name}}! Black Friday came early at Acme: {{discount}} off annual plans.",
     failure: "I'll text you the offer link instead.",
     contacts: {
       fileName: "bf-warm-leads.csv",

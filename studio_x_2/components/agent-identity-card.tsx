@@ -132,7 +132,7 @@ export function AgentIdentityCard({
               <button
                 type="button"
                 onClick={channel.onClick}
-                aria-label={`Channel: ${channel.label} — open channel setup`}
+                aria-label={`Channel: ${channel.label}. Open channel setup.`}
                 className="inline-flex max-w-full items-center gap-1.5 rounded-md text-left text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Radio className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -156,7 +156,7 @@ export function AgentIdentityCard({
                       type="button"
                       onClick={() => setShowLatency((v) => !v)}
                       aria-expanded={showLatency}
-                      aria-label={`Estimated response latency ${latencyMs} milliseconds — toggle the per-stage breakdown`}
+                      aria-label={`Estimated response latency ${latencyMs} milliseconds. Toggle the per-stage breakdown.`}
                       className="inline-flex items-center gap-1 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <Gauge className="h-3.5 w-3.5" aria-hidden />{latencyMs}ms
@@ -164,7 +164,7 @@ export function AgentIdentityCard({
                       <ChevronDown className={cn("h-3 w-3 transition-transform", showLatency && "rotate-180")} aria-hidden />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>Estimated response latency — click for the STT / LLM / TTS breakdown</TooltipContent>
+                  <TooltipContent>Estimated response latency. Click for the STT / LLM / TTS breakdown.</TooltipContent>
                 </Tooltip>
               ) : (
                 <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">

@@ -463,6 +463,9 @@ export default function AgentsPage() {
           key={builderId}
           id={builderId}
           landing={builderId === "agt_default"}
+          // Prop, not URL: startBlank remounts this in the same tick as its
+          // router.push, so the mount effect can't rely on reading ?blank=1.
+          blank={builderId === "new"}
           onCreateNew={builderId === "agt_default" ? startBlank : undefined}
           onBrowseTemplates={() => setTemplatesOpen(true)}
         />

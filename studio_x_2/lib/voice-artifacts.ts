@@ -48,7 +48,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     tone: "Friendly",
     language: "en-US",
     ttsVoice: "rachel",
-    firstMessage: "Hi, thanks for calling — how can I help you today?",
+    firstMessage: "Hi, thanks for calling. How can I help you today?",
   },
   {
     id: "voice_nova",
@@ -59,7 +59,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     tone: "Professional",
     language: "en-US",
     ttsVoice: "adam",
-    firstMessage: "Hi! This is a quick call about your account — do you have a moment?",
+    firstMessage: "Hi! This is a quick call about your account. Do you have a moment?",
   },
   {
     id: "voice_sage",
@@ -70,7 +70,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     tone: "Neutral",
     language: "en-US",
     ttsVoice: "bella",
-    firstMessage: "Hello, you've reached support. Take your time — what can I help with?",
+    firstMessage: "Hello, you've reached support. Take your time. What can I help with?",
   },
   {
     id: "voice_max",
@@ -81,7 +81,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     tone: "Playful",
     language: "en-US",
     ttsVoice: "josh",
-    firstMessage: "Hey there! Thanks for reaching out — what brings you in today?",
+    firstMessage: "Hey there! Thanks for reaching out. What brings you in today?",
   },
 ]
 
