@@ -105,7 +105,7 @@ export function StepVoice({
           </button>
           {/* Where the engine lives now — signpost it at the exact control. */}
           <p className="text-xs text-muted-foreground/80">
-            Speed, cost, and the STT / LLM / TTS models live with the voice — customize to change them.
+            Speed, cost, and the STT / LLM / TTS models live with the voice. Customize to change them.
           </p>
         </div>
       ) : (
