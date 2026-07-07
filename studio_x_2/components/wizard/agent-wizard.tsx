@@ -726,12 +726,7 @@ export function AgentWizard({
                     {done ? <Check className="h-3 w-3" aria-hidden /> : <Icon className="h-3 w-3" aria-hidden />}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 text-sm font-medium">
-                      {stepTitle(n, draft)}
-                      {isLive && n < 5 && stepDirty(n) && (
-                        <span className="shrink-0 rounded-full border border-border px-1.5 text-xs font-normal text-muted-foreground">Edited</span>
-                      )}
-                    </span>
+                    <span className="block text-sm font-medium">{stepTitle(n, draft)}</span>
                     <span className="line-clamp-1 block text-xs text-muted-foreground" title={detail}>{detail}</span>
                   </span>
                 </button>
@@ -771,7 +766,6 @@ export function AgentWizard({
           {[1, 2, 3, 4, 5].map((n) => {
             const done = isDone(n)
             const Icon = STEP_ICONS[n]
-            const edited = isLive && n < 5 && stepDirty(n)
             return (
               <section
                 key={n}
@@ -788,9 +782,9 @@ export function AgentWizard({
                       {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Icon className="h-3.5 w-3.5" aria-hidden />}
                     </span>
                     <h2 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h2>
-                    {edited ? (
-                      <Badge variant="outline" className="shrink-0 text-muted-foreground">Edited</Badge>
-                    ) : done ? (
+                    {/* No "Edited" tag (owner call, 2026-07-07): pending edits
+                        surface once, in the deploy block's status line. */}
+                    {done ? (
                       <Badge variant="outline" className="shrink-0 border-success/40 bg-success/10 text-success">Done</Badge>
                     ) : (
                       <Badge variant="outline" className="shrink-0 text-muted-foreground">Pending</Badge>
