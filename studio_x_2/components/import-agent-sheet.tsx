@@ -69,8 +69,8 @@ export function ImportAgentSheet({
         source,
       }
       const warnings: string[] = []
-      if (!config.systemPrompt) warnings.push("No system prompt found — Aria's default behavior will be used until you edit it.")
-      if (!config.tools?.length) warnings.push("No tools specified — agent will rely solely on conversation.")
+      if (!config.systemPrompt) warnings.push("No system prompt found. The default behavior applies until you edit it.")
+      if (!config.tools?.length) warnings.push("No tools specified. The agent will rely on conversation only.")
       setValidation({ ok: true, config, warnings: warnings.length ? warnings : undefined })
     } catch {
       setValidation({ ok: false })
@@ -82,7 +82,7 @@ export function ImportAgentSheet({
     const config = validation?.config
     if (!config) return
     toast.success("Agent imported", {
-      description: `${config.name} is ready on Agora's bundled stack — selected here so you can talk to it, then deploy.`,
+      description: `${config.name} is ready on Agora's bundled stack. Talk to it, then deploy.`,
     })
     onImported?.(config)
   }
@@ -94,7 +94,7 @@ export function ImportAgentSheet({
         <SheetHeader>
           <SheetTitle>Import an Agent</SheetTitle>
           <SheetDescription>
-            Migrating from another platform? Bring your agent from Vapi, Retell, ElevenLabs, Bland —
+            Migrating from another platform? Bring your agent from Vapi, Retell, ElevenLabs, Bland,
             or any JSON export. We map voice, model, prompt, and tools to an Agora agent. (YAML soon.)
           </SheetDescription>
         </SheetHeader>
@@ -122,7 +122,7 @@ export function ImportAgentSheet({
             <p className="text-xs text-muted-foreground">
               {source === "Generic JSON"
                 ? "Paste any agent config as JSON below."
-                : `Export your ${source} agent and paste its config below — we'll map it to an Agora agent.`}
+                : `Export your ${source} agent and paste its config below. We'll map it to an Agora agent.`}
             </p>
           </div>
 
@@ -168,12 +168,12 @@ export function ImportAgentSheet({
                 <Upload className="h-7 w-7 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Drop a .json file here</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Or click to browse — max 1 MB</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Or click to browse. Max 1 MB</p>
                 </div>
                 <Button variant="outline" size="sm" disabled>Choose file</Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                This preview imports via <span className="font-medium text-foreground">Paste JSON</span> — file upload is coming soon.
+                This preview imports via <span className="font-medium text-foreground">Paste JSON</span>. File upload is coming soon.
               </p>
             </TabsContent>
 
@@ -189,7 +189,7 @@ export function ImportAgentSheet({
                   className="font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  This preview imports via Paste JSON — fetching from a URL is coming soon.
+                  This preview imports via Paste JSON. Fetching from a URL is coming soon.
                 </p>
               </div>
             </TabsContent>
@@ -225,7 +225,7 @@ export function ImportAgentSheet({
                       <span className="font-medium text-foreground">{validation.config?.name}</span>
                       {validation.config?.voice && <> · voice {validation.config.voice}</>}
                       {validation.config?.llmModel && <> · {validation.config.llmModel}</>}
-                      {" "}maps onto Agora&apos;s bundled stack — talk to it right after import, free.
+                      {" "}maps onto Agora&apos;s bundled stack. Talk to it right after import, free.
                     </p>
                     {validation.warnings?.map((w) => (
                       <Badge key={w} variant="outline" className="text-xs mt-2 font-normal">

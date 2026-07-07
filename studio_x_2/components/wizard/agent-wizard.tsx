@@ -108,22 +108,24 @@ export function AgentWizard({
 
   // Intent switch (Step 2): stash the departing branch's config instead of
   // silently dropping it — otherwise an old CSV/number leaks into publish and
-  // dials real contacts on the wrong channel. Undo restores it.
-  const typeStash = React.useRef<{ type: AgentType; config: AgentDraft["config"] } | null>(null)
-  const restoreTypeStash = React.useCallback(() => {
-    const s = typeStash.current
+  // dials real contacts on the wrong channel. Undo restores it. A MAP, not a
+  // single slot: two consecutive flips must not discard the first branch's
+  // set-aside config (audit 2026-07-07).
+  const typeStash = React.useRef<Partial<Record<AgentType, AgentDraft["config"]>>>({})
+  const restoreTypeStash = React.useCallback((t: AgentType) => {
+    const s = typeStash.current[t]
     if (!s) return
     dirty.current = true
-    setDraft((d) => ({ ...d, type: s.type, config: { ...d.config, ...s.config } }))
-    typeStash.current = null
+    setDraft((d) => ({ ...d, type: t, config: { ...d.config, ...s } }))
+    delete typeStash.current[t]
   }, [])
   const selectType = React.useCallback((next: AgentType) => {
     const d = draftRef.current
     if (d.type === next) return
-    // Flipping back to the type whose config we set aside restores it — the
+    // Flipping back to a type whose config we set aside restores it — the
     // "set aside, not deleted" promise must not depend on the transient toast.
-    if (typeStash.current?.type === next) {
-      restoreTypeStash()
+    if (typeStash.current[next]) {
+      restoreTypeStash(next)
       return
     }
     dirty.current = true
@@ -134,7 +136,7 @@ export function AgentWizard({
       : departing === "code" ? !!d.config.code?.added
       : false
     if (departing && hasData) {
-      typeStash.current = { type: departing, config: { [departing]: d.config[departing] } as AgentDraft["config"] }
+      typeStash.current[departing] = { [departing]: d.config[departing] } as AgentDraft["config"]
       const nextConfig = { ...d.config }
       delete nextConfig[departing]
       setDraft({ ...d, type: next, config: nextConfig })
@@ -144,7 +146,7 @@ export function AgentWizard({
         : departing === "inbound" ? "phone number" : "code setup"
       toast(`Switched to ${nameOf(next)}`, {
         description: `Your ${nameOf(departing)} setup (${detail}) was set aside, not deleted.`,
-        action: { label: "Undo", onClick: restoreTypeStash },
+        action: { label: "Undo", onClick: () => restoreTypeStash(departing) },
       })
     } else {
       setDraft({ ...d, type: next })
@@ -197,9 +199,13 @@ export function AgentWizard({
     const stepParam = parseInt(params.get("step") ?? "", 10)
     const stepToOpen = stepParam >= 1 && stepParam <= 5 ? stepParam : null
     // Highlight + scroll to the deep-linked step once sections have painted.
+    // Scheduled HERE, not via a ref-consuming effect: an [openStep]-keyed
+    // effect cancels its own timeout when the queued setOpenStep commits
+    // (audit 2026-07-07: deep links highlighted but never scrolled).
     const openLater = (n: number) => {
       setOpenStep(n)
-      pendingScroll.current = n
+      muteSpy(1500)
+      window.setTimeout(() => scrollToStep(n), 120)
     }
     // One-shot params must not survive into a refresh (re-eval #4).
     const stripParam = (key: string) => {
@@ -217,6 +223,11 @@ export function AgentWizard({
       const unsaved = restoreDraft(existing!.id)
       if (unsaved) {
         setDraft(unsaved)
+        // Sync the ref NOW: selectType below reads draftRef, which otherwise
+        // still holds the pre-restore snapshot until the next render, and its
+        // non-functional setDraft would clobber the restored edits (audit
+        // 2026-07-07: a ?dc= link silently reverted unsaved prompts).
+        draftRef.current = unsaved
         toast("Resuming unsaved edits", {
           description: `${existing!.name} has changes that were never deployed.`,
           action: {
@@ -288,6 +299,11 @@ export function AgentWizard({
       } else {
         const seeded = templateToDraft(tpl)
         setDraft(seeded)
+        // Persist NOW, not via the debounced autosave: the standalone edit
+        // route can remount the wizard right after this effect (observed
+        // 2026-07-07); the remount's restore path must find the seed or the
+        // template silently degrades to a blank draft.
+        saveDraft(seeded)
         baseline.current = seeded
         dirty.current = true
         toast.success(`Started from ${tpl.name}`, {
@@ -323,7 +339,11 @@ export function AgentWizard({
     baseline.current = next
     if (dc) openLater(4)
     else if (stepToOpen) openLater(stepToOpen)
-    if (artifactId || dc) dirty.current = true
+    if (artifactId || dc) {
+      dirty.current = true
+      // Survive an immediate remount (see the template branch above).
+      saveDraft(next)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -345,8 +365,20 @@ export function AgentWizard({
   }, [])
 
   // Autosave BOTH modes (edit gets a per-agent slot) + drive the status chip.
+  // EDIT mode only: a draft byte-identical to the deployed baseline is NOT
+  // unsaved work — clear the slot so "Reset to live" doesn't leave a ghost
+  // that greets the next visit with a false "Resuming unsaved edits" toast
+  // (audit 2026-07-07). New drafts must NOT get this treatment: a template
+  // seed equals ITS baseline by definition, and clearing would lose it on
+  // refresh.
   useDebouncedEffect(() => {
     if (!dirty.current) return
+    if (isEdit && baseline.current && JSON.stringify(draftRef.current) === JSON.stringify(baseline.current)) {
+      clearDraft(existing!.id)
+      dirty.current = false
+      setSaveState("saved")
+      return
+    }
     saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
     setSaveState("saved")
   }, [draft], 600)
@@ -361,7 +393,16 @@ export function AgentWizard({
     window.history.replaceState({}, "", url)
   }
   const scrollToStep = (n: number) => {
-    document.getElementById(`wizard-step-${n}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    const el = document.getElementById(`wizard-step-${n}`)
+    if (!el) return
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+    // Some environments silently drop smooth scrolls (and reduced-motion users
+    // skip the glide anyway) — guarantee arrival: if the section top isn't
+    // near the reading line shortly after, jump instantly. scroll-mt-24 = 96px.
+    window.setTimeout(() => {
+      if (Math.abs(el.getBoundingClientRect().top - 96) > 120) el.scrollIntoView({ block: "start" })
+    }, 450)
   }
   // While a chosen scroll glides, the spy would re-highlight every section it
   // passes — mute it for the ride so the clicked step stays selected.
@@ -376,17 +417,6 @@ export function AgentWizard({
     scrollToStep(n)
   }
   openRowRef.current = openRow
-  // Deep links land before sections paint — scroll after mount settles.
-  const pendingScroll = React.useRef<number | null>(null)
-  React.useEffect(() => {
-    if (pendingScroll.current == null) return
-    const n = pendingScroll.current
-    pendingScroll.current = null
-    muteSpy(1200)
-    const t = setTimeout(() => scrollToStep(n), 80)
-    return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openStep])
 
   // Scroll-spy: the rail highlights the section under the reading line.
   React.useEffect(() => {
@@ -430,9 +460,13 @@ export function AgentWizard({
     const base = baseline.current
     if (!base) return
     dirty.current = true
-    if (n === 2) typeStash.current = null
+    // Type and channel setup are coupled: restoring the type WITHOUT the
+    // baseline config would bring back an inbound agent with its number gone
+    // (selectType stashes-and-deletes the departing branch; audit 2026-07-07).
+    const slice = n === 2 ? { type: base.type, config: base.config } : stepSlice(base, n)
+    if (n === 2) typeStash.current = {}
     // Deep-clone: the baseline must never share references with the live draft.
-    update(JSON.parse(JSON.stringify(stepSlice(base, n))) as Partial<AgentDraft>)
+    update(JSON.parse(JSON.stringify(slice)) as Partial<AgentDraft>)
     toast("Step reset", {
       description: isLive ? "Restored this step's live values." : "Cleared this step's changes.",
     })
@@ -534,7 +568,6 @@ export function AgentWizard({
   }
 
   const blockReason = publishBlockReason(draft)
-  const doneCount = [1, 2, 3, 4, 5].filter(isDone).length
   // Honest deploy-state line: a live agent with pending edits says so (the
   // missing dirty signal was the top finding in every operator audit run).
   const anyEdited = isLive && [1, 2, 3, 4].some(stepDirty)
@@ -603,12 +636,27 @@ export function AgentWizard({
       )}
 
       {/* Below lg the rail stacks above the sections and scrolls away, so a
-          slim sticky strip keeps progress + deploy in the fold (C2 harvest). */}
-      <div className="sticky top-14 z-30 -mx-4 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
-        <p className="min-w-0 truncate text-sm">
-          <span className="font-medium">{doneCount} of 5 done</span>
-          <span className="text-muted-foreground"> · {deploySub}</span>
-        </p>
+          slim sticky strip keeps STEP NAV + progress + deploy in the fold
+          (C2 harvest; top-12 = the app header's h-12, no see-through band). */}
+      <div className="sticky top-12 z-30 -mx-4 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+        <span className="flex shrink-0 items-center gap-1" role="group" aria-label="Jump to step">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => openRow(n)}
+              aria-label={`Step ${n}: ${stepTitle(n, draft)}${isDone(n) ? ", done" : ""}`}
+              className={cn(
+                "flex h-6 w-6 items-center justify-center rounded-full border text-xs font-medium transition-colors",
+                isDone(n) ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground",
+                n === selected && "ring-1 ring-ring",
+              )}
+            >
+              {isDone(n) ? <Check className="h-3 w-3" aria-hidden /> : n}
+            </button>
+          ))}
+        </span>
+        <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">{deploySub}</p>
         <Button size="sm" className="shrink-0 gap-1.5" onClick={publish}>
           <Rocket className="h-3.5 w-3.5" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
         </Button>
@@ -640,13 +688,17 @@ export function AgentWizard({
                 </p>
               </div>
             </div>
+            {/* Always outline: this button OPENS the Talk panel. Turning it
+                red mid-test made it read as "end call" while it did no such
+                thing (audit 2026-07-07); truncate guards long agent names. */}
             <Button
-              variant={testing ? "destructive" : "outline"}
+              variant="outline"
               size="sm"
               className="w-full gap-1.5"
               onClick={() => setTalkOpen(true)}
             >
-              <Mic className="h-4 w-4" aria-hidden /> Talk to {draft.name || "your agent"}
+              <Mic className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
             </Button>
           </div>
 
@@ -693,7 +745,9 @@ export function AgentWizard({
             "space-y-2.5 rounded-lg border p-3",
             isLive ? "border-success/40 bg-success/10" : "border-border bg-card",
           )}>
-            <p className="text-xs text-muted-foreground">{doneCount} of 5 done</p>
+            {/* ONE progress fraction: the step list above already shows what's
+                done; a second "N of 5" with a different denominator read as a
+                contradiction (audit 2026-07-07). */}
             <div>
               <p className="text-sm font-semibold">
                 {isLive ? `Live on ${channelTarget(draft)}` : `${setupCount} of 4 set up`}

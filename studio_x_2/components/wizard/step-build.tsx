@@ -29,16 +29,17 @@ export function StepBuild({ draft, update }: StepProps) {
         Tell {draft.name || "your agent"} how to behave and give it knowledge and connectors. Saves automatically as you type.
       </p>
 
-      {/* Prompt owns the left column at xl; greeting + tools + test dock right
-          (width-discipline: structure on big screens, one column on small). */}
-      <div className="grid gap-x-10 gap-y-5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      {/* Prompt owns the left column at 2xl; greeting + tools + test dock
+          right. 2xl (not xl): with the sidebar open a 1280-1440 viewport
+          leaves each column too narrow. max-w-7xl stops the 4K stretch. */}
+      <div className="grid max-w-7xl gap-x-10 gap-y-5 2xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="min-w-0 space-y-2">
           <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
           <Textarea
             id="wz-prompt"
             value={draft.systemPrompt}
             onChange={(e) => update({ systemPrompt: e.target.value })}
-            className="min-h-[180px] font-mono text-sm leading-relaxed xl:min-h-[260px]"
+            className="min-h-[180px] font-mono text-sm leading-relaxed 2xl:min-h-[260px]"
             placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
           />
           <p className="text-xs text-muted-foreground">

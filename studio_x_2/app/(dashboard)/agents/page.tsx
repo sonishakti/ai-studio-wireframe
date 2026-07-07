@@ -411,8 +411,11 @@ export default function AgentsPage() {
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
   const startBlank = () => {
     setBuilderId("new")
-    // ?blank=1 → the wizard skips the draft restore; "blank" means blank (#4).
-    router.push("/agents?blank=1")
+    // Blank intent travels as the `blank` PROP (the wizard remounts before the
+    // push commits, so it can't read the URL). Push a CLEAN /agents: a lingering
+    // ?blank=1 confused refreshes, which reset builderId to the default agent
+    // (audit 2026-07-07).
+    router.push("/agents")
   }
   const isBuilder = view === "builder"
 

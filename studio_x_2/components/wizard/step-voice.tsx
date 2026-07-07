@@ -46,7 +46,10 @@ export function StepVoice({
   const origin = draft.agentId ?? "new"
 
   return (
-    <div className="grid gap-x-10 gap-y-6 xl:grid-cols-2">
+    // Two columns only at 2xl: at 1280-1440 with the sidebar open, an xl split
+    // squeezed each preset card to ~45px of content (audit 2026-07-07).
+    // max-w-7xl keeps the columns readable on 4K instead of stretching.
+    <div className="grid max-w-7xl gap-x-10 gap-y-6 2xl:grid-cols-2">
       {/* Voice persona */}
       <section className="min-w-0 space-y-4">
         <header className="space-y-1">
@@ -128,7 +131,7 @@ export function StepVoice({
       </section>
 
       {/* The models behind the voice — preset-first. */}
-      <section className="min-w-0 border-t border-border pt-5 xl:border-l xl:border-t-0 xl:pl-10 xl:pt-0">
+      <section className="min-w-0 border-t border-border pt-5 2xl:border-l 2xl:border-t-0 2xl:pl-10 2xl:pt-0">
         <StackConfig draft={draft} update={update} />
       </section>
     </div>

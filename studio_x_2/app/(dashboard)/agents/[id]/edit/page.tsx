@@ -1,7 +1,5 @@
-"use client"
-
-import { use } from "react"
-import { AgentWizard } from "@/components/wizard/agent-wizard"
+import { AGENTS } from "@/lib/campaign-data"
+import { AgentEditorClient } from "./editor-client"
 
 /**
  * Agent editor → the unified creation WIZARD (2026-06-24, studio_x_2).
@@ -11,15 +9,22 @@ import { AgentWizard } from "@/components/wizard/agent-wizard"
  *   • id === "agt_*" → loads that agent into the wizard, every step unlocked
  *   • onboarding + empty-state → just link here; no separate wizard code
  *
- * The previous tab/breadcrumb editor (Stack/Knowledge/MCP/Connectors/Deploy) was
- * replaced wholesale by the 5-step wizard: Voice → Type → Prompt → Configure →
- * Test & publish. See `components/wizard/*`.
+ * SERVER wrapper + generateStaticParams: every mock agent id (plus "new") is
+ * pre-generated so the route builds STATIC. Request-time rendering left client
+ * pages under dynamic segments un-hydrated in this app: the SSR HTML showed
+ * but React never attached, so templates never seeded, deep links never
+ * scrolled, and every field was dead (found + bisected 2026-07-07; predates
+ * the one-pager).
  */
-export default function AgentEditorPage({
+export function generateStaticParams() {
+  return [{ id: "new" }, ...AGENTS.map((a) => ({ id: a.id }))]
+}
+
+export default async function AgentEditorPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = use(params)
-  return <AgentWizard id={id} />
+  const { id } = await params
+  return <AgentEditorClient id={id} />
 }

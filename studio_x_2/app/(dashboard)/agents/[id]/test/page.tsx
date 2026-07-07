@@ -4,10 +4,16 @@ import { ArrowLeft } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { AgentPlayground } from "@/components/agent-playground"
-import { getAgent } from "@/lib/campaign-data"
+import { getAgent, AGENTS } from "@/lib/campaign-data"
 
 interface Props {
   params: Promise<{ id: string }>
+}
+
+/** Pre-generate mock agent ids: dynamic rendering left client children under
+ *  [id] segments un-hydrated (see /agents/[id]/edit, 2026-07-07). */
+export function generateStaticParams() {
+  return [{ id: "new" }, ...AGENTS.map((a) => ({ id: a.id }))]
 }
 
 export default async function AgentTestPage({ params }: Props) {

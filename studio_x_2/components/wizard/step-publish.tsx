@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Mic, PhoneOff, Layers } from "lucide-react"
+import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Mic, PhoneOff, Layers, Gauge } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { publishBlocks, channelTarget, typeLabel, type AgentDraft } from "@/lib/wizard-draft"
-import { stackLine } from "@/lib/campaign-data"
+import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 
 /**
@@ -49,8 +49,8 @@ export function StepPublish({
           <PhoneOff className="h-4 w-4" aria-hidden /> End test
         </Button>
       ) : (
-        <Button variant="outline" size="sm" className="gap-1.5" onClick={onToggleTalk}>
-          <Mic className="h-4 w-4" aria-hidden /> Talk to {agentName}
+        <Button variant="outline" size="sm" className="max-w-full gap-1.5" onClick={onToggleTalk}>
+          <Mic className="h-4 w-4 shrink-0" aria-hidden /> <span className="truncate">Talk to {agentName}</span>
         </Button>
       )}
 
@@ -63,6 +63,13 @@ export function StepPublish({
           </SummaryRow>
           <SummaryRow icon={Layers} label="Models">
             {stackLine(draft.stack, { full: true })}
+          </SummaryRow>
+          {/* The two numbers that matter at the moment of commitment (judge
+              harvest: surface cost + latency ON the deploy step, not only in
+              Step 1's estimate line). */}
+          <SummaryRow icon={Gauge} label="Estimate">
+            ~{stackEstimateFor(draft.stack).latencyMs} ms to first word
+            <span className="text-muted-foreground"> · ~${stackEstimateFor(draft.stack).costPerMin.toFixed(2)}/min</span>
           </SummaryRow>
           <SummaryRow icon={typeIcon(draft)} label="Type">
             {draft.type ? typeLabel(draft.type) : "Not set yet"}
