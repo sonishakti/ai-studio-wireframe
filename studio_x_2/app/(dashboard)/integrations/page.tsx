@@ -17,10 +17,17 @@ import { ChannelsPanel } from "@/components/channels-panel"
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+// Reuse the builder's create/config surfaces so Resources and the agent's Prompt
+// & tools step create the SAME persisted resources — no mock/real drift.
+import { KnowledgeCreateForm, McpCreateForm, McpToolsSheet } from "@/components/wizard/step-build"
 // Canonical catalogs — shared with the agent builder's Actions hub so the two
 // never drift (2026-07-07 canonicalization).
-import { CONNECTORS, KNOWLEDGE_BASES, MCP_SERVERS, type Connector } from "@/lib/campaign-data"
-import { effectiveConnectorStatus, setConnectorConnected } from "@/lib/agent-resources"
+import { CONNECTORS, KNOWLEDGE_BASES, MCP_SERVERS, type Connector, type KnowledgeBase, type McpServer } from "@/lib/campaign-data"
+import {
+  effectiveConnectorStatus, setConnectorConnected,
+  allKnowledgeBases, allMcpServers, getUserMcpServer,
+} from "@/lib/agent-resources"
 
 // Resources is tab-routed (?tab=…), so deep links and the header breadcrumb stay
 // in sync. Order matches the tab list left-to-right.
@@ -93,6 +100,16 @@ function ResourcesInner() {
     setRev((r) => r + 1)
     toast(`${c.name} disconnected`)
   }
+
+  // KB / MCP lists come from the same store the builder writes to, so a base or
+  // server created in an agent shows up here too. Seed-only until mount (SSR
+  // parity), then the user's created items merge in.
+  const kbs: KnowledgeBase[] = mounted ? allKnowledgeBases() : KNOWLEDGE_BASES
+  const mcps: McpServer[] = mounted ? allMcpServers() : MCP_SERVERS
+  const [kbCreateOpen, setKbCreateOpen] = React.useState(false)
+  const [mcpCreateOpen, setMcpCreateOpen] = React.useState(false)
+  const [configMcpId, setConfigMcpId] = React.useState<string | null>(null)
+  const bump = () => setRev((r) => r + 1)
   void rev
 
   return (
@@ -131,7 +148,7 @@ function ResourcesInner() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search knowledge bases…" className="pl-9" />
           </div>
-          {KNOWLEDGE_BASES.length === 0 ? (
+          {kbs.length === 0 ? (
             <div className="rounded-lg border bg-card">
               <EmptyState
                 icon={Plus}
@@ -139,18 +156,14 @@ function ResourcesInner() {
                 subtitle="Add a knowledge base so your agent can answer from your docs, FAQs, or a crawled site."
               />
               <div className="flex justify-center pb-8">
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => toast.info("Mock: Add knowledge base")}
-                >
+                <Button size="sm" className="gap-1.5" onClick={() => setKbCreateOpen(true)}>
                   <Plus className="h-4 w-4" /> Add knowledge base
                 </Button>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {KNOWLEDGE_BASES.map((kb) => (
+              {kbs.map((kb) => (
                 <Card key={kb.id} className="p-4">
                   <p className="text-sm font-semibold">{kb.name}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Source: {kb.source}</p>
@@ -166,7 +179,7 @@ function ResourcesInner() {
               ))}
               <button
                 type="button"
-                onClick={() => toast.info("Mock: Add knowledge base")}
+                onClick={() => setKbCreateOpen(true)}
                 aria-label="Add knowledge base"
                 className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed bg-card p-4 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
               >
@@ -175,6 +188,20 @@ function ResourcesInner() {
               </button>
             </div>
           )}
+
+          {/* Create — the same form the builder uses, so both write one store. */}
+          <Sheet open={kbCreateOpen} onOpenChange={setKbCreateOpen}>
+            <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+              <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+                <SheetTitle>Create knowledge base</SheetTitle>
+              </SheetHeader>
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+                <KnowledgeCreateForm
+                  onCreated={() => { setKbCreateOpen(false); bump(); toast.success("Knowledge base created") }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
         </TabsContent>
 
         {/* MCP tab */}
@@ -192,45 +219,67 @@ function ResourcesInner() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search MCP servers…" className="pl-9" />
           </div>
-          {MCP_SERVERS.length === 0 ? (
+          {mcps.length === 0 ? (
             <div className="rounded-lg border bg-card">
               <EmptyState
                 icon={Plug}
                 title="No MCP servers yet"
-                subtitle="Connect an MCP server to give your agent extra tools — CRM lookups, calendar access, custom APIs."
+                subtitle="Connect an MCP server to give your agent extra tools: CRM lookups, calendar access, custom APIs."
               />
               <div className="flex justify-center pb-8">
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => toast.info("Mock: Add MCP server")}
-                >
+                <Button size="sm" className="gap-1.5" onClick={() => setMcpCreateOpen(true)}>
                   <Plus className="h-4 w-4" /> Add MCP server
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              {MCP_SERVERS.map((s) => (
-                <div key={s.id} className="flex items-center gap-3 rounded-md border bg-card p-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
-                    <Plug className="h-4 w-4 text-muted-foreground" />
+              {mcps.map((s) => {
+                // Only user-created servers carry an editable tool list; the seed
+                // samples don't, so their Configure is disabled with a hint.
+                const editable = mounted && !!getUserMcpServer(s.id)
+                return (
+                  <div key={s.id} className="flex items-center gap-3 rounded-md border bg-card p-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+                      <Plug className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">{s.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono truncate">{s.url}</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">{s.tools} tools</Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!editable}
+                      title={editable ? undefined : "Sample server — create your own to configure its tools"}
+                      onClick={() => setConfigMcpId(s.id)}
+                    >
+                      Configure tools
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">{s.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono truncate">{s.url}</p>
-                  </div>
-                  <Badge variant="secondary" className="text-xs">{s.tools} tools</Badge>
-                  <Button variant="outline" size="sm" onClick={() => toast.info(`Mock: Configure ${s.name}`)}>
-                    Configure
-                  </Button>
-                </div>
-              ))}
-              <Button variant="outline" className="w-full gap-1.5" onClick={() => toast.info("Mock: Add MCP server")}>
+                )
+              })}
+              <Button variant="outline" className="w-full gap-1.5" onClick={() => setMcpCreateOpen(true)}>
                 <Plus className="h-4 w-4" /> Add MCP Server
               </Button>
             </div>
           )}
+
+          {/* Create + configure — the builder's own surfaces, one shared store. */}
+          <Sheet open={mcpCreateOpen} onOpenChange={setMcpCreateOpen}>
+            <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+              <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+                <SheetTitle>Create MCP server</SheetTitle>
+              </SheetHeader>
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+                <McpCreateForm
+                  onCreated={() => { setMcpCreateOpen(false); bump(); toast.success("MCP server created") }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+          <McpToolsSheet id={configMcpId} onClose={() => setConfigMcpId(null)} onSaved={bump} />
         </TabsContent>
 
         {/* Connectors tab (Figma default) */}
@@ -247,7 +296,7 @@ function ResourcesInner() {
               <EmptyState
                 icon={Plug}
                 title="No connectors yet"
-                subtitle="Connect a tool so your agent can take real actions — look up an order, file a ticket, take a payment."
+                subtitle="Connect a tool so your agent can take real actions: look up an order, file a ticket, or take a payment."
               />
             </div>
           ) : (

@@ -90,8 +90,19 @@ export function AgentWizard({
   // Optional depth sections (F1 Advanced / F8 Analysis) — collapsed by default
   // so the novice skips them; the rail entry expands + scrolls.
   const [optOpen, setOptOpen] = React.useState<{ advanced: boolean; analysis: boolean }>({ advanced: false, analysis: false })
+  // Which section the scroll-spy currently highlights when it's an optional one
+  // (numbered steps live in `openStep`; the two coordinate so exactly one rail
+  // row reads active).
+  const [activeOpt, setActiveOpt] = React.useState<"advanced" | "analysis" | null>(null)
+  // muteSpy is defined further down (after the scroll refs); a ref lets the
+  // earlier openOptional reach it without a use-before-define.
+  const muteSpyRef = React.useRef<(ms: number) => void>(() => {})
   const openOptional = (key: "advanced" | "analysis") => {
     setOptOpen((o) => ({ ...o, [key]: true }))
+    // Mark it active now and mute the spy for the glide so the numbered-step
+    // highlight doesn't fight the jump (matches openRow's behaviour).
+    setActiveOpt(key)
+    muteSpyRef.current(1500)
     window.setTimeout(() => document.getElementById(`wizard-opt-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 60)
   }
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
@@ -419,6 +430,7 @@ export function AgentWizard({
   // passes — mute it for the ride so the clicked step stays selected.
   const spyMutedUntil = React.useRef(0)
   const muteSpy = (ms: number) => { spyMutedUntil.current = Date.now() + ms }
+  muteSpyRef.current = muteSpy
   const openRow = (n: number) => {
     // Set the highlight FIRST: on a short page (everything in one fold, the
     // 4K case) nothing scrolls, so the click must still give feedback.
@@ -438,14 +450,25 @@ export function AgentWizard({
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
         if (visible[0]) {
-          const n = Number(visible[0].target.id.replace("wizard-step-", ""))
-          if (n >= 1 && n <= 5) setOpenStep(n)
+          const id = visible[0].target.id
+          if (id.startsWith("wizard-opt-")) {
+            // An optional section is under the reading line — highlight IT and
+            // drop the numbered-step highlight so exactly one rail row is active.
+            setActiveOpt(id.replace("wizard-opt-", "") as "advanced" | "analysis")
+          } else {
+            const n = Number(id.replace("wizard-step-", ""))
+            if (n >= 1 && n <= 5) { setOpenStep(n); setActiveOpt(null) }
+          }
         }
       },
       { rootMargin: "-15% 0px -65% 0px" },
     )
     for (let i = 1; i <= 5; i++) {
       const el = document.getElementById(`wizard-step-${i}`)
+      if (el) obs.observe(el)
+    }
+    for (const key of ["advanced", "analysis"]) {
+      const el = document.getElementById(`wizard-opt-${key}`)
       if (el) obs.observe(el)
     }
     return () => obs.disconnect()
@@ -460,7 +483,7 @@ export function AgentWizard({
   const stepSlice = (d: AgentDraft, n: number) =>
     n === 1 ? { voice: d.voice, stack: d.stack }
     : n === 2 ? { type: d.type }
-    : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, knowledge: d.knowledge, mcp: d.mcp }
+    : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
     : { config: d.config }
   const stepDirty = (n: number) => {
     const base = baseline.current
@@ -580,13 +603,17 @@ export function AgentWizard({
     if (n === 3) {
       if (!promptDone) return undefined
       const chars = draft.systemPrompt.trim().length
-      // Actions counted distinctly now that KB / MCP / connectors are separate
-      // (F6, 2026-07-07) — the old summary called every MCP a "connector".
-      const attached = draft.knowledge.length + draft.mcp.length + draft.connectors.length
+      // KB / MCP / connectors are three distinct resources now (F6, 2026-07-07),
+      // so the recap names each rather than flattening them into one "actions"
+      // count that miscalled a knowledge base an action.
+      const bits: string[] = []
+      if (draft.knowledge.length) bits.push(`${draft.knowledge.length} knowledge`)
+      if (draft.mcp.length) bits.push(`${draft.mcp.length} MCP`)
+      if (draft.connectors.length) bits.push(`${draft.connectors.length} connector${draft.connectors.length === 1 ? "" : "s"}`)
       return [
         `Prompt · ${chars} chars`,
         draft.greeting.trim() ? "Greeting set" : "No greeting",
-        `${attached} action${attached === 1 ? "" : "s"} attached`,
+        bits.length ? bits.join(", ") : "No tools yet",
       ].join(" · ")
     }
     if (n === 4) {
@@ -628,7 +655,17 @@ export function AgentWizard({
   const blockReason = publishBlockReason(draft)
   // Honest deploy-state line: a live agent with pending edits says so (the
   // missing dirty signal was the top finding in every operator audit run).
-  const anyEdited = isLive && [1, 2, 3, 4].some(stepDirty)
+  // The optional Advanced / Analysis sections autosave too, so a live agent
+  // with only optional edits must still read "not live yet" (audit 2026-07-07).
+  const optionalDirty = () => {
+    const base = baseline.current
+    if (!base) return false
+    return (
+      JSON.stringify(draft.advanced ?? null) !== JSON.stringify(base.advanced ?? null) ||
+      JSON.stringify(draft.analysis ?? null) !== JSON.stringify(base.analysis ?? null)
+    )
+  }
+  const anyEdited = isLive && ([1, 2, 3, 4].some(stepDirty) || optionalDirty())
   const deploySub = isLive
     ? anyEdited
       ? "Edits are not live yet. Redeploy to apply."
@@ -771,10 +808,10 @@ export function AgentWizard({
                   key={n}
                   type="button"
                   onClick={() => openRow(n)}
-                  aria-current={n === selected ? "step" : undefined}
+                  aria-current={n === selected && !activeOpt ? "step" : undefined}
                   className={cn(
                     "flex w-full items-start gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
-                    n === selected && "bg-accent/60",
+                    n === selected && !activeOpt && "bg-accent/60",
                   )}
                 >
                   <span className={cn(
@@ -803,7 +840,11 @@ export function AgentWizard({
                 key={o.key}
                 type="button"
                 onClick={() => openOptional(o.key)}
-                className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40"
+                aria-current={activeOpt === o.key ? "location" : undefined}
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
+                  activeOpt === o.key && "bg-accent/60",
+                )}
               >
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
                   <o.icon className="h-3 w-3" aria-hidden />

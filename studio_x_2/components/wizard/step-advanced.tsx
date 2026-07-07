@@ -197,14 +197,14 @@ export function StepAdvanced({
         </div>
         <div className="max-w-[200px] space-y-1.5">
           <Label htmlFor="adv-history" className="text-xs text-muted-foreground">Max history messages</Label>
-          <Input
+          <IntInput
             id="adv-history"
-            type="number"
             min={0}
             max={200}
             value={adv.history.maxMessages}
-            onChange={(e) => patch({ history: { maxMessages: clampInt(e.target.value, 0, 200) } })}
+            onChange={(maxMessages) => patch({ history: { maxMessages } })}
             className="text-sm"
+            aria-label="Max history messages"
           />
         </div>
       </section>
@@ -271,18 +271,41 @@ function SliderRow({ label, helper, value, min, max, step, unit, onChange }: {
       </div>
       <div className="flex items-center gap-3">
         <Slider value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} aria-label={label} className="flex-1" />
-        <Input
-          type="number"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => onChange(clampInt(e.target.value, min, max))}
-          className="w-20 text-sm"
-          aria-label={`${label} value`}
-        />
+        <IntInput value={value} min={min} max={max} step={step} onChange={onChange} className="w-20 text-sm" aria-label={`${label} value`} />
       </div>
       <p className="text-xs text-muted-foreground">{helper}</p>
     </div>
+  )
+}
+
+/** A controlled integer field that keeps its own text state so it can be cleared
+ *  and retyped without snapping to `min` mid-keystroke; clamps + commits on blur
+ *  or Enter. */
+function IntInput({ value, min, max, step, onChange, className, "aria-label": ariaLabel, id }: {
+  value: number; min: number; max: number; step?: number; onChange: (v: number) => void
+  className?: string; "aria-label"?: string; id?: string
+}) {
+  const [text, setText] = React.useState(String(value))
+  React.useEffect(() => { setText(String(value)) }, [value])
+  const commit = () => {
+    const next = clampInt(text, min, max)
+    setText(String(next))
+    if (next !== value) onChange(next)
+  }
+  return (
+    <Input
+      id={id}
+      type="number"
+      min={min}
+      max={max}
+      step={step}
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit() } }}
+      className={className}
+      aria-label={ariaLabel}
+    />
   )
 }
 

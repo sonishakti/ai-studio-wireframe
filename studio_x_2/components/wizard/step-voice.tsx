@@ -112,9 +112,13 @@ export function StepVoice({
             <Pencil className="h-3.5 w-3.5" aria-hidden />
             {selected.kind === "custom" ? "Edit in playground" : "Customize this voice"}
           </button>
-          {/* Where the engine lives now — signpost it at the exact control. */}
+          {/* Where the engine lives now — signpost it at the exact control.
+              Realtime (multimodal) voices run a single model, so don't name the
+              three cascade stages (audit 2026-07-07). */}
           <p className="text-xs text-muted-foreground/80">
-            Speed, cost, and the STT / LLM / TTS models live with the voice. Customize to change them.
+            {draft.stack.pipeline === "mllm"
+              ? "Speed, cost, and the realtime model live with the voice. Customize to change them."
+              : "Speed, cost, and the STT / LLM / TTS models live with the voice. Customize to change them."}
           </p>
         </div>
       ) : (

@@ -76,6 +76,7 @@ export function StepAnalysis({
         {!cfg.transcribe ? (
           <p className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
             Turn on transcription to define data points.
+            {cfg.dataPoints.length > 0 && ` Your ${cfg.dataPoints.length} saved data point${cfg.dataPoints.length === 1 ? "" : "s"} ${cfg.dataPoints.length === 1 ? "is" : "are"} kept, but nothing is extracted while this is off.`}
           </p>
         ) : cfg.dataPoints.length === 0 ? (
           <p className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">

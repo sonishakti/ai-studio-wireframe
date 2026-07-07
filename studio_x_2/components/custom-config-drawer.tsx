@@ -143,7 +143,7 @@ await client.joinChannel({ channel: "support-room" })`
               ) : (
                 <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 p-3 text-sm">
                   <Check className="h-4 w-4 shrink-0 text-success" aria-hidden />
-                  <span className="text-muted-foreground">Valid JSON. Known keys (prompt, greeting, models, knowledge, MCP, connectors, advanced, analysis) apply.</span>
+                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, stack, type, knowledge, mcp, connectors, config, advanced, analysis. Voice is read-only here (set it in step 1).</span>
                 </div>
               )}
             </div>
@@ -187,6 +187,18 @@ await client.joinChannel({ channel: "support-room" })`
   )
 }
 
+/** A stack is only safe to apply if it carries the three engine sub-objects the
+ *  rest of the app dereferences unconditionally (stackLine reads llm.model /
+ *  asr.model / tts.voice). A partial stack from hand-edited JSON would white-screen
+ *  the builder on the next render, so we reject it rather than apply it. */
+function isValidStack(v: unknown): boolean {
+  if (!v || typeof v !== "object") return false
+  const s = v as Record<string, unknown>
+  const ok = (o: unknown, key: string) =>
+    !!o && typeof o === "object" && typeof (o as Record<string, unknown>)[key] === "string"
+  return ok(s.llm, "model") && ok(s.asr, "model") && ok(s.tts, "voice")
+}
+
 /** Map an edited-JSON object to a guarded draft patch — only known, safe keys,
  *  so a typo'd or hostile field can't corrupt the draft. */
 function toPatch(parsed: Record<string, unknown>): Partial<AgentDraft> {
@@ -201,7 +213,7 @@ function toPatch(parsed: Record<string, unknown>): Partial<AgentDraft> {
   if (parsed.type === null || parsed.type === "inbound" || parsed.type === "outbound" || parsed.type === "code") {
     p.type = parsed.type as AgentType | null
   }
-  if (parsed.stack && typeof parsed.stack === "object") p.stack = parsed.stack as AgentDraft["stack"]
+  if (isValidStack(parsed.stack)) p.stack = parsed.stack as AgentDraft["stack"]
   if (parsed.config && typeof parsed.config === "object") p.config = parsed.config as AgentDraft["config"]
   if (parsed.advanced && typeof parsed.advanced === "object") p.advanced = parsed.advanced as AgentDraft["advanced"]
   if (parsed.analysis && typeof parsed.analysis === "object") p.analysis = parsed.analysis as AgentDraft["analysis"]

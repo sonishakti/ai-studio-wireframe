@@ -114,8 +114,8 @@ export function VoiceBrowser({
               <TableRow>
                 <TableHead className="w-8" />
                 <TableHead>Voice</TableHead>
-                <TableHead>Traits</TableHead>
-                <TableHead>Voice ID</TableHead>
+                <TableHead className="hidden md:table-cell">Traits</TableHead>
+                <TableHead className="hidden sm:table-cell">Voice ID</TableHead>
                 <TableHead className="w-24 text-right" />
               </TableRow>
             </TableHeader>
@@ -136,12 +136,12 @@ export function VoiceBrowser({
                       </span>
                       <span className="text-xs text-muted-foreground">{v.gender} · {v.accent} · {v.voiceType}</span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <span className="flex flex-wrap gap-1">
                         {(v.traits ?? []).map((t) => <Badge key={t} variant="secondary" className="font-normal">{t}</Badge>)}
                       </span>
                     </TableCell>
-                    <TableCell><span className="font-mono text-xs text-muted-foreground">{v.voiceId ?? v.ttsVoice}</span></TableCell>
+                    <TableCell className="hidden sm:table-cell"><span className="font-mono text-xs text-muted-foreground">{v.voiceId ?? v.ttsVoice}</span></TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant={on ? "secondary" : "outline"} onClick={() => use(v)}>
                         {on ? "Selected" : "Use voice"}

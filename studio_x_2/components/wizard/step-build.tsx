@@ -4,7 +4,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import {
   BookOpen, Plug, Boxes, Plus, X, Check, Play, MessageSquare, ChevronLeft,
-  Upload, Settings2, MoreVertical, Trash2, ArrowUpRight,
+  Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -285,7 +285,16 @@ function ResourceField({
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((i) => (
-            <Badge key={i.id} variant="secondary" className="gap-1 pr-1 font-normal">
+            // An attached item that's since become unavailable (e.g. a connector
+            // disconnected in Resources) is flagged, not shown as healthy — so it
+            // can't silently ship in the deployed config (audit 2026-07-07).
+            <Badge
+              key={i.id}
+              variant={i.disabled ? "outline" : "secondary"}
+              className={cn("gap-1 pr-1 font-normal", i.disabled && "border-destructive/40 text-destructive")}
+              title={i.disabled ? "No longer connected — reconnect in Resources or remove it" : undefined}
+            >
+              {i.disabled && <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />}
               {i.name}
               <button
                 type="button"
@@ -421,7 +430,7 @@ function ResourceField({
 
 // ─── Create forms (rendered inside the ResourceField sheet) ────────────────────
 
-function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
+export function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
   const [name, setName] = React.useState("")
   const [ingest, setIngest] = React.useState<KbIngest>("pdf")
   const [fileName, setFileName] = React.useState("")
@@ -476,7 +485,7 @@ function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => void })
   )
 }
 
-function McpCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
+export function McpCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
   const [name, setName] = React.useState("")
   const [url, setUrl] = React.useState("")
   const [transport, setTransport] = React.useState<McpTransport>("sse")
@@ -546,7 +555,7 @@ function McpCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
 
 // ─── Configure-tools sheet for a created MCP server ────────────────────────────
 
-function McpToolsSheet({ id, onClose, onSaved }: { id: string | null; onClose: () => void; onSaved: () => void }) {
+export function McpToolsSheet({ id, onClose, onSaved }: { id: string | null; onClose: () => void; onSaved: () => void }) {
   const server = id ? getUserMcpServer(id) : undefined
   const [tools, setTools] = React.useState<McpTool[]>([])
   React.useEffect(() => { setTools(server?.toolList ?? []) }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -562,7 +571,7 @@ function McpToolsSheet({ id, onClose, onSaved }: { id: string | null; onClose: (
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
           <SheetTitle>Configure tools</SheetTitle>
-          <SheetDescription>{server?.name ?? "MCP server"} — turn each tool on or off.</SheetDescription>
+          <SheetDescription>{server?.name ?? "MCP server"}. Turn each tool on or off.</SheetDescription>
         </SheetHeader>
         <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-5 py-4">
           {tools.map((t) => (
