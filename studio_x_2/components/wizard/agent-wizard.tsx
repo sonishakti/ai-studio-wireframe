@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Check, Mic, Plus, Undo2 } from "lucide-react"
+import { Rocket, Check, Mic, Plus, Undo2, SlidersHorizontal, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +14,9 @@ import { AgentIdentityCard } from "@/components/agent-identity-card"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { StepVoice } from "@/components/wizard/step-voice"
+import { StepAdvanced } from "@/components/wizard/step-advanced"
 import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
@@ -84,6 +86,13 @@ export function AgentWizard({
   const [openStep, setOpenStep] = React.useState<number | null>(null)
   // The Talk panel (identity card + live test) — the ONLY right-side Sheet now.
   const [talkOpen, setTalkOpen] = React.useState(false)
+  // Optional depth sections (F1 Advanced / F8 Analysis) — collapsed by default
+  // so the novice skips them; the rail entry expands + scrolls.
+  const [optOpen, setOptOpen] = React.useState<{ advanced: boolean; analysis: boolean }>({ advanced: false, analysis: false })
+  const openOptional = (key: "advanced" | "analysis") => {
+    setOptOpen((o) => ({ ...o, [key]: true }))
+    window.setTimeout(() => document.getElementById(`wizard-opt-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 60)
+  }
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
   const [testing, setTesting] = React.useState(false)
   // Visible autosave status — "the copy promises autosave, so show it working"
@@ -782,6 +791,21 @@ export function AgentWizard({
             })}
           </nav>
 
+          {/* Optional depth — power-user sections, not part of "N of 5". */}
+          <div className="space-y-0.5">
+            <p className="px-2.5 pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground/70">Optional</p>
+            <button
+              type="button"
+              onClick={() => openOptional("advanced")}
+              className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40"
+            >
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
+                <SlidersHorizontal className="h-3 w-3" aria-hidden />
+              </span>
+              <span className="text-sm font-medium">Advanced</span>
+            </button>
+          </div>
+
           {/* Deploy state — honest about pending edits (audit fix: every
               operator run flagged the missing dirty signal). */}
           <div className={cn(
@@ -879,6 +903,22 @@ export function AgentWizard({
               </section>
             )
           })}
+
+          {/* Optional depth: Advanced (F1). Collapsed by default. */}
+          <OptionalSection
+            id="wizard-opt-advanced"
+            icon={SlidersHorizontal}
+            title="Advanced"
+            summary="Turn-taking · speech · filter words · history"
+            open={optOpen.advanced}
+            onOpenChange={(o) => setOptOpen((s) => ({ ...s, advanced: o }))}
+          >
+            <StepAdvanced
+              value={draft.advanced}
+              onChange={(advanced) => update({ advanced })}
+              realtime={draft.stack.pipeline === "mllm"}
+            />
+          </OptionalSection>
         </div>
       </div>
 
@@ -929,6 +969,47 @@ export function AgentWizard({
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** An optional, collapsed-by-default depth section in the one-pager (Advanced,
+ *  Analysis). Same card chrome as a step, but toggle-expanded and un-numbered. */
+function OptionalSection({
+  id, icon: Icon, title, summary, open, onOpenChange, children,
+}: {
+  id: string
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  summary: string
+  open: boolean
+  onOpenChange: (o: boolean) => void
+  children: React.ReactNode
+}) {
+  return (
+    <Collapsible open={open} onOpenChange={onOpenChange}>
+      <section id={id} className="scroll-mt-24 rounded-xl border border-border bg-card">
+        <CollapsibleTrigger asChild>
+          <button type="button" className="flex w-full items-center justify-between gap-3 rounded-xl px-5 py-3 text-left transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
+                <Icon className="h-3.5 w-3.5" aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">{title}</span>
+                  <Badge variant="outline" className="shrink-0 text-muted-foreground">Optional</Badge>
+                </span>
+                <span className="line-clamp-1 block text-xs text-muted-foreground">{summary}</span>
+              </span>
+            </span>
+            <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} aria-hidden />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="border-t border-border px-5 py-5">
+          {children}
+        </CollapsibleContent>
+      </section>
+    </Collapsible>
+  )
+}
 
 /** The first step whose completion predicate is unmet — used only for the
  *  "Start here" nudge + restore cursor. Not a gate. */
