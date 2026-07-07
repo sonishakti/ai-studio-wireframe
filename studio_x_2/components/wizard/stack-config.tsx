@@ -101,13 +101,8 @@ export function StackConfig({ draft, update }: StepProps) {
 
   return (
     <section className="space-y-4">
-      <header className="space-y-1">
-        <h3 className="text-sm font-semibold">Models</h3>
-        <p className="text-sm text-muted-foreground">
-          Pick a priority. We suggest the vendors to match.
-        </p>
-      </header>
-
+      {/* No section header (owner call, 2026-07-07): the preset cards are
+          self-describing; the estimate line below names the outcome. */}
       {/* Preset first — the ONE model decision most users make. */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="group" aria-label="Model preset">
         {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
