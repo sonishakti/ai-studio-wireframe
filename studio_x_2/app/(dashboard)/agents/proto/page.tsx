@@ -36,15 +36,17 @@ const VARIANTS = [
 
 export default function ProtoPage() {
   const [v, setV] = React.useState(1)
+  const [mode, setMode] = React.useState<"live" | "draft">("live")
   React.useEffect(() => {
     const n = parseInt(new URLSearchParams(window.location.search).get("v") ?? "1", 10)
     if (n >= 1 && n <= 10) setV(n)
   }, [])
   const Active = VARIANTS.find((x) => x.v === v)?.C ?? MasterP1
+  const ActiveAny = Active as React.ComponentType<{ mode?: "live" | "draft" }>
 
   return (
     <div className="relative flex-1">
-      <Active />
+      <ActiveAny mode={mode} />
       <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-full border border-border bg-popover/95 px-2 py-1.5 shadow-lg backdrop-blur">
         {VARIANTS.map((x) => (
           <button
@@ -65,6 +67,13 @@ export default function ProtoPage() {
           </button>
         ))}
         <span className="px-2 text-xs text-muted-foreground">{VARIANTS.find((x) => x.v === v)?.name}</span>
+        <button
+          type="button"
+          onClick={() => setMode((m) => (m === "live" ? "draft" : "live"))}
+          className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground"
+        >
+          {mode === "live" ? "Live" : "Draft"}
+        </button>
       </div>
     </div>
   )

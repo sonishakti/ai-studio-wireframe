@@ -21,17 +21,9 @@ export const STEP_TITLES = [
   "Deploy",
 ] as const
 
-/** The checklist's two chunks (variant-audit winner, 2026-07-06): "Your agent"
- *  = what it is; "How it goes live" = where it runs. Two labeled groups of 2-3
- *  beat one flat list of 5 for digestion; canonical step ids 1-5 are UNCHANGED
- *  (drawers, ?step=N, Back/Next all keep the original order). */
-export const STEP_GROUPS = [
-  { label: "Your agent", steps: [1, 3] },
-  { label: "How it goes live", steps: [2, 4, 5] },
-] as const
-
-/** Row glyph for not-done rows — grouping breaks digit contiguity (1,3 / 2,4,5),
- *  so rows show an icon (or ✓ when done) instead of a number. */
+/** Row glyph for not-done rows — rows read as one unbroken 1-5 sequence
+ *  (2026-07-07 direction: no group headers), each with its step's icon
+ *  (or ✓ when done). */
 export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string }>> = {
   1: AudioLines,
   2: Waypoints,

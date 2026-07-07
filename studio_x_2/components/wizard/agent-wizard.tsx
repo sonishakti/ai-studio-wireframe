@@ -2,14 +2,15 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Check, ChevronRight, Plus } from "lucide-react"
+import { Rocket, Check, ChevronRight, ChevronLeft, Mic, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
+import { AgentSphere } from "@/components/agent-test-panel"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { StepVoice } from "@/components/wizard/step-voice"
@@ -17,7 +18,7 @@ import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
-import { STEP_TITLES, STEP_GROUPS, STEP_ICONS, stepTitle, stepManifest } from "@/components/wizard/types"
+import { STEP_TITLES, STEP_ICONS, stepTitle, stepManifest } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
@@ -67,9 +68,15 @@ export function AgentWizard({
     [],
   )
   const [draft, setDraft] = React.useState<AgentDraft>(initialDraft)
-  // null = checklist overview; 1..5 = that step's drawer is open.
+  // Master-detail selection (2026-07-07): the right card ALWAYS shows a step.
+  // null = "no explicit choice yet" — the render falls back to a default
+  // captured once on first render (edit reviews from step 1; a new draft lands
+  // on its first incomplete step). Kept nullable so ?step deep links and the
+  // ⌘K event keep their exact semantics.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
-  // The left identity card's "Talk to it" toggle (mock test, mirrors the home).
+  // The Talk panel (identity card + live test) — the ONLY right-side Sheet now.
+  const [talkOpen, setTalkOpen] = React.useState(false)
+  // The identity card's "Talk to it" toggle (mock test, mirrors the home).
   const [testing, setTesting] = React.useState(false)
   // Visible autosave status — "the copy promises autosave, so show it working"
   // (heuristic-eval #6). idle → saving (on change) → saved (after the write).
@@ -77,6 +84,14 @@ export function AgentWizard({
   const dirty = React.useRef(false)
   const draftRef = React.useRef(draft)
   draftRef.current = draft
+
+  // The selection the right card renders. Default is locked on FIRST render —
+  // if it tracked firstIncomplete live, finishing a step inline would yank the
+  // card to the next step mid-edit. The mount effect overrides it for restored
+  // drafts and deep links via setOpenStep.
+  const defaultSelected = React.useRef<number | null>(null)
+  if (defaultSelected.current == null) defaultSelected.current = isEdit ? 1 : firstIncomplete(draft)
+  const selected = openStep ?? defaultSelected.current
 
   const update = React.useCallback((patch: Partial<AgentDraft>) => {
     dirty.current = true
@@ -189,6 +204,9 @@ export function AgentWizard({
       const unsaved = restoreDraft(existing!.id)
       if (unsaved) {
         setDraft(unsaved)
+        // Undo baseline = the restored draft, NOT the pristine agent — one
+        // "Undo changes" click must never wipe work that survived a refresh.
+        openSnapshot.current = unsaved
         toast("Resuming unsaved edits", {
           description: `${existing!.name} has changes that were never deployed.`,
           action: {
@@ -277,12 +295,18 @@ export function AgentWizard({
     } else if (restored) {
       const at = firstIncomplete(restored)
       toast("Draft restored", { description: `Picked up at Step ${at} — ${STEP_TITLES[at - 1]}.` })
+      // Land the selection where the work stopped (the default locked on
+      // first render was computed from the empty draft).
+      if (!stepToOpen && !dc) openLater(at)
     }
     if (dc) {
       const t = dcToType(dc)
       if (t) next = { ...next, type: t, config: dcToConfig(dc, next.config) }
     }
     setDraft(next)
+    // Undo baseline = what we just landed with — never the pre-restore empty
+    // draft (one "Undo changes" click must not erase restored work).
+    openSnapshot.current = next
     if (dc) openLater(4)
     else if (stepToOpen) openLater(stepToOpen)
     if (artifactId || dc) dirty.current = true
@@ -313,10 +337,10 @@ export function AgentWizard({
     setSaveState("saved")
   }, [draft], 600)
 
-  // ── Drawer navigation — mirrored into the URL (?step=N via replaceState, so
-  //    refresh restores the open drawer and the link is shareable, while Back
+  // ── Step selection — mirrored into the URL (?step=N via replaceState, so
+  //    refresh restores the selection and the link is shareable, while Back
   //    still exits the page predictably — heuristic-eval #20). A snapshot taken
-  //    on open powers the footer's "Undo changes" (#18).
+  //    on each selection change powers the footer's "Undo changes" (#18).
   const openSnapshot = React.useRef<AgentDraft | null>(null)
   const syncStepParam = (n: number | null) => {
     const url = new URL(window.location.href)
@@ -330,17 +354,15 @@ export function AgentWizard({
     syncStepParam(n)
   }
   openRowRef.current = openRow
-  const closeDrawer = () => { setOpenStep(null); syncStepParam(null) }
-  // Deep-link/refresh opens bypass openRow — capture a baseline anyway so
-  // "Undo changes" is never a silent no-op (re-eval #6); reset on close so the
-  // next open re-captures.
+  // The default selection (and deep links via openLater) bypass openRow —
+  // capture a baseline anyway so "Undo changes" is never a silent no-op
+  // (re-eval #6). Never reset: the right card always shows a step now.
   React.useEffect(() => {
-    if (openStep != null && openSnapshot.current == null) openSnapshot.current = draftRef.current
-    if (openStep == null) openSnapshot.current = null
+    if (openSnapshot.current == null) openSnapshot.current = draftRef.current
   }, [openStep])
   const advanceFrom = (n: number) => {
     openSnapshot.current = draftRef.current
-    const next = n < 5 ? n + 1 : null
+    const next = Math.min(5, n + 1)
     setOpenStep(next)
     syncStepParam(next)
   }
@@ -354,12 +376,12 @@ export function AgentWizard({
     const snap = openSnapshot.current
     if (!snap) return
     dirty.current = true
-    // The sheet is non-modal, so the card's name field and the row-2 type
-    // toggle stay editable behind it — preserve those (re-eval #14), and drop
-    // any stale type stash so a later restore can't reapply old config.
+    // The header name field stays editable outside the step card — preserve
+    // name + type (re-eval #14), and drop any stale type stash so a later
+    // restore can't reapply old config.
     setDraft((d) => ({ ...snap, name: d.name, type: d.type }))
     typeStash.current = null
-    toast("Changes undone", { description: "Everything changed in this drawer since opening it was reverted (name and type kept)." })
+    toast("Changes undone", { description: "Everything changed on this step since you selected it was reverted (name and type kept)." })
   }
 
   // Picking a voice seeds the draft + chains to the type step.
@@ -517,141 +539,148 @@ export function AgentWizard({
         </p>
       )}
 
-      <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-        {/* LEFT — the agent stays present (shared card, identical to the home). */}
-        <AgentIdentityCard
-          name={draft.name}
-          namePlaceholder={isEdit ? existing!.name : "Your new agent"}
-          onNameChange={(v) => update({ name: v })}
-          agentId={draft.agentId}
-          status={cardStatus}
-          subtitle={isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
-          stack={cardStack}
-          language={`${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`}
-          costPerMin={cardEst?.costPerMin}
-          latencyMs={cardEst?.latencyMs}
-          latencyBreakdown={cardLatency}
-          // WHERE the agent takes traffic — visible on the always-present card,
-          // not just inside the Step-4 drawer (heuristic-eval #11).
-          channel={draft.type ? {
-            label: channelLine(draft),
-            onClick: () => openRow(4),
-          } : undefined}
-          talking={testing}
-          onToggleTalk={toggleTest}
-          talkLabel={`Talk to ${draft.name || "your agent"}`}
-          endLabel="End test"
+      {/* Slim identity strip — the agent's face stays present, but details and
+          testing live in the on-demand panel (master-detail direction,
+          2026-07-07: the page belongs to the steps + their config). */}
+      <div className="flex items-center gap-3">
+        <AgentSphere size={36} active={testing} />
+        <input
+          value={draft.name}
+          onChange={(e) => update({ name: e.target.value })}
+          placeholder={isEdit ? existing!.name : "Your new agent"}
+          aria-label="Agent name"
+          className="min-w-0 max-w-56 rounded-md bg-transparent px-1 text-base font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
         />
+        <Badge variant="secondary" className="shrink-0">{cardStatus}</Badge>
+        <span className="hidden truncate text-sm text-muted-foreground sm:block">
+          {isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
+        </span>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <Button
+            variant={testing ? "destructive" : "outline"}
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setTalkOpen(true)}
+          >
+            <Mic className="h-4 w-4" aria-hidden /> Talk to {draft.name || "your agent"}
+          </Button>
+        </div>
+      </div>
 
-        {/* RIGHT — the build steps */}
-        <div className="space-y-6">
-          {/* Checklist — chunked into two labeled groups (variant-audit winner
-              V2, 2026-07-06): "Your agent" = what it is, "How it goes live" =
-              where it runs. Every row opens; nothing is locked. Canonical step
-              ids 1-5 (drawers, ?step=N, Back/Next) are unchanged — only the
-              visual grouping differs, so rows show ✓ or their step ICON, never
-              digits that would read out of order. */}
-          {STEP_GROUPS.map((group) => (
-            <section key={group.label} className="space-y-2">
-              <h2 className="px-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {group.label}
-              </h2>
-              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
-                {group.steps.map((n) => {
-                  const done = isDone(n)
-                  const isActive = !done && n === firstIncomplete(draft)
-                  const Icon = STEP_ICONS[n]
-                  const summary = stepSummary(n)
-                  return (
-                    // A div (not one big <button>) so row 2 can host the inline
-                    // intent control without nesting interactive elements. The
-                    // div still takes clicks so the whole hover-highlighted row
-                    // opens the step (real buttons inside carry keyboard/AT
-                    // semantics; their clicks bubble to the same idempotent
-                    // openRow).
-                    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-                    <div
-                      key={n}
-                      onClick={() => openRow(n)}
-                      className={cn(
-                        "group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent/40",
-                        isActive && "bg-primary/5",
-                      )}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => openRow(n)}
-                        aria-current={isActive ? "step" : undefined}
-                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                      >
-                        <span className={cn(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border",
-                          done && "border-primary bg-primary/10 text-primary",
-                          isActive && "border-primary bg-primary text-primary-foreground",
-                          !done && !isActive && "border-border text-muted-foreground",
-                        )}>
-                          {done ? <Check className="h-4 w-4" aria-hidden /> : <Icon className="h-4 w-4" aria-hidden />}
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-2 text-sm font-semibold">
-                            {stepTitle(n, draft)}
-                            {/* The last step never carries a first-step nudge (re-eval #10). */}
-                            {isActive && (
-                              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                                {n === 5 ? "Ready to deploy" : "Start here · ~1 min"}
-                              </span>
-                            )}
-                          </span>
-                          {/* Value line when set; the content manifest stays
-                              visible UNDERNEATH it (recognition data never
-                              hides behind completion — audit harvest from V5). */}
-                          {summary ? (
-                            <>
-                              <span className="line-clamp-1 block text-sm text-foreground/90">{summary}</span>
-                              <span className="line-clamp-1 block text-xs text-muted-foreground/70">{stepManifest(n, draft)}</span>
-                            </>
-                          ) : (
-                            <span className="line-clamp-1 block text-sm text-muted-foreground">{rowDetail(n)}</span>
-                          )}
-                        </span>
-                      </button>
-                      {/* Row 2 — switch the intent without opening the drawer.
-                          Routed through selectType so channel data gets the
-                          stash + undo toast. ToggleGroup = real radio semantics. */}
-                      {n === 2 && (
-                        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-                        <span className="hidden shrink-0 md:block" onClick={(e) => e.stopPropagation()}>
-                          <ToggleGroup
-                            type="single"
-                            value={draft.type ?? ""}
-                            onValueChange={(v) => v && selectType(v as AgentType)}
-                            variant="outline"
-                            size="sm"
-                            aria-label="Agent type"
-                          >
-                            {(["outbound", "inbound", "code"] as const).map((t) => (
-                              <ToggleGroupItem key={t} value={t} className="text-xs">
-                                {typeLabel(t)}
-                              </ToggleGroupItem>
-                            ))}
-                          </ToggleGroup>
-                        </span>
-                      )}
-                      {/* The row itself is the affordance — a quiet chevron. */}
-                      <button
-                        type="button"
-                        onClick={() => openRow(n)}
-                        aria-label={`${done ? "Edit" : "Open"} step ${n}: ${stepTitle(n, draft)}`}
-                        className="shrink-0 rounded text-muted-foreground transition-colors group-hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <ChevronRight className="h-4 w-4" aria-hidden />
-                      </button>
-                    </div>
-                  )
-                })}
+      {/* MASTER-DETAIL — two page-level cards (variant-audit round 2 winner
+          P10, 2026-07-07): left = the five steps as ONE unbroken sequence with
+          done/pending states; right = the SELECTED step's real form, upfront.
+          No drawers for config; ?step=N now means selection. */}
+      <div className="grid items-start gap-4 grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+        {/* LEFT card — build steps */}
+        <section className="min-w-0 rounded-xl border border-border bg-card">
+          <header className="flex items-center justify-between border-b border-border px-4 py-3">
+            <h2 className="text-sm font-semibold">Build steps</h2>
+            <span className="text-xs text-muted-foreground">{setupCount + (isLive ? 1 : 0)} of 5 done</span>
+          </header>
+          <div className="divide-y divide-border">
+            {[1, 2, 3, 4, 5].map((n) => {
+              const done = isDone(n)
+              const isSelected = n === selected
+              const Icon = STEP_ICONS[n]
+              const detail = rowDetail(n)
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => openRow(n)}
+                  aria-current={isSelected ? "step" : undefined}
+                  className={cn(
+                    "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/40",
+                    isSelected && "bg-accent/50",
+                  )}
+                >
+                  <span className={cn(
+                    "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
+                    done && "border-success/40 bg-success/10 text-success",
+                    !done && isSelected && "border-primary bg-primary/10 text-primary",
+                    !done && !isSelected && "border-border text-muted-foreground",
+                  )}>
+                    {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Icon className="h-3.5 w-3.5" aria-hidden />}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">{stepTitle(n, draft)}</span>
+                    <span className="line-clamp-1 block text-xs text-muted-foreground" title={detail}>{detail}</span>
+                  </span>
+                  <span
+                    role="img"
+                    aria-label={done ? "Done" : "Pending"}
+                    className={cn(
+                      "mt-2 h-1.5 w-1.5 shrink-0 rounded-full",
+                      done ? "bg-success" : "ring-1 ring-border",
+                    )}
+                  />
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* RIGHT card — the selected step's configuration, always upfront */}
+        <section className="min-w-0 rounded-xl border border-border bg-card">
+          <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+            {/* In-card breadcrumb: progress lives where you read. */}
+            <p className="min-w-0 truncate text-sm">
+              <span className="font-semibold">{stepTitle(selected, draft)}</span>
+              <span className="text-muted-foreground"> · Step {selected} of 5 · </span>
+              {isDone(selected) ? (
+                <span className="inline-flex items-center gap-1 text-success"><Check className="h-3.5 w-3.5" aria-hidden /> Done</span>
+              ) : (
+                <span className="text-muted-foreground">Pending</span>
+              )}
+            </p>
+            <span className="flex shrink-0 items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7" disabled={selected === 1} aria-label="Previous step" onClick={() => backFrom(selected)}>
+                <ChevronLeft className="h-4 w-4" aria-hidden />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7" disabled={selected === 5} aria-label="Next step" onClick={() => advanceFrom(selected)}>
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </Button>
+            </span>
+          </header>
+
+          <div className="px-5 py-5">
+            {selected === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
+            {selected === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
+            {selected === 3 && <StepBuild draft={draft} update={update} />}
+            {selected === 4 && <StepConfigure draft={draft} update={update} />}
+            {selected === 5 && (
+              <StepPublish
+                draft={draft}
+                onPublish={publish}
+                onFix={(n) => openRow(n)}
+                talking={testing}
+                onToggleTalk={toggleTest}
+              />
+            )}
+          </div>
+
+          <footer className="flex items-center justify-between gap-3 border-t border-border px-5 py-3">
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={undoDrawerChanges}>
+              Undo changes
+            </Button>
+            {selected < 5 ? (
+              <div className="flex min-w-0 items-center gap-3">
+                <p className="line-clamp-1 hidden text-xs text-muted-foreground md:block" title={stepManifest(selected + 1, draft)}>
+                  Up next: {stepTitle(selected + 1, draft)} — {stepManifest(selected + 1, draft)}
+                </p>
+                <Button size="sm" className="shrink-0 gap-1.5" onClick={() => advanceFrom(selected)}>
+                  Continue <ChevronRight className="h-4 w-4" aria-hidden />
+                </Button>
               </div>
-            </section>
-          ))}
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {isLive ? "Redeploy pushes your edits to the live agent." : "Deploying starts real traffic — watch it on Monitor."}
+              </p>
+            )}
+          </footer>
+        </section>
+      </div>
 
       {/* Sticky progress + publish (publish is a hint, not a lock). A LIVE
           agent shows its real state — never "attach a number" contradicting
@@ -686,68 +715,47 @@ export function AgentWizard({
           </div>
         </div>
       </div>
-        </div>
-      </div>
 
-      {/* Edit drawer — always fully interactive. */}
-      {/* modal={false}: a modal Radix dialog opened programmatically on mount
-          (the ?step deep-link) trips its focus guard and won't open. Non-modal
-          opens reliably, and lets the checklist stay visible behind the drawer. */}
-      <Sheet
-        modal={false}
-        open={openStep != null}
-        onOpenChange={(o) => !o && closeDrawer()}
-      >
-        {/* Roomy drawer — the shadcn default caps a right sheet at max-w-sm (384px),
-            which cramps the step forms. Override with a data-[side]-prefixed width so
-            it actually wins the specificity fight. */}
-        <SheetContent side="right" aria-modal className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-3xl">
-          {openStep != null && (
-            <>
-              <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-                <SheetTitle className="text-base">{stepTitle(openStep, draft)}</SheetTitle>
-                <p className="text-sm text-muted-foreground">Step {openStep} of 5 · {stepManifest(openStep, draft)}</p>
-              </SheetHeader>
-
-              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                {openStep === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
-                {openStep === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
-                {openStep === 3 && <StepBuild draft={draft} update={update} />}
-                {openStep === 4 && <StepConfigure draft={draft} update={update} />}
-                {openStep === 5 && (
-                  <StepPublish
-                    draft={draft}
-                    onPublish={publish}
-                    onFix={(n) => openRow(n)}
-                    talking={testing}
-                    onToggleTalk={toggleTest}
-                  />
-                )}
-              </div>
-
-              {/* One footer for ALL steps (step 5 included — it had no exit but
-                  X/Esc, #18). Labels promise exactly what happens: changes are
-                  already autosaved, so "Done", not a fictional "Save". */}
-              <div className="flex shrink-0 items-center justify-between border-t border-border px-5 py-3">
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" disabled={openStep === 1} onClick={() => backFrom(openStep)}>
-                    Back
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={undoDrawerChanges}>
-                    Undo changes
-                  </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={closeDrawer}>Done</Button>
-                  {openStep < 5 && (
-                    <Button size="sm" className="gap-1.5" onClick={() => advanceFrom(openStep)}>
-                      Next step <ChevronRight className="h-4 w-4" aria-hidden />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
+      {/* Talk panel — the agent's full identity card + live test, on demand.
+          Steps render inline now, so the ONLY job of the right panel is
+          "meet/test your agent" (master-detail direction, 2026-07-07). */}
+      <Sheet open={talkOpen} onOpenChange={setTalkOpen}>
+        {/* Don't autofocus the card's name input — Radix would select its text
+            and one stray keystroke would rename the agent. Esc/tab still work
+            (dismiss listens on the document; the focus trap catches Tab). */}
+        <SheetContent
+          side="right"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
+        >
+          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+            <SheetTitle className="text-base">{draft.name || (isEdit ? existing!.name : "Your new agent")}</SheetTitle>
+            <p className="text-sm text-muted-foreground">Agent details & live test</p>
+          </SheetHeader>
+          <div className="p-4">
+            <AgentIdentityCard
+              name={draft.name}
+              namePlaceholder={isEdit ? existing!.name : "Your new agent"}
+              onNameChange={(v) => update({ name: v })}
+              agentId={draft.agentId}
+              status={cardStatus}
+              subtitle={isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
+              stack={cardStack}
+              language={`${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`}
+              costPerMin={cardEst?.costPerMin}
+              latencyMs={cardEst?.latencyMs}
+              latencyBreakdown={cardLatency}
+              channel={draft.type ? {
+                label: channelLine(draft),
+                onClick: () => { setTalkOpen(false); openRow(4) },
+              } : undefined}
+              talking={testing}
+              onToggleTalk={toggleTest}
+              talkLabel={`Talk to ${draft.name || "your agent"}`}
+              endLabel="End test"
+              className="border-0 p-2 lg:static"
+            />
+          </div>
         </SheetContent>
       </Sheet>
     </div>

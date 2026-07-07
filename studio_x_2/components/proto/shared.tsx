@@ -84,6 +84,46 @@ export const DEPLOY_STATE = {
   cta: "Redeploy",
 } as const
 
+// ─── Draft-state fixtures (re-audit question 1: everything done:false) ───────
+
+export const DRAFT_STEPS: StepInfo[] = [
+  { n: 1, title: "Voice & models", value: "", manifest: "Persona · STT / LLM / TTS · Voice · Language", done: false },
+  { n: 2, title: "Agent type", value: "", manifest: "Batch calls · Inbound · Code / SDK", done: false },
+  { n: 3, title: "Prompt & tools", value: "", manifest: "Prompt · Greeting · Knowledge · Connectors · Quick test", done: false },
+  { n: 4, title: "Connect a channel", value: "", manifest: "Channel setup — pick a type first", done: false },
+  { n: 5, title: "Deploy", value: "", manifest: "Review everything · Go live", done: false },
+]
+
+export const DRAFT_FIELDS: Record<number, { label: string; value: string }[]> = {
+  1: [
+    { label: "Persona", value: "Not set yet — pick a voice" },
+    { label: "Preset", value: "Balanced (default)" },
+    { label: "Language", value: "English (default)" },
+  ],
+  2: [{ label: "Type", value: "Not set yet" }],
+  3: [
+    { label: "System prompt", value: "Not set yet" },
+    { label: "Greeting", value: "Not set yet" },
+  ],
+  4: [{ label: "Channel", value: "Pick a type first" }],
+  5: [{ label: "Status", value: "Not deployed — 0 of 4 steps set up" }],
+}
+
+export const DRAFT_AGENT = {
+  ...AGENT,
+  name: "Your new agent",
+  status: "Draft",
+  role: "Pick a voice to start",
+} as const
+
+export type ProtoMode = "live" | "draft"
+/** Convenience for variants that support the Live/Draft harness toggle. */
+export function dataFor(mode: ProtoMode) {
+  return mode === "draft"
+    ? { agent: DRAFT_AGENT, steps: DRAFT_STEPS, fields: DRAFT_FIELDS, live: false }
+    : { agent: AGENT, steps: STEPS, fields: STEP_FIELDS, live: true }
+}
+
 /** Small orb for compact headers. */
 export function Orb({ size = 56 }: { size?: number }) {
   return <AgentSphere size={size} active={false} />

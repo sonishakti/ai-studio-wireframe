@@ -5,7 +5,8 @@
  * Two side-by-side page-level cards: LEFT = the 5 build steps as one unbroken
  * list (breadcrumb-style done/current/pending dots), RIGHT = the selected
  * step's configuration upfront as label:value rows. Identity/testing lives in
- * a slim top bar with an on-demand "Talk to Aria" affordance. Throwaway.
+ * a slim top bar with an on-demand "Talk to Aria" affordance; the deploy state
+ * sits as a slim bar below the two cards. Throwaway.
  */
 
 import { useState } from "react"
@@ -26,7 +27,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { AGENT, DEPLOY_STATE, Orb, STEP_FIELDS, STEPS } from "@/components/proto/shared"
+import { DEPLOY_STATE, dataFor, Orb, type ProtoMode } from "@/components/proto/shared"
 
 const STEP_ICONS: Record<number, typeof AudioLines> = {
   1: AudioLines,
@@ -36,47 +37,62 @@ const STEP_ICONS: Record<number, typeof AudioLines> = {
   5: Rocket,
 }
 
-export function MasterP1() {
+export function MasterP1({ mode = "live" }: { mode?: ProtoMode }) {
   const [selected, setSelected] = useState(1)
 
-  const step = STEPS[selected - 1]
-  const fields = STEP_FIELDS[selected] ?? []
-  // The selected step reads as "in progress"; the rest keep their done state.
-  const doneCount = STEPS.filter((s) => s.done && s.n !== selected).length
+  const { agent, steps, fields: allFields, live } = dataFor(mode)
+  const step = steps[selected - 1]
+  const fields = allFields[selected] ?? []
+  // Done is done — selecting a step never removes it from the count.
+  const doneCount = steps.filter((s) => s.done).length
 
   return (
     <div className="flex flex-col gap-4">
       {/* Slim identity bar — agent lives here, out of the main layout */}
       <div className="flex items-center gap-3 px-1">
         <Orb size={32} />
-        <span className="text-sm font-semibold">{AGENT.name}</span>
-        <Badge variant="outline" className="gap-1.5 border-emerald-500/40 text-emerald-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          {AGENT.status}
+        <span className="text-sm font-semibold">{agent.name}</span>
+        <Badge
+          variant="outline"
+          className={cn(
+            "gap-1.5",
+            live ? "border-success/40 text-success" : "text-muted-foreground"
+          )}
+        >
+          <span
+            className={cn(
+              "h-1.5 w-1.5 rounded-full",
+              live ? "bg-success" : "bg-muted-foreground/60"
+            )}
+          />
+          {agent.status}
         </Badge>
-        <span className="text-xs text-muted-foreground">{AGENT.role}</span>
+        <span className="text-xs text-muted-foreground">{agent.role}</span>
         <div className="flex-1" />
-        <Button variant="outline" size="sm">
-          <MessageCircle className="h-4 w-4" />
-          Talk to Aria
-        </Button>
+        {live && (
+          <Button variant="outline" size="sm">
+            <MessageCircle className="h-4 w-4" />
+            Talk to {agent.name}
+          </Button>
+        )}
       </div>
 
-      {/* Master–detail: two page-level cards */}
-      <div className="grid grid-cols-[340px_1fr] items-start gap-4">
+      {/* Master–detail: two page-level cards; stacks below lg, list first */}
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_1fr]">
         {/* LEFT card — the 5 steps, one unbroken sequence */}
         <div className="rounded-xl border bg-card">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <span className="text-sm font-medium">Build steps</span>
             <span className="text-xs text-muted-foreground">
-              {doneCount} of {STEPS.length} done
+              {doneCount} of {steps.length} done
             </span>
           </div>
 
           <div className="flex flex-col gap-0.5 p-2">
-            {STEPS.map((s) => {
+            {steps.map((s) => {
               const Icon = STEP_ICONS[s.n]
               const isCurrent = s.n === selected
+              const valueLine = s.value || s.manifest || "Not set yet"
               return (
                 <button
                   key={s.n}
@@ -90,41 +106,36 @@ export function MasterP1() {
                   <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium">{s.title}</span>
-                    <span className="block truncate text-xs text-muted-foreground">{s.value}</span>
+                    <span
+                      className="block line-clamp-1 text-xs text-muted-foreground"
+                      title={valueLine}
+                    >
+                      {valueLine}
+                    </span>
                   </span>
                   {isCurrent ? (
-                    <span
-                      className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-primary"
-                      aria-label="Current step"
-                    />
+                    <Badge
+                      variant="outline"
+                      className="shrink-0 border-primary/40 text-primary"
+                    >
+                      Current
+                    </Badge>
                   ) : s.done ? (
                     <span
-                      className="h-2 w-2 shrink-0 rounded-full bg-emerald-500"
+                      role="img"
                       aria-label="Done"
+                      className="h-2 w-2 shrink-0 rounded-full bg-success"
                     />
                   ) : (
                     <span
-                      className="h-2 w-2 shrink-0 rounded-full ring-1 ring-muted-foreground/40"
+                      role="img"
                       aria-label="Pending"
+                      className="h-2 w-2 shrink-0 rounded-full ring-1 ring-muted-foreground/40"
                     />
                   )}
                 </button>
               )
             })}
-
-            {/* Deploy state — last row, subtly distinct, never competing */}
-            <div className="mt-1 flex items-center gap-3 rounded-lg border border-dashed bg-muted/30 px-3 py-2.5">
-              <Radio className="h-4 w-4 shrink-0 text-emerald-500" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium">{DEPLOY_STATE.headline}</span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {DEPLOY_STATE.sub}
-                </span>
-              </span>
-              <Button variant="ghost" size="xs">
-                {DEPLOY_STATE.cta}
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -132,10 +143,14 @@ export function MasterP1() {
         <div className="rounded-xl border bg-card">
           <div className="flex items-center gap-2.5 border-b px-5 py-3">
             <h2 className="text-sm font-medium">{step.title}</h2>
-            {step.done && (
-              <Badge variant="outline" className="gap-1 border-emerald-500/40 text-emerald-500">
+            {step.done ? (
+              <Badge variant="outline" className="gap-1 border-success/40 text-success">
                 <Check className="h-4 w-4" />
                 Done
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-muted-foreground">
+                Pending
               </Badge>
             )}
             <div className="ml-auto flex items-center gap-1">
@@ -151,8 +166,8 @@ export function MasterP1() {
               <Button
                 variant="outline"
                 size="icon-xs"
-                disabled={selected === STEPS.length}
-                onClick={() => setSelected((n) => Math.min(STEPS.length, n + 1))}
+                disabled={selected === steps.length}
+                onClick={() => setSelected((n) => Math.min(steps.length, n + 1))}
                 aria-label="Next step"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -166,17 +181,24 @@ export function MasterP1() {
                 <span className="w-40 shrink-0 pt-0.5 text-xs text-muted-foreground">
                   {f.label}
                 </span>
-                <span className="min-w-0 flex-1 text-sm">{f.value}</span>
+                <span className="min-w-0 flex-1 line-clamp-1 text-sm" title={f.value}>
+                  {f.value}
+                </span>
               </div>
             ))}
           </div>
 
           <div className="flex items-center justify-between gap-4 border-t px-5 py-3">
-            <span className="truncate text-xs text-muted-foreground">{step.manifest}</span>
+            <span
+              className="min-w-0 line-clamp-1 text-xs text-muted-foreground"
+              title={step.manifest}
+            >
+              {step.manifest}
+            </span>
             <Button
               size="sm"
-              disabled={selected === STEPS.length}
-              onClick={() => setSelected((n) => Math.min(STEPS.length, n + 1))}
+              disabled={selected === steps.length}
+              onClick={() => setSelected((n) => Math.min(steps.length, n + 1))}
             >
               Next step
               <ArrowRight className="h-4 w-4" />
@@ -184,6 +206,34 @@ export function MasterP1() {
           </div>
         </div>
       </div>
+
+      {/* Deploy state — its own slim bar, out of the step sequence */}
+      {live ? (
+        <div className="flex items-center gap-3 rounded-xl border border-success/40 bg-success/10 px-4 py-2.5">
+          <Radio className="h-4 w-4 shrink-0 text-success" />
+          <span className="min-w-0 flex-1">
+            <span className="block line-clamp-1 text-sm font-medium" title={DEPLOY_STATE.headline}>
+              {DEPLOY_STATE.headline}
+            </span>
+            <span
+              className="block line-clamp-1 text-xs text-muted-foreground"
+              title={DEPLOY_STATE.sub}
+            >
+              {DEPLOY_STATE.sub}
+            </span>
+          </span>
+          <Button variant="ghost" size="xs">
+            {DEPLOY_STATE.cta}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 rounded-xl border border-dashed bg-muted/30 px-4 py-2.5">
+          <Radio className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">
+            Not deployed — finish the steps to go live
+          </span>
+        </div>
+      )}
     </div>
   )
 }
