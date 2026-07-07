@@ -78,7 +78,7 @@ await client.joinChannel({ channel: "support-room" })`
 ></script>`
 
   const sections: { label: string; step: number }[] = [
-    { label: "Voice & models", step: 1 },
+    { label: "Voice", step: 1 },
     { label: "Type & channel", step: 2 },
     { label: "Prompt & tools", step: 3 },
     { label: "Channel setup", step: 4 },

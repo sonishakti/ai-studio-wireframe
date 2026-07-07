@@ -10,9 +10,9 @@ export interface StepProps {
 }
 
 export const STEP_TITLES = [
-  // "Voice & models" — the drawer holds the persona picker AND the model stack;
-  // calling it just "voice" would mislabel the LLM/STT config (review finding 7).
-  "Voice & models",
+  // "Voice" — the model stack moved to the Playground (2026-07-07), so Step 1
+  // is the voice pick + spoken language; the engine rides along with the voice.
+  "Voice",
   "Select agent type",
   // Scope-honest: the drawer holds prompt + greeting + knowledge + connectors,
   // not just a prompt textarea (heuristic-eval finding #3).
@@ -49,7 +49,7 @@ export function stepTitle(n: number, draft: AgentDraft): string {
  *  location is readable from the landing without opening anything. Branches on
  *  the chosen type so row 4 predicts its actual contents. */
 export function stepManifest(n: number, draft: AgentDraft): string {
-  if (n === 1) return "Persona · STT / LLM / TTS · Voice · Language"
+  if (n === 1) return "Voice · Language"
   if (n === 2) return "Batch calls · Inbound · Code / SDK"
   if (n === 3) return "Prompt · Greeting · Knowledge · Connectors · Quick test"
   if (n === 4) {

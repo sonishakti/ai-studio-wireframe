@@ -12,13 +12,24 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { StackConfig } from "@/components/wizard/stack-config"
 import {
   newVoiceId,
   saveVoiceArtifact,
   getVoiceArtifact,
+  takePlaygroundStack,
   type VoiceArtifact,
 } from "@/lib/voice-artifacts"
+import { stackFor, type AgentStack } from "@/lib/campaign-data"
 import { toast } from "sonner"
+
+/** The Playground's starting stack — the balanced cascade (mirrors
+ *  EMPTY_DRAFT.stack). Voices with no saved stack fall back to this. */
+const DEFAULT_STACK: AgentStack = { ...stackFor("balanced"), pipeline: "stt-llm-tts", language: "English" }
+
+/** A legacy custom (saved before the engine moved here) has a ttsVoice but no
+ *  stack — build one so its voice survives instead of snapping to the default. */
+const legacyStack = (ttsVoice: string): AgentStack => ({ ...DEFAULT_STACK, tts: { vendor: "ElevenLabs", voice: ttsVoice } })
 
 /**
  * Voice Playground — build or refine a CUSTOM voice (Step 1's "Create custom
@@ -28,8 +39,6 @@ import { toast } from "sonner"
  */
 
 const TONES = ["Friendly", "Professional", "Neutral", "Playful"]
-const LANGUAGES = ["en-US", "en-GB", "es-ES", "hi-IN", "ja-JP"]
-const TTS_VOICES = ["rachel", "adam", "bella", "josh", "sky", "river"]
 
 export default function PlaygroundPage() {
   const router = useRouter()
@@ -38,11 +47,14 @@ export default function PlaygroundPage() {
   const [tagline, setTagline] = React.useState("")
   const [personality, setPersonality] = React.useState("")
   const [tone, setTone] = React.useState("Friendly")
+  // Persona metadata carried through (the spoken language a deployed agent uses
+  // is a builder Step-1 trait — not editable here, to avoid a write-only field).
   const [language, setLanguage] = React.useState("en-US")
-  const [ttsVoice, setTtsVoice] = React.useState("rachel")
   const [firstMessage, setFirstMessage] = React.useState("")
   const [source, setSource] = React.useState<string | undefined>()
   const [systemPrompt, setSystemPrompt] = React.useState<string | undefined>()
+  // The engine + the specific TTS voice both live in the stack now.
+  const [stack, setStack] = React.useState<AgentStack>(DEFAULT_STACK)
   const [speaking, setSpeaking] = React.useState(false)
 
   // Three ways in: ?artifact= edits an existing custom in place; ?from= forks a
@@ -55,6 +67,10 @@ export default function PlaygroundPage() {
     // The builder that sent us here — exits return to IT, not to a fresh
     // create flow (re-eval #3: editing Aria then saving must land back on Aria).
     setOriginAgent(params.get("agent"))
+    // The builder hands off the agent's CURRENT engine so a fork/new voice
+    // starts from where the agent already runs (not a fresh Balanced) — a live
+    // Fastest agent must not silently downgrade on save (stack-move review).
+    const handoff = takePlaygroundStack()
     if (existing) {
       idRef.current = existing.id
       setName(existing.name)
@@ -62,10 +78,11 @@ export default function PlaygroundPage() {
       setPersonality(existing.personality)
       setTone(existing.tone)
       setLanguage(existing.language)
-      setTtsVoice(existing.ttsVoice)
       setFirstMessage(existing.firstMessage)
       setSource(existing.source)
       setSystemPrompt(existing.systemPrompt)
+      // Editing a saved custom: its OWN engine is authoritative.
+      setStack(existing.stack ?? legacyStack(existing.ttsVoice))
     } else if (forkOf) {
       idRef.current = newVoiceId()
       setName(`${forkOf.name} (custom)`)
@@ -73,16 +90,19 @@ export default function PlaygroundPage() {
       setPersonality(forkOf.personality)
       setTone(forkOf.tone)
       setLanguage(forkOf.language)
-      setTtsVoice(forkOf.ttsVoice)
       setFirstMessage(forkOf.firstMessage)
       setSource(`Customized from ${forkOf.name}`)
       setSystemPrompt(forkOf.systemPrompt)
+      // Forking a preset: start from the agent's current engine (handoff),
+      // then the preset's canonical, then Balanced.
+      setStack(handoff ?? forkOf.stack ?? legacyStack(forkOf.ttsVoice))
     } else {
       idRef.current = newVoiceId()
       setName("My custom voice")
       setTagline("A voice I built")
       setPersonality("Warm, concise, and helpful.")
       setFirstMessage("Hi! How can I help you today?")
+      if (handoff) setStack(handoff)
     }
   }, [])
 
@@ -102,9 +122,12 @@ export default function PlaygroundPage() {
       personality: personality.trim(),
       tone,
       language,
-      ttsVoice,
       firstMessage: firstMessage.trim() || "Hi! How can I help you today?",
       systemPrompt,
+      // The engine (incl. its coherent TTS vendor + voice) rides with the voice.
+      // ttsVoice mirrors stack.tts.voice so older readers still resolve a voice.
+      ttsVoice: stack.tts.voice,
+      stack,
       source: source ?? "Playground",
     }
     saveVoiceArtifact(artifact)
@@ -114,7 +137,7 @@ export default function PlaygroundPage() {
 
   const playSample = () => {
     setSpeaking(true)
-    toast("Playing sample", { description: `${name} · ${ttsVoice}` })
+    toast("Playing sample", { description: `${name} · ${stack.tts.voice}` })
     window.setTimeout(() => setSpeaking(false), 2200)
   }
 
@@ -127,7 +150,7 @@ export default function PlaygroundPage() {
           className="gap-1.5 text-muted-foreground"
           onClick={() => router.push(originHref("?step=1"))}
         >
-          <ArrowLeft className="h-4 w-4" /> Back to your agent — Voice &amp; models
+          <ArrowLeft className="h-4 w-4" /> Back to your agent
         </Button>
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -137,7 +160,7 @@ export default function PlaygroundPage() {
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          Shape a custom voice — how it sounds and how it behaves. Save it and it&apos;s selected back in your agent.
+          Shape a custom voice: how it sounds, how it behaves, and the models behind it. Save it and it&apos;s selected back in your agent.
         </p>
       </div>
 
@@ -166,34 +189,17 @@ export default function PlaygroundPage() {
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">TTS voice</Label>
-              <Select value={ttsVoice} onValueChange={setTtsVoice}>
-                <SelectTrigger className="text-sm capitalize"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TTS_VOICES.map((v) => <SelectItem key={v} value={v} className="capitalize">{v}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Tone</Label>
-              <Select value={tone} onValueChange={setTone}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Language</Label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* The TTS voice + spoken-language are NOT here: the voice lives in
+              the coherent Models section below (vendor + voice together), and
+              the deployed spoken language is a builder Step-1 trait. */}
+          <div className="max-w-xs space-y-2">
+            <Label className="text-sm font-medium">Tone</Label>
+            <Select value={tone} onValueChange={setTone}>
+              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {TONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -204,6 +210,13 @@ export default function PlaygroundPage() {
               onChange={(e) => setFirstMessage(e.target.value)}
               className="min-h-[64px] text-sm"
             />
+          </div>
+
+          {/* The engine behind the voice (2026-07-07: moved here from builder
+              Step 1). The voice + language above own the TTS voice + language;
+              this picks speed/cost and the STT/LLM/TTS vendors. */}
+          <div className="border-t border-border pt-5">
+            <StackConfig stack={stack} onChange={setStack} />
           </div>
         </div>
 

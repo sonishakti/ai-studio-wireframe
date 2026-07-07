@@ -549,9 +549,10 @@ export function AgentWizard({
   // ── Collapsed-row summaries — VALUES, not booleans (heuristic-eval #15/#16) ──
   function stepSummary(n: number): string | undefined {
     if (n === 1) {
-      // Full line = preset + models + language, so those settings have a
-      // visible home outside the drawer.
-      return cardVoice ? `${cardVoice.name} · ${stackLine(draft.stack, { full: true })}` : undefined
+      // Step 1 is voice + language now (the engine moved to the Playground),
+      // so the recap matches that scope; the full stack + $/min live on the
+      // agent card.
+      return cardVoice ? `${cardVoice.name} · ${draft.stack.language ?? "English"}` : undefined
     }
     if (n === 2) return draft.type ? typeLabel(draft.type) : undefined
     if (n === 3) {
@@ -926,13 +927,19 @@ function firstIncomplete(d: AgentDraft): number {
 }
 
 function seedFromVoice(d: AgentDraft, v: VoiceArtifact): AgentDraft {
+  // The voice carries its engine (2026-07-07): presets and Playground customs
+  // both ship a COHERENT stack (vendor + voice always match). The builder's
+  // spoken language wins (it's a Step-1 agent trait, not part of the voice).
+  // A legacy custom saved before this change has no stack → keep the current
+  // stack but force an ElevenLabs voice so vendor + voice stay coherent.
+  const stack = v.stack
+    ? { ...v.stack, language: d.stack.language }
+    : { ...d.stack, tts: { vendor: "ElevenLabs", voice: v.ttsVoice } }
   return {
     ...d,
     voice: { kind: v.kind, id: v.id },
     name: d.name || v.name,
-    // The persona IS the TTS voice — keep the stack in lockstep so the card,
-    // the Voice dropdown, and the exported config all name the same voice.
-    stack: { ...d.stack, tts: { ...d.stack.tts, voice: v.ttsVoice } },
+    stack,
     systemPrompt: d.systemPrompt.trim() ? d.systemPrompt : v.systemPrompt ?? defaultPromptFor(v),
     greeting: d.greeting.trim() ? d.greeting : v.firstMessage,
   }

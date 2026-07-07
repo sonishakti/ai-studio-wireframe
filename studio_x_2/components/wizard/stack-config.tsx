@@ -15,16 +15,20 @@ import {
   STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackLine,
   type StackPreset, type AgentStack,
 } from "@/lib/campaign-data"
-import type { StepProps } from "@/components/wizard/types"
 
 /**
- * StackConfig — the model stack behind the voice (Step 1's second half).
+ * StackConfig — the model stack (speed/cost preset + STT/LLM/TTS + voice)
+ * behind a voice. Lives in the PLAYGROUND now (2026-07-07: the engine belongs
+ * with the voice you customize, not in builder Step 1). It owns the TTS vendor
+ * AND the voice within it (kept coherent — a vendor change resets to that
+ * vendor's first voice); the spoken language is a builder trait, so no language
+ * control here.
  *
- * PRESET-FIRST (2026-07-07 directive): the first decision is Fastest vs
- * Balanced vs Cheapest; each preset suggests its vendors and shows its
- * latency/cost up front. Vendor-level dropdowns (and the cascade-vs-realtime
- * pipeline switch) live behind "Customize models". Two pipeline shapes, both
- * supported by Agora's Conversational AI Engine (bring-your-own vendors):
+ * PRESET-FIRST: the first decision is Fastest vs Balanced vs Cheapest; each
+ * preset suggests its vendors and shows its latency/cost up front. Vendor-level
+ * dropdowns (and the cascade-vs-realtime pipeline switch) live behind
+ * "Customize models". Two pipeline shapes, both supported by Agora's
+ * Conversational AI Engine (bring-your-own vendors):
  * https://docs.agora.io/en/conversational-ai/overview/product-overview
  *
  * Estimates are PRESET-based (no per-model tables at wireframe altitude):
@@ -38,8 +42,8 @@ type Pipeline = NonNullable<AgentStack["pipeline"]>
 const isMllmModel = (llm: AgentStack["llm"]) =>
   STACK_CATALOG.mllm.some((o) => o.vendor === llm.vendor && o.model === llm.model)
 
-/** Slots (voice excluded — personas legitimately change it) differ from the
- *  preset's writes → no card highlights and estimates read as approximate. */
+/** Slots (voice + language excluded — the Playground owns those) differ from
+ *  the preset's writes → no card highlights and estimates read as approximate. */
 const divergedFromPreset = (s: AgentStack) => {
   const p = STACK_PRESETS[s.preset]
   return (
@@ -49,8 +53,15 @@ const divergedFromPreset = (s: AgentStack) => {
   )
 }
 
-export function StackConfig({ draft, update }: StepProps) {
-  const stack = draft.stack
+export function StackConfig({
+  stack,
+  onChange,
+  className,
+}: {
+  stack: AgentStack
+  onChange: (next: AgentStack) => void
+  className?: string
+}) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const est = stackEstimateFor(stack)
   const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
@@ -58,11 +69,19 @@ export function StackConfig({ draft, update }: StepProps) {
   // arriving with one means the user belongs in there. Open it once.
   const [customOpen, setCustomOpen] = React.useState(diverged || pipeline === "mllm")
 
-  const patch = (s: Partial<AgentStack>) => update({ stack: { ...stack, ...s } })
+  const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
+
+  // The chosen vendor's voices; include the current voice if the catalog
+  // doesn't list it (imported/legacy) so the Select never renders blank.
+  const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
+  const vendorVoices = ttsVendor.voices as readonly string[]
+  const voiceOptions = vendorVoices.includes(stack.tts.voice)
+    ? [...vendorVoices]
+    : [stack.tts.voice, ...vendorVoices]
 
   // Switching shape must keep the LLM slot coherent: entering MLLM writes a
   // realtime model (never a display-only fallback), leaving it restores the
-  // preset's cascade model — otherwise card/summary/JSON contradict the UI.
+  // preset's cascade model — otherwise summary/JSON contradict the UI.
   const setPipeline = (p: Pipeline) => {
     if (p === pipeline) return
     if (p === "mllm") {
@@ -81,28 +100,31 @@ export function StackConfig({ draft, update }: StepProps) {
   }
 
   // A preset pick also returns a realtime pipeline to the standard cascade —
-  // that is what the cards promise ("we suggest the vendors").
-  const setPreset = (preset: StackPreset) =>
-    update({
-      stack: {
-        ...stackFor(preset, stack.modality),
-        pipeline: "stt-llm-tts",
-        language: stack.language,
-      },
+  // that is what the cards promise ("we suggest the vendors"). Keep the chosen
+  // language, and keep the current voice ONLY if the preset's TTS vendor still
+  // offers it (else fall back to the preset's own voice) — a vendor never
+  // presents a voice it doesn't provide (stack-move review).
+  const setPreset = (preset: StackPreset) => {
+    const base = stackFor(preset, stack.modality)
+    const vendorVoices = (STACK_CATALOG.tts.find((v) => v.vendor === base.tts.vendor)?.voices ?? []) as readonly string[]
+    const voice = vendorVoices.includes(stack.tts.voice) ? stack.tts.voice : base.tts.voice
+    onChange({
+      ...base,
+      pipeline: "stt-llm-tts",
+      language: stack.language,
+      tts: { vendor: base.tts.vendor, voice },
     })
-
-  const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
-  // A custom/imported voice may not be in the catalog — include it so the
-  // Select never renders blank.
-  const vendorVoices = ttsVendor.voices as readonly string[]
-  const voiceOptions = vendorVoices.includes(stack.tts.voice)
-    ? [...vendorVoices]
-    : [stack.tts.voice, ...vendorVoices]
+  }
 
   return (
-    <section className="space-y-4">
-      {/* No section header (owner call, 2026-07-07): the preset cards are
-          self-describing; the estimate line below names the outcome. */}
+    <section className={cn("space-y-4", className)}>
+      <header className="space-y-1">
+        <h3 className="text-sm font-semibold">Models &amp; speed</h3>
+        <p className="text-sm text-muted-foreground">
+          Pick a priority. We suggest the vendors to match.
+        </p>
+      </header>
+
       {/* Preset first — the ONE model decision most users make. */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="group" aria-label="Model preset">
         {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
@@ -143,16 +165,6 @@ export function StackConfig({ draft, update }: StepProps) {
           ? `Custom mix: ${stackLine(stack)}. Estimates approximate the ${STACK_PRESETS[stack.preset].label} preset (~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min).`
           : `Runs on ${stackLine(stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`}
       </p>
-
-      <div className="max-w-xs space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Spoken language</Label>
-        <Select value={stack.language ?? "English"} onValueChange={(language) => patch({ language })}>
-          <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Vendor-level control, tucked away until wanted. */}
       <Collapsible open={customOpen} onOpenChange={setCustomOpen}>
@@ -229,9 +241,11 @@ export function StackConfig({ draft, update }: StepProps) {
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Text-to-Speech (TTS)</Label>
                 <Select
-                  value={ttsVendor.vendor}
+                  value={stack.tts.vendor}
                   onValueChange={(vendor) => {
                     const v = STACK_CATALOG.tts.find((x) => x.vendor === vendor)
+                    // Reset the voice to the new vendor's first — a vendor never
+                    // presents a voice it doesn't provide (stack-move review).
                     if (v) patch({ tts: { vendor: v.vendor, voice: v.voices[0] } })
                   }}
                 >
@@ -243,13 +257,10 @@ export function StackConfig({ draft, update }: StepProps) {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Voice</Label>
-                <Select
-                  value={stack.tts.voice}
-                  onValueChange={(voice) => patch({ tts: { ...stack.tts, voice } })}
-                >
-                  <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                <Select value={stack.tts.voice} onValueChange={(voice) => patch({ tts: { ...stack.tts, voice } })}>
+                  <SelectTrigger className="text-sm capitalize"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {voiceOptions.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                    {voiceOptions.map((v) => <SelectItem key={v} value={v} className="capitalize">{v}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

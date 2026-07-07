@@ -13,7 +13,19 @@
  * (typeof-window + try/catch guards, no backend — wireframe only).
  */
 
+import { stackFor, type AgentStack } from "@/lib/campaign-data"
+
 export type VoiceKind = "preset" | "custom"
+
+/** A preset voice's canonical engine: the balanced cascade on ElevenLabs with
+ *  the preset's own TTS voice, so vendor + voice are always coherent (a preset
+ *  voice can never present as "Azure + rachel"). */
+const presetStack = (ttsVoice: string): AgentStack => ({
+  ...stackFor("balanced"),
+  pipeline: "stt-llm-tts",
+  language: "English",
+  tts: { vendor: "ElevenLabs", voice: ttsVoice },
+})
 
 export interface VoiceArtifact {
   id: string
@@ -32,6 +44,12 @@ export interface VoiceArtifact {
   /** Full system prompt to seed Step 3 with (carried from an import). When
    *  absent, the wizard generates a default prompt from the persona seed. */
   systemPrompt?: string
+  /** The model stack (speed/cost preset + STT/LLM/TTS) chosen for this voice
+   *  in the Playground (2026-07-07: the engine lives WITH the voice, not in
+   *  builder Step 1). Presets carry a canonical balanced stack; a legacy custom
+   *  saved before this change may lack one → the Playground falls back to the
+   *  balanced default. */
+  stack?: AgentStack
   /** Where a custom voice came from — "Playground" or an import source. */
   source?: string
 }
@@ -49,6 +67,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     language: "en-US",
     ttsVoice: "rachel",
     firstMessage: "Hi, thanks for calling. How can I help you today?",
+    stack: presetStack("rachel"),
   },
   {
     id: "voice_nova",
@@ -60,6 +79,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     language: "en-US",
     ttsVoice: "adam",
     firstMessage: "Hi! This is a quick call about your account. Do you have a moment?",
+    stack: presetStack("adam"),
   },
   {
     id: "voice_sage",
@@ -71,6 +91,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     language: "en-US",
     ttsVoice: "bella",
     firstMessage: "Hello, you've reached support. Take your time. What can I help with?",
+    stack: presetStack("bella"),
   },
   {
     id: "voice_max",
@@ -82,6 +103,7 @@ export const PRESET_VOICES: VoiceArtifact[] = [
     language: "en-US",
     ttsVoice: "josh",
     firstMessage: "Hey there! Thanks for reaching out. What brings you in today?",
+    stack: presetStack("josh"),
   },
 ]
 
@@ -130,4 +152,31 @@ export function allVoices(): VoiceArtifact[] {
 /** Mint a new custom-voice id. Runtime-only (browser), so Date.now() is fine. */
 export function newVoiceId(): string {
   return `voice_c_${Date.now().toString(36)}`
+}
+
+// ─── Engine handoff to the Playground ─────────────────────────────────────────
+//
+// When you "Customize this voice" from the builder, the Playground should open
+// on the agent's CURRENT engine — not a fresh balanced default — so a live
+// agent deployed on Fastest isn't silently downgraded to Balanced on save
+// (stack-move review, 2026-07-07). The builder stashes draft.stack here right
+// before navigating; the Playground reads and clears it.
+
+const SEED_STACK_KEY = "sx:pg_seed_stack"
+
+export function stashPlaygroundStack(stack: AgentStack) {
+  if (typeof window === "undefined") return
+  try { window.localStorage.setItem(SEED_STACK_KEY, JSON.stringify(stack)) } catch { /* wireframe only */ }
+}
+
+/** Read + clear the stashed engine (one-shot). */
+export function takePlaygroundStack(): AgentStack | undefined {
+  if (typeof window === "undefined") return undefined
+  try {
+    const raw = window.localStorage.getItem(SEED_STACK_KEY)
+    window.localStorage.removeItem(SEED_STACK_KEY)
+    return raw ? (JSON.parse(raw) as AgentStack) : undefined
+  } catch {
+    return undefined
+  }
 }
