@@ -63,17 +63,19 @@ export function StepBuild({ draft, update }: StepProps) {
         Tell {draft.name || "your agent"} how to behave and give it knowledge and connectors. Saves automatically as you type.
       </p>
 
-      {/* Prompt owns the left column at 2xl; greeting + tools + test dock
-          right. 2xl (not xl): with the sidebar open a 1280-1440 viewport
-          leaves each column too narrow. max-w-7xl stops the 4K stretch. */}
-      <div className="grid max-w-7xl gap-x-10 gap-y-5 2xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="min-w-0 space-y-2">
+      {/* TOP-TO-BOTTOM, not two columns: prompt → greeting → tools → test is a
+          SEQUENCE the user works through, not a set of parallel options. Columns
+          are reserved for choices/comparisons; a stack says "do this, then this"
+          (layout principle, 2026-07-08). max-w-3xl keeps the editor readable. */}
+      <div className="max-w-3xl space-y-6">
+        {/* 1 — Behaviour */}
+        <div className="space-y-2">
           <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
           <Textarea
             id="wz-prompt"
             value={draft.systemPrompt}
             onChange={(e) => update({ systemPrompt: e.target.value })}
-            className="min-h-[180px] font-mono text-sm leading-relaxed 2xl:min-h-[260px]"
+            className="min-h-[200px] font-mono text-sm leading-relaxed"
             placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
           />
           {/* Dynamic-variable mapping lives with the deployment (Batch calls →
@@ -89,80 +91,84 @@ export function StepBuild({ draft, update }: StepProps) {
           )}
         </div>
 
-        <div className="min-w-0 space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting</Label>
-            <Textarea
-              id="wz-greeting"
-              value={draft.greeting}
-              onChange={(e) => update({ greeting: e.target.value })}
-              className="min-h-[72px] text-sm"
-              placeholder="Hi, thanks for calling Acme, how can I help?"
-            />
-            <p className="text-xs text-muted-foreground">The one line your agent opens with. This is its only greeting.</p>
-          </div>
-
-          <div className="grid gap-4">
-            <ResourceField
-              icon={BookOpen}
-              title="Knowledge base"
-              description="Ground answers in your docs."
-              items={kbs.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
-              selectedIds={draft.knowledge}
-              onChange={(knowledge) => update({ knowledge })}
-              manageLabel="Add knowledge base"
-              create={{
-                label: "Create knowledge base",
-                render: (onCreated) => <KnowledgeCreateForm onCreated={onCreated} />,
-                onCreated: refresh,
-              }}
-            />
-            <ResourceField
-              icon={Plug}
-              title="MCP server"
-              description="Give it tools: CRM, calendar, APIs."
-              items={mcps.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools`, config: !!getUserMcpServer(m.id) }))}
-              selectedIds={draft.mcp}
-              onChange={(mcp) => update({ mcp })}
-              manageLabel="Add MCP server"
-              create={{
-                label: "Create MCP server",
-                render: (onCreated) => <McpCreateForm onCreated={onCreated} />,
-                onCreated: refresh,
-              }}
-              onConfigure={(id) => setConfigMcp(id)}
-              onDelete={(id) => { deleteMcpServer(id); update({ mcp: draft.mcp.filter((x) => x !== id) }); refresh() }}
-            />
-            <ResourceField
-              icon={Boxes}
-              title="Connectors"
-              description="Connect apps like HubSpot and Google Calendar."
-              items={CONNECTORS.map((c) => {
-                const s = effectiveConnectorStatus(c)
-                return {
-                  id: c.id, name: c.name,
-                  meta: c.category,
-                  disabled: s !== "connected",
-                  note: s === "coming-soon" ? "Coming soon" : s === "available" ? "Connect in Resources" : undefined,
-                }
-              })}
-              selectedIds={draft.connectors}
-              onChange={(connectors) => update({ connectors })}
-              manageLabel="Add connector"
-              footer={
-                <button
-                  type="button"
-                  onClick={() => router.push("/integrations?tab=connectors")}
-                  className="inline-flex items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Connect more in Resources <ArrowUpRight className="h-3 w-3" aria-hidden />
-                </button>
-              }
-            />
-          </div>
-
-          <QuickTest name={draft.name} greeting={draft.greeting} />
+        {/* 2 — Greeting */}
+        <div className="space-y-2">
+          <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting</Label>
+          <Textarea
+            id="wz-greeting"
+            value={draft.greeting}
+            onChange={(e) => update({ greeting: e.target.value })}
+            className="min-h-[72px] text-sm"
+            placeholder="Hi, thanks for calling Acme, how can I help?"
+          />
+          <p className="text-xs text-muted-foreground">The one line your agent opens with. This is its only greeting.</p>
         </div>
+
+        {/* 3 — Tools (knowledge / MCP / connectors), after the behaviour is set */}
+        <div className="space-y-4 border-t border-border pt-6">
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Knowledge &amp; tools</p>
+            <p className="text-xs text-muted-foreground">Optional. Give the agent docs to answer from and tools to act with.</p>
+          </div>
+          <ResourceField
+            icon={BookOpen}
+            title="Knowledge base"
+            description="Ground answers in your docs."
+            items={kbs.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
+            selectedIds={draft.knowledge}
+            onChange={(knowledge) => update({ knowledge })}
+            manageLabel="Add knowledge base"
+            create={{
+              label: "Create knowledge base",
+              render: (onCreated) => <KnowledgeCreateForm onCreated={onCreated} />,
+              onCreated: refresh,
+            }}
+          />
+          <ResourceField
+            icon={Plug}
+            title="MCP server"
+            description="Give it tools: CRM, calendar, APIs."
+            items={mcps.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools`, config: !!getUserMcpServer(m.id) }))}
+            selectedIds={draft.mcp}
+            onChange={(mcp) => update({ mcp })}
+            manageLabel="Add MCP server"
+            create={{
+              label: "Create MCP server",
+              render: (onCreated) => <McpCreateForm onCreated={onCreated} />,
+              onCreated: refresh,
+            }}
+            onConfigure={(id) => setConfigMcp(id)}
+            onDelete={(id) => { deleteMcpServer(id); update({ mcp: draft.mcp.filter((x) => x !== id) }); refresh() }}
+          />
+          <ResourceField
+            icon={Boxes}
+            title="Connectors"
+            description="Connect apps like HubSpot and Google Calendar."
+            items={CONNECTORS.map((c) => {
+              const s = effectiveConnectorStatus(c)
+              return {
+                id: c.id, name: c.name,
+                meta: c.category,
+                disabled: s !== "connected",
+                note: s === "coming-soon" ? "Coming soon" : s === "available" ? "Connect in Resources" : undefined,
+              }
+            })}
+            selectedIds={draft.connectors}
+            onChange={(connectors) => update({ connectors })}
+            manageLabel="Add connector"
+            footer={
+              <button
+                type="button"
+                onClick={() => router.push("/integrations?tab=connectors")}
+                className="inline-flex items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Connect more in Resources <ArrowUpRight className="h-3 w-3" aria-hidden />
+              </button>
+            }
+          />
+        </div>
+
+        <QuickTest name={draft.name} greeting={draft.greeting} />
       </div>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}
