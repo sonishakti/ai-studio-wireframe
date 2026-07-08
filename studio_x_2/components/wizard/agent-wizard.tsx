@@ -914,7 +914,6 @@ export function AgentWizard({
             structure, not 900px inputs (audit width-discipline fix). */}
         <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:border-l">
           {[1, 2, 3, 4, 5].map((n) => {
-            const done = isDone(n)
             const Icon = STEP_ICONS[n]
             return (
               <section
@@ -925,38 +924,39 @@ export function AgentWizard({
               >
                 <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
                   <div className="flex min-w-0 items-center gap-2.5">
-                    <span className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
-                      done ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground",
-                    )}>
-                      {done ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Icon className="h-3.5 w-3.5" aria-hidden />}
+                    {/* The header icon NAMES the section (its own icon), never a
+                        completion tick — done-state already lives in the rail;
+                        duplicating it here read as noise (owner call 2026-07-08). */}
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
+                      <Icon className="h-3.5 w-3.5" aria-hidden />
                     </span>
-                    {/* No Done/Pending/Edited badges (owner calls, 2026-07-07):
-                        the check circle already carries the state; pending
-                        edits surface once, in the deploy block's status line. */}
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
                   </div>
                   {/* LIVE agents only: with autosave there is no Save/Cancel,
                       so this is the one way back to the deployed config after
-                      an accidental edit. Drafts have nothing to revert TO. */}
+                      an accidental edit. Icon-only + tooltip — a quiet affordance,
+                      not a text button competing with the title (owner 2026-07-08). */}
                   {isLive && n < 5 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="shrink-0 gap-1.5 text-muted-foreground"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-muted-foreground"
                           disabled={!stepDirty(n)}
                           onClick={() => resetStep(n)}
+                          aria-label="Reset this step to the live version"
                         >
-                          <Undo2 className="h-3.5 w-3.5" aria-hidden /> Reset to live
+                          <Undo2 className="h-3.5 w-3.5" aria-hidden />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Reset this step to the live version</TooltipContent>
                     </Tooltip>
                   )}
                 </header>
-                <div className={cn("px-5 py-5", n !== 1 && n !== 3 && "[&>*]:max-w-4xl")}>
+                {/* Width discipline: cap the text-heavy steps so 4K doesn't
+                    stretch inputs; card-grid steps (2) span the full pane. */}
+                <div className={cn("px-5 py-5", (n === 4 || n === 5) && "[&>*]:max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
                   {n === 3 && <StepBuild draft={draft} update={update} />}

@@ -172,6 +172,11 @@ function OutboundConfigure({ draft, update }: StepProps) {
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">Contacts</Label>
+        {/* The {{var}} → column mapping lives HERE now (moved off the prompt
+            step): this is where the values actually come from. */}
+        <p className="text-xs text-muted-foreground">
+          Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column in this CSV.
+        </p>
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={attachCsv}>
             <Upload className="h-3.5 w-3.5" /> {hasCsv ? "Replace CSV" : "Upload contacts CSV"}

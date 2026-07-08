@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Pencil, ChevronDown } from "lucide-react"
+import { Plus, Pencil, ChevronDown, Play } from "lucide-react"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import {
@@ -55,17 +56,19 @@ export function StepVoice({
     router.push(`/agents/playground?${suffix}&agent=${origin}`)
   }
 
+  const modelsLine =
+    draft.stack.pipeline === "mllm"
+      ? "the realtime model, speed, and cost"
+      : "the STT / LLM / TTS models, speed, and cost"
+
   return (
     <div className="max-w-md space-y-5">
-      <header className="space-y-1">
-        <h3 className="text-sm font-semibold">Voice</h3>
-        <p className="text-sm text-muted-foreground">
-          How your agent sounds and its starting personality.
-        </p>
-      </header>
+      <p className="text-sm text-muted-foreground">
+        Pick the ready-made persona your agent speaks with. Preview it, or change the spoken language.
+      </p>
 
-      {/* Browse the full catalog (F5) — filters, traits, sample, voice IDs. */}
-      <div className="space-y-1.5">
+      {/* ── Pick + preview: the two things that belong together ── */}
+      <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Voice</Label>
         <button
           type="button"
@@ -87,6 +90,17 @@ export function StepVoice({
           )}
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
         </button>
+        {/* A sample of the VOICE — not the agent's greeting (that's one field,
+            in Prompt & tools). Framed as a preview so the two never blur. */}
+        {selected && (
+          <button
+            type="button"
+            onClick={() => toast(`Playing a sample of ${selected.name}`)}
+            className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Play className="h-3.5 w-3.5" aria-hidden /> Preview voice
+          </button>
+        )}
       </div>
 
       <VoiceBrowser
@@ -97,47 +111,9 @@ export function StepVoice({
         onSelect={onSelectVoice}
       />
 
-      {selected ? (
-        <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
-          <p className="text-sm text-muted-foreground">
-            Says: &ldquo;{selected.firstMessage}&rdquo;
-          </p>
-          <button
-            type="button"
-            onClick={() =>
-              goPlayground(selected.kind === "custom" ? `artifact=${selected.id}` : `from=${selected.id}`)
-            }
-            className="inline-flex items-center gap-1 rounded text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <Pencil className="h-3.5 w-3.5" aria-hidden />
-            {selected.kind === "custom" ? "Edit in playground" : "Customize this voice"}
-          </button>
-          {/* Where the engine lives now — signpost it at the exact control.
-              Realtime (multimodal) voices run a single model, so don't name the
-              three cascade stages (audit 2026-07-07). */}
-          <p className="text-xs text-muted-foreground/80">
-            {draft.stack.pipeline === "mllm"
-              ? "Speed, cost, and the realtime model live with the voice. Customize to change them."
-              : "Speed, cost, and the STT / LLM / TTS models live with the voice. Customize to change them."}
-          </p>
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          Each voice is a ready-made persona: tone, opening line, and the models behind it.
-        </p>
-      )}
-
-      <button
-        type="button"
-        onClick={() => goPlayground("new=1")}
-        className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
-      </button>
-
-      {/* Spoken language stays here — it's an agent trait, not a model detail
-          (heuristic-eval #16), and cheap to change without a Playground trip. */}
-      <div className="space-y-1.5 border-t border-border pt-5">
+      {/* Spoken language — an agent trait, cheap to change without a Playground
+          trip (heuristic-eval #16). */}
+      <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Spoken language</Label>
         <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
           <SelectTrigger className="w-full text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
@@ -145,6 +121,34 @@ export function StepVoice({
             {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* ── Advanced: optional Playground trips, demoted out of the main flow so
+             they don't read as required steps (owner call 2026-07-08). ── */}
+      <div className="space-y-2 border-t border-border pt-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground/70">Advanced</p>
+        {selected && (
+          <button
+            type="button"
+            onClick={() =>
+              goPlayground(selected.kind === "custom" ? `artifact=${selected.id}` : `from=${selected.id}`)
+            }
+            className="inline-flex items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden />
+            {selected.kind === "custom" ? "Edit this voice in the Playground" : "Tune this voice's models"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => goPlayground("new=1")}
+          className="inline-flex items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
+        </button>
+        <p className="text-xs text-muted-foreground/80">
+          Opens the Playground to change {modelsLine} behind the voice.
+        </p>
       </div>
     </div>
   )

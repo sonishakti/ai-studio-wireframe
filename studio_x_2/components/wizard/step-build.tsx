@@ -76,9 +76,9 @@ export function StepBuild({ draft, update }: StepProps) {
             className="min-h-[180px] font-mono text-sm leading-relaxed 2xl:min-h-[260px]"
             placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
           />
-          <p className="text-xs text-muted-foreground">
-            Wrap dynamic values in <code className="font-mono">{"{{double_braces}}"}</code>. For Batch calls, they map to your CSV columns.
-          </p>
+          {/* Dynamic-variable mapping lives with the deployment (Batch calls →
+              CSV columns), not here — this step is about behaviour (owner call
+              2026-07-08). We still surface what's been templated, no CSV talk. */}
           {vars.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
               <span className="text-xs text-muted-foreground">Variables detected:</span>
@@ -97,8 +97,9 @@ export function StepBuild({ draft, update }: StepProps) {
               value={draft.greeting}
               onChange={(e) => update({ greeting: e.target.value })}
               className="min-h-[72px] text-sm"
-              placeholder="The first line your agent speaks, e.g. Hi, thanks for calling Acme, how can I help?"
+              placeholder="Hi, thanks for calling Acme, how can I help?"
             />
+            <p className="text-xs text-muted-foreground">The one line your agent opens with. This is its only greeting.</p>
           </div>
 
           <div className="grid gap-4">
