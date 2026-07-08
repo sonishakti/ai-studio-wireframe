@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Check, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, ChevronDown, Sparkles } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, ChevronDown, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -754,7 +754,7 @@ export function AgentWizard({
                 n === selected && "ring-1 ring-ring",
               )}
             >
-              {isDone(n) ? <Check className="h-3 w-3" aria-hidden /> : n}
+              {n}
             </button>
           ))}
         </span>
@@ -818,29 +818,27 @@ export function AgentWizard({
             </Button>
           </div>
 
-          {/* Scroll-spy step list — recaps make it a recognition map (C3 harvest). */}
+          {/* Scroll-spy step list — recaps make it a recognition map (C3 harvest).
+              Plain icon + label rows, same idiom as the app sidebar: NO completion
+              ticks (owner 2026-07-08) — the recap line under each title already
+              says what's set, and the deploy block carries overall progress. */}
           <nav aria-label="Build steps" className="space-y-0.5">
             {[1, 2, 3, 4, 5].map((n) => {
-              const done = isDone(n)
               const Icon = STEP_ICONS[n]
               const detail = rowDetail(n)
+              const active = n === selected && !activeOpt
               return (
                 <button
                   key={n}
                   type="button"
                   onClick={() => openRow(n)}
-                  aria-current={n === selected && !activeOpt ? "step" : undefined}
+                  aria-current={active ? "step" : undefined}
                   className={cn(
                     "flex w-full items-start gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
-                    n === selected && !activeOpt && "bg-accent/60",
+                    active && "bg-accent/60",
                   )}
                 >
-                  <span className={cn(
-                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
-                    done ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground",
-                  )}>
-                    {done ? <Check className="h-3 w-3" aria-hidden /> : <Icon className="h-3 w-3" aria-hidden />}
-                  </span>
+                  <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium">{stepTitle(n, draft)}</span>
                     <span className="line-clamp-1 block text-xs text-muted-foreground" title={detail}>{detail}</span>
@@ -867,9 +865,7 @@ export function AgentWizard({
                   activeOpt === o.key && "bg-accent/60",
                 )}
               >
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
-                  <o.icon className="h-3 w-3" aria-hidden />
-                </span>
+                <o.icon className={cn("h-4 w-4 shrink-0", activeOpt === o.key ? "text-foreground" : "text-muted-foreground")} aria-hidden />
                 <span className="text-sm font-medium">{o.label}</span>
               </button>
             ))}
@@ -912,7 +908,10 @@ export function AgentWizard({
             separated by a divider (the card frame + the LHS border-l give the
             structure), not nested cards. Sections cap content width so 4K shows
             structure, not 900px inputs (audit width-discipline fix). */}
-        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:border-l">
+        {/* overflow-hidden + matched corner radii keep the header bands inside
+            the card's rounded corners. Safe: the sticky rail lives in the OTHER
+            grid column, and all popovers/sheets render in portals. */}
+        <div className="min-w-0 divide-y divide-border overflow-hidden rounded-b-2xl border-t border-border lg:rounded-bl-none lg:rounded-r-2xl lg:border-t-0 lg:border-l">
           {[1, 2, 3, 4, 5].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
@@ -922,12 +921,13 @@ export function AgentWizard({
                 aria-labelledby={`wizard-step-${n}-title`}
                 className="scroll-mt-24"
               >
-                <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+                {/* Banded header: a muted strip + bordered icon chip marks where
+                    each section STARTS — a 1px divider alone read as one flat
+                    page (arrange pass, 2026-07-08). The icon NAMES the section;
+                    never a completion tick (rail + deploy block own progress). */}
+                <header className="flex items-center justify-between gap-3 border-b border-border bg-muted/40 px-5 py-3">
                   <div className="flex min-w-0 items-center gap-2.5">
-                    {/* The header icon NAMES the section (its own icon), never a
-                        completion tick — done-state already lives in the rail;
-                        duplicating it here read as noise (owner call 2026-07-08). */}
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
                       <Icon className="h-3.5 w-3.5" aria-hidden />
                     </span>
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
@@ -955,8 +955,9 @@ export function AgentWizard({
                   )}
                 </header>
                 {/* Width discipline: cap the text-heavy steps so 4K doesn't
-                    stretch inputs; card-grid steps (2) span the full pane. */}
-                <div className={cn("px-5 py-5", (n === 4 || n === 5) && "[&>*]:max-w-4xl")}>
+                    stretch inputs; card-grid steps (2) span the full pane.
+                    py-6 gives each section air under its header band. */}
+                <div className={cn("px-5 py-6", (n === 4 || n === 5) && "[&>*]:max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
                   {n === 3 && <StepBuild draft={draft} update={update} />}
@@ -1074,9 +1075,11 @@ function OptionalSection({
     <Collapsible open={open} onOpenChange={onOpenChange}>
       <section id={id} className="scroll-mt-24">
         <CollapsibleTrigger asChild>
-          <button type="button" className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          {/* Same banded-header language as the numbered sections, so optional
+              depth reads as a peer section, not stray rows (arrange 2026-07-08). */}
+          <button type="button" className="flex w-full items-center justify-between gap-3 bg-muted/40 px-5 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <span className="flex min-w-0 items-center gap-2.5">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
                 <Icon className="h-3.5 w-3.5" aria-hidden />
               </span>
               <span className="min-w-0">
@@ -1090,7 +1093,7 @@ function OptionalSection({
             <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} aria-hidden />
           </button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="border-t border-border px-5 py-5">
+        <CollapsibleContent className="border-t border-border px-5 py-6">
           {children}
         </CollapsibleContent>
       </section>

@@ -133,7 +133,7 @@ export function StepVoice({
             onClick={() =>
               goPlayground(selected.kind === "custom" ? `artifact=${selected.id}` : `from=${selected.id}`)
             }
-            className="inline-flex items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex w-fit items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Pencil className="h-3.5 w-3.5" aria-hidden />
             {selected.kind === "custom" ? "Edit this voice in the Playground" : "Tune this voice's models"}
@@ -142,7 +142,7 @@ export function StepVoice({
         <button
           type="button"
           onClick={() => goPlayground("new=1")}
-          className="inline-flex items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex w-fit items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
         </button>
