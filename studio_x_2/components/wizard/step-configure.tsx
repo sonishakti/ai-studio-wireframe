@@ -18,7 +18,8 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard, WebWidgetConfig } from "@/components/wizard/channel-configs"
-import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
+import { PHONE_NUMBERS, extractVars, CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
+import { AddLinesSheet } from "@/components/concurrency-card"
 import {
   MOCK_CSV_COLUMNS,
   MOCK_CSV_ROWS,
@@ -186,6 +187,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
           </div>
           <OutboundSettings draft={draft} update={update} />
         </ConfigCard>
+        <OutboundCapacityNote draft={draft} />
 
         <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
           <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -335,6 +337,56 @@ function ContactsPanel({ draft, update }: StepProps) {
 // Other outbound settings — call window, concurrency, retries. Stored on the
 // DRAFT (not drawer-local state) so they survive close/reopen and appear in
 // the row summary, review, and config JSON (heuristic-eval finding #7).
+/** At-the-wall purchase moment (A6, graft from the judge round's variant C):
+ *  picking a max-concurrent above the project's line capacity is where the
+ *  limit is FELT — so the unlock lives here, inline, not on a billing page
+ *  the operator would have to go find. One component owns ALL capacity
+ *  communication in this step (a split select-suffix + note drifted). */
+function OutboundCapacityNote({ draft }: { draft: StepProps["draft"] }) {
+  const [purchasedBoost, setPurchasedBoost] = React.useState(0)
+  const [linesOpen, setLinesOpen] = React.useState(false)
+  const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchasedBoost })
+  const chosen = draft.config.outbound?.maxConcurrent ?? 10
+  const overBy = Math.max(0, chosen - stats.totalLines)
+
+  if (overBy === 0 && purchasedBoost === 0) return null
+
+  return (
+    <>
+      {overBy > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.04] px-3 py-2.5">
+          <p className="flex-1 min-w-0 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {chosen} at once is above your {stats.totalLines} concurrent lines.
+            </span>{" "}
+            Calls beyond {stats.totalLines} queue until a line frees — nothing drops. +{overBy}{" "}
+            lines (${overBy * stats.pricePerLineMo}/mo, prorated today) removes the queue.
+          </p>
+          <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => setLinesOpen(true)}>
+            Add lines
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 px-3 py-2.5">
+          <Check className="h-4 w-4 shrink-0 text-success" />
+          <p className="text-xs text-muted-foreground">
+            {stats.totalLines} concurrent lines — your max of {chosen} runs without queuing.
+          </p>
+        </div>
+      )}
+      <AddLinesSheet
+        open={linesOpen}
+        onOpenChange={setLinesOpen}
+        purchased={CONCURRENCY.purchased + purchasedBoost}
+        queued={0}
+        totalLines={stats.totalLines}
+        capHeadroomUsd={null}
+        onCommit={(qty) => { setPurchasedBoost((b) => Math.max(0, b + qty)); setLinesOpen(false) }}
+      />
+    </>
+  )
+}
+
 function OutboundSettings({ draft, update }: StepProps) {
   const out = draft.config.outbound
   const patch = (p: Partial<NonNullable<typeof out>>) =>
@@ -351,8 +403,9 @@ function OutboundSettings({ draft, update }: StepProps) {
           >
             <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="business">Business hours (9–5)</SelectItem>
-              <SelectItem value="extended">Extended (8–8)</SelectItem>
+              {/* Whose 9–5 matters on a call campaign — say it (user-test S3). */}
+              <SelectItem value="business">Business hours (9–5, contact&apos;s local time)</SelectItem>
+              <SelectItem value="extended">Extended (8–8, contact&apos;s local time)</SelectItem>
               <SelectItem value="anytime">Anytime</SelectItem>
             </SelectContent>
           </Select>

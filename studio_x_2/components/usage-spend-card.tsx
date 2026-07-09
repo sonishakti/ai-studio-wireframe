@@ -50,9 +50,7 @@ import { AddCardSheet } from "@/components/free-minutes-nudge"
  * a local overlay — the lifecycle state machine is never re-implemented here.
  */
 
-/** $/min PAYG rate — the one constant every $ figure traces back to (docs
- *  pricing: managed mode bundles ASR+LLM+TTS at $0.10/min). */
-const PAYG_RATE = 0.1
+import { PAYG_RATE } from "@/lib/campaign-data"
 
 function usd(n: number, cents = true) {
   return cents
@@ -429,8 +427,10 @@ export function UsageSpendCard() {
 }
 
 // ─── Contextual state banner ──────────────────────────────────────────────────
+// Exported: the ConcurrencyCard (A6) shares this exact banner idiom so the two
+// Billing money surfaces can never diverge in tone.
 
-function StateBanner({
+export function StateBanner({
   tone,
   icon: Icon,
   children,

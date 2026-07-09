@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { PageHeader } from "@/components/page-header"
 import { UsageSpendCard } from "@/components/usage-spend-card"
+import { ConcurrencyCard } from "@/components/concurrency-card"
 
 const PAYMENT_METHODS = [
   { kind: "visa",       last4: "4242", brand: "Visa",       primary: true  },
@@ -56,6 +57,11 @@ export default function BillingOverviewPage() {
                Free-tier truth, projected bill, and the spend-cap write path
                live together; all figures derive from PLAN_USAGE. ─────────── */}
           <UsageSpendCard />
+
+          {/* ─── Concurrent lines (A6) — capacity is a sibling money surface:
+               lines govern how many calls run at once, the cap governs $.
+               Included vs purchased never merge; the wall means queueing. ── */}
+          <ConcurrencyCard />
 
           {/* ─── Payment methods preview ────────────────────────────── */}
           <Card>

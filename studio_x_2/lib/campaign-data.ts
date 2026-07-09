@@ -476,6 +476,51 @@ export const PLAN_USAGE: PlanUsage = {
   periodDaysTotal: 31,
 }
 
+/** PAYG usage rate ($/min, managed mode bundles ASR+LLM+TTS — docs pricing).
+ *  THE one rate constant: every $-per-minute figure derives from it. */
+export const PAYG_RATE = 0.1
+
+// ─── Concurrent lines (A6) ───────────────────────────────────────────────────
+//
+// Lines govern how many calls run AT ONCE; the spend cap governs per-minute
+// usage $. They are deliberately separate: line fees are a subscription
+// ($/line/mo, prorated on add, credited on reduce), NEVER counted against the
+// usage cap — and the UI must say so (judge round 2026-07-09, fix #1).
+// At the wall, batch calls QUEUE (D1 semantics) — nothing drops or fails.
+
+export interface ConcurrencyState {
+  /** Free lines every project starts with (wireframe value — no public
+   *  ceiling is documented; docs sweep F8). */
+  included: number
+  /** Self-serve purchased add-on lines — never merged with included. */
+  purchased: number
+  /** Lines carrying live calls right now (mock gauge). */
+  inUse: number
+  /** Calls waiting for a free line (batch queue depth, mock). */
+  queued: number
+  /** $/line/month — wireframe placeholder (competitive w/ Retell's $8). */
+  pricePerLineMo: number
+}
+
+export const CONCURRENCY: ConcurrencyState = {
+  included: 10,
+  purchased: 0,
+  inUse: 2,
+  queued: 0,
+  pricePerLineMo: 8,
+}
+
+export function concurrencyStats(c: ConcurrencyState = CONCURRENCY) {
+  const totalLines = c.included + c.purchased
+  return {
+    ...c,
+    totalLines,
+    atWall: c.inUse >= totalLines,
+    pctInUse: totalLines > 0 ? Math.min(100, Math.round((c.inUse / totalLines) * 100)) : 0,
+    monthlyLineFeeUsd: c.purchased * c.pricePerLineMo,
+  }
+}
+
 /** Free-minutes summary from the single source of truth (PLAN_USAGE). Pure — lives
  *  in the lib (not a "use client" component) so server pages can call it too.
  *  Accepts an override so state fixtures (design harnesses) can render any

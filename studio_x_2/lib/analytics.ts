@@ -60,6 +60,11 @@ export const Events = {
   spend_alert_fired:          "spend_alert_fired",           // { pct_of_cap, cap_usd } — threshold warning before the wall
   projected_bill_viewed:      "projected_bill_viewed",       // { projected_usd, spend_state } — estimate seen on Billing
 
+  // ── Concurrent lines (A6, 2026-07-09) — the wall is a conversion moment.
+  concurrency_wall_viewed:    "concurrency_wall_viewed",     // { lines, queued } — user saw the at-capacity state
+  lines_added:                "lines_added",                 // { qty, prorated_charge_usd } — negative qty = reduction
+  keep_queuing_clicked:       "keep_queuing_clicked",        // { lines } — declined the upsell; queueing as designed
+
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
   defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
   defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
@@ -152,6 +157,9 @@ export type EventPayloads = {
   spend_cap_hit:               { cap_usd: number; projected_usd: number }
   spend_alert_fired:           { pct_of_cap: number; cap_usd: number }
   projected_bill_viewed:       { projected_usd: number; spend_state: string }
+  concurrency_wall_viewed:     { lines: number; queued: number }
+  lines_added:                 { qty: number; prorated_charge_usd: number }
+  keep_queuing_clicked:        { lines: number }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }
