@@ -139,7 +139,7 @@ split; note prompt is per-deployment again per the 06-24 rebuild):**
 
 | ID | Feature | Stage | Pri | Strategic impact | Technicality |
 |---|---|---|---|---|---|
-| X1 | Correct free-tier meter + spend cap + alert | Convert/guardrail | **P0** | Trust in a postpaid model; the counter-metric that makes "drive volume" safe (no bill-shock churn). Corrects the stale 10k-min surfaces (F1). | Persistent minutes-used meter (300-min truth) in chrome; spend cap + threshold alert in Project Settings/Billing. Studio-side. |
+| X1 | Correct free-tier meter + spend cap + alert | Convert/guardrail | **P0 ✅ SHIPPED 2026-07-09** | Trust in a postpaid model; the counter-metric that makes "drive volume" safe (no bill-shock churn). Corrects the stale 10k-min surfaces (F1). | Shipped as the Billing "Usage & spend" card (`components/usage-spend-card.tsx`, commit `24ad614`; diverge round `a570f62…3342b3e`). Design doc: `references/design/x1-usage-spend.html`. Research corrected the plan: usage belongs on Billing (all 5 competitors), NOT persistent chrome — the account-menu ring stays the glance. |
 
 ---
 

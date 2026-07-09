@@ -1,0 +1,295 @@
+<!-- X1 design doc — self-contained; brand-matched to studio_x_2 tokens -->
+<title>X1 — Free-tier truth &amp; spend cap · Design doc</title>
+<style>
+  :root {
+    --brand: #00658d;
+    --bg: #fdfcfc;
+    --fg: #0a0a0a;
+    --muted: #6b6b6b;
+    --card: #ffffff;
+    --border: #e4e2e0;
+    --soft: #f4f6f7;
+    --good: #1a7f4e;
+    --warn: #9a6700;
+    --bad: #b3261e;
+    --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --brand: #00c2ff;
+      --bg: #050505;
+      --fg: #fdfcfc;
+      --muted: #9a9a9a;
+      --card: #111214;
+      --border: #26282b;
+      --soft: #16181a;
+      --good: #4cc38a;
+      --warn: #e0b25a;
+      --bad: #ef8a80;
+    }
+  }
+  :root[data-theme="dark"] {
+    --brand: #00c2ff; --bg: #050505; --fg: #fdfcfc; --muted: #9a9a9a;
+    --card: #111214; --border: #26282b; --soft: #16181a;
+    --good: #4cc38a; --warn: #e0b25a; --bad: #ef8a80;
+  }
+  :root[data-theme="light"] {
+    --brand: #00658d; --bg: #fdfcfc; --fg: #0a0a0a; --muted: #6b6b6b;
+    --card: #ffffff; --border: #e4e2e0; --soft: #f4f6f7;
+    --good: #1a7f4e; --warn: #9a6700; --bad: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.6 "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  .mono { font-family: "Space Mono", ui-monospace, monospace; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.doc { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--brand); font-weight: 600; margin: 0 0 8px;
+  }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+  h2 { font-size: 19px; margin: 44px 0 12px; }
+  h3 { font-size: 15px; margin: 24px 0 8px; }
+  p { max-width: 68ch; }
+  .lede { color: var(--muted); font-size: 16px; max-width: 62ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 3px 12px; font-size: 12px; color: var(--muted); background: var(--card);
+  }
+  .chip.ship { border-color: color-mix(in oklab, var(--good) 45%, transparent); color: var(--good); font-weight: 600; }
+  .chip a { color: inherit; text-decoration: none; }
+  a { color: var(--brand); }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; margin: 14px 0;
+  }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .num { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  /* funnel strip */
+  .funnel { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 12px 0 4px; }
+  .stage {
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 12.5px; color: var(--muted); background: var(--card);
+  }
+  .stage.hot {
+    border-color: var(--brand); color: var(--brand); font-weight: 600;
+    background: color-mix(in oklab, var(--brand) 8%, var(--card));
+  }
+  .arrow { color: var(--muted); font-size: 12px; }
+  /* judge bars — single-hue magnitude, identity via row labels (no palette risk) */
+  .scorerow { display: grid; grid-template-columns: 150px 1fr 44px; gap: 10px; align-items: center; margin: 4px 0; }
+  .scorerow .label { font-size: 12.5px; color: var(--muted); }
+  .bar { height: 10px; border-radius: 5px; background: var(--soft); overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 5px; background: var(--brand); }
+  .bar.winner > i { background: var(--good); }
+  .score { font-size: 12.5px; font-variant-numeric: tabular-nums; text-align: right; }
+  .lens { margin: 18px 0 6px; font-size: 13px; font-weight: 600; }
+  /* state pills */
+  .tone-good { color: var(--good); font-weight: 600; }
+  .tone-warn { color: var(--warn); font-weight: 600; }
+  .tone-bad  { color: var(--bad);  font-weight: 600; }
+  .tag {
+    display: inline-block; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+    border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--muted); margin-right: 6px;
+  }
+  .graft { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 12px 0; }
+  .graft .card { margin: 0; }
+  .graft h4 { margin: 0 0 6px; font-size: 13px; }
+  .graft p { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .callout {
+    border-left: 3px solid var(--brand); background: var(--soft);
+    border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 16px; margin: 14px 0;
+    font-size: 13.5px;
+  }
+  code { font-family: "Space Mono", ui-monospace, monospace; font-size: 12.5px; background: var(--soft); border-radius: 4px; padding: 1px 5px; }
+  footer.doc { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 16px; color: var(--muted); font-size: 12.5px; }
+</style>
+
+<div class="wrap">
+  <header class="doc">
+    <p class="eyebrow">Studio_X · Feature design doc · P0 spine 1 of 6</p>
+    <h1>X1 — Free-tier truth &amp; spend cap</h1>
+    <p class="lede">
+      The Billing “Usage &amp; spend” card: an honest 300-minute free-tier meter, an
+      estimate-labeled projected bill, and a spend cap the user owns — the guardrail that
+      makes the “drive volume” activation strategy safe under postpaid billing.
+    </p>
+    <div class="meta">
+      <span class="chip ship">● Shipped 2026-07-09</span>
+      <span class="chip mono">commit 24ad614</span>
+      <span class="chip"><a href="https://ai-studio-console-redesign.vercel.app/billing">Live: /billing ↗</a></span>
+      <span class="chip">PRD: roadmap-features-prd-2026-07-09.md §3 · X1</span>
+    </div>
+  </header>
+
+  <h2>Why this feature exists</h2>
+  <p>
+    Agora earns revenue only when minutes flow on a live deployment — so the whole activation
+    strategy pushes users toward <em>volume</em>. But ConvoAI billing is <strong>postpaid</strong>
+    ($0.10/min after 300 free min/month), and volume without a visible ceiling produces surprise
+    invoices. Bill-shock is the churn engine that would eat every conversion the funnel wins.
+    X1 is the counter-metric made into UI: the free tier shown truthfully, the projected bill
+    always visible and always labeled an estimate, and a cap that pauses new calls before money
+    gets scary.
+  </p>
+  <div class="funnel" role="img" aria-label="Activation funnel: Land, Believe, Connect, Consume, then Convert highlighted, then Retain. X1 guards the Convert stage.">
+    <span class="stage">Land</span><span class="arrow">→</span>
+    <span class="stage">Believe</span><span class="arrow">→</span>
+    <span class="stage">Connect</span><span class="arrow">→</span>
+    <span class="stage">Consume</span><span class="arrow">→</span>
+    <span class="stage hot">Convert · X1 guards this</span><span class="arrow">→</span>
+    <span class="stage">Retain</span>
+  </div>
+  <div class="callout">
+    <strong>The fact-check that shaped it:</strong> ConvoAI’s free tier is
+    <strong>300 min/month</strong> (shared with Real-Time STT + Translation) — <em>not</em> the
+    10,000 minutes some surfaces implied. 10k belongs to core RTC voice. The split
+    150&nbsp;(no card) + 150&nbsp;(card unlocks) is the locked 2026-06-22 nudge design; X1 makes
+    that split legible in the meter itself without moving the nudge moment.
+  </div>
+
+  <h2>Research → requirements</h2>
+  <p>
+    Two research sweeps (competitor billing UX: Vapi, Retell, Bland, ElevenLabs, OpenAI;
+    usage-billing interaction patterns: Orb, Kinde, Dodo, Lago) produced 12 requirements.
+    The ones that drove the design:
+  </p>
+  <div class="scroll"><table>
+    <thead><tr><th>Requirement</th><th>Source</th><th>Kind</th></tr></thead>
+    <tbody>
+      <tr><td>Usage lives on Billing, not persistent chrome (account-menu ring stays the glance)</td><td>all 5 platforms</td><td><span class="tag">parity</span></td></tr>
+      <tr><td>Cap + alert threshold + usage read together</td><td>OpenAI Limits page</td><td><span class="tag">parity</span></td></tr>
+      <tr><td>Exact numbers + units everywhere — “212 of 300 min”, never a bare %</td><td>Dodo Payments</td><td><span class="tag">best practice</span></td></tr>
+      <tr><td>Cap semantics: pause <em>new</em> calls only; in-flight finish; invoice honors the cap</td><td>Orb spend management</td><td><span class="tag">best practice</span></td></tr>
+      <tr><td>Projected bill = straight-line run rate, always labeled an estimate</td><td>no competitor ships this — differentiation</td><td><span class="tag">best practice</span></td></tr>
+      <tr><td>Cap-hit: what stopped, what still works, ONE primary CTA, zero penalty tone</td><td>paywall-screen research</td><td><span class="tag">best practice</span></td></tr>
+      <tr><td>Metering-lag disclosure; no fake urgency; figures agree across all surfaces</td><td>Kinde / dark-patterns lit.</td><td><span class="tag">honesty</span></td></tr>
+      <tr><td>role="meter" + aria values + visible text label</td><td>W3C APG</td><td><span class="tag">honesty</span></td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px; color:var(--muted);">
+    Notable competitor facts: Vapi <em>freezes the wallet</em> at $0 (hard stop, penalty framing — the
+    anti-pattern X1 avoids); Retell splits Usage and Limits pages; nobody ships a projected-bill
+    widget — the estimate hero is X1’s differentiator.
+  </p>
+
+  <h2>The money lifecycle (journey)</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>#</th><th>State</th><th>What the card must say</th></tr></thead>
+    <tbody>
+      <tr><td class="num">S0</td><td>Fresh — 0/300</td><td>“300 free minutes ready”; split visible; $0 projected, PAYG explained</td></tr>
+      <tr><td class="num">S1–S2</td><td>Free burn → 150 threshold</td><td>Numbers-first meter; at 150: card unlocks <strong>150 more, free — $0 today</strong> (continuation, not gate)</td></tr>
+      <tr><td class="num">S3c</td><td>Exhausted, no card</td><td class="tone-bad">New calls paused</td></tr>
+      <tr><td class="num">S5</td><td>PAYG begins (card on file)</td><td>Meter <strong>switches unit</strong> — dollars-of-cap primary; projected bill is the hero</td></tr>
+      <tr><td class="num">S6</td><td>Cap approaching (≥75%)</td><td class="tone-warn">Alert fires BEFORE the wall; headroom in $ and ≈minutes</td></tr>
+      <tr><td class="num">S7</td><td>Cap hit</td><td class="tone-bad">“The cap you set did exactly its job.”</td></tr>
+      <tr><td class="num">S8</td><td>Cap raised</td><td class="tone-good">New cap, restored headroom, effective immediately</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Diverge → converge</h2>
+  <p>
+    Three variants were built on a throwaway harness (<code>/billing/spend-lab</code>,
+    commits <span class="mono">a570f62…3342b3e</span>, deleted after judging per the
+    <code>/agents/proto</code> convention) and scored by three independent judge lenses.
+  </p>
+
+  <div class="graft">
+    <div class="card"><h4>A · Consolidated card</h4><p>One card stacking meter → projection → inline cap/alert form. Best meter a11y and cap-hit prose; lost on an unclamped projection above a “never exceeds” promise, banners buried at the bottom, and an inert raise-cap loop.</p></div>
+    <div class="card"><h4>B · Meter band + controls row</h4><p>OpenAI-Limits read/write split. Only variant whose money story survived every scenario: projection always clamped to the cap, every recovery loop rendering its consequence.</p></div>
+    <div class="card"><h4>C · Compact card + setup sheet</h4><p>Calm glance card; considered 3-beat cap sheet. Best IA fit and the best at-the-cap education; lost on a broken resume loop and a chore-CTA at the capture moment.</p></div>
+  </div>
+
+  <div class="card" role="img" aria-label="Judge scores. Bill-shock clarity: A 6.5, B 8.7 winner, C 7.9. Activation fit: A 6.9, B 8.6 winner, C 7.3. IA and system fit: A 7.8, B 6.9, C 8.4 winner.">
+    <p class="lens">Lens 1 · Bill-shock clarity &amp; first-run honesty</p>
+    <div class="scorerow"><span class="label">A</span><div class="bar"><i style="width:65%"></i></div><span class="score">6.5</span></div>
+    <div class="scorerow"><span class="label">B — winner</span><div class="bar winner"><i style="width:87%"></i></div><span class="score">8.7</span></div>
+    <div class="scorerow"><span class="label">C</span><div class="bar"><i style="width:79%"></i></div><span class="score">7.9</span></div>
+    <p class="lens">Lens 2 · Time-to-value &amp; activation fit</p>
+    <div class="scorerow"><span class="label">A</span><div class="bar"><i style="width:69%"></i></div><span class="score">6.9</span></div>
+    <div class="scorerow"><span class="label">B — winner</span><div class="bar winner"><i style="width:86%"></i></div><span class="score">8.6</span></div>
+    <div class="scorerow"><span class="label">C</span><div class="bar"><i style="width:73%"></i></div><span class="score">7.3</span></div>
+    <p class="lens">Lens 3 · IA &amp; design-system fit</p>
+    <div class="scorerow"><span class="label">A</span><div class="bar"><i style="width:78%"></i></div><span class="score">7.8</span></div>
+    <div class="scorerow"><span class="label">B</span><div class="bar"><i style="width:69%"></i></div><span class="score">6.9</span></div>
+    <div class="scorerow"><span class="label">C — winner</span><div class="bar winner"><i style="width:84%"></i></div><span class="score">8.4</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>Verdict:</strong> B wins — it took both gating lenses (honesty + activation), and the
+    rule is that structure is fixable at fold-in while broken money-honesty is disqualifying.
+    The shipped component is <strong>B’s skeleton in C’s shell with A’s meter</strong>:
+    B’s clamped projection + consequence-rendering loops · C’s single-card shell, sheet
+    write-path, projected-bill hero and 3-beat cap education · A’s labelled
+    <code>role="meter"</code> and “the cap you set did exactly its job” prose.
+    All 13 defects on the judges’ fix list were applied at fold-in.
+  </div>
+
+  <h2>What shipped</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">Anatomy — <code>usage-spend-card.tsx</code></h3>
+      <ol style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li><strong>State banner</strong> (leads the card): threshold · paused · cap-warning · cap-hit · transient confirmations</li>
+        <li><strong>Hero</strong>: minutes while free (“150 of 300 free minutes used”) → <em>projected bill</em> once PAYG (“$40.74 · Estimate”)</li>
+        <li><strong>Meter</strong>: split-tier 150+150 (locked half = expandable capacity) → dollars-of-cap with alert tick</li>
+        <li><strong>Quiet controls row</strong>: cap chip + “Edit spend controls” → 3-beat sheet</li>
+        <li><strong>Disclosures</strong>: metering lag + cap semantics in one calm line</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Design decisions that bind</h3>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>Projection on display <strong>never exceeds the cap</strong>; the clamp is disclosed (“run rate alone would be $62 — your $50 cap holds the invoice”)</li>
+        <li>Cap is settable <strong>before</strong> a card exists; it arms at capture</li>
+        <li>“Keep paused” is a first-class choice, not a dark-pattern dead end</li>
+        <li>One card-capture flow product-wide (<code>AddCardSheet</code> reused from the Monitor nudge)</li>
+        <li>Every figure derives from <code>PLAN_USAGE</code> via <code>freeMinutesStats()/spendStats()</code> — surfaces can’t disagree</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Data &amp; events</h2>
+  <p style="font-size:13.5px;">
+    <code>PlanUsage</code> gained <code>spendCapUsd · spendAlertPct · paygSpendUsd · periodLabel ·
+    periodDaysElapsed/Total</code>; <code>spendStats()</code> mirrors <code>freeMinutesStats()</code>
+    (state machine lives in the lib, never re-implemented in components). New events:
+    <code>spend_cap_set</code> · <code>spend_cap_raised</code> · <code>spend_cap_hit</code> ·
+    <code>spend_alert_fired</code> · <code>projected_bill_viewed</code>.
+  </p>
+  <div class="callout">
+    <strong>Counter-metric:</strong> <code>spend_alert_fired</code> must precede
+    <code>spend_cap_hit</code> for the same cap. A cap hit with no prior alert is the failure this
+    whole surface exists to prevent — dashboard it that way.
+  </div>
+
+  <h2>Also fixed in this pass</h2>
+  <ul style="font-size:13.5px;">
+    <li><code>/billing/usage</code> quota row was hardcoded “Conversational AI 18,420 / 50,000 min”, contradicting the 300-min truth — now derives from <code>freeMinutesStats()</code>; the 10,000-min row is relabeled “Voice minutes (RTC)” because that allowance belongs to core RTC, a different product.</li>
+    <li>The Billing period label was hardcoded “May 1 – May 31” — now reads <code>PLAN_USAGE.periodLabel</code>.</li>
+  </ul>
+
+  <h2>Open follow-ups</h2>
+  <ul style="font-size:13.5px;">
+    <li><strong>A6 hook:</strong> the cap sheet is where a concurrency-purchase upsell could co-live — decide when A6 (self-serve concurrency) is designed, not before.</li>
+    <li><strong>Alert delivery:</strong> the 75% alert fires a bell/email in copy only (mock); D6 Alerting will own real delivery.</li>
+    <li><strong>Reconcile with Aria’s Monitor nudge cadence</strong> if PLAN_USAGE personas ever diverge per surface.</li>
+  </ul>
+
+  <footer class="doc">
+    Provenance: diverge commits <span class="mono">a570f62 · 323c4f5 · f819086 · 3342b3e</span> →
+    fold-in <span class="mono">24ad614</span>. Strategy:
+    <span class="mono">references/roadmap-activation-strategy-2026-07-09.md</span> · PRD card:
+    <span class="mono">references/roadmap-features-prd-2026-07-09.md §3 X1</span> · Journey +
+    research briefs archived in the 2026-07-09 session. Next in the P0 spine: A1 onboarding.
+  </footer>
+</div>
