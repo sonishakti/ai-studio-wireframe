@@ -1,0 +1,150 @@
+<!-- D1 design doc — self-contained; brand-matched to studio_x_2 tokens -->
+<title>D1 — Call throttling / batch detail · Design doc</title>
+<style>
+  :root{ --brand:#00658d; --bg:#fdfcfc; --fg:#0a0a0a; --muted:#6b6b6b; --card:#fff; --border:#e4e2e0;
+    --soft:#f4f6f7; --good:#1a7f4e; --warn:#9a6700; --bad:#b3261e; --radius:8px; }
+  @media (prefers-color-scheme: dark){ :root{ --brand:#00c2ff; --bg:#050505; --fg:#fdfcfc; --muted:#9a9a9a;
+    --card:#111214; --border:#26282b; --soft:#16181a; --good:#4cc38a; --warn:#e0b25a; --bad:#ef8a80; } }
+  :root[data-theme="dark"]{ --brand:#00c2ff; --bg:#050505; --fg:#fdfcfc; --muted:#9a9a9a; --card:#111214;
+    --border:#26282b; --soft:#16181a; --good:#4cc38a; --warn:#e0b25a; --bad:#ef8a80; }
+  :root[data-theme="light"]{ --brand:#00658d; --bg:#fdfcfc; --fg:#0a0a0a; --muted:#6b6b6b; --card:#fff;
+    --border:#e4e2e0; --soft:#f4f6f7; --good:#1a7f4e; --warn:#9a6700; --bad:#b3261e; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 "Instrument Sans",ui-sans-serif,system-ui,sans-serif; }
+  .mono{ font-family:"Space Mono",ui-monospace,monospace; }
+  .wrap{ max-width:880px; margin:0 auto; padding:48px 24px 96px; }
+  header.doc{ border-bottom:1px solid var(--border); padding-bottom:24px; margin-bottom:32px; }
+  .eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--brand); font-weight:600; margin:0 0 8px; }
+  h1{ font-size:30px; line-height:1.15; margin:0 0 10px; text-wrap:balance; } h2{ font-size:19px; margin:44px 0 12px; } p{ max-width:68ch; }
+  .lede{ color:var(--muted); font-size:16px; max-width:62ch; }
+  .meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); border-radius:999px; padding:3px 12px; font-size:12px; color:var(--muted); background:var(--card); }
+  .chip.ship{ border-color:color-mix(in oklab,var(--warn) 45%,transparent); color:var(--warn); font-weight:600; } .chip a{ color:inherit; text-decoration:none; }
+  a{ color:var(--brand); }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin:14px 0; }
+  .grid2{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; } .scroll{ overflow-x:auto; }
+  th{ text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  th,td{ padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .scorerow{ display:grid; grid-template-columns:170px 1fr 40px; gap:10px; align-items:center; margin:4px 0; }
+  .scorerow .label{ font-size:12.5px; color:var(--muted); }
+  .bar{ height:10px; border-radius:5px; background:var(--soft); overflow:hidden; } .bar>i{ display:block; height:100%; border-radius:5px; background:var(--brand); } .bar.winner>i{ background:var(--good); }
+  .score{ font-size:12.5px; font-variant-numeric:tabular-nums; text-align:right; }
+  .lens{ margin:18px 0 6px; font-size:13px; font-weight:600; }
+  .callout{ border-left:3px solid var(--brand); background:var(--soft); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; margin:14px 0; font-size:13.5px; }
+  code{ font-family:"Space Mono",ui-monospace,monospace; font-size:12.5px; background:var(--soft); border-radius:4px; padding:1px 5px; }
+  .graft{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:12px 0; } .graft .card{ margin:0; } .graft h4{ margin:0 0 6px; font-size:13px; } .graft p{ font-size:12.5px; color:var(--muted); margin:0; }
+  .twocol{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .state{ border-radius:var(--radius); padding:12px 14px; font-size:13px; }
+  .state.paced{ border:1px solid color-mix(in oklab,var(--brand) 40%,transparent); background:color-mix(in oklab,var(--brand) 7%,var(--card)); }
+  .state.degraded{ border:1px solid color-mix(in oklab,var(--bad) 40%,transparent); background:color-mix(in oklab,var(--bad) 6%,var(--card)); }
+  .state b{ display:block; margin-bottom:3px; }
+  footer.doc{ margin-top:56px; border-top:1px solid var(--border); padding-top:16px; color:var(--muted); font-size:12.5px; }
+  @media (max-width:560px){ .twocol{ grid-template-columns:1fr; } }
+</style>
+
+<div class="wrap">
+  <header class="doc">
+    <p class="eyebrow">Studio_X · Feature design doc · P0 spine 5 of 6</p>
+    <h1>D1 — “Paced ≠ failed”: the batch throttling view</h1>
+    <p class="lede">
+      A real detail page for a live outbound batch, built around one idea no competitor states
+      out loud: a batch dialing at its capacity ceiling is <em>working</em>, not broken — and
+      the design makes that gut-read instant, while a genuinely degraded batch reads as
+      unmistakably needing attention.
+    </p>
+    <div class="meta">
+      <span class="chip ship">◆ Built 2026-07-09 · held for local review</span>
+      <span class="chip mono">commit f07b862</span>
+      <span class="chip">Route: /deploy/batch-calls/[id]</span>
+      <span class="chip">PRD: roadmap-features-prd §3 · D1</span>
+    </div>
+  </header>
+
+  <h2>The failure mode this prevents</h2>
+  <p>
+    Research across Retell, Vapi, Bland, and Twilio found the same gap: platforms show a flat
+    “Sent” counter or a spinner, and <strong>every unexplained stall reads as broken.</strong>
+    Twilio’s own high-volume guidance is “queue-and-retry, not drop,” but no product says
+    <em>“you’re paced, and that’s fine”</em> to the operator. So a campaign quietly throttled by
+    its concurrency ceiling looks identical to one that’s failing — and the operator panics,
+    pauses it, or files a ticket. D1 replaces the redirect-to-Monitor with a page whose whole
+    job is to answer “is this working?” before any telemetry.
+  </p>
+
+  <div class="twocol">
+    <div class="state paced"><b>Paced (working)</b>“Working — dialing at capacity. 214 queued, none dropped. ~14 min to finish.” Primary tone, never amber. The A6 <em>Add lines</em> unlock sits right here.</div>
+    <div class="state degraded"><b>Degraded (act)</b>“Auto-paused — this batch needs attention.” Carrier failures hit 22% (SIP 503), so the circuit breaker stopped it. Destructive tone · Check the trunk · Resume anyway.</div>
+  </div>
+
+  <h2>The batch-health state model</h2>
+  <p style="font-size:13.5px;">
+    Deployment pacing: <code>scheduled → dialing → <b>paced</b> → draining → done</code>, with
+    <code>paused</code> (user) and <code>degraded</code> (circuit-breaker) as off-ramps. The
+    key semantic: <strong>paced is primary/working; degraded is destructive.</strong> Per-call
+    dispositions carry the real telephony taxonomy — <code>completed · no-answer · busy ·
+    voicemail · disconnected · wrong-number · carrier-failed · retrying · max-retries</code> —
+    where busy/no-answer re-enter the retry cadence and disconnected/wrong-number are flagged
+    and skipped (retrying a dead number is waste, not pacing).
+  </p>
+
+  <h2>Diverge → converge (3 variants)</h2>
+  <div class="graft">
+    <div class="card"><h4>1 · Ops console</h4><p>Dense telemetry. Won operator-answers (8.8) — most complete picture — but never states the “working” verdict in words.</p></div>
+    <div class="card"><h4>2 · Reassurance-first</h4><p>One leading StateBanner = the verdict, flipped primary↔destructive. Won is-this-working (8.8) + fold-fit (8.4).</p></div>
+    <div class="card"><h4>3 · Timeline / flow</h4><p>Pipeline nodes make “queued, not dropped” spatial. Strongest degraded read; but red disposition nodes always show in the paced flow.</p></div>
+  </div>
+
+  <div class="card" role="img" aria-label="Judge scores. Is-this-working: V1 7.4, V2 8.8 winner, V3 7.9. Operator-answers: V1 8.8 winner, V2 6.3, V3 7.7. IA fold-fit: V1 7.6, V2 8.4 winner, V3 6.9.">
+    <p class="lens">Lens 1 · “Is this working?” (the load-bearing test)</p>
+    <div class="scorerow"><span class="label">V1 Ops console</span><div class="bar"><i style="width:74%"></i></div><span class="score">7.4</span></div>
+    <div class="scorerow"><span class="label">V2 Reassurance — win</span><div class="bar winner"><i style="width:88%"></i></div><span class="score">8.8</span></div>
+    <div class="scorerow"><span class="label">V3 Timeline</span><div class="bar"><i style="width:79%"></i></div><span class="score">7.9</span></div>
+    <p class="lens">Lens 2 · Does it answer the operator’s questions?</p>
+    <div class="scorerow"><span class="label">V1 Ops console — win</span><div class="bar winner"><i style="width:88%"></i></div><span class="score">8.8</span></div>
+    <div class="scorerow"><span class="label">V2 Reassurance</span><div class="bar"><i style="width:63%"></i></div><span class="score">6.3</span></div>
+    <div class="scorerow"><span class="label">V3 Timeline</span><div class="bar"><i style="width:77%"></i></div><span class="score">7.7</span></div>
+    <p class="lens">Lens 3 · IA fit &amp; fold-in</p>
+    <div class="scorerow"><span class="label">V1 Ops console</span><div class="bar"><i style="width:76%"></i></div><span class="score">7.6</span></div>
+    <div class="scorerow"><span class="label">V2 Reassurance — win</span><div class="bar winner"><i style="width:84%"></i></div><span class="score">8.4</span></div>
+    <div class="scorerow"><span class="label">V3 Timeline</span><div class="bar"><i style="width:69%"></i></div><span class="score">6.9</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>Verdict:</strong> V2 wins the load-bearing lens (the verdict-in-one-sentence is the
+    most legible paced/degraded contrast) + fold-fit; V3 was disqualified on that lens because
+    its outcomes fan always renders red nodes inside the <em>paced</em> flow, letting the calm
+    case read broken. Shipped = <strong>V2’s reassurance chassis + V1’s complete telemetry</strong>
+    (dedicated concurrency meter, precise “92s longest wait”, page chrome) with all 6 judge
+    fixes: disposition breakdown expanded on live batches, bars scaled to total, <code>max-retries</code>
+    surfaced, and the amber/red split resolved by making the auto-pause a true <code>degraded</code>
+    pacing state.
+  </div>
+
+  <h2>Fold-in &amp; parity</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">Route + data</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>Replaces the redirect at <code>/deploy/batch-calls/[id]</code> with a real page wired to <code>getDeployment(id)</code></li>
+        <li><code>Deployment.batchRuntime</code> — pacing, dispositions, retry, cps, queue depth + reason</li>
+        <li><code>batchEta()</code> = live pace × remaining queue (no competitor exposes this)</li>
+        <li>Reuses shipped idioms: <code>StateBanner</code> (X1), <code>AddLinesSheet</code> (A6), <code>HealthDot</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">Monitor parity + hooks</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li><code>deploymentHealth()</code>: <code>degraded</code> → unhealthy dot, so the Monitor list and the detail banner agree; <strong>paced stays healthy</strong></li>
+        <li>The degraded StateBanner is the single insertion point for <strong>D6 Alerting</strong> — same signal feeds Monitor</li>
+        <li>The X1 spend-cap headroom threads into the A6 unlock at the wall — the three features compose</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="doc">
+    Provenance: research (Retell/Vapi/Bland batch states · Twilio CPS/queue-and-retry · disposition
+    taxonomy) → 3 variants → 3-lens judge panel → fold <span class="mono">f07b862</span> (lab deleted).
+    PRD: <span class="mono">roadmap-features-prd-2026-07-09.md §3 D1</span>. Siblings: x1 · a1 · a6 · a3.
+    Next &amp; last: F-Eval evals/simulation. <strong>Status: built, held for local review before deploy.</strong>
+  </footer>
+</div>

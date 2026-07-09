@@ -111,7 +111,7 @@ split; note prompt is per-deployment again per the 06-24 rebuild):**
 
 | ID | Feature | Stage | Pri | Today/Comp | Strategic impact | Technicality |
 |---|---|---|---|---|---|---|
-| D1 | Call Throttling | Consume | **P0** | ✗ / — | Makes batch actually *complete* → volume → paid. Dropped calls = churn. | **SIP Manager.** Auto-adjust CPS to trunk; queue + retry vs drop. |
+| D1 | Call Throttling | Consume | **P0 ◆ BUILT 2026-07-09 (held for local review)** | ✗ / — | Makes batch actually *complete* → volume → paid. Dropped calls = churn. "Paced ≠ failed" is the whitespace — no competitor says it out loud. | Built: batch detail view at `/deploy/batch-calls/[id]` (`components/batch-detail.tsx`, replaces the redirect); `Deployment.batchRuntime` + `batchEta()`; commit `f07b862`. Design doc: `references/design/d1-batch-throttling.html`. Paced=working (primary), degraded=needs-attention (destructive + Monitor dot parity). NOT deployed. |
 | D2 | STT/TTS Backup Vendor | Retain | P1 | ✗ / — | Reliability = enterprise expansion + churn defense (API downtime +60% YoY). | **Engine.** Health-check + automatic vendor failover. |
 | D3 | Call Queue | Connect/Consume | P2 | ✗ / — | Queue inbound instead of rejecting → capture demand. | SIP Manager/engine inbound queue. |
 | D4 | WhatsApp Voice | Connect | P2 | ✗ / — | New channel/audience, but **highest uncertainty**. | **Net-new, no Agora support (F6); third-party build.** |
