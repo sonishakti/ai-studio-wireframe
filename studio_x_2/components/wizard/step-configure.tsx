@@ -18,7 +18,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard, WebWidgetConfig } from "@/components/wizard/channel-configs"
-import { PHONE_NUMBERS } from "@/lib/campaign-data"
+import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
 import {
   MOCK_CSV_COLUMNS,
   MOCK_CSV_ROWS,
@@ -173,6 +173,16 @@ function OutboundConfigure({ draft, update }: StepProps) {
                 ))}
               </SelectContent>
             </Select>
+            {/* The no-number path must have a door on the batch side too —
+                inbound already hints SIP/BYO; a dropdown alone is a dead end
+                for an empty account (user-test 2026-07-09 S3). */}
+            <p className="text-xs text-muted-foreground">
+              No number of your own yet? Connect your carrier&apos;s via SIP in{" "}
+              <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
+                Resources › Channels
+              </a>
+              . Agora doesn&apos;t sell numbers — telephony is bring-your-own.
+            </p>
           </div>
           <OutboundSettings draft={draft} update={update} />
         </ConfigCard>
@@ -258,12 +268,16 @@ function ContactsPanel({ draft, update }: StepProps) {
             <Button variant="outline" size="sm" className="shrink-0" onClick={attachCsv}>Replace file</Button>
           </div>
 
-          {/* Prompt-variable coverage — it's about THIS data, so it lives here. */}
+          {/* Prompt-variable coverage — it's about THIS data, so it lives here.
+              A green check may only assert what exists: with zero {{vars}} in
+              the prompt there is nothing "covered" (user-test 2026-07-09 S3). */}
           {missing.length === 0 ? (
             <div className="flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
               <p className="text-xs leading-relaxed text-foreground">
-                All prompt variables are covered by your CSV columns. Ready to deploy.
+                {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
+                  ? "All prompt variables are covered by your CSV columns. Ready to deploy."
+                  : "Contacts ready. Your prompt uses no {{variables}} yet — add some to personalize each call from these columns."}
               </p>
             </div>
           ) : (

@@ -476,9 +476,13 @@ export default function AgentsPage() {
     return () => window.clearTimeout(t)
   }, [phase])
 
+  const [autoTalk, setAutoTalk] = React.useState(false)
   const finishCeremony = (skipped: boolean) => {
     markProvisioned()
     setPhase(skipped ? "warming" : "ready")
+    // "Say hello to Aria" must DELIVER the hello — the landing opens with the
+    // Talk panel already up (user-test S2: promise → form was the #1 break).
+    if (!skipped) setAutoTalk(true)
   }
 
   // List-view import lands somewhere VISIBLE: the same playground handoff the
@@ -566,6 +570,7 @@ export default function AgentsPage() {
             id={builderId}
             landing={builderId === "agt_default"}
             warming={phase === "warming" && builderId === "agt_default"}
+            autoTalk={autoTalk && builderId === "agt_default"}
             // Prop, not URL: startBlank remounts this in the same tick as its
             // router.push, so the mount effect can't rely on reading ?blank=1.
             blank={builderId === "new"}

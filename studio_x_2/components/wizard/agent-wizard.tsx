@@ -68,6 +68,9 @@ export function AgentWizard({
    *  is still warming — Talk is disabled WITH its promise attached ("this
    *  exact button flips on"), never silently dead. */
   warming?: boolean
+  /** Open the Talk panel on mount — the ceremony's "Say hello" CTA must land
+   *  IN the conversation, not on a form (user-test 2026-07-09 S2). */
+  autoTalk?: boolean
   /** Start truly blank, skipping the draft restore. A PROP (not just ?blank=1)
    *  because "New agent" remounts this component in the same tick as its
    *  router.push — the mount effect would read the OLD URL and resurrect a
@@ -96,6 +99,10 @@ export function AgentWizard({
   const [openStep, setOpenStep] = React.useState<number | null>(null)
   // The Talk panel (identity card + live test) — the ONLY right-side Sheet now.
   const [talkOpen, setTalkOpen] = React.useState(false)
+  React.useEffect(() => {
+    if (autoTalk) setTalkOpen(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoTalk])
   // Optional depth sections (F1 Advanced / F8 Analysis) — collapsed by default
   // so the novice skips them; the rail entry expands + scrolls.
   const [optOpen, setOptOpen] = React.useState<{ advanced: boolean; analysis: boolean }>({ advanced: false, analysis: false })
@@ -1160,10 +1167,16 @@ export function AgentWizard({
                 <ul className="space-y-1 text-muted-foreground">
                   <li>· Caller ID: {PHONE_NUMBERS.find((n) => n.id === draft.config.outbound?.numberId)?.number ?? "selected number"}</li>
                   <li>· Call window: {draft.config.outbound?.callWindow === "anytime" ? "anytime" : draft.config.outbound?.callWindow === "extended" ? "extended hours" : "business hours (contact's local time)"}</li>
-                  <li>· Up to {draft.config.outbound?.maxConcurrent ?? 5} calls at once</li>
+                  {/* Same default the Step-4 select shows — the manifest of
+                      truth must not disagree with the setting (user-test S3). */}
+                  <li>· Up to {draft.config.outbound?.maxConcurrent ?? 10} calls at once</li>
                   <li className="tabular-nums">
-                    · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * 0.1)} if every call runs ~2 min
-                    at $0.10/min — actual cost follows real talk time
+                    {/* Rate derives from THIS agent's stack — a hardcoded 0.10
+                        overquoted cheaper presets 66% at the moment of spend
+                        approval (user-test 2026-07-09 P0). */}
+                    · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * cardEst.costPerMin)} if every
+                    call runs ~2 min at ${cardEst.costPerMin.toFixed(2)}/min — actual cost
+                    follows real talk time
                   </li>
                 </ul>
               </div>

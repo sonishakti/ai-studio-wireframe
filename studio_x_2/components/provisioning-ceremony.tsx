@@ -105,9 +105,12 @@ export function ProvisioningCeremony({
                   <h1 className="text-2xl font-semibold tracking-tight">
                     Aria is live — say hello.
                   </h1>
+                  {/* No mic/answering claims before they're true — the arrival
+                      promise must be kept by the very next click (user-test
+                      2026-07-09 S2: "the first promise this product makes"). */}
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    Your agent is answering an in-browser test session right now — mic on,
-                    no number to buy, nothing to configure.
+                    Your agent is ready for its first conversation — in your browser,
+                    free, nothing to configure. The next click opens the live test.
                   </p>
                 </>
               ) : stalled ? (
