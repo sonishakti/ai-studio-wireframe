@@ -408,5 +408,13 @@ export function allOpenIssues(): AggregatedIssue[] {
 /** Health roll-up for one deployment (used for header dots + the queue summary). */
 export function deploymentHealth(deploymentId: string): { status: Health; criticals: number; warnings: number } {
   const agg = aggregateIssues(deploymentId)
-  return healthOf(agg.map((a) => a.issue))
+  const base = healthOf(agg.map((a) => a.issue))
+  // D1 parity: a batch auto-paused by the circuit breaker (pacing "degraded")
+  // must read UNHEALTHY in the Monitor list so the dot and the detail banner
+  // agree. "Paced" is NOT unhealthy — a throttled batch is working as designed.
+  const d = getDeployment(deploymentId)
+  if (d?.batchRuntime?.pacing === "degraded") {
+    return { status: "unhealthy", criticals: base.criticals + 1, warnings: base.warnings }
+  }
+  return base
 }

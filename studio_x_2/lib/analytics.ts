@@ -78,6 +78,14 @@ export const Events = {
   trunk_disconnected:         "trunk_disconnected",          // { provider } — Agora stops using the credential
   manual_fallback_opened:     "manual_fallback_opened",      // {} — escaped to the manual SIP form
 
+  // ── Batch pacing / throttling (D1, 2026-07-09) — "paced ≠ failed".
+  batch_detail_viewed:        "batch_detail_viewed",         // { pacing }
+  batch_banner_shown:         "batch_banner_shown",          // { tone } — the one-sentence verdict
+  batch_fix_trunk_clicked:    "batch_fix_trunk_clicked",     // {} — degraded → fix the trunk
+  batch_resume_anyway_clicked:"batch_resume_anyway_clicked", // {} — informed resume of a degraded batch
+  batch_add_lines_clicked:    "batch_add_lines_clicked",     // { cap_headroom_usd } — the A6 unlock at the wall
+  disposition_breakdown_expanded: "disposition_breakdown_expanded", // {}
+
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
   defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
   defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
@@ -182,6 +190,12 @@ export type EventPayloads = {
   test_call_connected:         Record<string, never>
   trunk_disconnected:          { provider: string }
   manual_fallback_opened:      Record<string, never>
+  batch_detail_viewed:         { pacing: string }
+  batch_banner_shown:          { tone: string }
+  batch_fix_trunk_clicked:     Record<string, never>
+  batch_resume_anyway_clicked: Record<string, never>
+  batch_add_lines_clicked:     { cap_headroom_usd: number | null }
+  disposition_breakdown_expanded: Record<string, never>
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }

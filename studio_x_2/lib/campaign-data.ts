@@ -912,10 +912,11 @@ Identify the company immediately. Never threaten. Offer the hardship line if ask
     metrics: { calls: 742, successRate: 18, avgHandleTimeSec: 198 },
     progress: { completed: 742, total: 1500 },
     startDate: "May 15, 2026",
-    // DEGRADED, then PAUSED by a circuit breaker — the state that is genuinely
-    // NOT "just paced": carrier failures spiked, so the system stopped itself.
+    // DEGRADED — auto-paused by the circuit breaker (carrier failures spiked).
+    // pacing "degraded" (not "paused") so it reads destructive + turns the
+    // Monitor HealthDot red; a plain USER pause would be "paused" (warning).
     batchRuntime: {
-      pacing: "paused",
+      pacing: "degraded",
       linesInUse: 0, linesTotal: 10, queued: 396,
       dispositions: { completed: 468, "no-answer": 121, busy: 58, "carrier-failed": 214, retrying: 0, "max-retries": 79 },
       retry: { max: 3, retrying: 0 },
