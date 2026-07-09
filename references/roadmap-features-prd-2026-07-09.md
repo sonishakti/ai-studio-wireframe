@@ -132,7 +132,7 @@ split; note prompt is per-deployment again per the 06-24 rebuild):**
 |---|---|---|---|---|---|---|
 | F-Sec | Security (retention + PII redaction) | Retain | P1 | ✗ / — | Unblocks regulated buyers (HIPAA/GDPR); table-stakes for enterprise. | Configurable retention + automatic PII redaction in transcript pipeline. |
 | F-Mon | Live Call Monitoring | Retain | P1 | ✗ / diff (~2/5) | Live listen/whisper/takeover; Retell shipped Jun 2026 → becoming table-stakes. | **Net-new for ConvoAI (F7).** Live audio+transcript stream + in-call controls. |
-| F-Eval | Evals / Simulation | Retain/Quality | **P0** | ✗ / **TS gap (5/5)** | All 5 competitors shipped this in ~12mo; **defensive parity**, gates confidence to scale. | Simulated-caller persona agents + assertions/LLM-judge + CI; author in Test step, results in Monitor. |
+| F-Eval | Evals / Simulation | Retain/Quality | **P0 ◆ BUILT 2026-07-09 (held for local review)** | ✗ / **TS gap (5/5)** | All 5 competitors shipped this in ~12mo; **defensive parity**, gates confidence to scale. ALSO closes the 3×-recurring Talk-surface orb gap. | Built: `components/eval-tests.tsx` (Tests section in builder Test step: suite table + Add-case Sheet + simulated-caller runs + save-call-as-test) on a shared `components/sim-transcript.tsx` primitive that also replaces the bare orb on the Talk surface; commit `0e4c3c2`. Design doc: `references/design/f-eval-simulation.html`. NOT deployed. |
 | F-Phys | Physical AI | — | park | ✗ / — | Exploratory ("beyond the phone"). Not an activation lever this cycle. | TBD. |
 
 ### Synthesized P0 (not on the deck, but the fact-checks demand it)

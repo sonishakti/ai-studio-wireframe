@@ -1,0 +1,146 @@
+<!-- F-Eval design doc — self-contained; brand-matched to studio_x_2 tokens -->
+<title>F-Eval — Evals / simulation · Design doc</title>
+<style>
+  :root{ --brand:#00658d; --bg:#fdfcfc; --fg:#0a0a0a; --muted:#6b6b6b; --card:#fff; --border:#e4e2e0;
+    --soft:#f4f6f7; --good:#1a7f4e; --warn:#9a6700; --bad:#b3261e; --radius:8px; }
+  @media (prefers-color-scheme: dark){ :root{ --brand:#00c2ff; --bg:#050505; --fg:#fdfcfc; --muted:#9a9a9a;
+    --card:#111214; --border:#26282b; --soft:#16181a; --good:#4cc38a; --warn:#e0b25a; --bad:#ef8a80; } }
+  :root[data-theme="dark"]{ --brand:#00c2ff; --bg:#050505; --fg:#fdfcfc; --muted:#9a9a9a; --card:#111214;
+    --border:#26282b; --soft:#16181a; --good:#4cc38a; --warn:#e0b25a; --bad:#ef8a80; }
+  :root[data-theme="light"]{ --brand:#00658d; --bg:#fdfcfc; --fg:#0a0a0a; --muted:#6b6b6b; --card:#fff;
+    --border:#e4e2e0; --soft:#f4f6f7; --good:#1a7f4e; --warn:#9a6700; --bad:#b3261e; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 "Instrument Sans",ui-sans-serif,system-ui,sans-serif; }
+  .mono{ font-family:"Space Mono",ui-monospace,monospace; }
+  .wrap{ max-width:880px; margin:0 auto; padding:48px 24px 96px; }
+  header.doc{ border-bottom:1px solid var(--border); padding-bottom:24px; margin-bottom:32px; }
+  .eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--brand); font-weight:600; margin:0 0 8px; }
+  h1{ font-size:30px; line-height:1.15; margin:0 0 10px; text-wrap:balance; } h2{ font-size:19px; margin:44px 0 12px; } p{ max-width:68ch; }
+  .lede{ color:var(--muted); font-size:16px; max-width:62ch; }
+  .meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); border-radius:999px; padding:3px 12px; font-size:12px; color:var(--muted); background:var(--card); }
+  .chip.ship{ border-color:color-mix(in oklab,var(--warn) 45%,transparent); color:var(--warn); font-weight:600; } .chip a{ color:inherit; text-decoration:none; }
+  a{ color:var(--brand); }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin:14px 0; }
+  .grid2{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; } .scroll{ overflow-x:auto; }
+  th{ text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  th,td{ padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .scorerow{ display:grid; grid-template-columns:190px 1fr 40px; gap:10px; align-items:center; margin:4px 0; }
+  .scorerow .label{ font-size:12.5px; color:var(--muted); }
+  .bar{ height:10px; border-radius:5px; background:var(--soft); overflow:hidden; } .bar>i{ display:block; height:100%; border-radius:5px; background:var(--brand); } .bar.winner>i{ background:var(--good); }
+  .score{ font-size:12.5px; font-variant-numeric:tabular-nums; text-align:right; }
+  .lens{ margin:18px 0 6px; font-size:13px; font-weight:600; }
+  .callout{ border-left:3px solid var(--brand); background:var(--soft); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; margin:14px 0; font-size:13.5px; }
+  code{ font-family:"Space Mono",ui-monospace,monospace; font-size:12.5px; background:var(--soft); border-radius:4px; padding:1px 5px; }
+  .graft{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:12px 0; } .graft .card{ margin:0; } .graft h4{ margin:0 0 6px; font-size:13px; } .graft p{ font-size:12.5px; color:var(--muted); margin:0; }
+  .before,.after{ border-radius:var(--radius); padding:12px 14px; font-size:13px; }
+  .before{ border:1px solid var(--border); background:var(--soft); }
+  .after{ border:1px solid color-mix(in oklab,var(--good) 40%,transparent); background:color-mix(in oklab,var(--good) 6%,var(--card)); }
+  footer.doc{ margin-top:56px; border-top:1px solid var(--border); padding-top:16px; color:var(--muted); font-size:12.5px; }
+</style>
+
+<div class="wrap">
+  <header class="doc">
+    <p class="eyebrow">Studio_X · Feature design doc · P0 spine 6 of 6</p>
+    <h1>F-Eval — evals &amp; simulation, and the end of the pulsing orb</h1>
+    <p class="lede">
+      Author simulated-caller tests with pass/fail assertions in the builder, watch them run as
+      a live transcript, and save a real call as a regression test — while closing the trust gap
+      that broke every user test: the “is this thing on?” orb.
+    </p>
+    <div class="meta">
+      <span class="chip ship">◆ Built 2026-07-09 · held for local review</span>
+      <span class="chip mono">commit 0e4c3c2</span>
+      <span class="chip">Table-stakes gap closed (5/5 → shipped)</span>
+      <span class="chip">PRD: roadmap-features-prd §3 · F-Eval</span>
+    </div>
+  </header>
+
+  <h2>Two problems, one feature</h2>
+  <p>
+    <strong>The gap:</strong> automated evals are table stakes — all five competitors shipped
+    simulated-call testing in ~12 months and Agora had none. <strong>The wound:</strong> for
+    three consecutive user-test sessions the in-browser “Talk to it” test was the #1 recurring
+    trust break — a pulsing orb with no transcript, no state, no “simulated” label. Both share a
+    root cause and a fix: <em>a test must prove it worked by showing the conversation, not by
+    animating a blob.</em> F-Eval builds the eval feature on a transcript primitive that also
+    replaces the orb on the real Talk surface.
+  </p>
+
+  <div class="grid2">
+    <div class="before"><b>Before</b> — a pulsing sphere + one word of state (“Connected”). “Is this thing on? Did it hear me?” No transcript, no verdict, nothing labeled a simulation.</div>
+    <div class="after"><b>After</b> — a “Simulated call” banner, explicit Listening → Thinking → Speaking chips, and a streaming transcript you can read, with tool calls noted on the turn.</div>
+  </div>
+
+  <h2>The eval object model (research)</h2>
+  <p style="font-size:13.5px;">
+    Composite across Vapi/Retell/ElevenLabs/Synthflow:
+    <code>Suite → Case{ persona(identity·goal·personality), assertions[] } → Run → per-case
+    verdict + transcript + which assertion failed + judge reasoning</code>. Assertions span
+    <strong>rubric</strong> (plain-language “PASS if…”, LLM-judged), <strong>tool-call</strong>
+    (right tool, right args), and <strong>data-point</strong> (field captured). Two whitespace
+    moves nobody ships natively: <strong>“save a real call as a test”</strong> and closing the
+    <strong>orb gap</strong> with transcript-as-proof.
+  </p>
+
+  <h2>Diverge → converge (3 variants)</h2>
+  <div class="graft">
+    <div class="card"><h4>1 · Suite table + Sheet</h4><p>The table IS the suite; authoring in a Sheet. Won author-to-value (8.0) + fold-fit (8.4); the only true orb-removal.</p></div>
+    <div class="card"><h4>2 · Conversation-first</h4><p>The transcript is the product; verdict anchored onto the turn. Won closes-the-gap (9.0) but can’t scale past a few cases.</p></div>
+    <div class="card"><h4>3 · Confidence dashboard</h4><p>“2/3 passing — review before deploy.” Best batch framing; but led with the largest orb and could only author one assertion per case.</p></div>
+  </div>
+
+  <div class="card" role="img" aria-label="Judge scores. Closes-the-gap: V1 8.6, V2 9.0 winner, V3 7.6. Author-to-value: V1 8.0 winner, V2 7.3, V3 7.0. Fold-fit: V1 8.4 winner, V2 7.6, V3 6.7.">
+    <p class="lens">Lens 1 · Closes the “did it work?” gap (load-bearing)</p>
+    <div class="scorerow"><span class="label">V1 Suite table</span><div class="bar"><i style="width:86%"></i></div><span class="score">8.6</span></div>
+    <div class="scorerow"><span class="label">V2 Conversation — win</span><div class="bar winner"><i style="width:90%"></i></div><span class="score">9.0</span></div>
+    <div class="scorerow"><span class="label">V3 Dashboard</span><div class="bar"><i style="width:76%"></i></div><span class="score">7.6</span></div>
+    <p class="lens">Lens 2 · Author-to-value (&amp; scale)</p>
+    <div class="scorerow"><span class="label">V1 Suite table — win</span><div class="bar winner"><i style="width:80%"></i></div><span class="score">8.0</span></div>
+    <div class="scorerow"><span class="label">V2 Conversation</span><div class="bar"><i style="width:73%"></i></div><span class="score">7.3</span></div>
+    <div class="scorerow"><span class="label">V3 Dashboard</span><div class="bar"><i style="width:70%"></i></div><span class="score">7.0</span></div>
+    <p class="lens">Lens 3 · Cross-surface fold-in</p>
+    <div class="scorerow"><span class="label">V1 Suite table — win</span><div class="bar winner"><i style="width:84%"></i></div><span class="score">8.4</span></div>
+    <div class="scorerow"><span class="label">V2 Conversation</span><div class="bar"><i style="width:76%"></i></div><span class="score">7.6</span></div>
+    <div class="scorerow"><span class="label">V3 Dashboard</span><div class="bar"><i style="width:67%"></i></div><span class="score">6.7</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>Verdict:</strong> V1 wins two of three lenses and, crucially, is the <em>only</em>
+    variant that removes the orb entirely — so it wins the load-bearing gap where it counts
+    (V2/V3 re-imported the sphere and merely augmented it). Shipped = <strong>V1’s suite table +
+    V2’s inline verdict-coupling</strong> (the failing assertion anchored onto the invented-discount
+    bubble) <strong>+ a shared <code>SimTranscript</code> primitive</strong> extracted so the same
+    transcript+state+Simulated treatment lands on the real Talk surface.
+  </div>
+
+  <h2>What shipped</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">The feature</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>A <strong>Tests</strong> section in the builder Test step: a suite table (case · caller goal · assertion kinds · verdict)</li>
+        <li>Add-case Sheet: name + persona + plain-language rubric / tool-call / data-point assertions</li>
+        <li>Run → simulated caller → live transcript → pass/fail verdict; failing case names the broken assertion, anchored to the turn</li>
+        <li><strong>Save a real call as a test</strong> — pre-fills persona + transcript, asks only for the assertion</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">The orb fix (real surface)</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li><code>sim-transcript.tsx</code>: <code>SimTranscript</code> + <code>AgentStateChips</code> + <code>SimulatedBanner</code>, aria-live throughout</li>
+        <li>Folded into the identity-card Talk panel — the bare orb is now joined by the Simulated banner, state chips, and a streaming sample transcript</li>
+        <li>The same primitive powers eval runs — one honesty treatment, everywhere a test runs</li>
+        <li>Events: test_authored · test_run_started/completed · suite_run_all · assertion_failed_viewed · save_call_as_test</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="doc">
+    Provenance: research (Vapi/Retell/ElevenLabs/Synthflow eval models + the voice-UX “transcript
+    as proof” pattern) → 3 variants → 3-lens judge panel → fold <span class="mono">0e4c3c2</span>
+    (lab deleted). PRD: <span class="mono">roadmap-features-prd-2026-07-09.md §3 F-Eval</span>.
+    Completes the P0 spine (X1 · A1 · A6 · A3 · D1 · F-Eval). <strong>Status: built, held for
+    local review before deploy.</strong>
+  </footer>
+</div>
