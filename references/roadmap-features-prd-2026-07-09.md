@@ -81,7 +81,7 @@ split; note prompt is per-deployment again per the 06-24 rebuild):**
 | A3 | Easy ITSP Onboarding | Connect | **P0** | ✗ / near-WS (1/5) | Collapses the #1 BYO-telephony pain; unblocks Connect for the BYO majority. | Auto-configure Elastic SIP Trunk from a Twilio/Telnyx **API key** (replaces ~6 manual steps). |
 | A4 | Import Agents from Competitors | Land | P1 | ✗ / **WS (0/5)** | Acquisition wedge: turns rivals' install base into Agora top-of-funnel. +110% first-week activation precedent (Streak). | Parse Vapi/Bland/Retell agent export → map to Agent+Deployment. **Feasibility spike required.** |
 | A5 | Growth Hacking | — | park | — | Umbrella, not a feature. | Route to `/measure` + experimentation program. |
-| A6 | Self-Serve Concurrency Purchase | Convert | **P0** | ✗ / **TS gap (5/5)** | The literal free→paid Convert UI; removes a sales wall (CAC-accretive). | Studio/Billing UI + Engine quota API. **Confirm real default ceiling (F8) before designing the number.** |
+| A6 | Self-Serve Concurrency Purchase | Convert | **P0 ✅ SHIPPED 2026-07-09** | ✗ / **TS gap (5/5)** | The literal free→paid Convert UI; removes a sales wall (CAC-accretive). | Shipped: "Concurrent lines" card on /billing (`components/concurrency-card.tsx`) + at-the-wall unlock in the wizard batch step; commit `3aeccd6`. Design doc: `references/design/a6-concurrent-lines.html`. Whitespace closed ×3: wall-moment purchase, cap separation, downgrade path. Wireframe pricing $8/line/mo (no public ceiling — F8 stands; confirm with Engine before real numbers). |
 
 ### B — Platform & APIs
 

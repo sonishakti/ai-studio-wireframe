@@ -1,0 +1,175 @@
+<!-- A6 design doc — self-contained; brand-matched to studio_x_2 tokens -->
+<title>A6 — Concurrent lines · Design doc</title>
+<style>
+  :root {
+    --brand: #00658d; --bg: #fdfcfc; --fg: #0a0a0a; --muted: #6b6b6b;
+    --card: #ffffff; --border: #e4e2e0; --soft: #f4f6f7;
+    --good: #1a7f4e; --warn: #9a6700; --bad: #b3261e; --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --brand: #00c2ff; --bg: #050505; --fg: #fdfcfc; --muted: #9a9a9a;
+      --card: #111214; --border: #26282b; --soft: #16181a;
+      --good: #4cc38a; --warn: #e0b25a; --bad: #ef8a80; }
+  }
+  :root[data-theme="dark"] { --brand: #00c2ff; --bg: #050505; --fg: #fdfcfc; --muted: #9a9a9a;
+    --card: #111214; --border: #26282b; --soft: #16181a;
+    --good: #4cc38a; --warn: #e0b25a; --bad: #ef8a80; }
+  :root[data-theme="light"] { --brand: #00658d; --bg: #fdfcfc; --fg: #0a0a0a; --muted: #6b6b6b;
+    --card: #ffffff; --border: #e4e2e0; --soft: #f4f6f7;
+    --good: #1a7f4e; --warn: #9a6700; --bad: #b3261e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.6 "Instrument Sans", ui-sans-serif, system-ui, sans-serif; }
+  .mono { font-family: "Space Mono", ui-monospace, monospace; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.doc { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--brand); font-weight: 600; margin: 0 0 8px; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+  h2 { font-size: 19px; margin: 44px 0 12px; }
+  p { max-width: 68ch; }
+  .lede { color: var(--muted); font-size: 16px; max-width: 62ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 12px; font-size: 12px; color: var(--muted); background: var(--card); }
+  .chip.ship { border-color: color-mix(in oklab, var(--good) 45%, transparent); color: var(--good); font-weight: 600; }
+  .chip a { color: inherit; text-decoration: none; }
+  a { color: var(--brand); }
+  .card { background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; margin: 14px 0; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .scroll { overflow-x: auto; }
+  .scorerow { display: grid; grid-template-columns: 150px 1fr 44px; gap: 10px; align-items: center; margin: 4px 0; }
+  .scorerow .label { font-size: 12.5px; color: var(--muted); }
+  .bar { height: 10px; border-radius: 5px; background: var(--soft); overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 5px; background: var(--brand); }
+  .bar.winner > i { background: var(--good); }
+  .score { font-size: 12.5px; font-variant-numeric: tabular-nums; text-align: right; }
+  .lens { margin: 18px 0 6px; font-size: 13px; font-weight: 600; }
+  .callout { border-left: 3px solid var(--brand); background: var(--soft);
+    border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 16px; margin: 14px 0; font-size: 13.5px; }
+  code { font-family: "Space Mono", ui-monospace, monospace; font-size: 12.5px;
+    background: var(--soft); border-radius: 4px; padding: 1px 5px; }
+  .graft { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 12px 0; }
+  .graft .card { margin: 0; }
+  .graft h4 { margin: 0 0 6px; font-size: 13px; }
+  .graft p { font-size: 12.5px; color: var(--muted); margin: 0; }
+  footer.doc { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 16px; color: var(--muted); font-size: 12.5px; }
+</style>
+
+<div class="wrap">
+  <header class="doc">
+    <p class="eyebrow">Studio_X · Feature design doc · P0 spine 3 of 6</p>
+    <h1>A6 — Concurrent lines: self-serve capacity, bought where it hurts</h1>
+    <p class="lede">
+      The Billing “Concurrent lines” card + the wizard’s at-the-wall unlock. Lines govern how
+      many calls run at once; the spend cap governs dollars — and the design says so, because
+      no competitor does.
+    </p>
+    <div class="meta">
+      <span class="chip ship">● Shipped 2026-07-09</span>
+      <span class="chip mono">commit 3aeccd6</span>
+      <span class="chip"><a href="https://ai-studio-console-redesign.vercel.app/billing">Live: /billing ↗</a></span>
+      <span class="chip">PRD: roadmap-features-prd §3 · A6</span>
+    </div>
+  </header>
+
+  <h2>Why this feature exists</h2>
+  <p>
+    Self-serve concurrency is table stakes (5/5 competitors sell it without a sales call) and
+    it sits directly on the Convert transition: the moment a batch operator needs more lines is
+    the moment of expansion intent. Research found the market splits into line-item add-ons
+    (Vapi $10/line, Retell $8/slot + burst) and plan-gating (ElevenLabs, Bland) — and exposed
+    three genuine gaps <strong>nobody</strong> ships: an in-product purchase moment at the
+    wall, an explicit reconciliation with spend limits, and a documented downgrade path.
+    A6 closes all three.
+  </p>
+
+  <h2>Research → the calls that shaped it</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Finding</th><th>Design consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Vapi splits <code>concurrencyLimitIncluded</code> vs <code>Purchased</code> in its API</td><td>Included vs purchased never merge — split legend + a seam tick in the gauge</td></tr>
+      <tr><td>Retell prorates on add, bills remaining days; instant apply</td><td>Proration derives from <code>PLAN_USAGE.periodDays*</code>; “live now” confirmation; exact amounts on commit buttons</td></tr>
+      <tr><td>Retell keeps an ambient live counter next to the control</td><td>Live utilization gauge sits beside the buy control — never sell blind</td></tr>
+      <tr><td>At the wall: Vapi queues, Retell waits→falls back, ElevenLabs rejects</td><td>Studio_X commits to <strong>queue, nothing drops</strong> (D1 semantics) — disclosed up front, treated as designed behavior in primary tone</td></tr>
+      <tr><td>Whitespace ×3: wall-moment purchase · cap reconciliation · downgrade path</td><td>The wizard capacity note; “line fees bill separately — the cap governs per-minute spend”; reduce-anytime with prorated credit</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Diverge → converge</h2>
+  <div class="graft">
+    <div class="card"><h4>A · Line-item stepper card</h4><p>Billing card + sheet, Vapi-style. Best IA fit and X1 idiom match; best peer-choice (“Keep queuing”). Weakness: the wall lived only on Billing.</p></div>
+    <div class="card"><h4>B · Limits panel + live gauge</h4><p>Quotas-tab panel, Retell-style. Cleanest math (zero indefensible figures) but sell-first ordering, no decline affordance, buried placement.</p></div>
+    <div class="card"><h4>C · At-the-wall-first</h4><p>Embeddable moment where the limit hurts — the whitespace itself. Won conversion; lost money-honesty on hardcoded cycle days and an over-claiming button.</p></div>
+  </div>
+
+  <div class="card" role="img" aria-label="Judge scores. Conversion at the wall: A 6.8, B 5.8, C 8.3 winner. Money honesty: A 7.9, B 8.4 winner, C 5.8. IA fit and fold: A 8.1 winner, B 6.9, C 6.6.">
+    <p class="lens">Lens 1 · Conversion at the wall</p>
+    <div class="scorerow"><span class="label">A</span><div class="bar"><i style="width:68%"></i></div><span class="score">6.8</span></div>
+    <div class="scorerow"><span class="label">B</span><div class="bar"><i style="width:58%"></i></div><span class="score">5.8</span></div>
+    <div class="scorerow"><span class="label">C — winner</span><div class="bar winner"><i style="width:83%"></i></div><span class="score">8.3</span></div>
+    <p class="lens">Lens 2 · Money honesty</p>
+    <div class="scorerow"><span class="label">A</span><div class="bar"><i style="width:79%"></i></div><span class="score">7.9</span></div>
+    <div class="scorerow"><span class="label">B — winner</span><div class="bar winner"><i style="width:84%"></i></div><span class="score">8.4</span></div>
+    <div class="scorerow"><span class="label">C</span><div class="bar"><i style="width:58%"></i></div><span class="score">5.8</span></div>
+    <p class="lens">Lens 3 · IA fit &amp; fold-in</p>
+    <div class="scorerow"><span class="label">A — winner</span><div class="bar winner"><i style="width:81%"></i></div><span class="score">8.1</span></div>
+    <div class="scorerow"><span class="label">B</span><div class="bar"><i style="width:69%"></i></div><span class="score">6.9</span></div>
+    <div class="scorerow"><span class="label">C</span><div class="bar"><i style="width:66%"></i></div><span class="score">6.6</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>Verdict:</strong> A wins on the highest cross-lens floor — its two disqualifying-tier
+    defects were repairable by edit, C’s money violations were structural, B’s IA violations
+    architectural. Shipped = <strong>A’s chassis + C’s wall placement (re-implemented inside
+    OutboundSettings) and show-your-work kit + B’s live-recomputed math and precisely-scoped
+    cap claim</strong>. All 12 judge fixes applied — including the deepest one: with the seeded
+    data, the spend cap would pause calls <em>before</em> the promised speed-up pays off, so
+    the sheet now says exactly that and points at the cap review.
+  </div>
+
+  <h2>What shipped</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">Billing · <code>concurrency-card.tsx</code></h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>Live gauge (<code>role="meter"</code>) with the included/purchased seam tick</li>
+        <li>Wall = primary-tone information: “new batch calls queue — nothing drops”; <strong>“Keep queuing” is a first-class choice</strong></li>
+        <li>Time-saved estimate shows its inputs: queue × ~2 min ÷ lines, Estimate badge</li>
+        <li>AddLinesSheet: quick chips, exact commit amounts (“Add 5 lines · $28.39 today”), proration from the period position, reduce-anytime with prorated credit</li>
+        <li>Cap separation stated: “line fees bill separately — your cap governs per-minute spend only”; warns when the cap bites before the speed-up pays off</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">The wall, where it hurts</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>Wizard batch step: choosing a max-concurrent above capacity surfaces the inline capacity note + Add lines (one component owns ALL capacity communication — a split select-suffix + note was rejected as drift)</li>
+        <li><code>CONCURRENCY</code> + <code>concurrencyStats()</code> in the lib; <code>PAYG_RATE</code> hoisted — one rate constant product-wide</li>
+        <li>“Concurrent channels” quota renamed <strong>“RTC concurrent channels”</strong> — a different product’s quota, no more collision</li>
+        <li>Events: <code>concurrency_wall_viewed</code> · <code>lines_added</code> · <code>keep_queuing_clicked</code> (the decline is data too)</li>
+        <li>Monitor’s wall banner deferred to D1 — it extracts this card’s banner as the shared moment</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Measurement</h2>
+  <p style="font-size:13.5px;">
+    Conversion: <code>concurrency_wall_viewed → lines_added</code> rate (the whitespace
+    hypothesis: wall-placed purchase converts better than billing-page discovery).
+    Counter-metrics: <code>keep_queuing_clicked</code> (a healthy decline rate proves no dark
+    pattern) and post-purchase <code>spend_cap_hit</code> within the hour (lines bought into a
+    cap wall = the reconciliation failed).
+  </p>
+
+  <footer class="doc">
+    Provenance: research (Vapi/Retell/ElevenLabs/Bland purchase mechanics + whitespace) →
+    3 variants → 3-lens judge panel → fold <span class="mono">3aeccd6</span> (lab deleted).
+    A1 session-3 user-test fixes rode the same commit. PRD:
+    <span class="mono">roadmap-features-prd-2026-07-09.md §3 A6</span>. Siblings:
+    <span class="mono">x1-usage-spend.html · a1-first-run.html</span>. Next: A3 Easy ITSP onboarding.
+  </footer>
+</div>
