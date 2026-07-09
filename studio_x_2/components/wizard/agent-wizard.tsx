@@ -824,7 +824,24 @@ export function AgentWizard({
                       className="w-full rounded-md bg-transparent px-1 text-lg font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
                     />
                   </h2>
-                  <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
+                  {/* The default agent's "why is this Live / who pays" answer
+                      lives in a tooltip ON the badge that raises the question,
+                      not as an always-visible strip (owner 2026-07-09). */}
+                  {landing ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="shrink-0 cursor-help">{warming ? "Warming up" : cardStatus}</Badge>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[240px]">
+                        <p className="font-medium">Provisioned free. Testing in-browser costs nothing.</p>
+                        <p className="mt-1 text-primary-foreground/70">
+                          Runs Agora Balanced: {STACK_PRESETS.balanced.llm.model} · {STACK_PRESETS.balanced.asr.vendor} {STACK_PRESETS.balanced.asr.model} · {STACK_PRESETS.balanced.tts.vendor}. Change it in step 1.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
+                  )}
                 </div>
                 {/* No role tag under the name (owner 2026-07-09) — the rail's
                     Voice row already recaps the persona. New drafts keep the
@@ -851,34 +868,8 @@ export function AgentWizard({
             </Button>
             {warming && (
               <p role="status" className="text-xs text-muted-foreground">
-                Warming up — this exact button flips on the moment it finishes.
+                Warming up. This exact button flips on the moment it finishes.
               </p>
-            )}
-            {/* A1: the named default + who-pays trust line (first-run landing
-                only). Every model value renders FROM the balanced preset so
-                this strip can never disagree with the Playground; the in-
-                browser test is free, so say so — the Live badge otherwise
-                reads as "who's paying for this?" (user-test 2026-07-09). */}
-            {landing && (
-              <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-3 py-2.5">
-                <p className="text-xs font-medium">
-                  Runs <span className="text-foreground">Agora Balanced</span> — smart model by default
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {STACK_PRESETS.balanced.llm.model} · {STACK_PRESETS.balanced.asr.vendor}{" "}
-                  {STACK_PRESETS.balanced.asr.model} · {STACK_PRESETS.balanced.tts.vendor}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Provisioned free for you — talking in-browser costs nothing.{" "}
-                  <button
-                    type="button"
-                    className="underline underline-offset-2 hover:text-foreground"
-                    onClick={() => openRow(1)}
-                  >
-                    Change any part of it
-                  </button>
-                </p>
-              </div>
             )}
           </div>
 
