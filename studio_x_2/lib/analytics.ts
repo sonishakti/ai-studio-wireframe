@@ -86,6 +86,14 @@ export const Events = {
   batch_add_lines_clicked:    "batch_add_lines_clicked",     // { cap_headroom_usd } — the A6 unlock at the wall
   disposition_breakdown_expanded: "disposition_breakdown_expanded", // {}
 
+  // ── Evals / simulation (F-Eval, 2026-07-09) — prove it works before it ships.
+  test_authored:              "test_authored",               // {} — a new eval case
+  test_run_started:           "test_run_started",            // {} — a simulated caller run began
+  test_run_completed:         "test_run_completed",          // { verdict }
+  suite_run_all:              "suite_run_all",               // {} — batch run
+  assertion_failed_viewed:    "assertion_failed_viewed",     // {} — inspected a failing check
+  save_call_as_test:          "save_call_as_test",           // {} ★ whitespace — a real call → regression case
+
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
   defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
   defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
@@ -196,6 +204,12 @@ export type EventPayloads = {
   batch_resume_anyway_clicked: Record<string, never>
   batch_add_lines_clicked:     { cap_headroom_usd: number | null }
   disposition_breakdown_expanded: Record<string, never>
+  test_authored:               Record<string, never>
+  test_run_started:            Record<string, never>
+  test_run_completed:          { verdict: string }
+  suite_run_all:               Record<string, never>
+  assertion_failed_viewed:     Record<string, never>
+  save_call_as_test:           Record<string, never>
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }

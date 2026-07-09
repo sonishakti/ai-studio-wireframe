@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import { TestsSection } from "@/components/eval-tests"
 import {
   BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
@@ -166,6 +167,12 @@ export function StepBuild({ draft, update }: StepProps) {
               </button>
             }
           />
+        </div>
+
+        {/* 4 — Tests (F-Eval): prove behaviour with simulated callers before a
+            real call. A thin section here; authoring + runs live in Sheets. */}
+        <div className="space-y-2 border-t border-border pt-6">
+          <TestsSection agentName={draft.name || "your agent"} />
         </div>
       </div>
 

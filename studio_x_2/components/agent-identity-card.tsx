@@ -7,6 +7,18 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
+import type { EvalTurn } from "@/lib/campaign-data"
+
+/** A short scripted exchange the in-browser "Talk to it" test plays so the
+ *  surface shows evidence of a working agent (mock — no real audio). */
+const SAMPLE_TALK: EvalTurn[] = [
+  { role: "agent", text: "Hi! Thanks for calling — how can I help today?" },
+  { role: "caller", text: "I wanted to check on my order." },
+  { role: "agent", text: "Happy to help. What's the order number?" },
+  { role: "caller", text: "It's 4471." },
+  { role: "agent", text: "Got it — order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
+]
 import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { type StackLatencyBreakdown } from "@/lib/campaign-data"
 
@@ -70,6 +82,7 @@ export function AgentIdentityCard({
   const displayName = name || namePlaceholder
   const hasStats = !!agentId || !!stack || costPerMin != null || latencyMs != null || !!channel
   const [showLatency, setShowLatency] = React.useState(false)
+  const [talkState, setTalkState] = React.useState<SimState>("listening")
   const { copied, copy } = useCopyFeedback()
   const copyId = () => {
     if (agentId) void copy(agentId, "Agent ID copied", agentId)
@@ -78,7 +91,7 @@ export function AgentIdentityCard({
   return (
     <section className={cn("flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6", className)}>
       <div className="flex flex-col items-center gap-3 text-center">
-        <AgentSphere size={104} active={talking} />
+        <AgentSphere size={talking ? 64 : 104} active={talking} />
         <div className="w-full space-y-1">
           <div className="flex items-center justify-center gap-2">
             {onNameChange ? (
@@ -97,6 +110,18 @@ export function AgentIdentityCard({
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
+
+      {/* Talk test = proof of work, not a pulsing orb (F-Eval, closes the
+          3×-recurring user-test gap): a "Simulated" banner, explicit agent
+          state, and a live transcript so "is this thing on?" is answered by
+          watching it, never inferred from silence. */}
+      {talking && (
+        <div className="mt-4 space-y-2 rounded-lg border border-border bg-muted/20 p-3 text-left">
+          <SimulatedBanner label="Simulated test call" />
+          <AgentStateChips state={talkState} />
+          <SimTranscript key={displayName} turns={SAMPLE_TALK} stream onState={setTalkState} compact />
+        </div>
+      )}
 
       {hasStats && (
         // Labeled fast-facts <dl> (variant-audit harvest: V3's label:value
