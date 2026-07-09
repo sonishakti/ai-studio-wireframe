@@ -8,8 +8,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { PageHeader } from "@/components/page-header"
-import { UsageSpendCard } from "@/components/usage-spend-card"
-import { ConcurrencyCard } from "@/components/concurrency-card"
+import { BillingFutureCards } from "@/components/billing-future-cards"
 
 const PAYMENT_METHODS = [
   { kind: "visa",       last4: "4242", brand: "Visa",       primary: true  },
@@ -53,15 +52,9 @@ export default function BillingOverviewPage() {
             </CardContent>
           </Card>
 
-          {/* ─── Usage & spend (X1) — replaces the old Current Period card.
-               Free-tier truth, projected bill, and the spend-cap write path
-               live together; all figures derive from PLAN_USAGE. ─────────── */}
-          <UsageSpendCard />
-
-          {/* ─── Concurrent lines (A6) — capacity is a sibling money surface:
-               lines govern how many calls run at once, the cap governs $.
-               Included vs purchased never merge; the wall means queueing. ── */}
-          <ConcurrencyCard />
+          {/* Future-scope gated: X1 Usage & spend + A6 Concurrent lines when
+               on; the baseline Current Period card when off. */}
+          <BillingFutureCards />
 
           {/* ─── Payment methods preview ────────────────────────────── */}
           <Card>

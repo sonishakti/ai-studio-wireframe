@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import {
   Tooltip,
@@ -21,6 +22,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { openComposerPanel } from "@/components/composer-panel"
+import { useFutureScope } from "@/lib/future-scope"
+import { cn } from "@/lib/utils"
 
 // ─── segment → human label map ───────────────────────────────────────────────
 
@@ -143,6 +146,8 @@ export function DashboardHeader() {
       </React.Suspense>
 
       <div className="ml-auto flex shrink-0 items-center gap-1.5">
+        <FutureScopeToggle />
+        <Separator orientation="vertical" className="h-4 mx-1" />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
@@ -189,6 +194,36 @@ export function DashboardHeader() {
         </Tooltip>
       </div>
     </header>
+  )
+}
+
+/** Top-bar switch that reveals the 6 roadmap P0 features. Default OFF so the
+ *  live app reads as today's product; a Sparkles + "Future scope" label makes
+ *  it unmistakable that what it unlocks is upcoming, not shipped. */
+function FutureScopeToggle() {
+  const [on, setOn] = useFutureScope()
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <label
+          className="flex h-8 cursor-pointer items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground transition-colors hover:bg-accent/40"
+          htmlFor="future-scope-switch"
+        >
+          <Sparkles className={cn("h-3.5 w-3.5", on ? "text-primary" : "text-muted-foreground/70")} />
+          <span className="hidden font-medium sm:inline">Future scope</span>
+          <Switch
+            id="future-scope-switch"
+            checked={on}
+            onCheckedChange={setOn}
+            aria-label="Toggle future-scope features"
+            className="ml-0.5 scale-90"
+          />
+        </label>
+      </TooltipTrigger>
+      <TooltipContent>
+        {on ? "Showing upcoming roadmap features" : "Preview upcoming roadmap features (off by default)"}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 

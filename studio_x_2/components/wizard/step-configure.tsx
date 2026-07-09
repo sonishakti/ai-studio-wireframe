@@ -20,6 +20,7 @@ import { CodeBlock } from "@/components/code-block"
 import { ConfigCard, WebWidgetConfig } from "@/components/wizard/channel-configs"
 import { PHONE_NUMBERS, extractVars, CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
 import { AddLinesSheet } from "@/components/concurrency-card"
+import { useFutureScope } from "@/lib/future-scope"
 import {
   MOCK_CSV_COLUMNS,
   MOCK_CSV_ROWS,
@@ -351,10 +352,13 @@ function ContactsPanel({ draft, update }: StepProps) {
 function OutboundCapacityNote({ draft }: { draft: StepProps["draft"] }) {
   const [purchasedBoost, setPurchasedBoost] = React.useState(0)
   const [linesOpen, setLinesOpen] = React.useState(false)
+  const [future] = useFutureScope()
   const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchasedBoost })
   const chosen = draft.config.outbound?.maxConcurrent ?? 10
   const overBy = Math.max(0, chosen - stats.totalLines)
 
+  // A6 (self-serve concurrency) is future-scope-gated.
+  if (!future) return null
   if (overBy === 0 && purchasedBoost === 0) return null
 
   return (

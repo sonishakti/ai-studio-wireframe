@@ -46,6 +46,7 @@ import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { AgentWizard } from "@/components/wizard/agent-wizard"
 import { ProvisioningCeremony } from "@/components/provisioning-ceremony"
 import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-progress"
+import { useFutureScope, readFutureScope } from "@/lib/future-scope"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
@@ -441,6 +442,9 @@ export default function AgentsPage() {
   // mismatch). ?provision=1 replays; ?provision=stall demos the error state.
   const [phase, setPhase] = React.useState<"ceremony" | "warming" | "ready">("ready")
   const [stallDemo, setStallDemo] = React.useState(false)
+  // A1 is future-scope-gated: with the flag off, the ceremony never runs and
+  // /agents opens straight on today's landing.
+  const [future] = useFutureScope()
 
   // The view FOLLOWS the URL (?view=list) via real navigation — Back works and
   // the segmented control below always shows which surface you're on (#8).
@@ -457,7 +461,7 @@ export default function AgentsPage() {
     // ⌘K / deep links can open the templates sheet directly (?templates=1).
     if (p.get("templates") === "1") setTemplatesOpen(true)
     const prov = p.get("provision")
-    if (prov === "1" || prov === "stall") {
+    if ((prov === "1" || prov === "stall") && readFutureScope()) {
       resetProvisioned()
       setStallDemo(prov === "stall")
       setPhase("ceremony")
@@ -465,8 +469,9 @@ export default function AgentsPage() {
   }, [])
 
   React.useEffect(() => {
-    if (!isProvisioned()) setPhase("ceremony")
-  }, [])
+    if (future && !isProvisioned()) setPhase("ceremony")
+    else if (!future) setPhase("ready")
+  }, [future])
 
   // The warming beat: the user broke the wall early, so the landing renders
   // while the remaining stages "finish" — then the Talk button flips on.

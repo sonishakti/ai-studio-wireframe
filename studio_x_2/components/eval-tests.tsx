@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { StateBanner } from "@/components/usage-spend-card"
+import { useFutureScope } from "@/lib/future-scope"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
   EVAL_SUITE, EVAL_RUN, evalRunStats,
@@ -49,6 +50,7 @@ function flaggedTurnIndex(result: EvalCaseResult): number | undefined {
 }
 
 export function TestsSection({ agentName = "your agent" }: { agentName?: string }) {
+  const [future] = useFutureScope()
   const suite = EVAL_SUITE
   const run = EVAL_RUN
   const stats = evalRunStats(run)
@@ -57,8 +59,11 @@ export function TestsSection({ agentName = "your agent" }: { agentName?: string 
   const [openResult, setOpenResult] = React.useState<EvalCaseResult | null>(null)
   const resultFor = (id: string) => run.results.find((r) => r.caseId === id)
 
+  // F-Eval is future-scope-gated — the whole Tests section hides when off.
+  if (!future) return null
+
   return (
-    <section className="max-w-3xl space-y-3">
+    <section className="max-w-3xl space-y-3 border-t border-border pt-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="text-sm font-medium">Tests</h3>

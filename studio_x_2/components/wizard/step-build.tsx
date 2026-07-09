@@ -170,10 +170,9 @@ export function StepBuild({ draft, update }: StepProps) {
         </div>
 
         {/* 4 — Tests (F-Eval): prove behaviour with simulated callers before a
-            real call. A thin section here; authoring + runs live in Sheets. */}
-        <div className="space-y-2 border-t border-border pt-6">
-          <TestsSection agentName={draft.name || "your agent"} />
-        </div>
+            real call. Future-scope-gated; owns its own top divider so it
+            leaves no empty band when hidden. */}
+        <TestsSection agentName={draft.name || "your agent"} />
       </div>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}

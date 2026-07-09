@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { DEPLOYMENTS, getDeployment } from "@/lib/campaign-data"
-import { BatchDetail } from "@/components/batch-detail"
+import { BatchDetailGate } from "@/components/batch-detail-gate"
 
 // A LIVE batch deployment's detail view (D1). Replaces the old redirect-to-
 // Monitor: a slow/throttled batch needs a real home that reads "paced ≠ failed".
@@ -17,5 +17,5 @@ export default async function BatchCallsDetailPage({
   const { id } = await params
   const deployment = getDeployment(id)
   if (!deployment || deployment.kind !== "batch") notFound()
-  return <BatchDetail deployment={deployment} />
+  return <BatchDetailGate deployment={deployment} />
 }
