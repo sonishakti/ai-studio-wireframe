@@ -21,7 +21,7 @@ const TYPES: {
   {
     id: "outbound",
     title: typeLabel("outbound"),
-    desc: "Your agent dials a contact list. Upload a CSV and it calls each one with dynamic variables.",
+    desc: "Your agent calls through a contact list you upload, one person at a time.",
     icon: PhoneOutgoing,
   },
   {
@@ -43,7 +43,7 @@ export function StepType({ draft, update }: StepProps) {
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
-        How will {draft.name || "your agent"} reach people? This shapes what you configure before going live.
+        How will {draft.name || "your agent"} reach people? You can change this any time.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-3">

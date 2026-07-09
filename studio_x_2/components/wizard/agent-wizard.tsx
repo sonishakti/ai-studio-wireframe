@@ -908,10 +908,11 @@ export function AgentWizard({
             separated by a divider (the card frame + the LHS border-l give the
             structure), not nested cards. Sections cap content width so 4K shows
             structure, not 900px inputs (audit width-discipline fix). */}
-        {/* overflow-hidden + matched corner radii keep the header bands inside
-            the card's rounded corners. Safe: the sticky rail lives in the OTHER
-            grid column, and all popovers/sheets render in portals. */}
-        <div className="min-w-0 divide-y divide-border overflow-hidden rounded-b-2xl border-t border-border lg:rounded-bl-none lg:rounded-r-2xl lg:border-t-0 lg:border-l">
+        {/* No overflow-hidden here — it would break the sticky section headers
+            (sticky can't escape a clipped ancestor). The rail is unaffected (it
+            lives in the other grid column). Corners: the first header rounds to
+            match the card's top-right (2026-07-08). */}
+        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:border-l">
           {[1, 2, 3, 4, 5].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
@@ -921,11 +922,17 @@ export function AgentWizard({
                 aria-labelledby={`wizard-step-${n}-title`}
                 className="scroll-mt-24"
               >
-                {/* Banded header: a muted strip + bordered icon chip marks where
-                    each section STARTS — a 1px divider alone read as one flat
-                    page (arrange pass, 2026-07-08). The icon NAMES the section;
+                {/* Banded header: an opaque strip + bordered icon chip marks
+                    where each section STARTS — a 1px divider alone read as one
+                    flat page (arrange pass, 2026-07-08). STICKY on desktop
+                    (lg:top-12 = under the app header) so the current section's
+                    title stays anchored while you scroll it; bg must be opaque so
+                    content slides cleanly under. The icon NAMES the section;
                     never a completion tick (rail + deploy block own progress). */}
-                <header className="flex items-center justify-between gap-3 border-b border-border bg-muted/40 px-5 py-3">
+                <header className={cn(
+                  "z-20 flex items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 lg:sticky lg:top-12",
+                  n === 1 && "lg:rounded-tr-2xl",
+                )}>
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
                       <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -1075,9 +1082,10 @@ function OptionalSection({
     <Collapsible open={open} onOpenChange={onOpenChange}>
       <section id={id} className="scroll-mt-24">
         <CollapsibleTrigger asChild>
-          {/* Same banded-header language as the numbered sections, so optional
-              depth reads as a peer section, not stray rows (arrange 2026-07-08). */}
-          <button type="button" className="flex w-full items-center justify-between gap-3 bg-muted/40 px-5 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          {/* Same banded, sticky header language as the numbered sections, so
+              optional depth reads as a peer section, not stray rows (arrange
+              2026-07-08). Opaque bg so content scrolls cleanly under it. */}
+          <button type="button" className="z-20 flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:sticky lg:top-12">
             <span className="flex min-w-0 items-center gap-2.5">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
                 <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -1093,7 +1101,7 @@ function OptionalSection({
             <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} aria-hidden />
           </button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="border-t border-border px-5 py-6">
+        <CollapsibleContent className="px-5 py-6">
           {children}
         </CollapsibleContent>
       </section>

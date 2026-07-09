@@ -45,7 +45,7 @@ export function StepConfigure({ draft, update }: StepProps) {
         {draft.type === "inbound" && "Choose how callers reach your agent."}
         {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
         {draft.type === "code" && "Drop the agent into your own app."}
-        {!draft.type && "What you set up here depends on how the agent runs. Pick that first."}
+        {!draft.type && "Pick how your agent runs first, then finish its setup."}
       </p>
 
       {/* No type yet → never an empty drawer: choose it right here. */}
