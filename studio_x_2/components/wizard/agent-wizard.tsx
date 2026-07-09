@@ -792,15 +792,13 @@ export function AgentWizard({
                   </h2>
                   <Badge variant="secondary" className="shrink-0">{cardStatus}</Badge>
                 </div>
-                <p className="truncate px-1 text-sm text-muted-foreground">
-                  {isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
-                </p>
-                {/* Edit state lives in a badge, not baked into the name/CTA.
-                    Its own row so it never truncates the role line. */}
-                {isLive && anyEdited && (
-                  <div className="px-1 pt-1">
-                    <Badge variant="warning">Unsaved changes</Badge>
-                  </div>
+                {/* No role tag under the name (owner 2026-07-09) — the rail's
+                    Voice row already recaps the persona. New drafts keep the
+                    pick-a-voice nudge until one is chosen. */}
+                {!isEdit && (
+                  <p className="truncate px-1 text-sm text-muted-foreground">
+                    {cardVoice?.name ?? "Pick a voice to start"}
+                  </p>
                 )}
               </div>
             </div>
@@ -880,11 +878,22 @@ export function AgentWizard({
             {/* ONE progress fraction: the step list above already shows what's
                 done; a second "N of 5" with a different denominator read as a
                 contradiction (audit 2026-07-07). */}
-            <div>
+            <div className="space-y-1">
               <p className="text-sm font-semibold">
                 {isLive ? `Live on ${channelTarget(draft)}` : `${setupCount} of 4 set up`}
               </p>
-              <p className="text-xs text-muted-foreground">{deploySub}</p>
+              {/* Edit-state lives HERE — one fixed slot in the deploy block,
+                  where "not live yet" is decided. The badge REPLACES the prose
+                  when edits are pending (same message twice = noise); under the
+                  agent name it flickered and shoved the lockup (owner
+                  2026-07-09). */}
+              {isLive && anyEdited ? (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Badge variant="warning">Unsaved changes</Badge> Redeploy to apply.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">{deploySub}</p>
+              )}
             </div>
             <Button className="w-full gap-1.5" onClick={publish}>
               <Rocket className="h-4 w-4" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
@@ -941,16 +950,16 @@ export function AgentWizard({
                   </div>
                   {/* LIVE agents only: with autosave there is no Save/Cancel,
                       so this is the one way back to the deployed config after
-                      an accidental edit. Icon-only + tooltip — a quiet affordance,
-                      not a text button competing with the title (owner 2026-07-08). */}
-                  {isLive && n < 5 && (
+                      an accidental edit. HIDDEN until the step actually differs
+                      from live — a control you can't use is noise, not state
+                      (owner 2026-07-09). Icon-only + tooltip. */}
+                  {isLive && n < 5 && stepDirty(n) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 shrink-0 text-muted-foreground"
-                          disabled={!stepDirty(n)}
                           onClick={() => resetStep(n)}
                           aria-label="Reset this step to the live version"
                         >
@@ -961,10 +970,11 @@ export function AgentWizard({
                     </Tooltip>
                   )}
                 </header>
-                {/* Width discipline: cap the text-heavy steps so 4K doesn't
-                    stretch inputs; card-grid steps (2) span the full pane.
-                    py-6 gives each section air under its header band. */}
-                <div className={cn("px-5 py-6", (n === 4 || n === 5) && "[&>*]:max-w-4xl")}>
+                {/* Width discipline: cap the review step so 4K doesn't stretch
+                    it; steps 1/3 cap themselves, 2 and 4 manage their own
+                    layout (type cards + the batch-calls split need the full
+                    pane). py-6 gives each section air under its header band. */}
+                <div className={cn("px-5 py-6", n === 5 && "[&>*]:max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
                   {n === 3 && <StepBuild draft={draft} update={update} />}

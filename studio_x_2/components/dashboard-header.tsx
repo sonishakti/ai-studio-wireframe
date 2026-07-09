@@ -129,7 +129,10 @@ const LINKABLE_PATHS = new Set<string>([
 
 export function DashboardHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
+    /* z-30: must sit ABOVE the builder's sticky section bands (z-20) so a band
+       being pushed out by its successor slides under the app chrome, never over
+       it (layering fix, 2026-07-09). */
+    <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="h-4" />
 

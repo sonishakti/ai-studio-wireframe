@@ -2,8 +2,11 @@
 
 import * as React from "react"
 import {
-  Upload, Check, AlertTriangle, Plug, PhoneIncoming, Globe, ExternalLink, Radio,
+  Upload, Check, AlertTriangle, Plug, PhoneIncoming, Globe, ExternalLink, Radio, Download,
 } from "lucide-react"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -65,9 +68,12 @@ export function StepConfigure({ draft, update }: StepProps) {
         </div>
       )}
 
-      {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
+      {/* Inbound/code are single-column forms → capped for readability.
+          Batch calls runs a two-pane split (settings | contact list) and
+          manages its own width. */}
+      {draft.type === "inbound" && <div className="max-w-3xl"><InboundConfigure draft={draft} update={update} agentId={agentId} /></div>}
       {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
-      {draft.type === "code" && <CodeConfigure agentId={agentId} />}
+      {draft.type === "code" && <div className="max-w-3xl"><CodeConfigure agentId={agentId} /></div>}
     </div>
   )
 }
@@ -136,7 +142,11 @@ function InboundConfigure({
   )
 }
 
-// ─── Outbound — caller-ID + contacts CSV with {{var}} validation ──────────────
+// ─── Outbound — settings LEFT, contact list RIGHT (Figma "Create Campaign",
+//     node 360-71898): the list is reference material you check WHILE you
+//     configure, so it earns a parallel pane, not a step below. Its rows scroll
+//     INSIDE the panel — a 500-contact upload must never grow the page between
+//     you and Deploy (owner 2026-07-09). ─────────────────────────────────────
 
 function OutboundConfigure({ draft, update }: StepProps) {
   const out = draft.config.outbound
@@ -144,99 +154,166 @@ function OutboundConfigure({ draft, update }: StepProps) {
   const available = PHONE_NUMBERS.filter((n) => n.status === "unassigned" || n.id === out?.numberId)
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
+
+  return (
+    <div className="grid items-start gap-4 xl:grid-cols-2">
+      {/* LHS — how the calls run */}
+      <div className="min-w-0 space-y-4">
+        <ConfigCard title="Call setup">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Caller-ID number</Label>
+            <Select value={out?.numberId ?? ""} onValueChange={setNumber}>
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Choose the number to dial from" />
+              </SelectTrigger>
+              <SelectContent>
+                {available.map((n) => (
+                  <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === out?.numberId ? " · current" : ""}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <OutboundSettings draft={draft} update={update} />
+        </ConfigCard>
+
+        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
+          <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground">
+            {draft.mcp.length > 0
+              ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from the prompt step will run during calls.`
+              : "Attach CRM/calendar connectors in the System prompt step to act during calls."}
+          </p>
+        </div>
+      </div>
+
+      {/* RHS — who gets called */}
+      <ContactsPanel draft={draft} update={update} />
+    </div>
+  )
+}
+
+// Deterministic preview rows (wireframe): enough to show real shape + internal
+// scrolling without ever growing the page.
+const PREVIEW_NAMES = [
+  "Ava Chen", "Liam Patel", "Maya Ortiz", "Noah Kim", "Zoe Ahmed", "Eli Novak",
+  "Ivy Santos", "Owen Brooks", "Lea Fischer", "Max Rivera", "Nia Kowalski", "Theo Lang",
+  "Ana Costa", "Ben Haddad", "Mia Johansson", "Raj Mehta", "Sara Lind", "Tom Baker",
+  "Uma Rao", "Vik Sharma", "Wes Cole", "Ines Duarte", "Yara Aziz", "Zack Moore",
+]
+const PREVIEW_ROWS = PREVIEW_NAMES.map((name, i) => ({
+  phone: `+1 (415) 555-${String(1204 + i * 7).slice(-4)}`,
+  name,
+  account: `AC-${2400 + i * 13}`,
+}))
+const CSV_TOTAL = 248
+
+function ContactsPanel({ draft, update }: StepProps) {
+  const out = draft.config.outbound
+  const hasCsv = !!out?.csvName
+  const missing = outboundMissingVars(draft)
   const attachCsv = () => {
     update({ config: { ...draft.config, outbound: { ...out, csvName: "contacts.csv" } } })
     toast.success("contacts.csv attached", {
-      description: `248 contacts · columns: ${MOCK_CSV_COLUMNS.join(", ")}`,
+      description: `${CSV_TOTAL} contacts · columns: ${MOCK_CSV_COLUMNS.join(", ")}`,
     })
   }
 
-  const missing = outboundMissingVars(draft)
-  const hasCsv = !!out?.csvName
-
   return (
-    <ConfigCard title="Launch batch calls">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Caller-ID number</Label>
-        <Select value={out?.numberId ?? ""} onValueChange={setNumber}>
-          <SelectTrigger className="text-sm">
-            <SelectValue placeholder="Choose the number to dial from" />
-          </SelectTrigger>
-          <SelectContent>
-            {available.map((n) => (
-              <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === out?.numberId ? " · current" : ""}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <section className="min-w-0 rounded-lg border border-border bg-card">
+      <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3.5">
+        <p className="text-sm font-semibold">Contact list</p>
+        <button
+          type="button"
+          onClick={() => toast("Template downloaded", { description: `Columns: ${MOCK_CSV_COLUMNS.join(", ")}` })}
+          className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Download className="h-3.5 w-3.5" aria-hidden /> Download template
+        </button>
+      </header>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Contacts</Label>
-        {/* The {{var}} → column mapping lives HERE now (moved off the prompt
-            step): this is where the values actually come from. */}
-        <p className="text-xs text-muted-foreground">
-          Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column in this CSV.
-        </p>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={attachCsv}>
-            <Upload className="h-3.5 w-3.5" /> {hasCsv ? "Replace CSV" : "Upload contacts CSV"}
-          </Button>
-          {hasCsv && (
-            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Check className="h-3.5 w-3.5 text-primary" /> {out!.csvName}
-            </span>
-          )}
-        </div>
-        {hasCsv && (
-          <div className="flex flex-wrap gap-1.5 pt-0.5">
-            <span className="text-xs text-muted-foreground">Columns:</span>
-            {MOCK_CSV_COLUMNS.map((c) => (
-              <Badge key={c} variant="outline" className="h-6 px-2 font-mono text-xs font-medium">{c}</Badge>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Template validation — the prompt's {{vars}} must be supplied by the CSV. */}
-      {hasCsv && (
-        missing.length === 0 ? (
-          <div className="flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-            <p className="text-xs leading-relaxed text-foreground">
-              All prompt variables are covered by your CSV columns. Ready to deploy.
+      {!hasCsv ? (
+        <div className="flex flex-col items-center justify-center gap-3 px-5 py-12 text-center">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <Upload className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-sm font-medium">Upload your contacts</p>
+            <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
+              A CSV with one row per person. Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column.
             </p>
           </div>
-        ) : (
-          <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 p-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-            <div className="space-y-1.5">
-              <p className="text-xs font-medium text-foreground">
-                Your contacts CSV is missing {missing.length} variable{missing.length > 1 ? "s" : ""}:
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {missing.map((v) => (
-                  <Badge key={v} variant="outline" className="h-6 border-destructive/40 px-2 font-mono text-xs font-medium text-destructive">{`{{${v}}}`}</Badge>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Add these columns to your contacts CSV, or remove them from the system prompt. Deploy stays blocked until they match.
+          <Button size="sm" className="gap-1.5" onClick={attachCsv}>
+            <Upload className="h-3.5 w-3.5" aria-hidden /> Upload contacts CSV
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3 p-4">
+          {/* Upload summary — swap the file without hunting for the control. */}
+          <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{CSV_TOTAL} contacts uploaded</p>
+              <p className="truncate font-mono text-xs text-muted-foreground">{out!.csvName}</p>
+            </div>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={attachCsv}>Replace file</Button>
+          </div>
+
+          {/* Prompt-variable coverage — it's about THIS data, so it lives here. */}
+          {missing.length === 0 ? (
+            <div className="flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+              <p className="text-xs leading-relaxed text-foreground">
+                All prompt variables are covered by your CSV columns. Ready to deploy.
               </p>
             </div>
+          ) : (
+            <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-foreground">
+                  This CSV is missing {missing.length} prompt variable{missing.length > 1 ? "s" : ""}:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {missing.map((v) => (
+                    <Badge key={v} variant="outline" className="h-6 border-destructive/40 px-2 font-mono text-xs font-medium text-destructive">{`{{${v}}}`}</Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Add these columns, or remove them from the system prompt. Deploy stays blocked until they match.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Preview scrolls INSIDE the panel: the page length never depends on
+              how many contacts were uploaded. */}
+          <div>
+            <p className="pb-2 text-xs text-muted-foreground">
+              Preview · first {PREVIEW_ROWS.length} of {CSV_TOTAL} rows
+            </p>
+            <div className="max-h-[340px] overflow-y-auto rounded-md border border-border">
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-card">
+                  <TableRow>
+                    <TableHead>Phone number</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Account</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {PREVIEW_ROWS.map((r) => (
+                    <TableRow key={r.phone}>
+                      <TableCell className="font-mono text-xs">{r.phone}</TableCell>
+                      <TableCell className="text-sm">{r.name}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{r.account}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-        )
+        </div>
       )}
-
-      <OutboundSettings draft={draft} update={update} />
-
-      <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
-        <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <p className="text-xs text-muted-foreground">
-          {draft.mcp.length > 0
-            ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from the prompt step will run during calls.`
-            : "Attach CRM/calendar connectors in the System prompt step to act during calls."}
-        </p>
-      </div>
-    </ConfigCard>
+    </section>
   )
 }
 
