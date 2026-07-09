@@ -1,0 +1,171 @@
+<!-- A3 design doc — self-contained; brand-matched to studio_x_2 tokens -->
+<title>A3 — Easy ITSP onboarding · Design doc</title>
+<style>
+  :root { --brand:#00658d; --bg:#fdfcfc; --fg:#0a0a0a; --muted:#6b6b6b; --card:#fff;
+    --border:#e4e2e0; --soft:#f4f6f7; --good:#1a7f4e; --warn:#9a6700; --bad:#b3261e; --radius:8px; }
+  @media (prefers-color-scheme: dark){ :root{ --brand:#00c2ff; --bg:#050505; --fg:#fdfcfc; --muted:#9a9a9a;
+    --card:#111214; --border:#26282b; --soft:#16181a; --good:#4cc38a; --warn:#e0b25a; --bad:#ef8a80; } }
+  :root[data-theme="dark"]{ --brand:#00c2ff; --bg:#050505; --fg:#fdfcfc; --muted:#9a9a9a;
+    --card:#111214; --border:#26282b; --soft:#16181a; --good:#4cc38a; --warn:#e0b25a; --bad:#ef8a80; }
+  :root[data-theme="light"]{ --brand:#00658d; --bg:#fdfcfc; --fg:#0a0a0a; --muted:#6b6b6b; --card:#fff;
+    --border:#e4e2e0; --soft:#f4f6f7; --good:#1a7f4e; --warn:#9a6700; --bad:#b3261e; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--fg); font:15px/1.6 "Instrument Sans",ui-sans-serif,system-ui,sans-serif; }
+  .mono{ font-family:"Space Mono",ui-monospace,monospace; }
+  .wrap{ max-width:880px; margin:0 auto; padding:48px 24px 96px; }
+  header.doc{ border-bottom:1px solid var(--border); padding-bottom:24px; margin-bottom:32px; }
+  .eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--brand); font-weight:600; margin:0 0 8px; }
+  h1{ font-size:30px; line-height:1.15; margin:0 0 10px; text-wrap:balance; }
+  h2{ font-size:19px; margin:44px 0 12px; } p{ max-width:68ch; }
+  .lede{ color:var(--muted); font-size:16px; max-width:62ch; }
+  .meta{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); border-radius:999px;
+    padding:3px 12px; font-size:12px; color:var(--muted); background:var(--card); }
+  .chip.ship{ border-color:color-mix(in oklab,var(--warn) 45%,transparent); color:var(--warn); font-weight:600; }
+  .chip a{ color:inherit; text-decoration:none; }
+  a{ color:var(--brand); }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin:14px 0; }
+  .grid2{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; } .scroll{ overflow-x:auto; }
+  th{ text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  th,td{ padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .scorerow{ display:grid; grid-template-columns:170px 1fr 40px; gap:10px; align-items:center; margin:4px 0; }
+  .scorerow .label{ font-size:12.5px; color:var(--muted); }
+  .bar{ height:10px; border-radius:5px; background:var(--soft); overflow:hidden; } .bar>i{ display:block; height:100%; border-radius:5px; background:var(--brand); }
+  .bar.winner>i{ background:var(--good); } .score{ font-size:12.5px; font-variant-numeric:tabular-nums; text-align:right; }
+  .lens{ margin:18px 0 6px; font-size:13px; font-weight:600; }
+  .callout{ border-left:3px solid var(--brand); background:var(--soft); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; margin:14px 0; font-size:13.5px; }
+  .callout.warn{ border-left-color:var(--warn); }
+  code{ font-family:"Space Mono",ui-monospace,monospace; font-size:12.5px; background:var(--soft); border-radius:4px; padding:1px 5px; }
+  .graft{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:12px 0; } .graft .card{ margin:0; }
+  .graft h4{ margin:0 0 6px; font-size:13px; } .graft p{ font-size:12.5px; color:var(--muted); margin:0; }
+  .flow{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:12px 0; }
+  .beat{ border:1px solid var(--border); border-radius:999px; padding:4px 12px; font-size:12px; color:var(--muted); background:var(--card); }
+  .beat.hot{ border-color:var(--brand); color:var(--brand); font-weight:600; background:color-mix(in oklab,var(--brand) 8%,var(--card)); }
+  .arrow{ color:var(--muted); font-size:12px; }
+  footer.doc{ margin-top:56px; border-top:1px solid var(--border); padding-top:16px; color:var(--muted); font-size:12.5px; }
+</style>
+
+<div class="wrap">
+  <header class="doc">
+    <p class="eyebrow">Studio_X · Feature design doc · P0 spine 4 of 6</p>
+    <h1>A3 — Easy ITSP onboarding: paste a key, we build the trunk</h1>
+    <p class="lede">
+      A Quick-connect path folded into “Add a phone number”: drop in a Twilio/Telnyx credential
+      and Agora configures the SIP trunk — a ~1-minute flow that ends on a real test call,
+      replacing the 5–9 manual steps every competitor still demands.
+    </p>
+    <div class="meta">
+      <span class="chip ship">◆ Built 2026-07-09 · held for local review (not yet deployed)</span>
+      <span class="chip mono">commit eada0d8</span>
+      <span class="chip">PRD: roadmap-features-prd §3 · A3</span>
+    </div>
+  </header>
+
+  <h2>The problem, in the user's own words</h2>
+  <p>
+    Three consecutive user-test sessions surfaced the same top-severity moment. D1, the
+    hustler: <em>“‘Agora doesn’t sell numbers’? It’s 9pm and I don’t have a SIP trunk. That
+    line is where my night dies.”</em> Agora genuinely sells no numbers (telephony is BYO SIP),
+    so the fix can’t be “sell one” — it has to make connecting the number the user already owns
+    take a minute, not an evening. Only ElevenLabs auto-configures at all (1/5), and even that
+    is narrow (webhook wiring). Retell demands 5 manual steps across two consoles; Vapi, 9.
+  </p>
+  <div class="flow" role="img" aria-label="The auto-config state machine: validate credentials, enumerate numbers, create trunk and routing, associate number, then verify with a real call.">
+    <span class="beat">Validate key</span><span class="arrow">→</span>
+    <span class="beat">Find numbers</span><span class="arrow">→</span>
+    <span class="beat">Create trunk + routing</span><span class="arrow">→</span>
+    <span class="beat">Attach number</span><span class="arrow">→</span>
+    <span class="beat hot">Verify with a real call</span>
+  </div>
+
+  <h2>The honest state machine (research)</h2>
+  <p>
+    A key→trunk flow really passes through five stages, each with real failure modes — the
+    design renders them honestly rather than faking a one-click success:
+  </p>
+  <div class="scroll"><table>
+    <thead><tr><th>Stage</th><th>Fails when</th><th>Honest recovery</th></tr></thead>
+    <tbody>
+      <tr><td>Validate credentials</td><td>401 bad SID/token</td><td>Name the fix; link Account › API keys; state “nothing else happened”</td></tr>
+      <tr><td>Enumerate numbers</td><td>zero numbers / outbound-only caller IDs</td><td>Capability badges before selection; deep-link to buy AT the carrier</td></tr>
+      <tr><td>Create trunk + routing</td><td>partial creation</td><td>Name the failed object; retry only that stage</td></tr>
+      <tr><td>Associate number</td><td>on another trunk (silent overwrite!) · geo-block 32205</td><td>Pre-overwrite confirm; per-error copy + carrier link</td></tr>
+      <tr><td><strong>Verify</strong></td><td>provisioned but calls don’t connect</td><td><strong>End on a real test call</strong>, not a “saved” check; offer manual fallback</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px; color:var(--muted);">
+    Security: Twilio itself recommends scoped API keys over the master Auth Token — so the UI
+    prefers the scoped key and labels the token “less secure.” Stored credentials mask to the
+    last 4, timestamp, and disconnect ≠ carrier-side revocation (said plainly).
+  </p>
+
+  <h2>Diverge → converge (4 variants)</h2>
+  <div class="graft">
+    <div class="card"><h4>1 · Mode-toggle sheet</h4><p>Quick|Manual toggle in one sheet. Won failure-honesty (9.3) + fold-fit (8.7) — folds literally into the existing sheet.</p></div>
+    <div class="card"><h4>2 · Guided three-step</h4><p>Connect · Pick · Verify stepper. Clearest picker + live call timer; thinner wait narration.</p></div>
+    <div class="card"><h4>3 · Paste-and-go</h4><p>One decision, a live fact-log, auto-pick. Won the 9pm test (8.7) — the emotional winner.</p></div>
+    <div class="card"><h4>4 · Provider-first honesty</h4><p>Doors that name their price up front. Most transparent; slowest to start, auto-ran the test call.</p></div>
+  </div>
+
+  <div class="card" role="img" aria-label="Judge scores. 9pm completion: V1 8.3, V2 7.9, V3 8.7 winner, V4 7.1. Failure honesty: V1 9.3 winner, V2 8.5, V3 9.0, V4 8.7. IA fold-fit: V1 8.7 winner, V2 6.0, V3 7.6, V4 6.5.">
+    <p class="lens">Lens 1 · The 9pm completion test</p>
+    <div class="scorerow"><span class="label">V1 Mode-toggle</span><div class="bar"><i style="width:83%"></i></div><span class="score">8.3</span></div>
+    <div class="scorerow"><span class="label">V3 Paste-and-go — win</span><div class="bar winner"><i style="width:87%"></i></div><span class="score">8.7</span></div>
+    <p class="lens">Lens 2 · Failure honesty &amp; recovery</p>
+    <div class="scorerow"><span class="label">V1 Mode-toggle — win</span><div class="bar winner"><i style="width:93%"></i></div><span class="score">9.3</span></div>
+    <div class="scorerow"><span class="label">V3 Paste-and-go</span><div class="bar"><i style="width:90%"></i></div><span class="score">9.0</span></div>
+    <p class="lens">Lens 3 · IA fit &amp; fold-in cost</p>
+    <div class="scorerow"><span class="label">V1 Mode-toggle — win</span><div class="bar winner"><i style="width:87%"></i></div><span class="score">8.7</span></div>
+    <div class="scorerow"><span class="label">V3 Paste-and-go</span><div class="bar"><i style="width:76%"></i></div><span class="score">7.6</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>Verdict:</strong> V1 wins — failure-honesty disqualifies over feel, and V1 leads
+    both honesty (9.3) and fold-fit (8.7) while near-tying V3 on the 9pm test (8.3 vs 8.7).
+    Shipped = <strong>V1’s mode-toggle chassis + V3’s streaming fact-log and auto-pick + V2’s
+    named picker step and live call timer</strong>. The manual SIP form survives verbatim as
+    the sibling tab; every existing entry point (Resources › Channels, phone-numbers,
+    channel-hero, the wizard SIP hints) inherits the upgrade because they all already trigger
+    the same sheet.
+  </div>
+
+  <h2>What was built</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;"><code>sip-quick-connect.tsx</code></h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>≤4 inputs; scoped API key preferred, Auth Token one disclosure-click away</li>
+        <li>Append-only timestamped fact-log — real work, never a bare spinner</li>
+        <li>Capability-badged picker (outbound-only rows disabled + explained)</li>
+        <li>Ends on a <strong>user-placed test call</strong> (ring → connected + live timer)</li>
+        <li>Masked stored credential + Disconnect (≠ carrier revocation); manual fallback always one tap away</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">Fold-in &amp; honesty</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>Persistent <strong>Quick connect | Manual SIP</strong> toggle in the existing sheet</li>
+        <li>Sheet description leads with “bring a number you already own”; the “sells no numbers” truth is fine print, not a gate</li>
+        <li>9 events; <code>test_call_connected</code> is the success line (not <code>trunk_created</code>)</li>
+        <li>Provider-parameterized copy: Twilio “SIP trunk” vs Telnyx “FQDN connection”</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Deferred to a follow-up (honest scope):</strong> the six failure scenarios (bad
+    creds, no numbers, on-other-trunk overwrite, geo-block, verify-fail) were fully designed &amp;
+    judged in the lab; the shipped component implements the happy path + the load-bearing
+    honesty moments (user-placed call, manual fallback, masked credential). Wiring each failure
+    state into the mock is a fast next pass — the pattern is proven.
+  </div>
+
+  <footer class="doc">
+    Provenance: research (ElevenLabs auto-config · Twilio/Telnyx trunk API mechanics · Retell/Vapi
+    manual step counts) → 4 variants → 3-lens judge panel → fold <span class="mono">eada0d8</span>
+    (lab deleted). PRD: <span class="mono">roadmap-features-prd-2026-07-09.md §3 A3</span>.
+    Siblings: <span class="mono">x1 · a1 · a6</span>. Next: D1 call throttling · F-Eval evals.
+    <strong>Status: built, held for local review before deploy.</strong>
+  </footer>
+</div>
