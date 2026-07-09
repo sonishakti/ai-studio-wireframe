@@ -38,13 +38,19 @@ const TYPES: {
   },
 ]
 
-export function StepType({ draft, update }: StepProps) {
+export function StepType({ draft, update, liveNote }: StepProps & { liveNote?: string }) {
   return (
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
         How will {draft.name || "your agent"} reach people?
       </p>
+      {/* Pre-click consequence for a LIVE agent: say what switching does BEFORE
+          the click; the stash+Undo toast stays as the recovery layer (user-test
+          P1: "ask me first, don't console me after"). */}
+      {liveNote && (
+        <p className="text-xs text-muted-foreground">{liveNote}</p>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-3">
         {TYPES.map((t) => {

@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { track, Events } from "@/lib/analytics"
-import { markActivationStep } from "@/components/activation-checklist"
+import { markJourneyStep } from "@/lib/journey-progress"
 
 // ─── stub transcript stream — in production this comes from the agent runtime
 // over WebRTC + a websocket. We simulate timing here so the wireframe shows
@@ -109,7 +109,9 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
 
   const endCall = (reason?: string) => {
     setState("ended")
-    markActivationStep("test")
+    // Credit the journey at call END (not mic-open) — completing a turn is
+    // the honest "heard it work" moment (A1 judge graft).
+    markJourneyStep("hear")
     toast(reason ?? "Call ended", {
       description: `${transcript.length} turns · ${(elapsed / 1000).toFixed(1)}s`,
     })

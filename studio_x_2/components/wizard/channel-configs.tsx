@@ -64,18 +64,26 @@ export function publishDeployment({
   agentName,
   channel,
   name,
+  mode,
 }: {
   router: ReturnType<typeof useRouter>
   agentId: string
   agentName: string
   channel: string
   name: string
+  /** Deployment type — drives the success-toast verb: an outbound campaign
+   *  CALLS people, it doesn't "answer" (user-test P0 #4). */
+  mode?: "inbound" | "outbound" | "code"
 }) {
   track(Events.deployment_went_live, { agent_id: agentId, channel })
   const ms = timeToLiveMs()
   if (ms != null) track(Events.time_to_live_ms, { ms, agent_id: agentId })
+  const who = agentName || "Your agent"
   toast.success(`${name || "Deployment"} is live`, {
-    description: `${agentName || "Your agent"} is now answering on ${channel}.`,
+    description:
+      mode === "outbound" ? `${who} is now calling your contact list.`
+      : mode === "code" ? `${who} is ready. It goes live the moment your app connects.`
+      : `${who} is now answering on ${channel}.`,
   })
   router.push(
     "/monitor?" +

@@ -90,7 +90,7 @@ export function ImportAgentSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="sm:max-w-xl w-full overflow-y-auto">
+      <SheetContent className="w-full overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>Import an Agent</SheetTitle>
           <SheetDescription>

@@ -44,6 +44,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { AgentWizard } from "@/components/wizard/agent-wizard"
+import { ProvisioningCeremony } from "@/components/provisioning-ceremony"
+import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-progress"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset } from "@/lib/campaign-data"
@@ -125,8 +127,21 @@ function TemplateRow({
           aria-pressed={isSelected}
           className="flex-1 min-w-0 text-left"
         >
-          <p className="text-sm font-semibold">{tpl.name}</p>
+          <p className="text-sm font-semibold">
+            {tpl.name}
+            {/* Quality signals (A1): sell the template instead of underselling
+                it — the most-picked starter gets a quiet badge. */}
+            {tpl.id === "appointment-reminder" && (
+              <Badge variant="secondary" className="ml-2 text-xs align-middle">Popular</Badge>
+            )}
+          </p>
           <p className="text-xs text-muted-foreground mt-0.5">{tpl.description}</p>
+          {/* The stack is a feature, not fine print — name what it runs on. */}
+          {tpl.id !== "blank" && (
+            <p className="text-xs text-muted-foreground/80 mt-1 font-mono">
+              {tpl.llm} · {tpl.asr} · {tpl.tts}
+            </p>
+          )}
         </button>
         {isSelected && (
           <div className="flex items-center gap-2 shrink-0">
@@ -392,6 +407,13 @@ export default function AgentsPage() {
   // the wizard can report time-to-live (the <3-min deploy spine).
   React.useEffect(() => { markBuildStart() }, [])
 
+  // First-run provisioning ceremony (A1) — once per browser, before the
+  // landing. "ready" is the SSR/hydration default; the effect downgrades to
+  // ceremony for unprovisioned browsers (one-frame flash beats a hydration
+  // mismatch). ?provision=1 replays; ?provision=stall demos the error state.
+  const [phase, setPhase] = React.useState<"ceremony" | "warming" | "ready">("ready")
+  const [stallDemo, setStallDemo] = React.useState(false)
+
   // The view FOLLOWS the URL (?view=list) via real navigation — Back works and
   // the segmented control below always shows which surface you're on (#8).
   // "Create new agent" opens a BLANK builder inline; editing an existing agent
@@ -406,7 +428,30 @@ export default function AgentsPage() {
     setView(p.get("view") === "list" ? "list" : "builder")
     // ⌘K / deep links can open the templates sheet directly (?templates=1).
     if (p.get("templates") === "1") setTemplatesOpen(true)
+    const prov = p.get("provision")
+    if (prov === "1" || prov === "stall") {
+      resetProvisioned()
+      setStallDemo(prov === "stall")
+      setPhase("ceremony")
+    }
   }, [])
+
+  React.useEffect(() => {
+    if (!isProvisioned()) setPhase("ceremony")
+  }, [])
+
+  // The warming beat: the user broke the wall early, so the landing renders
+  // while the remaining stages "finish" — then the Talk button flips on.
+  React.useEffect(() => {
+    if (phase !== "warming") return
+    const t = window.setTimeout(() => setPhase("ready"), 3200)
+    return () => window.clearTimeout(t)
+  }, [phase])
+
+  const finishCeremony = (skipped: boolean) => {
+    markProvisioned()
+    setPhase(skipped ? "warming" : "ready")
+  }
 
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
   const startBlank = () => {
@@ -462,23 +507,32 @@ export default function AgentsPage() {
       />
 
       {isBuilder ? (
-        <AgentWizard
-          key={builderId}
-          id={builderId}
-          landing={builderId === "agt_default"}
-          // Prop, not URL: startBlank remounts this in the same tick as its
-          // router.push, so the mount effect can't rely on reading ?blank=1.
-          blank={builderId === "new"}
-          onCreateNew={builderId === "agt_default" ? startBlank : undefined}
-          onBrowseTemplates={() => setTemplatesOpen(true)}
-        />
+        phase === "ceremony" ? (
+          <ProvisioningCeremony
+            stallDemo={stallDemo}
+            onSkip={() => finishCeremony(true)}
+            onDone={() => finishCeremony(false)}
+          />
+        ) : (
+          <AgentWizard
+            key={builderId}
+            id={builderId}
+            landing={builderId === "agt_default"}
+            warming={phase === "warming" && builderId === "agt_default"}
+            // Prop, not URL: startBlank remounts this in the same tick as its
+            // router.push, so the mount effect can't rely on reading ?blank=1.
+            blank={builderId === "new"}
+            onCreateNew={builderId === "agt_default" ? startBlank : undefined}
+            onBrowseTemplates={() => setTemplatesOpen(true)}
+          />
+        )
       ) : (
         <ListView onBrowseTemplates={() => setTemplatesOpen(true)} />
       )}
 
       {/* Templates sheet — returning users browse without leaving the list */}
       <Sheet open={templatesOpen} onOpenChange={setTemplatesOpen}>
-        <SheetContent className="sm:max-w-2xl w-full overflow-y-auto">
+        <SheetContent className="w-full overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-2xl">
           <SheetHeader>
             <SheetTitle>Browse Templates</SheetTitle>
             <p className="text-sm text-muted-foreground">

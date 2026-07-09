@@ -51,6 +51,7 @@ import { toast } from "sonner"
 export function AgentWizard({
   id,
   landing,
+  warming,
   blank,
   onCreateNew,
   onBrowseTemplates,
@@ -59,6 +60,10 @@ export function AgentWizard({
   /** Rendered inline on /agents (not the standalone edit route) — show the
    *  first-run chrome (secondary-starts line + inviting heading + create). */
   landing?: boolean
+  /** First-run only: the user left the provisioning ceremony early, so Aria
+   *  is still warming — Talk is disabled WITH its promise attached ("this
+   *  exact button flips on"), never silently dead. */
+  warming?: boolean
   /** Start truly blank, skipping the draft restore. A PROP (not just ?blank=1)
    *  because "New agent" remounts this component in the same tick as its
    *  router.push — the mount effect would read the OLD URL and resurrect a
@@ -586,6 +591,7 @@ export function AgentWizard({
     publishDeployment({
       router, agentId, agentName: draft.name || "Your agent",
       channel: channelLabel(draft), name: draft.name || "Deployment",
+      mode: draft.type ?? undefined,
     })
     // Deploying consumes the working copy — clear whichever slot this was.
     clearDraft(isEdit ? draft.agentId : undefined)
@@ -626,7 +632,9 @@ export function AgentWizard({
       }
       return parts.join(" · ")
     }
-    if (n === 5 && isLive) return `Deployed · live on ${channelTarget(draft)}`
+    // LIVE target comes from the deployed BASELINE, never the draft — a draft
+    // mid-reconfiguration rendered "live on No contacts yet" (user-test P0 #1).
+    if (n === 5 && isLive) return `Deployed · live on ${channelTarget(baseline.current ?? draft)}`
     return undefined
   }
 
@@ -683,7 +691,9 @@ export function AgentWizard({
           </h1>
           <p className="text-sm text-muted-foreground">
             {landing
-              ? "Talk to your ready-made agent, set it up, and put it live."
+              ? isLive
+                ? "Your ready-made agent is already live. Talk to it, then make it yours."
+                : "Talk to your ready-made agent, set it up, and put it live."
               : isEdit
               ? "Edit anything below. Changes save automatically."
               : "Five steps to a live agent, in any order. Changes save automatically."}
@@ -790,7 +800,7 @@ export function AgentWizard({
                       className="w-full rounded-md bg-transparent px-1 text-lg font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
                     />
                   </h2>
-                  <Badge variant="secondary" className="shrink-0">{cardStatus}</Badge>
+                  <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
                 </div>
                 {/* No role tag under the name (owner 2026-07-09) — the rail's
                     Voice row already recaps the persona. New drafts keep the
@@ -809,11 +819,43 @@ export function AgentWizard({
               variant="outline"
               size="sm"
               className="w-full gap-1.5"
+              disabled={warming}
               onClick={() => setTalkOpen(true)}
             >
               <Mic className="h-4 w-4 shrink-0" aria-hidden />
               <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
             </Button>
+            {warming && (
+              <p role="status" className="text-xs text-muted-foreground">
+                Warming up — this exact button flips on the moment it finishes.
+              </p>
+            )}
+            {/* A1: the named default + who-pays trust line (first-run landing
+                only). Every model value renders FROM the balanced preset so
+                this strip can never disagree with the Playground; the in-
+                browser test is free, so say so — the Live badge otherwise
+                reads as "who's paying for this?" (user-test 2026-07-09). */}
+            {landing && (
+              <div className="space-y-1 rounded-lg border border-border bg-muted/40 px-3 py-2.5">
+                <p className="text-xs font-medium">
+                  Runs <span className="text-foreground">Agora Balanced</span> — smart model by default
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {STACK_PRESETS.balanced.llm.model} · {STACK_PRESETS.balanced.asr.vendor}{" "}
+                  {STACK_PRESETS.balanced.asr.model} · {STACK_PRESETS.balanced.tts.vendor}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Provisioned free for you — talking in-browser costs nothing.{" "}
+                  <button
+                    type="button"
+                    className="underline underline-offset-2 hover:text-foreground"
+                    onClick={() => openRow(1)}
+                  >
+                    Change any part of it
+                  </button>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Scroll-spy step list — recaps make it a recognition map (C3 harvest).
@@ -879,8 +921,12 @@ export function AgentWizard({
                 done; a second "N of 5" with a different denominator read as a
                 contradiction (audit 2026-07-07). */}
             <div className="space-y-1">
+              {/* The heading reports what is live IN PRODUCTION — always the
+                  deployed baseline's target. Reading the draft here produced
+                  "Live on No contacts yet" mid-reconfiguration, corrupting the
+                  one string whose job is production truth (user-test P0 #1). */}
               <p className="text-sm font-semibold">
-                {isLive ? `Live on ${channelTarget(draft)}` : `${setupCount} of 4 set up`}
+                {isLive ? `Live on ${channelTarget(baseline.current ?? draft)}` : `${setupCount} of 4 set up`}
               </p>
               {/* Edit-state lives HERE — one fixed slot in the deploy block,
                   where "not live yet" is decided. The badge REPLACES the prose
@@ -976,12 +1022,21 @@ export function AgentWizard({
                     pane). py-6 gives each section air under its header band. */}
                 <div className={cn("px-5 py-6", n === 5 && "[&>*]:max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
-                  {n === 2 && <StepType draft={draft} update={(patch) => (patch.type ? selectType(patch.type) : update(patch))} />}
+                  {n === 2 && (
+                    <StepType
+                      draft={draft}
+                      update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
+                      liveNote={isLive && baseline.current
+                        ? `${draft.name || "Your agent"} is live on ${channelTarget(baseline.current)}. Switching sets that aside (undoable) and applies on redeploy.`
+                        : undefined}
+                    />
+                  )}
                   {n === 3 && <StepBuild draft={draft} update={update} />}
                   {n === 4 && <StepConfigure draft={draft} update={update} />}
                   {n === 5 && (
                     <StepPublish
                       draft={draft}
+                      live={isLive}
                       onPublish={publish}
                       onFix={(m) => openRow(m)}
                       talking={testing}
@@ -1037,7 +1092,7 @@ export function AgentWizard({
         <SheetContent
           side="right"
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-md"
+          className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md"
         >
           <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
             <SheetTitle className="text-base">{draft.name || (isEdit ? existing!.name : "Your new agent")}</SheetTitle>

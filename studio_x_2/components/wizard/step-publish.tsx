@@ -20,12 +20,16 @@ import { getVoiceArtifact } from "@/lib/voice-artifacts"
 export function StepPublish({
   draft,
   onPublish,
+  live,
   onFix,
   talking,
   onToggleTalk,
 }: {
   draft: AgentDraft
   onPublish: () => void
+  /** Agent already deployed: the CTA reads "Redeploy" so this step and the
+   *  rail's deploy block never disagree (user-test P0 #3). */
+  live?: boolean
   /** Jump to the step whose drawer fixes a blocker. */
   onFix: (step: number) => void
   /** Mirror of the identity card's Talk toggle — the card can be occluded by
@@ -41,7 +45,7 @@ export function StepPublish({
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
-        Review {agentName}, then deploy it. Talk to it any time, here or from the sidebar.
+        Review {agentName}, then {live ? "redeploy to apply your changes" : "deploy it"}. Talk to it any time, here or from the sidebar.
       </p>
 
       {talking ? (
@@ -116,10 +120,12 @@ export function StepPublish({
         {/* No hard lock: Deploy is always clickable. If something's unfinished the
             ramp above lists each fix; a toast still points to the first. */}
         <Button size="lg" className="w-full gap-2 sm:w-auto" onClick={onPublish}>
-          <Rocket className="h-4 w-4" aria-hidden /> Deploy agent
+          <Rocket className="h-4 w-4" aria-hidden /> {live ? "Redeploy" : "Deploy agent"}
         </Button>
         <p className="text-sm text-muted-foreground">
-          Deploying starts real traffic for {agentName}. You&apos;ll land on Monitor to watch it.
+          {live
+            ? `Redeploying applies your edits to live traffic. You'll land on Monitor to watch it.`
+            : `Deploying starts real traffic for ${agentName}. You'll land on Monitor to watch it.`}
         </p>
       </div>
     </div>

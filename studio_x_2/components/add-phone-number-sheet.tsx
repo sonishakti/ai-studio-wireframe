@@ -55,7 +55,7 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
       }}
     >
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="sm:max-w-[480px] w-full overflow-y-auto p-0 flex flex-col">
+      <SheetContent className="w-full overflow-y-auto p-0 flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="px-5 py-4 border-b border-border">
           <SheetTitle>Add Phone Number</SheetTitle>
           {phase === "form" && (
