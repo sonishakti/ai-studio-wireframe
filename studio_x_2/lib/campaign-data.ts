@@ -67,6 +67,10 @@ export interface Deployment {
   contacts?: ContactsFile
   progress?: { completed: number; total: number }
   startDate?: string
+  /** Live pacing telemetry (D1). A slow-but-throttled batch must read as
+   *  WORKING, not FAILED — so "paced" is a first-class state, and every
+   *  zero-progress moment carries its reason. */
+  batchRuntime?: BatchRuntime
 
   // ── Inbound only ──
   ringsPerWeek?: number
@@ -76,6 +80,91 @@ export interface Deployment {
     successRate: number
     avgHandleTimeSec: number
   }
+}
+
+// ─── Batch runtime (D1 — call throttling / pacing) ───────────────────────────
+//
+// "Paced" is the state no competitor says out loud (research 2026-07-09): a
+// batch dialing at its concurrency/CPS ceiling is working as designed, NOT
+// failing. It is DISTINCT from "degraded" (carrier-failure rate or queue-time
+// crossing an unhealthy threshold). Every zero-progress moment names its reason.
+
+export type BatchPacing =
+  | "dialing"      // healthy, room to spare
+  | "paced"        // concurrency/CPS-bound — working as designed, just capped
+  | "paused"       // user-initiated or a circuit-breaker tripped
+  | "degraded"     // carrier failures / queue time crossed an unhealthy line
+  | "scheduled"    // waiting for its window
+  | "draining"     // no new dials, letting in-flight + queued finish
+  | "done"
+
+/** The real outbound disposition set (research §5). Busy/No-answer re-enter the
+ *  retry cadence; Disconnected/Wrong-number EXIT immediately (retrying a dead
+ *  number is waste, not pacing). */
+export type CallDisposition =
+  | "queued" | "dialing" | "connected"
+  | "completed" | "no-answer" | "busy" | "voicemail"
+  | "disconnected" | "wrong-number" | "carrier-failed"
+  | "retrying" | "max-retries" | "cancelled"
+
+export interface BatchRuntime {
+  pacing: BatchPacing
+  /** Live concurrency: how many of the deployment's lines are dialing now. */
+  linesInUse: number
+  linesTotal: number
+  /** Calls waiting for a free line right now. */
+  queued: number
+  /** Rolling disposition tallies (sum ≈ progress.completed + in-flight). */
+  dispositions: Partial<Record<CallDisposition, number>>
+  /** Retry cadence + current in-flight retries. */
+  retry: { max: number; retrying: number }
+  /** Target vs achieved calls-per-second on the trunk. */
+  cps: { target: number; actual: number }
+  /** Longest a queued call has waited (Twilio's QueueTime analogue), seconds. */
+  maxQueueSec: number
+  /** Why progress is what it is — shown verbatim on any stall. */
+  reason: string
+}
+
+/** Presentational metadata for a pacing state — one place so the Monitor
+ *  list dot, the batch detail header, and any badge agree. tone maps to the
+ *  app's semantic tokens; "paced" is intentionally NEUTRAL/primary (working),
+ *  NOT warning — that distinction is the whole feature. */
+export const PACING_META: Record<BatchPacing, { label: string; tone: "success" | "primary" | "muted" | "warning" | "destructive" }> = {
+  dialing:   { label: "Dialing",           tone: "success" },
+  paced:     { label: "Paced",             tone: "primary" },
+  scheduled: { label: "Scheduled",         tone: "muted" },
+  draining:  { label: "Wrapping up",       tone: "primary" },
+  paused:    { label: "Paused",            tone: "warning" },
+  degraded:  { label: "Needs attention",   tone: "destructive" },
+  done:      { label: "Completed",         tone: "muted" },
+}
+
+export const DISPOSITION_META: Record<CallDisposition, { label: string; kind: "good" | "neutral" | "retry" | "bad" }> = {
+  queued:         { label: "Queued",           kind: "neutral" },
+  dialing:        { label: "Dialing",          kind: "neutral" },
+  connected:      { label: "Connected",        kind: "good" },
+  completed:      { label: "Completed",        kind: "good" },
+  "no-answer":    { label: "No answer",        kind: "retry" },
+  busy:           { label: "Busy",             kind: "retry" },
+  voicemail:      { label: "Voicemail",        kind: "neutral" },
+  disconnected:   { label: "Disconnected",     kind: "bad" },
+  "wrong-number": { label: "Wrong number",     kind: "bad" },
+  "carrier-failed": { label: "Carrier failed", kind: "bad" },
+  retrying:       { label: "Retrying",         kind: "retry" },
+  "max-retries":  { label: "Max retries",      kind: "bad" },
+  cancelled:      { label: "Cancelled",        kind: "neutral" },
+}
+
+/** Live ETA from current pace × remaining queue depth (research req #7 — no
+ *  competitor exposes this). Returns null when not dialing. */
+export function batchEta(d: Deployment): { minutes: number } | null {
+  const rt = d.batchRuntime
+  if (!rt || (rt.pacing !== "paced" && rt.pacing !== "dialing")) return null
+  const remaining = (d.progress?.total ?? 0) - (d.progress?.completed ?? 0)
+  const perMin = rt.cps.actual * 60
+  if (remaining <= 0 || perMin <= 0) return null
+  return { minutes: Math.round(remaining / perMin) }
 }
 
 export interface PhoneNumber {
@@ -716,6 +805,17 @@ Lead with the 20% win-back discount. If not interested, thank and end within 15 
     metrics: { calls: 3421, successRate: 24, avgHandleTimeSec: 162 },
     progress: { completed: 3421, total: 5000 },
     startDate: "May 20, 2026",
+    // PACED — 10/10 lines busy, a queue building. The demo's headline case:
+    // slow but working, and it must never read as failed.
+    batchRuntime: {
+      pacing: "paced",
+      linesInUse: 10, linesTotal: 10, queued: 214,
+      dispositions: { completed: 2610, "no-answer": 402, busy: 188, voicemail: 176, "wrong-number": 31, "carrier-failed": 14, retrying: 34 },
+      retry: { max: 3, retrying: 34 },
+      cps: { target: 3, actual: 1.9 },
+      maxQueueSec: 92,
+      reason: "All 10 lines are dialing — new calls are queuing, not dropping. Add lines to clear the queue faster.",
+    },
   },
   {
     id: "dp_ob_02",
@@ -740,6 +840,16 @@ Customer: {{name}}, current plan {{plan}}, account owner {{owner_email}}.`,
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 12000 },
     startDate: "Jun 1, 2026",
+    // SCHEDULED — zero progress, but for a KNOWN reason (honesty req #8).
+    batchRuntime: {
+      pacing: "scheduled",
+      linesInUse: 0, linesTotal: 10, queued: 0,
+      dispositions: {},
+      retry: { max: 3, retrying: 0 },
+      cps: { target: 3, actual: 0 },
+      maxQueueSec: 0,
+      reason: "Scheduled for Jun 1, 9:00 AM in each contact's local time — nothing dials until then.",
+    },
   },
   {
     id: "dp_ob_03",
@@ -764,6 +874,17 @@ Remind customers their Acme subscription renews soon and confirm payment details
     metrics: { calls: 2800, successRate: 31, avgHandleTimeSec: 145 },
     progress: { completed: 2800, total: 2800 },
     startDate: "May 10, 2026",
+    // DONE — but "Completed — Partial" honesty (Bland's pattern): not every
+    // call succeeded, and the summary says so rather than implying all-good.
+    batchRuntime: {
+      pacing: "done",
+      linesInUse: 0, linesTotal: 10, queued: 0,
+      dispositions: { completed: 2210, "no-answer": 341, busy: 92, voicemail: 98, disconnected: 41, "wrong-number": 18 },
+      retry: { max: 3, retrying: 0 },
+      cps: { target: 3, actual: 0 },
+      maxQueueSec: 0,
+      reason: "Completed — 2,210 of 2,800 connected; 59 numbers were disconnected or wrong and were flagged, not retried.",
+    },
   },
   {
     id: "dp_ob_04",
@@ -791,6 +912,17 @@ Identify the company immediately. Never threaten. Offer the hardship line if ask
     metrics: { calls: 742, successRate: 18, avgHandleTimeSec: 198 },
     progress: { completed: 742, total: 1500 },
     startDate: "May 15, 2026",
+    // DEGRADED, then PAUSED by a circuit breaker — the state that is genuinely
+    // NOT "just paced": carrier failures spiked, so the system stopped itself.
+    batchRuntime: {
+      pacing: "paused",
+      linesInUse: 0, linesTotal: 10, queued: 396,
+      dispositions: { completed: 468, "no-answer": 121, busy: 58, "carrier-failed": 214, retrying: 0, "max-retries": 79 },
+      retry: { max: 3, retrying: 0 },
+      cps: { target: 3, actual: 0 },
+      maxQueueSec: 610,
+      reason: "Paused automatically — carrier failures hit 22% (SIP 503, trunk saturated). Check the trunk's CPS limit before resuming.",
+    },
   },
   {
     id: "dp_ob_05",
