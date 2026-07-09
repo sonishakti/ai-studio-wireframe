@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { AgentSphere } from "@/components/agent-test-panel"
-import { STACK_PRESETS, getDefaultAgent } from "@/lib/campaign-data"
+import { getDefaultAgent } from "@/lib/campaign-data"
 
 /**
  * ProvisioningCeremony — the first-run arrival moment (A1, judge winner V1
@@ -55,7 +55,6 @@ export function ProvisioningCeremony({
   onDone: () => void
 }) {
   const aria = getDefaultAgent()
-  const preset = STACK_PRESETS.balanced
   const [stageIdx, setStageIdx] = React.useState(0)
   const [stalled, setStalled] = React.useState(false)
   const [elapsed, setElapsed] = React.useState(0)
@@ -103,14 +102,14 @@ export function ProvisioningCeremony({
               {complete ? (
                 <>
                   <h1 className="text-2xl font-semibold tracking-tight">
-                    Aria is live — say hello.
+                    Aria is live. Say hello.
                   </h1>
                   {/* No mic/answering claims before they're true — the arrival
                       promise must be kept by the very next click (user-test
                       2026-07-09 S2: "the first promise this product makes"). */}
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    Your agent is ready for its first conversation — in your browser,
-                    free, nothing to configure. The next click opens the live test.
+                    Your agent is ready for its first conversation, in your browser, free,
+                    nothing to configure. The next click opens the live test.
                   </p>
                 </>
               ) : stalled ? (
@@ -209,12 +208,11 @@ export function ProvisioningCeremony({
               )
             )}
 
-            {/* The named default — visible before the studio, honest by
-                construction: values render FROM the balanced preset. */}
+            {/* The named default, condensed — the full model breakdown is
+                clutter here (owner 2026-07-09); it lives in the builder's badge
+                tooltip for anyone who wants it. */}
             <p className="border-t border-border pt-4 text-center text-xs text-muted-foreground">
-              {aria.name} runs <span className="font-medium text-foreground">Agora Balanced</span> —
-              smart model by default ({preset.llm.model} · {preset.asr.vendor} {preset.asr.model} ·{" "}
-              {preset.tts.vendor}). Change any part of it anytime.
+              {aria.name} runs <span className="font-medium text-foreground">Agora Balanced</span>, a smart default you can change anytime.
             </p>
           </div>
         </CardContent>
