@@ -64,7 +64,9 @@ export function StepVoice({
   return (
     <div className="max-w-md space-y-5">
       <p className="text-sm text-muted-foreground">
-        Pick the ready-made persona your agent speaks with. Preview it, or change the spoken language.
+        Pick the ready-made persona your agent speaks with. Preview it, or change the spoken
+        language. A voice pre-fills your prompt and greeting only while they&apos;re empty —
+        switching voices never overwrites what you&apos;ve written.
       </p>
 
       {/* ── Pick + preview: the two things that belong together ── */}

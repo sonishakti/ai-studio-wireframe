@@ -132,8 +132,14 @@ function InboundConfigure({
                 ))}
               </SelectContent>
             </Select>
+            {/* ONE name + ONE link for the BYO-SIP door, same as the batch
+                side — "Numbers" vs "Channels" read as two doors (user-test S3). */}
             <p className="text-xs text-muted-foreground">
-              No number free? Agora routes your own carrier number. Connect one via SIP in Resources › Numbers.
+              No number free? Agora routes your own carrier number — connect one via SIP in{" "}
+              <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
+                Resources › Channels
+              </a>
+              .
             </p>
           </div>
         </ConfigCard>
