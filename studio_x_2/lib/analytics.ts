@@ -65,6 +65,19 @@ export const Events = {
   lines_added:                "lines_added",                 // { qty, prorated_charge_usd } — negative qty = reduction
   keep_queuing_clicked:       "keep_queuing_clicked",        // { lines } — declined the upsell; queueing as designed
 
+  // ── ITSP quick-connect (A3, 2026-07-09) — key → auto-configured SIP trunk.
+  // The whole point is a REAL test call closes it: test_call_connected is the
+  // success line, not "trunk_created" (provisioning success ≠ call success).
+  sip_quick_connect_started:  "sip_quick_connect_started",   // { provider, credential: token|scoped_key }
+  credentials_validated:      "credentials_validated",       // { provider }
+  numbers_enumerated:         "numbers_enumerated",          // { count }
+  number_picked:              "number_picked",               // { mode: auto|manual }
+  trunk_created:              "trunk_created",               // { provider }
+  test_call_placed:           "test_call_placed",            // {} — user pressed Place test call
+  test_call_connected:        "test_call_connected",         // {} ★ the real success line
+  trunk_disconnected:         "trunk_disconnected",          // { provider } — Agora stops using the credential
+  manual_fallback_opened:     "manual_fallback_opened",      // {} — escaped to the manual SIP form
+
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
   defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
   defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
@@ -160,6 +173,15 @@ export type EventPayloads = {
   concurrency_wall_viewed:     { lines: number; queued: number }
   lines_added:                 { qty: number; prorated_charge_usd: number }
   keep_queuing_clicked:        { lines: number }
+  sip_quick_connect_started:   { provider: string; credential: "token" | "scoped_key" }
+  credentials_validated:       { provider: string }
+  numbers_enumerated:          { count: number }
+  number_picked:               { mode: "auto" | "manual" }
+  trunk_created:               { provider: string }
+  test_call_placed:            Record<string, never>
+  test_call_connected:         Record<string, never>
+  trunk_disconnected:          { provider: string }
+  manual_fallback_opened:      Record<string, never>
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }

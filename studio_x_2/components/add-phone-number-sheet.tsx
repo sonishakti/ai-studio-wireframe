@@ -17,19 +17,31 @@ import {
 } from "lucide-react"
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
+import { SipQuickConnect } from "@/components/sip-quick-connect"
 
 type Phase = "form" | "success"
 type Transport = "TCP" | "UDP" | "TLS"
+type Mode = "quick" | "manual"
 
-export function AddPhoneNumberSheet({ children }: { children: React.ReactNode }) {
+export function AddPhoneNumberSheet({
+  children,
+  defaultMode = "quick",
+}: {
+  children: React.ReactNode
+  /** Resources › Channels and the wizard SIP hints open the fast path by
+   *  default; the manual form stays one toggle away (A3, 2026-07-09). */
+  defaultMode?: Mode
+}) {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
+  const [mode, setMode] = React.useState<Mode>(defaultMode)
   const [phase, setPhase] = React.useState<Phase>("form")
   const [showPw, setShowPw] = React.useState(false)
   const [transport, setTransport] = React.useState<Transport>("TCP")
   const [form, setForm] = React.useState({ number: "", vendor: "", displayName: "", sipDomain: "", username: "", password: "" })
 
   const reset = () => {
+    setMode(defaultMode)
     setPhase("form")
     setForm({ number: "", vendor: "", displayName: "", sipDomain: "", username: "", password: "" })
     setTransport("TCP")
@@ -57,13 +69,44 @@ export function AddPhoneNumberSheet({ children }: { children: React.ReactNode })
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent className="w-full overflow-y-auto p-0 flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="px-5 py-4 border-b border-border">
-          <SheetTitle>Add Phone Number</SheetTitle>
+          <SheetTitle>Add a phone number</SheetTitle>
           {phase === "form" && (
-            <SheetDescription>Import an existing SIP number from your carrier.</SheetDescription>
+            <SheetDescription>
+              Bring a number you already own — Agora routes it, and doesn&apos;t sell or port
+              numbers.
+            </SheetDescription>
           )}
         </SheetHeader>
 
-        {phase === "form" ? (
+        {phase === "form" && (
+          <div className="px-5 pt-4">
+            <ToggleGroup
+              type="single"
+              value={mode}
+              onValueChange={(v) => { if (v) setMode(v as Mode) }}
+              variant="outline"
+              size="sm"
+              className="w-full"
+              aria-label="Connection method"
+            >
+              <ToggleGroupItem value="quick" className="flex-1 text-xs data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
+                Quick connect
+              </ToggleGroupItem>
+              <ToggleGroupItem value="manual" className="flex-1 text-xs data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
+                Manual SIP
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        )}
+
+        {phase === "form" && mode === "quick" ? (
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <SipQuickConnect
+              onConnected={(e164) => { setForm((f) => ({ ...f, number: e164, vendor: f.vendor || "Twilio" })); setPhase("success") }}
+              onFallback={() => { track(Events.manual_fallback_opened, {}); setMode("manual") }}
+            />
+          </div>
+        ) : phase === "form" ? (
           <>
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
