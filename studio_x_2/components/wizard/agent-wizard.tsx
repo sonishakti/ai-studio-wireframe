@@ -56,6 +56,7 @@ export function AgentWizard({
   id,
   landing,
   warming,
+  autoTalk,
   blank,
   onCreateNew,
   onBrowseTemplates,
