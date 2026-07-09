@@ -1,0 +1,215 @@
+<!-- A1 design doc — self-contained; brand-matched to studio_x_2 tokens -->
+<title>A1 — First-run &amp; onboarding · Design doc</title>
+<style>
+  :root {
+    --brand: #00658d; --bg: #fdfcfc; --fg: #0a0a0a; --muted: #6b6b6b;
+    --card: #ffffff; --border: #e4e2e0; --soft: #f4f6f7;
+    --good: #1a7f4e; --warn: #9a6700; --bad: #b3261e; --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --brand: #00c2ff; --bg: #050505; --fg: #fdfcfc; --muted: #9a9a9a;
+      --card: #111214; --border: #26282b; --soft: #16181a;
+      --good: #4cc38a; --warn: #e0b25a; --bad: #ef8a80;
+    }
+  }
+  :root[data-theme="dark"] {
+    --brand: #00c2ff; --bg: #050505; --fg: #fdfcfc; --muted: #9a9a9a;
+    --card: #111214; --border: #26282b; --soft: #16181a;
+    --good: #4cc38a; --warn: #e0b25a; --bad: #ef8a80;
+  }
+  :root[data-theme="light"] {
+    --brand: #00658d; --bg: #fdfcfc; --fg: #0a0a0a; --muted: #6b6b6b;
+    --card: #ffffff; --border: #e4e2e0; --soft: #f4f6f7;
+    --good: #1a7f4e; --warn: #9a6700; --bad: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.6 "Instrument Sans", ui-sans-serif, system-ui, sans-serif; }
+  .mono { font-family: "Space Mono", ui-monospace, monospace; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.doc { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--brand); font-weight: 600; margin: 0 0 8px; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+  h2 { font-size: 19px; margin: 44px 0 12px; }
+  p { max-width: 68ch; }
+  .lede { color: var(--muted); font-size: 16px; max-width: 62ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 12px; font-size: 12px; color: var(--muted); background: var(--card); }
+  .chip.ship { border-color: color-mix(in oklab, var(--good) 45%, transparent); color: var(--good); font-weight: 600; }
+  .chip a { color: inherit; text-decoration: none; }
+  a { color: var(--brand); }
+  .card { background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; margin: 14px 0; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th { text-align: left; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .scroll { overflow-x: auto; }
+  .scorerow { display: grid; grid-template-columns: 150px 1fr 44px; gap: 10px; align-items: center; margin: 4px 0; }
+  .scorerow .label { font-size: 12.5px; color: var(--muted); }
+  .bar { height: 10px; border-radius: 5px; background: var(--soft); overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 5px; background: var(--brand); }
+  .bar.winner > i { background: var(--good); }
+  .score { font-size: 12.5px; font-variant-numeric: tabular-nums; text-align: right; }
+  .lens { margin: 18px 0 6px; font-size: 13px; font-weight: 600; }
+  .callout { border-left: 3px solid var(--brand); background: var(--soft);
+    border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 16px; margin: 14px 0; font-size: 13.5px; }
+  .callout.warn { border-left-color: var(--warn); }
+  code { font-family: "Space Mono", ui-monospace, monospace; font-size: 12.5px;
+    background: var(--soft); border-radius: 4px; padding: 1px 5px; }
+  .graft { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 12px 0; }
+  .graft .card { margin: 0; }
+  .graft h4 { margin: 0 0 6px; font-size: 13px; }
+  .graft p { font-size: 12.5px; color: var(--muted); margin: 0; }
+  .flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 12px 0 4px; }
+  .beat { border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 12.5px; color: var(--muted); background: var(--card); }
+  .beat.hot { border-color: var(--brand); color: var(--brand); font-weight: 600;
+    background: color-mix(in oklab, var(--brand) 8%, var(--card)); }
+  .arrow { color: var(--muted); font-size: 12px; }
+  footer.doc { margin-top: 56px; border-top: 1px solid var(--border); padding-top: 16px; color: var(--muted); font-size: 12.5px; }
+</style>
+
+<div class="wrap">
+  <header class="doc">
+    <p class="eyebrow">Studio_X · Feature design doc · P0 spine 2 of 6</p>
+    <h1>A1 — First-run: the provisioning ceremony &amp; the named default</h1>
+    <p class="lede">
+      The &gt;30-second project-creation wait becomes a staged, honest arrival moment that ends
+      on “Aria is live — say hello.” The default stack gets a name and a why. The stale
+      checklist dies; its persistence survives as a lib.
+    </p>
+    <div class="meta">
+      <span class="chip ship">● Shipped 2026-07-09</span>
+      <span class="chip mono">commit a1387f7</span>
+      <span class="chip"><a href="https://ai-studio-console-redesign.vercel.app/agents?provision=1">Live: /agents?provision=1 ↗</a></span>
+      <span class="chip"><a href="https://ai-studio-console-redesign.vercel.app/agents?provision=stall">Error state: ?provision=stall ↗</a></span>
+    </div>
+  </header>
+
+  <h2>The structural advantage this makes felt</h2>
+  <p>
+    Research across Retell, Vapi, Bland, and ElevenLabs found that <strong>no competitor gives
+    a new account a live agent</strong> — every one walls the first session behind
+    create-an-agent and a template picker. Studio_X provisions Aria live on signup. A1's job
+    was never to add onboarding chrome; it was to make that advantage <em>felt</em> in the
+    first 60 seconds and <em>credible</em> through named defaults. The deck's own complaints —
+    project creation &gt;30s, templates undersell, defaults trail Retell — are all
+    first-impression failures.
+  </p>
+  <div class="flow" role="img" aria-label="First-run flow: signup, then the provisioning ceremony, then Aria is live say hello, then the landing with the named default.">
+    <span class="beat">Signup</span><span class="arrow">→</span>
+    <span class="beat hot">Ceremony · staged honest work</span><span class="arrow">→</span>
+    <span class="beat hot">“Aria is live — say hello”</span><span class="arrow">→</span>
+    <span class="beat">Landing · named default · journey</span>
+  </div>
+
+  <h2>Research → the calls that shaped it</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Finding</th><th>Design consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Labeled, staged progress beats spinners; uncertainty inflates perceived wait (NN/g)</td><td>3 named stages + “usually under 40 seconds” + live elapsed counter; no fake %</td></tr>
+      <tr><td>Checklist completion averages 10–20%; a second checklist = nag, not lift</td><td><strong>Checklist deleted</strong>, persistence salvaged to <code>lib/journey-progress.ts</code></td></tr>
+      <tr><td>Retell brands “Retell LLM”; ElevenLabs brands default voices; silence hides Agora's claimed parity</td><td>“Runs <strong>Agora Balanced</strong> — smart model by default” strip, values rendered FROM <code>STACK_PRESETS</code></td></tr>
+      <tr><td>Unexplained Live badge → “who's paying for this?” (confirmed by user test)</td><td>Trust line: “Provisioned free for you — talking in-browser costs nothing”</td></tr>
+      <tr><td>Steps must be value verbs, not chores</td><td>Ceremony copy narrates work (“Warming the voice pipeline”), never “Please wait”</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Diverge → converge</h2>
+  <div class="graft">
+    <div class="card"><h4>V1 · Ceremony</h4><p>Full-takeover staged arrival ending in the landing. Honest end-to-end; grafts with zero surgery on the locked wizard. Weakness: a 40s wall — fixed via break-the-wall skip.</p></div>
+    <div class="card"><h4>V2 · Instant-feel</h4><p>Landing paints immediately; the Aria card warms in place. Best first-60-seconds feel; lost on a fabricated pre-checked stage and structural fold costs.</p></div>
+    <div class="card"><h4>V3 · Working session</h4><p>Provisioning as a self-completing journey row (endowed 1/6). Warmest wait story — about the wrong hero; demoted the live agent for a checklist.</p></div>
+  </div>
+
+  <div class="card" role="img" aria-label="Judge scores. First 60 seconds: V1 6.5, V2 8.7 winner, V3 7.2. Honesty and plausibility: V1 7.8 winner, V2 7.3, V3 6.8. Fold-in fit: V1 7.6 winner, V2 6.7, V3 5.0.">
+    <p class="lens">Lens 1 · The first 60 seconds</p>
+    <div class="scorerow"><span class="label">V1</span><div class="bar"><i style="width:65%"></i></div><span class="score">6.5</span></div>
+    <div class="scorerow"><span class="label">V2 — winner</span><div class="bar winner"><i style="width:87%"></i></div><span class="score">8.7</span></div>
+    <div class="scorerow"><span class="label">V3</span><div class="bar"><i style="width:72%"></i></div><span class="score">7.2</span></div>
+    <p class="lens">Lens 2 · Honesty &amp; plausibility</p>
+    <div class="scorerow"><span class="label">V1 — winner</span><div class="bar winner"><i style="width:78%"></i></div><span class="score">7.8</span></div>
+    <div class="scorerow"><span class="label">V2</span><div class="bar"><i style="width:73%"></i></div><span class="score">7.3</span></div>
+    <div class="scorerow"><span class="label">V3</span><div class="bar"><i style="width:68%"></i></div><span class="score">6.8</span></div>
+    <p class="lens">Lens 3 · Fold-in fit (locked landing)</p>
+    <div class="scorerow"><span class="label">V1 — winner</span><div class="bar winner"><i style="width:76%"></i></div><span class="score">7.6</span></div>
+    <div class="scorerow"><span class="label">V2</span><div class="bar"><i style="width:67%"></i></div><span class="score">6.7</span></div>
+    <div class="scorerow"><span class="label">V3</span><div class="bar"><i style="width:50%"></i></div><span class="score">5.0</span></div>
+  </div>
+
+  <div class="callout">
+    <strong>Verdict:</strong> V1 wins both gating lenses (honesty + fold-in); V2's feel score was
+    disqualified by a fabricated pre-checked stage — the honesty variant must not be the one
+    surface that lies. Shipped = <strong>V1's ceremony with V2's elapsed counter, warming-card
+    pattern and payoff line, plus V3's persistence and credit-at-call-end</strong>. The
+    independently-run user test on the prior commit reached the same conclusion before the
+    fold-in shipped ("the strongest first-run treatment in the product").
+  </div>
+
+  <div class="callout warn">
+    <strong>Documented deviation from the judge synthesis:</strong> the recommended right-column
+    JourneyPanel (checks + n/5) was <em>not</em> folded in. It would recreate the exact
+    two-progress-fractions contradiction the 2026-07-07 audit eliminated (the deploy block is
+    the page's single fraction; the rail owns done-state) and violate the spec's own R10
+    (no second competing checklist). The endowed-progress insight lands in the ceremony's
+    final beat instead; <code>journey-progress</code> flags exist for future rail styling if
+    evidence demands it.
+  </div>
+
+  <h2>What shipped</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">The ceremony — <code>provisioning-ceremony.tsx</code></h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li>3 stages naming plausible work: create project → provision Aria → warm voice pipeline</li>
+        <li>“Usually under 40 seconds · <em>n</em>s in” — estimate + live counter, no invented %</li>
+        <li>Stall state: stage named, finished work stays done, retry re-runs ONLY that step, status.agora.io escape</li>
+        <li>Break-the-wall: after stage 1, “Continue to Studio” → landing renders with Aria warming (Talk disabled WITH its promise)</li>
+        <li>Arrival beat: “Aria is live — say hello” in a persistent polite live region</li>
+        <li>Once per browser (<code>sx:provisioned</code>); <code>?provision=1</code> replays, <code>?provision=stall</code> demos the error</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin:0 0 6px; font-size:13px;">The landing additions (locked layout untouched)</h4>
+      <ul style="font-size:13.5px; padding-left:18px; margin:0;">
+        <li><strong>Named default strip</strong>: “Runs Agora Balanced — smart model by default” + models rendered from <code>STACK_PRESETS.balanced</code> (can't drift) + “Change any part of it” → step 1</li>
+        <li><strong>Trust line</strong>: “Provisioned free for you — talking in-browser costs nothing”</li>
+        <li><strong>Checklist deleted</strong>; <code>lib/journey-progress.ts</code> keeps the flags; playground credits “hear” at call <em>end</em></li>
+        <li><strong>Template sheet</strong>: stack chips (llm · asr · tts) + Popular badge</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>The user-test fix train (same commit)</h2>
+  <p style="font-size:13.5px;">
+    The X1 session (3 personas · 76.7% success · 2×S1 · 9×S2 · SUS 72) filed fixes that rode
+    this commit: <strong>list-view import now lands in the playground</strong> (S1 — a success
+    toast may never produce nothing); <strong>batch pre-flight</strong> (S2 — Deploy on an
+    outbound agent confirms 248 contacts, caller ID, window, an honest ~$50 estimate, and
+    offers “Talk to it first”); <strong>Pause/Resume in the agents row menu</strong> (S2 —
+    Delete is no longer the only off-switch). Full report:
+    <code>references/user-tests/2026-07-09-x1-usage-spend.md</code>.
+  </p>
+
+  <h2>Measurement</h2>
+  <p style="font-size:13.5px;">
+    Watch: <code>aria_conversation_started</code> rate and time-to-first-reply (Believe),
+    ceremony completion vs skip rate, <code>agent_test_started/ended</code> after arrival, and
+    the journey flags' correlation with <code>deployment_went_live</code>. Counter-metric:
+    ceremony abandon (close/bounce during the wait) — if the wait loses more users than the
+    arrival converts, shorten stages before adding spectacle.
+  </p>
+
+  <footer class="doc">
+    Provenance: research workflow (competitor first-run + onboarding-pattern evidence) → journey
+    (5 phases) → 3 variants (session commits pre-<span class="mono">a1387f7</span>) → 3-lens
+    judge panel → fold-in <span class="mono">a1387f7</span> (harness deleted). Strategy:
+    <span class="mono">roadmap-activation-strategy-2026-07-09.md</span> · PRD:
+    <span class="mono">roadmap-features-prd-2026-07-09.md §3 A1</span> · Prior doc:
+    <span class="mono">references/design/x1-usage-spend.html</span>. Next: A6 self-serve concurrency.
+  </footer>
+</div>
