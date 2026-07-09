@@ -168,9 +168,13 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
   )
 }
 
+// The ConvoAI row derives from PLAN_USAGE (free tier = 300 min/mo shared —
+// docs.agora.io/en/conversational-ai/overview/pricing); the 10,000-min Voice
+// row is the separate core-RTC free tier, a different product's allowance.
+const convoFree = freeMinutesStats()
 const QUOTA_METERS = [
-  { label: "Conversational AI minutes", used: 18420, limit: 50000, unit: "min" },
-  { label: "Voice minutes",             used: 4218,  limit: 10000, unit: "min" },
+  { label: "Conversational AI free minutes", used: convoFree.used, limit: convoFree.included, unit: "min" },
+  { label: "Voice minutes (RTC)",       used: 4218,  limit: 10000, unit: "min" },
   { label: "Cloud Recording",           used: 1.42,  limit: 5,     unit: "GB-hrs" },
   { label: "Real-Time STT",             used: 312,   limit: 1000,  unit: "min" },
   { label: "Concurrent channels",       used: 12,    limit: 50,    unit: "ch" },

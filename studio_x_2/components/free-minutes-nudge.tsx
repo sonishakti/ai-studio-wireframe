@@ -132,8 +132,10 @@ export function FreeMinutesNudge() {
 }
 
 // ─── Add-card sheet — unlocks the second free slice ──────────────────────────
+// Exported: the Billing UsageSpendCard reuses this exact flow (one card-capture
+// surface product-wide, so copy and events can never fork).
 
-function AddCardSheet({
+export function AddCardSheet({
   children,
   onUnlocked,
 }: {

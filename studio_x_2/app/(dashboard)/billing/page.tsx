@@ -1,15 +1,14 @@
 import Link from "next/link"
-import { ArrowRight, MoreHorizontal, Plus, CreditCard, Gift } from "lucide-react"
+import { ArrowRight, MoreHorizontal, Plus, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { PageHeader } from "@/components/page-header"
-import { freeMinutesStats } from "@/lib/campaign-data"
+import { UsageSpendCard } from "@/components/usage-spend-card"
 
 const PAYMENT_METHODS = [
   { kind: "visa",       last4: "4242", brand: "Visa",       primary: true  },
@@ -17,11 +16,6 @@ const PAYMENT_METHODS = [
 ]
 
 export default function BillingOverviewPage() {
-  const { plan, included, used, pctUsed, remaining } = freeMinutesStats()
-  // A fresh account that has never consumed a minute shouldn't see a fabricated
-  // current-period meter — branch on real usage from the single source of truth.
-  const hasUsage = used > 0
-
   return (
     <>
       <PageHeader
@@ -58,48 +52,10 @@ export default function BillingOverviewPage() {
             </CardContent>
           </Card>
 
-          {/* ─── Current period usage ────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-sm">Current Period</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">May 1 – May 31, 2026</CardDescription>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/billing/usage">View details <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {hasUsage ? (
-                <>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary" className="text-xs">{plan} tier</Badge>
-                    <span className="text-sm font-semibold tabular-nums">{pctUsed}% Used</span>
-                  </div>
-                  <Progress value={pctUsed} className="h-2" />
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 tabular-nums">
-                    <span>{used.toLocaleString()} mins used</span>
-                    <span>{remaining.toLocaleString()} of {included.toLocaleString()} mins left</span>
-                  </div>
-                </>
-              ) : (
-                <div className="flex items-center gap-3 rounded-lg border border-dashed bg-muted/30 px-4 py-3">
-                  <Gift className="h-5 w-5 shrink-0 text-primary" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">No usage yet this period</p>
-                    <p className="text-xs text-muted-foreground">
-                      Your {included.toLocaleString()} free minutes are ready. Put your agent live to start the meter.
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/deploy">Go live <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* ─── Usage & spend (X1) — replaces the old Current Period card.
+               Free-tier truth, projected bill, and the spend-cap write path
+               live together; all figures derive from PLAN_USAGE. ─────────── */}
+          <UsageSpendCard />
 
           {/* ─── Payment methods preview ────────────────────────────── */}
           <Card>

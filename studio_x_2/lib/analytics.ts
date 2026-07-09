@@ -51,6 +51,15 @@ export const Events = {
   free_minutes_unlocked:      "free_minutes_unlocked",       // +150 free unlocked by the card — { unlocked, included }
   first_paid_minute:          "first_paid_minute",           // ★ replaces the deleted suspend→reactivate CAC loop — { agent_id }
 
+  // ── Spend controls (X1, 2026-07-09) — the bill-shock counter-metric set.
+  // spend_alert_fired MUST precede spend_cap_hit for the same cap: a cap hit
+  // with no prior alert is the failure these events exist to catch.
+  spend_cap_set:              "spend_cap_set",               // { cap_usd, alert_pct, pre_card } — user set/changed their cap
+  spend_cap_raised:           "spend_cap_raised",            // { from_usd, to_usd, at_spend_usd } — raised at/near the wall
+  spend_cap_hit:              "spend_cap_hit",               // { cap_usd, projected_usd } — new calls paused by the user's cap
+  spend_alert_fired:          "spend_alert_fired",           // { pct_of_cap, cap_usd } — threshold warning before the wall
+  projected_bill_viewed:      "projected_bill_viewed",       // { projected_usd, spend_state } — estimate seen on Billing
+
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
   defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
   defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
@@ -138,6 +147,11 @@ export type EventPayloads = {
   card_captured:               { agent_id: string; at_minute: number }
   free_minutes_unlocked:       { unlocked: number; included: number }
   first_paid_minute:           { agent_id: string }
+  spend_cap_set:               { cap_usd: number; alert_pct: number; pre_card: boolean }
+  spend_cap_raised:            { from_usd: number; to_usd: number; at_spend_usd: number }
+  spend_cap_hit:               { cap_usd: number; projected_usd: number }
+  spend_alert_fired:           { pct_of_cap: number; cap_usd: number }
+  projected_bill_viewed:       { projected_usd: number; spend_state: string }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }
