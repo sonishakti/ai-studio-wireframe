@@ -444,6 +444,21 @@ export interface PlanUsage {
   cardOnFile: boolean
   /** Default spend cap (USD/mo) offered with the card, so PAYG can't bill-shock. */
   defaultSpendCapUsd: number
+  /** Active monthly spend cap (USD). null until a card is on file — the cap is
+   *  set (defaulting to defaultSpendCapUsd) at card capture. At the cap NEW calls
+   *  pause; in-flight calls always finish (the invoice honors the cap). */
+  spendCapUsd: number | null
+  /** Alert threshold as a fraction of the cap (0.75 → warn at 75%). The alert
+   *  must fire BEFORE the wall — cap_hit without a prior alert is the counter-
+   *  metric this exists to prevent. */
+  spendAlertPct: number
+  /** PAYG spend accrued this period (USD), beyond the free tier, at $0.10/min. */
+  paygSpendUsd: number
+  /** Mock billing-period position — drives the run-rate projection and period
+   *  labels deterministically (no clock reads in the lib). */
+  periodLabel: string
+  periodDaysElapsed: number
+  periodDaysTotal: number
 }
 
 export const PLAN_USAGE: PlanUsage = {
@@ -453,15 +468,60 @@ export const PLAN_USAGE: PlanUsage = {
   freeMinutesUngated: 150,
   cardOnFile: false,
   defaultSpendCapUsd: 50,
+  spendCapUsd: null,
+  spendAlertPct: 0.75,
+  paygSpendUsd: 0,
+  periodLabel: "Jul 1 – Jul 31, 2026",
+  periodDaysElapsed: 9,
+  periodDaysTotal: 31,
 }
 
 /** Free-minutes summary from the single source of truth (PLAN_USAGE). Pure — lives
- *  in the lib (not a "use client" component) so server pages can call it too. */
-export function freeMinutesStats() {
-  const { plan, freeMinutesIncluded: included, freeMinutesUsed: used } = PLAN_USAGE
+ *  in the lib (not a "use client" component) so server pages can call it too.
+ *  Accepts an override so state fixtures (design harnesses) can render any
+ *  point in the money lifecycle without mutating the global. */
+export function freeMinutesStats(u: PlanUsage = PLAN_USAGE) {
+  const { plan, freeMinutesIncluded: included, freeMinutesUsed: used } = u
   const pctUsed = included > 0 ? Math.min(100, Math.round((used / included) * 100)) : 0
   const remaining = Math.max(0, included - used)
   return { plan, included, used, pctUsed, remaining }
+}
+
+/** Where the account sits in the money lifecycle once PAYG is possible. */
+export type SpendState = "free" | "payg" | "cap_warning" | "cap_hit"
+
+/** Spend summary — the $ counterpart of freeMinutesStats(), same source of
+ *  truth. The meter changes UNIT at the free→PAYG boundary: minutes while the
+ *  free tier lasts, dollars-of-cap once paid metering starts. Projection is a
+ *  straight-line run rate (spend ÷ days elapsed × days in period), always
+ *  presented as an estimate. */
+export function spendStats(u: PlanUsage = PLAN_USAGE) {
+  const freeMinutesLeft = Math.max(0, u.freeMinutesIncluded - u.freeMinutesUsed)
+  const cap = u.spendCapUsd
+  const spent = u.paygSpendUsd
+  const pctOfCap = cap && cap > 0 ? Math.min(100, Math.round((spent / cap) * 100)) : 0
+  const projectedUsd =
+    u.periodDaysElapsed > 0
+      ? Math.round((spent / u.periodDaysElapsed) * u.periodDaysTotal * 100) / 100
+      : 0
+  let state: SpendState = "free"
+  if (freeMinutesLeft <= 0 && u.cardOnFile) {
+    state = "payg"
+    if (cap != null && cap > 0) {
+      if (spent >= cap) state = "cap_hit"
+      else if (spent >= cap * u.spendAlertPct) state = "cap_warning"
+    }
+  }
+  return {
+    capUsd: cap,
+    alertPct: u.spendAlertPct,
+    spentUsd: spent,
+    pctOfCap,
+    projectedUsd,
+    freeMinutesLeft,
+    periodLabel: u.periodLabel,
+    state,
+  }
 }
 
 // ─── Status display ──────────────────────────────────────────────────────────
