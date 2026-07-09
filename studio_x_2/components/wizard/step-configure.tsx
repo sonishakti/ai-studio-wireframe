@@ -21,6 +21,7 @@ import { ConfigCard, WebWidgetConfig } from "@/components/wizard/channel-configs
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
   MOCK_CSV_COLUMNS,
+  MOCK_CSV_ROWS,
   outboundMissingVars,
   typeLabel,
   type AgentType,
@@ -205,7 +206,7 @@ const PREVIEW_ROWS = PREVIEW_NAMES.map((name, i) => ({
   name,
   account: `AC-${2400 + i * 13}`,
 }))
-const CSV_TOTAL = 248
+const CSV_TOTAL = MOCK_CSV_ROWS
 
 function ContactsPanel({ draft, update }: StepProps) {
   const out = draft.config.outbound

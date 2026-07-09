@@ -241,6 +241,10 @@ export function templateToDraft(tpl: AgentTemplate): AgentDraft {
 /** Columns a freshly-uploaded contacts CSV is mocked to contain (wireframe). */
 export const MOCK_CSV_COLUMNS = ["name", "account", "balance", "due_date", "phone"]
 
+/** Row count of that mocked CSV — single source for the upload toast, the
+ *  contacts panel, and the batch pre-flight confirmation (they must agree). */
+export const MOCK_CSV_ROWS = 248
+
 /** {{vars}} the prompt/greeting reference that the attached CSV does NOT supply.
  *  With no CSV yet, every referenced var counts as missing. */
 export function outboundMissingVars(d: AgentDraft): string[] {

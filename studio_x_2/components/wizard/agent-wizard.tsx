@@ -26,14 +26,18 @@ import { STEP_TITLES, STEP_ICONS, stepTitle, stepManifest } from "@/components/w
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, STACK_PRESETS, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
 import {
   EMPTY_DRAFT, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
-  publishBlockReason, channelTarget, typeLabel, type AgentDraft, type AgentType,
+  publishBlockReason, channelTarget, typeLabel, MOCK_CSV_ROWS, type AgentDraft, type AgentType,
 } from "@/lib/wizard-draft"
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
 
 /**
@@ -579,10 +583,22 @@ export function AgentWizard({
   }
 
   const publishingRef = React.useRef(false)
+  // Batch pre-flight — a ref (not state) so the confirmed re-entry into
+  // publish() can't race the dialog's close render.
+  const batchConfirmedRef = React.useRef(false)
+  const [batchConfirmOpen, setBatchConfirmOpen] = React.useState(false)
   const publish = () => {
     if (publishingRef.current) return // guard: double-click must not double-publish
     const reason = publishBlockReason(draftRef.current)
     if (reason) { toast.error("Not ready to deploy yet", { description: reason }); return }
+    // Batch pre-flight (user-test 2026-07-09, S2 ×2 personas): one click must
+    // never start dialing a whole contact list silently — confirm the count,
+    // caller ID, window, and an honest cost estimate first.
+    if (draftRef.current.type === "outbound" && !batchConfirmedRef.current) {
+      setBatchConfirmOpen(true)
+      return
+    }
+    batchConfirmedRef.current = false
     publishingRef.current = true
     // Disarm any pending debounced autosave BEFORE clearing the slot — a save
     // firing mid-navigation would resurrect the consumed draft (re-eval #16).
@@ -1124,6 +1140,55 @@ export function AgentWizard({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Batch pre-flight — the ONE confirmation in the wizard. Deploying an
+          outbound agent starts real calls to a whole list; the moment deserves
+          a manifest (count · caller ID · window · honest cost estimate), and
+          "talk to it first" is offered as the safer path. */}
+      <AlertDialog open={batchConfirmOpen} onOpenChange={setBatchConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Start calling {MOCK_CSV_ROWS} contacts?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Deploying starts the batch immediately — {draft.name || "your agent"} dials
+                  every contact in {draft.config.outbound?.csvName ?? "your list"}.
+                </p>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li>· Caller ID: {PHONE_NUMBERS.find((n) => n.id === draft.config.outbound?.numberId)?.number ?? "selected number"}</li>
+                  <li>· Call window: {draft.config.outbound?.callWindow === "anytime" ? "anytime" : draft.config.outbound?.callWindow === "extended" ? "extended hours" : "business hours (contact's local time)"}</li>
+                  <li>· Up to {draft.config.outbound?.maxConcurrent ?? 5} calls at once</li>
+                  <li className="tabular-nums">
+                    · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * 0.1)} if every call runs ~2 min
+                    at $0.10/min — actual cost follows real talk time
+                  </li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => { setBatchConfirmOpen(false); setTalkOpen(true) }}
+            >
+              Talk to it first
+            </Button>
+            <AlertDialogCancel>Not yet</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                batchConfirmedRef.current = true
+                setBatchConfirmOpen(false)
+                publish()
+              }}
+            >
+              Start the batch
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

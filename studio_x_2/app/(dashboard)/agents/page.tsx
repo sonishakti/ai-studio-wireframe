@@ -48,7 +48,9 @@ import { ProvisioningCeremony } from "@/components/provisioning-ceremony"
 import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-progress"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
-import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset } from "@/lib/campaign-data"
+import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { newVoiceId, saveVoiceArtifact } from "@/lib/voice-artifacts"
+import { toast } from "sonner"
 
 // ─── data ────────────────────────────────────────────────────────────────────
 
@@ -175,15 +177,34 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
   const [status, setStatus] = React.useState<"all" | AgentStatus>("all")
   const [pageSize, setPageSize] = React.useState(10)
   const [page, setPage] = React.useState(1)
+  // Rows in state so Pause/Resume actually flips status — the user-test found
+  // the list filters by "Paused" while offering no way to PRODUCE that state:
+  // Delete was the only off-switch for a live agent (S2).
+  const [agents, setAgents] = React.useState(AGENTS)
+
+  const togglePause = (id: string) => {
+    setAgents((rows) =>
+      rows.map((a) => {
+        if (a.id !== id) return a
+        const paused = a.status === "live"
+        toast(paused ? `${a.name} paused` : `${a.name} is live again`, {
+          description: paused
+            ? "It stops taking new calls until you resume it. Calls in progress finish normally."
+            : `Answering on ${a.channelLabel} again.`,
+        })
+        return { ...a, status: paused ? "paused" : "live" }
+      }),
+    )
+  }
 
   const rows = React.useMemo(() => {
     const q = query.trim().toLowerCase()
-    return AGENTS.filter((a) => {
+    return agents.filter((a) => {
       if (status !== "all" && a.status !== status) return false
       if (q && !a.name.toLowerCase().includes(q) && !a.id.toLowerCase().includes(q)) return false
       return true
     })
-  }, [query, status])
+  }, [query, status, agents])
 
   React.useEffect(() => { setPage(1) }, [query, status, pageSize])
 
@@ -334,6 +355,13 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                                 anchor was consumed by nothing (#14). */}
                             <Link href={`/agents/${agent.id}/edit?step=5`}>Deploy</Link>
                           </DropdownMenuItem>
+                          {/* A reversible off-switch — Delete must never be the
+                              only way to stop a live agent (user-test S2). */}
+                          {(agent.status === "live" || agent.status === "paused") && (
+                            <DropdownMenuItem onClick={() => togglePause(agent.id)}>
+                              {agent.status === "live" ? "Pause — take offline" : "Resume"}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DestructiveActionDialog
                             action="Delete"
@@ -453,6 +481,23 @@ export default function AgentsPage() {
     setPhase(skipped ? "warming" : "ready")
   }
 
+  // List-view import lands somewhere VISIBLE: the same playground handoff the
+  // builder banner uses (import → custom voice artifact → round-trip). The
+  // user-test's top S1 was "Import as draft" toasting success while the list
+  // stayed unchanged — an import must never produce nothing.
+  const onListImported = (config: ImportedAgentConfig) => {
+    const vid = newVoiceId()
+    saveVoiceArtifact({
+      id: vid, name: config.name, kind: "custom",
+      tagline: config.source ? `Imported from ${config.source}` : "Imported agent",
+      personality: config.systemPrompt ? config.systemPrompt.slice(0, 140) : "Imported behavior",
+      tone: "Professional", language: config.language ?? "en-US",
+      ttsVoice: config.voice ?? "rachel", firstMessage: config.firstMessage ?? "Hi, how can I help you today?",
+      systemPrompt: config.systemPrompt, source: config.source ?? "Import",
+    })
+    router.push(`/agents/playground?artifact=${vid}&agent=new`)
+  }
+
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
   const startBlank = () => {
     setBuilderId("new")
@@ -493,7 +538,9 @@ export default function AgentsPage() {
         actions={
           isBuilder ? undefined : (
             <div className="flex items-center gap-2">
-              <ImportAgentSheet>
+              {/* Same handoff as the builder banner — a success toast with no
+                  visible artifact was the user-test's #1 trust break. */}
+              <ImportAgentSheet onImported={onListImported}>
                 <Button variant="outline" className="gap-1.5 max-sm:hidden">
                   <Upload className="h-4 w-4" /> Import Agent
                 </Button>
