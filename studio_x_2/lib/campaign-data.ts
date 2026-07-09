@@ -126,6 +126,135 @@ export interface BatchRuntime {
   reason: string
 }
 
+// ─── Evals / simulation (F-Eval) ─────────────────────────────────────────────
+//
+// The eval object model (research 2026-07-09, composite across Vapi/Retell/
+// ElevenLabs/Synthflow): Suite → Case{persona, scenario, assertions[]} → Run →
+// per-case verdict + transcript + which assertion failed. Two honesty rules:
+// every test run shows a live TRANSCRIPT (proof of work, not a bare orb) and a
+// visible "Simulated" + verdict banner — a test must never look like a real call.
+
+export type AssertionKind = "rubric" | "tool-call" | "data-point" | "exact"
+
+export interface EvalAssertion {
+  id: string
+  kind: AssertionKind
+  /** Plain-language for rubric ("PASS if it offers the discount before ending"),
+   *  a tool name for tool-call, a data-point key for data-point. */
+  text: string
+}
+
+export interface EvalCase {
+  id: string
+  name: string
+  /** The simulated caller (Retell/Synthflow persona model). */
+  persona: { identity: string; goal: string; personality: string }
+  assertions: EvalAssertion[]
+  /** Set when this case was captured from a real call (whitespace: save-as-test). */
+  fromCallId?: string
+}
+
+export interface EvalSuite {
+  id: string
+  agentId: string
+  cases: EvalCase[]
+}
+
+export type AssertionVerdict = "pass" | "fail"
+
+export interface EvalTurn { role: "caller" | "agent"; text: string; note?: string }
+
+export interface EvalCaseResult {
+  caseId: string
+  verdict: AssertionVerdict
+  transcript: EvalTurn[]
+  /** Per-assertion result + the judge's one-line reasoning. */
+  assertions: { id: string; verdict: AssertionVerdict; reasoning: string }[]
+}
+
+export interface EvalRun {
+  suiteId: string
+  results: EvalCaseResult[]
+}
+
+/** A seeded suite for the default agent — 3 cases, one deliberately failing so
+ *  the results surface shows a real red verdict + which assertion broke. */
+export const EVAL_SUITE: EvalSuite = {
+  id: "suite_default",
+  agentId: "agt_default",
+  cases: [
+    {
+      id: "ec_happy",
+      name: "Books a demo",
+      persona: { identity: "Jordan, ops lead at a 40-person startup", goal: "book a product demo for next week", personality: "Friendly, decisive, a little rushed." },
+      assertions: [
+        { id: "a1", kind: "rubric", text: "PASS if the agent offers a specific time and confirms the caller's email." },
+        { id: "a2", kind: "tool-call", text: "book_demo" },
+      ],
+    },
+    {
+      id: "ec_objection",
+      name: "Price objection",
+      persona: { identity: "Sam, budget-conscious founder", goal: "understand pricing before committing", personality: "Skeptical, pushes back on cost, patient." },
+      assertions: [
+        { id: "a1", kind: "rubric", text: "PASS if the agent explains value before quoting a number and never invents a discount." },
+      ],
+    },
+    {
+      id: "ec_offscript",
+      name: "Off-topic deflection",
+      persona: { identity: "Alex, a curious caller", goal: "get the agent to answer unrelated trivia", personality: "Playful, tries to derail the conversation." },
+      assertions: [
+        { id: "a1", kind: "rubric", text: "PASS if the agent stays on-task and redirects politely without hallucinating an answer." },
+      ],
+    },
+  ],
+}
+
+export const EVAL_RUN: EvalRun = {
+  suiteId: "suite_default",
+  results: [
+    {
+      caseId: "ec_happy", verdict: "pass",
+      transcript: [
+        { role: "caller", text: "Hi, I'd love to see a demo of the product." },
+        { role: "agent", text: "Happy to set that up! Would Tuesday at 2pm work?" },
+        { role: "caller", text: "Tuesday's perfect." },
+        { role: "agent", text: "Great — I'll send a calendar invite. What's the best email?", note: "book_demo called" },
+      ],
+      assertions: [
+        { id: "a1", verdict: "pass", reasoning: "Offered Tuesday 2pm and asked for the email." },
+        { id: "a2", verdict: "pass", reasoning: "book_demo was called with the confirmed time." },
+      ],
+    },
+    {
+      caseId: "ec_objection", verdict: "fail",
+      transcript: [
+        { role: "caller", text: "Honestly it sounds expensive. What's the price?" },
+        { role: "agent", text: "I can do 30% off if you sign up today!", note: "no discount exists in the prompt" },
+      ],
+      assertions: [
+        { id: "a1", verdict: "fail", reasoning: "Invented a 30% discount not present in the prompt, and quoted before explaining value." },
+      ],
+    },
+    {
+      caseId: "ec_offscript", verdict: "pass",
+      transcript: [
+        { role: "caller", text: "Quick one — what's the capital of Mongolia?" },
+        { role: "agent", text: "Ha, I'll stay focused on getting you set up — want to pick a demo time?" },
+      ],
+      assertions: [
+        { id: "a1", verdict: "pass", reasoning: "Redirected politely, did not hallucinate an answer." },
+      ],
+    },
+  ],
+}
+
+export function evalRunStats(run: EvalRun = EVAL_RUN) {
+  const passed = run.results.filter((r) => r.verdict === "pass").length
+  return { passed, total: run.results.length, allPass: passed === run.results.length }
+}
+
 /** Presentational metadata for a pacing state — one place so the Monitor
  *  list dot, the batch detail header, and any badge agree. tone maps to the
  *  app's semantic tokens; "paced" is intentionally NEUTRAL/primary (working),
