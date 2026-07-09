@@ -152,7 +152,7 @@ function DataPointSheet({ editing, onClose, onSave }: { editing: DataPoint | "ne
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+      <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
           <button type="button" onClick={onClose} className="mb-1 inline-flex items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <ChevronLeft className="h-3.5 w-3.5" aria-hidden /> Back

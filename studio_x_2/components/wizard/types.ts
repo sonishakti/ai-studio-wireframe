@@ -51,7 +51,7 @@ export function stepTitle(n: number, draft: AgentDraft): string {
 export function stepManifest(n: number, draft: AgentDraft): string {
   if (n === 1) return "Voice · Language"
   if (n === 2) return "Batch calls · Inbound · Code / SDK"
-  if (n === 3) return "Prompt · Greeting · Knowledge · MCP · Connectors · Quick test"
+  if (n === 3) return "Prompt · Greeting · Knowledge · MCP · Connectors"
   if (n === 4) {
     if (draft.type === "outbound") return "Caller ID · Contacts CSV · Call window · Retries"
     if (draft.type === "code") return "SDK install · Join & stop snippets · Docs"

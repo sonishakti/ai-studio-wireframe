@@ -43,7 +43,7 @@ export function StepType({ draft, update }: StepProps) {
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
-        How will {draft.name || "your agent"} reach people? You can change this any time.
+        How will {draft.name || "your agent"} reach people?
       </p>
 
       <div className="grid gap-3 sm:grid-cols-3">

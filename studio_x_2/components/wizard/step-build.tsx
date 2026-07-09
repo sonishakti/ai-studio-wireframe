@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import {
-  BookOpen, Plug, Boxes, Plus, X, Check, Play, MessageSquare, ChevronLeft,
+  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -167,8 +167,6 @@ export function StepBuild({ draft, update }: StepProps) {
             }
           />
         </div>
-
-        <QuickTest name={draft.name} greeting={draft.greeting} />
       </div>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}
@@ -177,45 +175,6 @@ export function StepBuild({ draft, update }: StepProps) {
   )
 }
 
-// ─── Quick test — hear the opening + a sample reply without leaving the step ───
-
-function QuickTest({ name, greeting }: { name: string; greeting: string }) {
-  const [ran, setRan] = React.useState(false)
-  const agent = name || "Your agent"
-  const opener = greeting.trim() || "Hi, thanks for reaching out. How can I help?"
-  return (
-    <section className="space-y-3 rounded-lg border border-border bg-card p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold">Quick test</p>
-          <p className="text-xs text-muted-foreground">Hear how it opens and a sample reply.</p>
-        </div>
-        <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => setRan(true)}>
-          <Play className="h-3.5 w-3.5" /> {ran ? "Run again" : "Run a sample turn"}
-        </Button>
-      </div>
-      {ran && (
-        <div className="space-y-2 rounded-md border border-border bg-muted/20 p-3">
-          <Turn who={agent} text={opener} agent />
-          <Turn who="Caller" text="Do you have any availability tomorrow?" />
-          <Turn who={agent} text="Let me check that for you. What time of day works best?" agent />
-          <p className="pt-1 text-xs text-muted-foreground">Full voice test: use &ldquo;Talk to your agent&rdquo; in the sidebar.</p>
-        </div>
-      )}
-    </section>
-  )
-}
-
-function Turn({ who, text, agent = false }: { who: string; text: string; agent?: boolean }) {
-  return (
-    <div className="flex items-start gap-2">
-      <span className={cn("mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full", agent ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-        <MessageSquare className="h-3 w-3" />
-      </span>
-      <p className="text-xs leading-relaxed"><span className="font-medium">{who}:</span> <span className="text-muted-foreground">{text}</span></p>
-    </div>
-  )
-}
 
 // ─── Resource field — chips + a Sheet that ATTACHES existing and CREATES new ───
 
@@ -322,7 +281,7 @@ function ResourceField({
             <Plus className="h-3.5 w-3.5" /> {manageLabel}
           </Button>
         </SheetTrigger>
-        <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+        <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
           {view === "create" && create ? (
             <>
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
@@ -575,7 +534,7 @@ export function McpToolsSheet({ id, onClose, onSaved }: { id: string | null; onC
   }
   return (
     <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+      <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
           <SheetTitle>Configure tools</SheetTitle>
           <SheetDescription>{server?.name ?? "MCP server"}. Turn each tool on or off.</SheetDescription>

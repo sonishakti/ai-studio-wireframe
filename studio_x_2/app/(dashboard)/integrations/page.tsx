@@ -191,7 +191,7 @@ function ResourcesInner() {
 
           {/* Create — the same form the builder uses, so both write one store. */}
           <Sheet open={kbCreateOpen} onOpenChange={setKbCreateOpen}>
-            <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+            <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
                 <SheetTitle>Create knowledge base</SheetTitle>
               </SheetHeader>
@@ -268,7 +268,7 @@ function ResourcesInner() {
 
           {/* Create + configure — the builder's own surfaces, one shared store. */}
           <Sheet open={mcpCreateOpen} onOpenChange={setMcpCreateOpen}>
-            <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+            <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
                 <SheetTitle>Create MCP server</SheetTitle>
               </SheetHeader>
