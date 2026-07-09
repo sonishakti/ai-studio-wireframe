@@ -121,7 +121,7 @@ export function Variant1({ scenario }: ItspVariantProps) {
   }, [])
 
   // Reset when the harness switches scenarios — render-time state adjustment
-  // (react.dev pattern), no effect needed.
+  // (react.dev "adjusting state when a prop changes"), no effect needed.
   const [seenScenario, setSeenScenario] = React.useState(scenario.id)
   if (seenScenario !== scenario.id) {
     setSeenScenario(scenario.id)
@@ -262,6 +262,105 @@ export function Variant1({ scenario }: ItspVariantProps) {
     },
   ]
 
+  // Credential fields render in two places (setup, and re-opened under a 401
+  // so the fix reads top-to-bottom: failed stage → why → edit → retry) —
+  // hoisted once so the two spots can't drift.
+  const credentialFields =
+    provider === "twilio" ? (
+      <Collapsible
+        open={!twilioScoped}
+        onOpenChange={(o) => setTwilioScoped(!o)}
+        className="space-y-3"
+      >
+        {twilioScoped && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="API key SID" required>
+                <Input
+                  placeholder="SK…"
+                  value={form.keySid}
+                  onChange={(e) => setForm({ ...form, keySid: e.target.value })}
+                  className="font-mono text-sm"
+                />
+              </Field>
+              <Field label="API key secret" required>
+                <Input
+                  type="password"
+                  placeholder="••••••••••••"
+                  value={form.keySecret}
+                  onChange={(e) => setForm({ ...form, keySecret: e.target.value })}
+                  className="font-mono text-sm"
+                />
+              </Field>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <KeyRound className="mr-1 inline h-3 w-3 align-[-0.125em]" aria-hidden />
+              Scoped to voice and revocable on its own — the safer credential.
+              Create one under{" "}
+              <a href={CARRIER.twilio.keysUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                {CARRIER.twilio.keysWhere} ↗
+              </a>
+            </p>
+          </div>
+        )}
+        {/* Less-secure fallback is disclosed, not hidden (R1) — opening it
+            swaps the fields so the pre-automation input count stays ≤4. */}
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs text-muted-foreground">
+            {twilioScoped ? "Use Account SID + Auth Token instead" : "Back to the scoped key (safer)"}
+            <ChevronDown
+              className={`h-3 w-3 motion-safe:transition-transform ${twilioScoped ? "" : "rotate-180"}`}
+              aria-hidden
+            />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Account SID" required>
+              <Input
+                placeholder="AC…"
+                value={form.accountSid}
+                onChange={(e) => setForm({ ...form, accountSid: e.target.value })}
+                className="font-mono text-sm"
+              />
+            </Field>
+            <Field label="Auth Token" required>
+              <Input
+                type="password"
+                placeholder="••••••••••••"
+                value={form.authToken}
+                onChange={(e) => setForm({ ...form, authToken: e.target.value })}
+                className="font-mono text-sm"
+              />
+            </Field>
+          </div>
+          <p className="text-xs text-warning">
+            The auth token grants full account access and can&apos;t be scoped —
+            rotating it breaks every integration that uses it. Prefer a scoped
+            API key when you can.
+          </p>
+        </CollapsibleContent>
+      </Collapsible>
+    ) : (
+      <div className="space-y-3">
+        <Field label="API key" required>
+          <Input
+            type="password"
+            placeholder="KEY…"
+            value={form.telnyxKey}
+            onChange={(e) => setForm({ ...form, telnyxKey: e.target.value })}
+            className="font-mono text-sm"
+          />
+        </Field>
+        <p className="text-xs text-muted-foreground">
+          Create one under{" "}
+          <a href={CARRIER.telnyx.keysUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+            {CARRIER.telnyx.keysWhere} ↗
+          </a>
+        </p>
+      </div>
+    )
+
   return (
     <div className="space-y-2">
       {/* Scenario context so the variant reads standalone in the lab grid */}
@@ -339,142 +438,41 @@ export function Variant1({ scenario }: ItspVariantProps) {
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-                {/* ── Setup form: ≤4 inputs before automation starts (R1) —
-                    label (optional) + provider + one credential pair. */}
-                {(phase === "idle" || credsFailed) && (
+                {/* ── Setup: ≤4 inputs before automation starts (R1) —
+                    optional label + provider + one credential pair. */}
+                {phase === "idle" && (
                   <div className="space-y-4">
-                    {phase === "idle" && (
-                      <>
-                        <Field label="Label" hint="optional">
-                          <Input
-                            placeholder="Support line"
-                            value={form.label}
-                            onChange={(e) => setForm({ ...form, label: e.target.value })}
-                          />
-                        </Field>
-                        <Field label="Provider" required>
-                          <ToggleGroup
-                            type="single"
-                            value={provider}
-                            onValueChange={(v) => { if (v) setProvider(v as ProviderId) }}
-                            variant="outline"
-                            aria-label="Carrier"
-                            className="w-full"
+                    <Field label="Label" hint="optional">
+                      <Input
+                        placeholder="Support line"
+                        value={form.label}
+                        onChange={(e) => setForm({ ...form, label: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Provider" required>
+                      <ToggleGroup
+                        type="single"
+                        value={provider}
+                        onValueChange={(v) => { if (v) setProvider(v as ProviderId) }}
+                        variant="outline"
+                        aria-label="Carrier"
+                        className="w-full"
+                      >
+                        {PROVIDERS.map((p) => (
+                          <ToggleGroupItem
+                            key={p.id}
+                            value={p.id}
+                            className="h-auto flex-1 flex-col items-start gap-0.5 px-3 py-2 data-[state=on]:border-primary/50 data-[state=on]:bg-primary/5"
                           >
-                            {PROVIDERS.map((p) => (
-                              <ToggleGroupItem
-                                key={p.id}
-                                value={p.id}
-                                className="h-auto flex-1 flex-col items-start gap-0.5 px-3 py-2 data-[state=on]:border-primary/50 data-[state=on]:bg-primary/5"
-                              >
-                                <span className="text-sm font-medium">{p.label}</span>
-                                <span className="text-xs font-normal text-muted-foreground">
-                                  {p.id === "twilio" ? "Scoped key, or SID + token" : "API key"}
-                                </span>
-                              </ToggleGroupItem>
-                            ))}
-                          </ToggleGroup>
-                        </Field>
-                      </>
-                    )}
-
-                    {/* Credential fields — editable again on a 401 so the fix
-                        happens in place, then retry re-runs ONLY validation. */}
-                    {provider === "twilio" ? (
-                      twilioScoped ? (
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Field label="API key SID" required>
-                              <Input
-                                placeholder="SK…"
-                                value={form.keySid}
-                                onChange={(e) => setForm({ ...form, keySid: e.target.value })}
-                                className="font-mono text-sm"
-                              />
-                            </Field>
-                            <Field label="API key secret" required>
-                              <Input
-                                type="password"
-                                placeholder="••••••••••••"
-                                value={form.keySecret}
-                                onChange={(e) => setForm({ ...form, keySecret: e.target.value })}
-                                className="font-mono text-sm"
-                              />
-                            </Field>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            <KeyRound className="mr-1 inline h-3 w-3 align-[-0.125em]" aria-hidden />
-                            Scoped to voice and revocable on its own — the safer credential.
-                            Create one under{" "}
-                            <a href={CARRIER.twilio.keysUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                              {CARRIER.twilio.keysWhere} ↗
-                            </a>
-                          </p>
-                          {/* Less-secure fallback is disclosed, not hidden (R1) */}
-                          <Collapsible open={false} onOpenChange={() => setTwilioScoped(false)}>
-                            <CollapsibleTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs text-muted-foreground">
-                                Use Account SID + Auth Token instead
-                                <ChevronDown className="h-3 w-3" aria-hidden />
-                              </Button>
-                            </CollapsibleTrigger>
-                          </Collapsible>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Field label="Account SID" required>
-                              <Input
-                                placeholder="AC…"
-                                value={form.accountSid}
-                                onChange={(e) => setForm({ ...form, accountSid: e.target.value })}
-                                className="font-mono text-sm"
-                              />
-                            </Field>
-                            <Field label="Auth Token" required>
-                              <Input
-                                type="password"
-                                placeholder="••••••••••••"
-                                value={form.authToken}
-                                onChange={(e) => setForm({ ...form, authToken: e.target.value })}
-                                className="font-mono text-sm"
-                              />
-                            </Field>
-                          </div>
-                          <p className="text-xs text-warning">
-                            The auth token grants full account access and can&apos;t be
-                            scoped — rotating it breaks every integration that uses it.
-                            Prefer a scoped API key when you can.
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 gap-1 px-2 text-xs text-muted-foreground"
-                            onClick={() => setTwilioScoped(true)}
-                          >
-                            Back to the scoped key (safer)
-                          </Button>
-                        </div>
-                      )
-                    ) : (
-                      <div className="space-y-3">
-                        <Field label="API key" required>
-                          <Input
-                            type="password"
-                            placeholder="KEY…"
-                            value={form.telnyxKey}
-                            onChange={(e) => setForm({ ...form, telnyxKey: e.target.value })}
-                            className="font-mono text-sm"
-                          />
-                        </Field>
-                        <p className="text-xs text-muted-foreground">
-                          Create one under{" "}
-                          <a href={CARRIER.telnyx.keysUrl} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                            {CARRIER.telnyx.keysWhere} ↗
-                          </a>
-                        </p>
-                      </div>
-                    )}
+                            <span className="text-sm font-medium">{p.label}</span>
+                            <span className="text-xs font-normal text-muted-foreground">
+                              {p.id === "twilio" ? "Scoped key, or SID + token" : "API key"}
+                            </span>
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </Field>
+                    {credentialFields}
                   </div>
                 )}
 
@@ -709,6 +707,11 @@ export function Variant1({ scenario }: ItspVariantProps) {
                     )}
                   </div>
                 )}
+
+                {/* On a 401 the credential fields re-open BELOW the failure
+                    card so the fix reads top-to-bottom: what failed → why →
+                    edit → retry (footer). */}
+                {credsFailed && <div className="space-y-4">{credentialFields}</div>}
               </div>
 
               {/* Footer only when there's one obvious next action; mid-run the
@@ -745,7 +748,7 @@ export function Variant1({ scenario }: ItspVariantProps) {
 /* ── Per-failure copy (R5): the carrier-side fix is NAMED and LINKED, the
    blast radius is stated (what did NOT happen), and retry touches only the
    failed stage. Credentials failures get no inline retry — the fields
-   re-open above and the footer's "Validate again" is the retry. */
+   re-open below and the footer's "Validate again" is the retry. */
 function FailurePanel({
   failure,
   carrier,
@@ -766,7 +769,7 @@ function FailurePanel({
           body: `The credential didn't authenticate. Check for a missing character or an inactive key — both live under ${carrier.keysWhere}.`,
           honesty: `Nothing ran after this: no numbers were read, no trunk was created, nothing changed at ${carrier.name}.`,
           link: { label: `Open ${carrier.name} keys ↗`, href: carrier.keysUrl },
-          retryLabel: undefined,
+          retryLabel: undefined as string | undefined,
         }
       : failure === "no-numbers"
         ? {
@@ -774,7 +777,7 @@ function FailurePanel({
             body: `The credential works — the account just owns no numbers to attach. Agora doesn't sell numbers, so buy one at ${carrier.name} first, then rescan.`,
             honesty: "Trunk creation didn't start — nothing was created.",
             link: { label: `Buy a number at ${carrier.name} ↗`, href: carrier.buyUrl },
-            retryLabel: "Rescan numbers",
+            retryLabel: "Rescan numbers" as string | undefined,
           }
         : failure === "geo-blocked"
           ? {
@@ -785,15 +788,16 @@ function FailurePanel({
               body: `${carrier.name} refuses calls to this number's region until it's enabled account-side, under ${carrier.geoWhere}. Fix it there, then retry — only this step re-runs; everything above stays done.`,
               honesty: undefined,
               link: { label: `Open ${carrier.geoWhere} ↗`, href: carrier.geoUrl },
-              retryLabel: "Retry attach",
+              retryLabel: "Retry attach" as string | undefined,
             }
           : {
-              // verify-fail: two different facts, stated as such.
+              // verify-fail: configuration exists, calls don't connect yet —
+              // two different facts, stated as such.
               title: "The trunk exists — the call didn't connect.",
               body: `Provisioning succeeded: trunk, routing, and ${number ?? "the number"} are all configured. The test call still failed — those are different facts, and only a connected call is proof. ${carrier.name}'s call logs show what the carrier saw.`,
               honesty: undefined,
               link: { label: `Open ${carrier.name} call logs ↗`, href: carrier.logsUrl },
-              retryLabel: "Call again",
+              retryLabel: "Call again" as string | undefined,
             }
 
   return (
@@ -858,9 +862,9 @@ function Summary({ label, value, mono }: { label: string; value: string; mono?: 
   )
 }
 
-/* Same route-card shape as add-phone-number-sheet.tsx so the two entry
-   points end on an identical "now use it" beat — plus a disabled treatment
-   for outbound-only numbers, which can't take inbound. */
+/* Same route-card shape as add-phone-number-sheet.tsx so both entry points
+   end on an identical "now use it" beat — plus a disabled treatment for
+   outbound-only numbers, which can't take inbound. */
 function RouteCard({
   icon: Icon, title, desc, onClick, disabled,
 }: {
@@ -890,5 +894,3 @@ function RouteCard({
     </button>
   )
 }
-
-type ProviderId2 = ProviderId // (type alias retained for clarity of FailurePanel prop)
