@@ -19,8 +19,9 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 1. `HANDOFF-2026-06-18.md` — **latest** state, commits, deploy, the shipped Diagnostics feature + the next slice (§4); `HANDOFF-2026-06-02.md` is the prior one
 2. `LEARNINGS.md` — strategic frame, funnel data, personas, hypothesis stack, decision log (paid for in research — **don't re-litigate**)
-3. `references/ia-mapping.md` — Console → Studio 56/56 URL coverage
-4. `references/sitemap.md` — original Agora Console structure
+3. `references/roadmap-activation-strategy-2026-07-09.md` + `references/roadmap-features-prd-2026-07-09.md` — **the cn2meet roadmap (42 features) reframed as an activation engine** + design-ready PRD (register, P0/P1 cards, per-feature "run this skill next"). Load-bearing fact-checks inside (300-min free tier NOT 10k; Agora sells no numbers; MLLM+MCP already ship; postpaid billing; no live-monitoring/WhatsApp). Proposal — not yet built.
+4. `references/ia-mapping.md` — Console → Studio 56/56 URL coverage
+5. `references/sitemap.md` — original Agora Console structure
 5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
 6. `studio-x/` — the live Next.js app (the wireframe itself); `wireframes/app.html` is the superseded HTML origin
 
