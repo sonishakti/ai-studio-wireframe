@@ -117,7 +117,7 @@ function TurnBubble({
   const isAgent = role === "agent"
   return (
     <div className={cn("flex flex-col gap-1", isAgent ? "items-start" : "items-end")}>
-      <span className="px-1 text-[0.6875rem] font-medium uppercase tracking-wide text-muted-foreground">
+      <span className="px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {isAgent ? AGENT.name : "Simulated caller"}
       </span>
       <div
@@ -277,7 +277,7 @@ function RunningView({ fromAuthor, onEditCaller }: { fromAuthor: boolean; onEdit
             <p>{t.text}</p>
             {/* A tool the agent fired mid-turn — shown as evidence, not chrome. */}
             {t.note && (
-              <p className="mt-1.5 inline-flex items-center gap-1 rounded bg-background/60 px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted-foreground">
+              <p className="mt-1.5 inline-flex items-center gap-1 rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                 <Wrench className="h-3 w-3" /> {t.note}
               </p>
             )}
@@ -495,7 +495,7 @@ function ResultsView() {
                   <TurnBubble role={t.role} flag={turnFailed}>
                     <p>{t.text}</p>
                     {t.note && (
-                      <p className="mt-1.5 inline-flex items-center gap-1 rounded bg-background/60 px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted-foreground">
+                      <p className="mt-1.5 inline-flex items-center gap-1 rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                         <Wrench className="h-3 w-3" /> {t.note}
                       </p>
                     )}
@@ -842,7 +842,7 @@ function SaveFromCallView() {
           <TurnBubble key={i} role={t.role}>
             <p>{t.text}</p>
             {t.note && (
-              <p className="mt-1.5 inline-flex items-center gap-1 rounded bg-background/60 px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted-foreground">
+              <p className="mt-1.5 inline-flex items-center gap-1 rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                 <Wrench className="h-3 w-3" /> {t.note}
               </p>
             )}
