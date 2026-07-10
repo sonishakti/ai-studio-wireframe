@@ -125,8 +125,10 @@ export function StackConfig({
         </p>
       </header>
 
-      {/* Preset first — the ONE model decision most users make. */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="group" aria-label="Model preset">
+      {/* Preset first — the ONE model decision most users make. Three across at
+          4/12 each; two lines, sized to the select-box scale (owner 2026-07-10:
+          the old three-line cards dwarfed every other control). */}
+      <div className="grid grid-cols-12 gap-2" role="group" aria-label="Model preset">
         {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
           const preset = STACK_PRESETS[p]
           const pEst = stackEstimateFor(stackFor(p, stack.modality))
@@ -137,8 +139,9 @@ export function StackConfig({
               type="button"
               onClick={() => setPreset(p)}
               aria-pressed={active}
+              title={preset.hint}
               className={cn(
-                "rounded-lg border p-3 text-left transition-colors",
+                "col-span-12 rounded-lg border p-3 text-left transition-colors sm:col-span-4",
                 active
                   ? "border-primary bg-primary/5 ring-1 ring-primary"
                   : "border-border bg-card hover:border-foreground/20 hover:bg-accent/40",
@@ -148,8 +151,8 @@ export function StackConfig({
                 <span className="text-sm font-medium">{preset.label}</span>
                 {active && <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />}
               </span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">{preset.hint}</span>
-              <span className="mt-1.5 block text-xs text-muted-foreground">
+              {/* The numbers ARE the hint; the prose moved to the title tooltip. */}
+              <span className="mt-0.5 block text-xs text-muted-foreground">
                 ~{pEst.latencyMs} ms · ~${pEst.costPerMin.toFixed(2)}/min
               </span>
             </button>
@@ -171,22 +174,22 @@ export function StackConfig({
         type="single"
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
-        className="grid w-full gap-2 sm:grid-cols-2"
+        className="grid w-full grid-cols-12 gap-2"
         aria-label="Pipeline"
       >
         <ToggleGroupItem
           value="stt-llm-tts"
-          className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          className="col-span-12 h-auto flex-col items-start gap-0.5 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5 sm:col-span-6"
         >
           <span className="text-sm font-medium">Separate models <span className="font-normal text-muted-foreground">(default)</span></span>
-          <span className="text-xs font-normal leading-relaxed text-muted-foreground">Speech-to-text, then an LLM, then text-to-speech. Tune each stage.</span>
+          <span className="text-xs font-normal text-muted-foreground">Speech, then an LLM, then speech. Tune each stage.</span>
         </ToggleGroupItem>
         <ToggleGroupItem
           value="mllm"
-          className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          className="col-span-12 h-auto flex-col items-start gap-0.5 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5 sm:col-span-6"
         >
           <span className="text-sm font-medium">One realtime model</span>
-          <span className="text-xs font-normal leading-relaxed text-muted-foreground">A single model hears and speaks. Faster, and it handles turn-taking itself.</span>
+          <span className="text-xs font-normal text-muted-foreground">Hears and speaks. Faster, fewer knobs.</span>
         </ToggleGroupItem>
       </ToggleGroup>
 
@@ -219,8 +222,8 @@ export function StackConfig({
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 pt-4">
           {pipeline === "stt-llm-tts" ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
+            <div className="grid grid-cols-12 gap-3">
+              <div className="col-span-12 space-y-1.5 sm:col-span-6">
                 <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
                 <Select
                   value={`${stack.asr.vendor}/${stack.asr.model}`}
@@ -237,7 +240,7 @@ export function StackConfig({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="col-span-12 space-y-1.5 sm:col-span-6">
                 <Label className="text-xs text-muted-foreground">Large Language Model (LLM)</Label>
                 <Select
                   value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -254,7 +257,7 @@ export function StackConfig({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="col-span-12 space-y-1.5 sm:col-span-6">
                 <Label className="text-xs text-muted-foreground">Text-to-Speech (TTS)</Label>
                 <Select
                   value={stack.tts.vendor}
@@ -271,7 +274,7 @@ export function StackConfig({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+              <div className="col-span-12 space-y-1.5 sm:col-span-6">
                 {/* "TTS voice", not "Voice" — the persona picker sits directly
                     above this on Step 1; two controls named Voice read as a bug. */}
                 <Label className="text-xs text-muted-foreground">TTS voice</Label>
@@ -284,7 +287,8 @@ export function StackConfig({
               </div>
             </div>
           ) : (
-            <div className="max-w-xs space-y-1.5">
+            <div className="grid grid-cols-12">
+            <div className="col-span-12 space-y-1.5 sm:col-span-6">
               <Label className="text-xs text-muted-foreground">Realtime model</Label>
               <Select
                 value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -300,6 +304,7 @@ export function StackConfig({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
             </div>
           )}
         </CollapsibleContent>

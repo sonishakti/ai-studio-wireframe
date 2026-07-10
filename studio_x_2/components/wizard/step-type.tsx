@@ -21,19 +21,19 @@ const TYPES: {
   {
     id: "outbound",
     title: typeLabel("outbound"),
-    desc: "Your agent calls through a contact list you upload, one person at a time.",
+    desc: "Calls through a contact list you upload.",
     icon: PhoneOutgoing,
   },
   {
     id: "inbound",
     title: typeLabel("inbound"),
-    desc: "Your agent answers on a phone number, 24/7, or as a web widget on your site.",
+    desc: "Answers a phone number 24/7, or a web widget.",
     icon: PhoneIncoming,
   },
   {
     id: "code",
     title: typeLabel("code"),
-    desc: "Run the agent inside your own app via the SDK or API. No phone number required.",
+    desc: "Runs inside your own app. No phone number.",
     icon: Code2,
   },
 ]
@@ -52,7 +52,10 @@ export function StepType({ draft, update, liveNote }: StepProps & { liveNote?: s
         <p className="text-xs text-muted-foreground">{liveNote}</p>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      {/* Three across at 4/12 each. Compact two-line cards on the select-box
+          scale — the icon sits inline with the title instead of in a 36px tile
+          (owner 2026-07-10: these dwarfed every other control). */}
+      <div className="grid grid-cols-12 gap-2">
         {TYPES.map((t) => {
           const Icon = t.icon
           const selected = draft.type === t.id
@@ -63,27 +66,18 @@ export function StepType({ draft, update, liveNote }: StepProps & { liveNote?: s
               onClick={() => update({ type: t.id })}
               aria-pressed={selected}
               className={cn(
-                "relative flex flex-col gap-3 rounded-lg border p-4 text-left transition-colors",
+                "col-span-12 flex flex-col items-start gap-0.5 rounded-lg border p-3 text-left transition-colors sm:col-span-4",
                 selected
                   ? "border-primary bg-primary/5 ring-1 ring-primary"
                   : "border-border bg-card hover:border-foreground/20 hover:bg-accent/40",
               )}
             >
-              <div className="flex items-center justify-between">
-                <span
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg",
-                    selected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                {selected && <Check className="h-4 w-4 text-primary" />}
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold">{t.title}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">{t.desc}</p>
-              </div>
+              <span className="flex w-full items-center gap-2">
+                <Icon className={cn("h-4 w-4 shrink-0", selected ? "text-primary" : "text-muted-foreground")} aria-hidden />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{t.title}</span>
+                {selected && <Check className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />}
+              </span>
+              <span className="text-xs text-muted-foreground">{t.desc}</span>
             </button>
           )
         })}

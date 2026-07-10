@@ -4,6 +4,7 @@ import * as React from "react"
 import { Plus, Pencil, ChevronDown, Play } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -18,19 +19,13 @@ import type { AgentDraft } from "@/lib/wizard-draft"
 /**
  * Step 1 — Voice & models.
  *
- * EVERYTHING ON ONE PAGE (owner 2026-07-09). This reverses the 2026-07-07
- * "engine lives in the Playground" call: reaching the multimodal-vs-cascade
- * choice took a route change plus two disclosures, and editing a voice meant
- * leaving the builder entirely.
+ * EVERYTHING ON ONE PAGE (owner 2026-07-09): the voice picker, the voice editor
+ * (a sheet, not a route), the spoken language, and the full model stack.
  *
- *   • Voice   — pick a ready-made persona (browser modal) or make your own.
- *   • Models  — StackConfig inline, editing `draft.stack` directly. Preset and
- *               pipeline shape are both visible; only vendor dropdowns nest.
- *   • Voice editing/creating — a Sheet on this page, never `/agents/playground`.
- *
- * Presets are IMMUTABLE: "Customize" forks a preset into a new custom you own.
- * The standalone Playground route still exists (⌘K, agents list) but the
- * builder never sends you there.
+ * TWELVE-COLUMN GRID (owner 2026-07-10): the step body is a 12-col grid. Rows
+ * hold 3 items at 4 cols (33%) or 2 items at 6 cols (50%); a field that is a
+ * STEP in a sequence spans all 12. Reading order stays left-to-right, then top
+ * to bottom. Controls are sized to the select-box scale — no oversized cards.
  */
 export function StepVoice({
   draft,
@@ -59,76 +54,79 @@ export function StepVoice({
     onSelectVoice(v)
   }
 
+  const editSelected = () => {
+    if (!selected) return
+    setEditor(selected.kind === "custom"
+      ? { kind: "edit", artifact: selected }
+      : { kind: "fork", from: selected })
+  }
+
   return (
-    <div className="max-w-3xl space-y-6">
-      <p className="text-sm text-muted-foreground">
+    <div className="grid max-w-4xl grid-cols-12 gap-x-4 gap-y-6">
+      <p className="col-span-12 text-sm text-muted-foreground">
         Pick the ready-made persona your agent speaks with, then tune the models behind it. A voice
         pre-fills your prompt and greeting only while they&apos;re empty; switching voices never
         overwrites what you&apos;ve written.
       </p>
 
-      {/* ── Voice: pick · preview · make your own ── */}
-      <div className="space-y-2">
+      {/* Voice: select · Preview · Edit on ONE line (owner 2026-07-10). */}
+      <div className="col-span-12 space-y-2">
         <Label className="text-xs text-muted-foreground">Voice</Label>
-        <button
-          type="button"
-          onClick={() => setBrowserOpen(true)}
-          aria-label="Browse voices"
-          className={cn(
-            "flex w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-        >
-          {selected ? (
-            <span className="flex min-w-0 items-baseline gap-2">
-              <span className="font-medium">{selected.name}</span>
-              <span className="truncate text-xs text-muted-foreground">
-                {selected.tagline}{selected.kind === "custom" ? " · Custom" : ""}
-              </span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">Browse voices</span>
-          )}
-          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-        </button>
-
-        {/* A sample of the VOICE, plus the two make-your-own actions. Both open a
-            sheet on this page (no Playground trip). */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-          {selected && (
-            <button
-              type="button"
-              onClick={() => toast(`Playing a sample of ${selected.name}`)}
-              className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Play className="h-3.5 w-3.5" aria-hidden /> Preview voice
-            </button>
-          )}
-          {selected && (
-            <button
-              type="button"
-              onClick={() =>
-                setEditor(selected.kind === "custom"
-                  ? { kind: "edit", artifact: selected }
-                  : { kind: "fork", from: selected })
-              }
-              className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Pencil className="h-3.5 w-3.5" aria-hidden />
-              {selected.kind === "custom" ? "Edit voice" : "Customize"}
-            </button>
-          )}
+        <div className="grid grid-cols-12 gap-2">
           <button
             type="button"
-            onClick={() => setEditor({ kind: "create" })}
-            className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => setBrowserOpen(true)}
+            aria-label="Browse voices"
+            className={cn(
+              "col-span-12 flex h-9 items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:col-span-8",
+            )}
           >
-            <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
+            {selected ? (
+              <span className="flex min-w-0 items-baseline gap-2">
+                <span className="font-medium">{selected.name}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {selected.tagline}{selected.kind === "custom" ? " · Custom" : ""}
+                </span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Browse voices</span>
+            )}
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
           </button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!selected}
+            onClick={() => selected && toast(`Playing a sample of ${selected.name}`)}
+            className="col-span-6 h-9 gap-1.5 sm:col-span-2"
+          >
+            <Play className="h-3.5 w-3.5" aria-hidden /> Preview
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!selected}
+            onClick={editSelected}
+            className="col-span-6 h-9 gap-1.5 sm:col-span-2"
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
+          </Button>
         </div>
+
+        {/* Optional, so it reads quieter than the row above it. */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setEditor({ kind: "create" })}
+          className="h-8 gap-1.5 px-2 text-muted-foreground"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Create custom voice
+        </Button>
       </div>
 
-      {/* Spoken language — an agent trait, not a model detail (heuristic-eval #16). */}
-      <div className="max-w-xs space-y-1.5">
+      {/* Spoken language — an agent trait, not a model detail. Half a row. */}
+      <div className="col-span-12 space-y-1.5 sm:col-span-6">
         <Label className="text-xs text-muted-foreground">Spoken language</Label>
         <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
           <SelectTrigger className="w-full text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
@@ -138,8 +136,8 @@ export function StepVoice({
         </Select>
       </div>
 
-      {/* ── Models & speed: inline. Preset + pipeline shape both visible. ── */}
-      <div className="border-t border-border pt-5">
+      {/* Models & speed: inline, and it lays itself out on the same 12-col grid. */}
+      <div className="col-span-12 border-t border-border pt-5">
         <StackConfig stack={draft.stack} onChange={(stack) => update({ stack })} />
       </div>
 
