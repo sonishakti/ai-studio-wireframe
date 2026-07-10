@@ -861,8 +861,11 @@ export function AgentWizard({
             {/* Always outline: this button OPENS the Talk panel. Turning it
                 red mid-test made it read as "end call" while it did no such
                 thing (audit 2026-07-07); truncate guards long agent names. */}
+            {/* Hero on first landing: with a live agent and nothing changed,
+                "talk to it" IS the pitch — Redeploy shouting before any edit was
+                a meaningless CTA (user-test 2026-07-09). They swap once dirty. */}
             <Button
-              variant="outline"
+              variant={isLive && !anyEdited ? "default" : "outline"}
               size="sm"
               className="w-full gap-1.5"
               disabled={warming}
@@ -961,7 +964,11 @@ export function AgentWizard({
                 <p className="text-xs text-muted-foreground">{deploySub}</p>
               )}
             </div>
-            <Button className="w-full gap-1.5" onClick={publish}>
+            <Button
+              variant={isLive && !anyEdited ? "outline" : "default"}
+              className="w-full gap-1.5"
+              onClick={publish}
+            >
               <Rocket className="h-4 w-4" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
             </Button>
             {/* One action to walk away from ALL pending edits (owner call,
@@ -1116,7 +1123,13 @@ export function AgentWizard({
         >
           <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
             <SheetTitle className="text-base">{draft.name || (isEdit ? existing!.name : "Your new agent")}</SheetTitle>
-            <p className="text-sm text-muted-foreground">Agent details & live test</p>
+            <p className="text-sm text-muted-foreground">Agent details & test</p>
+            {/* Say what the test IS. All three personas clicked, watched a silent
+                orb, and could not tell working from broken (user-test 2026-07-09).
+                The real transcript lives behind the future-scope flag. */}
+            <p className="text-xs text-muted-foreground">
+              Simulated preview. No live audio in this wireframe, and testing in-browser is free.
+            </p>
           </SheetHeader>
           <div className="p-4">
             <AgentIdentityCard

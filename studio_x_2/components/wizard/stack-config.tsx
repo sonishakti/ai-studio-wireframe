@@ -157,9 +157,16 @@ export function StackConfig({
         })}
       </div>
 
-      {/* Pipeline shape — a FIRST-CLASS choice, not buried in the disclosure.
-          Multimodal-vs-cascade is a shape decision, not a vendor detail; hiding
-          it two levels down made it unreachable (owner 2026-07-09). */}
+      {/* Pipeline shape — a FIRST-CLASS choice, not buried in the disclosure
+          (owner 2026-07-09). Framed in plain language: the user-test panel found
+          the bare "STT · LLM · TTS" jargon lands cold on a first-timer, but the
+          answer is to EXPLAIN it here, not to re-hide it. */}
+      <div className="space-y-1">
+        <p className="text-sm font-medium">How it listens and speaks</p>
+        <p className="text-xs text-muted-foreground">
+          Most people keep the default. Both run on Agora.
+        </p>
+      </div>
       <ToggleGroup
         type="single"
         value={pipeline}
@@ -171,17 +178,24 @@ export function StackConfig({
           value="stt-llm-tts"
           className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
         >
-          <span className="text-sm font-medium">STT · LLM · TTS</span>
-          <span className="text-xs font-normal leading-relaxed text-muted-foreground">Configure each stage of the cascade yourself.</span>
+          <span className="text-sm font-medium">Separate models <span className="font-normal text-muted-foreground">(default)</span></span>
+          <span className="text-xs font-normal leading-relaxed text-muted-foreground">Speech-to-text, then an LLM, then text-to-speech. Tune each stage.</span>
         </ToggleGroupItem>
         <ToggleGroupItem
           value="mllm"
           className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
         >
-          <span className="text-sm font-medium">Multimodal LLM</span>
-          <span className="text-xs font-normal leading-relaxed text-muted-foreground">One model handles speech in and out. Lower latency, fewer knobs.</span>
+          <span className="text-sm font-medium">One realtime model</span>
+          <span className="text-xs font-normal leading-relaxed text-muted-foreground">A single model hears and speaks. Faster, and it handles turn-taking itself.</span>
         </ToggleGroupItem>
       </ToggleGroup>
+
+      {pipeline === "mllm" && (
+        <p className="text-xs text-muted-foreground">
+          The model owns turn-taking, so the interruption and end-of-speech controls in
+          Advanced don&apos;t apply.
+        </p>
+      )}
 
       {/* What the pick means, in vendors and numbers. */}
       <p className="text-xs text-muted-foreground">
