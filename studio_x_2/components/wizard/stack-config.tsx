@@ -17,18 +17,18 @@ import {
 } from "@/lib/campaign-data"
 
 /**
- * StackConfig — the model stack (speed/cost preset + STT/LLM/TTS + voice)
- * behind a voice. Lives in the PLAYGROUND now (2026-07-07: the engine belongs
- * with the voice you customize, not in builder Step 1). It owns the TTS vendor
- * AND the voice within it (kept coherent — a vendor change resets to that
- * vendor's first voice); the spoken language is a builder trait, so no language
- * control here.
+ * StackConfig — the model stack (speed/cost preset + pipeline + STT/LLM/TTS)
+ * behind an agent. Rendered INLINE in builder Step 1 (2026-07-09: the owner
+ * reversed the 2026-07-07 "engine lives in the Playground" call — everything
+ * must be reachable on the builder page). Also still used by the standalone
+ * Playground. It owns the TTS vendor AND the voice within it (kept coherent —
+ * a vendor change resets to that vendor's first voice); the spoken language is
+ * a builder trait, so no language control here.
  *
- * PRESET-FIRST: the first decision is Fastest vs Balanced vs Cheapest; each
- * preset suggests its vendors and shows its latency/cost up front. Vendor-level
- * dropdowns (and the cascade-vs-realtime pipeline switch) live behind
- * "Customize models". Two pipeline shapes, both supported by Agora's
- * Conversational AI Engine (bring-your-own vendors):
+ * TWO VISIBLE DECISIONS, then detail: (1) the speed/cost preset, (2) the
+ * pipeline shape (cascade vs multimodal). Only vendor/model dropdowns live
+ * behind the "Choose specific models" disclosure. Both pipeline shapes are
+ * supported by Agora's Conversational AI Engine (bring-your-own vendors):
  * https://docs.agora.io/en/conversational-ai/overview/product-overview
  *
  * Estimates are PRESET-based (no per-model tables at wireframe altitude):
@@ -157,6 +157,32 @@ export function StackConfig({
         })}
       </div>
 
+      {/* Pipeline shape — a FIRST-CLASS choice, not buried in the disclosure.
+          Multimodal-vs-cascade is a shape decision, not a vendor detail; hiding
+          it two levels down made it unreachable (owner 2026-07-09). */}
+      <ToggleGroup
+        type="single"
+        value={pipeline}
+        onValueChange={(v) => v && setPipeline(v as Pipeline)}
+        className="grid w-full gap-2 sm:grid-cols-2"
+        aria-label="Pipeline"
+      >
+        <ToggleGroupItem
+          value="stt-llm-tts"
+          className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+        >
+          <span className="text-sm font-medium">STT · LLM · TTS</span>
+          <span className="text-xs font-normal leading-relaxed text-muted-foreground">Configure each stage of the cascade yourself.</span>
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="mllm"
+          className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+        >
+          <span className="text-sm font-medium">Multimodal LLM</span>
+          <span className="text-xs font-normal leading-relaxed text-muted-foreground">One model handles speech in and out. Lower latency, fewer knobs.</span>
+        </ToggleGroupItem>
+      </ToggleGroup>
+
       {/* What the pick means, in vendors and numbers. */}
       <p className="text-xs text-muted-foreground">
         {pipeline === "mllm"
@@ -174,34 +200,10 @@ export function StackConfig({
             className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-foreground transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ChevronDown className={cn("h-4 w-4 transition-transform", customOpen && "rotate-180")} aria-hidden />
-            Customize models
+            {pipeline === "mllm" ? "Choose the realtime model" : "Choose specific models"}
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 pt-4">
-          {/* Pipeline shape — ToggleGroup for real radio keyboard semantics. */}
-          <ToggleGroup
-            type="single"
-            value={pipeline}
-            onValueChange={(v) => v && setPipeline(v as Pipeline)}
-            className="grid w-full gap-2 sm:grid-cols-2"
-            aria-label="Pipeline"
-          >
-            <ToggleGroupItem
-              value="stt-llm-tts"
-              className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
-            >
-              <span className="text-sm font-medium">STT · LLM · TTS</span>
-              <span className="text-xs font-normal leading-relaxed text-muted-foreground">Configure each stage of the cascade yourself.</span>
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="mllm"
-              className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 text-left data-[state=on]:border-primary data-[state=on]:bg-primary/5"
-            >
-              <span className="text-sm font-medium">Multimodal LLM</span>
-              <span className="text-xs font-normal leading-relaxed text-muted-foreground">One model handles speech in and out. Lower latency, fewer knobs.</span>
-            </ToggleGroupItem>
-          </ToggleGroup>
-
           {pipeline === "stt-llm-tts" ? (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -256,7 +258,9 @@ export function StackConfig({
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Voice</Label>
+                {/* "TTS voice", not "Voice" — the persona picker sits directly
+                    above this on Step 1; two controls named Voice read as a bug. */}
+                <Label className="text-xs text-muted-foreground">TTS voice</Label>
                 <Select value={stack.tts.voice} onValueChange={(voice) => patch({ tts: { ...stack.tts, voice } })}>
                   <SelectTrigger className="text-sm capitalize"><SelectValue /></SelectTrigger>
                   <SelectContent>

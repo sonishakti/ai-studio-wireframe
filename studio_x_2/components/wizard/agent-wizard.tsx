@@ -585,9 +585,14 @@ export function AgentWizard({
       systemPrompt: config.systemPrompt, source: config.source ?? "Import",
     })
     if (dirty.current) saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
-    // Thread the ORIGIN agent so the playground round-trip returns here, not
-    // to a fresh create builder (re-eval #3).
-    router.push(`/agents/playground?artifact=${vid}&agent=${draft.agentId ?? "new"}`)
+    // Select the imported voice RIGHT HERE — no Playground round-trip. Step 1
+    // now holds the voice editor and the engine inline (owner 2026-07-09).
+    const imported = getVoiceArtifact(vid)
+    if (imported) selectVoice(imported)
+    toast.success(`${config.name} imported`, {
+      description: "Review its voice, models, and prompt below.",
+    })
+    openRow(1)
   }
 
   const publishingRef = React.useRef(false)

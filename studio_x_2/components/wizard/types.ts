@@ -10,9 +10,10 @@ export interface StepProps {
 }
 
 export const STEP_TITLES = [
-  // "Voice" — the model stack moved to the Playground (2026-07-07), so Step 1
-  // is the voice pick + spoken language; the engine rides along with the voice.
-  "Voice",
+  // "Voice & models" — the model stack came BACK inline (2026-07-09, reversing
+  // the 2026-07-07 Playground move): Step 1 owns the voice, the spoken language,
+  // and the engine (preset + pipeline + vendors), all on the builder page.
+  "Voice & models",
   "Select agent type",
   // Scope-honest: the drawer holds prompt + greeting + knowledge + connectors,
   // not just a prompt textarea (heuristic-eval finding #3).
@@ -49,7 +50,7 @@ export function stepTitle(n: number, draft: AgentDraft): string {
  *  location is readable from the landing without opening anything. Branches on
  *  the chosen type so row 4 predicts its actual contents. */
 export function stepManifest(n: number, draft: AgentDraft): string {
-  if (n === 1) return "Voice · Language"
+  if (n === 1) return "Voice · Models · Language"
   if (n === 2) return "Batch calls · Inbound · Code / SDK"
   if (n === 3) return "Prompt · Greeting · Knowledge · MCP · Connectors"
   if (n === 4) {

@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { Plus, Pencil, ChevronDown, Play } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -10,24 +9,28 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
-import {
-  allVoices,
-  PRESET_VOICES,
-  stashPlaygroundStack,
-  type VoiceArtifact,
-} from "@/lib/voice-artifacts"
+import { StackConfig } from "@/components/wizard/stack-config"
+import { VoiceEditorSheet, type VoiceEditorMode } from "@/components/wizard/voice-editor-sheet"
+import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_CATALOG } from "@/lib/campaign-data"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /**
- * Step 1 — Voice.
+ * Step 1 — Voice & models.
  *
- * Pick a voice (a ready-made persona) and the spoken language. The MODEL STACK
- * moved out (2026-07-07): the engine lives WITH the voice, so you set it in the
- * Playground when you customize. Presets are IMMUTABLE — "Customize this voice"
- * forks a copy into the Playground (?from=), a custom edits in place
- * (?artifact=); both return here with the artifact selected. The chosen voice's
- * cost/latency show on the agent card.
+ * EVERYTHING ON ONE PAGE (owner 2026-07-09). This reverses the 2026-07-07
+ * "engine lives in the Playground" call: reaching the multimodal-vs-cascade
+ * choice took a route change plus two disclosures, and editing a voice meant
+ * leaving the builder entirely.
+ *
+ *   • Voice   — pick a ready-made persona (browser modal) or make your own.
+ *   • Models  — StackConfig inline, editing `draft.stack` directly. Preset and
+ *               pipeline shape are both visible; only vendor dropdowns nest.
+ *   • Voice editing/creating — a Sheet on this page, never `/agents/playground`.
+ *
+ * Presets are IMMUTABLE: "Customize" forks a preset into a new custom you own.
+ * The standalone Playground route still exists (⌘K, agents list) but the
+ * builder never sends you there.
  */
 export function StepVoice({
   draft,
@@ -38,38 +41,33 @@ export function StepVoice({
   update: (patch: Partial<AgentDraft>) => void
   onSelectVoice: (v: VoiceArtifact) => void
 }) {
-  const router = useRouter()
   // Customs live in localStorage — load after mount to avoid hydration mismatch.
   const [voices, setVoices] = React.useState<VoiceArtifact[]>(PRESET_VOICES)
-  React.useEffect(() => {
-    setVoices(allVoices())
-  }, [])
+  const refreshVoices = React.useCallback(() => setVoices(allVoices()), [])
+  React.useEffect(() => { refreshVoices() }, [refreshVoices])
 
   const selected = draft.voice ? voices.find((v) => v.id === draft.voice!.id) : undefined
-  const origin = draft.agentId ?? "new"
   const [browserOpen, setBrowserOpen] = React.useState(false)
+  const [editor, setEditor] = React.useState<VoiceEditorMode | null>(null)
+
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
-  // Hand the agent's current engine to the Playground so customizing starts
-  // from where it runs today, then navigate (stack-move review, 2026-07-07).
-  const goPlayground = (suffix: string) => {
-    stashPlaygroundStack(draft.stack)
-    router.push(`/agents/playground?${suffix}&agent=${origin}`)
+
+  // A saved voice is immediately selected, so the agent runs what you just made.
+  const onVoiceSaved = (v: VoiceArtifact) => {
+    refreshVoices()
+    setEditor(null)
+    onSelectVoice(v)
   }
 
-  const modelsLine =
-    draft.stack.pipeline === "mllm"
-      ? "the realtime model, speed, and cost"
-      : "the STT / LLM / TTS models, speed, and cost"
-
   return (
-    <div className="max-w-md space-y-5">
+    <div className="max-w-3xl space-y-6">
       <p className="text-sm text-muted-foreground">
-        Pick the ready-made persona your agent speaks with. Preview it, or change the spoken
-        language. A voice pre-fills your prompt and greeting only while they&apos;re empty —
-        switching voices never overwrites what you&apos;ve written.
+        Pick the ready-made persona your agent speaks with, then tune the models behind it. A voice
+        pre-fills your prompt and greeting only while they&apos;re empty; switching voices never
+        overwrites what you&apos;ve written.
       </p>
 
-      {/* ── Pick + preview: the two things that belong together ── */}
+      {/* ── Voice: pick · preview · make your own ── */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Voice</Label>
         <button
@@ -92,30 +90,45 @@ export function StepVoice({
           )}
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
         </button>
-        {/* A sample of the VOICE — not the agent's greeting (that's one field,
-            in Prompt & tools). Framed as a preview so the two never blur. */}
-        {selected && (
+
+        {/* A sample of the VOICE, plus the two make-your-own actions. Both open a
+            sheet on this page (no Playground trip). */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          {selected && (
+            <button
+              type="button"
+              onClick={() => toast(`Playing a sample of ${selected.name}`)}
+              className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Play className="h-3.5 w-3.5" aria-hidden /> Preview voice
+            </button>
+          )}
+          {selected && (
+            <button
+              type="button"
+              onClick={() =>
+                setEditor(selected.kind === "custom"
+                  ? { kind: "edit", artifact: selected }
+                  : { kind: "fork", from: selected })
+              }
+              className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Pencil className="h-3.5 w-3.5" aria-hidden />
+              {selected.kind === "custom" ? "Edit voice" : "Customize"}
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => toast(`Playing a sample of ${selected.name}`)}
+            onClick={() => setEditor({ kind: "create" })}
             className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <Play className="h-3.5 w-3.5" aria-hidden /> Preview voice
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
           </button>
-        )}
+        </div>
       </div>
 
-      <VoiceBrowser
-        open={browserOpen}
-        onOpenChange={setBrowserOpen}
-        voices={voices}
-        selectedId={draft.voice?.id}
-        onSelect={onSelectVoice}
-      />
-
-      {/* Spoken language — an agent trait, cheap to change without a Playground
-          trip (heuristic-eval #16). */}
-      <div className="space-y-1.5">
+      {/* Spoken language — an agent trait, not a model detail (heuristic-eval #16). */}
+      <div className="max-w-xs space-y-1.5">
         <Label className="text-xs text-muted-foreground">Spoken language</Label>
         <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
           <SelectTrigger className="w-full text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
@@ -125,33 +138,24 @@ export function StepVoice({
         </Select>
       </div>
 
-      {/* ── Advanced: optional Playground trips, demoted out of the main flow so
-             they don't read as required steps (owner call 2026-07-08). ── */}
-      <div className="space-y-2 border-t border-border pt-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground/70">Advanced</p>
-        {selected && (
-          <button
-            type="button"
-            onClick={() =>
-              goPlayground(selected.kind === "custom" ? `artifact=${selected.id}` : `from=${selected.id}`)
-            }
-            className="flex w-fit items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Pencil className="h-3.5 w-3.5" aria-hidden />
-            {selected.kind === "custom" ? "Edit this voice in the Playground" : "Tune this voice's models"}
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => goPlayground("new=1")}
-          className="flex w-fit items-center gap-1.5 rounded text-sm text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden /> Create a custom voice
-        </button>
-        <p className="text-xs text-muted-foreground/80">
-          Opens the Playground to change {modelsLine} behind the voice.
-        </p>
+      {/* ── Models & speed: inline. Preset + pipeline shape both visible. ── */}
+      <div className="border-t border-border pt-5">
+        <StackConfig stack={draft.stack} onChange={(stack) => update({ stack })} />
       </div>
+
+      <VoiceBrowser
+        open={browserOpen}
+        onOpenChange={setBrowserOpen}
+        voices={voices}
+        selectedId={draft.voice?.id}
+        onSelect={onSelectVoice}
+      />
+      <VoiceEditorSheet
+        mode={editor}
+        stack={draft.stack}
+        onClose={() => setEditor(null)}
+        onSaved={onVoiceSaved}
+      />
     </div>
   )
 }
