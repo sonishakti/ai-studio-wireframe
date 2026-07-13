@@ -100,8 +100,17 @@ export function WidgetStudio() {
   const [agentId, setAgentId] = React.useState(liveAgents[0]?.id ?? AGENTS[0].id)
   const [cfg, setCfg] = React.useState<WidgetConfig>(DEFAULTS)
   const [mode, setMode] = React.useState<PreviewMode>("collapsed")
+  // Embed-state truth (user-test #5 P0): the studio styles a snippet the user
+  // may have ALREADY pasted somewhere — so track what the last-copied embed
+  // contained and say plainly whether current edits are in it. Styling here
+  // never changes an embedded widget until the snippet is re-copied.
+  const [copiedSnapshot, setCopiedSnapshot] = React.useState<string | null>(null)
   const set = <K extends keyof WidgetConfig>(k: K, v: WidgetConfig[K]) =>
     setCfg((c) => ({ ...c, [k]: v }))
+
+  const currentSnapshot = JSON.stringify({ agentId, cfg })
+  const embedState: "never" | "stale" | "current" =
+    copiedSnapshot == null ? "never" : copiedSnapshot === currentSnapshot ? "current" : "stale"
 
   const snippet = `<script
   src="https://cdn.agora.io/agent-widget.js"
@@ -116,6 +125,7 @@ export function WidgetStudio() {
 
   const copySnippet = () => {
     void navigator.clipboard?.writeText(snippet).catch(() => {})
+    setCopiedSnapshot(currentSnapshot)
     toast("Embed snippet copied", {
       description: "Paste it before </body> on any page.",
     })
@@ -144,6 +154,20 @@ export function WidgetStudio() {
           </Select>
         </div>
         <div className="flex items-center gap-2">
+          {/* The embed-state truth line — "is my edit live?" must have an
+              answer here, the way the builder answers it with its deploy line. */}
+          <span
+            className={cn(
+              "hidden text-xs sm:inline",
+              embedState === "stale" ? "text-warning" : "text-muted-foreground",
+            )}
+          >
+            {embedState === "never"
+              ? "Not embedded yet — copy the snippet to put it on your site"
+              : embedState === "stale"
+                ? "Edits aren't in your embed yet — re-copy the snippet"
+                : "Embed up to date"}
+          </span>
           <Button variant="ghost" size="sm" onClick={copySnippet}>Get Code</Button>
           <Button size="sm" className="gap-1.5" onClick={copySnippet}>
             <Code2 className="h-4 w-4" /> Embed
@@ -266,7 +290,9 @@ export function WidgetStudio() {
         {/* ── RIGHT: live preview ─────────────────────────────────────────── */}
         <div className="flex flex-col">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-6 py-3">
-            <p className="text-sm font-medium">Live Preview</p>
+            {/* "Preview", not "Live Preview" — "Live" is the deploy-state word
+                and overloading it here undid the builder's trust model. */}
+            <p className="text-sm font-medium">Preview</p>
             <Tabs value={mode} onValueChange={(v) => setMode(v as PreviewMode)}>
               <TabsList className="h-9">
                 <TabsTrigger value="collapsed" className="text-xs">Collapsed</TabsTrigger>

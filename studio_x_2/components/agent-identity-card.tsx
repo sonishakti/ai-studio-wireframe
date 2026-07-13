@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
-import { useFutureScope } from "@/lib/future-scope"
 import type { EvalTurn } from "@/lib/campaign-data"
 
 /** A short scripted exchange the in-browser "Talk to it" test plays so the
@@ -84,7 +83,6 @@ export function AgentIdentityCard({
   const hasStats = !!agentId || !!stack || costPerMin != null || latencyMs != null || !!channel
   const [showLatency, setShowLatency] = React.useState(false)
   const [talkState, setTalkState] = React.useState<SimState>("listening")
-  const [future] = useFutureScope()
   const { copied, copy } = useCopyFeedback()
   const copyId = () => {
     if (agentId) void copy(agentId, "Agent ID copied", agentId)
@@ -93,7 +91,7 @@ export function AgentIdentityCard({
   return (
     <section className={cn("flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6", className)}>
       <div className="flex flex-col items-center gap-3 text-center">
-        <AgentSphere size={talking && future ? 64 : 104} active={talking} />
+        <AgentSphere size={talking ? 64 : 104} active={talking} />
         <div className="w-full space-y-1">
           <div className="flex items-center justify-center gap-2">
             {onNameChange ? (
@@ -113,12 +111,13 @@ export function AgentIdentityCard({
         </div>
       </div>
 
-      {/* Talk test = proof of work, not a pulsing orb (F-Eval, closes the
-          3×-recurring user-test gap): a "Simulated" banner, explicit agent
-          state, and a live transcript so "is this thing on?" is answered by
-          watching it, never inferred from silence. Future-scope-gated —
-          off = the original bare orb. */}
-      {talking && future && (
+      {/* Talk test = proof of work, not a pulsing orb: a "Simulated" banner,
+          explicit agent state, and a live transcript so "is this thing on?"
+          is answered by watching it, never inferred from silence. NOT
+          future-scope-gated (user-test #5): this is a trust REPAIR to the
+          current product — the silent orb was the top recurring break across
+          three sessions — while the evals feature itself stays gated. */}
+      {talking && (
         <div className="mt-4 space-y-2 rounded-lg border border-border bg-muted/20 p-3 text-left">
           <SimulatedBanner label="Simulated test call" />
           <AgentStateChips state={talkState} />

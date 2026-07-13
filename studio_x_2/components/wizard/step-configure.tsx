@@ -159,8 +159,16 @@ function InboundConfigure({
 
 function OutboundConfigure({ draft, update }: StepProps) {
   const out = draft.config.outbound
-  // Same rule as inbound: the attached caller-ID must stay visible/selectable.
-  const available = PHONE_NUMBERS.filter((n) => n.status === "unassigned" || n.id === out?.numberId)
+  // Caller-ID candidates: unassigned numbers, the current pick, AND numbers
+  // already carrying outbound traffic (a shared outbound pool can take more
+  // batches; inbound-dedicated lines can't dial out for you) — user-test #5
+  // found only "SMS Sender" offered while the obvious pool was hidden.
+  const available = PHONE_NUMBERS.filter(
+    (n) =>
+      n.status === "unassigned" ||
+      n.id === out?.numberId ||
+      n.assignedTo.some((d) => d.startsWith("dp_ob")),
+  )
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
 

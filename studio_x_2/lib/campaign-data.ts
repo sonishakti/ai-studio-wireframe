@@ -1150,7 +1150,9 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
   {
     id: "pn_06",
     number: "+1 (628) 555-0260",
-    label: "SMS Sender",
+    // Provenance matters on a BYO-SIP platform: this one is the sandbox test
+    // line (same canon as TEST_INBOUND_NUMBER), not a number Agora "sold".
+    label: "Sandbox test number",
     vendor: "Twilio",
     assignedTo: [],
     status: "unassigned",

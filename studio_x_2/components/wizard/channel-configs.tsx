@@ -353,14 +353,14 @@ export function WebWidgetConfig({ agentId }: { agentId: string }) {
         {snippet}
       </CodeBlock>
       {/* Deep styling (theme, blob, branding colors, per-mode preview) lives
-          in the Widget studio — this step stays the quick path. */}
-      <Link
-        href="/deploy/web-widget"
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
-      >
-        Theme, branding, and a live preview in the Widget studio
-        <ArrowUpRight className="h-3 w-3" aria-hidden />
-      </Link>
+          in the Widget studio — this step stays the quick path. A visible
+          button, not a footnote: the studio was invisible in user-test #5. */}
+      <Button variant="outline" size="sm" className="gap-1.5" asChild>
+        <Link href="/deploy/web-widget">
+          Customize in Widget studio
+          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
+      </Button>
     </ConfigCard>
   )
 }
