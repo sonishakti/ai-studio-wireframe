@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { track, Events } from "@/lib/analytics"
+import { parseImport, VENDOR_EXAMPLES, type ImportSource } from "@/lib/import-agent"
 import {
   STACK_PRESETS,
   PLAN_USAGE,
@@ -37,49 +38,18 @@ import {
  * EXPLICITLY (email field, not silently), and there's no fabricated countdown.
  */
 
-const SOURCES = ["Vapi", "Retell", "Bland", "ElevenLabs", "Generic JSON"] as const
-
-const EXAMPLE = `{
-  "name": "Acme Support",
-  "voice": "elevenlabs:rachel",
-  "llm": { "model": "gpt-4o" },
-  "first_message": "Hi! Thanks for calling Acme — how can I help?",
-  "system_prompt": "You are Acme's tier-1 support agent…",
-  "tools": ["transfer_call", "check_order_status"]
-}`
+// Same per-vendor parsers as the Import sheet (lib/import-agent) — a REAL
+// Retell/Vapi/ElevenLabs export must work here too, not just the idealized
+// shape (user-test #6 S1). This flow only needs ok/config/error; the sheet
+// renders the full mapping report.
+const SOURCES: readonly ImportSource[] = ["Vapi", "Retell", "Bland", "ElevenLabs", "Generic JSON"]
 
 type Step = "paste" | "cloning" | "live" | "claim" | "done"
 type Line = { role: "agent" | "you"; text: string }
 
-function parseConfig(raw: string, source: string): { ok: boolean; config?: ImportedAgentConfig; error?: string } {
-  try {
-    const p = JSON.parse(raw)
-    if (typeof p !== "object" || !p || !p.name) {
-      return { ok: false, error: "That JSON is missing a name — paste your agent's config." }
-    }
-    return {
-      ok: true,
-      config: {
-        name: String(p.name),
-        systemPrompt: p.system_prompt ?? p.systemPrompt ?? p.prompt,
-        firstMessage: p.first_message ?? p.firstMessage ?? p.greeting,
-        voice: typeof p.voice === "string" ? p.voice : p.voice?.voice ?? p.tts?.voice,
-        llmModel: p.llm?.model ?? p.model,
-        language: p.language,
-        tools: Array.isArray(p.tools)
-          ? p.tools.map((t: unknown) => (typeof t === "string" ? t : (t as { name?: string })?.name)).filter(Boolean)
-          : undefined,
-        source,
-      },
-    }
-  } catch {
-    return { ok: false, error: "That doesn't parse as JSON — check for a stray comma." }
-  }
-}
-
 export function DefectorFlow() {
   const [step, setStep] = React.useState<Step>("paste")
-  const [source, setSource] = React.useState<(typeof SOURCES)[number]>("Vapi")
+  const [source, setSource] = React.useState<ImportSource>("Vapi")
   const [pasted, setPasted] = React.useState("")
   const [config, setConfig] = React.useState<ImportedAgentConfig | null>(null)
   const [error, setError] = React.useState<string | null>(null)
@@ -96,7 +66,7 @@ export function DefectorFlow() {
   const model = config?.llmModel || STACK_PRESETS.balanced.llm.model
 
   function submitPaste() {
-    const res = parseConfig(pasted, source)
+    const res = parseImport(pasted, source)
     if (!res.ok || !res.config) {
       setError(res.error ?? "Couldn't read that config.")
       return
@@ -189,8 +159,8 @@ function StepDots({ step }: { step: Step }) {
 function PasteStep({
   source, setSource, pasted, setPasted, error, onSubmit,
 }: {
-  source: string
-  setSource: (s: (typeof SOURCES)[number]) => void
+  source: ImportSource
+  setSource: (s: ImportSource) => void
   pasted: string
   setPasted: (v: string) => void
   error: string | null
@@ -226,7 +196,7 @@ function PasteStep({
           rows={11}
           value={pasted}
           onChange={(e) => setPasted(e.target.value)}
-          placeholder={EXAMPLE}
+          placeholder={VENDOR_EXAMPLES[source]}
           className="font-mono text-xs"
         />
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

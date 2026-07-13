@@ -144,6 +144,14 @@ export function newVoiceId(): string {
   return `voice_c_${Date.now().toString(36)}`
 }
 
+/** Generated Step-3 starter for a voice (or import) that carries no prompt —
+ *  one truth for the wizard's seeding and the import "create as new" path. */
+export function defaultPromptFor(v: VoiceArtifact): string {
+  return `You are ${v.name}, a voice agent. ${v.personality}
+
+Be concise and helpful. Greet the caller, understand what they need, resolve it, and escalate to a human if asked.`
+}
+
 // ─── Engine handoff to the Playground ─────────────────────────────────────────
 //
 // When you "Customize this voice" from the builder, the Playground should open

@@ -28,8 +28,11 @@ import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
 import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
-  newVoiceId, saveVoiceArtifact, getVoiceArtifact, type VoiceArtifact,
+  getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
+import {
+  importedConfigToArtifact, importedAgentToDraft, stashImportNotice, takeImportNotice,
+} from "@/lib/import-agent"
 import {
   EMPTY_DRAFT, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
   publishBlockReason, channelTarget, typeLabel, MOCK_CSV_ROWS, type AgentDraft, type AgentType,
@@ -60,6 +63,7 @@ export function AgentWizard({
   blank,
   onCreateNew,
   onBrowseTemplates,
+  onImportAsNew,
 }: {
   id: string
   /** Rendered inline on /agents (not the standalone edit route) — show the
@@ -81,6 +85,10 @@ export function AgentWizard({
   /** Opens the starter-templates sheet — templates must be reachable from the
    *  default landing, not just the list view (heuristic-eval #4). */
   onBrowseTemplates?: () => void
+  /** "Create as new agent" from the import dialog: the host page remounts the
+   *  builder on the seeded new-agent draft INLINE (no page hop). Without it
+   *  (standalone edit route) the wizard falls back to /agents/new/edit. */
+  onImportAsNew?: () => void
 }) {
   const router = useRouter()
   const existing = id !== "new" ? getAgent(id) : undefined
@@ -363,7 +371,33 @@ export function AgentWizard({
       }
     } else if (restored) {
       const at = firstIncomplete(restored)
-      toast("Draft restored", { description: `Picked up at Step ${at}: ${STEP_TITLES[at - 1]}.` })
+      // An import just landed here ("Create as new agent" / list-view import
+      // writes the slot, then remounts the builder) — say THAT, not a generic
+      // "Draft restored", and offer the replaced draft back if there was one.
+      const notice = takeImportNotice()
+      if (notice) {
+        const prev = notice.prev
+        // Stable id: the StrictMode replay REPLACES this toast instead of
+        // stacking a duplicate.
+        toast.success(`${notice.name} imported as a new agent`, {
+          id: "import-landing",
+          description: notice.hadPrompt
+            ? "Voice, engine, prompt, and greeting came in. Point it at a channel and deploy."
+            : "Voice and engine came in — the export had no prompt, so we started one for you.",
+          action: prev
+            ? {
+                label: "Undo import",
+                onClick: () => {
+                  dirty.current = true
+                  setDraft(prev)
+                  saveDraft(prev)
+                },
+              }
+            : undefined,
+        })
+      } else {
+        toast("Draft restored", { description: `Picked up at Step ${at}: ${STEP_TITLES[at - 1]}.` })
+      }
       // Land the highlight where the work stopped (the default locked on
       // first render was computed from the empty draft).
       if (!stepToOpen && !dc) openLater(at)
@@ -574,25 +608,101 @@ export function AgentWizard({
     setDraft((d) => seedFromVoice(d, v))
   }
 
+  // ── Import landing (user-test #6, 2×S1) ─────────────────────────────────────
+  // The old path pushed every import through seedFromVoice, whose keep-existing-
+  // prompt rule (right for voice SWITCHING) silently dropped the imported prompt
+  // whenever the open draft (Aria) already had one — while the toast claimed the
+  // prompt was "below". Now the import is routed EXPLICITLY: editing a saved
+  // agent asks where it lands (new agent vs apply here), and applying over a
+  // non-empty prompt asks which prompt wins. Every toast states what happened.
+  const [importPending, setImportPending] = React.useState<
+    { config: ImportedAgentConfig; phase: "dest" | "conflict" } | null
+  >(null)
+
+  const promptConflict = (config: ImportedAgentConfig) => {
+    const cur = draftRef.current.systemPrompt.trim()
+    const inc = config.systemPrompt?.trim()
+    return !!(cur && inc && cur !== inc)
+  }
+
   const onImported = (config: ImportedAgentConfig) => {
-    const vid = newVoiceId()
-    saveVoiceArtifact({
-      id: vid, name: config.name, kind: "custom",
-      tagline: config.source ? `Imported from ${config.source}` : "Imported agent",
-      personality: config.systemPrompt ? config.systemPrompt.slice(0, 140) : "Imported behavior",
-      tone: "Professional", language: config.language ?? "en-US",
-      ttsVoice: config.voice ?? "rachel", firstMessage: config.firstMessage ?? "Hi, how can I help you today?",
-      systemPrompt: config.systemPrompt, source: config.source ?? "Import",
+    if (isEdit) {
+      // A saved agent is open — the import must never silently rewrite it.
+      setImportPending({ config, phase: "dest" })
+      return
+    }
+    if (promptConflict(config)) {
+      setImportPending({ config, phase: "conflict" })
+      return
+    }
+    applyImport(config, { replacePrompt: true })
+  }
+
+  /** Apply the import INTO the open draft. Voice + engine always update;
+   *  `replacePrompt` decides whether the imported prompt/greeting overwrite
+   *  non-empty ones (seedFromVoice alone keeps existing text). */
+  const applyImport = (config: ImportedAgentConfig, opts: { replacePrompt: boolean }) => {
+    const artifact = importedConfigToArtifact(config)
+    const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
+    const hadOwnPrompt = !!before.systemPrompt.trim()
+    const importedPrompt = !!config.systemPrompt?.trim()
+    dirty.current = true
+    setDraft((d) => {
+      const seeded = seedFromVoice(d, artifact)
+      if (opts.replacePrompt && importedPrompt) {
+        return {
+          ...seeded,
+          systemPrompt: config.systemPrompt!,
+          greeting: config.firstMessage?.trim() ? config.firstMessage : seeded.greeting,
+        }
+      }
+      return seeded
     })
-    if (dirty.current) saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
-    // Select the imported voice RIGHT HERE — no Playground round-trip. Step 1
-    // now holds the voice editor and the engine inline (owner 2026-07-09).
-    const imported = getVoiceArtifact(vid)
-    if (imported) selectVoice(imported)
-    toast.success(`${config.name} imported`, {
-      description: "Review its voice, models, and prompt below.",
+    const promptChanged = importedPrompt ? opts.replacePrompt || !hadOwnPrompt : !hadOwnPrompt
+    toast.success(
+      importedPrompt && !promptChanged
+        ? `${config.name} applied — kept your prompt`
+        : `${config.name} applied`,
+      {
+        description:
+          importedPrompt && promptChanged && hadOwnPrompt
+            ? "Imported prompt and greeting replaced this draft's. Voice and engine updated too."
+            : importedPrompt && promptChanged
+              ? "Voice, engine, prompt, and greeting are in. Review below."
+              : importedPrompt
+                ? "Voice and engine updated; your prompt and greeting stayed."
+                : hadOwnPrompt
+                  ? "Voice and engine updated — the export had no prompt, so yours stayed."
+                  : "Voice and engine updated — the export had no prompt, so we started one for you.",
+        action: {
+          label: "Undo",
+          onClick: () => {
+            dirty.current = true
+            setDraft(before)
+          },
+        },
+      },
+    )
+    // Review lands where the change is: the prompt when it moved, else voice.
+    openRow(promptChanged ? 3 : 1)
+  }
+
+  /** Land the import as its OWN draft — the open agent stays untouched. Writes
+   *  the new-agent slot, stashes the landing notice (with the replaced draft,
+   *  if any, for Undo), and remounts the builder on it. */
+  const createAsNewFromImport = (config: ImportedAgentConfig) => {
+    const artifact = importedConfigToArtifact(config)
+    const seeded = importedAgentToDraft(config, artifact)
+    const prev = restoreDraft()
+    const prevHasWork = !!(prev && (prev.name.trim() || prev.systemPrompt.trim() || prev.voice))
+    saveDraft(seeded)
+    stashImportNotice({
+      name: config.name,
+      hadPrompt: !!config.systemPrompt?.trim(),
+      prev: prevHasWork ? prev! : undefined,
     })
-    openRow(1)
+    if (onImportAsNew) onImportAsNew()
+    else router.push("/agents/new/edit")
   }
 
   const publishingRef = React.useRef(false)
@@ -771,7 +881,8 @@ export function AgentWizard({
                 import an existing agent
               </button>
             </ImportAgentSheet>
-            . Vapi, Retell, Bland, and ElevenLabs configs map automatically.
+            . Vapi, Retell, Bland, and ElevenLabs exports map in — with a field-by-field report of
+            what carried.
           </p>
         </div>
       )}
@@ -1212,6 +1323,103 @@ export function AgentWizard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Import landing — never silent (user-test #6, 2×S1). Phase "dest": a
+          saved agent is open, so the import asks where it lands. Phase
+          "conflict": applying over a non-empty prompt asks which prompt wins.
+          Cancel aborts the whole import — nothing is written until a choice. */}
+      <AlertDialog open={!!importPending} onOpenChange={(o) => { if (!o) setImportPending(null) }}>
+        <AlertDialogContent>
+          {importPending?.phase === "dest" ? (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Where should {importPending.config.name} land?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You&apos;re editing {existing?.name ?? "an agent"}{isLive ? ", which is live" : ""}. Import{" "}
+                  {importPending.config.name} as its own agent, or apply its voice, engine, and prompt to{" "}
+                  {existing?.name ?? "this agent"}{isLive ? " — applied changes only go live when you redeploy" : ""}.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const config = importPending.config
+                    if (promptConflict(config)) {
+                      setImportPending({ config, phase: "conflict" })
+                    } else {
+                      setImportPending(null)
+                      applyImport(config, { replacePrompt: true })
+                    }
+                  }}
+                >
+                  Apply to {existing?.name ?? "this agent"}
+                </Button>
+                <AlertDialogAction
+                  onClick={() => {
+                    const config = importPending.config
+                    setImportPending(null)
+                    createAsNewFromImport(config)
+                  }}
+                >
+                  Create as new agent
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          ) : importPending ? (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Which prompt should this agent use?</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-2.5 text-sm">
+                    <p>
+                      {draft.name || "This draft"} already has a prompt, and {importPending.config.name} brings
+                      its own. Voice and engine update either way.
+                    </p>
+                    <div className="space-y-1.5">
+                      <p className="text-xs">
+                        <span className="font-medium text-foreground">Current</span>{" "}
+                        <span className="text-muted-foreground">
+                          “{truncPrompt(draft.systemPrompt)}”
+                        </span>
+                      </p>
+                      <p className="text-xs">
+                        <span className="font-medium text-foreground">Imported</span>{" "}
+                        <span className="text-muted-foreground">
+                          “{truncPrompt(importPending.config.systemPrompt ?? "")}”
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel import</AlertDialogCancel>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const config = importPending.config
+                    setImportPending(null)
+                    applyImport(config, { replacePrompt: false })
+                  }}
+                >
+                  Keep current prompt
+                </Button>
+                <AlertDialogAction
+                  onClick={() => {
+                    const config = importPending.config
+                    setImportPending(null)
+                    applyImport(config, { replacePrompt: true })
+                  }}
+                >
+                  Use imported prompt
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          ) : null}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -1291,10 +1499,11 @@ function seedFromVoice(d: AgentDraft, v: VoiceArtifact): AgentDraft {
   }
 }
 
-function defaultPromptFor(v: VoiceArtifact): string {
-  return `You are ${v.name}, a voice agent. ${v.personality}
-
-Be concise and helpful. Greet the caller, understand what they need, resolve it, and escalate to a human if asked.`
+/** One-line preview for the prompt-conflict dialog — enough to recognize
+ *  which prompt is which, not to read it. */
+function truncPrompt(s: string, n = 90): string {
+  const flat = s.replace(/\s+/g, " ").trim()
+  return flat.length > n ? `${flat.slice(0, n - 1)}…` : flat
 }
 
 function dcToType(dc: string): AgentType | null {

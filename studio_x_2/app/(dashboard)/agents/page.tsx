@@ -50,7 +50,8 @@ import { useFutureScope, readFutureScope } from "@/lib/future-scope"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
-import { newVoiceId, saveVoiceArtifact } from "@/lib/voice-artifacts"
+import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
+import { restoreDraft, saveDraft } from "@/lib/wizard-draft"
 import { toast } from "sonner"
 
 // ─── data ────────────────────────────────────────────────────────────────────
@@ -490,21 +491,37 @@ export default function AgentsPage() {
     if (!skipped) setAutoTalk(true)
   }
 
-  // List-view import lands somewhere VISIBLE: the same playground handoff the
-  // builder banner uses (import → custom voice artifact → round-trip). The
-  // user-test's top S1 was "Import as draft" toasting success while the list
-  // stayed unchanged — an import must never produce nothing.
+  // BOTH import entry points land in the same INLINE builder flow (user-test
+  // #6 P1: the list button page-hopped to the playground while the builder
+  // banner stayed inline). Landing = write the new-agent draft slot, remount
+  // the builder on it. "imported" is a non-edit, non-blank id: getAgent misses
+  // (fresh draft) and the blank prop stays off (the restore path must FIND the
+  // seeded draft instead of wiping to empty).
+  const landImportedDraft = React.useCallback(() => {
+    // Clean the URL SYNCHRONOUSLY before the key-change remount: the wizard's
+    // mount effect reads window.location, and a lingering ?step/?dc from the
+    // previous builder session would deep-link the fresh import (same race as
+    // startBlank, 2026-07-07).
+    window.history.replaceState({}, "", "/agents")
+    setBuilderId("imported")
+    router.push("/agents")
+  }, [router])
+
+  // List-view import: no draft is open here, so it always lands as a NEW agent
+  // draft — seeded from the import, with the landing toast (and Undo when it
+  // replaced unsaved work) shown by the builder it remounts into.
   const onListImported = (config: ImportedAgentConfig) => {
-    const vid = newVoiceId()
-    saveVoiceArtifact({
-      id: vid, name: config.name, kind: "custom",
-      tagline: config.source ? `Imported from ${config.source}` : "Imported agent",
-      personality: config.systemPrompt ? config.systemPrompt.slice(0, 140) : "Imported behavior",
-      tone: "Professional", language: config.language ?? "en-US",
-      ttsVoice: config.voice ?? "rachel", firstMessage: config.firstMessage ?? "Hi, how can I help you today?",
-      systemPrompt: config.systemPrompt, source: config.source ?? "Import",
+    const artifact = importedConfigToArtifact(config)
+    const seeded = importedAgentToDraft(config, artifact)
+    const prev = restoreDraft()
+    const prevHasWork = !!(prev && (prev.name.trim() || prev.systemPrompt.trim() || prev.voice))
+    saveDraft(seeded)
+    stashImportNotice({
+      name: config.name,
+      hadPrompt: !!config.systemPrompt?.trim(),
+      prev: prevHasWork ? prev! : undefined,
     })
-    router.push(`/agents/playground?artifact=${vid}&agent=new`)
+    landImportedDraft()
   }
 
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
@@ -547,8 +564,9 @@ export default function AgentsPage() {
         actions={
           isBuilder ? undefined : (
             <div className="flex items-center gap-2">
-              {/* Same handoff as the builder banner — a success toast with no
-                  visible artifact was the user-test's #1 trust break. */}
+              {/* Lands in the same INLINE builder flow as the banner import —
+                  one landing for both entry points (user-test #6 P1); a success
+                  toast with no visible artifact was the original trust break. */}
               <ImportAgentSheet onImported={onListImported}>
                 <Button variant="outline" className="gap-1.5 max-sm:hidden">
                   <Upload className="h-4 w-4" /> Import Agent
@@ -581,6 +599,7 @@ export default function AgentsPage() {
             blank={builderId === "new"}
             onCreateNew={builderId === "agt_default" ? startBlank : undefined}
             onBrowseTemplates={() => setTemplatesOpen(true)}
+            onImportAsNew={landImportedDraft}
           />
         )
       ) : (
