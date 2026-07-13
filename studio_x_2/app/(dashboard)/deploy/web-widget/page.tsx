@@ -1,9 +1,10 @@
 import { WidgetStudio } from "@/components/widget-studio"
 
-// Deploy › Web Widget — the widget studio (Figma 847-17167). Was a redirect
-// into the wizard; the full configurator (behaviour · appearance · text ·
-// branding · live preview · embed) now lives here, and the wizard's web-widget
-// step links out for the deep config.
+// Deploy › Web Widget — the standalone widget studio (Figma 847-17167): the
+// post-build MANAGE surface, with an agent picker. The builder no longer links
+// out here — Step 4 (web mode) embeds the same studio inline
+// (WidgetStudioEmbedded), and both read one per-agent store (lib/widget-config)
+// so they can never disagree.
 export default function DeployWebWidgetPage() {
   return <WidgetStudio />
 }

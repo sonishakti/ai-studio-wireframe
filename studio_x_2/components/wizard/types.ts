@@ -58,7 +58,7 @@ export function stepManifest(n: number, draft: AgentDraft): string {
     if (draft.type === "code") return "SDK install · Join & stop snippets · Docs"
     if (draft.type === "inbound")
       return draft.config.inbound?.mode === "web"
-        ? "Widget title · Greeting · Embed snippet"
+        ? "Widget style · Live preview · Embed snippet"
         : "Phone number · Web widget option"
     return "Channel setup · pick a type first"
   }

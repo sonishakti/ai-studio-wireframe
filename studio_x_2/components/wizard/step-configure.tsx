@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { CodeBlock } from "@/components/code-block"
-import { ConfigCard, WebWidgetConfig } from "@/components/wizard/channel-configs"
+import { ConfigCard } from "@/components/wizard/channel-configs"
+import { WidgetStudioEmbedded } from "@/components/widget-studio"
 import { PHONE_NUMBERS, extractVars, CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
 import { AddLinesSheet } from "@/components/concurrency-card"
 import { useFutureScope } from "@/lib/future-scope"
@@ -71,10 +72,10 @@ export function StepConfigure({ draft, update }: StepProps) {
         </div>
       )}
 
-      {/* Inbound/code are single-column forms → capped for readability.
-          Batch calls runs a two-pane split (settings | contact list) and
-          manages its own width. */}
-      {draft.type === "inbound" && <div className="max-w-3xl"><InboundConfigure draft={draft} update={update} agentId={agentId} /></div>}
+      {/* Code is a single-column form → capped for readability. Batch calls
+          and the inbound web-widget studio run two-pane splits (settings |
+          reference) and manage their own width. */}
+      {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
       {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
       {draft.type === "code" && <div className="max-w-3xl"><CodeConfigure agentId={agentId} /></div>}
     </div>
@@ -107,7 +108,7 @@ function InboundConfigure({
         type="single"
         value={mode}
         onValueChange={(v) => v && setMode(v as InboundMode)}
-        className="grid grid-cols-2 gap-2"
+        className="grid max-w-3xl grid-cols-2 gap-2"
       >
         <ToggleGroupItem value="phone" className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 data-[state=on]:border-primary data-[state=on]:bg-primary/5">
           <span className="flex items-center gap-2 text-sm font-medium"><PhoneIncoming className="h-4 w-4" /> Phone number</span>
@@ -120,6 +121,7 @@ function InboundConfigure({
       </ToggleGroup>
 
       {mode === "phone" ? (
+        <div className="max-w-3xl">
         <ConfigCard title="Answer a phone number">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Phone number</Label>
@@ -144,8 +146,13 @@ function InboundConfigure({
             </p>
           </div>
         </ConfigCard>
+        </div>
       ) : (
-        <WebWidgetConfig agentId={agentId} />
+        /* The widget studio lives HERE, inline — style + preview + embed code
+           without leaving the build (owner 2026-07-13: the link-out to
+           /deploy/web-widget broke first-timers' flow). That page remains the
+           post-build manage surface, reading the same per-agent store. */
+        <WidgetStudioEmbedded agentId={agentId} />
       )}
     </div>
   )

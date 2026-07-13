@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  Bot, ChevronDown, Code2, Copy, ImagePlus, Info, Mic, MessageSquareText, RotateCcw, X,
+  Bot, ChevronDown, Code2, ImagePlus, Info, Mic, MessageSquareText, RotateCcw, X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,15 +21,32 @@ import {
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { CodeBlock } from "@/components/code-block"
 import { AGENTS } from "@/lib/campaign-data"
+import {
+  WIDGET_DEFAULTS,
+  loadWidgetState,
+  saveWidgetState,
+  widgetSnapshot,
+  widgetSnippet,
+  type WidgetConfig,
+  type WidgetState,
+} from "@/lib/widget-config"
 
 /**
- * WidgetStudio — Deploy › Web Widget (Figma 847-17167, "04_Deploy_Web_Widget
- * (From_App_Builder)"). The missing page: a two-column widget configurator —
- * config sections on the left (Behaviour · Appearance · Text · Branding ·
- * Semantic Colors · Input Fields · UI Elements), a live preview on the right
- * (Collapsed · Voice Mode · Chat Mode), and Get Code / Embed actions that copy
- * the snippet.
+ * WidgetStudio — the web-widget configurator (Figma 847-17167,
+ * "04_Deploy_Web_Widget (From_App_Builder)"): config sections (Behaviour ·
+ * Appearance · Text · Branding · Semantic Colors · Input Fields · UI Elements),
+ * a live preview (Collapsed · Voice Mode · Chat Mode), and embed actions.
+ *
+ * TWO surfaces, one store (`sx:widget_cfg:<agent>` via lib/widget-config):
+ *   • `WidgetStudioEmbedded` — INLINE in builder Step 4 (web mode). The frame's
+ *     "(From_App_Builder)" name means exactly this: first-time users style and
+ *     embed the widget without leaving the build (owner 2026-07-13 — the
+ *     link-out to a separate page broke the flow).
+ *   • `WidgetStudio` — the standalone Deploy › Web Widget page, the post-build
+ *     manage surface with an agent picker. Same store, so it always shows what
+ *     the builder saved.
  *
  * The preview's colors are USER CONFIG (data, not chrome) — inline styles are
  * correct there; the studio chrome itself stays on design tokens.
@@ -38,98 +55,83 @@ import { AGENTS } from "@/lib/campaign-data"
  * standing rule, Figma page CONTENT is canonical, its sidebar is not.
  */
 
-interface WidgetConfig {
-  interactionMode: "voice-chat" | "voice" | "chat"
-  theme: "dark" | "light"
-  blobStyle: "aura" | "orb" | "pulse"
-  buttonLabel: string
-  greeting: string
-  listeningStatus: string
-  connectingStatus: string
-  errorMessage: string
-  brandColor: string
-  brandTextColor: string
-  fontColor: string
-  secondaryColor: string
-  bgColor: string
-  // Semantic colors
-  successColor: string
-  warningColor: string
-  errorColor: string
-  // Input fields
-  inputBg: string
-  inputPlaceholder: string
-  inputRadius: number
-  // UI elements
-  showMic: boolean
-  showChat: boolean
-  showClose: boolean
-  poweredBy: boolean
-}
-
-const DEFAULTS: WidgetConfig = {
-  interactionMode: "voice-chat",
-  theme: "dark",
-  blobStyle: "aura",
-  buttonLabel: "Try our Voice AI Agent",
-  greeting: "Hi there, I'm Agora Agent. How can I help you today?",
-  listeningStatus: "Agent Listening…",
-  connectingStatus: "Connecting…",
-  errorMessage: "An error occurred",
-  brandColor: "#099DFD",
-  brandTextColor: "#FFFFFF",
-  fontColor: "#333333",
-  secondaryColor: "#19394D",
-  bgColor: "#111111",
-  successColor: "#22C55E",
-  warningColor: "#F59E0B",
-  errorColor: "#EF4444",
-  inputBg: "#1D1F23",
-  inputPlaceholder: "Type a message…",
-  inputRadius: 8,
-  showMic: true,
-  showChat: true,
-  showClose: true,
-  poweredBy: true,
-}
-
 type PreviewMode = "collapsed" | "voice" | "chat"
 
-export function WidgetStudio() {
-  const liveAgents = AGENTS.filter((a) => a.status === "live")
-  const [agentId, setAgentId] = React.useState(liveAgents[0]?.id ?? AGENTS[0].id)
-  const [cfg, setCfg] = React.useState<WidgetConfig>(DEFAULTS)
-  const [mode, setMode] = React.useState<PreviewMode>("collapsed")
+type SetCfg = <K extends keyof WidgetConfig>(k: K, v: WidgetConfig[K]) => void
+
+/** Load + persist one agent's widget state; every mutation flows through here
+ *  so the builder step and the standalone page stay in lockstep. */
+function useWidgetState(agentId: string) {
+  const [state, setState] = React.useState<WidgetState>({
+    cfg: WIDGET_DEFAULTS,
+    copiedSnapshot: null,
+  })
+  // localStorage is client-only: hydrate after mount, and again on agent switch.
+  React.useEffect(() => {
+    setState(loadWidgetState(agentId))
+  }, [agentId])
+
+  const commit = (next: WidgetState) => {
+    setState(next)
+    saveWidgetState(agentId, next)
+  }
+  const set: SetCfg = (k, v) => commit({ ...state, cfg: { ...state.cfg, [k]: v } })
+
   // Embed-state truth (user-test #5 P0): the studio styles a snippet the user
   // may have ALREADY pasted somewhere — so track what the last-copied embed
   // contained and say plainly whether current edits are in it. Styling here
   // never changes an embedded widget until the snippet is re-copied.
-  const [copiedSnapshot, setCopiedSnapshot] = React.useState<string | null>(null)
-  const set = <K extends keyof WidgetConfig>(k: K, v: WidgetConfig[K]) =>
-    setCfg((c) => ({ ...c, [k]: v }))
-
-  const currentSnapshot = JSON.stringify({ agentId, cfg })
+  const current = widgetSnapshot(agentId, state.cfg)
   const embedState: "never" | "stale" | "current" =
-    copiedSnapshot == null ? "never" : copiedSnapshot === currentSnapshot ? "current" : "stale"
+    state.copiedSnapshot == null ? "never" : state.copiedSnapshot === current ? "current" : "stale"
 
-  const snippet = `<script
-  src="https://cdn.agora.io/agent-widget.js"
-  data-agent-id="${agentId}"
-  data-mode="${cfg.interactionMode}"
-  data-theme="${cfg.theme}"
-  data-blob="${cfg.blobStyle}"
-  data-label="${cfg.buttonLabel}"
-  data-brand-color="${cfg.brandColor}"
-  async
-></script>`
-
+  const snippet = widgetSnippet(agentId, state.cfg)
+  /** Record that the current config is what's on the user's clipboard. */
+  const markCopied = () => commit({ ...state, copiedSnapshot: current })
   const copySnippet = () => {
     void navigator.clipboard?.writeText(snippet).catch(() => {})
-    setCopiedSnapshot(currentSnapshot)
+    markCopied()
     toast("Embed snippet copied", {
       description: "Paste it before </body> on any page.",
     })
   }
+
+  return { cfg: state.cfg, set, embedState, snippet, copySnippet, markCopied }
+}
+
+/** "Is my edit live?" must have an answer here, the way the builder answers it
+ *  with its deploy line. */
+function EmbedTruthLine({
+  state,
+  className,
+}: {
+  state: "never" | "stale" | "current"
+  className?: string
+}) {
+  return (
+    <span
+      className={cn(
+        "text-xs",
+        state === "stale" ? "text-warning" : "text-muted-foreground",
+        className,
+      )}
+    >
+      {state === "never"
+        ? "Not embedded yet — copy the snippet to put it on your site"
+        : state === "stale"
+          ? "Edits aren't in your embed yet — re-copy the snippet"
+          : "Embed up to date"}
+    </span>
+  )
+}
+
+// ─── Standalone page — Deploy › Web Widget ────────────────────────────────────
+
+export function WidgetStudio() {
+  const liveAgents = AGENTS.filter((a) => a.status === "live")
+  const [agentId, setAgentId] = React.useState(liveAgents[0]?.id ?? AGENTS[0].id)
+  const studio = useWidgetState(agentId)
+  const [mode, setMode] = React.useState<PreviewMode>("collapsed")
 
   return (
     <main className="flex flex-1 flex-col" data-fluid>
@@ -154,22 +156,9 @@ export function WidgetStudio() {
           </Select>
         </div>
         <div className="flex items-center gap-2">
-          {/* The embed-state truth line — "is my edit live?" must have an
-              answer here, the way the builder answers it with its deploy line. */}
-          <span
-            className={cn(
-              "hidden text-xs sm:inline",
-              embedState === "stale" ? "text-warning" : "text-muted-foreground",
-            )}
-          >
-            {embedState === "never"
-              ? "Not embedded yet — copy the snippet to put it on your site"
-              : embedState === "stale"
-                ? "Edits aren't in your embed yet — re-copy the snippet"
-                : "Embed up to date"}
-          </span>
-          <Button variant="ghost" size="sm" onClick={copySnippet}>Get Code</Button>
-          <Button size="sm" className="gap-1.5" onClick={copySnippet}>
+          <EmbedTruthLine state={studio.embedState} className="hidden sm:inline" />
+          <Button variant="ghost" size="sm" onClick={studio.copySnippet}>Get Code</Button>
+          <Button size="sm" className="gap-1.5" onClick={studio.copySnippet}>
             <Code2 className="h-4 w-4" /> Embed
           </Button>
         </div>
@@ -178,113 +167,7 @@ export function WidgetStudio() {
       <div className="grid flex-1 lg:grid-cols-2">
         {/* ── LEFT: config sections ───────────────────────────────────────── */}
         <div className="border-b border-border lg:border-b-0 lg:border-r">
-          <Section title="Behaviour" defaultOpen>
-            <FieldRow label="Interaction Mode">
-              <Select value={cfg.interactionMode} onValueChange={(v) => set("interactionMode", v as WidgetConfig["interactionMode"])}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="voice-chat">Voice &amp; Chat</SelectItem>
-                  <SelectItem value="voice">Voice only</SelectItem>
-                  <SelectItem value="chat">Chat only</SelectItem>
-                </SelectContent>
-              </Select>
-            </FieldRow>
-          </Section>
-
-          <Section title="Appearance" defaultOpen>
-            <FieldRow label="Select a theme">
-              <Select value={cfg.theme} onValueChange={(v) => set("theme", v as WidgetConfig["theme"])}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dark">Dark Theme</SelectItem>
-                  <SelectItem value="light">Light Theme</SelectItem>
-                </SelectContent>
-              </Select>
-            </FieldRow>
-            <FieldRow label="Voice blob style">
-              <Select value={cfg.blobStyle} onValueChange={(v) => set("blobStyle", v as WidgetConfig["blobStyle"])}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aura">Aura</SelectItem>
-                  <SelectItem value="orb">Orb</SelectItem>
-                  <SelectItem value="pulse">Pulse</SelectItem>
-                </SelectContent>
-              </Select>
-            </FieldRow>
-          </Section>
-
-          <Section title="Text" defaultOpen>
-            <TextField label="Button label" value={cfg.buttonLabel} onChange={(v) => set("buttonLabel", v)} />
-            <TextField label="Greeting" value={cfg.greeting} onChange={(v) => set("greeting", v)} />
-            <TextField label="Listening status" value={cfg.listeningStatus} onChange={(v) => set("listeningStatus", v)} />
-            <TextField label="Connecting status" value={cfg.connectingStatus} onChange={(v) => set("connectingStatus", v)} />
-            <TextField label="Error message" value={cfg.errorMessage} onChange={(v) => set("errorMessage", v)} />
-          </Section>
-
-          <Section title="Branding" defaultOpen>
-            <ColorField label="Primary Action/Brand Color" value={cfg.brandColor} onChange={(v) => set("brandColor", v)} />
-            <ColorField
-              label="Primary Action Text Color"
-              value={cfg.brandTextColor}
-              onChange={(v) => set("brandTextColor", v)}
-              onReset={() => set("brandTextColor", DEFAULTS.brandTextColor)}
-            />
-            <ColorField label="Font Color" value={cfg.fontColor} onChange={(v) => set("fontColor", v)} />
-            <ColorField label="Secondary Action Color" value={cfg.secondaryColor} onChange={(v) => set("secondaryColor", v)} />
-            <FieldRow
-              label={
-                <span className="inline-flex items-center gap-1.5">
-                  Background Image
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 cursor-help text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[220px]">
-                      Shown behind the voice view. PNG/JPG, ≤1&nbsp;MB. Overrides the background color.
-                    </TooltipContent>
-                  </Tooltip>
-                </span>
-              }
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => toast.info("Mock: image picker")}
-              >
-                <ImagePlus className="h-4 w-4" /> Choose Image
-              </Button>
-            </FieldRow>
-            <ColorField label="Background Color" value={cfg.bgColor} onChange={(v) => set("bgColor", v)} />
-          </Section>
-
-          <Section title="Semantic Colors">
-            <ColorField label="Success" value={cfg.successColor} onChange={(v) => set("successColor", v)} />
-            <ColorField label="Warning" value={cfg.warningColor} onChange={(v) => set("warningColor", v)} />
-            <ColorField label="Error" value={cfg.errorColor} onChange={(v) => set("errorColor", v)} />
-          </Section>
-
-          <Section title="Input Fields">
-            <ColorField label="Input background" value={cfg.inputBg} onChange={(v) => set("inputBg", v)} />
-            <TextField label="Placeholder text" value={cfg.inputPlaceholder} onChange={(v) => set("inputPlaceholder", v)} />
-            <FieldRow label="Corner radius">
-              <Select value={String(cfg.inputRadius)} onValueChange={(v) => set("inputRadius", Number(v))}>
-                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {[4, 8, 12, 999].map((r) => (
-                    <SelectItem key={r} value={String(r)}>{r === 999 ? "Pill" : `${r}px`}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FieldRow>
-          </Section>
-
-          <Section title="UI Elements">
-            <ToggleRow label="Microphone button" checked={cfg.showMic} onChange={(v) => set("showMic", v)} />
-            <ToggleRow label="Chat button" checked={cfg.showChat} onChange={(v) => set("showChat", v)} />
-            <ToggleRow label="Close button" checked={cfg.showClose} onChange={(v) => set("showClose", v)} />
-            <ToggleRow label='"Powered by Agora" footer' checked={cfg.poweredBy} onChange={(v) => set("poweredBy", v)} />
-          </Section>
+          <ConfigSections cfg={studio.cfg} set={studio.set} />
         </div>
 
         {/* ── RIGHT: live preview ─────────────────────────────────────────── */}
@@ -293,20 +176,207 @@ export function WidgetStudio() {
             {/* "Preview", not "Live Preview" — "Live" is the deploy-state word
                 and overloading it here undid the builder's trust model. */}
             <p className="text-sm font-medium">Preview</p>
-            <Tabs value={mode} onValueChange={(v) => setMode(v as PreviewMode)}>
-              <TabsList className="h-9">
-                <TabsTrigger value="collapsed" className="text-xs">Collapsed</TabsTrigger>
-                <TabsTrigger value="voice" className="text-xs">Voice Mode</TabsTrigger>
-                <TabsTrigger value="chat" className="text-xs">Chat Mode</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <PreviewModeTabs mode={mode} onChange={setMode} />
           </div>
           <div className="flex flex-1 items-start justify-center bg-muted/20 p-8 lg:sticky lg:top-12">
-            <WidgetPreview cfg={cfg} mode={mode} />
+            <WidgetPreview cfg={studio.cfg} mode={mode} />
           </div>
         </div>
       </div>
     </main>
+  )
+}
+
+// ─── Embedded — builder Step 4, web mode ──────────────────────────────────────
+
+/** The same studio, inline in the builder: style + preview + embed code in the
+ *  step, no page hop. No agent picker — the agent is the one being built. */
+export function WidgetStudioEmbedded({ agentId }: { agentId: string }) {
+  const studio = useWidgetState(agentId)
+  // "voice" by default: next to the controls, the open widget teaches more
+  // than a closed launcher pill would.
+  const [mode, setMode] = React.useState<PreviewMode>("voice")
+
+  return (
+    // @container: the split depends on the STEP PANE's width, not the viewport —
+    // the sidebar + wizard rail eat most of a 1280px screen, and a viewport
+    // breakpoint would slice the fixed-width preview into a 280px column.
+    <div className="@container space-y-4">
+      {/* Action row — embed truth + the one copy action, always in reach. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <EmbedTruthLine state={studio.embedState} />
+        <Button size="sm" className="gap-1.5" onClick={studio.copySnippet}>
+          <Code2 className="h-4 w-4" /> Copy embed code
+        </Button>
+      </div>
+
+      <div className="grid items-start gap-4 @4xl:grid-cols-2">
+        {/* LHS — style it. Embed code sits LAST: style, then ship. */}
+        <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card [&>*:last-child]:border-b-0">
+          <ConfigSections cfg={studio.cfg} set={studio.set} />
+          <Section title="Embed on your site" defaultOpen>
+            <p className="text-sm text-muted-foreground">
+              Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
+              any page. The widget appears, wired to this agent. After style
+              changes, re-copy and re-paste to update it.
+            </p>
+            <CodeBlock language="html" filename="index.html" onCopy={studio.markCopied}>
+              {studio.snippet}
+            </CodeBlock>
+          </Section>
+        </div>
+
+        {/* RHS — see it, sticky beside the controls when split (top-28 clears
+            the builder's sticky section header band; inert when stacked). */}
+        <div className="min-w-0 @4xl:sticky @4xl:top-28">
+          <div className="overflow-hidden rounded-lg border border-border bg-card">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+              <p className="text-sm font-medium">Preview</p>
+              <PreviewModeTabs mode={mode} onChange={setMode} />
+            </div>
+            {/* overflow-x-auto: below ~423px of pane the fixed-width widget
+                scrolls instead of being clipped by the card. */}
+            <div className="flex items-start justify-center overflow-x-auto bg-muted/20 p-6">
+              <WidgetPreview cfg={studio.cfg} mode={mode} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PreviewModeTabs({
+  mode,
+  onChange,
+}: {
+  mode: PreviewMode
+  onChange: (m: PreviewMode) => void
+}) {
+  return (
+    <Tabs value={mode} onValueChange={(v) => onChange(v as PreviewMode)}>
+      <TabsList className="h-9">
+        <TabsTrigger value="collapsed" className="text-xs">Collapsed</TabsTrigger>
+        <TabsTrigger value="voice" className="text-xs">Voice Mode</TabsTrigger>
+        <TabsTrigger value="chat" className="text-xs">Chat Mode</TabsTrigger>
+      </TabsList>
+    </Tabs>
+  )
+}
+
+// ─── The seven config sections (Figma anatomy) — shared by both surfaces ──────
+
+function ConfigSections({ cfg, set }: { cfg: WidgetConfig; set: SetCfg }) {
+  return (
+    <>
+      <Section title="Behaviour" defaultOpen>
+        <FieldRow label="Interaction Mode">
+          <Select value={cfg.interactionMode} onValueChange={(v) => set("interactionMode", v as WidgetConfig["interactionMode"])}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="voice-chat">Voice &amp; Chat</SelectItem>
+              <SelectItem value="voice">Voice only</SelectItem>
+              <SelectItem value="chat">Chat only</SelectItem>
+            </SelectContent>
+          </Select>
+        </FieldRow>
+      </Section>
+
+      <Section title="Appearance" defaultOpen>
+        <FieldRow label="Select a theme">
+          <Select value={cfg.theme} onValueChange={(v) => set("theme", v as WidgetConfig["theme"])}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dark">Dark Theme</SelectItem>
+              <SelectItem value="light">Light Theme</SelectItem>
+            </SelectContent>
+          </Select>
+        </FieldRow>
+        <FieldRow label="Voice blob style">
+          <Select value={cfg.blobStyle} onValueChange={(v) => set("blobStyle", v as WidgetConfig["blobStyle"])}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="aura">Aura</SelectItem>
+              <SelectItem value="orb">Orb</SelectItem>
+              <SelectItem value="pulse">Pulse</SelectItem>
+            </SelectContent>
+          </Select>
+        </FieldRow>
+      </Section>
+
+      <Section title="Text" defaultOpen>
+        <TextField label="Button label" value={cfg.buttonLabel} onChange={(v) => set("buttonLabel", v)} />
+        <TextField label="Greeting" value={cfg.greeting} onChange={(v) => set("greeting", v)} />
+        <TextField label="Listening status" value={cfg.listeningStatus} onChange={(v) => set("listeningStatus", v)} />
+        <TextField label="Connecting status" value={cfg.connectingStatus} onChange={(v) => set("connectingStatus", v)} />
+        <TextField label="Error message" value={cfg.errorMessage} onChange={(v) => set("errorMessage", v)} />
+      </Section>
+
+      <Section title="Branding" defaultOpen>
+        <ColorField label="Primary Action/Brand Color" value={cfg.brandColor} onChange={(v) => set("brandColor", v)} />
+        <ColorField
+          label="Primary Action Text Color"
+          value={cfg.brandTextColor}
+          onChange={(v) => set("brandTextColor", v)}
+          onReset={() => set("brandTextColor", WIDGET_DEFAULTS.brandTextColor)}
+        />
+        <ColorField label="Font Color" value={cfg.fontColor} onChange={(v) => set("fontColor", v)} />
+        <ColorField label="Secondary Action Color" value={cfg.secondaryColor} onChange={(v) => set("secondaryColor", v)} />
+        <FieldRow
+          label={
+            <span className="inline-flex items-center gap-1.5">
+              Background Image
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 cursor-help text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[220px]">
+                  Shown behind the voice view. PNG/JPG, ≤1&nbsp;MB. Overrides the background color.
+                </TooltipContent>
+              </Tooltip>
+            </span>
+          }
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => toast.info("Mock: image picker")}
+          >
+            <ImagePlus className="h-4 w-4" /> Choose Image
+          </Button>
+        </FieldRow>
+        <ColorField label="Background Color" value={cfg.bgColor} onChange={(v) => set("bgColor", v)} />
+      </Section>
+
+      <Section title="Semantic Colors">
+        <ColorField label="Success" value={cfg.successColor} onChange={(v) => set("successColor", v)} />
+        <ColorField label="Warning" value={cfg.warningColor} onChange={(v) => set("warningColor", v)} />
+        <ColorField label="Error" value={cfg.errorColor} onChange={(v) => set("errorColor", v)} />
+      </Section>
+
+      <Section title="Input Fields">
+        <ColorField label="Input background" value={cfg.inputBg} onChange={(v) => set("inputBg", v)} />
+        <TextField label="Placeholder text" value={cfg.inputPlaceholder} onChange={(v) => set("inputPlaceholder", v)} />
+        <FieldRow label="Corner radius">
+          <Select value={String(cfg.inputRadius)} onValueChange={(v) => set("inputRadius", Number(v))}>
+            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[4, 8, 12, 999].map((r) => (
+                <SelectItem key={r} value={String(r)}>{r === 999 ? "Pill" : `${r}px`}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldRow>
+      </Section>
+
+      <Section title="UI Elements">
+        <ToggleRow label="Microphone button" checked={cfg.showMic} onChange={(v) => set("showMic", v)} />
+        <ToggleRow label="Chat button" checked={cfg.showChat} onChange={(v) => set("showChat", v)} />
+        <ToggleRow label="Close button" checked={cfg.showClose} onChange={(v) => set("showClose", v)} />
+        <ToggleRow label='"Powered by Agora" footer' checked={cfg.poweredBy} onChange={(v) => set("poweredBy", v)} />
+      </Section>
+    </>
   )
 }
 

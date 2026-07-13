@@ -20,17 +20,22 @@ export function CodeBlock({
   filename,
   className,
   variant = "default",
+  onCopy,
 }: {
   children: string
   language?: string
   filename?: string
   className?: string
   variant?: "default" | "inline"
+  /** Hook for callers whose state tracks what was copied (e.g. the widget
+   *  studio's embed-truth line). The clipboard write + toast stay here. */
+  onCopy?: () => void
 }) {
   const [copied, setCopied] = React.useState(false)
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(children)
+    onCopy?.()
     setCopied(true)
     toast.success("Copied")
     setTimeout(() => setCopied(false), 1500)

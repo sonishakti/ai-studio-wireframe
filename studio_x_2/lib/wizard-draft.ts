@@ -10,6 +10,7 @@
 
 import { extractVars, stackFor, PHONE_NUMBERS, type Agent, type AgentStack } from "@/lib/campaign-data"
 import { PRESET_VOICES } from "@/lib/voice-artifacts"
+import { clearWidgetState } from "@/lib/widget-config"
 
 export type AgentType = "inbound" | "outbound" | "code"
 
@@ -162,6 +163,10 @@ export function restoreDraft(agentId?: string): AgentDraft | null {
 export function clearDraft(agentId?: string) {
   if (typeof window === "undefined") return
   window.localStorage.removeItem(keyFor(agentId))
+  // New-agent slot only: its widget styling was keyed "new" and must not leak
+  // into the next build. A LIVE agent's widget store survives publish/discard —
+  // the embed snippet, not the deploy, is what carries widget styling.
+  if (!agentId) clearWidgetState("new")
 }
 
 export function hasDraft(agentId?: string): boolean {

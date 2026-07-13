@@ -31,8 +31,9 @@ import { toast } from "sonner"
  * so BOTH the legacy deploy panel AND the new creation wizard
  * (`components/wizard/*`) consume one source of truth for "how a channel goes
  * live". The wizard reuses `ConfigCard` / `GoLiveButton` / `publishDeployment` /
- * `EmbedConfig` / `WebWidgetConfig` directly; `InboundConfig` / `BatchConfig`
- * keep the legacy panel working unchanged.
+ * `EmbedConfig` directly; `InboundConfig` / `BatchConfig` / `WebWidgetConfig`
+ * keep the legacy panel working unchanged (the wizard's web mode embeds the
+ * full `WidgetStudioEmbedded` instead — owner 2026-07-13).
  */
 
 export type Channel = "inbound" | "batch" | "code" | "web"
@@ -352,9 +353,10 @@ export function WebWidgetConfig({ agentId }: { agentId: string }) {
       <CodeBlock language="html" filename="index.html">
         {snippet}
       </CodeBlock>
-      {/* Deep styling (theme, blob, branding colors, per-mode preview) lives
-          in the Widget studio — this step stays the quick path. A visible
-          button, not a footnote: the studio was invisible in user-test #5. */}
+      {/* LEGACY PANEL ONLY (the builder embeds WidgetStudioEmbedded inline).
+          Deep styling (theme, blob, branding colors, per-mode preview) lives
+          in the Widget studio — a visible button, not a footnote: the studio
+          was invisible in user-test #5. */}
       <Button variant="outline" size="sm" className="gap-1.5" asChild>
         <Link href="/deploy/web-widget">
           Customize in Widget studio
