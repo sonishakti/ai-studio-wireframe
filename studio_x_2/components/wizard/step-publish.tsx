@@ -8,14 +8,13 @@ import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 
 /**
- * Step 5 — Deploy.
- *
- * A read-only summary of everything configured + the Deploy CTA. Testing lives
- * on the always-present left identity card ("Talk to…"), so this step is purely
- * review-then-deploy — no duplicate agent widget here. The CTA is gated by
- * `publishBlocks`, surfaced as a "Fix this →" ramp (never a hard-disabled
- * button). Deploy → host fires deployment_went_live + time_to_live, clears the
- * draft, lands on Monitor.
+ * The Deploy step's REVIEW + GO-LIVE block (below the channel block since
+ * 2026-07-13 — deploy is one step, not two). A read-only summary of everything
+ * configured + the Deploy CTA. Testing lives on the always-present left
+ * identity card ("Talk to…"), so this block is purely review-then-deploy — no
+ * duplicate agent widget here. The CTA is gated by `publishBlocks`, surfaced
+ * as a "Fix this →" ramp (never a hard-disabled button). Deploy → host fires
+ * deployment_went_live + time_to_live, clears the draft, lands on Monitor.
  */
 export function StepPublish({
   draft,

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  Bot, ChevronDown, Code2, ImagePlus, Info, Mic, MessageSquareText, RotateCcw, X,
+  Bot, ChevronDown, Code2, ImagePlus, Info, Mic, MessageSquareText, Palette, RotateCcw, X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -187,10 +187,48 @@ export function WidgetStudio() {
   )
 }
 
-// ─── Embedded — builder Step 4, web mode ──────────────────────────────────────
+// ─── Deploy step panels (owner 2026-07-13: chooser = Phone · Web widget ·
+//     Widget UI; the studio was too heavy under the Web-widget option) ────────
 
-/** The same studio, inline in the builder: style + preview + embed code in the
- *  step, no page hop. No agent picker — the agent is the one being built. */
+/** "Web widget" — the reach-the-agent option: embed snippet + truth line, kept
+ *  lean. Styling lives one segment over in Widget UI (same store, no page hop). */
+export function WebEmbedPanel({
+  agentId,
+  onStyleWidget,
+}: {
+  agentId: string
+  /** Switch the deploy chooser to the Widget UI segment. */
+  onStyleWidget: () => void
+}) {
+  const studio = useWidgetState(agentId)
+  return (
+    <div className="max-w-3xl space-y-4 rounded-lg border border-border bg-card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold">Embed on your site</p>
+        <EmbedTruthLine state={studio.embedState} />
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
+        any page. The floating widget appears, wired to this agent.
+      </p>
+      <CodeBlock language="html" filename="index.html" onCopy={studio.markCopied}>
+        {studio.snippet}
+      </CodeBlock>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" className="gap-1.5" onClick={studio.copySnippet}>
+          <Code2 className="h-4 w-4" /> Copy embed code
+        </Button>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={onStyleWidget}>
+          <Palette className="h-4 w-4" /> Style it in Widget UI
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+/** "Widget UI" — the full studio, inline in the builder: style + preview +
+ *  embed code in the step, no page hop. No agent picker — the agent is the one
+ *  being built. */
 export function WidgetStudioEmbedded({ agentId }: { agentId: string }) {
   const studio = useWidgetState(agentId)
   // "voice" by default: next to the controls, the open widget teaches more

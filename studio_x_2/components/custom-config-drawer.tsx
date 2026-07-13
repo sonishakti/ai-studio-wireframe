@@ -100,7 +100,7 @@ await client.joinChannel({ channel: "support-room" })`
     { label: "Voice", step: 1 },
     { label: "Type & channel", step: 2 },
     { label: "Prompt & tools", step: 3 },
-    { label: "Channel setup", step: 4 },
+    { label: "Deploy", step: 4 },
   ]
 
   return (

@@ -261,14 +261,14 @@ export function outboundMissingVars(d: AgentDraft): string[] {
 export interface PublishBlock {
   /** Plain-language reason this isn't ready. */
   reason: string
-  /** The step (1–5) whose drawer fixes it. */
+  /** The step (1–4) whose drawer fixes it. */
   step: number
   /** Verb+noun for the "Fix this" button (e.g. "Pick a voice"). */
   action: string
 }
 
 /** Every unmet requirement between the draft and a live agent, in step order.
- *  Drives Step 5's "Fix this →" ramp; `publishBlockReason` returns just the first. */
+ *  Drives the Deploy step's "Fix this →" ramp; `publishBlockReason` returns just the first. */
 export function publishBlocks(d: AgentDraft): PublishBlock[] {
   const blocks: PublishBlock[] = []
   if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
@@ -299,13 +299,13 @@ export function publishBlockReason(d: AgentDraft): string | null {
   return publishBlocks(d)[0]?.reason ?? null
 }
 
-/** The first step (1–5) still needing input — for "resume at step N" affordances. */
+/** The first step (1–4) still needing input — for "resume at step N" affordances.
+ *  Channel + go-live share step 4 now, so anything past the prompt resumes there. */
 export function firstIncompleteStep(d: AgentDraft): number {
   if (!d.voice) return 1
   if (!d.type) return 2
   if (!d.systemPrompt.trim()) return 3
-  if (publishBlockReason(d)) return 4
-  return 5
+  return 4
 }
 
 export function canPublish(d: AgentDraft): boolean {
@@ -313,8 +313,8 @@ export function canPublish(d: AgentDraft): boolean {
 }
 
 /** Human-readable target of the configured channel — the number, "Web widget",
- *  "SDK / API", or contacts. Shared by Step 5's summary and the stepped
- *  builder's collapsed Step-4 summary so the two never drift. */
+ *  "SDK / API", or contacts. Shared by the Deploy step's summary and the rail's
+ *  step-4 recap so the two never drift. */
 export function channelTarget(d: AgentDraft): string {
   if (d.type === "inbound") {
     if (d.config.inbound?.mode === "web") return "Web widget"

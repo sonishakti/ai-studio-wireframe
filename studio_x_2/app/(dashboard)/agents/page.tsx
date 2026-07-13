@@ -353,9 +353,9 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           </DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            {/* ?step=5 opens the Deploy drawer — the old #deployment
-                                anchor was consumed by nothing (#14). */}
-                            <Link href={`/agents/${agent.id}/edit?step=5`}>Deploy</Link>
+                            {/* ?step=4 lands on the merged Deploy step — the old
+                                #deployment anchor was consumed by nothing (#14). */}
+                            <Link href={`/agents/${agent.id}/edit?step=4`}>Deploy</Link>
                           </DropdownMenuItem>
                           {/* A reversible off-switch — Delete must never be the
                               only way to stop a live agent (user-test S2). */}

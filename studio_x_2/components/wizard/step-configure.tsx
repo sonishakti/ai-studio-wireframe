@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  Upload, Check, AlertTriangle, Plug, PhoneIncoming, Globe, ExternalLink, Radio, Download,
+  Upload, Check, AlertTriangle, Plug, PhoneIncoming, Globe, ExternalLink, Palette, Radio, Download,
 } from "lucide-react"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -18,10 +18,8 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
-import { WidgetStudioEmbedded } from "@/components/widget-studio"
-import { PHONE_NUMBERS, extractVars, CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
-import { AddLinesSheet } from "@/components/concurrency-card"
-import { useFutureScope } from "@/lib/future-scope"
+import { WebEmbedPanel, WidgetStudioEmbedded } from "@/components/widget-studio"
+import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
 import {
   MOCK_CSV_COLUMNS,
   MOCK_CSV_ROWS,
@@ -33,21 +31,24 @@ import {
 import { type StepProps } from "@/components/wizard/types"
 
 /**
- * Step 4 — Configure. Branches on `draft.type`:
- *   • inbound  → phone number (telephony) OR web widget (embed)
- *   • outbound → caller-ID number + contacts CSV (with {{var}} validation)
+ * The Deploy step's CHANNEL BLOCK (owner 2026-07-13: "Connect a phone number
+ * should not be a step at all" — channel connection lives inside Deploy, above
+ * the review + go-live). Branches on `draft.type`:
+ *   • inbound  → Phone number · Web widget (embed) · Widget UI (the studio)
+ *   • outbound → caller-ID number + contacts CSV (with {{var}} validation);
+ *                window/concurrency/retries live in the optional Call settings
  *   • code     → SDK/API snippets + Docs Center
  *
- * The prompt + greeting were set in Step 3 and are NOT re-asked here — this step
- * is purely about WHERE/HOW the agent runs. The agent id (for snippets) is the
- * draft's agentId or "new" until published.
+ * The prompt + greeting were set in Step 3 and are NOT re-asked here — this
+ * block is purely about WHERE/HOW the agent runs. The agent id (for snippets)
+ * is the draft's agentId or "new" until published.
  */
 export function StepConfigure({ draft, update }: StepProps) {
   const agentId = draft.agentId ?? "new"
 
   return (
     <div className="space-y-5">
-      {/* No inner h2: the section header above already carries stepTitle(4). */}
+      {/* No inner h2: the section header above already carries "Deploy". */}
       <p className="text-sm text-muted-foreground">
         {draft.type === "inbound" && "Choose how callers reach your agent."}
         {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
@@ -82,12 +83,18 @@ export function StepConfigure({ draft, update }: StepProps) {
   )
 }
 
-// ─── Inbound — phone number OR web widget ─────────────────────────────────────
+// ─── Inbound — Phone number · Web widget · Widget UI ──────────────────────────
 
 function InboundConfigure({
   draft, update, agentId,
 }: StepProps & { agentId: string }) {
   const mode: InboundMode = draft.config.inbound?.mode ?? "phone"
+  // Third option "Widget UI" (owner 2026-07-13): the styling studio for the
+  // same web channel — its own segment because the full studio crammed under
+  // the Web-widget option drowned the embed path. Channel truth stays binary
+  // (phone | web); which web panel is open is view state.
+  const [webView, setWebView] = React.useState<"web" | "ui">("web")
+  const view = mode === "phone" ? "phone" : webView
   // The agent's CURRENT number must always be listable/selectable — a live
   // agent's number is status "active" and a pure unassigned filter renders the
   // Select as an empty placeholder under summaries that name it (re-eval #1).
@@ -99,6 +106,12 @@ function InboundConfigure({
       toast("Switched to Web widget", { description: "Your phone number stays attached. Switch back any time." })
     }
   }
+  const pick = (v: string) => {
+    if (!v) return
+    if (v === "phone") { setMode("phone"); return }
+    setWebView(v === "ui" ? "ui" : "web")
+    if (mode !== "web") setMode("web")
+  }
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, inbound: { mode, numberId } } })
 
@@ -106,9 +119,9 @@ function InboundConfigure({
     <div className="space-y-4">
       <ToggleGroup
         type="single"
-        value={mode}
-        onValueChange={(v) => v && setMode(v as InboundMode)}
-        className="grid max-w-3xl grid-cols-2 gap-2"
+        value={view}
+        onValueChange={pick}
+        className="grid max-w-3xl grid-cols-3 gap-2"
       >
         <ToggleGroupItem value="phone" className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 data-[state=on]:border-primary data-[state=on]:bg-primary/5">
           <span className="flex items-center gap-2 text-sm font-medium"><PhoneIncoming className="h-4 w-4" /> Phone number</span>
@@ -118,9 +131,13 @@ function InboundConfigure({
           <span className="flex items-center gap-2 text-sm font-medium"><Globe className="h-4 w-4" /> Web widget</span>
           <span className="text-xs font-normal text-muted-foreground">Embed on your site</span>
         </ToggleGroupItem>
+        <ToggleGroupItem value="ui" className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 data-[state=on]:border-primary data-[state=on]:bg-primary/5">
+          <span className="flex items-center gap-2 text-sm font-medium"><Palette className="h-4 w-4" /> Widget UI</span>
+          <span className="text-xs font-normal text-muted-foreground">Style &amp; preview</span>
+        </ToggleGroupItem>
       </ToggleGroup>
 
-      {mode === "phone" ? (
+      {view === "phone" ? (
         <div className="max-w-3xl">
         <ConfigCard title="Answer a phone number">
           <div className="space-y-2">
@@ -147,11 +164,13 @@ function InboundConfigure({
           </div>
         </ConfigCard>
         </div>
+      ) : view === "web" ? (
+        /* Reach-the-agent, kept lean: snippet + embed truth. */
+        <WebEmbedPanel agentId={agentId} onStyleWidget={() => setWebView("ui")} />
       ) : (
-        /* The widget studio lives HERE, inline — style + preview + embed code
-           without leaving the build (owner 2026-07-13: the link-out to
-           /deploy/web-widget broke first-timers' flow). That page remains the
-           post-build manage surface, reading the same per-agent store. */
+        /* Widget UI — the full studio, inline: style + preview + embed code
+           without leaving the build (owner 2026-07-13). /deploy/web-widget
+           remains the post-build manage surface, reading the same store. */
         <WidgetStudioEmbedded agentId={agentId} />
       )}
     </div>
@@ -207,9 +226,10 @@ function OutboundConfigure({ draft, update }: StepProps) {
               . Agora doesn&apos;t sell numbers — telephony is bring-your-own.
             </p>
           </div>
-          <OutboundSettings draft={draft} update={update} />
+          {/* Call window · concurrency · retries live in the optional CALL
+              SETTINGS section now (owner 2026-07-13: four steps, three in
+              advanced) — this card is just the connection. */}
         </ConfigCard>
-        <OutboundCapacityNote draft={draft} />
 
         <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
           <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -356,115 +376,9 @@ function ContactsPanel({ draft, update }: StepProps) {
   )
 }
 
-// Other outbound settings — call window, concurrency, retries. Stored on the
-// DRAFT (not drawer-local state) so they survive close/reopen and appear in
-// the row summary, review, and config JSON (heuristic-eval finding #7).
-/** At-the-wall purchase moment (A6, graft from the judge round's variant C):
- *  picking a max-concurrent above the project's line capacity is where the
- *  limit is FELT — so the unlock lives here, inline, not on a billing page
- *  the operator would have to go find. One component owns ALL capacity
- *  communication in this step (a split select-suffix + note drifted). */
-function OutboundCapacityNote({ draft }: { draft: StepProps["draft"] }) {
-  const [purchasedBoost, setPurchasedBoost] = React.useState(0)
-  const [linesOpen, setLinesOpen] = React.useState(false)
-  const [future] = useFutureScope()
-  const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchasedBoost })
-  const chosen = draft.config.outbound?.maxConcurrent ?? 10
-  const overBy = Math.max(0, chosen - stats.totalLines)
-
-  // A6 (self-serve concurrency) is future-scope-gated.
-  if (!future) return null
-  if (overBy === 0 && purchasedBoost === 0) return null
-
-  return (
-    <>
-      {overBy > 0 ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.04] px-3 py-2.5">
-          <p className="flex-1 min-w-0 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {chosen} at once is above your {stats.totalLines} concurrent lines.
-            </span>{" "}
-            Calls beyond {stats.totalLines} queue until a line frees — nothing drops. +{overBy}{" "}
-            lines (${overBy * stats.pricePerLineMo}/mo, prorated today) removes the queue.
-          </p>
-          <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => setLinesOpen(true)}>
-            Add lines
-          </Button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 px-3 py-2.5">
-          <Check className="h-4 w-4 shrink-0 text-success" />
-          <p className="text-xs text-muted-foreground">
-            {stats.totalLines} concurrent lines — your max of {chosen} runs without queuing.
-          </p>
-        </div>
-      )}
-      <AddLinesSheet
-        open={linesOpen}
-        onOpenChange={setLinesOpen}
-        purchased={CONCURRENCY.purchased + purchasedBoost}
-        queued={0}
-        totalLines={stats.totalLines}
-        capHeadroomUsd={null}
-        onCommit={(qty) => { setPurchasedBoost((b) => Math.max(0, b + qty)); setLinesOpen(false) }}
-      />
-    </>
-  )
-}
-
-function OutboundSettings({ draft, update }: StepProps) {
-  const out = draft.config.outbound
-  const patch = (p: Partial<NonNullable<typeof out>>) =>
-    update({ config: { ...draft.config, outbound: { ...out, ...p } } })
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">Other settings</Label>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Call window</Label>
-          <Select
-            value={out?.callWindow ?? "business"}
-            onValueChange={(v) => patch({ callWindow: v as "business" | "extended" | "anytime" })}
-          >
-            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {/* Whose 9–5 matters on a call campaign — say it (user-test S3). */}
-              <SelectItem value="business">Business hours (9–5, contact&apos;s local time)</SelectItem>
-              <SelectItem value="extended">Extended (8–8, contact&apos;s local time)</SelectItem>
-              <SelectItem value="anytime">Anytime</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Max concurrent</Label>
-          <Select
-            value={String(out?.maxConcurrent ?? 10)}
-            onValueChange={(v) => patch({ maxConcurrent: Number(v) })}
-          >
-            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {["5", "10", "25", "50"].map((c) => <SelectItem key={c} value={c}>{c} calls</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
-          <Select
-            value={String(out?.retries ?? 1)}
-            onValueChange={(v) => patch({ retries: Number(v) })}
-          >
-            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">Don&apos;t retry</SelectItem>
-              <SelectItem value="1">Once</SelectItem>
-              <SelectItem value="2">Twice</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-  )
-}
+// Call window · concurrency · retries + the capacity note moved to the optional
+// CALL SETTINGS section — components/wizard/step-call-settings.tsx (owner
+// 2026-07-13: four steps, three in advanced).
 
 // ─── Code — SDK/API snippets + Docs Center ────────────────────────────────────
 
@@ -494,7 +408,7 @@ await client.stop()`
         <p className="text-xs text-warning">
           This agent&apos;s ID is minted when you deploy — these snippets carry the
           placeholder <code className="font-mono">&quot;new&quot;</code> until then. Deploy
-          first (Step 5), then copy.
+          below first, then copy.
         </p>
       )}
       <ConfigCard title="Add to your app">

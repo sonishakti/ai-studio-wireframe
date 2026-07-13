@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, ChevronDown, Sparkles } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, Timer, ChevronDown, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -22,6 +22,7 @@ import { StepType } from "@/components/wizard/step-type"
 import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
+import { CallSettings } from "@/components/wizard/step-call-settings"
 import { STEP_TITLES, STEP_ICONS, stepTitle, stepManifest } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
@@ -46,9 +47,11 @@ import { toast } from "sonner"
 /**
  * AgentWizard — the unified creation surface (new · edit · onboarding · empty).
  *
- * A SCROLL-SPY ONE-PAGER (composition winner C5, 2026-07-07): all five steps
- * render open in the main column; a sticky rail holds the agent lockup, the
- * step list (spy-highlighted, with value recaps), and the live deploy state.
+ * A SCROLL-SPY ONE-PAGER (composition winner C5, 2026-07-07): all four steps
+ * render open in the main column (owner 2026-07-13: channel connection lives
+ * INSIDE Deploy — "connect a phone number" is not a step); a sticky rail holds
+ * the agent lockup, the step list (spy-highlighted, with value recaps), and
+ * the live deploy state.
  * NOTHING IS LOCKED — every field is editable at any time, zero clicks to
  * reach any of it. Publish is a HINT, not a gate: the reason is shown, the
  * button still works. Deep-links: `?step=N` scrolls to a section, `?dc=`
@@ -112,17 +115,17 @@ export function AgentWizard({
     if (autoTalk) setTalkOpen(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoTalk])
-  // Optional depth sections (F1 Advanced / F8 Analysis) — collapsed by default
-  // so the novice skips them; the rail entry expands + scrolls.
-  const [optOpen, setOptOpen] = React.useState<{ advanced: boolean; analysis: boolean }>({ advanced: false, analysis: false })
+  // Optional depth sections (Advanced / Analysis / Call settings) — collapsed
+  // by default so the novice skips them; the rail entry expands + scrolls.
+  const [optOpen, setOptOpen] = React.useState<{ advanced: boolean; analysis: boolean; call: boolean }>({ advanced: false, analysis: false, call: false })
   // Which section the scroll-spy currently highlights when it's an optional one
   // (numbered steps live in `openStep`; the two coordinate so exactly one rail
   // row reads active).
-  const [activeOpt, setActiveOpt] = React.useState<"advanced" | "analysis" | null>(null)
+  const [activeOpt, setActiveOpt] = React.useState<"advanced" | "analysis" | "call" | null>(null)
   // muteSpy is defined further down (after the scroll refs); a ref lets the
   // earlier openOptional reach it without a use-before-define.
   const muteSpyRef = React.useRef<(ms: number) => void>(() => {})
-  const openOptional = (key: "advanced" | "analysis") => {
+  const openOptional = (key: "advanced" | "analysis" | "call") => {
     setOptOpen((o) => ({ ...o, [key]: true }))
     // Mark it active now and mute the spy for the glide so the numbered-step
     // highlight doesn't fight the jump (matches openRow's behaviour).
@@ -205,23 +208,13 @@ export function AgentWizard({
   const voiceDone = draft.voice !== null
   const typeDone = draft.type !== null
   const promptDone = draft.systemPrompt.trim().length > 0
-  // Row 4's ✓ reflects STEP-4 facts only — an attached number must show even
-  // while the prompt is still empty (re-eval #18); whole-draft readiness stays
-  // the sticky bar's job via publishBlockReason.
-  const step4Done =
-    typeDone &&
-    (draft.type === "outbound"
-      ? !!(draft.config.outbound?.numberId && draft.config.outbound?.csvName)
-      : draft.type === "inbound" && (draft.config.inbound?.mode ?? "phone") === "phone"
-      ? !!draft.config.inbound?.numberId
-      : true)
-  const configReady = typeDone && publishBlockReason(draft) === null
-  // Step 5 is deployment itself: ✓ only when the agent is actually live —
-  // "4 of 5 complete" next to "Everything's set" was a contradiction (#13).
+  // Step 4 (Deploy) is deployment itself: ✓ only when the agent is actually
+  // live — "complete" next to "Everything's set" was a contradiction (#13).
+  // Channel facts (number attached, CSV in) surface through the row recap.
   const isLive = isEdit && existing!.status === "live"
   const isDone = (n: number) =>
-    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : n === 4 ? step4Done : isLive
-  const setupCount = [1, 2, 3, 4].filter(isDone).length
+    n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : isLive
+  const setupCount = [1, 2, 3].filter(isDone).length
 
   // Row detail line — ALWAYS informative (heuristic-eval #1): summaries are
   // recognition data, not a completion reward, so prefer real values whenever
@@ -229,7 +222,6 @@ export function AgentWizard({
   const rowDetail = (n: number): string => {
     const summary = stepSummary(n)
     if (summary) return summary
-    if (n === 5 && configReady) return "Review your agent and go live"
     return stepManifest(n, draft)
   }
 
@@ -244,7 +236,9 @@ export function AgentWizard({
     const artifactId = params.get("artifact")
     const dc = params.get("dc")
     const stepParam = parseInt(params.get("step") ?? "", 10)
-    const stepToOpen = stepParam >= 1 && stepParam <= 5 ? stepParam : null
+    // Old ?step=5 links (pre-2026-07-13, when Deploy was the fifth step) land
+    // on the merged Deploy step instead of dangling.
+    const stepToOpen = stepParam >= 1 && stepParam <= 4 ? stepParam : stepParam === 5 ? 4 : null
     // Highlight + scroll to the deep-linked step once sections have painted.
     // Scheduled HERE, not via a ref-consuming effect: an [openStep]-keyed
     // effect cancels its own timeout when the queued setOpenStep commits
@@ -428,7 +422,7 @@ export function AgentWizard({
   React.useEffect(() => {
     const onOpenStep = (e: Event) => {
       const n = (e as CustomEvent<number>).detail
-      if (typeof n === "number" && n >= 1 && n <= 5) {
+      if (typeof n === "number" && n >= 1 && n <= 4) {
         e.preventDefault()
         openRowRef.current(n)
       }
@@ -505,20 +499,20 @@ export function AgentWizard({
           if (id.startsWith("wizard-opt-")) {
             // An optional section is under the reading line — highlight IT and
             // drop the numbered-step highlight so exactly one rail row is active.
-            setActiveOpt(id.replace("wizard-opt-", "") as "advanced" | "analysis")
+            setActiveOpt(id.replace("wizard-opt-", "") as "advanced" | "analysis" | "call")
           } else {
             const n = Number(id.replace("wizard-step-", ""))
-            if (n >= 1 && n <= 5) { setOpenStep(n); setActiveOpt(null) }
+            if (n >= 1 && n <= 4) { setOpenStep(n); setActiveOpt(null) }
           }
         }
       },
       { rootMargin: "-15% 0px -65% 0px" },
     )
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 4; i++) {
       const el = document.getElementById(`wizard-step-${i}`)
       if (el) obs.observe(el)
     }
-    for (const key of ["advanced", "analysis"]) {
+    for (const key of ["advanced", "analysis", "call"]) {
       const el = document.getElementById(`wizard-opt-${key}`)
       if (el) obs.observe(el)
     }
@@ -762,18 +756,12 @@ export function AgentWizard({
       ].join(" · ")
     }
     if (n === 4) {
+      // LIVE target comes from the deployed BASELINE, never the draft — a draft
+      // mid-reconfiguration rendered "live on No contacts yet" (user-test P0 #1).
+      if (isLive) return `Deployed · live on ${channelTarget(baseline.current ?? draft)}`
       if (!draft.type) return undefined
-      const parts = [channelLine(draft)]
-      const out = draft.config.outbound
-      if (draft.type === "outbound" && (out?.callWindow || out?.maxConcurrent || out?.retries != null)) {
-        const win = out.callWindow === "extended" ? "8–8" : out.callWindow === "anytime" ? "anytime" : "9–5"
-        parts.push(`${win} · ${out.maxConcurrent ?? 10} lines · retry ×${out.retries ?? 1}`)
-      }
-      return parts.join(" · ")
+      return channelLine(draft)
     }
-    // LIVE target comes from the deployed BASELINE, never the draft — a draft
-    // mid-reconfiguration rendered "live on No contacts yet" (user-test P0 #1).
-    if (n === 5 && isLive) return `Deployed · live on ${channelTarget(baseline.current ?? draft)}`
     return undefined
   }
 
@@ -817,7 +805,7 @@ export function AgentWizard({
     ? anyEdited
       ? "Edits are not live yet. Redeploy to apply."
       : "Changes apply on your next redeploy."
-    : blockReason ?? "Review Step 5 and go live."
+    : blockReason ?? "Review the Deploy step and go live."
 
   return (
     // data-fluid opts out of the layout's 1536px cap: the builder uses the
@@ -835,7 +823,7 @@ export function AgentWizard({
                 : "Talk to your ready-made agent, set it up, and put it live."
               : isEdit
               ? "Edit anything below. Changes save automatically."
-              : "Five steps to a live agent, in any order. Changes save automatically."}
+              : "Four steps to a live agent, in any order. Changes save automatically."}
           </p>
         </header>
         <div className="flex shrink-0 items-center gap-2">
@@ -892,7 +880,7 @@ export function AgentWizard({
           (C2 harvest; top-12 = the app header's h-12, no see-through band). */}
       <div className="sticky top-12 z-30 -mx-4 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
         <span className="flex shrink-0 items-center gap-1" role="group" aria-label="Jump to step">
-          {[1, 2, 3, 4, 5].map((n) => (
+          {[1, 2, 3, 4].map((n) => (
             <button
               key={n}
               type="button"
@@ -997,7 +985,7 @@ export function AgentWizard({
               ticks (owner 2026-07-08) — the recap line under each title already
               says what's set, and the deploy block carries overall progress. */}
           <nav aria-label="Build steps" className="space-y-0.5">
-            {[1, 2, 3, 4, 5].map((n) => {
+            {[1, 2, 3, 4].map((n) => {
               const Icon = STEP_ICONS[n]
               const detail = rowDetail(n)
               const active = n === selected && !activeOpt
@@ -1022,12 +1010,15 @@ export function AgentWizard({
             })}
           </nav>
 
-          {/* Optional depth — power-user sections, not part of "N of 5". */}
+          {/* Optional depth — power-user sections, not part of "N of 3".
+              Three of them (owner 2026-07-13): Advanced · Analysis · Call
+              settings. */}
           <div className="space-y-0.5">
             <p className="px-2.5 pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground/70">Optional</p>
             {([
               { key: "advanced" as const, label: "Advanced", icon: SlidersHorizontal },
               { key: "analysis" as const, label: "Analysis", icon: ListChecks },
+              { key: "call" as const, label: "Call settings", icon: Timer },
             ]).map((o) => (
               <button
                 key={o.key}
@@ -1060,7 +1051,7 @@ export function AgentWizard({
                   "Live on No contacts yet" mid-reconfiguration, corrupting the
                   one string whose job is production truth (user-test P0 #1). */}
               <p className="text-sm font-semibold">
-                {isLive ? `Live on ${channelTarget(baseline.current ?? draft)}` : `${setupCount} of 4 set up`}
+                {isLive ? `Live on ${channelTarget(baseline.current ?? draft)}` : `${setupCount} of 3 set up`}
               </p>
               {/* Edit-state lives HERE — one fixed slot in the deploy block,
                   where "not live yet" is decided. The badge REPLACES the prose
@@ -1106,7 +1097,7 @@ export function AgentWizard({
             lives in the other grid column). Corners: the first header rounds to
             match the card's top-right (2026-07-08). */}
         <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:border-l">
-          {[1, 2, 3, 4, 5].map((n) => {
+          {[1, 2, 3, 4].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
               <section
@@ -1137,7 +1128,7 @@ export function AgentWizard({
                       an accidental edit. HIDDEN until the step actually differs
                       from live — a control you can't use is noise, not state
                       (owner 2026-07-09). Icon-only + tooltip. */}
-                  {isLive && n < 5 && stepDirty(n) && (
+                  {isLive && stepDirty(n) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -1154,11 +1145,11 @@ export function AgentWizard({
                     </Tooltip>
                   )}
                 </header>
-                {/* Width discipline: cap the review step so 4K doesn't stretch
-                    it; steps 1/3 cap themselves, 2 and 4 manage their own
-                    layout (type cards + the batch-calls split need the full
-                    pane). py-6 gives each section air under its header band. */}
-                <div className={cn("px-5 py-6", n === 5 && "[&>*]:max-w-4xl")}>
+                {/* Width discipline: steps 1/3 cap themselves; 2 and 4 manage
+                    their own layout (type cards + the batch-calls split and the
+                    widget studio need the full pane). py-6 gives each section
+                    air under its header band. */}
+                <div className="px-5 py-6">
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && (
                     <StepType
@@ -1170,16 +1161,23 @@ export function AgentWizard({
                     />
                   )}
                   {n === 3 && <StepBuild draft={draft} update={update} />}
-                  {n === 4 && <StepConfigure draft={draft} update={update} />}
-                  {n === 5 && (
-                    <StepPublish
-                      draft={draft}
-                      live={isLive}
-                      onPublish={publish}
-                      onFix={(m) => openRow(m)}
-                      talking={testing}
-                      onToggleTalk={toggleTest}
-                    />
+                  {/* Deploy = channel connection + review + go live, ONE step
+                      (owner 2026-07-13): "Choose how callers reach your agent"
+                      lives here, and connecting a number is not a step. */}
+                  {n === 4 && (
+                    <div className="space-y-8">
+                      <StepConfigure draft={draft} update={update} />
+                      <div className="border-t border-border pt-6 [&>*]:max-w-4xl">
+                        <StepPublish
+                          draft={draft}
+                          live={isLive}
+                          onPublish={publish}
+                          onFix={(m) => openRow(m)}
+                          talking={testing}
+                          onToggleTalk={toggleTest}
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
               </section>
@@ -1215,6 +1213,19 @@ export function AgentWizard({
               value={draft.analysis}
               onChange={(analysis) => update({ analysis })}
             />
+          </OptionalSection>
+
+          {/* Optional depth: Call settings — the batch tuning that used to
+              crowd the channel step (owner 2026-07-13: three in advanced). */}
+          <OptionalSection
+            id="wizard-opt-call"
+            icon={Timer}
+            title="Call settings"
+            summary="Call window · concurrency · retries"
+            open={optOpen.call}
+            onOpenChange={(o) => setOptOpen((s) => ({ ...s, call: o }))}
+          >
+            <CallSettings draft={draft} update={update} />
           </OptionalSection>
         </div>
         </div>
@@ -1471,13 +1482,13 @@ function OptionalSection({
 }
 
 /** The first step whose completion predicate is unmet — used only for the
- *  "Start here" nudge + restore cursor. Not a gate. */
+ *  "Start here" nudge + restore cursor. Not a gate. Channel + go-live share
+ *  step 4 now, so anything past the prompt resumes there. */
 function firstIncomplete(d: AgentDraft): number {
   if (d.voice === null) return 1
   if (d.type === null) return 2
   if (d.systemPrompt.trim() === "") return 3
-  if (publishBlockReason(d)) return 4
-  return 5
+  return 4
 }
 
 function seedFromVoice(d: AgentDraft, v: VoiceArtifact): AgentDraft {

@@ -1,5 +1,5 @@
 import type * as React from "react"
-import { AudioLines, Waypoints, FileText, Phone, Rocket } from "lucide-react"
+import { AudioLines, Waypoints, FileText, Rocket } from "lucide-react"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /** Shared contract every wizard step receives. `update` shallow-merges a patch
@@ -9,6 +9,10 @@ export interface StepProps {
   update: (patch: Partial<AgentDraft>) => void
 }
 
+/** FOUR steps (owner 2026-07-13): "Connect a phone number should not be a step
+ *  at all" — channel connection (how callers reach the agent) lives INSIDE
+ *  Deploy, and the per-channel tuning (call window · concurrency · retries)
+ *  moved to the optional group ("four steps and then three in advanced"). */
 export const STEP_TITLES = [
   // "Voice & models" — the model stack came BACK inline (2026-07-09, reversing
   // the 2026-07-07 Playground move): Step 1 owns the voice, the spoken language,
@@ -18,30 +22,23 @@ export const STEP_TITLES = [
   // Scope-honest: the drawer holds prompt + greeting + knowledge + connectors,
   // not just a prompt textarea (heuristic-eval finding #3).
   "Prompt & tools",
-  "Connect a channel",
+  // Channel + review + go live, one step: connecting a channel IS deploying.
   "Deploy",
 ] as const
 
-/** Row glyph for not-done rows — rows read as one unbroken 1-5 sequence
+/** Row glyph for not-done rows — rows read as one unbroken 1-4 sequence
  *  (2026-07-07 direction: no group headers), each with its step's icon
  *  (or ✓ when done). */
 export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string }>> = {
   1: AudioLines,
   2: Waypoints,
   3: FileText,
-  4: Phone,
-  5: Rocket,
+  4: Rocket,
 }
 
-/** Row title — static except Step 4, which names the chosen destination once
- *  the type is picked ("Connect a channel" → "Set up batch calls"). The row
- *  and the drawer header both use this, so they can never disagree. */
-export function stepTitle(n: number, draft: AgentDraft): string {
-  if (n === 4 && draft.type) {
-    if (draft.type === "outbound") return "Set up batch calls"
-    if (draft.type === "code") return "Add to your app"
-    return draft.config.inbound?.mode === "web" ? "Add the web widget" : "Connect a phone number"
-  }
+/** Row title — static now that step 4 is simply "Deploy" (the old dynamic
+ *  "Connect a phone number" titles named a step that no longer exists). */
+export function stepTitle(n: number, _draft: AgentDraft): string {
   return STEP_TITLES[n - 1]
 }
 
@@ -54,13 +51,10 @@ export function stepManifest(n: number, draft: AgentDraft): string {
   if (n === 2) return "Batch calls · Inbound · Code / SDK"
   if (n === 3) return "Prompt · Greeting · Knowledge · MCP · Connectors"
   if (n === 4) {
-    if (draft.type === "outbound") return "Caller ID · Contacts CSV · Call window · Retries"
-    if (draft.type === "code") return "SDK install · Join & stop snippets · Docs"
-    if (draft.type === "inbound")
-      return draft.config.inbound?.mode === "web"
-        ? "Widget style · Live preview · Embed snippet"
-        : "Phone number · Web widget option"
-    return "Channel setup · pick a type first"
+    if (draft.type === "outbound") return "Caller ID · Contacts CSV · Review · Go live"
+    if (draft.type === "code") return "SDK snippets · Review · Go live"
+    if (draft.type === "inbound") return "Phone number · Web widget · Widget UI · Go live"
+    return "Channel · Review · Go live"
   }
-  return "Review everything · Go live"
+  return ""
 }
