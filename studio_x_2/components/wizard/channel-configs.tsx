@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import type { useRouter } from "next/navigation"
 import {
   PhoneIncoming,
@@ -9,6 +10,7 @@ import {
   Globe,
   Upload,
   Check,
+  ArrowUpRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -350,6 +352,15 @@ export function WebWidgetConfig({ agentId }: { agentId: string }) {
       <CodeBlock language="html" filename="index.html">
         {snippet}
       </CodeBlock>
+      {/* Deep styling (theme, blob, branding colors, per-mode preview) lives
+          in the Widget studio — this step stays the quick path. */}
+      <Link
+        href="/deploy/web-widget"
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+      >
+        Theme, branding, and a live preview in the Widget studio
+        <ArrowUpRight className="h-3 w-3" aria-hidden />
+      </Link>
     </ConfigCard>
   )
 }

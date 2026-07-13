@@ -1,7 +1,9 @@
-import { redirect } from "next/navigation"
+import { WidgetStudio } from "@/components/widget-studio"
 
-// studio_x_2 wizard IA: the web widget is configured INSIDE the creation wizard
-// (Step 4, Inbound → Web widget). Route into the wizard with web preselected.
-export default function DeployWebWidgetLegacyRedirect() {
-  redirect("/agents/new/edit?dc=web")
+// Deploy › Web Widget — the widget studio (Figma 847-17167). Was a redirect
+// into the wizard; the full configurator (behaviour · appearance · text ·
+// branding · live preview · embed) now lives here, and the wizard's web-widget
+// step links out for the deep config.
+export default function DeployWebWidgetPage() {
+  return <WidgetStudio />
 }
