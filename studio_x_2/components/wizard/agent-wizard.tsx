@@ -721,11 +721,27 @@ export function AgentWizard({
     // firing mid-navigation would resurrect the consumed draft (re-eval #16).
     dirty.current = false
     const agentId = draft.agentId ?? `agt_${Date.now().toString(36)}`
+    // Code/SDK deploys STAY on the step: the snippet card says "deploy first,
+    // then copy", so deploy must mint the ID into the visible snippets, not
+    // teleport to Monitor away from them (user-test #7, D3 S2). Monitor rides
+    // the success toast as an action instead.
+    const stay = draftRef.current.type === "code"
     publishDeployment({
       router, agentId, agentName: draft.name || "Your agent",
       channel: channelLabel(draft), name: draft.name || "Deployment",
       mode: draft.type ?? undefined,
+      stay,
     })
+    if (stay) {
+      const next = { ...draftRef.current, agentId }
+      setDraft(next)
+      draftRef.current = next
+      // The working copy survives (with its minted ID) — persist it so a
+      // refresh keeps the now-real snippets, and re-arm publish for later edits.
+      saveDraft(next, isEdit ? next.agentId : undefined)
+      publishingRef.current = false
+      return
+    }
     // Deploying consumes the working copy — clear whichever slot this was.
     clearDraft(isEdit ? draft.agentId : undefined)
   }
@@ -806,6 +822,15 @@ export function AgentWizard({
       ? "Edits are not live yet. Redeploy to apply."
       : "Changes apply on your next redeploy."
     : blockReason ?? "Review the Deploy step and go live."
+  // "Redeploy" on a live agent being REPOINTED read as re-publishing the OLD
+  // channel at the moment of launching a first batch (user-test #7, D1 S3) —
+  // when the type changed since the live baseline, name what actually starts.
+  const typeChanged = isLive && !!baseline.current && draft.type !== baseline.current.type
+  const deployCta = !isLive
+    ? "Deploy"
+    : typeChanged && draft.type === "outbound" ? "Launch batch calls"
+    : typeChanged && draft.type ? `Deploy ${typeLabel(draft.type)}`
+    : "Redeploy"
 
   return (
     // data-fluid opts out of the layout's 1536px cap: the builder uses the
@@ -898,7 +923,7 @@ export function AgentWizard({
         </span>
         <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">{deploySub}</p>
         <Button size="sm" className="shrink-0 gap-1.5" onClick={publish}>
-          <Rocket className="h-3.5 w-3.5" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
+          <Rocket className="h-3.5 w-3.5" aria-hidden /> {deployCta}
         </Button>
       </div>
 
@@ -1071,7 +1096,7 @@ export function AgentWizard({
               className="w-full gap-1.5"
               onClick={publish}
             >
-              <Rocket className="h-4 w-4" aria-hidden /> {isLive ? "Redeploy" : "Deploy"}
+              <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
             </Button>
             {/* One action to walk away from ALL pending edits (owner call,
                 2026-07-07) — shown only when something is actually pending. */}
@@ -1166,11 +1191,19 @@ export function AgentWizard({
                       lives here, and connecting a number is not a step. */}
                   {n === 4 && (
                     <div className="space-y-8">
-                      <StepConfigure draft={draft} update={update} />
+                      {/* Type changes from IN here (the no-type chooser, the
+                          batch cross-link) must ride the same stash/undo
+                          machinery as Step 2 — a plain update({type}) would
+                          silently drop the departing channel's config. */}
+                      <StepConfigure
+                        draft={draft}
+                        update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
+                      />
                       <div className="border-t border-border pt-6 [&>*]:max-w-4xl">
                         <StepPublish
                           draft={draft}
                           live={isLive}
+                          ctaLabel={isLive ? deployCta : undefined}
                           onPublish={publish}
                           onFix={(m) => openRow(m)}
                           talking={testing}
@@ -1297,6 +1330,17 @@ export function AgentWizard({
                   every contact in {draft.config.outbound?.csvName ?? "your list"}.
                 </p>
                 <ul className="space-y-1 text-muted-foreground">
+                  {/* One agent ↔ one channel: launching the batch takes the
+                      live inbound line dark — say it at the moment of
+                      commitment, not only in the earlier stash toast
+                      (user-test #7, D1 latent). */}
+                  {isLive && baseline.current?.type === "inbound" && baseline.current.config.inbound?.numberId && (
+                    <li>
+                      · {draft.name || "Your agent"} stops answering{" "}
+                      {PHONE_NUMBERS.find((n) => n.id === baseline.current!.config.inbound?.numberId)?.number ?? "its inbound number"}{" "}
+                      while on Batch calls
+                    </li>
+                  )}
                   <li>· Caller ID: {PHONE_NUMBERS.find((n) => n.id === draft.config.outbound?.numberId)?.number ?? "selected number"}</li>
                   <li>· Call window: {draft.config.outbound?.callWindow === "anytime" ? "anytime" : draft.config.outbound?.callWindow === "extended" ? "extended hours" : "business hours (contact's local time)"}</li>
                   {/* Same default the Step-4 select shows — the manifest of

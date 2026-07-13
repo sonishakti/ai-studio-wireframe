@@ -68,6 +68,7 @@ export function publishDeployment({
   channel,
   name,
   mode,
+  stay,
 }: {
   router: ReturnType<typeof useRouter>
   agentId: string
@@ -77,21 +78,31 @@ export function publishDeployment({
   /** Deployment type — drives the success-toast verb: an outbound campaign
    *  CALLS people, it doesn't "answer" (user-test P0 #4). */
   mode?: "inbound" | "outbound" | "code"
+  /** Skip the Monitor redirect and stay in place (Monitor rides the toast as
+   *  an action instead). Used by the Code/SDK path: its own step said "deploy
+   *  first, then copy" while deploy teleported away from the snippets — the
+   *  merged Deploy step must keep that promise (user-test #7, D3 S2). */
+  stay?: boolean
 }) {
   track(Events.deployment_went_live, { agent_id: agentId, channel })
   const ms = timeToLiveMs()
   if (ms != null) track(Events.time_to_live_ms, { ms, agent_id: agentId })
   const who = agentName || "Your agent"
-  toast.success(`${name || "Deployment"} is live`, {
-    description:
-      mode === "outbound" ? `${who} is now calling your contact list.`
-      : mode === "code" ? `${who} is ready. It goes live the moment your app connects.`
-      : `${who} is now answering on ${channel}.`,
-  })
-  router.push(
-    "/monitor?" +
-      new URLSearchParams({ deployed: name, channel, agent: agentName }),
-  )
+  const monitorUrl =
+    "/monitor?" + new URLSearchParams({ deployed: name, channel, agent: agentName })
+  const description =
+    mode === "outbound" ? `${who} is now calling your contact list.`
+    : mode === "code" ? `${who} is ready. It goes live the moment your app connects.`
+    : `${who} is now answering on ${channel}.`
+  if (stay) {
+    toast.success(`${name || "Deployment"} is live`, {
+      description: `${description} The snippets below now carry its live ID.`,
+      action: { label: "View Monitor", onClick: () => router.push(monitorUrl) },
+    })
+    return
+  }
+  toast.success(`${name || "Deployment"} is live`, { description })
+  router.push(monitorUrl)
 }
 
 // ─── Shared frame + button ────────────────────────────────────────────────────

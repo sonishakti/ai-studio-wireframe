@@ -20,6 +20,7 @@ export function StepPublish({
   draft,
   onPublish,
   live,
+  ctaLabel,
   onFix,
   talking,
   onToggleTalk,
@@ -29,6 +30,11 @@ export function StepPublish({
   /** Agent already deployed: the CTA reads "Redeploy" so this step and the
    *  rail's deploy block never disagree (user-test P0 #3). */
   live?: boolean
+  /** Host-computed CTA label so all three deploy buttons (rail, sub-lg strip,
+   *  this block) say the same thing — e.g. "Launch batch calls" when a live
+   *  agent is being REPOINTED, where a bare "Redeploy" read as re-publishing
+   *  the old channel (user-test #7, D1 S3). */
+  ctaLabel?: string
   /** Jump to the step whose drawer fixes a blocker. */
   onFix: (step: number) => void
   /** Mirror of the identity card's Talk toggle — the card can be occluded by
@@ -119,7 +125,7 @@ export function StepPublish({
         {/* No hard lock: Deploy is always clickable. If something's unfinished the
             ramp above lists each fix; a toast still points to the first. */}
         <Button size="lg" className="w-full gap-2 sm:w-auto" onClick={onPublish}>
-          <Rocket className="h-4 w-4" aria-hidden /> {live ? "Redeploy" : "Deploy agent"}
+          <Rocket className="h-4 w-4" aria-hidden /> {ctaLabel ?? (live ? "Redeploy" : "Deploy agent")}
         </Button>
         <p className="text-sm text-muted-foreground">
           {live

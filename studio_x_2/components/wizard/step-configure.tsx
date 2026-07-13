@@ -137,6 +137,21 @@ function InboundConfigure({
         </ToggleGroupItem>
       </ToggleGroup>
 
+      {/* The chooser reads as THE channel menu, but it only forks the inbound
+          family — an outbound builder hunts here first (user-test #7, D1 S2).
+          One cross-link; it rides the host's selectType stash/undo. */}
+      <p className="text-xs text-muted-foreground">
+        Dialing a contact list instead?{" "}
+        <button
+          type="button"
+          onClick={() => update({ type: "outbound" })}
+          className="rounded underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Switch to Batch calls
+        </button>
+        {" "}— this setup is set aside, not deleted.
+      </p>
+
       {view === "phone" ? (
         <div className="max-w-3xl">
         <ConfigCard title="Answer a phone number">
@@ -157,7 +172,7 @@ function InboundConfigure({
             <p className="text-xs text-muted-foreground">
               No number free? Agora routes your own carrier number — connect one via SIP in{" "}
               <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
-                Resources › Channels
+                Resources › Deployment Channels
               </a>
               .
             </p>
@@ -221,7 +236,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
             <p className="text-xs text-muted-foreground">
               No number of your own yet? Connect your carrier&apos;s via SIP in{" "}
               <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
-                Resources › Channels
+                Resources › Deployment Channels
               </a>
               . Agora doesn&apos;t sell numbers — telephony is bring-your-own.
             </p>
@@ -255,10 +270,14 @@ const PREVIEW_NAMES = [
   "Ana Costa", "Ben Haddad", "Mia Johansson", "Raj Mehta", "Sara Lind", "Tom Baker",
   "Uma Rao", "Vik Sharma", "Wes Cole", "Ines Duarte", "Yara Aziz", "Zack Moore",
 ]
+// Every claimed MOCK_CSV_COLUMN renders — the green "all covered" check must
+// be inspectable against visible evidence, not 3 of 5 columns (user-test #7).
 const PREVIEW_ROWS = PREVIEW_NAMES.map((name, i) => ({
   phone: `+1 (415) 555-${String(1204 + i * 7).slice(-4)}`,
   name,
   account: `AC-${2400 + i * 13}`,
+  balance: `$${(140 + i * 37) % 900}.${String(20 + (i * 7) % 80).padStart(2, "0")}`,
+  dueDate: `2026-08-${String(1 + (i % 28)).padStart(2, "0")}`,
 }))
 const CSV_TOTAL = MOCK_CSV_ROWS
 
@@ -356,6 +375,8 @@ function ContactsPanel({ draft, update }: StepProps) {
                     <TableHead>Phone number</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Account</TableHead>
+                    <TableHead>Balance</TableHead>
+                    <TableHead>Due date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -364,6 +385,8 @@ function ContactsPanel({ draft, update }: StepProps) {
                       <TableCell className="font-mono text-xs">{r.phone}</TableCell>
                       <TableCell className="text-sm">{r.name}</TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">{r.account}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{r.balance}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{r.dueDate}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
