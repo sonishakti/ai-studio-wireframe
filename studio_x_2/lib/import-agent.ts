@@ -123,11 +123,23 @@ interface Found {
   name?: { path: string; value: string }
   prompt?: { path: string; value: string }
   greeting?: { path: string; value: string }
-  /** `normalized` = the id we store (e.g. "11labs-Adrian" → "adrian"). */
-  voice?: { path: string; value: string; normalized?: string }
+  /** `normalized` = the id we store (e.g. "11labs-Adrian" → "adrian");
+   *  `provider` = the TTS vendor the export names, when it names one. */
+  voice?: { path: string; value: string; normalized?: string; provider?: string }
   model?: { path: string; value: string }
   language?: { path: string; value: string }
   tools?: { path: string; names: string[] }
+}
+
+/** Providers Agora's bundled stack can actually run. A voice from anyone else
+ *  (PlayHT, Cartesia, Rime…) must NOT be silently rebranded ElevenLabs — the
+ *  report drops it honestly instead (user-test #7 P0). */
+function bundledTtsVendor(provider: string | undefined): "ElevenLabs" | "Azure" | undefined {
+  if (!provider) return "ElevenLabs" // bare voice ids keep the historical default
+  const p = provider.toLowerCase().replace(/[\s_-]/g, "")
+  if (p === "11labs" || p === "elevenlabs") return "ElevenLabs"
+  if (p === "azure" || p === "microsoft") return "Azure"
+  return undefined
 }
 
 interface VendorParse {
@@ -157,7 +169,22 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
     })
   }
   if (found.greeting) mapped.push({ theirs: found.greeting.path, ours: LANDS.greeting, value: quote(found.greeting.value) })
-  if (found.voice) mapped.push({ theirs: found.voice.path, ours: LANDS.voice, value: found.voice.value })
+  // A voice only carries when its provider runs on the bundled stack — a
+  // PlayHT/Cartesia id rebranded "ElevenLabs" would be the one dishonest row
+  // in an otherwise field-by-field-honest report.
+  const voiceVendor = bundledTtsVendor(found.voice?.provider)
+  if (found.voice && voiceVendor) {
+    mapped.push({
+      theirs: found.voice.path,
+      ours: LANDS.voice,
+      value: found.voice.provider ? `${found.voice.value} · ${found.voice.provider}` : found.voice.value,
+    })
+  } else if (found.voice) {
+    dropped.push({
+      theirs: found.voice.path,
+      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Step 1.`,
+    })
+  }
   const llm = catalogLlm(found.model?.value)
   if (found.model && llm) {
     mapped.push({ theirs: found.model.path, ours: LANDS.llm, value: llm.label })
@@ -185,9 +212,10 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
 
   const config: ImportedAgentConfig = {
     name: name!,
+    voice: found.voice && voiceVendor ? found.voice.normalized ?? found.voice.value : undefined,
+    voiceProvider: found.voice && voiceVendor ? voiceVendor : undefined,
     systemPrompt: found.prompt?.value,
     firstMessage: found.greeting?.value,
-    voice: found.voice?.normalized ?? found.voice?.value,
     llmModel: llm?.model,
     language: found.language?.value,
     tools: found.tools?.names.length ? found.tools.names : undefined,
@@ -206,21 +234,27 @@ const META_KEYS = new Set([
 ])
 
 /** Curated reasons for the interesting keys real exports carry. Anything not
- *  listed falls back to an honest generic line. */
+ *  listed falls back to an honest generic line.
+ *
+ *  HONESTY RULE (user-test #7 P0): a reason may only point somewhere that
+ *  EXISTS — Advanced's turn-taking/speech sections, Step 3 Resources, the
+ *  Analysis section, Step-1 engine, the deployment's CSV columns. Anything
+ *  without a real landing spot says "isn't supported yet", never a phantom
+ *  address (voicemail/call caps pointed at a Step 4 that has neither). */
 const DROP_REASONS: Record<string, string> = {
-  webhook_url: "Webhooks attach to the deployment, not the agent — reconnect after you deploy.",
-  server: "Server URLs attach to the deployment — reconnect after you deploy.",
-  serverUrl: "Server URLs attach to the deployment — reconnect after you deploy.",
-  serverMessages: "Server events attach to the deployment — reconnect after you deploy.",
+  webhook_url: "Webhooks would belong to the deployment, not the agent — deployment webhooks aren't here yet.",
+  server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
+  serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
+  serverMessages: "Server event streams aren't supported yet.",
   states: "Conversation states don't port — express the flow in your prompt (Step 3).",
   starting_state: "Conversation states don't port — express the flow in your prompt (Step 3).",
   pathway_id: "Bland pathways don't port — express the flow in your prompt (Step 3).",
-  voicemail_detection: "Voicemail handling lives in the channel setup (Step 4).",
-  voicemailMessage: "Voicemail handling lives in the channel setup (Step 4).",
-  voicemailDetection: "Voicemail handling lives in the channel setup (Step 4).",
-  endCallMessage: "End-call behavior lives in Advanced.",
-  endCallPhrases: "End-call behavior lives in Advanced.",
-  end_call_after_silence_ms: "End-call behavior lives in Advanced.",
+  voicemail_detection: "Voicemail handling isn't supported yet.",
+  voicemailMessage: "Voicemail handling isn't supported yet.",
+  voicemailDetection: "Voicemail handling isn't supported yet.",
+  endCallMessage: "End-call behavior isn't configurable yet.",
+  endCallPhrases: "End-call behavior isn't configurable yet.",
+  end_call_after_silence_ms: "End-call behavior isn't configurable yet.",
   analysisPlan: "Post-call analysis is configured in the Analysis section.",
   artifactPlan: "Recording settings live in the Analysis section.",
   post_call_analysis_data: "Post-call analysis is configured in the Analysis section.",
@@ -237,15 +271,17 @@ const DROP_REASONS: Record<string, string> = {
   interruption_sensitivity: "Interruption tuning lives in Advanced (turn-taking).",
   interruption_threshold: "Interruption tuning lives in Advanced (turn-taking).",
   responsiveness: "Turn-taking tuning lives in Advanced.",
+  startSpeakingPlan: "Interruption tuning lives in Advanced (turn-taking).",
+  stopSpeakingPlan: "Interruption tuning lives in Advanced (turn-taking).",
   enable_backchannel: "Backchannel tuning stays vendor-specific.",
   backchannel_frequency: "Backchannel tuning stays vendor-specific.",
   backchannel_words: "Backchannel tuning stays vendor-specific.",
-  boosted_keywords: "Keyword boosting lives in Advanced (speech).",
-  keywords: "Keyword boosting lives in Advanced (speech).",
+  boosted_keywords: "ASR keyword boosting isn't supported yet (Advanced's keywords are wake words, not boosting).",
+  keywords: "ASR keyword boosting isn't supported yet (Advanced's keywords are wake words, not boosting).",
   pronunciation_dictionary: "Pronunciation dictionaries aren't supported yet.",
-  max_duration: "Call caps live in the channel setup (Step 4).",
-  max_call_duration_ms: "Call caps live in the channel setup (Step 4).",
-  silenceTimeoutSeconds: "Silence timeouts live in Advanced.",
+  max_duration: "Call-duration caps aren't supported yet.",
+  max_call_duration_ms: "Call-duration caps aren't supported yet.",
+  silenceTimeoutSeconds: "Call silence timeouts aren't configurable yet.",
   reminder_trigger_ms: "Reminder nudges stay vendor-specific.",
   reminder_max_count: "Reminder nudges stay vendor-specific.",
   dynamic_data: "Dynamic variables move to the deployment's CSV columns.",
@@ -256,7 +292,7 @@ const DROP_REASONS: Record<string, string> = {
   fallback_voice_ids: "Voice fallbacks stay vendor-specific.",
   volume: "Voice tuning stays vendor-specific.",
   firstMessageMode: "Who speaks first is part of the greeting (Step 3).",
-  clientMessages: "Client events belong to the Code / SDK channel (Step 4).",
+  clientMessages: "Client event streams aren't configurable here yet.",
   metadata: "Freeform metadata isn't carried.",
   tags: "Tags aren't carried.",
 }
@@ -292,7 +328,10 @@ function parseVapi(p: Rec): VendorParse {
       ["instructions", p.instructions],
     ]),
     greeting: firstStr([["firstMessage", p.firstMessage]]),
-    voice: firstStr([["voice.voiceId", voice?.voiceId]]),
+    voice: (() => {
+      const f = firstStr([["voice.voiceId", voice?.voiceId]])
+      return f ? { ...f, provider: str(voice?.provider) } : undefined
+    })(),
     model: firstStr([["model.model", model?.model]]),
     language: firstStr([["transcriber.language", transcriber?.language]]),
     tools: Array.isArray(model?.tools) && (model!.tools as unknown[]).length
@@ -324,12 +363,19 @@ function parseRetell(p: Rec): VendorParse {
     .map(([prefix, o]) => [prefix ? `${prefix}.general_tools` : "general_tools", o?.general_tools] as [string, unknown])
     .find(([, v]) => Array.isArray(v) && (v as unknown[]).length)
   const voiceFound = firstStr([["voice_id", p.voice_id]])
+  // Retell brands the provider into the id: "11labs-Adrian", "openai-Alloy",
+  // "deepgram-Angus". Read it so a non-ElevenLabs voice isn't rebranded.
+  const voicePrefix = voiceFound?.value.match(/^([a-z0-9]+)-/i)?.[1]
   const found: Found = {
     name: firstStr([["agent_name", p.agent_name], ["name", p.name]]),
     prompt: firstStr(at("general_prompt")),
     greeting: firstStr(at("begin_message")),
     voice: voiceFound
-      ? { ...voiceFound, normalized: voiceFound.value.replace(/^11labs-/i, "").toLowerCase() }
+      ? {
+          ...voiceFound,
+          normalized: voiceFound.value.replace(/^11labs-/i, "").toLowerCase(),
+          provider: voicePrefix,
+        }
       : undefined,
     model: firstStr(at("model")),
     language: firstStr([["language", p.language]]),
@@ -362,7 +408,10 @@ function parseElevenLabs(p: Rec): VendorParse {
     name: firstStr([["name", p.name]]),
     prompt: firstStr([["conversation_config.agent.prompt.prompt", promptObj?.prompt]]),
     greeting: firstStr([["conversation_config.agent.first_message", agent?.first_message]]),
-    voice: firstStr([["conversation_config.tts.voice_id", tts?.voice_id]]),
+    voice: (() => {
+      const f = firstStr([["conversation_config.tts.voice_id", tts?.voice_id]])
+      return f ? { ...f, provider: "ElevenLabs" } : undefined
+    })(),
     model: firstStr([["conversation_config.agent.prompt.llm", promptObj?.llm]]),
     language: firstStr([["conversation_config.agent.language", agent?.language]]),
     tools: Array.isArray(promptObj?.tools) && (promptObj!.tools as unknown[]).length
@@ -552,12 +601,15 @@ export function parseImport(raw: string, source: ImportSource): ImportParseResul
 export function importedConfigToArtifact(config: ImportedAgentConfig): VoiceArtifact {
   const base = stackFor("balanced")
   const llm = catalogLlm(config.llmModel)
+  // The parser only carries a voice whose provider runs on the bundled stack
+  // (voiceProvider is already "ElevenLabs" | "Azure") — brand it truthfully.
+  const ttsVendor = config.voiceProvider === "Azure" ? "Azure" : "ElevenLabs"
   const stack: AgentStack = {
     ...base,
     pipeline: "stt-llm-tts",
     language: languageLabelFor(config.language) ?? "English",
     llm: llm ? { vendor: llm.vendor, model: llm.model } : base.llm,
-    tts: config.voice ? { vendor: "ElevenLabs", voice: config.voice } : base.tts,
+    tts: config.voice ? { vendor: ttsVendor, voice: config.voice } : base.tts,
   }
   return saveVoiceArtifact({
     id: newVoiceId(),
@@ -571,6 +623,7 @@ export function importedConfigToArtifact(config: ImportedAgentConfig): VoiceArti
     firstMessage: config.firstMessage ?? "Hi, how can I help you today?",
     systemPrompt: config.systemPrompt,
     source: config.source ?? "Import",
+    provider: config.voice ? ttsVendor : undefined,
     stack,
   })
 }

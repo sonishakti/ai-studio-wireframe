@@ -344,6 +344,10 @@ export interface ImportedAgentConfig {
   systemPrompt?: string
   firstMessage?: string
   voice?: string
+  /** TTS provider the voice belongs to, when the export names one (e.g. Vapi
+   *  voice.provider, Retell's "11labs-" prefix) — carried so the stack can be
+   *  branded truthfully instead of assuming ElevenLabs (user-test #7 P0). */
+  voiceProvider?: string
   llmModel?: string
   language?: string
   tools?: string[]

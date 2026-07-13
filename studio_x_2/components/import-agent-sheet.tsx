@@ -1,16 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { Upload, FileJson, Link2, FileUp, CheckCircle2, AlertCircle, Check, Minus } from "lucide-react"
+import Link from "next/link"
+import { CheckCircle2, AlertCircle, Check, Minus, ArrowRight } from "lucide-react"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger,
   SheetFooter, SheetClose,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { CodeBlock } from "@/components/code-block"
 import { track } from "@/lib/analytics"
@@ -33,7 +32,6 @@ export function ImportAgentSheet({
   onImported?: (config: ImportedAgentConfig) => void
 }) {
   const [pasted, setPasted] = React.useState("")
-  const [url, setUrl] = React.useState("")
   const [source, setSource] = React.useState<ImportSource>("Vapi")
   const [validation, setValidation] = React.useState<ImportParseResult | null>(null)
 
@@ -92,72 +90,43 @@ export function ImportAgentSheet({
                 ? "Paste any agent config as JSON below."
                 : `Copy the full agent object from the ${source} dashboard or API and paste it below.`}
             </p>
+            {/* The standalone paste-to-live flow was an orphan route — built
+                for switchers, reachable by nobody (user-test #7 P0). This is
+                its one door in the product. */}
+            <p className="text-xs text-muted-foreground">
+              Starting fresh on Agora?{" "}
+              <Link
+                href="/defect"
+                className="inline-flex items-center gap-0.5 rounded font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Try the paste-to-live migration flow <ArrowRight className="h-3 w-3" aria-hidden />
+              </Link>
+            </p>
           </div>
 
-          <Tabs defaultValue="paste">
-            <TabsList className="w-full">
-              <TabsTrigger value="paste" className="flex-1 gap-1.5">
-                <FileJson className="h-3.5 w-3.5" /> Paste JSON
-              </TabsTrigger>
-              <TabsTrigger value="upload" className="flex-1 gap-1.5">
-                <FileUp className="h-3.5 w-3.5" /> Upload file
-              </TabsTrigger>
-              <TabsTrigger value="url" className="flex-1 gap-1.5">
-                <Link2 className="h-3.5 w-3.5" /> From URL
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Paste */}
-            <TabsContent value="paste" className="space-y-3 pt-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="agent-json">Agent config</Label>
-                <Textarea
-                  id="agent-json"
-                  rows={10}
-                  value={pasted}
-                  onChange={(e) => { setPasted(e.target.value); setValidation(null) }}
-                  placeholder={VENDOR_EXAMPLES[source]}
-                  className="font-mono text-xs"
-                />
-                <p className="text-xs text-muted-foreground">{VENDOR_FIELD_HINTS[source]}</p>
-              </div>
+          {/* Paste is the ONE way in today. The Upload/URL tabs used to sit
+              here disabled — dead tabs made testers squint at the working
+              parts (user-test #7 P0), so the futures are one honest line. */}
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="agent-json">Agent config</Label>
+              <Textarea
+                id="agent-json"
+                rows={10}
+                value={pasted}
+                onChange={(e) => { setPasted(e.target.value); setValidation(null) }}
+                placeholder={VENDOR_EXAMPLES[source]}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">{VENDOR_FIELD_HINTS[source]}</p>
+            </div>
+            <div className="flex items-center justify-between gap-3">
               <Button variant="outline" size="sm" onClick={handleValidate} disabled={!pasted.trim()}>
                 Validate
               </Button>
-            </TabsContent>
-
-            {/* Upload */}
-            <TabsContent value="upload" className="pt-3 space-y-3">
-              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 gap-3 text-center">
-                <Upload className="h-7 w-7 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Drop a .json file here</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Or click to browse. Max 1 MB</p>
-                </div>
-                <Button variant="outline" size="sm" disabled>Choose file</Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                This preview imports via <span className="font-medium text-foreground">Paste JSON</span>. File upload is coming soon.
-              </p>
-            </TabsContent>
-
-            {/* From URL */}
-            <TabsContent value="url" className="pt-3 space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="agent-url">Public URL</Label>
-                <Input
-                  id="agent-url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com/agent-config.json"
-                  className="font-mono text-sm"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This preview imports via Paste JSON. Fetching from a URL is coming soon.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
+              <p className="text-xs text-muted-foreground">File upload and URL import are coming soon.</p>
+            </div>
+          </div>
 
           {/* Example — a REAL export shape for the chosen vendor, so the
               "configs map" promise is demonstrable: paste this, see the report. */}
