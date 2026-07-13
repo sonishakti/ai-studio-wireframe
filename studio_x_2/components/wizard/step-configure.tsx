@@ -469,11 +469,16 @@ function OutboundSettings({ draft, update }: StepProps) {
 // ─── Code — SDK/API snippets + Docs Center ────────────────────────────────────
 
 function CodeConfigure({ agentId }: { agentId: string }) {
+  // Snippet-truth (user-test #6, D3): before deploy the agent id is a
+  // placeholder — say so where the Copy button is, the way the widget studio's
+  // embed-truth line does. And speak Agora vocabulary: projects carry an App ID
+  // + App Certificate (Project Settings), not an "API key" that exists nowhere.
+  const unpublished = agentId === "new"
   const connect = `import { AgentClient } from "@agora/agent-sdk"
 
 const client = new AgentClient({
   agentId: "${agentId}",
-  apiKey: process.env.AGORA_API_KEY,
+  appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
 // Add the agent to a live Agora RTC channel
@@ -485,12 +490,24 @@ await client.stop()`
 
   return (
     <div className="space-y-4">
+      {unpublished && (
+        <p className="text-xs text-warning">
+          This agent&apos;s ID is minted when you deploy — these snippets carry the
+          placeholder <code className="font-mono">&quot;new&quot;</code> until then. Deploy
+          first (Step 5), then copy.
+        </p>
+      )}
       <ConfigCard title="Add to your app">
         <p className="text-sm text-muted-foreground">
           Install the SDK, then drop the agent into any Agora channel. No phone number needed. It runs wherever your app does.
         </p>
         <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
         <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
+        <p className="text-xs text-muted-foreground">
+          Secured-mode channels: the platform mints the agent&apos;s token from your
+          App Certificate on join — your clients keep bringing their own tokens,
+          and the agent needs nothing extra from you.
+        </p>
       </ConfigCard>
 
       <ConfigCard title="Stop the agent">
@@ -511,7 +528,9 @@ await client.stop()`
           </div>
         </div>
         <Button variant="outline" size="sm" className="gap-1.5" asChild>
-          <a href="https://docs.agora.io/en/" target="_blank" rel="noopener noreferrer">
+          {/* Deep-link the Voice Agent docs section, not the docs homepage
+              (user-test #6 D3; URL verified 2026-07-13: "Voice Agent overview"). */}
+          <a href="https://docs.agora.io/en/ai" target="_blank" rel="noopener noreferrer">
             Docs Center <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </Button>

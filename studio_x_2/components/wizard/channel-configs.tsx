@@ -286,13 +286,15 @@ export function BatchConfig({
 }
 
 export function EmbedConfig({ agentId }: { agentId: string }) {
+  // Same vocabulary truth as the wizard's Code step (user-test #6, D3): App ID
+  // from Project Settings — there is no "API key" surface in the product.
   const snippet = `npm install @agora/agent-sdk
 
 import { AgentClient } from "@agora/agent-sdk"
 
 const client = new AgentClient({
   agentId: "${agentId}",
-  apiKey: process.env.AGORA_API_KEY,
+  appId: process.env.AGORA_APP_ID,
 })
 
 await client.connect()`
@@ -307,7 +309,7 @@ await client.connect()`
         {snippet}
       </CodeBlock>
       <p className="text-xs text-muted-foreground">
-        Your API key lives in Project Settings. The agent goes live the first time a
+        Your App ID lives in Project Settings. The agent goes live the first time a
         client connects.
       </p>
     </ConfigCard>
