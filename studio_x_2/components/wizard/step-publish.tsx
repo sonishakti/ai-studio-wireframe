@@ -128,8 +128,13 @@ export function StepPublish({
           <Rocket className="h-4 w-4" aria-hidden /> {ctaLabel ?? (live ? "Redeploy" : "Deploy agent")}
         </Button>
         <p className="text-sm text-muted-foreground">
+          {/* Code-aware promise (user-test #9, D3): a code deploy mints the ID
+              and STAYS here — no "real traffic"/Monitor language for a channel
+              where traffic starts when the app connects. */}
           {live
             ? `Redeploying applies your edits to live traffic. You'll land on Monitor to watch it.`
+            : draft.type === "code"
+            ? `Deploying mints ${agentName}'s agent ID into the snippets above. Traffic starts when your app connects — you stay right here.`
             : `Deploying starts real traffic for ${agentName}. You'll land on Monitor to watch it.`}
         </p>
       </div>

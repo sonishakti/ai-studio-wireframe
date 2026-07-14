@@ -703,6 +703,11 @@ export function AgentWizard({
     else router.push("/agents/new/edit")
   }
 
+  // Code/SDK third deploy state (user-test #9, D3 S2): after the stay-branch
+  // deploy the UI still read "Draft + go live" while the toast said deployed.
+  // Session flag + the minted agentId on a NEW draft (persists via saveDraft)
+  // both witness the deploy, so a refresh keeps the truth.
+  const [codeDeployedNow, setCodeDeployedNow] = React.useState(false)
   const publishingRef = React.useRef(false)
   // Batch pre-flight — a ref (not state) so the confirmed re-entry into
   // publish() can't race the dialog's close render.
@@ -712,6 +717,14 @@ export function AgentWizard({
     if (publishingRef.current) return // guard: double-click must not double-publish
     const reason = publishBlockReason(draftRef.current)
     if (reason) { toast.error("Not ready to deploy yet", { description: reason }); return }
+    // No-op honesty (user-test #10, D1 S3): redeploying an untouched live
+    // agent fired a success toast + Monitor hop while nothing changed — a
+    // fake success devalues every later toast.
+    const tChanged = isLive && !!baseline.current && draftRef.current.type !== baseline.current.type
+    if (isLive && !anyEdited && !tChanged) {
+      toast("Already live", { description: "No changes since the last deploy." })
+      return
+    }
     // Batch pre-flight (user-test 2026-07-09, S2 ×2 personas): one click must
     // never start dialing a whole contact list silently — confirm the count,
     // caller ID, window, and an honest cost estimate first.
@@ -737,6 +750,7 @@ export function AgentWizard({
       stay,
     })
     if (stay) {
+      setCodeDeployedNow(true)
       const next = { ...draftRef.current, agentId }
       setDraft(next)
       draftRef.current = next
@@ -758,7 +772,13 @@ export function AgentWizard({
     () => (draft.voice ? getVoiceArtifact(draft.voice.id) : undefined),
     [draft.voice],
   )
-  const cardStatus = isEdit ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1) : "Draft"
+  // "Deployed" ≠ "Live" for Code/SDK: the deploy mints the ID; traffic (and
+  // billing) starts when the app connects. Witnessed by the session flag OR a
+  // minted agentId on a NEW draft (edit-mode drafts always carry an id).
+  const codeDeployed = draft.type === "code" && !isLive && (codeDeployedNow || (!isEdit && !!draft.agentId))
+  const cardStatus = isEdit
+    ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1)
+    : codeDeployed ? "Deployed" : "Draft"
   // Stats come from the DRAFT's stack (not the saved agent) so the card's
   // $/min + latency move live as the Step-1 stack config changes — and new
   // drafts show numbers from first paint (balanced default).
@@ -790,21 +810,23 @@ export function AgentWizard({
     ? anyEdited
       ? "Edits are not live yet. Redeploy to apply."
       : "Changes apply on your next redeploy."
+    : codeDeployed
+    ? "Deployed — goes live when your app connects."
     : blockReason ?? "Review the Deploy step and go live."
   // "Redeploy" on a live agent being REPOINTED read as re-publishing the OLD
   // channel at the moment of launching a first batch (user-test #7, D1 S3) —
   // when the type changed since the live baseline, name what actually starts.
   const typeChanged = isLive && !!baseline.current && draft.type !== baseline.current.type
   const deployCta = !isLive
-    ? "Deploy"
+    ? codeDeployed ? "Redeploy" : "Deploy"
     : typeChanged && draft.type === "outbound" ? "Launch batch calls"
     : typeChanged && draft.type ? `Deploy ${typeLabel(draft.type)}`
     : "Redeploy"
 
   // Graft A (judge round): the Deploy fill invites action only when acting
-  // means something — a ready draft or a dirty live agent. A clean live agent
-  // or a blocked draft gets the outline (the status line says why).
-  const deployHot = isLive ? anyEdited : !blockReason
+  // means something — a ready draft or a dirty live agent. A clean live agent,
+  // a blocked draft, or an already-deployed code agent gets the outline.
+  const deployHot = isLive ? anyEdited : codeDeployed ? false : !blockReason
 
   return (
     // data-fluid opts out of the layout's 1536px cap: the builder uses the
@@ -1006,10 +1028,13 @@ export function AgentWizard({
           </div>
 
           {/* Autosave feedback survives the lean pass for BOTH modes — losing
-              "Saving…/Saved" would un-fix heuristic-eval #6. */}
+              "Saving…/Saved" would un-fix heuristic-eval #6. "DRAFT saved",
+              not "Saved": the bare word one line above "Unsaved changes" read
+              as the product contradicting itself (user-test #11, D1) —
+              saved-as-draft ≠ live. */}
           {saveState !== "idle" && (
             <p className="px-2.5 text-xs text-muted-foreground" role="status" aria-live="polite">
-              {saveState === "saving" ? "Saving…" : "Saved"}
+              {saveState === "saving" ? "Saving…" : "Draft saved"}
             </p>
           )}
 
@@ -1023,6 +1048,11 @@ export function AgentWizard({
           <div className="space-y-2 pt-2">
             {isLive && anyEdited && (
               <p className="px-0.5 text-xs text-warning">Unsaved changes — redeploy to apply.</p>
+            )}
+            {/* Code third state: the one slim truth line this slot carries
+                (same idiom as the dirty line — conditional, no container). */}
+            {codeDeployed && (
+              <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
             )}
             {/* Always outline: this button OPENS the Talk panel. Turning it
                 red mid-test made it read as "end call" while it did no such
@@ -1154,7 +1184,7 @@ export function AgentWizard({
                         <StepPublish
                           draft={draft}
                           live={isLive}
-                          ctaLabel={isLive ? deployCta : undefined}
+                          ctaLabel={isLive || codeDeployed ? deployCta : undefined}
                           onPublish={publish}
                           onFix={(m) => openRow(m)}
                           talking={testing}

@@ -246,6 +246,12 @@ function OutboundConfigure({ draft, update }: StepProps) {
       n.id === out?.numberId ||
       n.assignedTo.some((d) => d.startsWith("dp_ob")),
   )
+  // Busy inbound lines SHOW, disabled, with the one-agent-one-channel reason —
+  // silently omitting the number the status line just named ("Live on +1 …")
+  // read as the product hiding something (user-tests #9 + #10, S2 both).
+  const answering = PHONE_NUMBERS.filter(
+    (n) => !available.includes(n) && n.assignedTo.length > 0,
+  )
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
 
@@ -263,6 +269,11 @@ function OutboundConfigure({ draft, update }: StepProps) {
               <SelectContent>
                 {available.map((n) => (
                   <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === out?.numberId ? " · current" : ""}</SelectItem>
+                ))}
+                {answering.map((n) => (
+                  <SelectItem key={n.id} value={n.id} disabled>
+                    {n.number} · answering {n.label} — a line can&apos;t answer and dial at once
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
