@@ -215,17 +215,18 @@ export function AgentWizard({
     n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : isLive
   const setupCount = [1, 2, 3].filter(isDone).length
 
-  // ── CTA-placement lab (owner 2026-07-14: "not a treasure hunt") ────────────
-  // Five arrangements of the SAME actions (Talk · Deploy · status truth),
-  // switched by ?cta=1..5 for the judge round; no param = the shipped layout
-  // (control). The winner becomes the only code path and this switch dies.
-  //   1 header cluster · 2 one rail block · 3 sticky bottom bar ·
-  //   4 contextual (talk-by-name, deploy in step) · 5 hybrid (talk-by-name,
-  //   deploy in header)
-  const [ctaVariant, setCtaVariant] = React.useState(0)
+  // ── One-primary discipline (CTA-judge round 2026-07-14, graft B) ───────────
+  // While step 4's own go-live CTA is on screen, the rail's Deploy demotes to
+  // outline so exactly ONE filled primary exists at the commit moment — every
+  // judge flagged the duplicate-primary collision on sticky arrangements.
+  const publishRegionRef = React.useRef<HTMLDivElement>(null)
+  const [publishInView, setPublishInView] = React.useState(false)
   React.useEffect(() => {
-    const v = Number(new URLSearchParams(window.location.search).get("cta") ?? "0")
-    if (v >= 1 && v <= 5) setCtaVariant(v)
+    const el = publishRegionRef.current
+    if (!el || typeof IntersectionObserver === "undefined") return
+    const io = new IntersectionObserver(([e]) => setPublishInView(e.isIntersecting), { threshold: 0.1 })
+    io.observe(el)
+    return () => io.disconnect()
   }, [])
 
   // ── Mount: time-to-live clock; restore + ?artifact/?dc/?step/?template/?blank ──
@@ -808,6 +809,10 @@ export function AgentWizard({
       ? "Unsaved changes — redeploy to apply"
       : `Live on ${channelTarget(baseline.current ?? draft)}`
     : deploySub
+  // Graft A (judge round): the Deploy fill invites action only when acting
+  // means something — a ready draft or a dirty live agent. A clean live agent
+  // or a blocked draft gets the outline (the status line says why).
+  const deployHot = isLive ? anyEdited : !blockReason
 
   return (
     // data-fluid opts out of the layout's 1536px cap: the builder uses the
@@ -836,34 +841,6 @@ export function AgentWizard({
               <Button variant="outline" size="sm" className="gap-1.5" onClick={onCreateNew}>
                 <Plus className="h-4 w-4" aria-hidden /> New agent
               </Button>
-            )}
-            {/* V1/V5 — the doc-level action cluster in the expected top-right
-                slot (NN/g consistency): status truth reads first, then the
-                actions, destructive separated left of the pair. */}
-            {(ctaVariant === 1 || ctaVariant === 5) && (
-              <>
-                <span className="mx-1 hidden h-5 w-px bg-border sm:inline-block" aria-hidden />
-                <span className={cn(
-                  "hidden max-w-[280px] truncate text-xs lg:inline",
-                  isLive && anyEdited ? "text-warning" : "text-muted-foreground",
-                )}>
-                  {statusLine}
-                </span>
-                {isLive && anyEdited && (
-                  <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={discardEdits}>
-                    Discard edits
-                  </Button>
-                )}
-                {ctaVariant === 1 && (
-                  <Button variant="outline" size="sm" className="max-w-[180px] gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
-                    <Mic className="h-4 w-4 shrink-0" aria-hidden />
-                    <span className="truncate">Talk to {draft.name || "your agent"}</span>
-                  </Button>
-                )}
-                <Button size="sm" className="gap-1.5" onClick={publish}>
-                  <Rocket className="h-3.5 w-3.5" aria-hidden /> {deployCta}
-                </Button>
-              </>
             )}
           </div>
       </div>
@@ -939,7 +916,10 @@ export function AgentWizard({
           lockup + scroll-spy step list + live deploy state. ?step=N scrolls. */}
       <div className="rounded-2xl border border-border bg-card">
         <div className="grid grid-cols-1 items-start lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="min-w-0 space-y-6 p-5 lg:sticky lg:top-16 lg:self-start lg:p-6">
+        {/* max-h + overflow: on short viewports the rail scrolls INTERNALLY so
+            the action cluster can never scroll itself out of reach (judge
+            round's one pre-ship check). */}
+        <aside className="min-w-0 space-y-6 p-5 lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:self-start lg:overflow-y-auto lg:p-6">
           {/* Agent lockup — LEAN (Figma 2026-07-14): the name and its status,
               nothing else. No sphere, no voice recap; the sphere lives in the
               Talk panel where the agent actually performs. */}
@@ -975,78 +955,65 @@ export function AgentWizard({
               ) : (
                 <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
               )}
-              {/* V4/V5 — Talk as a compact control ON the agent it acts on
-                  (NN/g proximity: the action beside its object). */}
-              {(ctaVariant === 4 || ctaVariant === 5) && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 shrink-0"
-                      disabled={warming}
-                      onClick={() => setTalkOpen(true)}
-                      aria-label={`Talk to ${draft.name || "your agent"}`}
-                    >
-                      <Mic className="h-4 w-4" aria-hidden />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Talk to {draft.name || "your agent"}</TooltipContent>
-                </Tooltip>
-              )}
             </div>
-            {/* V4 — status stays informational under the name; the deploy
-                ACTION lives at the end of the flow (the Deploy step). */}
-            {ctaVariant === 4 && (
-              <p className={cn("text-xs", isLive && anyEdited ? "text-warning" : "text-muted-foreground")}>{statusLine}</p>
+          </div>
+
+          {/* THE action cluster (CTA-judge round 2026-07-14: V2 won 41.5/50,
+              first with 4 of 5 lenses) — status truth + Deploy + Talk +
+              Discard in ONE sticky slot directly under the agent, identical
+              for draft and live at every scroll depth. No treasure hunt.
+              Talk sits BETWEEN Deploy and Discard: the destructive-slip
+              buffer. Graft A (from control): state-driven weight — the fill
+              invites action only when acting means something (draft-ready or
+              live-dirty), tint keys on the edit state; live-clean keeps its
+              semibold production-truth headline. Graft B: publishInView
+              demotes the fill while step 4's own CTA is visible. */}
+          <div className={cn(
+            "space-y-2 rounded-lg border p-3",
+            isLive
+              ? anyEdited
+                ? "border-warning/40 bg-warning/[0.06]"
+                : "border-success/40 bg-success/10"
+              : "border-border bg-muted/30",
+          )}>
+            {isLive && !anyEdited ? (
+              <p className="text-sm font-semibold">Live on {channelTarget(baseline.current ?? draft)}</p>
+            ) : (
+              <p className={cn("text-xs", isLive && anyEdited ? "text-warning" : "text-muted-foreground")}>
+                {statusLine}
+              </p>
             )}
+            <Button
+              variant={deployHot && !publishInView ? "default" : "outline"}
+              className="w-full gap-1.5"
+              onClick={publish}
+            >
+              <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
+            </Button>
             {/* Always outline: this button OPENS the Talk panel. Turning it
                 red mid-test made it read as "end call" while it did no such
                 thing (audit 2026-07-07); truncate guards long agent names. */}
-            {/* Hero on first landing: with a live agent and nothing changed,
-                "talk to it" IS the pitch — Redeploy shouting before any edit was
-                a meaningless CTA (user-test 2026-07-09). They swap once dirty. */}
-            {ctaVariant === 0 && (
-              <Button
-                variant={isLive && !anyEdited ? "default" : "outline"}
-                size="sm"
-                className="w-full gap-1.5"
-                disabled={warming}
-                onClick={() => setTalkOpen(true)}
-              >
-                <Mic className="h-4 w-4 shrink-0" aria-hidden />
-                <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1.5"
+              disabled={warming}
+              onClick={() => setTalkOpen(true)}
+            >
+              <Mic className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
+            </Button>
             {warming && (
               <p role="status" className="text-xs text-muted-foreground">
-                Warming up. This exact button flips on the moment it finishes.
+                Warming up. Talk flips on the moment it finishes.
               </p>
             )}
+            {isLive && anyEdited && (
+              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
+                Discard edits
+              </Button>
+            )}
           </div>
-
-          {/* V2 — ONE rail cluster directly under the agent: status + both
-              actions grouped (nothing else anywhere in the rail). */}
-          {ctaVariant === 2 && (
-            <div className={cn(
-              "space-y-2 rounded-lg border p-3",
-              isLive ? "border-success/40 bg-success/10" : "border-border bg-muted/30",
-            )}>
-              <p className={cn("text-xs", isLive && anyEdited ? "text-warning" : "text-muted-foreground")}>{statusLine}</p>
-              <Button className="w-full gap-1.5" onClick={publish}>
-                <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
-              </Button>
-              <Button variant="outline" size="sm" className="w-full gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
-                <Mic className="h-4 w-4 shrink-0" aria-hidden />
-                <span className="truncate">Talk to {draft.name || "your agent"}</span>
-              </Button>
-              {isLive && anyEdited && (
-                <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
-                  Discard edits
-                </Button>
-              )}
-            </div>
-          )}
 
           {/* Scroll-spy step list — LEAN rows (Figma 2026-07-14): icon + title
               only, under a CONFIGURE group label. The recap lines are gone; the
@@ -1102,45 +1069,6 @@ export function AgentWizard({
             ))}
           </div>
 
-          {/* Production truth — LIVE agents only (Figma 2026-07-14: a new
-              draft's rail stays lean; its deploy CTA lives in the Deploy step
-              and the sub-lg strip). The heading reports what is live IN
-              PRODUCTION — always the deployed baseline's target. Reading the
-              draft here produced "Live on No contacts yet" mid-reconfiguration
-              (user-test P0 #1). */}
-          {ctaVariant === 0 && isLive && (
-            <div className="space-y-2.5 rounded-lg border border-success/40 bg-success/10 p-3">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold">
-                  Live on {channelTarget(baseline.current ?? draft)}
-                </p>
-                {/* Edit-state lives HERE, where "not live yet" is decided. The
-                    badge REPLACES the prose when edits are pending (same
-                    message twice = noise). */}
-                {anyEdited ? (
-                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Badge variant="warning">Unsaved changes</Badge> Redeploy to apply.
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">{deploySub}</p>
-                )}
-              </div>
-              <Button
-                variant={!anyEdited ? "outline" : "default"}
-                className="w-full gap-1.5"
-                onClick={publish}
-              >
-                <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
-              </Button>
-              {/* One action to walk away from ALL pending edits (owner call,
-                  2026-07-07) — shown only when something is actually pending. */}
-              {anyEdited && (
-                <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
-                  Discard edits
-                </Button>
-              )}
-            </div>
-          )}
           {/* Autosave feedback survives the lean pass for BOTH modes — losing
               "Saving…/Saved" would un-fix heuristic-eval #6. */}
           {saveState !== "idle" && (
@@ -1242,7 +1170,9 @@ export function AgentWizard({
                         draft={draft}
                         update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
                       />
-                      <div className="border-t border-border pt-6 [&>*]:max-w-4xl">
+                      {/* publishRegionRef feeds graft B: while this in-step
+                          go-live CTA is on screen, the rail Deploy demotes. */}
+                      <div ref={publishRegionRef} className="border-t border-border pt-6 [&>*]:max-w-4xl">
                         <StepPublish
                           draft={draft}
                           live={isLive}
@@ -1306,58 +1236,7 @@ export function AgentWizard({
           </OptionalSection>
         </div>
         </div>
-        {/* V3 — a slim sticky action bar where the work ends (forms guidance):
-            status truth left, actions right, always in reach mid-scroll.
-            lg+ only; below lg the existing strip owns this job. */}
-        {ctaVariant === 3 && (
-          <div className="sticky bottom-0 z-30 hidden items-center justify-between gap-3 rounded-b-2xl border-t border-border bg-background/95 px-5 py-2.5 backdrop-blur lg:flex">
-            <p className={cn("min-w-0 truncate text-xs", isLive && anyEdited ? "text-warning" : "text-muted-foreground")}>
-              {statusLine}
-            </p>
-            <div className="flex shrink-0 items-center gap-2">
-              {isLive && anyEdited && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={discardEdits}>
-                  Discard edits
-                </Button>
-              )}
-              <Button variant="outline" size="sm" className="max-w-[200px] gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
-                <Mic className="h-4 w-4 shrink-0" aria-hidden />
-                <span className="truncate">Talk to {draft.name || "your agent"}</span>
-              </Button>
-              <Button size="sm" className="gap-1.5" onClick={publish}>
-                <Rocket className="h-3.5 w-3.5" aria-hidden /> {deployCta}
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* CTA-lab switcher — lab affordance only (visible once a variant is
-          active); dies with the lab when the winner ships. */}
-      {ctaVariant > 0 && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1 rounded-full border border-border bg-background/95 px-2 py-1 shadow-lg backdrop-blur">
-          <span className="px-1 text-xs text-muted-foreground">CTA</span>
-          {[1, 2, 3, 4, 5].map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => {
-                const url = new URL(window.location.href)
-                url.searchParams.set("cta", String(v))
-                window.location.assign(url)
-              }}
-              aria-label={`CTA variant ${v}`}
-              aria-pressed={v === ctaVariant}
-              className={cn(
-                "flex h-6 w-6 items-center justify-center rounded-full text-xs transition-colors",
-                v === ctaVariant ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent",
-              )}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Talk panel — the agent's full identity card + live test, on demand.
           Steps render inline now, so the ONLY job of the right panel is
