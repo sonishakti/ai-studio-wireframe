@@ -77,9 +77,54 @@ export function StepConfigure({ draft, update }: StepProps) {
           and the inbound web-widget studio run two-pane splits (settings |
           reference) and manage their own width. */}
       {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
-      {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
-      {draft.type === "code" && <div className="max-w-3xl"><CodeConfigure agentId={agentId} /></div>}
+      {draft.type === "outbound" && (
+        <div className="space-y-4">
+          <TypeEscapeLine current="outbound" update={update} />
+          <OutboundConfigure draft={draft} update={update} />
+        </div>
+      )}
+      {draft.type === "code" && (
+        <div className="max-w-3xl space-y-4">
+          <TypeEscapeLine current="code" update={update} />
+          <CodeConfigure agentId={agentId} />
+        </div>
+      )}
     </div>
+  )
+}
+
+// ─── The way BACK out of a type ───────────────────────────────────────────────
+
+/** Every Deploy branch offers the other doors, riding the host's selectType
+ *  stash/undo (owner 2026-07-14: picking Batch calls in Deploy was a one-way
+ *  door — an explorer's only ways back were a 4-second toast or recalling that
+ *  Step 2 exists). Inbound keeps its intent-specific line from user-test #7;
+ *  outbound/code get this generic twin. */
+function TypeEscapeLine({
+  current,
+  update,
+}: {
+  current: AgentType
+  update: StepProps["update"]
+}) {
+  const others = (["inbound", "outbound", "code"] as AgentType[]).filter((t) => t !== current)
+  return (
+    <p className="text-xs text-muted-foreground">
+      Changed your mind? Switch to{" "}
+      {others.map((t, i) => (
+        <React.Fragment key={t}>
+          {i > 0 ? " or " : null}
+          <button
+            type="button"
+            onClick={() => update({ type: t })}
+            className="rounded underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {typeLabel(t)}
+          </button>
+        </React.Fragment>
+      ))}
+      {" "}— this setup is set aside, not deleted.
+    </p>
   )
 }
 
