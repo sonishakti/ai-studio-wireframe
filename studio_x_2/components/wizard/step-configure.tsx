@@ -16,6 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
 import { WebEmbedPanel, WidgetStudioEmbedded } from "@/components/widget-studio"
@@ -56,75 +57,37 @@ export function StepConfigure({ draft, update }: StepProps) {
         {!draft.type && "Pick how your agent runs first, then finish its setup."}
       </p>
 
-      {/* No type yet → never an empty drawer: choose it right here. */}
-      {!draft.type && (
-        <div className="space-y-3 rounded-lg border border-dashed border-border bg-muted/20 p-4">
-          <p className="text-sm font-medium">How will your agent run?</p>
-          <div className="flex flex-wrap gap-2">
+      {/* The run-mode switcher is TABS, always visible (owner 2026-07-14:
+          the one-shot buttons were a one-way door — "if user clicks any one
+          they can't go back"). Switching rides the host's selectType
+          stash/undo, so the departing setup is set aside, not deleted; this
+          replaces the per-branch escape lines. */}
+      <div className="space-y-2">
+        <Tabs
+          value={draft.type ?? ""}
+          onValueChange={(v) => v && v !== draft.type && update({ type: v as AgentType })}
+        >
+          <TabsList className="h-9">
             {(["outbound", "inbound", "code"] as AgentType[]).map((t) => (
-              <Button key={t} variant="outline" size="sm" onClick={() => update({ type: t })}>
+              <TabsTrigger key={t} value={t} className="text-xs sm:text-sm">
                 {typeLabel(t)}
-              </Button>
+              </TabsTrigger>
             ))}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Batch calls dial a contact list · Inbound answers a number or web widget · Code / SDK runs inside your app.
-          </p>
-        </div>
-      )}
+          </TabsList>
+        </Tabs>
+        <p className="text-xs text-muted-foreground">
+          Batch calls dial a contact list · Inbound answers a number or web widget · Code / SDK
+          runs inside your app.{draft.type ? " Switching sets the current setup aside, not deleted." : ""}
+        </p>
+      </div>
 
       {/* Code is a single-column form → capped for readability. Batch calls
           and the inbound web-widget studio run two-pane splits (settings |
           reference) and manage their own width. */}
       {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
-      {draft.type === "outbound" && (
-        <div className="space-y-4">
-          <TypeEscapeLine current="outbound" update={update} />
-          <OutboundConfigure draft={draft} update={update} />
-        </div>
-      )}
-      {draft.type === "code" && (
-        <div className="max-w-3xl space-y-4">
-          <TypeEscapeLine current="code" update={update} />
-          <CodeConfigure agentId={agentId} />
-        </div>
-      )}
+      {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
+      {draft.type === "code" && <div className="max-w-3xl"><CodeConfigure agentId={agentId} /></div>}
     </div>
-  )
-}
-
-// ─── The way BACK out of a type ───────────────────────────────────────────────
-
-/** Every Deploy branch offers the other doors, riding the host's selectType
- *  stash/undo (owner 2026-07-14: picking Batch calls in Deploy was a one-way
- *  door — an explorer's only ways back were a 4-second toast or recalling that
- *  Step 2 exists). Inbound keeps its intent-specific line from user-test #7;
- *  outbound/code get this generic twin. */
-function TypeEscapeLine({
-  current,
-  update,
-}: {
-  current: AgentType
-  update: StepProps["update"]
-}) {
-  const others = (["inbound", "outbound", "code"] as AgentType[]).filter((t) => t !== current)
-  return (
-    <p className="text-xs text-muted-foreground">
-      Changed your mind? Switch to{" "}
-      {others.map((t, i) => (
-        <React.Fragment key={t}>
-          {i > 0 ? " or " : null}
-          <button
-            type="button"
-            onClick={() => update({ type: t })}
-            className="rounded underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {typeLabel(t)}
-          </button>
-        </React.Fragment>
-      ))}
-      {" "}— this setup is set aside, not deleted.
-    </p>
   )
 }
 
@@ -173,21 +136,9 @@ function InboundConfigure({
         <RadioCard value="ui" title="Widget UI" description="Style & preview" />
       </RadioCardGroup>
 
-      {/* The chooser reads as THE channel menu, but it only forks the inbound
-          family — an outbound builder hunts here first (user-test #7, D1 S2).
-          One cross-link; it rides the host's selectType stash/undo. */}
-      <p className="text-xs text-muted-foreground">
-        Dialing a contact list instead?{" "}
-        <button
-          type="button"
-          onClick={() => update({ type: "outbound" })}
-          className="rounded underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          Switch to Batch calls
-        </button>
-        {" "}— this setup is set aside, not deleted.
-      </p>
-
+      {/* The batch cross-link that lived here is gone: the run-mode TABS
+          directly above are now the always-visible way between families
+          (owner 2026-07-14). */}
       {view === "phone" ? (
         <div className="max-w-3xl">
         <ConfigCard title="Answer a phone number">
