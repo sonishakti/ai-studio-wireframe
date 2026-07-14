@@ -131,8 +131,15 @@ export function StepPublish({
           {/* Code-aware promise (user-test #9, D3): a code deploy mints the ID
               and STAYS here — no "real traffic"/Monitor language for a channel
               where traffic starts when the app connects. */}
+          {/* The promise must match the CTA (user-test #12: "Launch batch
+              calls" over "Redeploying applies your edits…" read as two
+              stories) — branch by the draft's TYPE in both live states. */}
           {live
-            ? `Redeploying applies your edits to live traffic. You'll land on Monitor to watch it.`
+            ? draft.type === "outbound"
+              ? `This starts calling your contact list — you'll confirm the batch first, then land on Monitor.`
+              : draft.type === "code"
+              ? `This repoints ${agentName} to your app. Traffic starts when it connects — you stay right here.`
+              : `Redeploying applies your edits to live traffic. You'll land on Monitor to watch it.`
             : draft.type === "code"
             ? `Deploying mints ${agentName}'s agent ID into the snippets above. Traffic starts when your app connects — you stay right here.`
             : `Deploying starts real traffic for ${agentName}. You'll land on Monitor to watch it.`}

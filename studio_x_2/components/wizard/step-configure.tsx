@@ -250,7 +250,9 @@ function OutboundConfigure({ draft, update }: StepProps) {
   // silently omitting the number the status line just named ("Live on +1 …")
   // read as the product hiding something (user-tests #9 + #10, S2 both).
   const answering = PHONE_NUMBERS.filter(
-    (n) => !available.includes(n) && n.assignedTo.length > 0,
+    // assignedAgent too: pn_09-style numbers (agent-assigned, no dp_*
+    // deployment) fell through BOTH filters and vanished (user-test #12).
+    (n) => !available.includes(n) && (n.assignedTo.length > 0 || n.assignedAgent),
   )
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
@@ -272,7 +274,9 @@ function OutboundConfigure({ draft, update }: StepProps) {
                 ))}
                 {answering.map((n) => (
                   <SelectItem key={n.id} value={n.id} disabled>
-                    {n.number} · answering {n.label} — a line can&apos;t answer and dial at once
+                    {n.number} · {n.assignedTo.length > 0
+                      ? `answering ${n.label}`
+                      : `assigned to ${n.assignedAgent?.name ?? n.label}`} — a line can&apos;t answer and dial at once
                   </SelectItem>
                 ))}
               </SelectContent>

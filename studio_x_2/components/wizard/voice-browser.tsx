@@ -79,7 +79,11 @@ export function VoiceBrowser({
   const pageRows = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
 
   const use = (v: VoiceArtifact) => { onSelect(v); onOpenChange(false) }
-  const sample = (v: VoiceArtifact) => toast("Playing sample", { description: `${v.name} · ${v.voiceId ?? v.ttsVoice}` })
+  // Same simulated-audio disclosure as step-voice's Preview (user-test #12) —
+  // a bare "Playing sample" with no sound reads as broken.
+  const sample = (v: VoiceArtifact) => toast("Simulated preview", {
+    description: `No live audio in this wireframe — ${v.name} (${v.voiceId ?? v.ttsVoice}) would play here.`,
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -95,8 +95,11 @@ export function publishDeployment({
     : mode === "code" ? `${who} is ready. It goes live the moment your app connects.`
     : `${who} is now answering on ${channel}.`
   if (stay) {
-    toast.success(`${name || "Deployment"} is live`, {
-      description: `${description} The snippets below now carry its live ID.`,
+    // Code stay-path: "Deployed" ≠ "live" — the third state's vocabulary
+    // (user-test #12: the shared "is live" headline contradicted the badge,
+    // and "below" pointed the wrong way from the toast).
+    toast.success(`${name || "Deployment"} is deployed`, {
+      description: `${who} goes live the moment your app connects — the snippets now carry its live ID.`,
       action: { label: "View Monitor", onClick: () => router.push(monitorUrl) },
     })
     return
