@@ -11,7 +11,6 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
-import { AgentSphere } from "@/components/agent-test-panel"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -23,7 +22,7 @@ import { StepBuild } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
 import { CallSettings } from "@/components/wizard/step-call-settings"
-import { STEP_TITLES, STEP_ICONS, stepTitle, stepManifest } from "@/components/wizard/types"
+import { STEP_TITLES, STEP_ICONS, stepTitle } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
@@ -215,15 +214,6 @@ export function AgentWizard({
   const isDone = (n: number) =>
     n === 1 ? voiceDone : n === 2 ? typeDone : n === 3 ? promptDone : isLive
   const setupCount = [1, 2, 3].filter(isDone).length
-
-  // Row detail line — ALWAYS informative (heuristic-eval #1): summaries are
-  // recognition data, not a completion reward, so prefer real values whenever
-  // they exist, ✓ or not; fall back to the step's content manifest.
-  const rowDetail = (n: number): string => {
-    const summary = stepSummary(n)
-    if (summary) return summary
-    return stepManifest(n, draft)
-  }
 
   // ── Mount: time-to-live clock; restore + ?artifact/?dc/?step/?template/?blank ──
   React.useEffect(() => {
@@ -746,41 +736,6 @@ export function AgentWizard({
     clearDraft(isEdit ? draft.agentId : undefined)
   }
 
-  // ── Collapsed-row summaries — VALUES, not booleans (heuristic-eval #15/#16) ──
-  function stepSummary(n: number): string | undefined {
-    if (n === 1) {
-      // Step 1 is voice + language now (the engine moved to the Playground),
-      // so the recap matches that scope; the full stack + $/min live on the
-      // agent card.
-      return cardVoice ? `${cardVoice.name} · ${draft.stack.language ?? "English"}` : undefined
-    }
-    if (n === 2) return draft.type ? typeLabel(draft.type) : undefined
-    if (n === 3) {
-      if (!promptDone) return undefined
-      const chars = draft.systemPrompt.trim().length
-      // KB / MCP / connectors are three distinct resources now (F6, 2026-07-07),
-      // so the recap names each rather than flattening them into one "actions"
-      // count that miscalled a knowledge base an action.
-      const bits: string[] = []
-      if (draft.knowledge.length) bits.push(`${draft.knowledge.length} knowledge`)
-      if (draft.mcp.length) bits.push(`${draft.mcp.length} MCP`)
-      if (draft.connectors.length) bits.push(`${draft.connectors.length} connector${draft.connectors.length === 1 ? "" : "s"}`)
-      return [
-        `Prompt · ${chars} chars`,
-        draft.greeting.trim() ? "Greeting set" : "No greeting",
-        bits.length ? bits.join(", ") : "No tools yet",
-      ].join(" · ")
-    }
-    if (n === 4) {
-      // LIVE target comes from the deployed BASELINE, never the draft — a draft
-      // mid-reconfiguration rendered "live on No contacts yet" (user-test P0 #1).
-      if (isLive) return `Deployed · live on ${channelTarget(baseline.current ?? draft)}`
-      if (!draft.type) return undefined
-      return channelLine(draft)
-    }
-    return undefined
-  }
-
   // ── Left identity card (shared component — keeps the agent present, same as
   //    the Agents home, so it never "goes missing" when you enter the builder). ──
   // One voice lookup per id change — getVoiceArtifact reads localStorage, and
@@ -934,53 +889,42 @@ export function AgentWizard({
           lockup + scroll-spy step list + live deploy state. ?step=N scrolls. */}
       <div className="rounded-2xl border border-border bg-card">
         <div className="grid grid-cols-1 items-start lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="min-w-0 space-y-5 p-4 lg:sticky lg:top-16 lg:self-start lg:p-5">
-          {/* Agent lockup */}
+        <aside className="min-w-0 space-y-6 p-5 lg:sticky lg:top-16 lg:self-start lg:p-6">
+          {/* Agent lockup — LEAN (Figma 2026-07-14): the name and its status,
+              nothing else. No sphere, no voice recap; the sphere lives in the
+              Talk panel where the agent actually performs. */}
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <AgentSphere size={44} active={testing} />
-              <div className="min-w-0 flex-1">
-                {/* Agent name = the page's H2 (the subject under the H1 title).
-                    It stays inline-editable; aria-label names the heading since
-                    its only child is the input. */}
-                <div className="flex items-center gap-2">
-                  <h2 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 flex-1">
-                    <input
-                      value={draft.name}
-                      onChange={(e) => update({ name: e.target.value })}
-                      placeholder={isEdit ? existing!.name : "Name your agent"}
-                      aria-label="Agent name"
-                      className="w-full rounded-md bg-transparent px-1 text-lg font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
-                    />
-                  </h2>
-                  {/* The default agent's "why is this Live / who pays" answer
-                      lives in a tooltip ON the badge that raises the question,
-                      not as an always-visible strip (owner 2026-07-09). */}
-                  {landing ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="shrink-0 cursor-help">{warming ? "Warming up" : cardStatus}</Badge>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-[240px]">
-                        <p className="font-medium">Provisioned free. Testing in-browser costs nothing.</p>
-                        <p className="mt-1 text-primary-foreground/70">
-                          Runs Agora Balanced: {STACK_PRESETS.balanced.llm.model} · {STACK_PRESETS.balanced.asr.vendor} {STACK_PRESETS.balanced.asr.model} · {STACK_PRESETS.balanced.tts.vendor}. Change it in step 1.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
-                  )}
-                </div>
-                {/* No role tag under the name (owner 2026-07-09) — the rail's
-                    Voice row already recaps the persona. New drafts keep the
-                    pick-a-voice nudge until one is chosen. */}
-                {!isEdit && (
-                  <p className="truncate px-1 text-sm text-muted-foreground">
-                    {cardVoice?.name ?? "Pick a voice to start"}
-                  </p>
-                )}
-              </div>
+            <div className="flex items-center gap-2">
+              {/* Agent name = the page's H2 (the subject under the H1 title).
+                  It stays inline-editable; aria-label names the heading since
+                  its only child is the input. */}
+              <h2 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 flex-1">
+                <input
+                  value={draft.name}
+                  onChange={(e) => update({ name: e.target.value })}
+                  placeholder={isEdit ? existing!.name : "Name your agent"}
+                  aria-label="Agent name"
+                  className="-mx-1 w-full rounded-md bg-transparent px-1 text-xl font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
+                />
+              </h2>
+              {/* The default agent's "why is this Live / who pays" answer
+                  lives in a tooltip ON the badge that raises the question,
+                  not as an always-visible strip (owner 2026-07-09). */}
+              {landing ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="secondary" className="shrink-0 cursor-help">{warming ? "Warming up" : cardStatus}</Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[240px]">
+                    <p className="font-medium">Provisioned free. Testing in-browser costs nothing.</p>
+                    <p className="mt-1 text-primary-foreground/70">
+                      Runs Agora Balanced: {STACK_PRESETS.balanced.llm.model} · {STACK_PRESETS.balanced.asr.vendor} {STACK_PRESETS.balanced.asr.model} · {STACK_PRESETS.balanced.tts.vendor}. Change it in step 1.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
+              )}
             </div>
             {/* Always outline: this button OPENS the Talk panel. Turning it
                 red mid-test made it read as "end call" while it did no such
@@ -1005,14 +949,15 @@ export function AgentWizard({
             )}
           </div>
 
-          {/* Scroll-spy step list — recaps make it a recognition map (C3 harvest).
-              Plain icon + label rows, same idiom as the app sidebar: NO completion
-              ticks (owner 2026-07-08) — the recap line under each title already
-              says what's set, and the deploy block carries overall progress. */}
+          {/* Scroll-spy step list — LEAN rows (Figma 2026-07-14): icon + title
+              only, under a CONFIGURE group label. The recap lines are gone; the
+              one-pager keeps every step's content visible, so the map duty the
+              recaps used to carry lives in the sections themselves. NO
+              completion ticks (owner 2026-07-08). */}
           <nav aria-label="Build steps" className="space-y-0.5">
+            <p className="px-2.5 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">Configure</p>
             {[1, 2, 3, 4].map((n) => {
               const Icon = STEP_ICONS[n]
-              const detail = rowDetail(n)
               const active = n === selected && !activeOpt
               return (
                 <button
@@ -1021,15 +966,12 @@ export function AgentWizard({
                   onClick={() => openRow(n)}
                   aria-current={active ? "step" : undefined}
                   className={cn(
-                    "flex w-full items-start gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
                     active && "bg-accent/60",
                   )}
                 >
-                  <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium">{stepTitle(n, draft)}</span>
-                    <span className="line-clamp-1 block text-xs text-muted-foreground" title={detail}>{detail}</span>
-                  </span>
+                  <Icon className={cn("h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
                 </button>
               )
             })}
@@ -1039,7 +981,7 @@ export function AgentWizard({
               Three of them (owner 2026-07-13): Advanced · Analysis · Call
               settings. */}
           <div className="space-y-0.5">
-            <p className="px-2.5 pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground/70">Optional</p>
+            <p className="px-2.5 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">Optional</p>
             {([
               { key: "advanced" as const, label: "Advanced", icon: SlidersHorizontal },
               { key: "analysis" as const, label: "Analysis", icon: ListChecks },
@@ -1061,56 +1003,52 @@ export function AgentWizard({
             ))}
           </div>
 
-          {/* Deploy state — honest about pending edits (audit fix: every
-              operator run flagged the missing dirty signal). */}
-          <div className={cn(
-            "space-y-2.5 rounded-lg border p-3",
-            isLive ? "border-success/40 bg-success/10" : "border-border bg-card",
-          )}>
-            {/* ONE progress fraction: the step list above already shows what's
-                done; a second "N of 5" with a different denominator read as a
-                contradiction (audit 2026-07-07). */}
-            <div className="space-y-1">
-              {/* The heading reports what is live IN PRODUCTION — always the
-                  deployed baseline's target. Reading the draft here produced
-                  "Live on No contacts yet" mid-reconfiguration, corrupting the
-                  one string whose job is production truth (user-test P0 #1). */}
-              <p className="text-sm font-semibold">
-                {isLive ? `Live on ${channelTarget(baseline.current ?? draft)}` : `${setupCount} of 3 set up`}
-              </p>
-              {/* Edit-state lives HERE — one fixed slot in the deploy block,
-                  where "not live yet" is decided. The badge REPLACES the prose
-                  when edits are pending (same message twice = noise); under the
-                  agent name it flickered and shoved the lockup (owner
-                  2026-07-09). */}
-              {isLive && anyEdited ? (
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Badge variant="warning">Unsaved changes</Badge> Redeploy to apply.
+          {/* Production truth — LIVE agents only (Figma 2026-07-14: a new
+              draft's rail stays lean; its deploy CTA lives in the Deploy step
+              and the sub-lg strip). The heading reports what is live IN
+              PRODUCTION — always the deployed baseline's target. Reading the
+              draft here produced "Live on No contacts yet" mid-reconfiguration
+              (user-test P0 #1). */}
+          {isLive && (
+            <div className="space-y-2.5 rounded-lg border border-success/40 bg-success/10 p-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">
+                  Live on {channelTarget(baseline.current ?? draft)}
                 </p>
-              ) : (
-                <p className="text-xs text-muted-foreground">{deploySub}</p>
+                {/* Edit-state lives HERE, where "not live yet" is decided. The
+                    badge REPLACES the prose when edits are pending (same
+                    message twice = noise). */}
+                {anyEdited ? (
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Badge variant="warning">Unsaved changes</Badge> Redeploy to apply.
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">{deploySub}</p>
+                )}
+              </div>
+              <Button
+                variant={!anyEdited ? "outline" : "default"}
+                className="w-full gap-1.5"
+                onClick={publish}
+              >
+                <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
+              </Button>
+              {/* One action to walk away from ALL pending edits (owner call,
+                  2026-07-07) — shown only when something is actually pending. */}
+              {anyEdited && (
+                <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
+                  Discard edits
+                </Button>
               )}
             </div>
-            <Button
-              variant={isLive && !anyEdited ? "outline" : "default"}
-              className="w-full gap-1.5"
-              onClick={publish}
-            >
-              <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
-            </Button>
-            {/* One action to walk away from ALL pending edits (owner call,
-                2026-07-07) — shown only when something is actually pending. */}
-            {isLive && anyEdited && (
-              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
-                Discard edits
-              </Button>
-            )}
-            {saveState !== "idle" && (
-              <p className="text-center text-xs text-muted-foreground" role="status" aria-live="polite">
-                {saveState === "saving" ? "Saving…" : "Saved"}
-              </p>
-            )}
-          </div>
+          )}
+          {/* Autosave feedback survives the lean pass for BOTH modes — losing
+              "Saving…/Saved" would un-fix heuristic-eval #6. */}
+          {saveState !== "idle" && (
+            <p className="px-2.5 text-xs text-muted-foreground" role="status" aria-live="polite">
+              {saveState === "saving" ? "Saving…" : "Saved"}
+            </p>
+          )}
         </aside>
 
         {/* RHS pane of the unified card: the steps are borderless sections
@@ -1139,13 +1077,13 @@ export function AgentWizard({
                     content slides cleanly under. The icon NAMES the section;
                     never a completion tick (rail + deploy block own progress). */}
                 <header className={cn(
-                  "z-20 flex items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 lg:sticky lg:top-12",
+                  "z-20 flex items-center justify-between gap-3 border-b border-border bg-muted px-6 py-3 lg:sticky lg:top-12",
                   n === 1 && "lg:rounded-tr-2xl",
                 )}>
+                  {/* Plain icon, no chip box (Figma 2026-07-14 — the band got
+                      quieter, the content around it got the room). */}
                   <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
-                      <Icon className="h-3.5 w-3.5" aria-hidden />
-                    </span>
+                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
                   </div>
                   {/* LIVE agents only: with autosave there is no Save/Cancel,
@@ -1170,11 +1108,17 @@ export function AgentWizard({
                     </Tooltip>
                   )}
                 </header>
-                {/* Width discipline: steps 1/3 cap themselves; 2 and 4 manage
-                    their own layout (type cards + the batch-calls split and the
-                    widget studio need the full pane). py-6 gives each section
-                    air under its header band. */}
-                <div className="px-5 py-6">
+                {/* Section anatomy = [label | content] (Figma 2026-07-14): a
+                    quiet repeat of the step name in a 190px label column at
+                    xl+, the form in a roomy content column. aria-hidden — the
+                    band's h3 already names the section. Steps 1–3 cap at 4xl
+                    for readability; Deploy stays fluid (the batch split + the
+                    widget studio manage their own width). */}
+                <div className="grid gap-x-10 gap-y-5 px-5 py-7 sm:px-6 lg:px-8 xl:grid-cols-[190px_minmax(0,1fr)]">
+                  <p aria-hidden className="hidden text-sm font-medium text-muted-foreground xl:block">
+                    {stepTitle(n, draft)}
+                  </p>
+                  <div className={cn("min-w-0", n !== 4 && "max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && (
                     <StepType
@@ -1212,6 +1156,7 @@ export function AgentWizard({
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               </section>
             )
@@ -1501,24 +1446,28 @@ function OptionalSection({
           {/* Same banded, sticky header language as the numbered sections, so
               optional depth reads as a peer section, not stray rows (arrange
               2026-07-08). Opaque bg so content scrolls cleanly under it. */}
-          <button type="button" className="z-20 flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:sticky lg:top-12">
+          <button type="button" className="z-20 flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-6 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:sticky lg:top-12">
             <span className="flex min-w-0 items-center gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
-                <Icon className="h-3.5 w-3.5" aria-hidden />
-              </span>
+              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               <span className="min-w-0">
                 <span className="flex items-center gap-2">
                   <span className="text-sm font-semibold">{title}</span>
                   <Badge variant="outline" className="shrink-0 text-muted-foreground">Optional</Badge>
                 </span>
+                {/* Collapsed content still needs its manifest — unlike the open
+                    steps, what's inside here is not visible. */}
                 <span className="line-clamp-1 block text-xs text-muted-foreground">{summary}</span>
               </span>
             </span>
             <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} aria-hidden />
           </button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="px-5 py-6">
-          {children}
+        <CollapsibleContent>
+          {/* Same [label | content] anatomy as the numbered sections. */}
+          <div className="grid gap-x-10 gap-y-5 px-5 py-7 sm:px-6 lg:px-8 xl:grid-cols-[190px_minmax(0,1fr)]">
+            <p aria-hidden className="hidden text-sm font-medium text-muted-foreground xl:block">{title}</p>
+            <div className="min-w-0 max-w-4xl">{children}</div>
+          </div>
         </CollapsibleContent>
       </section>
     </Collapsible>

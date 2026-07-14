@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  Upload, Check, AlertTriangle, Plug, PhoneIncoming, Globe, ExternalLink, Palette, Radio, Download,
+  Upload, Check, AlertTriangle, Plug, ExternalLink, Radio, Download,
 } from "lucide-react"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
 import { WebEmbedPanel, WidgetStudioEmbedded } from "@/components/widget-studio"
@@ -117,25 +117,16 @@ function InboundConfigure({
 
   return (
     <div className="space-y-4">
-      <ToggleGroup
-        type="single"
+      <RadioCardGroup
         value={view}
         onValueChange={pick}
-        className="grid max-w-3xl grid-cols-3 gap-2"
+        aria-label="How callers reach this agent"
+        className="max-w-3xl sm:grid-cols-3"
       >
-        <ToggleGroupItem value="phone" className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 data-[state=on]:border-primary data-[state=on]:bg-primary/5">
-          <span className="flex items-center gap-2 text-sm font-medium"><PhoneIncoming className="h-4 w-4" /> Phone number</span>
-          <span className="text-xs font-normal text-muted-foreground">Answer calls 24/7</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem value="web" className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 data-[state=on]:border-primary data-[state=on]:bg-primary/5">
-          <span className="flex items-center gap-2 text-sm font-medium"><Globe className="h-4 w-4" /> Web widget</span>
-          <span className="text-xs font-normal text-muted-foreground">Embed on your site</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem value="ui" className="h-auto flex-col items-start gap-1 rounded-lg border border-border p-3 data-[state=on]:border-primary data-[state=on]:bg-primary/5">
-          <span className="flex items-center gap-2 text-sm font-medium"><Palette className="h-4 w-4" /> Widget UI</span>
-          <span className="text-xs font-normal text-muted-foreground">Style &amp; preview</span>
-        </ToggleGroupItem>
-      </ToggleGroup>
+        <RadioCard value="phone" title="Phone number" description="Answer calls 24/7" />
+        <RadioCard value="web" title="Web widget" description="Embed on your site" />
+        <RadioCard value="ui" title="Widget UI" description="Style & preview" />
+      </RadioCardGroup>
 
       {/* The chooser reads as THE channel menu, but it only forks the inbound
           family — an outbound builder hunts here first (user-test #7, D1 S2).
