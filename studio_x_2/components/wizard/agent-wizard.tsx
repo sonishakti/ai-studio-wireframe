@@ -801,14 +801,6 @@ export function AgentWizard({
     : typeChanged && draft.type ? `Deploy ${typeLabel(draft.type)}`
     : "Redeploy"
 
-  // One status string every CTA arrangement reuses — the truth may move, but
-  // it never forks (production target from the deployed BASELINE, never the
-  // draft — user-test P0 #1).
-  const statusLine = isLive
-    ? anyEdited
-      ? "Unsaved changes — redeploy to apply"
-      : `Live on ${channelTarget(baseline.current ?? draft)}`
-    : deploySub
   // Graft A (judge round): the Deploy fill invites action only when acting
   // means something — a ready draft or a dirty live agent. A clean live agent
   // or a blocked draft gets the outline (the status line says why).
@@ -958,62 +950,6 @@ export function AgentWizard({
             </div>
           </div>
 
-          {/* THE action cluster (CTA-judge round 2026-07-14: V2 won 41.5/50,
-              first with 4 of 5 lenses) — status truth + Deploy + Talk +
-              Discard in ONE sticky slot directly under the agent, identical
-              for draft and live at every scroll depth. No treasure hunt.
-              Talk sits BETWEEN Deploy and Discard: the destructive-slip
-              buffer. Graft A (from control): state-driven weight — the fill
-              invites action only when acting means something (draft-ready or
-              live-dirty), tint keys on the edit state; live-clean keeps its
-              semibold production-truth headline. Graft B: publishInView
-              demotes the fill while step 4's own CTA is visible. */}
-          <div className={cn(
-            "space-y-2 rounded-lg border p-3",
-            isLive
-              ? anyEdited
-                ? "border-warning/40 bg-warning/[0.06]"
-                : "border-success/40 bg-success/10"
-              : "border-border bg-muted/30",
-          )}>
-            {isLive && !anyEdited ? (
-              <p className="text-sm font-semibold">Live on {channelTarget(baseline.current ?? draft)}</p>
-            ) : (
-              <p className={cn("text-xs", isLive && anyEdited ? "text-warning" : "text-muted-foreground")}>
-                {statusLine}
-              </p>
-            )}
-            <Button
-              variant={deployHot && !publishInView ? "default" : "outline"}
-              className="w-full gap-1.5"
-              onClick={publish}
-            >
-              <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
-            </Button>
-            {/* Always outline: this button OPENS the Talk panel. Turning it
-                red mid-test made it read as "end call" while it did no such
-                thing (audit 2026-07-07); truncate guards long agent names. */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full gap-1.5"
-              disabled={warming}
-              onClick={() => setTalkOpen(true)}
-            >
-              <Mic className="h-4 w-4 shrink-0" aria-hidden />
-              <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
-            </Button>
-            {warming && (
-              <p role="status" className="text-xs text-muted-foreground">
-                Warming up. Talk flips on the moment it finishes.
-              </p>
-            )}
-            {isLive && anyEdited && (
-              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
-                Discard edits
-              </Button>
-            )}
-          </div>
 
           {/* Scroll-spy step list — LEAN rows (Figma 2026-07-14): icon + title
               only, under a CONFIGURE group label. The recap lines are gone; the
@@ -1076,6 +1012,48 @@ export function AgentWizard({
               {saveState === "saving" ? "Saving…" : "Saved"}
             </p>
           )}
+
+          {/* TWO bare CTAs at the rail's end (owner 2026-07-14: "only two
+              CTAs, no container" — the boxed cluster + 'Choose a voice.'
+              blocker line read as noise). Order = the product's story: test
+              it FIRST, then deploy. State rides the buttons themselves —
+              graft A's fill-when-meaningful + the name badge; the live-dirty
+              truth keeps one slim line (the honesty fixture every test round
+              praised) and Discard stays as its only entry, dirty-only. */}
+          <div className="space-y-2 pt-2">
+            {isLive && anyEdited && (
+              <p className="px-0.5 text-xs text-warning">Unsaved changes — redeploy to apply.</p>
+            )}
+            {/* Always outline: this button OPENS the Talk panel. Turning it
+                red mid-test made it read as "end call" while it did no such
+                thing (audit 2026-07-07); truncate guards long agent names. */}
+            <Button
+              variant="outline"
+              className="w-full gap-1.5"
+              disabled={warming}
+              onClick={() => setTalkOpen(true)}
+            >
+              <Mic className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
+            </Button>
+            {warming && (
+              <p role="status" className="text-xs text-muted-foreground">
+                Warming up. Talk flips on the moment it finishes.
+              </p>
+            )}
+            <Button
+              variant={deployHot && !publishInView ? "default" : "outline"}
+              className="w-full gap-1.5"
+              onClick={publish}
+            >
+              <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
+            </Button>
+            {isLive && anyEdited && (
+              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
+                Discard edits
+              </Button>
+            )}
+          </div>
         </aside>
 
         {/* RHS pane of the unified card: the steps are borderless sections
