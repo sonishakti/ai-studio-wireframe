@@ -71,6 +71,12 @@ flexibility (deep links preserved where sensible).
   http://localhost:3002/proto?v=1..10 (server: `cd <worktree>/studio_x_2 && pnpm dev -p 3002`)
 - Side-find: `components/ui/tabs.tsx` styles actives with `data-active:` but Radix emits
   `data-state="active"` → dead CSS app-wide incl. main's Deploy run-mode tabs (chipped: task_27f48285)
-- Gen-1 tested: IN PROGRESS (focus group, 3 personas × 10 shells + moderator)
-- Best-so-far: —
-- 5/5 achieved: NO
+- Gen-1 tested: DONE — no 5/5; v4 consensus chassis, v5 the only perfect (D1)
+- Gen-2 (v11–14) built + tested: DONE — **no unanimous 5/5, but v14 "Live Rail" dominated**
+  (top pick all three personas, 56/60 dims, D1 ship-tonight 5/5). D2+D3 withheld for ONE
+  identical defect: "Preset — view all" rows are read-only ("audit I can read but not act
+  on is wizard theater"). Action counts: v12=2, v14=3, v11≈8, v13≈9 (v13 eliminated).
+- Gen-3: v14 + v12's AuditRow inline editors on every preset row (the single graft ALL
+  THREE sessions predict yields unanimous 5/5) — grafting + re-judgment IN PROGRESS
+- Best-so-far: **v14 Live Rail** (localhost:3002/proto?v=14)
+- 5/5 achieved: NOT YET (gen-3 pending)
