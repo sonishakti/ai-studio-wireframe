@@ -969,7 +969,30 @@ export function AgentWizard({
               ) : (
                 <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
               )}
+              {/* Talk lives ON the agent, beside its status tag (owner
+                  2026-07-15) — the action next to the thing it acts on. */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 shrink-0 gap-1 px-2"
+                    disabled={warming}
+                    onClick={() => setTalkOpen(true)}
+                    aria-label={`Talk to ${draft.name || "your agent"}`}
+                  >
+                    <Mic className="h-3.5 w-3.5" aria-hidden />
+                    Talk
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</TooltipContent>
+              </Tooltip>
             </div>
+            {warming && (
+              <p role="status" className="text-xs text-muted-foreground">
+                Warming up. Talk flips on the moment it finishes.
+              </p>
+            )}
           </div>
 
 
@@ -1054,23 +1077,8 @@ export function AgentWizard({
             {codeDeployed && (
               <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
             )}
-            {/* Always outline: this button OPENS the Talk panel. Turning it
-                red mid-test made it read as "end call" while it did no such
-                thing (audit 2026-07-07); truncate guards long agent names. */}
-            <Button
-              variant="outline"
-              className="w-full gap-1.5"
-              disabled={warming}
-              onClick={() => setTalkOpen(true)}
-            >
-              <Mic className="h-4 w-4 shrink-0" aria-hidden />
-              <span className="truncate">{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</span>
-            </Button>
-            {warming && (
-              <p role="status" className="text-xs text-muted-foreground">
-                Warming up. Talk flips on the moment it finishes.
-              </p>
-            )}
+            {/* Talk moved up beside the status tag (owner 2026-07-15) — the
+                rail's end keeps ONE action: Deploy. */}
             <Button
               variant={deployHot && !publishInView ? "default" : "outline"}
               className="w-full gap-1.5"

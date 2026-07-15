@@ -207,6 +207,23 @@ export function WebEmbedPanel({
         <p className="text-sm font-semibold">Embed on your site</p>
         <EmbedTruthLine state={studio.embedState} />
       </div>
+      {/* The style door, FIRST and loud (owner 2026-07-15: "the style in
+          Widget UI is very very difficult to find" — it hid below the code
+          block as a quiet outline button). */}
+      <button
+        type="button"
+        onClick={onStyleWidget}
+        className="flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3 text-left transition-colors hover:border-foreground/25 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <Palette className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="min-w-0">
+            <span className="block text-sm font-medium">Style this widget</span>
+            <span className="block text-xs text-muted-foreground">Colors, text, launcher, live preview — in Widget UI</span>
+          </span>
+        </span>
+        <span className="shrink-0 text-xs text-muted-foreground">Open →</span>
+      </button>
       <p className="text-sm text-muted-foreground">
         Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
         any page. The floating widget appears, wired to this agent.
