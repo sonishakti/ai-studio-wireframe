@@ -55,8 +55,11 @@ flexibility (deep links preserved where sensible).
 
 ## Status ledger (update every turn that touches the lab)
 
-- Worktree created: pending
-- Gen-1 built: pending
-- Gen-1 tested: pending
+- Worktree created: YES (`../ai-studio-console-redesign-lab`, branch exploration/builder-shells)
+- Gen-1 built: YES — 10/10 shells, tsc+build green, committed on the branch; all render at
+  http://localhost:3002/proto?v=1..10 (server: `cd <worktree>/studio_x_2 && pnpm dev -p 3002`)
+- Side-find: `components/ui/tabs.tsx` styles actives with `data-active:` but Radix emits
+  `data-state="active"` → dead CSS app-wide incl. main's Deploy run-mode tabs (chipped: task_27f48285)
+- Gen-1 tested: IN PROGRESS (focus group, 3 personas × 10 shells + moderator)
 - Best-so-far: —
 - 5/5 achieved: NO
