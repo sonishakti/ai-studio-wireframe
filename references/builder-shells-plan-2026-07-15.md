@@ -50,8 +50,19 @@ flexibility (deep links preserved where sensible).
 ## Running log
 
 - 2026-07-15: plan committed. Quick fixes shipped separately on main (`3876527`).
-- Gen 1: scaffolding + 10 variant builds — IN PROGRESS (workflow).
-- (append results per generation here: scores table, verdicts, kills/refinements)
+- Gen 1 RESULTS (3 personas × 10 shells): **no unanimous 5/5.** Ranking: v4 Master-detail
+  (54/60 dims; the only shell in ALL three top-3s) > v1 Top tabs (49; header-Deploy+blocker
+  chip = best single affordance) > v8 accordion (48) > v5 Smart defaults (the study's ONLY
+  perfect 5 — D1: "deployed in ~3 actions" — but D2/D3 distrust invisible client-seeded
+  defaults) > v3/v10/v7/v9 (10) > v2 (8) > v6 (7). Action-count spread for the same task:
+  v5≈3 … v3/v10≈13 (4×). Killed: v2 v3 v6 v7 v9 v10 (mechanics harvested: lit rail, fix-ramp
+  jumps, preset-audit disclosure, hub-card value density). KEY FINDING: "the overload fix
+  isn't layout, it's arriving configured" + "position and value must be co-located."
+- Gen 2 (building as v11–14): v11 = v4 + header rocket w/ blocker chip + merged type+channel
+  row + fix-ramp; v12 = v5 with SSR-honest lazy-init seeding + flat audit table + default
+  badges; v13 = v8 with honest Channel/Go-live split + left value rail; v14 = **Live Rail
+  wildcard** (v4 chassis + v7 lit signal-path rows + v5 pre-seed + v1 header rocket + v9
+  jump buttons + v10 audit) — near-verbatim what D2 & D3 each described as their 5/5.
 
 ## Status ledger (update every turn that touches the lab)
 
