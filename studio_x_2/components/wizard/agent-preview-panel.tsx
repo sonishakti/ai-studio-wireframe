@@ -5,6 +5,7 @@ import { Gauge, CircleDollarSign, PanelRightClose, PanelRightOpen, Mic } from "l
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AgentSphere } from "@/components/agent-test-panel"
 
 /**
@@ -33,6 +34,7 @@ export function AgentPreviewPanel({
   name,
   statusLabel,
   isLive,
+  statusHint,
   latencyMs,
   costPerMin,
   stats,
@@ -46,6 +48,9 @@ export function AgentPreviewPanel({
   name: string
   statusLabel: string
   isLive: boolean
+  /** Provenance for an auto-provisioned agent ("why is this Live / who pays") —
+   *  reattached to the status badge as a tooltip (user-test 2026-07-15). */
+  statusHint?: string
   latencyMs: number
   costPerMin: number
   stats: AgentPreviewStats
@@ -109,22 +114,28 @@ export function AgentPreviewPanel({
       <div className="flex flex-col items-center gap-6 px-4 pb-8 pt-6">
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Badge variant="secondary" className="max-w-[180px] truncate">{name || "Your agent"}</Badge>
-          <Badge
-            variant="outline"
-            className={cn(
-              "gap-1.5",
-              isLive ? "border-success/40 text-success" : "text-muted-foreground",
-            )}
-          >
-            <span
-              className={cn(
-                "h-1.5 w-1.5 rounded-full",
-                isLive ? "bg-success" : "bg-muted-foreground/50",
-              )}
-              aria-hidden
-            />
-            {statusLabel}
-          </Badge>
+          {statusHint ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="outline"
+                  className={cn("cursor-help gap-1.5", isLive ? "border-success/40 text-success" : "text-muted-foreground")}
+                >
+                  <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-success" : "bg-muted-foreground/50")} aria-hidden />
+                  {statusLabel}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[240px]">{statusHint}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Badge
+              variant="outline"
+              className={cn("gap-1.5", isLive ? "border-success/40 text-success" : "text-muted-foreground")}
+            >
+              <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-success" : "bg-muted-foreground/50")} aria-hidden />
+              {statusLabel}
+            </Badge>
+          )}
         </div>
 
         <div className="relative flex items-center justify-center">

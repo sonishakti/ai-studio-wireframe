@@ -1239,6 +1239,7 @@ export function AgentWizard({
             name={draft.name || (isEdit ? existing!.name : "")}
             statusLabel={previewStatus}
             isLive={isLive}
+            statusHint={landing ? "Sample agent — Agora provisioned this free. Testing in-browser costs nothing; it runs the Balanced stack until you change it in Voice & models." : undefined}
             latencyMs={cardEst.latencyMs}
             costPerMin={cardEst.costPerMin}
             stats={previewStats}

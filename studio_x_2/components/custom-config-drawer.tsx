@@ -86,7 +86,7 @@ export function CustomConfigDrawer({
 
 const client = new AgentClient({
   agentId: "${agentId}",
-  apiKey: process.env.AGORA_API_KEY,
+  appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
 await client.joinChannel({ channel: "support-room" })`
