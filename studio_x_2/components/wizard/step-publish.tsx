@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Mic, PhoneOff, Layers, Gauge } from "lucide-react"
+import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Layers, Gauge } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { publishBlocks, channelTarget, typeLabel, type AgentDraft } from "@/lib/wizard-draft"
 import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
@@ -22,8 +22,6 @@ export function StepPublish({
   live,
   ctaLabel,
   onFix,
-  talking,
-  onToggleTalk,
 }: {
   draft: AgentDraft
   onPublish: () => void
@@ -37,10 +35,6 @@ export function StepPublish({
   ctaLabel?: string
   /** Jump to the step whose drawer fixes a blocker. */
   onFix: (step: number) => void
-  /** Mirror of the identity card's Talk toggle — the card can be occluded by
-   *  this drawer on small screens, so testing must work from HERE too (#21). */
-  talking: boolean
-  onToggleTalk: () => void
 }) {
   const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
   const agentName = draft.name || voice?.name || "your agent"
@@ -48,20 +42,13 @@ export function StepPublish({
 
   return (
     <div className="space-y-5">
-      {/* No inner h2: the section header above already names this step. */}
+      {/* No inner h2: the section header above already names this step. No Talk
+          button either (journey dedup 2026-07-15): Talk has ONE home per
+          viewport — the agent panel at xl, the header below it. The old
+          "card can be occluded" rationale died with the sticky panel. */}
       <p className="text-sm text-muted-foreground">
-        Review {agentName}, then {live ? "redeploy to apply your changes" : "deploy it"}. Talk to it any time, here or from the sidebar.
+        Review {agentName}, then {live ? "redeploy to apply your changes" : "deploy it"}. Talk to it any time from the agent panel.
       </p>
-
-      {talking ? (
-        <Button variant="destructive" size="sm" className="gap-1.5" onClick={onToggleTalk}>
-          <PhoneOff className="h-4 w-4" aria-hidden /> End test
-        </Button>
-      ) : (
-        <Button variant="outline" size="sm" className="max-w-full gap-1.5" onClick={onToggleTalk}>
-          <Mic className="h-4 w-4 shrink-0" aria-hidden /> <span className="truncate">Talk to {agentName}</span>
-        </Button>
-      )}
 
       <section className="space-y-3 rounded-lg border border-border bg-card p-5">
         <p className="text-sm font-semibold">Deployment summary</p>

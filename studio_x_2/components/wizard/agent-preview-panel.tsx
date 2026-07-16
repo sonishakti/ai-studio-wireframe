@@ -44,6 +44,7 @@ export function AgentPreviewPanel({
   onViewChange,
   showWidgetToggle,
   widgetAgentId,
+  widgetGreeting,
   className,
 }: {
   name: string
@@ -66,6 +67,8 @@ export function AgentPreviewPanel({
   showWidgetToggle?: boolean
   /** Agent id whose widget config the preview reads. */
   widgetAgentId?: string
+  /** The agent's greeting (Step 3 = its one home) — the widget opens with it. */
+  widgetGreeting?: string
   className?: string
 }) {
   if (collapsed) {
@@ -142,7 +145,7 @@ export function AgentPreviewPanel({
         </div>
 
         {view === "widget" && widgetAgentId ? (
-          <WidgetPreviewCard agentId={widgetAgentId} />
+          <WidgetPreviewCard agentId={widgetAgentId} greeting={widgetGreeting} />
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-8 pb-6">
             <AgentSphere size={150} active={testing} />

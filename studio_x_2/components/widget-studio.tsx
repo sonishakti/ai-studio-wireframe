@@ -192,7 +192,12 @@ export function WidgetStudio() {
             <PreviewModeTabs mode={mode} onChange={setMode} />
           </div>
           <div className="flex flex-1 items-start justify-center bg-muted/20 p-8 lg:sticky lg:top-12">
-            <WidgetPreview cfg={studio.cfg} mode={mode} />
+            {/* The selected agent's own greeting — one home (Prompt & tools). */}
+            <WidgetPreview
+              cfg={studio.cfg}
+              mode={mode}
+              greeting={AGENTS.find((a) => a.id === agentId)?.persona.firstMessage}
+            />
           </div>
         </div>
       </div>
@@ -357,7 +362,7 @@ export function WidgetStyleConfig({ agentId }: { agentId: string }) {
  * sx:widget-changed), so styling on the left updates the widget on the right
  * live — "here's how your widget looks."
  */
-export function WidgetPreviewCard({ agentId }: { agentId: string }) {
+export function WidgetPreviewCard({ agentId, greeting }: { agentId: string; greeting?: string }) {
   const studio = useWidgetState(agentId)
   const [mode, setMode] = React.useState<PreviewMode>("voice")
   return (
@@ -366,7 +371,7 @@ export function WidgetPreviewCard({ agentId }: { agentId: string }) {
         <PreviewModeTabs mode={mode} onChange={setMode} />
       </div>
       <div className="flex flex-1 items-start justify-center overflow-x-auto px-4">
-        <WidgetPreview cfg={studio.cfg} mode={mode} />
+        <WidgetPreview cfg={studio.cfg} mode={mode} greeting={greeting} />
       </div>
     </div>
   )
@@ -432,7 +437,11 @@ function ConfigSections({ cfg, set }: { cfg: WidgetConfig; set: SetCfg }) {
 
       <Section title="Text" defaultOpen>
         <TextField label="Button label" value={cfg.buttonLabel} onChange={(v) => set("buttonLabel", v)} />
-        <TextField label="Greeting" value={cfg.greeting} onChange={(v) => set("greeting", v)} />
+        {/* NO greeting field here (owner 2026-07-15): the greeting is
+            established ONCE in Prompt & tools — the widget reflects it. */}
+        <p className="text-xs text-muted-foreground">
+          The widget opens with your agent&apos;s greeting — set once in Prompt &amp; tools.
+        </p>
         <TextField label="Listening status" value={cfg.listeningStatus} onChange={(v) => set("listeningStatus", v)} />
         <TextField label="Connecting status" value={cfg.connectingStatus} onChange={(v) => set("connectingStatus", v)} />
         <TextField label="Error message" value={cfg.errorMessage} onChange={(v) => set("errorMessage", v)} />
@@ -508,7 +517,18 @@ function ConfigSections({ cfg, set }: { cfg: WidgetConfig; set: SetCfg }) {
 
 // ─── The widget itself — colors come from user config (inline by design) ─────
 
-function WidgetPreview({ cfg, mode }: { cfg: WidgetConfig; mode: PreviewMode }) {
+function WidgetPreview({
+  cfg,
+  mode,
+  greeting,
+}: {
+  cfg: WidgetConfig
+  mode: PreviewMode
+  /** The AGENT's greeting (Step 3 = its one home). The store's cfg.greeting is
+   *  only a fallback for surfaces with no agent context. */
+  greeting?: string
+}) {
+  const openingLine = greeting?.trim() || cfg.greeting
   const dark = cfg.theme === "dark"
   const surface = dark ? cfg.bgColor : "#FFFFFF"
   const ink = dark ? "#FDFDFD" : cfg.fontColor
@@ -545,7 +565,7 @@ function WidgetPreview({ cfg, mode }: { cfg: WidgetConfig; mode: PreviewMode }) 
       {mode === "voice" ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
           <AgentSphere size={90} active />
-          <p className="text-lg leading-snug">{cfg.greeting}</p>
+          <p className="text-lg leading-snug">{openingLine}</p>
           <p className="text-xs opacity-60">{cfg.listeningStatus}</p>
         </div>
       ) : (
@@ -558,7 +578,7 @@ function WidgetPreview({ cfg, mode }: { cfg: WidgetConfig; mode: PreviewMode }) 
             className="max-w-[80%] px-3 py-2 text-sm"
             style={{ background: cfg.secondaryColor, color: "#FDFDFD", borderRadius: cfg.inputRadius }}
           >
-            {cfg.greeting}
+            {openingLine}
           </div>
           <div
             className="ml-auto max-w-[80%] px-3 py-2 text-sm"

@@ -1178,8 +1178,6 @@ export function AgentWizard({
                           ctaLabel={isLive || codeDeployed ? deployCta : undefined}
                           onPublish={publish}
                           onFix={(m) => openRow(m)}
-                          talking={testing}
-                          onToggleTalk={toggleTest}
                         />
                       </div>
                     </div>
@@ -1256,6 +1254,7 @@ export function AgentWizard({
             onViewChange={setPreviewView}
             showWidgetToggle={!!isWebWidget}
             widgetAgentId={draft.agentId ?? "new"}
+            widgetGreeting={draft.greeting.trim() || undefined}
           />
         </div>
       </div>
