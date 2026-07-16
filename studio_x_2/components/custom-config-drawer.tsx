@@ -23,12 +23,16 @@ export function CustomConfigDrawer({
   draft,
   onEditStep,
   onApply,
+  iconOnly,
 }: {
   draft: AgentDraft
   /** Jump to the wizard step that edits a JSON section. */
   onEditStep?: (step: number) => void
   /** Merge an edited-JSON patch into the draft (with the host's undo/autosave). */
   onApply?: (patch: Partial<AgentDraft>) => void
+  /** Header (Figma "Shell Exploration") renders this as an icon-only 32px
+   *  </> button; elsewhere it keeps its "Custom config" label. */
+  iconOnly?: boolean
 }) {
   const [open, setOpen] = React.useState(false)
   const [editing, setEditing] = React.useState(false)
@@ -106,9 +110,15 @@ await client.joinChannel({ channel: "support-room" })`
   return (
     <Sheet open={open} onOpenChange={(o) => { setOpen(o); if (!o) cancelEdit() }}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5">
-          <Code2 className="h-4 w-4" aria-hidden /> Custom config
-        </Button>
+        {iconOnly ? (
+          <Button variant="ghost" size="icon" className="size-8" aria-label="Custom config (JSON)">
+            <Code2 className="h-4 w-4" aria-hidden />
+          </Button>
+        ) : (
+          <Button variant="ghost" size="sm" className="gap-1.5">
+            <Code2 className="h-4 w-4" aria-hidden /> Custom config
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent side="right" className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">

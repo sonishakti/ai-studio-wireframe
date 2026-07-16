@@ -2,11 +2,14 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, Timer, ChevronDown, Sparkles, Bot, Copy, Check } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, Timer, ChevronDown, Bot, Copy, Check, EllipsisVertical, Upload, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
@@ -846,104 +849,87 @@ export function AgentWizard({
   }
 
   return (
-    // data-fluid opts out of the layout's 1536px cap: the builder uses the
-    // whole viewport (composition-concept winner C5, 2026-07-07).
-    <div data-fluid className="w-full space-y-6 px-4 py-8 pb-16 sm:px-6 xl:px-10 2xl:px-14">
-      {/* Agent-identity header (Figma "Shell Exploration" 2026-07-15): sphere +
-          editable name + copyable agent ID on the left; Deploy + config on the
-          right. The old H1/subtitle is gone — the agent's own name is the H1. */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <AgentSphere size={32} active={testing} />
-          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <h1 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0">
-              <input
-                value={draft.name}
-                onChange={(e) => update({ name: e.target.value })}
-                placeholder={isEdit ? existing!.name : "Name your agent"}
-                aria-label="Agent name"
-                className="w-full max-w-[15rem] rounded-md bg-transparent px-1 text-xl font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
-              />
-            </h1>
-            {/* Copyable agent ID — appears once the agent has an id (edit/live/
-                deployed); a brand-new draft has none yet. */}
-            {draft.agentId && (
-              <button
-                type="button"
-                onClick={() => copyId(draft.agentId!, "Agent ID copied")}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={`Copy agent ID ${draft.agentId}`}
-              >
-                <Bot className="h-3.5 w-3.5" aria-hidden />
-                {draft.agentId}
-                {idCopied ? <Check className="h-3 w-3 text-success" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {onCreateNew && (
-            <Button variant="ghost" size="sm" className="gap-1.5" onClick={onCreateNew}>
-              <Plus className="h-4 w-4" aria-hidden /> New agent
-            </Button>
+    // Full-bleed three-column shell built to the Figma "Shell Exploration"
+    // (node 2508:97094) 20px grid — data-fluid removes the layout cap, the
+    // layout adds NO padding, so the wizard owns all spacing: no card, no
+    // outer padding, flush border-divided columns.
+    <div data-fluid className="flex flex-col">
+      {/* Header — px-5 py-4, border-b, gap-4 items-center (Figma Base/Header). */}
+      <header className="flex items-center gap-4 border-b border-border px-5 py-4">
+        <AgentSphere size={32} active={testing} />
+        <div className="flex min-w-0 flex-1 items-center gap-8">
+          <h1 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 shrink-0">
+            <input
+              value={draft.name}
+              onChange={(e) => update({ name: e.target.value })}
+              placeholder={isEdit ? existing!.name : "Name your agent"}
+              aria-label="Agent name"
+              className="max-w-[18rem] rounded-md bg-transparent text-base font-semibold leading-6 outline-none [field-sizing:content] placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
+            />
+          </h1>
+          {/* Copyable agent ID — borderless (Figma): bot icon · mono 12/50% ·
+              copy icon. Appears once the agent has an id. */}
+          {draft.agentId && (
+            <button
+              type="button"
+              onClick={() => copyId(draft.agentId!, "Agent ID copied")}
+              className="inline-flex shrink-0 items-center gap-0.5 rounded text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={`Copy agent ID ${draft.agentId}`}
+            >
+              <Bot className="size-4" aria-hidden />
+              <span className="flex items-center gap-1">
+                <span className="font-mono text-xs opacity-50">{draft.agentId}</span>
+                {idCopied ? <Check className="size-3 text-success" aria-hidden /> : <Copy className="size-3" aria-hidden />}
+              </span>
+            </button>
           )}
-          {/* Talk on smaller screens — the right preview panel that owns Talk
-              only shows at xl+. */}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Kebab overflow (Figma): New agent · Import · Template. */}
+          {(onCreateNew || onBrowseTemplates || !isEdit || landing) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-9" aria-label="More actions">
+                  <EllipsisVertical className="size-4" aria-hidden />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onCreateNew && (
+                  <DropdownMenuItem onClick={onCreateNew}>
+                    <Plus className="size-4" aria-hidden /> New agent
+                  </DropdownMenuItem>
+                )}
+                {(!isEdit || landing) && (
+                  <ImportAgentSheet onImported={onImported}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Upload className="size-4" aria-hidden /> Import an existing agent
+                    </DropdownMenuItem>
+                  </ImportAgentSheet>
+                )}
+                {onBrowseTemplates && (
+                  <DropdownMenuItem onClick={onBrowseTemplates}>
+                    <FileText className="size-4" aria-hidden /> Start from a template
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {/* Talk on <xl (the right preview panel owns Talk at xl+). */}
           <Button variant="outline" size="sm" className="gap-1.5 xl:hidden" disabled={warming} onClick={() => setTalkOpen(true)}>
-            <Mic className="h-4 w-4" aria-hidden /> Talk
+            <Mic className="size-4" aria-hidden /> Talk
           </Button>
-          {/* The whole agent on one read-only surface (the </> config view). */}
-          <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} />
-          {/* Header Deploy demotes to outline while the in-step go-live CTA is
-              on screen, so there is never two filled primaries (the judge
-              round's one-primary rule, now applied to the header). */}
-          <Button className="gap-1.5" variant={deployHot && !publishInView ? "default" : "outline"} onClick={publish}>
-            <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
+          {/* </> config view (icon-only, 32px, Figma code-xml). */}
+          <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
+          {/* Deploy — secondary (Figma), min-w-16 px-2 py-1.5. */}
+          <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
+            <Rocket className="size-4" aria-hidden /> {deployCta}
           </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Tertiary tier: the "start differently" paths, demoted into a quiet
-          alert-style banner so they read below the H1 and the agent (H2)
-          without competing (hierarchy pass, 2026-07-08). */}
-      {(!isEdit || landing) && (
-        <div
-          role="note"
-          className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 px-3.5 py-2.5 text-sm text-muted-foreground"
-        >
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <p className="min-w-0">
-            Prefer to start differently?{" "}
-            {onBrowseTemplates && (
-              <>
-                <button
-                  type="button"
-                  onClick={onBrowseTemplates}
-                  className="rounded font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Start from a template
-                </button>
-                {" or "}
-              </>
-            )}
-            <ImportAgentSheet onImported={onImported}>
-              <button
-                type="button"
-                className="rounded font-medium text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                import an existing agent
-              </button>
-            </ImportAgentSheet>
-            . Vapi, Retell, Bland, and ElevenLabs exports map in — with a field-by-field report of
-            what carried.
-          </p>
-        </div>
-      )}
-
-      {/* Below lg the rail stacks above the sections and scrolls away, so a
-          slim sticky strip keeps STEP NAV + progress + deploy in the fold
-          (C2 harvest; top-12 = the app header's h-12, no see-through band). */}
-      <div className="sticky top-12 z-30 -mx-4 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
+      {/* Below lg the rail stacks above the sections; a slim sticky strip keeps
+          step nav + deploy in the fold (top-12 = the app header height). */}
+      <div className="sticky top-12 z-30 flex items-center gap-3 border-b border-border bg-background/95 px-5 py-2 backdrop-blur lg:hidden">
         <span className="flex shrink-0 items-center gap-1" role="group" aria-label="Jump to step">
           {[1, 2, 3, 4].map((n) => (
             <button
@@ -967,21 +953,13 @@ export function AgentWizard({
         </Button>
       </div>
 
-      {/* ONE-PAGER as a UNIFIED CARD (2026-07-08): the rail (LHS) and the step
-          content (RHS) live inside one bordered surface split by a full-height
-          divider, so they read as a single master-detail structure rather than
-          two loose regions. Every step renders open; the sticky rail is agent
-          lockup + scroll-spy step list + live deploy state. ?step=N scrolls. */}
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        {/* THREE columns at xl (Figma 2026-07-15): rail · config canvas ·
-            persistent agent preview. The preview column is `auto` — the panel
-            sets its own width (full or a thin collapsed rail). At lg it hides
-            (renders xl:flex) and the column collapses to nothing. */}
-        <div className="grid grid-cols-1 items-start lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_auto]">
-        {/* max-h + overflow: on short viewports the rail scrolls INTERNALLY so
-            the action cluster can never scroll itself out of reach (judge
-            round's one pre-ship check). */}
-        <aside className="min-w-0 space-y-6 p-5 lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:self-start lg:overflow-y-auto lg:p-6">
+      {/* FLUSH three-column grid (Figma "Shell Exploration"): rail 320 · config
+          canvas · preview 400, divided by borders (no card, no gaps, no outer
+          padding). The preview column is `auto` — the panel owns its width. */}
+      <div className="grid grid-cols-1 items-start lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_auto]">
+        {/* Rail — p-5 (20px, Figma), border-r divider; scrolls internally on
+            short viewports so the deploy state stays reachable. */}
+        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r">
           {/* Rail = pure nav now (Figma 2026-07-15): the agent identity moved
               to the header and the sphere/Talk to the right preview panel, so
               the rail holds only the CONFIGURE + OPTIONAL section lists. */}
@@ -1080,7 +1058,7 @@ export function AgentWizard({
             (sticky can't escape a clipped ancestor). The rail is unaffected (it
             lives in the other grid column). Corners: the first header rounds to
             match the card's top-right (2026-07-08). */}
-        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:border-l">
+        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0">
           {[1, 2, 3, 4].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
@@ -1098,8 +1076,7 @@ export function AgentWizard({
                     content slides cleanly under. The icon NAMES the section;
                     never a completion tick (rail + deploy block own progress). */}
                 <header className={cn(
-                  "z-20 flex items-center justify-between gap-3 border-b border-border bg-muted px-6 py-3 lg:sticky lg:top-12",
-                  n === 1 && "lg:rounded-tr-2xl",
+                  "z-20 flex items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 lg:sticky lg:top-12",
                 )}>
                   {/* Plain icon, no chip box (Figma 2026-07-14 — the band got
                       quieter, the content around it got the room). */}
@@ -1139,7 +1116,7 @@ export function AgentWizard({
                     the rail + the section header band already name the section,
                     and the right preview panel takes the width the old 190px
                     label column used to occupy. */}
-                <div className="px-5 py-7 sm:px-6 lg:px-8">
+                <div className="p-5">
                   <div className={cn("min-w-0", n !== 4 && "max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && (
@@ -1231,10 +1208,9 @@ export function AgentWizard({
           </OptionalSection>
         </div>
 
-        {/* Third column: the persistent agent preview (xl+). The one place
-            Talk lives on wide screens; sticky so it stays with you as the
-            config canvas scrolls. */}
-        <div className="lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:self-start lg:overflow-hidden">
+        {/* Third column: the persistent agent preview (xl+ only — no phantom
+            grid cell below xl). Sticky under the app header. */}
+        <div className="hidden xl:block xl:sticky xl:top-12 xl:max-h-[calc(100vh-3rem)] xl:self-start xl:overflow-hidden">
           <AgentPreviewPanel
             name={draft.name || (isEdit ? existing!.name : "")}
             statusLabel={previewStatus}
@@ -1249,7 +1225,6 @@ export function AgentWizard({
             collapsed={previewCollapsed}
             onToggleCollapsed={() => setPreviewCollapsed((v) => !v)}
           />
-        </div>
         </div>
       </div>
 
@@ -1490,7 +1465,7 @@ function OptionalSection({
           {/* Same banded, sticky header language as the numbered sections, so
               optional depth reads as a peer section, not stray rows (arrange
               2026-07-08). Opaque bg so content scrolls cleanly under it. */}
-          <button type="button" className="z-20 flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-6 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:sticky lg:top-12">
+          <button type="button" className="z-20 flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:sticky lg:top-12">
             <span className="flex min-w-0 items-center gap-2.5">
               <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               <span className="min-w-0">
@@ -1508,7 +1483,7 @@ function OptionalSection({
         </CollapsibleTrigger>
         <CollapsibleContent>
           {/* Single-column body — matches the numbered sections (Figma 2026-07-15). */}
-          <div className="px-5 py-7 sm:px-6 lg:px-8">
+          <div className="p-5">
             <div className="min-w-0 max-w-4xl">{children}</div>
           </div>
         </CollapsibleContent>

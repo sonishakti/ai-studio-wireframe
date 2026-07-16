@@ -10,7 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
-import { StackPresetCards, StackModelsDetail } from "@/components/wizard/stack-config"
+import { StackPresetCards, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { VoiceEditorSheet, type VoiceEditorMode } from "@/components/wizard/voice-editor-sheet"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_CATALOG } from "@/lib/campaign-data"
@@ -61,9 +61,9 @@ export function StepVoice({
   }
 
   return (
+    // Figma "Shell Exploration" order (2026-07-15): Voice + Spoken language →
+    // Agent Architecture → Configure Models → Choose specific models.
     <div className="space-y-8">
-      <StackPresetCards stack={draft.stack} onChange={(stack) => update({ stack })} />
-
       {/* Voice + Spoken language: parallel choices, one row (Figma 2026-07-14).
           The voice keeps its select · Preview · Edit line (owner 2026-07-10). */}
       <div className="grid items-start gap-x-4 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -139,7 +139,11 @@ export function StepVoice({
         </div>
       </div>
 
-      <StackModelsDetail stack={draft.stack} onChange={(stack) => update({ stack })} />
+      {/* Agent Architecture (no picker) → Configure Models → Choose specific
+          models, matching the Figma vertical order. */}
+      <StackModelsDetail stack={draft.stack} onChange={(stack) => update({ stack })} showPicker={false} />
+      <StackPresetCards stack={draft.stack} onChange={(stack) => update({ stack })} />
+      <StackModelPicker stack={draft.stack} onChange={(stack) => update({ stack })} />
 
       <VoiceBrowser
         open={browserOpen}

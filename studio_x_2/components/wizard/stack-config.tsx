@@ -115,23 +115,12 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
 
 // ─── Piece 2: pipeline shape + vendor-level control ───────────────────────────
 
-export function StackModelsDetail({ stack, onChange, className }: StackPieceProps) {
+export function StackModelsDetail({ stack, onChange, className, showPicker = true }: StackPieceProps & { showPicker?: boolean }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const est = stackEstimateFor(stack)
   const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
-  // Custom mixes and realtime pipelines only exist inside the disclosure, so
-  // arriving with one means the user belongs in there. Open it once.
-  const [customOpen, setCustomOpen] = React.useState(diverged || pipeline === "mllm")
 
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
-
-  // The chosen vendor's voices; include the current voice if the catalog
-  // doesn't list it (imported/legacy) so the Select never renders blank.
-  const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
-  const vendorVoices = ttsVendor.voices as readonly string[]
-  const voiceOptions = vendorVoices.includes(stack.tts.voice)
-    ? [...vendorVoices]
-    : [stack.tts.voice, ...vendorVoices]
 
   // Switching shape must keep the LLM slot coherent: entering MLLM writes a
   // realtime model (never a display-only fallback), leaving it restores the
@@ -155,11 +144,8 @@ export function StackModelsDetail({ stack, onChange, className }: StackPieceProp
 
   return (
     <section className={cn("space-y-4", className)}>
-      {/* Pipeline shape — a FIRST-CLASS choice, not buried in the disclosure
-          (owner 2026-07-09), in plain language (user-test: bare "STT · LLM ·
-          TTS" jargon lands cold — explain, don't re-hide). */}
       {/* "Agent Architecture" = the pipeline shape (Figma "Shell Exploration"
-          heading + card names, 2026-07-15). */}
+          heading + card names) — a first-class choice, plain language. */}
       <h4 className="text-base font-medium">Agent Architecture</h4>
       <RadioCardGroup
         value={pipeline}
@@ -195,7 +181,31 @@ export function StackModelsDetail({ stack, onChange, className }: StackPieceProp
           : `Runs on ${stackLine(stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`}
       </p>
 
-      {/* Vendor-level control, tucked away until wanted. */}
+      {/* The vendor picker renders here by default; the builder (Figma order)
+          renders it separately, AFTER Configure Models, via showPicker={false}
+          + a standalone <StackModelPicker>. */}
+      {showPicker && <StackModelPicker stack={stack} onChange={onChange} />}
+    </section>
+  )
+}
+
+/** The "Choose specific models" disclosure — STT/LLM/TTS (or realtime) vendor
+ *  pickers. Split out of StackModelsDetail so the builder can place it after
+ *  Configure Models per the Figma order (2026-07-15). */
+export function StackModelPicker({ stack, onChange, className }: StackPieceProps) {
+  const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
+  const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
+  const [customOpen, setCustomOpen] = React.useState(diverged || pipeline === "mllm")
+  const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
+
+  const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
+  const vendorVoices = ttsVendor.voices as readonly string[]
+  const voiceOptions = vendorVoices.includes(stack.tts.voice)
+    ? [...vendorVoices]
+    : [stack.tts.voice, ...vendorVoices]
+
+  return (
+    <div className={className}>
       <Collapsible open={customOpen} onOpenChange={setCustomOpen}>
         <CollapsibleTrigger asChild>
           <button
@@ -295,7 +305,7 @@ export function StackModelsDetail({ stack, onChange, className }: StackPieceProp
           )}
         </CollapsibleContent>
       </Collapsible>
-    </section>
+    </div>
   )
 }
 
