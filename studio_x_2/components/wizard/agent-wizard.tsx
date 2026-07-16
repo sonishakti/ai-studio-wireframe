@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, Timer, ChevronDown, Sparkles } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, SlidersHorizontal, ListChecks, Timer, ChevronDown, Sparkles, Bot, Copy, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,9 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
+import { AgentSphere } from "@/components/agent-test-panel"
+import { AgentPreviewPanel } from "@/components/wizard/agent-preview-panel"
+import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -828,35 +831,76 @@ export function AgentWizard({
   // a blocked draft, or an already-deployed code agent gets the outline.
   const deployHot = isLive ? anyEdited : codeDeployed ? false : !blockReason
 
+  // Three-column shell (Figma "Shell Exploration", 2026-07-15): the agent
+  // lives in a persistent right preview panel; the header owns identity +
+  // Deploy; the rail is pure nav.
+  const [previewCollapsed, setPreviewCollapsed] = React.useState(false)
+  const { copied: idCopied, copy: copyId } = useCopyFeedback()
+  const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
+  const previewStats = {
+    llmVendor: draft.stack.llm.vendor,
+    asrVendor: draft.stack.asr.vendor,
+    ttsVendor: draft.stack.tts.vendor,
+    avgLatencyMs: cardLatency?.bestCaseMs ?? cardEst.latencyMs,
+    firstTokenMs: cardLatency?.llmMs ?? cardEst.latencyMs,
+  }
+
   return (
     // data-fluid opts out of the layout's 1536px cap: the builder uses the
     // whole viewport (composition-concept winner C5, 2026-07-07).
     <div data-fluid className="w-full space-y-6 px-4 py-8 pb-16 sm:px-6 xl:px-10 2xl:px-14">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <header className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">
-            {landing ? "Deploy an AI agent in minutes" : isEdit ? "Edit your agent" : "Create your agent"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {landing
-              ? isLive
-                ? "Your ready-made agent is already live. Talk to it, then make it yours."
-                : "Talk to your ready-made agent, set it up, and put it live."
-              : isEdit
-              ? "Edit anything below. Changes save automatically."
-              : "Four steps to a live agent, in any order. Changes save automatically."}
-          </p>
-        </header>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {/* The whole agent on one read-only surface, with per-section jump
-                links into the editing steps. */}
-            <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} />
-            {onCreateNew && (
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={onCreateNew}>
-                <Plus className="h-4 w-4" aria-hidden /> New agent
-              </Button>
+      {/* Agent-identity header (Figma "Shell Exploration" 2026-07-15): sphere +
+          editable name + copyable agent ID on the left; Deploy + config on the
+          right. The old H1/subtitle is gone — the agent's own name is the H1. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <AgentSphere size={32} active={testing} />
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+            <h1 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0">
+              <input
+                value={draft.name}
+                onChange={(e) => update({ name: e.target.value })}
+                placeholder={isEdit ? existing!.name : "Name your agent"}
+                aria-label="Agent name"
+                className="w-full max-w-[15rem] rounded-md bg-transparent px-1 text-xl font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
+              />
+            </h1>
+            {/* Copyable agent ID — appears once the agent has an id (edit/live/
+                deployed); a brand-new draft has none yet. */}
+            {draft.agentId && (
+              <button
+                type="button"
+                onClick={() => copyId(draft.agentId!, "Agent ID copied")}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`Copy agent ID ${draft.agentId}`}
+              >
+                <Bot className="h-3.5 w-3.5" aria-hidden />
+                {draft.agentId}
+                {idCopied ? <Check className="h-3 w-3 text-success" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
+              </button>
             )}
           </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {onCreateNew && (
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={onCreateNew}>
+              <Plus className="h-4 w-4" aria-hidden /> New agent
+            </Button>
+          )}
+          {/* Talk on smaller screens — the right preview panel that owns Talk
+              only shows at xl+. */}
+          <Button variant="outline" size="sm" className="gap-1.5 xl:hidden" disabled={warming} onClick={() => setTalkOpen(true)}>
+            <Mic className="h-4 w-4" aria-hidden /> Talk
+          </Button>
+          {/* The whole agent on one read-only surface (the </> config view). */}
+          <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} />
+          {/* Header Deploy demotes to outline while the in-step go-live CTA is
+              on screen, so there is never two filled primaries (the judge
+              round's one-primary rule, now applied to the header). */}
+          <Button className="gap-1.5" variant={deployHot && !publishInView ? "default" : "outline"} onClick={publish}>
+            <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
+          </Button>
+        </div>
       </div>
 
       {/* Tertiary tier: the "start differently" paths, demoted into a quiet
@@ -928,73 +972,19 @@ export function AgentWizard({
           divider, so they read as a single master-detail structure rather than
           two loose regions. Every step renders open; the sticky rail is agent
           lockup + scroll-spy step list + live deploy state. ?step=N scrolls. */}
-      <div className="rounded-2xl border border-border bg-card">
-        <div className="grid grid-cols-1 items-start lg:grid-cols-[300px_minmax(0,1fr)]">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        {/* THREE columns at xl (Figma 2026-07-15): rail · config canvas ·
+            persistent agent preview. The preview column is `auto` — the panel
+            sets its own width (full or a thin collapsed rail). At lg it hides
+            (renders xl:flex) and the column collapses to nothing. */}
+        <div className="grid grid-cols-1 items-start lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_auto]">
         {/* max-h + overflow: on short viewports the rail scrolls INTERNALLY so
             the action cluster can never scroll itself out of reach (judge
             round's one pre-ship check). */}
         <aside className="min-w-0 space-y-6 p-5 lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:self-start lg:overflow-y-auto lg:p-6">
-          {/* Agent lockup — LEAN (Figma 2026-07-14): the name and its status,
-              nothing else. No sphere, no voice recap; the sphere lives in the
-              Talk panel where the agent actually performs. */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              {/* Agent name = the page's H2 (the subject under the H1 title).
-                  It stays inline-editable; aria-label names the heading since
-                  its only child is the input. */}
-              <h2 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 flex-1">
-                <input
-                  value={draft.name}
-                  onChange={(e) => update({ name: e.target.value })}
-                  placeholder={isEdit ? existing!.name : "Name your agent"}
-                  aria-label="Agent name"
-                  className="-mx-1 w-full rounded-md bg-transparent px-1 text-xl font-semibold tracking-tight outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
-                />
-              </h2>
-              {/* The default agent's "why is this Live / who pays" answer
-                  lives in a tooltip ON the badge that raises the question,
-                  not as an always-visible strip (owner 2026-07-09). */}
-              {landing ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="secondary" className="shrink-0 cursor-help">{warming ? "Warming up" : cardStatus}</Badge>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[240px]">
-                    <p className="font-medium">Provisioned free. Testing in-browser costs nothing.</p>
-                    <p className="mt-1 text-primary-foreground/70">
-                      Runs Agora Balanced: {STACK_PRESETS.balanced.llm.model} · {STACK_PRESETS.balanced.asr.vendor} {STACK_PRESETS.balanced.asr.model} · {STACK_PRESETS.balanced.tts.vendor}. Change it in step 1.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Badge variant="secondary" className="shrink-0">{warming ? "Warming up" : cardStatus}</Badge>
-              )}
-              {/* Talk lives ON the agent, beside its status tag (owner
-                  2026-07-15) — the action next to the thing it acts on. */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 shrink-0 gap-1 px-2"
-                    disabled={warming}
-                    onClick={() => setTalkOpen(true)}
-                    aria-label={`Talk to ${draft.name || "your agent"}`}
-                  >
-                    <Mic className="h-3.5 w-3.5" aria-hidden />
-                    Talk
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{testing ? "Open the live test" : `Talk to ${draft.name || "your agent"}`}</TooltipContent>
-              </Tooltip>
-            </div>
-            {warming && (
-              <p role="status" className="text-xs text-muted-foreground">
-                Warming up. Talk flips on the moment it finishes.
-              </p>
-            )}
-          </div>
-
+          {/* Rail = pure nav now (Figma 2026-07-15): the agent identity moved
+              to the header and the sphere/Talk to the right preview panel, so
+              the rail holds only the CONFIGURE + OPTIONAL section lists. */}
 
           {/* Scroll-spy step list — LEAN rows (Figma 2026-07-14): icon + title
               only, under a CONFIGURE group label. The recap lines are gone; the
@@ -1061,37 +1051,25 @@ export function AgentWizard({
             </p>
           )}
 
-          {/* TWO bare CTAs at the rail's end (owner 2026-07-14: "only two
-              CTAs, no container" — the boxed cluster + 'Choose a voice.'
-              blocker line read as noise). Order = the product's story: test
-              it FIRST, then deploy. State rides the buttons themselves —
-              graft A's fill-when-meaningful + the name badge; the live-dirty
-              truth keeps one slim line (the honesty fixture every test round
-              praised) and Discard stays as its only entry, dirty-only. */}
-          <div className="space-y-2 pt-2">
-            {isLive && anyEdited && (
-              <p className="px-0.5 text-xs text-warning">Unsaved changes — redeploy to apply.</p>
-            )}
-            {/* Code third state: the one slim truth line this slot carries
-                (same idiom as the dirty line — conditional, no container). */}
-            {codeDeployed && (
-              <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
-            )}
-            {/* Talk moved up beside the status tag (owner 2026-07-15) — the
-                rail's end keeps ONE action: Deploy. */}
-            <Button
-              variant={deployHot && !publishInView ? "default" : "outline"}
-              className="w-full gap-1.5"
-              onClick={publish}
-            >
-              <Rocket className="h-4 w-4" aria-hidden /> {deployCta}
-            </Button>
-            {isLive && anyEdited && (
-              <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
-                Discard edits
-              </Button>
-            )}
-          </div>
+          {/* Deploy moved to the HEADER (Figma "Shell Exploration" 2026-07-15).
+              The rail keeps ONLY the validated state signals the header button
+              doesn't carry: the dirty / code-deployed truth lines + Discard
+              (every test round praised these; don't drop them silently). */}
+          {((isLive && anyEdited) || codeDeployed) && (
+            <div className="space-y-2 border-t border-border pt-3">
+              {isLive && anyEdited && (
+                <p className="px-0.5 text-xs text-warning">Unsaved changes — redeploy to apply.</p>
+              )}
+              {codeDeployed && (
+                <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
+              )}
+              {isLive && anyEdited && (
+                <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
+                  Discard edits
+                </Button>
+              )}
+            </div>
+          )}
         </aside>
 
         {/* RHS pane of the unified card: the steps are borderless sections
@@ -1157,10 +1135,11 @@ export function AgentWizard({
                     band's h3 already names the section. Steps 1–3 cap at 4xl
                     for readability; Deploy stays fluid (the batch split + the
                     widget studio manage their own width). */}
-                <div className="grid gap-x-10 gap-y-5 px-5 py-7 sm:px-6 lg:px-8 xl:grid-cols-[190px_minmax(0,1fr)]">
-                  <p aria-hidden className="hidden text-sm font-medium text-muted-foreground xl:block">
-                    {stepTitle(n, draft)}
-                  </p>
+                {/* Single-column body (Figma "Shell Exploration" 2026-07-15):
+                    the rail + the section header band already name the section,
+                    and the right preview panel takes the width the old 190px
+                    label column used to occupy. */}
+                <div className="px-5 py-7 sm:px-6 lg:px-8">
                   <div className={cn("min-w-0", n !== 4 && "max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && (
@@ -1250,6 +1229,25 @@ export function AgentWizard({
           >
             <CallSettings draft={draft} update={update} />
           </OptionalSection>
+        </div>
+
+        {/* Third column: the persistent agent preview (xl+). The one place
+            Talk lives on wide screens; sticky so it stays with you as the
+            config canvas scrolls. */}
+        <div className="lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:self-start lg:overflow-hidden">
+          <AgentPreviewPanel
+            name={draft.name || (isEdit ? existing!.name : "")}
+            statusLabel={previewStatus}
+            isLive={isLive}
+            latencyMs={cardEst.latencyMs}
+            costPerMin={cardEst.costPerMin}
+            stats={previewStats}
+            testing={testing}
+            warming={!!warming}
+            onTalk={() => setTalkOpen(true)}
+            collapsed={previewCollapsed}
+            onToggleCollapsed={() => setPreviewCollapsed((v) => !v)}
+          />
         </div>
         </div>
       </div>
@@ -1508,9 +1506,8 @@ function OptionalSection({
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          {/* Same [label | content] anatomy as the numbered sections. */}
-          <div className="grid gap-x-10 gap-y-5 px-5 py-7 sm:px-6 lg:px-8 xl:grid-cols-[190px_minmax(0,1fr)]">
-            <p aria-hidden className="hidden text-sm font-medium text-muted-foreground xl:block">{title}</p>
+          {/* Single-column body — matches the numbered sections (Figma 2026-07-15). */}
+          <div className="px-5 py-7 sm:px-6 lg:px-8">
             <div className="min-w-0 max-w-4xl">{children}</div>
           </div>
         </CollapsibleContent>

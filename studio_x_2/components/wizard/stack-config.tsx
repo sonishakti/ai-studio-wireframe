@@ -84,12 +84,16 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
   }
 
   return (
-    <RadioCardGroup
-      value={active}
-      onValueChange={(v) => v && setPreset(v as StackPreset)}
-      aria-label="Model preset"
-      className={cn("sm:grid-cols-3", className)}
-    >
+    <section className={cn("space-y-3", className)}>
+      {/* "Configure Models" = the speed/cost preset (Figma "Shell Exploration"
+          heading, 2026-07-15). */}
+      <h4 className="text-base font-medium">Configure Models</h4>
+      <RadioCardGroup
+        value={active}
+        onValueChange={(v) => v && setPreset(v as StackPreset)}
+        aria-label="Model preset"
+        className="sm:grid-cols-3"
+      >
       {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
         const preset = STACK_PRESETS[p]
         const pEst = stackEstimateFor(stackFor(p, stack.modality))
@@ -104,7 +108,8 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
           />
         )
       })}
-    </RadioCardGroup>
+      </RadioCardGroup>
+    </section>
   )
 }
 
@@ -153,21 +158,23 @@ export function StackModelsDetail({ stack, onChange, className }: StackPieceProp
       {/* Pipeline shape — a FIRST-CLASS choice, not buried in the disclosure
           (owner 2026-07-09), in plain language (user-test: bare "STT · LLM ·
           TTS" jargon lands cold — explain, don't re-hide). */}
-      <h4 className="text-base font-medium">Configure Models</h4>
+      {/* "Agent Architecture" = the pipeline shape (Figma "Shell Exploration"
+          heading + card names, 2026-07-15). */}
+      <h4 className="text-base font-medium">Agent Architecture</h4>
       <RadioCardGroup
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
-        aria-label="Pipeline"
+        aria-label="Agent architecture"
         className="sm:grid-cols-2"
       >
         <RadioCard
           value="stt-llm-tts"
-          title={<>Separate models <span className="font-normal text-muted-foreground">(default)</span></>}
+          title="Cascading Model"
           description="Speech, then an LLM, then speech. Tune each stage."
         />
         <RadioCard
           value="mllm"
-          title="One realtime model"
+          title="Chained Model (MLLM)"
           description="Hears and speaks. Faster, fewer knobs."
         />
       </RadioCardGroup>
