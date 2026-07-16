@@ -67,13 +67,26 @@ function useWidgetState(agentId: string) {
     copiedSnapshot: null,
   })
   // localStorage is client-only: hydrate after mount, and again on agent switch.
+  // Also listen for cross-instance edits (sx:widget-changed) so the config
+  // panel and the right-panel preview stay in lockstep (owner 2026-07-15).
   React.useEffect(() => {
     setState(loadWidgetState(agentId))
+    const onChanged = (e: Event) => {
+      if ((e as CustomEvent<{ agentId: string }>).detail?.agentId === agentId) {
+        setState(loadWidgetState(agentId))
+      }
+    }
+    window.addEventListener("sx:widget-changed", onChanged)
+    return () => window.removeEventListener("sx:widget-changed", onChanged)
   }, [agentId])
 
   const commit = (next: WidgetState) => {
     setState(next)
     saveWidgetState(agentId, next)
+    // Broadcast so any other useWidgetState instance for this agent re-reads.
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sx:widget-changed", { detail: { agentId } }))
+    }
   }
   const set: SetCfg = (k, v) => commit({ ...state, cfg: { ...state.cfg, [k]: v } })
 
@@ -296,6 +309,64 @@ export function WidgetStudioEmbedded({ agentId }: { agentId: string }) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * WidgetStyleConfig — the web-widget CONFIG only (styling sections + embed
+ * code), no preview. Web widget and "Widget UI" are one thing now (owner
+ * 2026-07-15): a single "Web widget" channel whose look you style here, while
+ * the LIVE PREVIEW lives in the right-hand agent panel (toggle it to "Widget").
+ */
+export function WidgetStyleConfig({ agentId }: { agentId: string }) {
+  const studio = useWidgetState(agentId)
+  return (
+    <div className="max-w-3xl space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <EmbedTruthLine state={studio.embedState} />
+        <Button size="sm" className="gap-1.5" onClick={studio.copySnippet}>
+          <Code2 className="h-4 w-4" /> Copy embed code
+        </Button>
+      </div>
+      {/* See-it hint — the preview is the right panel now, not crammed here. */}
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3.5 py-2.5 text-xs text-muted-foreground">
+        <Palette className="h-4 w-4 shrink-0" aria-hidden />
+        Styling updates live in the <span className="font-medium text-foreground">Widget</span> preview on the right. Re-copy the embed after changes to update your site.
+      </div>
+      <div className="overflow-hidden rounded-lg border border-border bg-card [&>*:last-child]:border-b-0">
+        <ConfigSections cfg={studio.cfg} set={studio.set} />
+        <Section title="Embed on your site" defaultOpen>
+          <p className="text-sm text-muted-foreground">
+            Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
+            any page. The widget appears, wired to this agent.
+          </p>
+          <CodeBlock language="html" filename="index.html" onCopy={studio.markCopied}>
+            {studio.snippet}
+          </CodeBlock>
+        </Section>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * WidgetPreviewCard — the widget preview for the persistent right panel. Reads
+ * the same per-agent store as WidgetStyleConfig (kept in sync via
+ * sx:widget-changed), so styling on the left updates the widget on the right
+ * live — "here's how your widget looks."
+ */
+export function WidgetPreviewCard({ agentId }: { agentId: string }) {
+  const studio = useWidgetState(agentId)
+  const [mode, setMode] = React.useState<PreviewMode>("voice")
+  return (
+    <div className="flex flex-1 flex-col gap-4 py-4">
+      <div className="flex justify-center">
+        <PreviewModeTabs mode={mode} onChange={setMode} />
+      </div>
+      <div className="flex flex-1 items-start justify-center overflow-x-auto px-4">
+        <WidgetPreview cfg={studio.cfg} mode={mode} />
       </div>
     </div>
   )

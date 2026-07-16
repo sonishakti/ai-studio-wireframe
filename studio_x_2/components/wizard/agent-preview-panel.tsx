@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgentSphere } from "@/components/agent-test-panel"
+import { WidgetPreviewCard } from "@/components/widget-studio"
 
 /**
  * AgentPreviewPanel — the persistent right column of the three-column builder
@@ -38,6 +40,10 @@ export function AgentPreviewPanel({
   onTalk,
   collapsed,
   onToggleCollapsed,
+  view = "agent",
+  onViewChange,
+  showWidgetToggle,
+  widgetAgentId,
   className,
 }: {
   name: string
@@ -52,12 +58,20 @@ export function AgentPreviewPanel({
   onTalk: () => void
   collapsed: boolean
   onToggleCollapsed: () => void
+  /** "agent" = sphere + Talk; "widget" = the styled web-widget preview
+   *  (owner 2026-07-15: the right panel doubles as the widget preview). */
+  view?: "agent" | "widget"
+  onViewChange?: (v: "agent" | "widget") => void
+  /** Show the [Agent | Widget] segmented toggle (web-widget channel only). */
+  showWidgetToggle?: boolean
+  /** Agent id whose widget config the preview reads. */
+  widgetAgentId?: string
   className?: string
 }) {
   if (collapsed) {
     return (
       <aside
-        className={cn("hidden w-12 shrink-0 border-l border-border xl:flex xl:flex-col xl:items-center xl:py-2.5", className)}
+        className={cn("hidden w-12 shrink-0 xl:flex xl:flex-col xl:items-center xl:py-2.5", className)}
         aria-label="Agent preview (collapsed)"
       >
         <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onToggleCollapsed} aria-label="Show agent preview">
@@ -69,7 +83,7 @@ export function AgentPreviewPanel({
 
   return (
     <aside
-      className={cn("hidden shrink-0 flex-col border-l border-border xl:flex xl:w-[400px]", className)}
+      className={cn("hidden shrink-0 flex-col xl:flex xl:w-[400px]", className)}
       aria-label="Agent preview"
     >
       {/* Header — px-5 py-2.5, border-b, gap-4. Collapse toggles flank a
@@ -93,9 +107,20 @@ export function AgentPreviewPanel({
         </Button>
       </div>
 
-      {/* Agent body — pl-4 pr-6 py-4, gap-3. Badges (h-15), then the sphere
-          with Talk BELOW it (gap-8), centered. */}
+      {/* Agent body — pl-4 pr-6 py-4, gap-3. Badges (h-15), then either the
+          sphere+Talk (agent view) or the styled widget preview (widget view). */}
       <div className="flex flex-1 flex-col gap-3 py-4 pl-4 pr-6">
+        {/* [Agent | Widget] toggle — only for a web-widget channel. */}
+        {showWidgetToggle && (
+          <div className="flex justify-center">
+            <Tabs value={view} onValueChange={(v) => onViewChange?.(v as "agent" | "widget")}>
+              <TabsList className="h-8">
+                <TabsTrigger value="agent" className="text-xs">Agent</TabsTrigger>
+                <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        )}
         <div className="flex h-15 items-center justify-center gap-2">
           <Badge variant="outline" className="max-w-[180px] truncate">{name || "Your agent"}</Badge>
           {statusHint ? (
@@ -116,18 +141,22 @@ export function AgentPreviewPanel({
           )}
         </div>
 
-        <div className="flex flex-1 flex-col items-center justify-center gap-8 pb-6">
-          <AgentSphere size={150} active={testing} />
-          <Button variant="secondary" size="sm" className="gap-1.5" disabled={warming} onClick={onTalk}>
-            <AudioLines className="size-4" aria-hidden />
-            {testing ? "Open test" : `Talk to ${name || "agent"}`}
-          </Button>
-          {warming && (
-            <p role="status" className="text-center text-xs text-muted-foreground">
-              Warming up. Talk flips on the moment it finishes.
-            </p>
-          )}
-        </div>
+        {view === "widget" && widgetAgentId ? (
+          <WidgetPreviewCard agentId={widgetAgentId} />
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center gap-8 pb-6">
+            <AgentSphere size={150} active={testing} />
+            <Button variant="secondary" size="sm" className="gap-1.5" disabled={warming} onClick={onTalk}>
+              <AudioLines className="size-4" aria-hidden />
+              {testing ? "Open test" : `Talk to ${name || "agent"}`}
+            </Button>
+            {warming && (
+              <p role="status" className="text-center text-xs text-muted-foreground">
+                Warming up. Talk flips on the moment it finishes.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Stats — border-t, pl-4 pr-6 py-4, gap-3 rows. Mono-50% labels,

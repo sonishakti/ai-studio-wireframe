@@ -19,7 +19,7 @@ import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
-import { WebEmbedPanel, WidgetStudioEmbedded } from "@/components/widget-studio"
+import { WidgetStyleConfig } from "@/components/widget-studio"
 import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
 import {
   MOCK_CSV_COLUMNS,
@@ -97,12 +97,10 @@ function InboundConfigure({
   draft, update, agentId,
 }: StepProps & { agentId: string }) {
   const mode: InboundMode = draft.config.inbound?.mode ?? "phone"
-  // Third option "Widget UI" (owner 2026-07-13): the styling studio for the
-  // same web channel — its own segment because the full studio crammed under
-  // the Web-widget option drowned the embed path. Channel truth stays binary
-  // (phone | web); which web panel is open is view state.
-  const [webView, setWebView] = React.useState<"web" | "ui">("web")
-  const view = mode === "phone" ? "phone" : webView
+  // Web widget and "Widget UI" are ONE thing (owner 2026-07-15): a single "Web
+  // widget" channel. Styling lives in WidgetStyleConfig here; the live PREVIEW
+  // moved to the right agent panel (toggle it to "Widget"). Channel truth is
+  // binary (phone | web).
   // The agent's CURRENT number must always be listable/selectable — a live
   // agent's number is status "active" and a pure unassigned filter renders the
   // Select as an empty placeholder under summaries that name it (re-eval #1).
@@ -114,32 +112,22 @@ function InboundConfigure({
       toast("Switched to Web widget", { description: "Your phone number stays attached. Switch back any time." })
     }
   }
-  const pick = (v: string) => {
-    if (!v) return
-    if (v === "phone") { setMode("phone"); return }
-    setWebView(v === "ui" ? "ui" : "web")
-    if (mode !== "web") setMode("web")
-  }
   const setNumber = (numberId: string) =>
     update({ config: { ...draft.config, inbound: { mode, numberId } } })
 
   return (
     <div className="space-y-4">
       <RadioCardGroup
-        value={view}
-        onValueChange={pick}
+        value={mode}
+        onValueChange={(v) => v && setMode(v as InboundMode)}
         aria-label="How callers reach this agent"
-        className="max-w-3xl sm:grid-cols-3"
+        className="max-w-3xl sm:grid-cols-2"
       >
         <RadioCard value="phone" title="Phone number" description="Answer calls 24/7" />
-        <RadioCard value="web" title="Web widget" description="Embed on your site" />
-        <RadioCard value="ui" title="Widget UI" description="Style & preview" />
+        <RadioCard value="web" title="Web widget" description="Embed & style a floating widget" />
       </RadioCardGroup>
 
-      {/* The batch cross-link that lived here is gone: the run-mode TABS
-          directly above are now the always-visible way between families
-          (owner 2026-07-14). */}
-      {view === "phone" ? (
+      {mode === "phone" ? (
         <div className="max-w-3xl">
         <ConfigCard title="Answer a phone number">
           <div className="space-y-2">
@@ -166,14 +154,10 @@ function InboundConfigure({
           </div>
         </ConfigCard>
         </div>
-      ) : view === "web" ? (
-        /* Reach-the-agent, kept lean: snippet + embed truth. */
-        <WebEmbedPanel agentId={agentId} onStyleWidget={() => setWebView("ui")} />
       ) : (
-        /* Widget UI — the full studio, inline: style + preview + embed code
-           without leaving the build (owner 2026-07-13). /deploy/web-widget
-           remains the post-build manage surface, reading the same store. */
-        <WidgetStudioEmbedded agentId={agentId} />
+        /* Web widget — style + embed here; the live preview is the right panel
+           (owner 2026-07-15: no half-widget crammed in the config). */
+        <WidgetStyleConfig agentId={agentId} />
       )}
     </div>
   )

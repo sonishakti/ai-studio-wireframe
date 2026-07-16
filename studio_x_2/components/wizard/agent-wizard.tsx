@@ -114,6 +114,11 @@ export function AgentWizard({
   // on its first incomplete step). Kept nullable so ?step deep links and the
   // ⌘K event keep their exact semantics.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
+  // Accordion (owner 2026-07-15): only the FIRST numbered section is expanded
+  // on load; the rest collapse to their header rows. Opening a rail item or a
+  // deep link expands that section; the header chevron toggles it.
+  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true })
+  const toggleStep = (n: number) => setExpandedSteps((s) => ({ ...s, [n]: !s[n] }))
   // The Talk panel (identity card + live test) — the ONLY right-side Sheet now.
   const [talkOpen, setTalkOpen] = React.useState(false)
   React.useEffect(() => {
@@ -490,6 +495,9 @@ export function AgentWizard({
     // Set the highlight FIRST: on a short page (everything in one fold, the
     // 4K case) nothing scrolls, so the click must still give feedback.
     setOpenStep(n)
+    // Accordion: opening a section from the rail/deep-link expands it (it may
+    // have been collapsed) so the scroll lands on real content, not a header.
+    setExpandedSteps((s) => ({ ...s, [n]: true }))
     syncStepParam(n)
     muteSpy(800)
     scrollToStep(n)
@@ -838,6 +846,14 @@ export function AgentWizard({
   // lives in a persistent right preview panel; the header owns identity +
   // Deploy; the rail is pure nav.
   const [previewCollapsed, setPreviewCollapsed] = React.useState(false)
+  // The right panel doubles as the web-widget preview (owner 2026-07-15): on a
+  // web-widget channel it shows a [Agent | Widget] toggle and defaults to the
+  // widget view — "here's how your widget looks."
+  const [previewView, setPreviewView] = React.useState<"agent" | "widget">("agent")
+  const isWebWidget = draft.type === "inbound" && draft.config.inbound?.mode === "web"
+  React.useEffect(() => {
+    setPreviewView(isWebWidget ? "widget" : "agent")
+  }, [isWebWidget])
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
   const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
   const previewStats = {
@@ -959,7 +975,7 @@ export function AgentWizard({
       <div className="grid grid-cols-1 items-start lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_auto]">
         {/* Rail — p-5 (20px, Figma), border-r divider; scrolls internally on
             short viewports so the deploy state stays reachable. */}
-        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r">
+        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
           {/* Rail = pure nav now (Figma 2026-07-15): the agent identity moved
               to the header and the sphere/Talk to the right preview panel, so
               the rail holds only the CONFIGURE + OPTIONAL section lists. */}
@@ -1058,7 +1074,12 @@ export function AgentWizard({
             (sticky can't escape a clipped ancestor). The rail is unaffected (it
             lives in the other grid column). Corners: the first header rounds to
             match the card's top-right (2026-07-08). */}
-        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0">
+        {/* Full-height column dividers live on the CENTER (owner 2026-07-15:
+            the borders "only reached half the page" because the sticky rail/
+            panel columns are shorter than the content). min-h fills the
+            viewport so the dividers span it even when the accordion is short;
+            border-l = rail divider (lg+), border-r = panel divider (xl+). */}
+        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l xl:border-r">
           {[1, 2, 3, 4].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
@@ -1075,27 +1096,31 @@ export function AgentWizard({
                     title stays anchored while you scroll it; bg must be opaque so
                     content slides cleanly under. The icon NAMES the section;
                     never a completion tick (rail + deploy block own progress). */}
-                <header className={cn(
-                  "z-20 flex items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 lg:sticky lg:top-12",
-                )}>
-                  {/* Plain icon, no chip box (Figma 2026-07-14 — the band got
-                      quieter, the content around it got the room). */}
-                  <div className="flex min-w-0 items-center gap-2.5">
+                {/* Accordion header (owner 2026-07-15): the band is a toggle —
+                    clicking it expands/collapses the section; a chevron shows
+                    state. Sticky under the app header while its body scrolls. */}
+                <header className="z-20 flex items-center gap-1 border-b border-border bg-muted lg:sticky lg:top-12">
+                  <button
+                    type="button"
+                    onClick={() => toggleStep(n)}
+                    aria-expanded={!!expandedSteps[n]}
+                    aria-controls={`wizard-step-${n}-body`}
+                    className="flex min-w-0 flex-1 items-center gap-2.5 px-5 py-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                  >
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
-                  </div>
-                  {/* LIVE agents only: with autosave there is no Save/Cancel,
-                      so this is the one way back to the deployed config after
-                      an accidental edit. HIDDEN until the step actually differs
-                      from live — a control you can't use is noise, not state
-                      (owner 2026-07-09). Icon-only + tooltip. */}
+                    <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedSteps[n] && "rotate-180")} aria-hidden />
+                  </button>
+                  {/* LIVE agents only: with autosave there is no Save/Cancel, so
+                      this is the one way back to the deployed config. HIDDEN
+                      until the step differs from live. */}
                   {isLive && stepDirty(n) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 shrink-0 text-muted-foreground"
+                          className="mr-3 h-7 w-7 shrink-0 text-muted-foreground"
                           onClick={() => resetStep(n)}
                           aria-label="Reset this step to the live version"
                         >
@@ -1112,11 +1137,9 @@ export function AgentWizard({
                     band's h3 already names the section. Steps 1–3 cap at 4xl
                     for readability; Deploy stays fluid (the batch split + the
                     widget studio manage their own width). */}
-                {/* Single-column body (Figma "Shell Exploration" 2026-07-15):
-                    the rail + the section header band already name the section,
-                    and the right preview panel takes the width the old 190px
-                    label column used to occupy. */}
-                <div className="p-5">
+                {/* Body renders only when the section is expanded (accordion). */}
+                {expandedSteps[n] && (
+                <div id={`wizard-step-${n}-body`} className="p-5">
                   <div className={cn("min-w-0", n !== 4 && "max-w-4xl")}>
                   {n === 1 && <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />}
                   {n === 2 && (
@@ -1159,6 +1182,7 @@ export function AgentWizard({
                   )}
                   </div>
                 </div>
+                )}
               </section>
             )
           })}
@@ -1224,6 +1248,10 @@ export function AgentWizard({
             onTalk={() => setTalkOpen(true)}
             collapsed={previewCollapsed}
             onToggleCollapsed={() => setPreviewCollapsed((v) => !v)}
+            view={previewView}
+            onViewChange={setPreviewView}
+            showWidgetToggle={!!isWebWidget}
+            widgetAgentId={draft.agentId ?? "new"}
           />
         </div>
       </div>
