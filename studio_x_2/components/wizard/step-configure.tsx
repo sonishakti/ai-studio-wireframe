@@ -16,7 +16,6 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
 import { WidgetStyleConfig } from "@/components/widget-studio"
@@ -25,8 +24,6 @@ import {
   MOCK_CSV_COLUMNS,
   MOCK_CSV_ROWS,
   outboundMissingVars,
-  typeLabel,
-  type AgentType,
   type InboundMode,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
@@ -44,42 +41,39 @@ import { type StepProps } from "@/components/wizard/types"
  * block is purely about WHERE/HOW the agent runs. The agent id (for snippets)
  * is the draft's agentId or "new" until published.
  */
-export function StepConfigure({ draft, update }: StepProps) {
+export function StepConfigure({
+  draft,
+  update,
+  onChooseType,
+}: StepProps & {
+  /** Jump to Step 2 (Select agent type) — Deploy does NOT re-offer the type
+   *  chooser (owner 2026-07-15: the run-mode tabs here duplicated Step 2). */
+  onChooseType?: () => void
+}) {
   const agentId = draft.agentId ?? "new"
 
   return (
     <div className="space-y-5">
-      {/* No inner h2: the section header above already carries "Deploy". */}
+      {/* No inner h2: the section header above already carries "Deploy". The
+          agent TYPE is chosen in Step 2 only — this step just configures it. */}
       <p className="text-sm text-muted-foreground">
         {draft.type === "inbound" && "Choose how callers reach your agent."}
         {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
         {draft.type === "code" && "Drop the agent into your own app."}
-        {!draft.type && "Pick how your agent runs first, then finish its setup."}
       </p>
 
-      {/* The run-mode switcher is TABS, always visible (owner 2026-07-14:
-          the one-shot buttons were a one-way door — "if user clicks any one
-          they can't go back"). Switching rides the host's selectType
-          stash/undo, so the departing setup is set aside, not deleted; this
-          replaces the per-branch escape lines. */}
-      <div className="space-y-2">
-        <Tabs
-          value={draft.type ?? ""}
-          onValueChange={(v) => v && v !== draft.type && update({ type: v as AgentType })}
-        >
-          <TabsList className="h-9">
-            {(["outbound", "inbound", "code"] as AgentType[]).map((t) => (
-              <TabsTrigger key={t} value={t} className="text-xs sm:text-sm">
-                {typeLabel(t)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <p className="text-xs text-muted-foreground">
-          Batch calls dial a contact list · Inbound answers a number or web widget · Code / SDK
-          runs inside your app.{draft.type ? " Switching sets the current setup aside, not deleted." : ""}
-        </p>
-      </div>
+      {!draft.type && (
+        /* Never an empty step: without a type there is nothing to configure —
+           point at the step that owns the choice instead of duplicating it. */
+        <div className="flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            Pick how your agent runs in <span className="font-medium text-foreground">Select agent type</span> first — then finish its setup here.
+          </p>
+          <Button variant="outline" size="sm" onClick={onChooseType}>
+            Choose agent type
+          </Button>
+        </div>
+      )}
 
       {/* Code is a single-column form → capped for readability. Batch calls
           and the inbound web-widget studio run two-pane splits (settings |

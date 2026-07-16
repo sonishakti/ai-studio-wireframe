@@ -66,6 +66,12 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
   const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
   const active = pipeline === "stt-llm-tts" && !diverged ? stack.preset : ""
 
+  // Chained Model (MLLM): the speed/cost presets write CASCADE vendor stacks —
+  // they serve no purpose on a realtime pipeline, so the whole block hides
+  // (owner 2026-07-15: "why is it still shown if it serves no purpose").
+  // The realtime model itself is picked in "Choose the realtime model".
+  if (pipeline === "mllm") return null
+
   // A preset pick also returns a realtime pipeline to the standard cascade —
   // that is what the cards promise ("we suggest the vendors"). Keep the chosen
   // language, and keep the current voice ONLY if the preset's TTS vendor still

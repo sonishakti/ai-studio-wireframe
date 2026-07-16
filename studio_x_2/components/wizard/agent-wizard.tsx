@@ -260,6 +260,9 @@ export function AgentWizard({
     // (audit 2026-07-07: deep links highlighted but never scrolled).
     const openLater = (n: number) => {
       setOpenStep(n)
+      // Accordion: a deep link must EXPAND its section, not just scroll to a
+      // collapsed header (same rule as openRow).
+      setExpandedSteps((s) => ({ ...s, [n]: true }))
       muteSpy(1500)
       window.setTimeout(() => scrollToStep(n), 120)
     }
@@ -1164,6 +1167,7 @@ export function AgentWizard({
                       <StepConfigure
                         draft={draft}
                         update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
+                        onChooseType={() => openRow(2)}
                       />
                       {/* publishRegionRef feeds graft B: while this in-step
                           go-live CTA is on screen, the rail Deploy demotes. */}

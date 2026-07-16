@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -90,28 +91,41 @@ export function StepVoice({
               )}
               <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             </button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!selected}
-              // Same simulated-disclosure pattern as the Talk panel — a bare
-              // "Playing a sample" with no audio read as broken (user-test #9).
-              onClick={() => selected && toast("Simulated preview", {
-                description: `No live audio in this wireframe — ${selected.name}'s sample would play here.`,
-              })}
-              className="h-9 gap-1.5"
-            >
-              <Play className="h-3.5 w-3.5" aria-hidden /> Preview
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!selected}
-              onClick={editSelected}
-              className="h-9 gap-1.5"
-            >
-              <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit
-            </Button>
+            {/* Icon-only CTAs (owner 2026-07-15) — tooltips carry the labels. */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={!selected}
+                  // Same simulated-disclosure pattern as the Talk panel — a bare
+                  // "Playing a sample" with no audio read as broken (user-test #9).
+                  onClick={() => selected && toast("Simulated preview", {
+                    description: `No live audio in this wireframe — ${selected.name}'s sample would play here.`,
+                  })}
+                  className="size-9"
+                  aria-label="Preview voice"
+                >
+                  <Play className="h-4 w-4" aria-hidden />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Preview voice</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={!selected}
+                  onClick={editSelected}
+                  className="size-9"
+                  aria-label="Edit voice"
+                >
+                  <Pencil className="h-4 w-4" aria-hidden />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit voice</TooltipContent>
+            </Tooltip>
           </div>
           {/* The promise that used to be an intro paragraph, kept to one line. */}
           <p className="text-xs text-muted-foreground">
