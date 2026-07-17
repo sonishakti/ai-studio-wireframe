@@ -20,7 +20,7 @@ import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { StepVoice } from "@/components/wizard/step-voice"
-import { StepAdvanced } from "@/components/wizard/step-advanced"
+import { StepAdvanced, HistoryField } from "@/components/wizard/step-advanced"
 import { StepType } from "@/components/wizard/step-type"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
 import { SectionKnowledgeTools } from "@/components/wizard/step-build"
@@ -499,8 +499,12 @@ export function AgentWizard({
   // subsection anchor — "everything navigable from the left panel, no RHS
   // scrolling to find anything". Expands the section first so the anchor
   // exists, then glides.
+  // The TOC entry the user last jumped to — highlighted in the rail so the
+  // outliner shows "you are here" (owner 2026-07-17).
+  const [activeAnchor, setActiveAnchor] = React.useState<string | null>(null)
   const openAnchor = (n: number, anchorId: string) => {
     setOpenStep(n)
+    setActiveAnchor(anchorId)
     setExpandedSteps((s) => ({ ...s, [n]: true }))
     syncStepParam(n)
     muteSpy(1500)
@@ -509,6 +513,12 @@ export function AgentWizard({
       if (!el) { scrollToStep(n); return }
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
+      // Arrival feedback: flash the target block so the jump visibly lands —
+      // especially when it was already on screen and nothing scrolled.
+      el.classList.remove("wz-anchor-flash")
+      void el.offsetWidth // restart the animation on repeat clicks
+      el.classList.add("wz-anchor-flash")
+      window.setTimeout(() => el.classList.remove("wz-anchor-flash"), 1500)
       // Same arrival guarantee as scrollToStep: some environments silently
       // drop long smooth scrolls — if the anchor isn't near the reading line
       // shortly after, jump instantly. scroll-mt-28 = 112px.
@@ -1066,7 +1076,11 @@ export function AgentWizard({
                               <button
                                 type="button"
                                 onClick={() => openAnchor(n, t.id)}
-                                className="flex h-7 w-full min-w-0 items-center rounded-md px-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
+                                aria-current={activeAnchor === t.id ? "location" : undefined}
+                                className={cn(
+                                  "flex h-7 w-full min-w-0 items-center rounded-md px-2 text-left text-xs transition-colors hover:bg-accent/40 hover:text-foreground",
+                                  activeAnchor === t.id ? "bg-accent/60 text-foreground" : "text-muted-foreground",
+                                )}
                               >
                                 <span className="min-w-0 flex-1 truncate">{t.label}</span>
                               </button>
@@ -1265,6 +1279,14 @@ export function AgentWizard({
                           </p>
                         </div>
                       </div>
+                      {/* Conversation history is MODEL config — how much
+                          context the LLM keeps — not a tool (owner
+                          2026-07-17: it read as oddly placed in Tools). */}
+                      <HistoryField
+                        id="wz-4-history"
+                        value={draft.advanced}
+                        onChange={(advanced) => update({ advanced })}
+                      />
                     </div>
                   )}
                   {/* 5 · KNOWLEDGE & TOOLS (Customize). */}

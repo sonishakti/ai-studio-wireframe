@@ -52,7 +52,7 @@ export function SectionPrompt({
           : `Pick a channel first, then write the words for it.`}
       </p>
 
-      <div className="max-w-3xl space-y-6">
+      <div className="space-y-6">
         {/* 1 — System prompt */}
         <div id="wz-2-prompt" className="scroll-mt-28 space-y-2">
           <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>

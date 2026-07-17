@@ -157,7 +157,7 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
         aria-label="Pipeline"
-        className="@lg:grid-cols-2"
+        className="gap-4 @2xl:grid-cols-4"
       >
         <RadioCard
           value="stt-llm-tts"
@@ -199,8 +199,8 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
           {pipeline === "mllm" ? "Realtime model" : "Models"}
         </h4>
           {pipeline === "stt-llm-tts" ? (
-            <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
+            <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
+              <div className="min-w-0 space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
                 <Select
                   value={`${stack.asr.vendor}/${stack.asr.model}`}
@@ -217,7 +217,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
+              <div className="min-w-0 space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Large Language Model (LLM)</Label>
                 <Select
                   value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -234,7 +234,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
+              <div className="min-w-0 space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Text-to-Speech (TTS)</Label>
                 <Select
                   value={stack.tts.vendor}
@@ -251,7 +251,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
+              <div className="min-w-0 space-y-1.5">
                 {/* "TTS voice", not "Voice" — the persona picker sits directly
                     above this on Step 1; two controls named Voice read as a bug. */}
                 <Label className="text-xs text-muted-foreground">TTS voice</Label>
@@ -264,8 +264,8 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-12">
-            <div className="col-span-12 space-y-1.5 @lg:col-span-6">
+            <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
+            <div className="min-w-0 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Realtime model</Label>
               <Select
                 value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -321,7 +321,8 @@ export function StackTradeoffSlider({ stack, onChange, className }: StackPiecePr
   return (
     <section className={cn("@container space-y-3", className)}>
       <h4 className="text-base font-medium">Latency vs cost</h4>
-      <div className="max-w-xl space-y-2">
+      {/* 50% of the 4-col system (owner 2026-07-17 layout normalization). */}
+      <div className="w-full space-y-2 @2xl:w-1/2">
         <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
           <span title="Typical time to first word">~{est.latencyMs} ms</span>
           <span title="Estimated cost per minute">~${est.costPerMin.toFixed(2)}/min</span>

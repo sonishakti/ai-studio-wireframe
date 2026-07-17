@@ -34,7 +34,7 @@ export function CallSettings({ draft, update }: StepProps) {
     // @container: the builder's center column can be far narrower than the
     // viewport (three-column shell) — the selects must reflow by CONTAINER
     // width, not window breakpoints (72px selects bug, 2026-07-17).
-    <div className="@container max-w-3xl space-y-4">
+    <div className="@container space-y-4">
       <OutboundSettings draft={draft} update={update} />
       <OutboundCapacityNote draft={draft} />
     </div>
@@ -52,7 +52,7 @@ function OutboundSettings({ draft, update }: StepProps) {
     // grid-cols-1 is load-bearing: an implicit column is min-content-sized,
     // and the nowrap Select values (e.g. "Business hours (9–5…)") would
     // force ~300px and overflow a starved center column.
-    <div className="grid grid-cols-1 gap-3 @xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Call window</Label>
         <Select
