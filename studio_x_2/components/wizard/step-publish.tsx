@@ -44,13 +44,14 @@ export function StepPublish({
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. No Talk
           button either (journey dedup 2026-07-15): Talk has ONE home per
-          viewport — the agent panel at xl, the header below it. The old
-          "card can be occluded" rationale died with the sticky panel. */}
+          viewport — the agent panel at xl, the header below it. */}
       <p className="text-sm text-muted-foreground">
-        Review {agentName}, then {live ? "redeploy to apply your changes" : "deploy it"}. Talk to it any time from the agent panel.
+        {live ? `Review your changes, then redeploy ${agentName}.` : `Review ${agentName}, then deploy it.`}
       </p>
 
-      <section className="space-y-3 rounded-lg border border-border bg-card p-5">
+      {/* Summary card only below xl — at xl+ the right panel carries the
+          always-visible Deployment summary (owner 2026-07-17). */}
+      <section className="space-y-3 rounded-lg border border-border bg-card p-5 xl:hidden">
         <p className="text-sm font-semibold">Deployment summary</p>
         <dl className="space-y-2.5 text-sm">
           <SummaryRow icon={AudioLines} label="Voice">
@@ -115,21 +116,19 @@ export function StepPublish({
           <Rocket className="h-4 w-4" aria-hidden /> {ctaLabel ?? (live ? "Redeploy" : "Deploy agent")}
         </Button>
         <p className="text-sm text-muted-foreground">
-          {/* Code-aware promise (user-test #9, D3): a code deploy mints the ID
-              and STAYS here — no "real traffic"/Monitor language for a channel
-              where traffic starts when the app connects. */}
-          {/* The promise must match the CTA (user-test #12: "Launch batch
-              calls" over "Redeploying applies your edits…" read as two
-              stories) — branch by the draft's TYPE in both live states. */}
+          {/* Outcome first, destination second — one sentence each, no
+              narration (owner 2026-07-17). Code deploys stay on this page
+              (the snippets need the minted ID); everything else opens
+              Monitor. The promise always matches the CTA (user-test #12). */}
           {live
             ? draft.type === "outbound"
-              ? `This starts calling your contact list — you'll confirm the batch first, then land on Monitor.`
+              ? `Starts calling your list after one confirmation. Opens Monitor.`
               : draft.type === "code"
-              ? `This repoints ${agentName} to your app. Traffic starts when it connects — you stay right here.`
-              : `Redeploying applies your edits to live traffic. You'll land on Monitor to watch it.`
+              ? `Updates the agent your app connects to. You stay on this page.`
+              : `Your changes take effect on the next call. Opens Monitor.`
             : draft.type === "code"
-            ? `Deploying mints ${agentName}'s agent ID into the snippets above. Traffic starts when your app connects — you stay right here.`
-            : `Deploying starts real traffic for ${agentName}. You'll land on Monitor to watch it.`}
+            ? `Creates the agent ID for the snippets above. You stay on this page.`
+            : `Puts ${agentName} live. Opens Monitor.`}
         </p>
       </div>
     </div>

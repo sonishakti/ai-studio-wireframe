@@ -1,18 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import {
-  Collapsible, CollapsibleContent, CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+import { Slider } from "@/components/ui/slider"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
-  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackLine,
+  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor,
   type StackPreset, type AgentStack,
 } from "@/lib/campaign-data"
 
@@ -90,7 +87,9 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
   }
 
   return (
-    <section className={cn("space-y-3", className)}>
+    // @container: cards reflow by the component's real width (builder center
+    // column vs Playground page), not viewport breakpoints.
+    <section className={cn("@container space-y-3", className)}>
       {/* "Configure Models" = the speed/cost preset (Figma "Shell Exploration"
           heading, 2026-07-15). */}
       <h4 className="text-base font-medium">Configure Models</h4>
@@ -98,7 +97,7 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
         value={active}
         onValueChange={(v) => v && setPreset(v as StackPreset)}
         aria-label="Model preset"
-        className="sm:grid-cols-3"
+        className="@xl:grid-cols-3"
       >
       {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
         const preset = STACK_PRESETS[p]
@@ -123,8 +122,6 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
 
 export function StackModelsDetail({ stack, onChange, className, showPicker = true }: StackPieceProps & { showPicker?: boolean }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
-  const est = stackEstimateFor(stack)
-  const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
 
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
 
@@ -149,15 +146,18 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
   }
 
   return (
-    <section className={cn("space-y-4", className)}>
-      {/* "Agent Architecture" = the pipeline shape (Figma "Shell Exploration"
-          heading + card names) — a first-class choice, plain language. */}
-      <h4 className="text-base font-medium">Agent Architecture</h4>
+    <section className={cn("@container space-y-4", className)}>
+      {/* "Pipeline" — this section already lives inside the agent's Models
+          page, so "Agent Architecture" double-qualified it (owner 2026-07-17).
+          No estimate/summary paragraphs here: variable-length text above the
+          cards moved them under the cursor on every switch (the model-switch
+          jump); the live numbers live in the right panel's summary instead. */}
+      <h4 className="text-base font-medium">Pipeline</h4>
       <RadioCardGroup
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
-        aria-label="Agent architecture"
-        className="sm:grid-cols-2"
+        aria-label="Pipeline"
+        className="@lg:grid-cols-2"
       >
         <RadioCard
           value="stt-llm-tts"
@@ -171,37 +171,19 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
         />
       </RadioCardGroup>
 
-      {pipeline === "mllm" ? (
-        <p className="text-xs text-muted-foreground">
-          The model owns turn-taking, so the interruption and end-of-speech controls in
-          Advanced don&apos;t apply.
-        </p>
-      ) : null}
-
-      {/* What the pick means, in vendors and numbers. */}
-      <p className="text-xs text-muted-foreground">
-        {pipeline === "mllm"
-          ? `Realtime model: ${stackLine(stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`
-          : diverged
-          ? `Custom mix: ${stackLine(stack)}. Estimates approximate the ${STACK_PRESETS[stack.preset].label} preset (~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min).`
-          : `Runs on ${stackLine(stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`}
-      </p>
-
       {/* The vendor picker renders here by default; the builder (Figma order)
-          renders it separately, AFTER Configure Models, via showPicker={false}
-          + a standalone <StackModelPicker>. */}
+          renders it separately via showPicker={false} + a standalone
+          <StackModelPicker>. */}
       {showPicker && <StackModelPicker stack={stack} onChange={onChange} />}
     </section>
   )
 }
 
-/** The "Choose specific models" disclosure — STT/LLM/TTS (or realtime) vendor
- *  pickers. Split out of StackModelsDetail so the builder can place it after
- *  Configure Models per the Figma order (2026-07-15). */
+/** The STT/LLM/TTS (or realtime) vendor pickers — ALWAYS VISIBLE (owner
+ *  2026-07-17: "if user has selected cascading, show the asr-tts-llm
+ *  selection, don't hide it"). Formerly a collapsed disclosure. */
 export function StackModelPicker({ stack, onChange, className }: StackPieceProps) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
-  const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
-  const [customOpen, setCustomOpen] = React.useState(diverged || pipeline === "mllm")
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
 
   const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
@@ -211,21 +193,14 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
     : [stack.tts.voice, ...vendorVoices]
 
   return (
-    <div className={className}>
-      <Collapsible open={customOpen} onOpenChange={setCustomOpen}>
-        <CollapsibleTrigger asChild>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded text-sm font-medium text-foreground transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {pipeline === "mllm" ? "Choose the realtime model" : "Choose specific models"}
-            <ChevronDown className={cn("h-4 w-4 transition-transform", customOpen && "rotate-180")} aria-hidden />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pt-4">
+    <div className={cn("@container", className)}>
+      <div className="space-y-4">
+        <h4 className="text-base font-medium">
+          {pipeline === "mllm" ? "Realtime model" : "Models"}
+        </h4>
           {pipeline === "stt-llm-tts" ? (
             <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
                 <Select
                   value={`${stack.asr.vendor}/${stack.asr.model}`}
@@ -242,7 +217,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 <Label className="text-xs text-muted-foreground">Large Language Model (LLM)</Label>
                 <Select
                   value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -259,7 +234,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 <Label className="text-xs text-muted-foreground">Text-to-Speech (TTS)</Label>
                 <Select
                   value={stack.tts.vendor}
@@ -276,7 +251,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 {/* "TTS voice", not "Voice" — the persona picker sits directly
                     above this on Step 1; two controls named Voice read as a bug. */}
                 <Label className="text-xs text-muted-foreground">TTS voice</Label>
@@ -290,7 +265,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
             </div>
           ) : (
             <div className="grid grid-cols-12">
-            <div className="col-span-12 space-y-1.5 sm:col-span-6">
+            <div className="col-span-12 space-y-1.5 @lg:col-span-6">
               <Label className="text-xs text-muted-foreground">Realtime model</Label>
               <Select
                 value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -309,9 +284,68 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
             </div>
             </div>
           )}
-        </CollapsibleContent>
-      </Collapsible>
+      </div>
     </div>
+  )
+}
+
+// ─── The latency ↔ cost tradeoff slider ───────────────────────────────────────
+
+/** One slider instead of three preset cards (owner 2026-07-17): drag toward
+ *  Fastest and cost rises; drag toward Cheapest and latency rises. Snaps to
+ *  the three presets underneath, so the data model is unchanged — each stop
+ *  writes the same vendor defaults the cards did. Hidden on MLLM (one model
+ *  owns the whole pipeline). */
+const SLIDER_ORDER: StackPreset[] = ["fastest", "balanced", "cheapest"]
+
+export function StackTradeoffSlider({ stack, onChange, className }: StackPieceProps) {
+  const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
+  if (pipeline === "mllm") return null
+
+  const idx = Math.max(0, SLIDER_ORDER.indexOf(stack.preset))
+  const diverged = divergedFromPreset(stack)
+  const est = stackEstimateFor(stack)
+
+  const setPreset = (preset: StackPreset) => {
+    const base = stackFor(preset, stack.modality)
+    const vendorVoices = (STACK_CATALOG.tts.find((v) => v.vendor === base.tts.vendor)?.voices ?? []) as readonly string[]
+    const voice = vendorVoices.includes(stack.tts.voice) ? stack.tts.voice : base.tts.voice
+    onChange({
+      ...base,
+      pipeline: "stt-llm-tts",
+      language: stack.language,
+      tts: { vendor: base.tts.vendor, voice },
+    })
+  }
+
+  return (
+    <section className={cn("@container space-y-3", className)}>
+      <h4 className="text-base font-medium">Latency vs cost</h4>
+      <div className="max-w-xl space-y-2">
+        <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
+          <span title="Typical time to first word">~{est.latencyMs} ms</span>
+          <span title="Estimated cost per minute">~${est.costPerMin.toFixed(2)}/min</span>
+        </div>
+        <Slider
+          value={[idx]}
+          min={0}
+          max={SLIDER_ORDER.length - 1}
+          step={1}
+          onValueChange={([v]) => setPreset(SLIDER_ORDER[v])}
+          aria-label="Latency versus cost"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>Fastest · costs more</span>
+          <span>{STACK_PRESETS.balanced.label}</span>
+          <span>Cheapest · slower</span>
+        </div>
+      </div>
+      {diverged && (
+        <p className="text-xs text-muted-foreground">
+          Custom model mix — moving the slider replaces it with the {STACK_PRESETS[SLIDER_ORDER[idx]].label} defaults.
+        </p>
+      )}
+    </section>
   )
 }
 

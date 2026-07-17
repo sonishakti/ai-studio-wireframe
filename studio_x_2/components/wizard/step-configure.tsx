@@ -53,9 +53,11 @@ export function StepConfigure({
   const agentId = draft.agentId ?? "new"
 
   return (
-    <div className="space-y-5">
-      {/* No inner h2: the section header above already carries "Deploy". The
-          agent TYPE is chosen in Step 2 only — this step just configures it. */}
+    // @container: the channel blocks reflow by the center column's REAL width
+    // (the three-column shell can starve it), never viewport breakpoints.
+    <div className="@container space-y-5">
+      {/* No inner h2: the section header above already carries the section
+          name. The channel is PICKED above — this block just configures it. */}
       <p className="text-sm text-muted-foreground">
         {draft.type === "inbound" && "Choose how callers reach your agent."}
         {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
@@ -115,7 +117,7 @@ function InboundConfigure({
         value={mode}
         onValueChange={(v) => v && setMode(v as InboundMode)}
         aria-label="How callers reach this agent"
-        className="max-w-3xl sm:grid-cols-2"
+        className="max-w-3xl @lg:grid-cols-2"
       >
         <RadioCard value="phone" title="Phone number" description="Answer calls 24/7" />
         <RadioCard value="web" title="Web widget" description="Embed & style a floating widget" />
@@ -187,7 +189,7 @@ function OutboundConfigure({ draft, update }: StepProps) {
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
 
   return (
-    <div className="grid items-start gap-4 xl:grid-cols-2">
+    <div className="grid items-start gap-4 @4xl:grid-cols-2">
       {/* LHS — how the calls run */}
       <div className="min-w-0 space-y-4">
         <ConfigCard title="Call setup">
@@ -230,8 +232,8 @@ function OutboundConfigure({ draft, update }: StepProps) {
           <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">
             {draft.mcp.length > 0
-              ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from the prompt step will run during calls.`
-              : "Attach CRM/calendar connectors in the System prompt step to act during calls."}
+              ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from Knowledge & Tools will run during calls.`
+              : "Attach CRM/calendar connectors in Knowledge & Tools to act during calls."}
           </p>
         </div>
       </div>

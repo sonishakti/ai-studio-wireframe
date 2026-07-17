@@ -25,13 +25,16 @@ export function CallSettings({ draft, update }: StepProps) {
     // instead of vanishing the row for non-batch agents.
     return (
       <p className="text-sm text-muted-foreground">
-        These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> in
-        Step 2 to schedule the window, concurrency, and retries.
+        These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> above
+        to schedule the window, concurrency, and retries.
       </p>
     )
   }
   return (
-    <div className="max-w-3xl space-y-4">
+    // @container: the builder's center column can be far narrower than the
+    // viewport (three-column shell) — the selects must reflow by CONTAINER
+    // width, not window breakpoints (72px selects bug, 2026-07-17).
+    <div className="@container max-w-3xl space-y-4">
       <OutboundSettings draft={draft} update={update} />
       <OutboundCapacityNote draft={draft} />
     </div>
@@ -46,14 +49,17 @@ function OutboundSettings({ draft, update }: StepProps) {
   const patch = (p: Partial<NonNullable<typeof out>>) =>
     update({ config: { ...draft.config, outbound: { ...out, ...p } } })
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
+    // grid-cols-1 is load-bearing: an implicit column is min-content-sized,
+    // and the nowrap Select values (e.g. "Business hours (9–5…)") would
+    // force ~300px and overflow a starved center column.
+    <div className="grid grid-cols-1 gap-3 @xl:grid-cols-3">
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Call window</Label>
         <Select
           value={out?.callWindow ?? "business"}
           onValueChange={(v) => patch({ callWindow: v as "business" | "extended" | "anytime" })}
         >
-          <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
           <SelectContent>
             {/* Whose 9–5 matters on a call campaign — say it (user-test S3). */}
             <SelectItem value="business">Business hours (9–5, contact&apos;s local time)</SelectItem>
@@ -68,7 +74,7 @@ function OutboundSettings({ draft, update }: StepProps) {
           value={String(out?.maxConcurrent ?? 10)}
           onValueChange={(v) => patch({ maxConcurrent: Number(v) })}
         >
-          <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
           <SelectContent>
             {["5", "10", "25", "50"].map((c) => <SelectItem key={c} value={c}>{c} calls</SelectItem>)}
           </SelectContent>
@@ -80,7 +86,7 @@ function OutboundSettings({ draft, update }: StepProps) {
           value={String(out?.retries ?? 1)}
           onValueChange={(v) => patch({ retries: Number(v) })}
         >
-          <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="0">Don&apos;t retry</SelectItem>
             <SelectItem value="1">Once</SelectItem>

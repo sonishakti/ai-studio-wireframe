@@ -32,9 +32,17 @@ const TYPES: { id: AgentType; title: string; desc: string }[] = [
   },
 ]
 
-export function StepType({ draft, update, liveNote }: StepProps & { liveNote?: string }) {
+export function StepType({ draft, update, liveNote, displayType }: StepProps & {
+  liveNote?: string
+  /** UI-level selection override (owner 2026-07-17: never pre-select — the
+   *  cards show no choice until the user makes one; `null` = show nothing
+   *  selected even when draft.type is set, `undefined` = mirror the draft). */
+  displayType?: AgentType | null
+}) {
   return (
-    <div className="space-y-5">
+    // @container: reflow by the center column's real width (the shell can
+    // leave it ~280px at xl viewports), not the viewport.
+    <div className="@container space-y-5">
       <div className="space-y-1">
         {/* The question IS the heading (Figma 2026-07-14). */}
         <h4 className="text-base font-medium">
@@ -47,10 +55,10 @@ export function StepType({ draft, update, liveNote }: StepProps & { liveNote?: s
       </div>
 
       <RadioCardGroup
-        value={draft.type ?? ""}
+        value={(displayType === undefined ? draft.type : displayType) ?? ""}
         onValueChange={(v) => v && update({ type: v as AgentType })}
         aria-label="Agent type"
-        className="sm:grid-cols-3"
+        className="@xl:grid-cols-3"
       >
         {TYPES.map((t) => (
           <RadioCard key={t.id} value={t.id} title={t.title} description={t.desc} />

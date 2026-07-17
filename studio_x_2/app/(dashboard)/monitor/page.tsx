@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { MonitorNav } from "@/components/monitor-nav"
+import { CallCaptureSheet } from "@/components/call-capture-sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -104,13 +105,18 @@ export default function MonitorPage() {
     <div className="flex flex-col flex-1">
       <MonitorNav
         action={
-          <Button
-            variant="outline" size="icon" className="h-8 w-8" title="Refresh"
-            onClick={() => toast.info("Mock: refreshing monitor data…")}
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span className="sr-only">Refresh</span>
-          </Button>
+          <>
+            {/* Capture config lives HERE (owner 2026-07-17): what calls
+                record is a monitoring concern, not a builder step. */}
+            <CallCaptureSheet />
+            <Button
+              variant="outline" size="icon" className="h-8 w-8" title="Refresh"
+              onClick={() => toast.info("Mock: refreshing monitor data…")}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span className="sr-only">Refresh</span>
+            </Button>
+          </>
         }
       />
 
