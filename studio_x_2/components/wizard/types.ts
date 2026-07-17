@@ -1,5 +1,5 @@
 import type * as React from "react"
-import { Waypoints, FileText, AudioLines, Cpu, Boxes, Rocket } from "lucide-react"
+import { Waypoints, FileText, AudioLines, Cpu, Boxes, Mic, Rocket } from "lucide-react"
 import type { AgentDraft } from "@/lib/wizard-draft"
 import { typeLabel } from "@/lib/wizard-draft"
 
@@ -23,17 +23,19 @@ export const STEP_TITLES = [
   "Voice & speech",
   "Models",
   "Knowledge & Tools",
+  "Test",
   "Go live",
 ] as const
 
 export const SECTION_COUNT = STEP_TITLES.length
 
 /** LHS rail groups — journey stages, not layer names (v3 §4): the critical
- *  path is Set up → Ship; Customize is skippable by design. */
+ *  path is Set up → Ship; Customize is skippable by design. Ship = try it,
+ *  then deploy it (owner 2026-07-17: Test is a first-class Ship section). */
 export const SECTION_GROUPS: { label: string; steps: number[] }[] = [
   { label: "Set up", steps: [1, 2] },
   { label: "Customize", steps: [3, 4, 5] },
-  { label: "Ship", steps: [6] },
+  { label: "Ship", steps: [6, 7] },
 ]
 
 export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string }>> = {
@@ -42,7 +44,8 @@ export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string
   3: AudioLines,
   4: Cpu,
   5: Boxes,
-  6: Rocket,
+  6: Mic,
+  7: Rocket,
 }
 
 export function stepTitle(n: number, _draft: AgentDraft): string {
@@ -64,9 +67,10 @@ export function stepManifest(n: number, draft: AgentDraft): string {
   }
   if (n === 2) return "System prompt · Greeting · Persona"
   if (n === 3) return "Voice · Language · Turn-taking · Filters"
-  if (n === 4) return "Pipeline · Model choice · Preset"
+  if (n === 4) return "Pipeline · Latency vs cost · Models"
   if (n === 5) return "Knowledge · History · MCP · Connectors"
-  if (n === 6) return "Review & deploy"
+  if (n === 6) return "Simulated test call · Evals"
+  if (n === 7) return "Review & deploy"
   return ""
 }
 
@@ -105,7 +109,7 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
   if (n === 4)
     return [
       { id: "wz-4-arch", label: "Pipeline" },
-      { id: "wz-4-model", label: "Model choice" },
+      { id: "wz-4-model", label: "Latency vs cost · Models" },
     ]
   if (n === 5)
     return [
@@ -116,7 +120,11 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     ]
   if (n === 6)
     return [
-      { id: "wz-6-review", label: "Review & deploy" },
+      { id: "wz-6-test", label: "Test call" },
+    ]
+  if (n === 7)
+    return [
+      { id: "wz-7-review", label: "Review & deploy" },
     ]
   return []
 }

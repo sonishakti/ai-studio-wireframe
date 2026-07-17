@@ -1,12 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Pencil, UserRound } from "lucide-react"
+import { UserRound } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { VoiceEditorSheet, type VoiceEditorMode } from "@/components/wizard/voice-editor-sheet"
 import { extractVars } from "@/lib/campaign-data"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import type { StepProps } from "@/components/wizard/types"
@@ -23,26 +21,15 @@ import { typeLabel } from "@/lib/wizard-draft"
 export function SectionPrompt({
   draft,
   update,
-  onSelectVoice,
-}: StepProps & { onSelectVoice: (v: VoiceArtifact) => void }) {
+}: StepProps) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
 
-  // Persona lives on the selected voice artifact today (customs in
-  // localStorage — load after mount, same idiom as step-voice).
+  // Persona rides the selected voice artifact (customs in localStorage —
+  // load after mount, same idiom as step-voice). Read-only here: voice
+  // customization left the builder (owner 2026-07-17 — selection only).
   const [voices, setVoices] = React.useState<VoiceArtifact[]>(PRESET_VOICES)
-  const refreshVoices = React.useCallback(() => setVoices(allVoices()), [])
-  React.useEffect(() => { refreshVoices() }, [refreshVoices])
+  React.useEffect(() => { setVoices(allVoices()) }, [])
   const selected = draft.voice ? voices.find((v) => v.id === draft.voice!.id) : undefined
-  const [editor, setEditor] = React.useState<VoiceEditorMode | null>(null)
-  const editPersona = () => {
-    if (!selected) return
-    setEditor(selected.kind === "custom" ? { kind: "edit", artifact: selected } : { kind: "fork", from: selected })
-  }
-  const onVoiceSaved = (v: VoiceArtifact) => {
-    refreshVoices()
-    setEditor(null)
-    onSelectVoice(v)
-  }
 
   // Channel-aware helper copy: the greeting example follows the chosen channel
   // (v3 rule 2 — the fork determines the words).
@@ -99,24 +86,19 @@ export function SectionPrompt({
           </p>
         </div>
 
-        {/* 3 — Persona (personality · tone). Edited in the voice editor for
-            now (IA tension T3) — this block files it under Prompt and links. */}
+        {/* 3 — Persona (personality · tone). Read-only: it comes with the
+            selected voice; pick a different voice to change it. */}
         <div id="wz-2-persona" className="scroll-mt-28 space-y-3 border-t border-border pt-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                <UserRound className="h-4 w-4" aria-hidden />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold">Persona</p>
-                <p className="text-xs text-muted-foreground">
-                  Personality and tone ride the selected voice{selected ? ` (${selected.name})` : ""}.
-                </p>
-              </div>
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <UserRound className="h-4 w-4" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Persona</p>
+              <p className="text-xs text-muted-foreground">
+                Comes with the selected voice{selected ? ` (${selected.name})` : ""}. Change it by picking a different voice.
+              </p>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={!selected} onClick={editPersona}>
-              <Pencil className="h-3.5 w-3.5" aria-hidden /> Edit persona
-            </Button>
           </div>
           {selected ? (
             <dl className="space-y-1.5 rounded-lg border border-border bg-card p-4 text-sm">
@@ -136,13 +118,6 @@ export function SectionPrompt({
           )}
         </div>
       </div>
-
-      <VoiceEditorSheet
-        mode={editor}
-        stack={draft.stack}
-        onClose={() => setEditor(null)}
-        onSaved={onVoiceSaved}
-      />
     </div>
   )
 }

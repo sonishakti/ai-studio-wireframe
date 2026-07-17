@@ -4,7 +4,7 @@ import * as React from "react"
 import { useRouter } from "next/navigation"
 import { HistoryField } from "@/components/wizard/step-advanced"
 import {
-  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft, KeyRound,
+  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -137,18 +137,6 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
           />
         </div>
 
-        {/* Runtime & credentials reduced to a cross-link (v3 rule 5): BYOK
-            vendor keys are project-scoped and edited in Manage, not here. */}
-        <div className="flex items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
-          <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <p className="text-xs text-muted-foreground">
-            Bring-your-own vendor keys (LLM · TTS · STT · telephony) live in{" "}
-            <a href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
-              Manage › Vendor Credentials
-            </a>
-            . The model stack uses them automatically.
-          </p>
-        </div>
       </div>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}

@@ -353,8 +353,8 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           </DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            {/* ?step=6 lands on Go live (v3 journey order). */}
-                            <Link href={`/agents/${agent.id}/edit?step=6`}>Deploy</Link>
+                            {/* ?step=7 lands on Go live (v3 journey order). */}
+                            <Link href={`/agents/${agent.id}/edit?step=7`}>Deploy</Link>
                           </DropdownMenuItem>
                           {/* A reversible off-switch — Delete must never be the
                               only way to stop a live agent (user-test S2). */}

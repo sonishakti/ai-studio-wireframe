@@ -86,13 +86,13 @@ const COMMANDS: Command[] = [
   { id: "ag-voice",      label: "Change voice or language", href: "/agents?step=3", wizardStep: 3, icon: Bot,          group: "Agent settings", keywords: ["voice", "language", "spoken", "stt", "turn detection", "interruption", "filter words"] },
   { id: "ag-models",     label: "Change models or architecture", href: "/agents?step=4", wizardStep: 4, icon: Bot,     group: "Agent settings", keywords: ["llm", "tts", "model", "preset", "multimodal", "mllm", "architecture", "latency", "cost"] },
   { id: "ag-tools",      label: "Knowledge, MCP & connectors", href: "/agents?step=5", wizardStep: 5, icon: Bot,       group: "Agent settings", keywords: ["knowledge base", "mcp", "connector", "crm", "tools", "history", "memory"] },
-  { id: "ag-deploy",     label: "Review & deploy the agent", href: "/agents?step=6", wizardStep: 6,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "test", "review", "transcription", "data points"] },
+  { id: "ag-test",       label: "Test the agent",            href: "/agents?step=6", wizardStep: 6,   icon: Bot,                group: "Agent settings", keywords: ["test", "talk", "try", "simulate", "eval"] },
+  { id: "ag-deploy",     label: "Review & deploy the agent", href: "/agents?step=7", wizardStep: 7,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "review"] },
   { id: "ag-getcode",    label: "Get code — SDK & widget snippets (read-only)", href: "/agents", windowEvent: "sx:open-config-drawer", icon: Code2, group: "Agent settings", keywords: ["embed", "snippet", "sdk", "widget code", "copy code", "api", "json", "config"] },
 
   // ── Actions ──────────────────────────────────────────────────────────────
   { id: "new-agent",     label: "Create a new agent",       href: "/agents/new/edit?blank=1",         icon: Plus,               group: "Actions", keywords: ["create", "new", "blank"] },
   { id: "browse-tpl",    label: "Browse agent templates",   href: "/agents?view=list&templates=1",    icon: Sparkles,           group: "Actions", keywords: ["template", "starter", "ivr", "survey", "reminder", "example"] },
-  { id: "playground",    label: "Voice playground — design a custom voice", href: "/agents/playground", icon: Sparkles,         group: "Actions", keywords: ["voice", "tts", "playground", "custom voice", "clone", "persona"] },
   { id: "new-camp",      label: "Create a new batch call",  href: "/deploy/batch-calls/new",                   icon: Plus,               group: "Actions", keywords: ["create"] },
 ]
 

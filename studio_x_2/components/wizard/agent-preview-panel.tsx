@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { Gauge, CircleDollarSign, PanelLeftOpen, PanelRightClose, PanelRightOpen, AudioLines } from "lucide-react"
+import { Gauge, CircleDollarSign, PanelLeftOpen, PanelRightClose, PanelRightOpen, AudioLines, AppWindow, Bot } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 
@@ -118,15 +117,22 @@ export function AgentPreviewPanel({
       {/* Agent body — pl-4 pr-6 py-4, gap-3. Badges (h-15), then either the
           sphere+Talk (agent view) or the styled widget preview (widget view). */}
       <div className="flex flex-1 flex-col gap-3 py-4 pl-4 pr-6">
-        {/* [Agent | Widget] toggle — only for a web-widget channel. */}
+        {/* Agent ⇄ widget switch — a single text toggle, NOT a tab strip: the
+            widget preview carries its own mode tabs (Collapsed · Voice ·
+            Chat), and two adjacent tab rows read as one broken control
+            (owner 2026-07-17). */}
         {showWidgetToggle && (
           <div className="flex justify-center">
-            <Tabs value={view} onValueChange={(v) => onViewChange?.(v as "agent" | "widget")}>
-              <TabsList className="h-8">
-                <TabsTrigger value="agent" className="text-xs">Agent</TabsTrigger>
-                <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => onViewChange?.(view === "widget" ? "agent" : "widget")}
+            >
+              {view === "widget"
+                ? <><Bot className="size-3.5" aria-hidden /> Show agent</>
+                : <><AppWindow className="size-3.5" aria-hidden /> Show widget preview</>}
+            </Button>
           </div>
         )}
         <div className="flex h-15 items-center justify-center gap-2">

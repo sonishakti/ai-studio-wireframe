@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Plus, Pencil, ChevronDown, Play } from "lucide-react"
+import { ChevronDown, Play } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -11,17 +11,16 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
-import { VoiceEditorSheet, type VoiceEditorMode } from "@/components/wizard/voice-editor-sheet"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_CATALOG } from "@/lib/campaign-data"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /**
  * Section 3 — Voice & speech (v3 IA, 2026-07-17: Customize — only if needed).
- * The voice picker + editor and the spoken language / STT side of the stack.
- * The MODEL stack (architecture · preset · LLM) moved to its own Models
- * section; turn-taking + attention/filters render below this component (the
- * old Advanced accordion, dissolved into this section).
+ * The voice picker and the spoken language. SELECTION ONLY (owner 2026-07-17:
+ * voice customization/creation was scope creep — users pick from the catalog;
+ * the editor + "Create custom voice" were removed). The MODEL stack lives in
+ * Models; turn-taking + attention/filters render below this component.
  */
 export function StepVoice({
   draft,
@@ -32,35 +31,20 @@ export function StepVoice({
   update: (patch: Partial<AgentDraft>) => void
   onSelectVoice: (v: VoiceArtifact) => void
 }) {
-  // Customs live in localStorage — load after mount to avoid hydration mismatch.
+  // Customs (legacy/playground/import) live in localStorage — load after
+  // mount to avoid hydration mismatch; still selectable, just not editable.
   const [voices, setVoices] = React.useState<VoiceArtifact[]>(PRESET_VOICES)
   const refreshVoices = React.useCallback(() => setVoices(allVoices()), [])
   React.useEffect(() => { refreshVoices() }, [refreshVoices])
 
   const selected = draft.voice ? voices.find((v) => v.id === draft.voice!.id) : undefined
   const [browserOpen, setBrowserOpen] = React.useState(false)
-  const [editor, setEditor] = React.useState<VoiceEditorMode | null>(null)
 
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
 
-  // A saved voice is immediately selected, so the agent runs what you just made.
-  const onVoiceSaved = (v: VoiceArtifact) => {
-    refreshVoices()
-    setEditor(null)
-    onSelectVoice(v)
-  }
-
-  const editSelected = () => {
-    if (!selected) return
-    setEditor(selected.kind === "custom"
-      ? { kind: "edit", artifact: selected }
-      : { kind: "fork", from: selected })
-  }
-
   return (
     <div className="space-y-8">
-      {/* Voice + Spoken language: parallel choices, one row (Figma 2026-07-14).
-          The voice keeps its select · Preview · Edit line (owner 2026-07-10). */}
+      {/* Voice + Spoken language: parallel choices, one row (Figma 2026-07-14). */}
       <div className="grid items-start gap-x-4 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div id="wz-3-voice" className="min-w-0 scroll-mt-28 space-y-2">
           <Label className="text-sm font-medium">Voice</Label>
@@ -77,7 +61,7 @@ export function StepVoice({
                 <span className="flex min-w-0 items-baseline gap-2">
                   <span className="font-medium">{selected.name}</span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {selected.tagline}{selected.kind === "custom" ? " · Custom" : ""}
+                    {selected.tagline}
                   </span>
                 </span>
               ) : (
@@ -85,7 +69,6 @@ export function StepVoice({
               )}
               <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
             </button>
-            {/* Icon-only CTAs (owner 2026-07-15) — tooltips carry the labels. */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -105,33 +88,10 @@ export function StepVoice({
               </TooltipTrigger>
               <TooltipContent>Preview voice</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={!selected}
-                  onClick={editSelected}
-                  className="size-9"
-                  aria-label="Edit voice"
-                >
-                  <Pencil className="h-4 w-4" aria-hidden />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit voice</TooltipContent>
-            </Tooltip>
           </div>
           <p className="text-xs text-muted-foreground">
             Picking a voice fills in the prompt and greeting while they&apos;re empty.
           </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setEditor({ kind: "create" })}
-            className="h-8 gap-1.5 px-2 text-muted-foreground"
-          >
-            <Plus className="h-3.5 w-3.5" aria-hidden /> Create custom voice
-          </Button>
         </div>
 
         {/* Spoken language — an agent trait, not a model detail. */}
@@ -152,12 +112,6 @@ export function StepVoice({
         voices={voices}
         selectedId={draft.voice?.id}
         onSelect={onSelectVoice}
-      />
-      <VoiceEditorSheet
-        mode={editor}
-        stack={draft.stack}
-        onClose={() => setEditor(null)}
-        onSaved={onVoiceSaved}
       />
     </div>
   )
