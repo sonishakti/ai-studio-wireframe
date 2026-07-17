@@ -110,7 +110,7 @@
   .pill.type   { background: var(--violet-wash); color: var(--violet); }
   .pill.docs   { background: var(--brand-wash); color: var(--brand); }
   .pill.new    { background: var(--red-wash); color: var(--red); }
-  .pill.hidden { background: var(--line); color: var(--muted); }
+  .pill.parked { background: var(--line); color: var(--muted); }
 
   /* tables */
   .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 18px 0; }
@@ -127,6 +127,7 @@
   td .sub { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
   td .home { font-weight: 600; color: var(--brand); white-space: nowrap; }
   td .home .sep { color: var(--faint); font-weight: 400; }
+  td .park { color: var(--muted); white-space: nowrap; }
   tr.groupband td {
     background: var(--bg); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--muted); font-weight: 600; padding: 8px 14px;
@@ -154,13 +155,13 @@
   .tree li { padding: 4px 0; font-size: 13.5px; border-top: 1px dotted var(--line); }
   .tree li:first-child { border-top: none; }
   .tree li .from { color: var(--faint); font-size: 12px; margin-left: 6px; }
-  .tree li.road { color: var(--muted); }
 
   /* two-col principle cards */
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin: 18px 0; }
   .card { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 16px 18px; }
   .card h4 { margin: 0 0 6px; font-size: 13.5px; }
   .card p { margin: 0; font-size: 13px; color: var(--muted); }
+  .card h4 .done { color: var(--green); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 6px; }
 
   ol.rules { max-width: 74ch; padding-left: 22px; }
   ol.rules li { margin: 10px 0; }
@@ -174,17 +175,17 @@
   <header class="doc">
     <p class="eyebrow">Studio_X · Agent Builder · IA proposal (draft to push)</p>
     <h1>Agora agent capabilities → the layered agent structure</h1>
-    <p class="subtitle">Every configuration item that exists in the agent builder today (live app + Figma), inventoried and re-slotted into the layered agent convention — Conversation → Brain → Orchestration → Memory → Tools → Runtime → Session → Governance — grouped under the Agent / Environment / Session meta-model. IA only: no visual design, no new features.</p>
+    <p class="subtitle">Every configuration item that exists in the agent builder today, inventoried and re-slotted into the layered agent convention, grouped under the Agent / Environment / Session meta-model. Draft v2: the tree maps <strong>100% to production</strong> — five sections, no optional group, no future scope. IA only: no visual design, no new features.</p>
     <div class="meta">
-      <span><strong>Date</strong> 2026-07-17</span>
+      <span><strong>Date</strong> 2026-07-17 · v2</span>
       <span><strong>Source of truth</strong> studio_x_2/ (live) · references/figma-agentic-flow-digest · roadmap PRD 2026-07-09</span>
-      <span><strong>Status</strong> Draft v1 — push first, improve later</span>
+      <span><strong>Status</strong> Draft v2 — production-only tree, five sections (was nine)</span>
     </div>
     <nav class="toc">
       <a href="#inventory">1 · Capabilities inventory</a>
       <a href="#convention">2 · The convention</a>
-      <a href="#tree">3 · Proposed structure (LHS/RHS)</a>
-      <a href="#roadmap">4 · Roadmap items pre-slotted</a>
+      <a href="#tree">3 · The production tree (LHS/RHS)</a>
+      <a href="#parked">4 · Parked (everything not in production)</a>
       <a href="#rules">5 · Deviations &amp; rules applied</a>
       <a href="#tensions">6 · Open tensions (improve pass)</a>
     </nav>
@@ -192,68 +193,68 @@
 
   <section id="inventory">
     <h2><span class="no">1</span>Capabilities inventory — everything in Configure Agent today</h2>
-    <p class="lede">The complete list of agent-config items, grouped by where they live in the current builder (the 4-step wizard + the “Optional” trio + global surfaces). The last column is the mapping: where each item lands in the new structure. Status: <span class="pill live">LIVE</span> shipping in studio_x_2 · <span class="pill gated">GATED</span> built, behind the Future-scope flag · <span class="pill type">TYPE-ONLY</span> in the schema, no UI · <span class="pill docs">FIGMA/DOCS</span> reference only.</p>
+    <p class="lede">The complete register of agent-config items, grouped by where they live in the current builder (the 4-step wizard + the “Optional” trio + global surfaces). The last column is the mapping into the production tree (§3). Status: <span class="pill live">LIVE</span> shipping in studio_x_2 · <span class="pill gated">GATED</span> built, behind the Future-scope flag · <span class="pill type">TYPE-ONLY</span> in the schema, no UI · <span class="pill docs">FIGMA/DOCS</span> reference only. Anything not LIVE maps to <span class="pill parked">PARKED</span> — it has a reserved home in §4, not a place in the tree.</p>
 
     <div class="tablewrap">
     <table>
       <caption>Agora agent capabilities / config register — for design purposes. Sources: components/wizard/*, lib/wizard-draft.ts, lib/campaign-data.ts, lib/widget-config.ts.</caption>
       <thead>
-        <tr><th>#</th><th>Config item</th><th>What it configures</th><th>Status</th><th>Proposed home</th></tr>
+        <tr><th>#</th><th>Config item</th><th>What it configures</th><th>Status</th><th>Home in the tree</th></tr>
       </thead>
       <tbody>
         <tr class="groupband"><td colspan="5">Step 1 · Voice &amp; models</td></tr>
         <tr><td class="n">01</td><td>Voice (persona picker)<span class="sub">Voice Browser: provider tabs, search, gender / accent / type filters</span></td><td>Picks the agent’s voice identity; seeds prompt + greeting when empty</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Voice &amp; speech</span></td></tr>
         <tr><td class="n">02</td><td>Voice preview</td><td>Plays a voice sample</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Voice &amp; speech</span></td></tr>
         <tr><td class="n">03</td><td>Voice editor — identity<span class="sub">Voice name · tagline · opening line</span></td><td>Custom-voice identity (presets fork to custom)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Voice &amp; speech</span></td></tr>
-        <tr><td class="n">04</td><td>Voice editor — persona<span class="sub">Personality · tone (Friendly / Professional / Neutral / Playful)</span></td><td>Behavioral persona text bundled inside the voice today</td><td><span class="pill live">LIVE</span></td><td><span class="home">Agent Brain <span class="sep">›</span> Persona</span></td></tr>
+        <tr><td class="n">04</td><td>Voice editor — persona<span class="sub">Personality · tone (Friendly / Professional / Neutral / Playful)</span></td><td>Behavioral persona text bundled inside the voice today</td><td><span class="pill live">LIVE</span></td><td><span class="home">Brain <span class="sep">›</span> Persona</span></td></tr>
         <tr><td class="n">05</td><td>Spoken language</td><td>STT listening language (EN · ES · FR · DE · HI · ZH)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Language &amp; input</span></td></tr>
-        <tr><td class="n">06</td><td>Agent architecture<span class="sub">Cascading (STT–LLM–TTS) vs Chained (MLLM realtime)</span></td><td>Pipeline shape; MLLM hides cascade-only knobs</td><td><span class="pill live">LIVE</span></td><td><span class="home">Agent Brain <span class="sep">›</span> Architecture</span></td></tr>
-        <tr><td class="n">07</td><td>Configure-models preset<span class="sub">Fastest / Balanced / Cheapest cards with latency + $/min</span></td><td>Writes vendor defaults across STT + LLM + TTS</td><td><span class="pill live">LIVE</span></td><td><span class="home">Agent Brain <span class="sep">›</span> Model</span></td></tr>
+        <tr><td class="n">06</td><td>Agent architecture<span class="sub">Cascading (STT–LLM–TTS) vs Chained (MLLM realtime)</span></td><td>Pipeline shape; MLLM hides cascade-only knobs</td><td><span class="pill live">LIVE</span></td><td><span class="home">Brain <span class="sep">›</span> Architecture</span></td></tr>
+        <tr><td class="n">07</td><td>Configure-models preset<span class="sub">Fastest / Balanced / Cheapest cards with latency + $/min</span></td><td>Writes vendor defaults across STT + LLM + TTS</td><td><span class="pill live">LIVE</span></td><td><span class="home">Brain <span class="sep">›</span> Model</span></td></tr>
         <tr><td class="n">08</td><td>STT model</td><td>Speech-to-text vendor/model (Deepgram Nova-3/2, Whisper)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Language &amp; input</span></td></tr>
-        <tr><td class="n">09</td><td>LLM model</td><td>Reasoning model (GPT-4o, GPT-4o mini, Claude Haiku)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Agent Brain <span class="sep">›</span> Model</span></td></tr>
+        <tr><td class="n">09</td><td>LLM model</td><td>Reasoning model (GPT-4o, GPT-4o mini, Claude Haiku)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Brain <span class="sep">›</span> Model</span></td></tr>
         <tr><td class="n">10</td><td>TTS vendor + voice</td><td>Text-to-speech vendor (ElevenLabs, Azure) + voice within it</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Voice &amp; speech</span></td></tr>
-        <tr><td class="n">11</td><td>Realtime model (MLLM mode)</td><td>GPT-4o Realtime · Gemini 2.0 Flash Live</td><td><span class="pill live">LIVE</span></td><td><span class="home">Agent Brain <span class="sep">›</span> Model</span></td></tr>
-        <tr><td class="n">12</td><td>Modality<span class="sub"><code>voice | voice+video | chat</code></span></td><td>In <code>AgentStack</code> type; no UI control (defaults “voice”)</td><td><span class="pill type">TYPE-ONLY</span></td><td><span class="home">Conversation <span class="sep">›</span> Modality</span></td></tr>
+        <tr><td class="n">11</td><td>Realtime model (MLLM mode)</td><td>GPT-4o Realtime · Gemini 2.0 Flash Live</td><td><span class="pill live">LIVE</span></td><td><span class="home">Brain <span class="sep">›</span> Model</span></td></tr>
+        <tr><td class="n">12</td><td>Modality<span class="sub"><code>voice | voice+video | chat</code></span></td><td>In <code>AgentStack</code> type; no UI control (defaults “voice”)</td><td><span class="pill type">TYPE-ONLY</span></td><td><span class="park">Parked → §4</span></td></tr>
 
-        <tr class="groupband"><td colspan="5">Step 2 · Select agent type</td></tr>
-        <tr><td class="n">13</td><td>Agent type<span class="sub">Batch calls (outbound) · Inbound · Code/SDK — switch stashes departing branch</span></td><td>Which channel family the agent serves</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Channel</span></td></tr>
+        <tr class="groupband"><td colspan="5">Step 2 · Select agent type (renames to “Channel”)</td></tr>
+        <tr><td class="n">13</td><td>Agent type<span class="sub">Batch calls (outbound) · Inbound · Code/SDK — switch stashes departing branch</span></td><td>Which channel the agent serves</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Pick channel</span></td></tr>
 
         <tr class="groupband"><td colspan="5">Step 3 · Prompt &amp; tools</td></tr>
-        <tr><td class="n">14</td><td>System prompt<span class="sub"><code>{{variables}}</code> auto-detected and chipped</span></td><td>Behavioral core of the agent</td><td><span class="pill live">LIVE</span></td><td><span class="home">Agent Brain <span class="sep">›</span> System prompt</span></td></tr>
+        <tr><td class="n">14</td><td>System prompt<span class="sub"><code>{{variables}}</code> auto-detected and chipped</span></td><td>Behavioral core of the agent</td><td><span class="pill live">LIVE</span></td><td><span class="home">Brain <span class="sep">›</span> System prompt</span></td></tr>
         <tr><td class="n">15</td><td>Greeting</td><td>The single opening line</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Greeting</span></td></tr>
-        <tr><td class="n">16</td><td>Knowledge base<span class="sub">Attach/create · sources: PDF/raw text · website/markdown · segmented</span></td><td>Grounds answers in documents (RAG)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Memory <span class="sep">›</span> Knowledge base</span></td></tr>
-        <tr><td class="n">17</td><td>MCP servers<span class="sub">Create/attach · server URL · transport (SSE / Streamable HTTP) · HTTP headers</span></td><td>External tools over MCP</td><td><span class="pill live">LIVE</span></td><td><span class="home">Tools <span class="sep">›</span> MCP servers</span></td></tr>
-        <tr><td class="n">18</td><td>MCP per-tool toggles</td><td>Enable/disable each discovered tool on a server</td><td><span class="pill live">LIVE</span></td><td><span class="home">Tools <span class="sep">›</span> MCP servers</span></td></tr>
-        <tr><td class="n">19</td><td>Connectors<span class="sub">HubSpot · Salesforce · Google Calendar · Zendesk · Slack · Stripe (soon)</span></td><td>Third-party OAuth apps the agent can act through</td><td><span class="pill live">LIVE</span></td><td><span class="home">Tools <span class="sep">›</span> Connectors</span></td></tr>
-        <tr><td class="n">20</td><td>Tests / Evals<span class="sub">Simulated-caller suites · rubric / tool-call / data-point / exact assertions</span></td><td>Author + run agent test suites</td><td><span class="pill gated">GATED</span></td><td><span class="home">Session <span class="sep">›</span> Evals &amp; tests</span></td></tr>
+        <tr><td class="n">16</td><td>Knowledge base<span class="sub">Attach/create · sources: PDF/raw text · website/markdown · segmented</span></td><td>Grounds answers in documents (RAG)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> Knowledge base</span></td></tr>
+        <tr><td class="n">17</td><td>MCP servers<span class="sub">Create/attach · server URL · transport (SSE / Streamable HTTP) · HTTP headers</span></td><td>External tools over MCP</td><td><span class="pill live">LIVE</span></td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> MCP servers</span></td></tr>
+        <tr><td class="n">18</td><td>MCP per-tool toggles</td><td>Enable/disable each discovered tool on a server</td><td><span class="pill live">LIVE</span></td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> MCP servers</span></td></tr>
+        <tr><td class="n">19</td><td>Connectors<span class="sub">HubSpot · Salesforce · Google Calendar · Zendesk · Slack · Stripe (soon)</span></td><td>Third-party OAuth apps the agent can act through</td><td><span class="pill live">LIVE</span></td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> Connectors</span></td></tr>
+        <tr><td class="n">20</td><td>Tests / Evals<span class="sub">Simulated-caller suites · rubric / tool-call / data-point / exact assertions</span></td><td>Author + run agent test suites</td><td><span class="pill gated">GATED</span></td><td><span class="park">Parked → §4</span></td></tr>
 
         <tr class="groupband"><td colspan="5">Step 4 · Deploy (branches by type)</td></tr>
-        <tr><td class="n">21</td><td>Inbound mode<span class="sub">Phone number (answer 24/7) vs Web widget</span></td><td>Which inbound surface the agent answers</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Channel</span></td></tr>
-        <tr><td class="n">22</td><td>Phone number select</td><td>Assign an inbound line (BYO-SIP note → Resources)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Phone number</span></td></tr>
-        <tr><td class="n">23</td><td>Widget style studio<span class="sub">Interaction mode · theme · blob · labels/status copy · 9 colors · radius · toggles · embed snippet</span></td><td>Everything about the embeddable web widget</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Web widget</span></td></tr>
-        <tr><td class="n">24</td><td>Caller-ID number (batch)</td><td>Outbound line; unavailable lines disabled with reason</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
-        <tr><td class="n">25</td><td>Contacts CSV<span class="sub">Upload + template · column preview · <code>{{var}}</code> coverage validation blocks deploy</span></td><td>The dial list; source of dynamic variables</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
-        <tr><td class="n">26</td><td>Code / SDK snippets<span class="sub">Install · join-channel · stop · App ID vocabulary · secured-mode note</span></td><td>Run the agent in your own app</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Code / SDK</span></td></tr>
-        <tr><td class="n">27</td><td>Deployment summary + blockers<span class="sub">Read-only review · “Fix this →” ramp · Deploy / Redeploy CTA</span></td><td>Pre-publish review of the whole config</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Review &amp; go live</span></td></tr>
-        <tr><td class="n">28</td><td>Batch pre-flight confirm<span class="sub">Count · caller ID · window · concurrency · cost estimate</span></td><td>Last check before launching a batch</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Review &amp; go live</span></td></tr>
+        <tr><td class="n">21</td><td>Inbound mode<span class="sub">Phone number (answer 24/7) vs Web widget</span></td><td>Which inbound surface the agent answers</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Pick channel</span></td></tr>
+        <tr><td class="n">22</td><td>Phone number select</td><td>Assign an inbound line (BYO-SIP note → Resources)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Phone number</span></td></tr>
+        <tr><td class="n">23</td><td>Widget style studio<span class="sub">Interaction mode · theme · blob · labels/status copy · 9 colors · radius · toggles · embed snippet</span></td><td>Everything about the embeddable web widget</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Web widget</span></td></tr>
+        <tr><td class="n">24</td><td>Caller-ID number (batch)</td><td>Outbound line; unavailable lines disabled with reason</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">25</td><td>Contacts CSV<span class="sub">Upload + template · column preview · <code>{{var}}</code> coverage validation blocks deploy</span></td><td>The dial list; source of dynamic variables</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">26</td><td>Code / SDK snippets<span class="sub">Install · join-channel · stop · App ID vocabulary · secured-mode note</span></td><td>Run the agent in your own app</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Code / SDK</span></td></tr>
+        <tr><td class="n">27</td><td>Deployment summary + blockers<span class="sub">Read-only review · “Fix this →” ramp · Deploy / Redeploy CTA</span></td><td>Pre-publish review of the whole config</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Review &amp; go live</span></td></tr>
+        <tr><td class="n">28</td><td>Batch pre-flight confirm<span class="sub">Count · caller ID · window · concurrency · cost estimate</span></td><td>Last check before launching a batch</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Review &amp; go live</span></td></tr>
 
-        <tr class="groupband"><td colspan="5">Optional · Advanced</td></tr>
+        <tr class="groupband"><td colspan="5">Optional · Advanced (group dissolves)</td></tr>
         <tr><td class="n">29</td><td>Turn detection<span class="sub">Responsive / Balanced / Patient / Custom → threshold slider</span></td><td>When the agent takes its turn</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Turn-taking</span></td></tr>
         <tr><td class="n">30</td><td>Start of speech<span class="sub">VAD / keyword (+triggers) · interrupt duration · prefix padding (cascade only)</span></td><td>How user speech begins / interrupts</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Turn-taking</span></td></tr>
         <tr><td class="n">31</td><td>End of speech<span class="sub">VAD / semantic · silence duration · max wait (cascade only)</span></td><td>How the agent decides the user finished</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Turn-taking</span></td></tr>
         <tr><td class="n">32</td><td>Selective attention locking<span class="sub">Lock to speaker / listen to all</span></td><td>Who the agent listens to in multi-speaker audio</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Attention &amp; filters</span></td></tr>
         <tr><td class="n">33</td><td>Filter words<span class="sub">Patterns textarea · response wait threshold</span></td><td>Utterances to ignore before responding</td><td><span class="pill live">LIVE</span></td><td><span class="home">Conversation <span class="sep">›</span> Attention &amp; filters</span></td></tr>
-        <tr><td class="n">34</td><td>Max history messages<span class="sub">0–200</span></td><td>Working-memory window per conversation</td><td><span class="pill live">LIVE</span></td><td><span class="home">Memory <span class="sep">›</span> Conversation history</span></td></tr>
+        <tr><td class="n">34</td><td>Max history messages<span class="sub">0–200</span></td><td>Working-memory window per conversation</td><td><span class="pill live">LIVE</span></td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> Conversation history</span></td></tr>
 
-        <tr class="groupband"><td colspan="5">Optional · Analysis</td></tr>
+        <tr class="groupband"><td colspan="5">Optional · Analysis (group dissolves)</td></tr>
         <tr><td class="n">35</td><td>Transcription &amp; recording</td><td>Store transcripts (gates data points)</td><td><span class="pill live">LIVE</span></td><td><span class="home">Session <span class="sep">›</span> Transcription &amp; recording</span></td></tr>
         <tr><td class="n">36</td><td>Data points<span class="sub">Name · type (text / number / yes-no / one-of-list) · description</span></td><td>Structured outputs extracted per call</td><td><span class="pill live">LIVE</span></td><td><span class="home">Session <span class="sep">›</span> Data points</span></td></tr>
 
-        <tr class="groupband"><td colspan="5">Optional · Call settings (batch only)</td></tr>
-        <tr><td class="n">37</td><td>Call window<span class="sub">Business hours · extended · anytime</span></td><td>When batch calls may dial</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
-        <tr><td class="n">38</td><td>Max concurrent<span class="sub">5 / 10 / 25 / 50</span></td><td>Parallel dial capacity</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
-        <tr><td class="n">39</td><td>Retry unanswered<span class="sub">Don’t / once / twice</span></td><td>Redial policy for unanswered numbers</td><td><span class="pill live">LIVE</span></td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
-        <tr><td class="n">40</td><td>Add concurrent lines<span class="sub">At-the-wall self-serve purchase (A6)</span></td><td>Buy more parallel capacity</td><td><span class="pill gated">GATED</span></td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr class="groupband"><td colspan="5">Optional · Call settings (group dissolves — batch only)</td></tr>
+        <tr><td class="n">37</td><td>Call window<span class="sub">Business hours · extended · anytime</span></td><td>When batch calls may dial</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">38</td><td>Max concurrent<span class="sub">5 / 10 / 25 / 50</span></td><td>Parallel dial capacity</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">39</td><td>Retry unanswered<span class="sub">Don’t / once / twice</span></td><td>Redial policy for unanswered numbers</td><td><span class="pill live">LIVE</span></td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">40</td><td>Add concurrent lines<span class="sub">At-the-wall self-serve purchase (A6)</span></td><td>Buy more parallel capacity</td><td><span class="pill gated">GATED</span></td><td><span class="park">Parked → §4</span></td></tr>
 
         <tr class="groupband"><td colspan="5">Global surfaces (header / drawers / sheets)</td></tr>
         <tr><td class="n">41</td><td>Agent name + Agent ID</td><td>Identity of the agent record</td><td><span class="pill live">LIVE</span></td><td><span class="home">Header <span class="sep">·</span> stays global</span></td></tr>
@@ -261,150 +262,123 @@
         <tr><td class="n">43</td><td>Custom config (JSON drawer)<span class="sub">Whole agent as editable JSON + read-only “Get code”</span></td><td>Power-user escape hatch over every field</td><td><span class="pill live">LIVE</span></td><td><span class="home">Header <span class="sep">·</span> stays global</span></td></tr>
         <tr><td class="n">44</td><td>Import an existing agent<span class="sub">Vapi / Retell / ElevenLabs / Bland / JSON → name, prompt, first message, voice, LLM, language, tools</span></td><td>Competitor-export import into a draft</td><td><span class="pill live">LIVE</span></td><td><span class="home">Header <span class="sep">·</span> entry action, stays global</span></td></tr>
         <tr><td class="n">45</td><td>Deploy status &amp; drift<span class="sub">Draft vs live truth lines · per-section “Reset to live” · discard edits</span></td><td>State of draft vs deployed config</td><td><span class="pill live">LIVE</span></td><td><span class="home">Session <span class="sep">›</span> State &amp; versions</span></td></tr>
-        <tr><td class="n">46</td><td>Persona brand<span class="sub"><code>persona.brand</code> (company / brand voice)</span></td><td>In the type; no builder UI</td><td><span class="pill type">TYPE-ONLY</span></td><td><span class="home">Agent Brain <span class="sep">›</span> Persona</span></td></tr>
-        <tr><td class="n">47</td><td>Vendor credentials (BYOK)<span class="sub">LLM / TTS / STT / telephony keys — lives in Manage › Vendor Credentials</span></td><td>Referenced by the stack, edited outside the builder</td><td><span class="pill live">LIVE</span></td><td><span class="home">Runtime <span class="sep">›</span> Credentials (cross-link)</span></td></tr>
-        <tr><td class="n">48</td><td>Figma 5-step checklist naming<span class="sub">“Choose your voice / how it runs / System prompt / Configure / Test &amp; deploy”</span></td><td>Older Figma step naming; live app collapsed to 4</td><td><span class="pill docs">FIGMA</span></td><td><span class="home">superseded <span class="sep">·</span> absorbed by this IA</span></td></tr>
+        <tr><td class="n">46</td><td>Persona brand<span class="sub"><code>persona.brand</code> (company / brand voice)</span></td><td>In the type; no builder UI</td><td><span class="pill type">TYPE-ONLY</span></td><td><span class="park">Parked → §4</span></td></tr>
+        <tr><td class="n">47</td><td>Vendor credentials (BYOK)<span class="sub">LLM / TTS / STT / telephony keys — lives in Manage › Vendor Credentials</span></td><td>Referenced by the stack, edited outside the builder</td><td><span class="park">Outside builder — cross-link from Knowledge &amp; Tools</span></td></tr>
+        <tr><td class="n">48</td><td>Figma 5-step checklist naming<span class="sub">“Choose your voice / how it runs / System prompt / Configure / Test &amp; deploy”</span></td><td>Older Figma step naming; live app collapsed to 4</td><td><span class="pill docs">FIGMA</span></td><td><span class="park">Superseded — absorbed by this IA</span></td></tr>
       </tbody>
     </table>
     </div>
-    <p class="callout"><strong>Count</strong>45 live items (incl. 2 gated), 2 type-only fields with no UI, 1 superseded Figma naming scheme. Roadmap/docs-only items are pre-slotted separately in <a href="#roadmap">§4</a> so this table stays a register of what exists.</p>
+    <p class="callout"><strong>Count</strong>43 live items — every one has exactly one home in the §3 tree. 2 gated + 2 type-only + all roadmap items are parked in §4 with reserved homes, so nothing in the tree is aspirational.</p>
   </section>
 
   <section id="convention">
     <h2><span class="no">2</span>The convention we’re aligning to</h2>
-    <p class="lede">Two views of the same model. The <strong>three buckets</strong> are the meta-grouping — they become the LHS group labels. The <strong>layers</strong> are the pages under them. Every Agora config item slots into a layer; layers we have nothing for stay in the model but are hidden from v1 navigation (rule 3, §5).</p>
+    <p class="lede">The three buckets are the meta-grouping — they become the LHS group labels. The convention’s nine layers collapse to <strong>five sections</strong> for v1: layers with nothing live in production are dropped (parked in §4), and small adjacent layers merge. Nine doors is daunting; five is walkable.</p>
     <div class="grid2">
       <div class="card">
         <h4>Agent — the brain</h4>
-        <p>Model, system instructions, persona, skills, behavior and reasoning. Plus the layers the brain talks through and remembers with: Conversation, Orchestration, Memory.</p>
+        <p>Model, system instructions, persona, behavior — plus the conversation surface it talks through. For Agora: <strong>Conversation</strong> + <strong>Brain</strong>.</p>
       </div>
       <div class="card">
         <h4>Environment — the hands</h4>
-        <p>Runtime/sandbox, files, APIs, MCP servers, permissions, credentials, network. For Agora this is Tools + Runtime — and Deployment, the one section we add (rule 1, §5).</p>
+        <p>Files, APIs, MCP servers, credentials, network — where the agent reaches the world. For Agora: <strong>Knowledge &amp; Tools</strong> + <strong>Channel</strong>.</p>
       </div>
       <div class="card">
         <h4>Session — the execution</h4>
-        <p>Connects agent + environment: state, streaming, events, progress, replay, debugging. For Agora: test/talk, transcription, data points, evals, draft-vs-live state.</p>
+        <p>Connects agent + environment: state, streaming, progress, replay, debugging. For Agora: <strong>Session</strong> (test &amp; talk, transcripts, data points, draft-vs-live state).</p>
       </div>
     </div>
     <p class="callout"><strong>Navigation behavior (the ask)</strong>LHS is an outliner: each section row expands to show the table of contents of its page — every subsection is a link. Clicking a subsection navigates the RHS straight to it; the user never has to scroll the RHS to find anything. This matches the existing scroll-spy rail mechanics — the change is the grouping and the expandable TOC level, not the interaction model.</p>
   </section>
 
   <section id="tree">
-    <h2><span class="no">3</span>Proposed structure — LHS outline with full subsection TOC</h2>
-    <p class="lede">The draft to push. Grey text marks where each item lives today; <span class="pill road" style="background:var(--brand-wash);color:var(--brand);font-size:10.5px;font-weight:600;padding:1px 8px 2px;border-radius:999px;">roadmap</span> rows are docs-only items pre-slotted so they have a home when they ship. Sections marked <span class="pill hidden">HIDDEN V1</span> exist in the model but don’t render until they have content.</p>
+    <h2><span class="no">3</span>The production tree — five sections, 100% live</h2>
+    <p class="lede">The draft to push. Every row below exists in studio_x_2 production today; grey text marks where each item lives in the current builder. No optional group, no gated features, no roadmap.</p>
 
     <div class="tree">
       <div class="bucket">Agent <em>the brain</em></div>
       <details open>
-        <summary>1 · Conversation <span class="was">mostly Step 1 + the Advanced accordion, dissolved</span></summary>
+        <summary>1 · Conversation <span class="was">Step 1 + the Advanced accordion, dissolved</span></summary>
         <ul>
           <li>Voice &amp; speech — voice picker, preview, voice editor identity, TTS vendor + voice <span class="from">← Step 1</span></li>
           <li>Language &amp; input — spoken language, STT model <span class="from">← Step 1</span></li>
           <li>Greeting — opening line <span class="from">← Step 3</span></li>
           <li>Turn-taking &amp; interruptions — turn detection, start of speech, end of speech <span class="from">← Optional › Advanced</span></li>
           <li>Attention &amp; filters — attention locking, filter words <span class="from">← Optional › Advanced</span></li>
-          <li>Modality — voice / voice+video / chat <span class="from">← type-only today, no UI</span></li>
-          <li class="road">Roadmap: backchanneling · dynamic filler words · background sound · voice cloning · pronunciation dictionary · voice formatting · in-call sentiment</li>
         </ul>
       </details>
       <details open>
-        <summary>2 · Agent Brain <span class="was">Step 1 stack + Step 3 prompt + voice-editor persona</span></summary>
+        <summary>2 · Brain <span class="was">Step 1 stack + Step 3 prompt + voice-editor persona</span></summary>
         <ul>
           <li>Architecture — cascading (STT–LLM–TTS) vs chained (MLLM) <span class="from">← Step 1</span></li>
           <li>Model — LLM / realtime model, Fastest–Balanced–Cheapest preset <span class="from">← Step 1</span></li>
           <li>System prompt — with auto-detected <code>{{variables}}</code> <span class="from">← Step 3</span></li>
-          <li>Persona — personality, tone, brand <span class="from">← voice editor + type-only <code>persona.brand</code></span></li>
-          <li class="road">Roadmap: Agent Handbook persona presets (C1) — the convention’s “skills / goals / planning” stays empty until then</li>
-        </ul>
-      </details>
-      <details>
-        <summary>3 · Decision &amp; Orchestration <span class="was"><span class="pill hidden">HIDDEN V1</span> nothing to configure yet</span></summary>
-        <ul>
-          <li class="road">Roadmap: agent handoff (C2) · multi-agent coordination · tool routing / approval policy — section appears when the first of these ships</li>
-        </ul>
-      </details>
-      <details open>
-        <summary>4 · Memory <span class="was">Step 3 knowledge + one Advanced field</span></summary>
-        <ul>
-          <li>Knowledge base — attach/create; PDF/raw · website/markdown · segmented <span class="from">← Step 3</span></li>
-          <li>Conversation history — max history messages <span class="from">← Optional › Advanced</span></li>
-          <li class="road">Roadmap: KB web crawl (E1) · chunking &amp; similarity tuning (E2) · Couchbase RAG provider (B5). Long-term / episodic / user-profile memory: not offered — stays out of nav.</li>
+          <li>Persona — personality, tone <span class="from">← voice editor</span></li>
         </ul>
       </details>
 
       <div class="bucket">Environment <em>the hands</em></div>
       <details open>
-        <summary>5 · Tools <span class="was">Step 3 second half</span></summary>
+        <summary>3 · Knowledge &amp; Tools <span class="was">Step 3 second half + one Advanced field</span></summary>
         <ul>
+          <li>Knowledge base — attach/create; PDF/raw · website/markdown · segmented <span class="from">← Step 3</span></li>
+          <li>Conversation history — max history messages <span class="from">← Optional › Advanced</span></li>
           <li>MCP servers — create/attach, URL, transport, headers, per-tool toggles <span class="from">← Step 3</span></li>
           <li>Connectors — HubSpot, Salesforce, Google Calendar, Zendesk, Slack, Stripe <span class="from">← Step 3</span></li>
-          <li class="road">Roadmap: custom HTTP tools (V3) · connector marketplace (B3)</li>
-        </ul>
-      </details>
-      <details>
-        <summary>6 · Runtime &amp; credentials <span class="was">thin — mostly platform-managed</span></summary>
-        <ul>
-          <li>Vendor credentials (BYOK) — cross-link to Manage › Vendor Credentials <span class="from">← outside builder today</span></li>
-          <li>App ID &amp; secured mode — cross-link to Project Settings <span class="from">← Step 4 code copy</span></li>
-          <li class="road">Sandbox / containers / queues / network: platform-managed, never user config. Improve-pass option: fold this page into Tools (§6 T4).</li>
+          <li>Vendor credentials — cross-link to Manage › Vendor Credentials (not duplicated here) <span class="from">← outside builder</span></li>
         </ul>
       </details>
       <details open>
-        <summary>7 · Deployment <span class="was"><span class="pill new">NEW SECTION</span> Step 2 + Step 4 + Call settings, unified</span></summary>
+        <summary>4 · Channel <span class="was">Step 2 (“Select agent type” retires) + Step 4 + Call settings</span></summary>
         <ul>
-          <li>Channel — inbound phone · web widget · batch calls · code/SDK <span class="from">← Step 2 + inbound mode radio</span></li>
+          <li>Pick channel — inbound phone · web widget · batch calls · code/SDK <span class="from">← Step 2 + inbound mode radio</span></li>
           <li>Phone number — inbound line assignment, BYO-SIP note <span class="from">← Step 4</span></li>
           <li>Web widget — style studio + embed snippet <span class="from">← Step 4 / widget-studio</span></li>
           <li>Batch calls — caller ID, contacts CSV + variable coverage, call window, concurrency, retries <span class="from">← Step 4 + Optional › Call settings</span></li>
           <li>Code / SDK — install, join, stop snippets <span class="from">← Step 4</span></li>
           <li>Review &amp; go live — deployment summary, blockers ramp, batch pre-flight, Deploy CTA <span class="from">← Step 4 publish</span></li>
-          <li class="road">Roadmap: SIP quick connect (A3) · SIP transfer + dynamic headers (V6/V7) · throttling (D1) · call queue (D3) · split concurrency (D5) · text-only agents (E3)</li>
         </ul>
       </details>
 
       <div class="bucket">Session <em>the execution</em></div>
       <details open>
-        <summary>8 · Session <span class="was">Talk panel + Optional › Analysis + draft state</span></summary>
+        <summary>5 · Session <span class="was">Talk panel + Optional › Analysis + draft state</span></summary>
         <ul>
           <li>Test &amp; talk — simulated in-browser call, latency + cost readout <span class="from">← header Talk / preview panel</span></li>
           <li>Transcription &amp; recording — store transcripts <span class="from">← Optional › Analysis</span></li>
           <li>Data points — structured extraction per call <span class="from">← Optional › Analysis</span></li>
-          <li>Evals &amp; tests — simulated-caller suites <span class="from">← Step 3, gated (F-Eval)</span></li>
           <li>State &amp; versions — draft vs live, reset-to-live, discard edits <span class="from">← header truth lines</span></li>
-        </ul>
-      </details>
-      <details>
-        <summary>9 · Safety &amp; Governance <span class="was"><span class="pill hidden">HIDDEN V1</span> nothing in the builder yet</span></summary>
-        <ul>
-          <li class="road">Roadmap: PII redaction + retention window (F-Sec, → Project Settings › Security) · guardrails · approval policy. Adjacent-existing: spend cap / alerts live on Billing (X1) and stay there.</li>
         </ul>
       </details>
     </div>
 
-    <p class="callout"><strong>What this dissolves</strong>The “Optional” group disappears — its three panels are re-homed where they semantically belong (Advanced → Conversation + Memory; Analysis → Session; Call settings → Deployment › Batch calls). Every item now has exactly one home, and nothing is labeled as an afterthought. Header-level utilities (name/ID, Custom config JSON, Import, Deploy CTA) stay global — they operate on the whole agent, not one layer.</p>
+    <p class="callout"><strong>What this dissolves</strong>The “Optional” group disappears — its three panels are re-homed where they semantically belong (Advanced → Conversation + Knowledge &amp; Tools; Analysis → Session; Call settings → Channel › Batch calls). “Select agent type” retires in favor of <strong>Channel</strong> (it never was a type of agent — it’s where the agent is deployed; “Environment” was considered and rejected because it’s the meta-bucket’s name and reads as infra to developers). Header-level utilities (name/ID, Custom config JSON, Import, Deploy CTA) stay global — they operate on the whole agent, not one layer.</p>
+    <p class="callout warn"><strong>Weight check</strong>Today’s builder is 4 steps + 3 optional panels = 7 doors. The new tree is 5 doors, all first-class. Channel’s subsections are mutually exclusive per agent (a phone agent never sees widget or batch subsections), so the effective TOC a user actually reads is ~4 sections × 4–5 rows.</p>
   </section>
 
-  <section id="roadmap">
-    <h2><span class="no">4</span>Roadmap items pre-slotted</h2>
-    <p class="lede">Docs-only items from the roadmap PRD (2026-07-09) and IA-revamp reference, each with a reserved home so shipping them never re-opens the IA. None of these are in the v1 draft nav.</p>
+  <section id="parked">
+    <h2><span class="no">4</span>Parked — everything deliberately NOT in the tree</h2>
+    <p class="lede">Gated builds, schema-only fields, and roadmap features, each with a reserved home so shipping them later never re-opens the IA. None of these render in v1.</p>
     <div class="tablewrap">
     <table>
-      <thead><tr><th>Ref</th><th>Item</th><th>Reserved home</th></tr></thead>
+      <thead><tr><th>Ref</th><th>Item</th><th>Why parked</th><th>Reserved home</th></tr></thead>
       <tbody>
-        <tr><td class="n">C1</td><td>Agent Handbook / persona presets</td><td><span class="home">Agent Brain <span class="sep">›</span> Persona</span></td></tr>
-        <tr><td class="n">C2</td><td>Agent handoff</td><td><span class="home">Decision &amp; Orchestration</span> (unhides the section)</td></tr>
-        <tr><td class="n">C3–C7</td><td>Backchanneling · filler words · background sound · voice cloning · in-call sentiment</td><td><span class="home">Conversation</span></td></tr>
-        <tr><td class="n">V3</td><td>Custom HTTP tools (function calling)</td><td><span class="home">Tools <span class="sep">›</span> Custom tools</span></td></tr>
-        <tr><td class="n">V4–V5</td><td>Voice formatting · pronunciation dictionary</td><td><span class="home">Conversation <span class="sep">›</span> Voice &amp; speech</span></td></tr>
-        <tr><td class="n">V6–V7</td><td>Transfer to SIP · dynamic SIP headers</td><td><span class="home">Deployment <span class="sep">›</span> Phone number</span></td></tr>
-        <tr><td class="n">A3</td><td>SIP quick connect (built, held)</td><td><span class="home">Deployment <span class="sep">›</span> Phone number</span></td></tr>
-        <tr><td class="n">D1 · D3 · D5</td><td>Call throttling · call queue · split concurrency</td><td><span class="home">Deployment <span class="sep">›</span> Batch calls</span></td></tr>
-        <tr><td class="n">E1–E2 · B5</td><td>KB web crawl · chunking/similarity tuning · Couchbase RAG</td><td><span class="home">Memory <span class="sep">›</span> Knowledge base</span></td></tr>
-        <tr><td class="n">E3</td><td>Text-only agents (4th type)</td><td><span class="home">Deployment <span class="sep">›</span> Channel</span> + Conversation › Modality</td></tr>
-        <tr><td class="n">B3</td><td>Connector marketplace</td><td><span class="home">Tools <span class="sep">›</span> Connectors</span></td></tr>
-        <tr><td class="n">F-Sec</td><td>PII redaction · retention window</td><td><span class="home">Safety &amp; Governance</span> (unhides the section; settings live in Project Settings › Security)</td></tr>
-        <tr><td class="n">—</td><td>Deployment-level failure line · custom code hooks (IA-revamp doc)</td><td><span class="home">Deployment <span class="sep">›</span> Review &amp; go live</span> · open question</td></tr>
+        <tr><td class="n">F-Eval</td><td>Tests / Evals (simulated-caller suites)</td><td>Built, future-scope gated</td><td><span class="home">Session <span class="sep">›</span> Evals &amp; tests</span></td></tr>
+        <tr><td class="n">A6</td><td>Self-serve concurrent lines</td><td>Built, future-scope gated</td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">—</td><td>Modality (<code>voice | voice+video | chat</code>)</td><td>Type-only, no UI</td><td><span class="home">Conversation <span class="sep">›</span> Modality</span></td></tr>
+        <tr><td class="n">—</td><td>Persona brand (<code>persona.brand</code>)</td><td>Type-only, no UI</td><td><span class="home">Brain <span class="sep">›</span> Persona</span></td></tr>
+        <tr><td class="n">C1</td><td>Agent Handbook / persona presets</td><td>Roadmap</td><td><span class="home">Brain <span class="sep">›</span> Persona</span></td></tr>
+        <tr><td class="n">C2</td><td>Agent handoff / multi-agent</td><td>Roadmap</td><td>New “Orchestration” section when it ships</td></tr>
+        <tr><td class="n">C3–C7</td><td>Backchanneling · filler words · background sound · voice cloning · in-call sentiment</td><td>Roadmap</td><td><span class="home">Conversation</span></td></tr>
+        <tr><td class="n">V3</td><td>Custom HTTP tools (function calling)</td><td>Roadmap</td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> Custom tools</span></td></tr>
+        <tr><td class="n">V4–V5</td><td>Voice formatting · pronunciation dictionary</td><td>Roadmap</td><td><span class="home">Conversation <span class="sep">›</span> Voice &amp; speech</span></td></tr>
+        <tr><td class="n">V6–V7 · A3</td><td>SIP transfer · dynamic SIP headers · SIP quick connect (built, held)</td><td>Roadmap / held</td><td><span class="home">Channel <span class="sep">›</span> Phone number</span></td></tr>
+        <tr><td class="n">D1 · D3 · D5</td><td>Call throttling · call queue · split concurrency</td><td>Roadmap</td><td><span class="home">Channel <span class="sep">›</span> Batch calls</span></td></tr>
+        <tr><td class="n">E1–E2 · B5</td><td>KB web crawl · chunking/similarity tuning · Couchbase RAG</td><td>Roadmap</td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> Knowledge base</span></td></tr>
+        <tr><td class="n">E3</td><td>Text-only agents (4th channel)</td><td>Roadmap</td><td><span class="home">Channel <span class="sep">›</span> Pick channel</span></td></tr>
+        <tr><td class="n">B3</td><td>Connector marketplace</td><td>Roadmap</td><td><span class="home">Knowledge &amp; Tools <span class="sep">›</span> Connectors</span></td></tr>
+        <tr><td class="n">F-Sec</td><td>PII redaction · retention window</td><td>Roadmap</td><td>New “Safety &amp; Governance” section when it ships (settings in Project Settings › Security)</td></tr>
+        <tr><td class="n">—</td><td>Deployment-level failure line · custom code hooks</td><td>IA-revamp doc, open question</td><td><span class="home">Channel <span class="sep">›</span> Review &amp; go live</span></td></tr>
       </tbody>
     </table>
     </div>
@@ -412,30 +386,29 @@
 
   <section id="rules">
     <h2><span class="no">5</span>Deviations from the convention &amp; rules applied</h2>
-    <p class="lede">Per the brief: items were added/removed from a bucket, or a section created, only when something genuinely didn’t fit.</p>
+    <p class="lede">Per the brief: sections were merged, added, or dropped only where the convention didn’t survive contact with what production actually has.</p>
     <ol class="rules">
-      <li><strong>One new section: Deployment.</strong> Phone numbers, widget embeds, batch dial-lists, and SDK snippets are distribution, not conversation behavior — none of the nine layers holds them without distortion. It sits under <em>Environment</em> (it is where the agent meets the world) and it protects the product’s north star: go live fast. Batch call window / concurrency / retries stay with the Batch channel (task coherence) rather than scattering into “Decision &amp; Orchestration.”</li>
-      <li><strong>Layer names kept, two shortened.</strong> “Conversation Layer” → <em>Conversation</em>, “Memory System” → <em>Memory</em>, “Tool Layer” → <em>Tools</em>, “Execution Runtime” → <em>Runtime &amp; credentials</em>, “Session Manager” → <em>Session</em>. Same buckets, sidebar-length labels.</li>
-      <li><strong>Empty sections are hidden, not deleted.</strong> Decision &amp; Orchestration and Safety &amp; Governance have zero configurable items today. They stay in the model with reserved homes (§4) and appear in nav the day their first item ships. Rendering empty convention pages would be navigation theater.</li>
-      <li><strong>Runtime is honest about being thin.</strong> Agora manages sandbox/containers/queues; the only user-facing runtime concerns are BYOK credentials and App ID — both live elsewhere and are cross-linked, not duplicated.</li>
-      <li><strong>Persona splits from voice.</strong> The voice editor currently bundles audio identity (Conversation) with personality/tone text (Brain). The IA separates them; the editor UI can keep editing both — it just files them under two homes.</li>
-      <li><strong>Global utilities stay global.</strong> Name/ID, Custom config JSON, Import, and the Deploy CTA operate on the whole agent — they belong to the header, not any layer.</li>
+      <li><strong>100% production rule.</strong> The tree contains only what ships in studio_x_2 today. Gated builds, type-only fields, and roadmap features are parked in §4 with reserved homes — visible in the register, invisible in navigation.</li>
+      <li><strong>Nine layers → five sections.</strong> Decision &amp; Orchestration and Safety &amp; Governance have zero live items — dropped, not hidden. Memory + Tool Layer merge into <em>Knowledge &amp; Tools</em> (two small pages don’t justify two doors). Execution Runtime reduces to one cross-link row (BYOK credentials) inside Knowledge &amp; Tools — Agora manages sandbox/containers/queues, so there is nothing for a user to configure.</li>
+      <li><strong>One new section: Channel.</strong> Phone numbers, widget embeds, batch dial-lists, and SDK snippets are distribution — none of the nine layers holds them without distortion. It also retires the “Select agent type” label (it’s not a type of agent) and absorbs Call settings. “Environment” was rejected as its name: it’s already the meta-bucket, and developers read it as infra.</li>
+      <li><strong>Persona splits from voice.</strong> The voice editor currently bundles audio identity (Conversation) with personality/tone text (Brain). The IA files them under two homes; the editor UI can keep editing both.</li>
+      <li><strong>Global utilities stay global.</strong> Name/ID, Custom config JSON, Import, and the Deploy CTA operate on the whole agent — they belong to the header, not any section.</li>
     </ol>
   </section>
 
   <section id="tensions">
     <h2><span class="no">6</span>Open tensions — for the improve pass, not this draft</h2>
     <div class="grid2">
-      <div class="card"><h4>T1 · Widget styling’s true layer</h4><p>By the convention, widget chrome is “Streaming UI” → Conversation. Kept with its channel in Deployment so one artifact isn’t split across two pages. Revisit if widget styling ever becomes channel-independent.</p></div>
-      <div class="card"><h4>T2 · The speed/cost preset spans layers</h4><p>Fastest/Balanced/Cheapest writes STT + LLM + TTS at once. It lives in Brain › Model but mutates Conversation fields — needs a cross-layer affordance (or a “stack” banner) in design.</p></div>
-      <div class="card"><h4>T3 · Where does Review &amp; go live end?</h4><p>Deploy summary/blockers sit in Deployment; draft-vs-live state sits in Session. Same underlying state machine — decide in design whether they share one surface.</p></div>
-      <div class="card"><h4>T4 · Runtime page vs fold into Tools</h4><p>Two cross-links may not justify a section. Options: keep (convention-aligned, room for BYOK-in-builder) or fold into Tools until credentials move in.</p></div>
-      <div class="card"><h4>T5 · Nine sections vs four steps</h4><p>The wizard’s strength is a short critical path. The outline view must keep a “what’s required to deploy” ramp (blockers already exist) so first-run users aren’t lost in nine doors.</p></div>
-      <div class="card"><h4>T6 · Knowledge = Memory or Tools?</h4><p>Mapped to Memory per the convention (vector store / semantic search). Some competitors file KB under Tools. Tree-test this label with users before locking.</p></div>
+      <div class="card"><h4>T1 · Widget styling’s true layer</h4><p>By the convention, widget chrome is “Streaming UI” → Conversation. Kept with its channel so one artifact isn’t split across two pages. Revisit if widget styling ever becomes channel-independent.</p></div>
+      <div class="card"><h4>T2 · The speed/cost preset spans layers</h4><p>Fastest/Balanced/Cheapest writes STT + LLM + TTS at once. It lives in Brain › Model but mutates Conversation fields — needs a cross-section affordance in design.</p></div>
+      <div class="card"><h4>T3 · Where does Review &amp; go live end?</h4><p>Deploy summary/blockers sit in Channel; draft-vs-live state sits in Session. Same underlying state machine — decide in design whether they share one surface.</p></div>
+      <div class="card"><h4>T4 · Runtime section <span class="done">resolved v2</span></h4><p>Dropped. BYOK credentials are one cross-link row in Knowledge &amp; Tools. Revisit only if credentials editing ever moves into the builder.</p></div>
+      <div class="card"><h4>T5 · Five doors still need a ramp</h4><p>The wizard’s strength is a short critical path. The outline view must keep a “what’s required to deploy” ramp (the blockers list already exists) so first-run users aren’t left to wander even five sections.</p></div>
+      <div class="card"><h4>T6 · “Knowledge &amp; Tools” label</h4><p>The merge sidesteps the Memory-vs-Tools debate, but the compound label is untested. Tree-test against alternatives (“Resources”, “Capabilities”) before locking.</p></div>
     </div>
   </section>
 
   <footer class="doc">
-    Studio_X · references/agent-builder-ia-2026-07-17.html · Inventory sourced from studio_x_2 components/wizard/*, lib/wizard-draft.ts, lib/campaign-data.ts, lib/widget-config.ts; Figma digest 2026-07-06; roadmap PRD 2026-07-09. IA proposal only — no build, no visual design.
+    Studio_X · references/agent-builder-ia-2026-07-17.html · v2 (production-only tree) · Inventory sourced from studio_x_2 components/wizard/*, lib/wizard-draft.ts, lib/campaign-data.ts, lib/widget-config.ts; Figma digest 2026-07-06; roadmap PRD 2026-07-09. IA proposal only — no build, no visual design.
   </footer>
 </div>
