@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Gauge, CircleDollarSign, PanelLeftOpen, PanelRightClose, PanelRightOpen, AudioLines, AppWindow, Bot } from "lucide-react"
+import { Gauge, CircleDollarSign, PanelRightClose, PanelRightOpen, AudioLines, AppWindow, Bot } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -93,11 +93,12 @@ export function AgentPreviewPanel({
       className={cn("hidden shrink-0 flex-col xl:flex xl:w-[400px]", className)}
       aria-label="Agent preview"
     >
-      {/* Header — px-5 py-2.5, border-b, gap-4. Collapse toggles flank a
+      {/* Header — px-5 py-2.5, border-b. ONE collapse toggle (owner
+          2026-07-17: two buttons doing the same thing read as a bug), then a
           centered gauge/latency · $/price readout (mono 12, 50% opacity). */}
       <div className="flex items-center gap-4 border-b border-border px-5 py-2.5">
         <Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground" onClick={onToggleCollapsed} aria-label="Hide agent preview">
-          <PanelLeftOpen className="size-4" aria-hidden />
+          <PanelRightClose className="size-4" aria-hidden />
         </Button>
         <div className="flex flex-1 items-center justify-center gap-2 pr-11">
           <span className="flex items-center gap-1 text-muted-foreground" title="Typical end-to-end latency">
@@ -109,9 +110,6 @@ export function AgentPreviewPanel({
             <span className="font-mono text-xs opacity-50 tabular-nums">${costPerMin.toFixed(2)}/min</span>
           </span>
         </div>
-        <Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground" onClick={onToggleCollapsed} aria-label="Hide agent preview">
-          <PanelRightClose className="size-4" aria-hidden />
-        </Button>
       </div>
 
       {/* Agent body — pl-4 pr-6 py-4, gap-3. Badges (h-15), then either the

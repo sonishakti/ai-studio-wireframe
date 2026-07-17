@@ -67,8 +67,8 @@ export function stepManifest(n: number, draft: AgentDraft): string {
   }
   if (n === 2) return "System prompt · Greeting · Persona"
   if (n === 3) return "Voice · Language · Turn-taking · Filters"
-  if (n === 4) return "Pipeline · Latency vs cost · Models"
-  if (n === 5) return "Knowledge · History · MCP · Connectors"
+  if (n === 4) return "Pipeline · Latency vs cost · Models · History"
+  if (n === 5) return "Knowledge · MCP · Connectors"
   if (n === 6) return "Simulated test call · Evals"
   if (n === 7) return "Review & deploy"
   return ""
@@ -110,11 +110,11 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     return [
       { id: "wz-4-arch", label: "Pipeline" },
       { id: "wz-4-model", label: "Latency vs cost · Models" },
+      { id: "wz-4-history", label: "Conversation history" },
     ]
   if (n === 5)
     return [
       { id: "wz-5-kb", label: "Knowledge base" },
-      { id: "wz-5-history", label: "Conversation history" },
       { id: "wz-5-mcp", label: "MCP servers" },
       { id: "wz-5-connectors", label: "Connectors" },
     ]

@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { HistoryField } from "@/components/wizard/step-advanced"
 import {
   BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
@@ -61,10 +60,10 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
-        Give {draft.name || "your agent"} docs to answer from, memory, and tools to act with.
+        Give {draft.name || "your agent"} docs to answer from and tools to act with.
       </p>
 
-      <div className="max-w-3xl space-y-4">
+      <div className="space-y-4">
         <div id="wz-5-kb" className="scroll-mt-28">
           <ResourceField
             icon={BookOpen}
@@ -81,13 +80,6 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
             }}
           />
         </div>
-
-        {/* Working memory sits with knowledge (v3: Memory + Tools merged). */}
-        <HistoryField
-          id="wz-5-history"
-          value={draft.advanced}
-          onChange={(advanced) => update({ advanced })}
-        />
 
         <div id="wz-5-mcp" className="scroll-mt-28">
           <ResourceField

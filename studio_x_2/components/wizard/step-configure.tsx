@@ -82,7 +82,7 @@ export function StepConfigure({
           reference) and manage their own width. */}
       {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
       {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
-      {draft.type === "code" && <div className="max-w-3xl"><CodeConfigure agentId={agentId} /></div>}
+      {draft.type === "code" && <CodeConfigure agentId={agentId} />}
     </div>
   )
 }
@@ -117,14 +117,14 @@ function InboundConfigure({
         value={mode}
         onValueChange={(v) => v && setMode(v as InboundMode)}
         aria-label="How callers reach this agent"
-        className="max-w-3xl @lg:grid-cols-2"
+        className="gap-4 @2xl:grid-cols-4"
       >
         <RadioCard value="phone" title="Phone number" description="Answer calls 24/7" />
         <RadioCard value="web" title="Web widget" description="Embed & style a floating widget" />
       </RadioCardGroup>
 
       {mode === "phone" ? (
-        <div className="max-w-3xl">
+        <div>
         <ConfigCard title="Answer a phone number">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Phone number</Label>

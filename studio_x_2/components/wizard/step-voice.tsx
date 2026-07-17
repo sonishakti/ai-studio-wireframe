@@ -43,10 +43,11 @@ export function StepVoice({
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
 
   return (
-    <div className="space-y-8">
-      {/* Voice + Spoken language: parallel choices, one row (Figma 2026-07-14). */}
-      <div className="grid items-start gap-x-4 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div id="wz-3-voice" className="min-w-0 scroll-mt-28 space-y-2">
+    // @container + the wizard's 4-col system: Voice and Spoken language are
+    // two equal 50% columns on one row (owner 2026-07-17).
+    <div className="@container space-y-8">
+      <div className="grid grid-cols-1 items-start gap-4 @2xl:grid-cols-4">
+        <div id="wz-3-voice" className="min-w-0 scroll-mt-28 space-y-2 @2xl:col-span-2">
           <Label className="text-sm font-medium">Voice</Label>
           <div className="flex flex-wrap gap-2">
             <button
@@ -95,7 +96,7 @@ export function StepVoice({
         </div>
 
         {/* Spoken language — an agent trait, not a model detail. */}
-        <div id="wz-3-language" className="min-w-0 scroll-mt-28 space-y-2">
+        <div id="wz-3-language" className="min-w-0 scroll-mt-28 space-y-2 @2xl:col-span-2">
           <Label className="text-sm font-medium">Spoken language</Label>
           <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
             <SelectTrigger className="w-full text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>

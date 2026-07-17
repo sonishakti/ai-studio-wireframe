@@ -58,7 +58,7 @@ export function StepType({ draft, update, liveNote, displayType }: StepProps & {
         value={(displayType === undefined ? draft.type : displayType) ?? ""}
         onValueChange={(v) => v && update({ type: v as AgentType })}
         aria-label="Agent type"
-        className="@xl:grid-cols-3"
+        className="gap-4 @2xl:grid-cols-4"
       >
         {TYPES.map((t) => (
           <RadioCard key={t.id} value={t.id} title={t.title} description={t.desc} />
