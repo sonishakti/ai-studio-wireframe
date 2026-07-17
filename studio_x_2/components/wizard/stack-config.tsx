@@ -90,7 +90,9 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
   }
 
   return (
-    <section className={cn("space-y-3", className)}>
+    // @container: cards reflow by the component's real width (builder center
+    // column vs Playground page), not viewport breakpoints.
+    <section className={cn("@container space-y-3", className)}>
       {/* "Configure Models" = the speed/cost preset (Figma "Shell Exploration"
           heading, 2026-07-15). */}
       <h4 className="text-base font-medium">Configure Models</h4>
@@ -98,7 +100,7 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
         value={active}
         onValueChange={(v) => v && setPreset(v as StackPreset)}
         aria-label="Model preset"
-        className="sm:grid-cols-3"
+        className="@xl:grid-cols-3"
       >
       {(Object.keys(STACK_PRESETS) as StackPreset[]).map((p) => {
         const preset = STACK_PRESETS[p]
@@ -149,7 +151,7 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
   }
 
   return (
-    <section className={cn("space-y-4", className)}>
+    <section className={cn("@container space-y-4", className)}>
       {/* "Agent Architecture" = the pipeline shape (Figma "Shell Exploration"
           heading + card names) — a first-class choice, plain language. */}
       <h4 className="text-base font-medium">Agent Architecture</h4>
@@ -157,7 +159,7 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
         aria-label="Agent architecture"
-        className="sm:grid-cols-2"
+        className="@lg:grid-cols-2"
       >
         <RadioCard
           value="stt-llm-tts"
@@ -211,7 +213,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
     : [stack.tts.voice, ...vendorVoices]
 
   return (
-    <div className={className}>
+    <div className={cn("@container", className)}>
       <Collapsible open={customOpen} onOpenChange={setCustomOpen}>
         <CollapsibleTrigger asChild>
           <button
@@ -225,7 +227,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
         <CollapsibleContent className="space-y-4 pt-4">
           {pipeline === "stt-llm-tts" ? (
             <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
                 <Select
                   value={`${stack.asr.vendor}/${stack.asr.model}`}
@@ -242,7 +244,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 <Label className="text-xs text-muted-foreground">Large Language Model (LLM)</Label>
                 <Select
                   value={`${stack.llm.vendor}/${stack.llm.model}`}
@@ -259,7 +261,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 <Label className="text-xs text-muted-foreground">Text-to-Speech (TTS)</Label>
                 <Select
                   value={stack.tts.vendor}
@@ -276,7 +278,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-12 space-y-1.5 sm:col-span-6">
+              <div className="col-span-12 space-y-1.5 @lg:col-span-6">
                 {/* "TTS voice", not "Voice" — the persona picker sits directly
                     above this on Step 1; two controls named Voice read as a bug. */}
                 <Label className="text-xs text-muted-foreground">TTS voice</Label>
@@ -290,7 +292,7 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
             </div>
           ) : (
             <div className="grid grid-cols-12">
-            <div className="col-span-12 space-y-1.5 sm:col-span-6">
+            <div className="col-span-12 space-y-1.5 @lg:col-span-6">
               <Label className="text-xs text-muted-foreground">Realtime model</Label>
               <Select
                 value={`${stack.llm.vendor}/${stack.llm.model}`}

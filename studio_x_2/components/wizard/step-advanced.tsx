@@ -38,7 +38,8 @@ export function StepAdvanced({
   const patch = (p: Partial<AdvancedConfig>) => onChange({ ...adv, ...p })
 
   return (
-    <div className="space-y-4">
+    // @container: preset cards reflow by real column width, not viewport.
+    <div className="@container space-y-4">
       <p className="text-sm text-muted-foreground">
         Fine-tune how the agent listens and takes turns. Defaults work for most agents.
       </p>
@@ -53,7 +54,7 @@ export function StepAdvanced({
         enabled={adv.turnDetection.enabled}
         onToggle={(enabled) => patch({ turnDetection: { ...adv.turnDetection, enabled } })}
       >
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 @3xl:grid-cols-4">
           {TURN_PRESETS.map((p) => {
             const on = adv.turnDetection.preset === p.id
             return (
