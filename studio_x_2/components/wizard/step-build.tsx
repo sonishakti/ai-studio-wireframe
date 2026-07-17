@@ -2,16 +2,15 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { TestsSection } from "@/components/eval-tests"
+import { HistoryField } from "@/components/wizard/step-advanced"
 import {
-  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft,
+  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft, KeyRound,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -23,7 +22,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  CONNECTORS, KNOWLEDGE_BASES, MCP_SERVERS, extractVars,
+  CONNECTORS, KNOWLEDGE_BASES, MCP_SERVERS,
   type KnowledgeBase, type McpServer,
 } from "@/lib/campaign-data"
 import {
@@ -35,14 +34,15 @@ import {
 import type { StepProps } from "@/components/wizard/types"
 
 /**
- * Step 3 — System prompt. The behavioral core: the prompt + the greeting it
- * opens with, plus optional Knowledge bases and MCP connectors attached inline
- * (a Sheet — "manage in Resources" without navigating away). Autosave kicks in
- * from here (the host debounces the whole draft).
+ * Section 5 — Knowledge & Tools (v3 IA, 2026-07-17: Customize — only if
+ * needed). The prompt + greeting moved to the Prompt section; this holds what
+ * the agent KNOWS and can ACT with: knowledge bases, conversation history
+ * (working memory), MCP servers, connectors — attached inline via Sheets
+ * ("manage in Resources" without navigating away) — plus the BYOK
+ * vendor-credentials cross-link (Execution Runtime reduced to one row).
  */
-export function StepBuild({ draft, update }: StepProps) {
+export function SectionKnowledgeTools({ draft, update }: StepProps) {
   const router = useRouter()
-  const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
 
   // Created KBs / MCP servers live in localStorage — seed with the canonical
   // catalog (matches SSR), then load the user's customs after mount. `refresh`
@@ -61,56 +61,11 @@ export function StepBuild({ draft, update }: StepProps) {
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
-        Tell {draft.name || "your agent"} how to behave and give it knowledge and connectors. Saves automatically as you type.
+        Give {draft.name || "your agent"} docs to answer from, memory, and tools to act with. All optional — it works without any of this.
       </p>
 
-      {/* TOP-TO-BOTTOM, not two columns: prompt → greeting → tools → test is a
-          SEQUENCE the user works through, not a set of parallel options. Columns
-          are reserved for choices/comparisons; a stack says "do this, then this"
-          (layout principle, 2026-07-08). max-w-3xl keeps the editor readable. */}
-      <div className="max-w-3xl space-y-6">
-        {/* 1 — Behaviour */}
-        <div className="space-y-2">
-          <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
-          <Textarea
-            id="wz-prompt"
-            value={draft.systemPrompt}
-            onChange={(e) => update({ systemPrompt: e.target.value })}
-            className="min-h-[200px] font-mono text-sm leading-relaxed"
-            placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
-          />
-          {/* Dynamic-variable mapping lives with the deployment (Batch calls →
-              CSV columns), not here — this step is about behaviour (owner call
-              2026-07-08). We still surface what's been templated, no CSV talk. */}
-          {vars.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-              <span className="text-xs text-muted-foreground">Variables detected:</span>
-              {vars.map((v) => (
-                <Badge key={v} variant="secondary" className="h-6 px-2 font-mono text-xs">{`{{${v}}}`}</Badge>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 2 — Greeting */}
-        <div className="space-y-2">
-          <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting</Label>
-          <Textarea
-            id="wz-greeting"
-            value={draft.greeting}
-            onChange={(e) => update({ greeting: e.target.value })}
-            className="min-h-[72px] text-sm"
-            placeholder="Hi, thanks for calling Acme, how can I help?"
-          />
-          <p className="text-xs text-muted-foreground">The one line your agent opens with. This is its only greeting.</p>
-        </div>
-
-        {/* 3 — Tools (knowledge / MCP / connectors), after the behaviour is set */}
-        <div className="space-y-4 border-t border-border pt-6">
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Knowledge &amp; tools</p>
-            <p className="text-xs text-muted-foreground">Optional. Give the agent docs to answer from and tools to act with.</p>
-          </div>
+      <div className="max-w-3xl space-y-4">
+        <div id="wz-5-kb" className="scroll-mt-28">
           <ResourceField
             icon={BookOpen}
             title="Knowledge base"
@@ -125,6 +80,16 @@ export function StepBuild({ draft, update }: StepProps) {
               onCreated: refresh,
             }}
           />
+        </div>
+
+        {/* Working memory sits with knowledge (v3: Memory + Tools merged). */}
+        <HistoryField
+          id="wz-5-history"
+          value={draft.advanced}
+          onChange={(advanced) => update({ advanced })}
+        />
+
+        <div id="wz-5-mcp" className="scroll-mt-28">
           <ResourceField
             icon={Plug}
             title="MCP server"
@@ -141,6 +106,9 @@ export function StepBuild({ draft, update }: StepProps) {
             onConfigure={(id) => setConfigMcp(id)}
             onDelete={(id) => { deleteMcpServer(id); update({ mcp: draft.mcp.filter((x) => x !== id) }); refresh() }}
           />
+        </div>
+
+        <div id="wz-5-connectors" className="scroll-mt-28">
           <ResourceField
             icon={Boxes}
             title="Connectors"
@@ -169,10 +137,18 @@ export function StepBuild({ draft, update }: StepProps) {
           />
         </div>
 
-        {/* 4 — Tests (F-Eval): prove behaviour with simulated callers before a
-            real call. Future-scope-gated; owns its own top divider so it
-            leaves no empty band when hidden. */}
-        <TestsSection agentName={draft.name || "your agent"} />
+        {/* Runtime & credentials reduced to a cross-link (v3 rule 5): BYOK
+            vendor keys are project-scoped and edited in Manage, not here. */}
+        <div className="flex items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
+          <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          <p className="text-xs text-muted-foreground">
+            Bring-your-own vendor keys (LLM · TTS · STT · telephony) live in{" "}
+            <a href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
+              Manage › Vendor Credentials
+            </a>
+            . The model stack uses them automatically.
+          </p>
+        </div>
       </div>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}

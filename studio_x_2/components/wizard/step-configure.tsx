@@ -230,8 +230,8 @@ function OutboundConfigure({ draft, update }: StepProps) {
           <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">
             {draft.mcp.length > 0
-              ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from the prompt step will run during calls.`
-              : "Attach CRM/calendar connectors in the System prompt step to act during calls."}
+              ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from Knowledge & Tools will run during calls.`
+              : "Attach CRM/calendar connectors in Knowledge & Tools to act during calls."}
           </p>
         </div>
       </div>

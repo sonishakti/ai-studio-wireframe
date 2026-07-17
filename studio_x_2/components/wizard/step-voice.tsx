@@ -11,21 +11,17 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
-import { StackPresetCards, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { VoiceEditorSheet, type VoiceEditorMode } from "@/components/wizard/voice-editor-sheet"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_CATALOG } from "@/lib/campaign-data"
 import type { AgentDraft } from "@/lib/wizard-draft"
 
 /**
- * Step 1 — Voice & models. EVERYTHING ON ONE PAGE (owner 2026-07-09): the
- * voice picker, the voice editor (a sheet, not a route), the spoken language,
- * and the full model stack.
- *
- * ORDER = the Figma direction (2026-07-14): the speed/cost preset first (the
- * one decision most people make), then Voice + Spoken language side by side
- * (parallel choices), then "Configure Models" depth. Controls stay on the
- * select-box scale; the space between them is what grew.
+ * Section 3 — Voice & speech (v3 IA, 2026-07-17: Customize — only if needed).
+ * The voice picker + editor and the spoken language / STT side of the stack.
+ * The MODEL stack (architecture · preset · LLM) moved to its own Models
+ * section; turn-taking + attention/filters render below this component (the
+ * old Advanced accordion, dissolved into this section).
  */
 export function StepVoice({
   draft,
@@ -62,13 +58,11 @@ export function StepVoice({
   }
 
   return (
-    // Figma "Shell Exploration" order (2026-07-15): Voice + Spoken language →
-    // Agent Architecture → Configure Models → Choose specific models.
     <div className="space-y-8">
       {/* Voice + Spoken language: parallel choices, one row (Figma 2026-07-14).
           The voice keeps its select · Preview · Edit line (owner 2026-07-10). */}
       <div className="grid items-start gap-x-4 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="min-w-0 space-y-2">
+        <div id="wz-3-voice" className="min-w-0 scroll-mt-28 space-y-2">
           <Label className="text-sm font-medium">Voice</Label>
           <div className="flex flex-wrap gap-2">
             <button
@@ -142,7 +136,7 @@ export function StepVoice({
         </div>
 
         {/* Spoken language — an agent trait, not a model detail. */}
-        <div className="min-w-0 space-y-2">
+        <div id="wz-3-language" className="min-w-0 scroll-mt-28 space-y-2">
           <Label className="text-sm font-medium">Spoken language</Label>
           <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
             <SelectTrigger className="w-full text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
@@ -152,12 +146,6 @@ export function StepVoice({
           </Select>
         </div>
       </div>
-
-      {/* Agent Architecture (no picker) → Configure Models → Choose specific
-          models, matching the Figma vertical order. */}
-      <StackModelsDetail stack={draft.stack} onChange={(stack) => update({ stack })} showPicker={false} />
-      <StackPresetCards stack={draft.stack} onChange={(stack) => update({ stack })} />
-      <StackModelPicker stack={draft.stack} onChange={(stack) => update({ stack })} />
 
       <VoiceBrowser
         open={browserOpen}

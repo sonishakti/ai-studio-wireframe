@@ -25,8 +25,8 @@ export function CallSettings({ draft, update }: StepProps) {
     // instead of vanishing the row for non-batch agents.
     return (
       <p className="text-sm text-muted-foreground">
-        These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> in
-        Step 2 to schedule the window, concurrency, and retries.
+        These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> above
+        to schedule the window, concurrency, and retries.
       </p>
     )
   }

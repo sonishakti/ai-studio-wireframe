@@ -13,21 +13,26 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DEFAULT_ADVANCED, type AdvancedConfig } from "@/lib/wizard-draft"
 
 /**
- * Advanced section (Figma "Advanced") — voice-interaction tuning: turn
- * detection, start/end of speech, selective attention locking, filter words,
- * history. Optional depth: every sub-section is toggle-gated with sane defaults,
- * so a novice can skip the whole thing. MLLM (realtime) hides the cascade-only
- * knobs (speech VAD) since one model owns turn-taking.
+ * Speech tuning (was the optional "Advanced" section — dissolved into Voice &
+ * speech by the v3 IA, 2026-07-17): turn detection, start/end of speech,
+ * selective attention locking, filter words. Every sub-section is toggle-gated
+ * with sane defaults, so a novice can skip the whole thing. MLLM (realtime)
+ * hides the cascade-only knobs (speech VAD) since one model owns turn-taking.
+ * History moved to Knowledge & Tools (its own `HistoryField` below) —
+ * `showHistory` keeps it here for the standalone Playground.
  */
 export function StepAdvanced({
   value,
   onChange,
   realtime,
+  showHistory = true,
 }: {
   value: AdvancedConfig | undefined
   onChange: (next: AdvancedConfig) => void
   /** True when the agent runs a multimodal realtime model. */
   realtime?: boolean
+  /** v3 builder renders history in Knowledge & Tools instead. */
+  showHistory?: boolean
 }) {
   const adv = value ?? DEFAULT_ADVANCED
   const patch = (p: Partial<AdvancedConfig>) => onChange({ ...adv, ...p })
@@ -38,6 +43,8 @@ export function StepAdvanced({
         Fine-tune how the agent listens and takes turns. Defaults work for most agents.
       </p>
 
+      {/* Turn-taking & interruptions (v3 TOC anchor). */}
+      <div id="wz-3-turntaking" className="scroll-mt-28 space-y-4">
       {/* Turn detection */}
       <Sub
         icon={MessagesSquare}
@@ -141,7 +148,10 @@ export function StepAdvanced({
           </Sub>
         </>
       )}
+      </div>
 
+      {/* Attention & filters (v3 TOC anchor). */}
+      <div id="wz-3-attention" className="scroll-mt-28 space-y-4">
       {/* Selective attention locking */}
       <Sub
         icon={Lock}
@@ -183,32 +193,51 @@ export function StepAdvanced({
           onChange={(responseWaitMs) => patch({ filterWords: { ...adv.filterWords, responseWaitMs } })}
         />
       </Sub>
+      </div>
 
-      {/* History */}
-      <section className="space-y-3 rounded-lg border border-border bg-card p-4">
-        <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <Gauge className="h-4 w-4" aria-hidden />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">History</p>
-            <p className="text-xs text-muted-foreground">How much conversation the agent keeps in context.</p>
-          </div>
-        </div>
-        <div className="max-w-[200px] space-y-1.5">
-          <Label htmlFor="adv-history" className="text-xs text-muted-foreground">Max history messages</Label>
-          <IntInput
-            id="adv-history"
-            min={0}
-            max={200}
-            value={adv.history.maxMessages}
-            onChange={(maxMessages) => patch({ history: { maxMessages } })}
-            className="text-sm"
-            aria-label="Max history messages"
-          />
-        </div>
-      </section>
+      {showHistory && <HistoryField value={value} onChange={onChange} />}
     </div>
+  )
+}
+
+/** Conversation history (max messages) — its own export because the v3 IA
+ *  homes it under Knowledge & Tools (working memory sits with knowledge),
+ *  while the Playground keeps it inside StepAdvanced. */
+export function HistoryField({
+  value,
+  onChange,
+  id,
+}: {
+  value: AdvancedConfig | undefined
+  onChange: (next: AdvancedConfig) => void
+  /** Optional TOC scroll anchor (e.g. "wz-5-history"). */
+  id?: string
+}) {
+  const adv = value ?? DEFAULT_ADVANCED
+  return (
+    <section id={id} className="scroll-mt-28 space-y-3 rounded-lg border border-border bg-card p-4">
+      <div className="flex items-start gap-2.5">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <Gauge className="h-4 w-4" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Conversation history</p>
+          <p className="text-xs text-muted-foreground">How much conversation the agent keeps in context.</p>
+        </div>
+      </div>
+      <div className="max-w-[200px] space-y-1.5">
+        <Label htmlFor="adv-history" className="text-xs text-muted-foreground">Max history messages</Label>
+        <IntInput
+          id="adv-history"
+          min={0}
+          max={200}
+          value={adv.history.maxMessages}
+          onChange={(maxMessages) => onChange({ ...adv, history: { maxMessages } })}
+          className="text-sm"
+          aria-label="Max history messages"
+        />
+      </div>
+    </section>
   )
 }
 

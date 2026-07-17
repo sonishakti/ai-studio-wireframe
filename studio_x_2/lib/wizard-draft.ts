@@ -261,35 +261,37 @@ export function outboundMissingVars(d: AgentDraft): string[] {
 export interface PublishBlock {
   /** Plain-language reason this isn't ready. */
   reason: string
-  /** The step (1–4) whose drawer fixes it. */
+  /** The section (1–6, v3 journey order) that fixes it. */
   step: number
   /** Verb+noun for the "Fix this" button (e.g. "Pick a voice"). */
   action: string
 }
 
-/** Every unmet requirement between the draft and a live agent, in step order.
- *  Drives the Deploy step's "Fix this →" ramp; `publishBlockReason` returns just the first. */
+/** Every unmet requirement between the draft and a live agent, in JOURNEY
+ *  order (v3: Channel → Prompt → …). Drives the Go-live "Fix this →" ramp;
+ *  `publishBlockReason` returns just the first. */
 export function publishBlocks(d: AgentDraft): PublishBlock[] {
   const blocks: PublishBlock[] = []
-  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
-  if (!d.type) blocks.push({ reason: "Choose an agent type.", step: 2, action: "Choose type" })
-  if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 3, action: "Write the prompt" })
+  if (!d.type) blocks.push({ reason: "Pick a channel.", step: 1, action: "Pick channel" })
 
   if (d.type === "outbound") {
-    if (!d.config.outbound?.numberId) blocks.push({ reason: "Attach a caller-ID phone number.", step: 4, action: "Set up calls" })
-    if (!d.config.outbound?.csvName) blocks.push({ reason: "Upload a contacts CSV.", step: 4, action: "Add contacts" })
-    else {
-      const missing = outboundMissingVars(d)
-      if (missing.length) blocks.push({
-        reason: `Your contacts CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`,
-        step: 3, action: "Edit prompt",
-      })
-    }
+    if (!d.config.outbound?.numberId) blocks.push({ reason: "Attach a caller-ID phone number.", step: 1, action: "Set up calls" })
+    if (!d.config.outbound?.csvName) blocks.push({ reason: "Upload a contacts CSV.", step: 1, action: "Add contacts" })
+  }
+  if (d.type === "inbound" && (d.config.inbound?.mode ?? "phone") === "phone" && !d.config.inbound?.numberId) {
+    blocks.push({ reason: "Attach a phone number for the agent to answer.", step: 1, action: "Set up the channel" })
   }
 
-  if (d.type === "inbound" && (d.config.inbound?.mode ?? "phone") === "phone" && !d.config.inbound?.numberId) {
-    blocks.push({ reason: "Attach a phone number for the agent to answer.", step: 4, action: "Set up the channel" })
+  if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 2, action: "Write the prompt" })
+  if (d.type === "outbound" && d.config.outbound?.csvName) {
+    const missing = outboundMissingVars(d)
+    if (missing.length) blocks.push({
+      reason: `Your contacts CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`,
+      step: 2, action: "Edit prompt",
+    })
   }
+
+  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 3, action: "Pick a voice" })
 
   return blocks
 }
@@ -299,13 +301,14 @@ export function publishBlockReason(d: AgentDraft): string | null {
   return publishBlocks(d)[0]?.reason ?? null
 }
 
-/** The first step (1–4) still needing input — for "resume at step N" affordances.
- *  Channel + go-live share step 4 now, so anything past the prompt resumes there. */
+/** The first section (1–6, v3 journey order) still needing input — for
+ *  "resume at" affordances. Voice has a working default, so past the prompt
+ *  the resume point is Go live. */
 export function firstIncompleteStep(d: AgentDraft): number {
-  if (!d.voice) return 1
-  if (!d.type) return 2
-  if (!d.systemPrompt.trim()) return 3
-  return 4
+  if (!d.type) return 1
+  if (!d.systemPrompt.trim()) return 2
+  if (!d.voice) return 3
+  return 6
 }
 
 export function canPublish(d: AgentDraft): boolean {

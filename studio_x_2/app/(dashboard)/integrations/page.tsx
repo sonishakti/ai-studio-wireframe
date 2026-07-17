@@ -140,8 +140,8 @@ function ResourcesInner() {
               it (heuristic-eval walkthrough T3 / re-eval #8). */}
           <p className="text-sm text-muted-foreground">
             Attach these to an agent from its{" "}
-            <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Prompt &amp; tools step →
+            <Link href="/agents?step=5" className="font-medium text-foreground underline-offset-4 hover:underline">
+              Knowledge &amp; Tools section →
             </Link>
           </p>
           <div className="relative max-w-md">
@@ -211,8 +211,8 @@ function ResourcesInner() {
               it (heuristic-eval walkthrough T3 / re-eval #8). */}
           <p className="text-sm text-muted-foreground">
             Attach these to an agent from its{" "}
-            <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Prompt &amp; tools step →
+            <Link href="/agents?step=5" className="font-medium text-foreground underline-offset-4 hover:underline">
+              Knowledge &amp; Tools section →
             </Link>
           </p>
           <div className="relative max-w-md">

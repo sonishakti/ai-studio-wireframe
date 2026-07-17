@@ -34,7 +34,7 @@ export function DeployContextBar({ channelLabel }: { channelLabel: string }) {
   return (
     <div className="sticky top-12 z-10 flex items-center gap-1.5 border-b bg-muted/40 px-4 py-1.5 text-sm backdrop-blur supports-[backdrop-filter]:bg-muted/30 sm:px-6">
       <Button variant="ghost" size="sm" asChild className="-ml-2 h-7 gap-1.5">
-        <Link href={`/agents/${agent.id}/edit?step=4`} title={`Back to ${agent.name}`}>
+        <Link href={`/agents/${agent.id}/edit?step=1`} title={`Back to ${agent.name}`}>
           <ArrowLeft className="h-3.5 w-3.5" />
           {agent.name}
         </Link>
