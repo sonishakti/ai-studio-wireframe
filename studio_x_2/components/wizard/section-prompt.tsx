@@ -5,6 +5,7 @@ import { UserRound } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { extractVars } from "@/lib/campaign-data"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import type { StepProps } from "@/components/wizard/types"
@@ -21,7 +22,12 @@ import { typeLabel } from "@/lib/wizard-draft"
 export function SectionPrompt({
   draft,
   update,
-}: StepProps) {
+  onPickVoice,
+}: StepProps & {
+  /** Jump to Voice & speech › Voice — the persona block must never be a
+   *  dead end (owner 2026-07-17: it read as "empty and unclickable"). */
+  onPickVoice?: () => void
+}) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
 
   // Persona rides the selected voice artifact (customs in localStorage —
@@ -87,20 +93,26 @@ export function SectionPrompt({
         </div>
 
         {/* 3 — Persona (personality · tone). Read-only: it comes with the
-            selected voice; pick a different voice to change it. */}
+            selected voice. Both states carry ONE action — jump to the voice
+            picker — so this block is never a dead end. */}
         <div id="wz-2-persona" className="scroll-mt-28 space-y-3 border-t border-border pt-6">
-          <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              <UserRound className="h-4 w-4" aria-hidden />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold">Persona</p>
-              <p className="text-xs text-muted-foreground">
-                Comes with the selected voice{selected ? ` (${selected.name})` : ""}. Change it by picking a different voice.
-              </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <UserRound className="h-4 w-4" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">Persona</p>
+                <p className="text-xs text-muted-foreground">
+                  {selected ? `Comes with ${selected.name}, the selected voice.` : "Comes with the voice you pick."}
+                </p>
+              </div>
             </div>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={onPickVoice}>
+              {selected ? "Change voice" : "Pick a voice"}
+            </Button>
           </div>
-          {selected ? (
+          {selected && (
             <dl className="space-y-1.5 rounded-lg border border-border bg-card p-4 text-sm">
               <div className="flex flex-wrap items-baseline gap-x-1.5">
                 <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Personality</dt>
@@ -111,10 +123,6 @@ export function SectionPrompt({
                 <dd>{selected.tone}</dd>
               </div>
             </dl>
-          ) : (
-            <p className="rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
-              Pick a voice in Voice &amp; speech to give the agent a persona.
-            </p>
           )}
         </div>
       </div>

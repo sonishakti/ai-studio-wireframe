@@ -503,13 +503,19 @@ export function AgentWizard({
     setOpenStep(n)
     setExpandedSteps((s) => ({ ...s, [n]: true }))
     syncStepParam(n)
-    muteSpy(1200)
+    muteSpy(1500)
     window.setTimeout(() => {
       const el = document.getElementById(anchorId)
       if (!el) { scrollToStep(n); return }
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
-    }, 80)
+      // Same arrival guarantee as scrollToStep: some environments silently
+      // drop long smooth scrolls — if the anchor isn't near the reading line
+      // shortly after, jump instantly. scroll-mt-28 = 112px.
+      window.setTimeout(() => {
+        if (Math.abs(el.getBoundingClientRect().top - 112) > 140) el.scrollIntoView({ block: "start" })
+      }, 450)
+    }, 120)
   }
 
   // Stack edits can collapse/expand content ABOVE the clicked control
@@ -1217,7 +1223,7 @@ export function AgentWizard({
                     </div>
                   )}
                   {/* 2 · PROMPT — the words, rewritten for the channel. */}
-                  {n === 2 && <SectionPrompt draft={draft} update={update} />}
+                  {n === 2 && <SectionPrompt draft={draft} update={update} onPickVoice={() => openAnchor(3, "wz-3-voice")} />}
                   {/* 3 · VOICE & SPEECH (Customize) — voice, language/STT, and
                       the dissolved Advanced speech tuning. */}
                   {n === 3 && (
