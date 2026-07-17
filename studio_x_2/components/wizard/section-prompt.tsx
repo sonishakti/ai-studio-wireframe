@@ -55,8 +55,8 @@ export function SectionPrompt({
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">
         {draft.type
-          ? `Write what ${draft.name || "your agent"} says on ${typeLabel(draft.type)}. Saves automatically as you type.`
-          : `Tell ${draft.name || "your agent"} how to behave. Pick a channel first — the words follow it.`}
+          ? `Write what ${draft.name || "your agent"} says on ${typeLabel(draft.type)}.`
+          : `Pick a channel first, then write the words for it.`}
       </p>
 
       <div className="max-w-3xl space-y-6">
@@ -95,8 +95,7 @@ export function SectionPrompt({
             placeholder={greetingPlaceholder}
           />
           <p className="text-xs text-muted-foreground">
-            The one line your agent opens with — it follows the channel:
-            inbound answers (&ldquo;Thanks for calling…&rdquo;), batch calls introduce themselves (&ldquo;Hey {"{{name}}"}, I&apos;m calling from…&rdquo;).
+            The first thing your agent says.
           </p>
         </div>
 

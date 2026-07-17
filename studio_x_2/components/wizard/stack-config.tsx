@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/collapsible"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
-  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackLine,
+  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor,
   type StackPreset, type AgentStack,
 } from "@/lib/campaign-data"
 
@@ -125,8 +125,6 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
 
 export function StackModelsDetail({ stack, onChange, className, showPicker = true }: StackPieceProps & { showPicker?: boolean }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
-  const est = stackEstimateFor(stack)
-  const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
 
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
 
@@ -152,13 +150,16 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
 
   return (
     <section className={cn("@container space-y-4", className)}>
-      {/* "Agent Architecture" = the pipeline shape (Figma "Shell Exploration"
-          heading + card names) — a first-class choice, plain language. */}
-      <h4 className="text-base font-medium">Agent Architecture</h4>
+      {/* "Pipeline" — this section already lives inside the agent's Models
+          page, so "Agent Architecture" double-qualified it (owner 2026-07-17).
+          No estimate/summary paragraphs here: variable-length text above the
+          cards moved them under the cursor on every switch (the model-switch
+          jump); the live numbers live in the right panel's summary instead. */}
+      <h4 className="text-base font-medium">Pipeline</h4>
       <RadioCardGroup
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
-        aria-label="Agent architecture"
+        aria-label="Pipeline"
         className="@lg:grid-cols-2"
       >
         <RadioCard
@@ -173,25 +174,9 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
         />
       </RadioCardGroup>
 
-      {pipeline === "mllm" ? (
-        <p className="text-xs text-muted-foreground">
-          The model owns turn-taking, so the interruption and end-of-speech controls in
-          Advanced don&apos;t apply.
-        </p>
-      ) : null}
-
-      {/* What the pick means, in vendors and numbers. */}
-      <p className="text-xs text-muted-foreground">
-        {pipeline === "mllm"
-          ? `Realtime model: ${stackLine(stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`
-          : diverged
-          ? `Custom mix: ${stackLine(stack)}. Estimates approximate the ${STACK_PRESETS[stack.preset].label} preset (~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min).`
-          : `Runs on ${stackLine(stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`}
-      </p>
-
       {/* The vendor picker renders here by default; the builder (Figma order)
-          renders it separately, AFTER Configure Models, via showPicker={false}
-          + a standalone <StackModelPicker>. */}
+          renders it separately via showPicker={false} + a standalone
+          <StackModelPicker>. */}
       {showPicker && <StackModelPicker stack={stack} onChange={onChange} />}
     </section>
   )
@@ -204,6 +189,12 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
   const [customOpen, setCustomOpen] = React.useState(diverged || pipeline === "mllm")
+  // Entering MLLM after mount opens the disclosure — the realtime-model
+  // select is the ONLY model control on that pipeline and must not hide
+  // behind a collapsed row (owner 2026-07-17).
+  React.useEffect(() => {
+    if (pipeline === "mllm") setCustomOpen(true)
+  }, [pipeline])
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
 
   const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]

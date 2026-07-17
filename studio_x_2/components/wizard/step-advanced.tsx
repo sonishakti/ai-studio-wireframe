@@ -41,7 +41,7 @@ export function StepAdvanced({
     // @container: preset cards reflow by real column width, not viewport.
     <div className="@container space-y-4">
       <p className="text-sm text-muted-foreground">
-        Fine-tune how the agent listens and takes turns. Defaults work for most agents.
+        Fine-tune how the agent listens and takes turns.
       </p>
 
       {/* Turn-taking & interruptions (v3 TOC anchor). */}

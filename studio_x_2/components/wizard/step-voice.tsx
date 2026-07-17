@@ -121,9 +121,8 @@ export function StepVoice({
               <TooltipContent>Edit voice</TooltipContent>
             </Tooltip>
           </div>
-          {/* The promise that used to be an intro paragraph, kept to one line. */}
           <p className="text-xs text-muted-foreground">
-            A voice pre-fills your prompt and greeting only while they&apos;re empty — switching never overwrites your work.
+            Picking a voice fills in the prompt and greeting while they&apos;re empty.
           </p>
           <Button
             variant="ghost"

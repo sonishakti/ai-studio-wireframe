@@ -61,7 +61,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     <div className="space-y-5">
       {/* No inner h2: the section header above already names this step. */}
       <p className="text-sm text-muted-foreground">
-        Give {draft.name || "your agent"} docs to answer from, memory, and tools to act with. All optional — it works without any of this.
+        Give {draft.name || "your agent"} docs to answer from, memory, and tools to act with.
       </p>
 
       <div className="max-w-3xl space-y-4">

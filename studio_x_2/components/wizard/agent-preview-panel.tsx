@@ -19,12 +19,17 @@ import { WidgetPreviewCard } from "@/components/widget-studio"
  * and sans-14 values, gap-3 rhythm.
  */
 
-export interface AgentPreviewStats {
-  llmVendor: string
-  asrVendor: string
-  ttsVendor: string
-  avgLatencyMs: number
-  firstTokenMs: number
+/** The deployment summary the panel carries (owner 2026-07-17: the summary
+ *  lives HERE, always visible, not buried in the Go-live section). */
+export interface AgentPreviewSummary {
+  /** Selected voice — name + tagline (absent until one is picked). */
+  voice?: { name: string; tagline?: string }
+  /** The model stack in one line (stackLine full). */
+  models: string
+  estimateLatencyMs: number
+  estimateCostPerMin: number
+  /** Channel line, e.g. "Inbound · +1 (628) 555-0188" (absent until picked). */
+  channel?: string
 }
 
 export function AgentPreviewPanel({
@@ -34,7 +39,7 @@ export function AgentPreviewPanel({
   statusHint,
   latencyMs,
   costPerMin,
-  stats,
+  summary,
   testing,
   warming,
   onTalk,
@@ -53,7 +58,7 @@ export function AgentPreviewPanel({
   statusHint?: string
   latencyMs: number
   costPerMin: number
-  stats: AgentPreviewStats
+  summary: AgentPreviewSummary
   testing: boolean
   warming: boolean
   onTalk: () => void
@@ -162,24 +167,28 @@ export function AgentPreviewPanel({
         )}
       </div>
 
-      {/* Stats — border-t, pl-4 pr-6 py-4, gap-3 rows. Mono-50% labels,
-          sans-14 values, justify-between. */}
+      {/* Deployment summary — border-t, pl-4 pr-6 py-4. The full picture of
+          what deploys (Voice · Models · Estimate · Channel), always visible,
+          updating live as the draft changes. Same quiet mono-label language
+          as the old vendor stats it replaces. */}
       <div className="flex flex-col gap-3 border-t border-border py-4 pl-4 pr-6">
-        <StatRow label="LLM" value={stats.llmVendor} />
-        <StatRow label="ASR" value={stats.asrVendor} />
-        <StatRow label="TTS" value={stats.ttsVendor} />
-        <StatRow label="AVERAGE END-TO-END LATENCY" value={`${stats.avgLatencyMs} ms`} />
-        <StatRow label="AVERAGE LLM TIME TO FIRST TOKEN" value={`${stats.firstTokenMs} ms`} />
+        <p className="font-mono text-xs uppercase text-muted-foreground opacity-50">Deployment summary</p>
+        <SummaryRow label="Voice" value={summary.voice ? `${summary.voice.name}${summary.voice.tagline ? ` · ${summary.voice.tagline}` : ""}` : "Not set"} />
+        <SummaryRow label="Models" value={summary.models} />
+        <SummaryRow label="Estimate" value={`~${summary.estimateLatencyMs} ms to first word · ~$${summary.estimateCostPerMin.toFixed(2)}/min`} />
+        <SummaryRow label="Channel" value={summary.channel ?? "Not set"} />
       </div>
     </aside>
   )
 }
 
-function StatRow({ label, value }: { label: string; value: string }) {
+/** Stacked label-over-value row — summary values (voice tagline, full stack
+ *  line) are too long for the one-line justify-between StatRow idiom. */
+function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex min-w-0 flex-col gap-0.5">
       <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">{label}</span>
-      <span className="shrink-0 text-sm leading-none text-foreground">{value}</span>
+      <span className="text-sm leading-snug text-foreground">{value}</span>
     </div>
   )
 }

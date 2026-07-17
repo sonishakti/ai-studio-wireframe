@@ -30,9 +30,9 @@ export const SECTION_COUNT = STEP_TITLES.length
 
 /** LHS rail groups — journey stages, not layer names (v3 §4): the critical
  *  path is Set up → Ship; Customize is skippable by design. */
-export const SECTION_GROUPS: { label: string; hint?: string; steps: number[] }[] = [
+export const SECTION_GROUPS: { label: string; steps: number[] }[] = [
   { label: "Set up", steps: [1, 2] },
-  { label: "Customize", hint: "Only if you need to", steps: [3, 4, 5] },
+  { label: "Customize", steps: [3, 4, 5] },
   { label: "Ship", steps: [6] },
 ]
 
@@ -64,9 +64,9 @@ export function stepManifest(n: number, draft: AgentDraft): string {
   }
   if (n === 2) return "System prompt · Greeting · Persona"
   if (n === 3) return "Voice · Language · Turn-taking · Filters"
-  if (n === 4) return "Architecture · LLM / realtime · Preset"
+  if (n === 4) return "Pipeline · Model choice · Preset"
   if (n === 5) return "Knowledge · History · MCP · Connectors"
-  if (n === 6) return "Test · Call capture · Review & deploy"
+  if (n === 6) return "Review & deploy"
   return ""
 }
 
@@ -104,7 +104,7 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     ]
   if (n === 4)
     return [
-      { id: "wz-4-arch", label: "Architecture" },
+      { id: "wz-4-arch", label: "Pipeline" },
       { id: "wz-4-model", label: "Model choice" },
     ]
   if (n === 5)
@@ -116,8 +116,6 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     ]
   if (n === 6)
     return [
-      { id: "wz-6-test", label: "Test & talk" },
-      { id: "wz-6-capture", label: "Call capture" },
       { id: "wz-6-review", label: "Review & deploy" },
     ]
   return []

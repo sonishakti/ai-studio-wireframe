@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, ChevronDown, Bot, Copy, Check, EllipsisVertical, Upload, FileText, CornerDownRight } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, ChevronDown, Bot, Copy, Check, EllipsisVertical, Upload, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -21,7 +21,6 @@ import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { StepVoice } from "@/components/wizard/step-voice"
 import { StepAdvanced } from "@/components/wizard/step-advanced"
-import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { StepType } from "@/components/wizard/step-type"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
 import { SectionKnowledgeTools } from "@/components/wizard/step-build"
@@ -505,6 +504,26 @@ export function AgentWizard({
     }, 80)
   }
 
+  // Stack edits can collapse/expand content ABOVE the clicked control
+  // (MLLM hides the speech knobs in Voice & speech, the preset block
+  // unmounts), which yanked the viewport around. Pin the Models anchor's
+  // viewport position across the reflow: measure before the update, correct
+  // scroll in a layout effect before paint.
+  const stackAnchor = React.useRef<{ el: HTMLElement; top: number } | null>(null)
+  const updateStack = (stack: AgentDraft["stack"]) => {
+    const el = document.getElementById("wz-4-arch")
+    stackAnchor.current = el ? { el, top: el.getBoundingClientRect().top } : null
+    muteSpy(800)
+    update({ stack })
+  }
+  React.useLayoutEffect(() => {
+    const a = stackAnchor.current
+    if (!a) return
+    stackAnchor.current = null
+    const delta = a.el.getBoundingClientRect().top - a.top
+    if (Math.abs(delta) > 1) window.scrollBy({ top: delta })
+  }, [draft.stack])
+
   // Scroll-spy: the rail highlights the section under the reading line.
   React.useEffect(() => {
     const obs = new IntersectionObserver(
@@ -537,14 +556,15 @@ export function AgentWizard({
   // 3 Voice & speech (voice + language/STT/TTS + speech tuning; the whole
   // `advanced` rides here — its history field renders in section 5 but resets
   // with 3, an accepted draft simplification) · 4 Models (pipeline/preset/LLM)
-  // · 5 Knowledge & Tools · 6 Go live (analysis).
+  // · 5 Knowledge & Tools · 6 Go live (owns no fields — capture config lives
+  // on Monitor now).
   // Sections 3 and 4 split the shared stack object — they get their own
   // pick/apply paths below; this covers the sections that own whole fields.
   const stepSlice = (d: AgentDraft, n: number): Partial<AgentDraft> =>
     n === 1 ? { type: d.type, config: d.config }
     : n === 2 ? { systemPrompt: d.systemPrompt, greeting: d.greeting }
     : n === 5 ? { knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
-    : { analysis: d.analysis }
+    : {}
   const stepDirty = (n: number) => {
     const base = baseline.current
     if (!base) return false
@@ -823,9 +843,9 @@ export function AgentWizard({
   // missing dirty signal was the top finding in every operator audit run).
   // The optional Advanced / Analysis sections autosave too, so a live agent
   // with only optional edits must still read "not live yet" (audit 2026-07-07).
-  // advanced + analysis ride sections 3 and 6 now, so the six slices cover
-  // the whole draft — no separate optional-dirty check.
-  const anyEdited = isLive && [1, 2, 3, 4, 5, 6].some(stepDirty)
+  // `advanced` rides section 3, so the section slices cover every field the
+  // builder edits (capture/`analysis` is edited on Monitor, not here).
+  const anyEdited = isLive && [1, 2, 3, 4, 5].some(stepDirty)
   const deploySub = isLive
     ? anyEdited
       ? "Edits are not live yet. Redeploy to apply."
@@ -862,12 +882,14 @@ export function AgentWizard({
   }, [isWebWidget])
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
   const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
-  const previewStats = {
-    llmVendor: draft.stack.llm.vendor,
-    asrVendor: draft.stack.asr.vendor,
-    ttsVendor: draft.stack.tts.vendor,
-    avgLatencyMs: cardLatency?.bestCaseMs ?? cardEst.latencyMs,
-    firstTokenMs: cardLatency?.llmMs ?? cardEst.latencyMs,
+  // The panel's deployment summary — the same facts the Go-live review used
+  // to card up, now always visible and live (owner 2026-07-17).
+  const previewSummary = {
+    voice: cardVoice ? { name: cardVoice.name, tagline: cardVoice.tagline } : undefined,
+    models: stackLine(draft.stack, { full: true }),
+    estimateLatencyMs: cardEst.latencyMs,
+    estimateCostPerMin: cardEst.costPerMin,
+    channel: draft.type ? channelLine(draft) : undefined,
   }
 
   return (
@@ -993,9 +1015,8 @@ export function AgentWizard({
           <nav aria-label="Build sections" className="space-y-4">
             {SECTION_GROUPS.map((g) => (
               <div key={g.label} className="space-y-0.5">
-                <p className="flex items-baseline gap-1.5 px-2.5 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+                <p className="px-2.5 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
                   {g.label}
-                  {g.hint && <span className="normal-case tracking-normal text-muted-foreground/50">· {g.hint}</span>}
                 </p>
                 {g.steps.map((n) => {
                   const Icon = STEP_ICONS[n]
@@ -1018,17 +1039,19 @@ export function AgentWizard({
                       </button>
                       {/* The section's TOC — the LHS table of contents of the
                           page (v3 ask). Shown for the active section only, so
-                          the rail stays scannable. */}
+                          the rail stays scannable. One continuous border-l line
+                          for every nested entry (the SidebarMenuSub treatment,
+                          on rail tokens — the component itself is bound to
+                          SidebarProvider tokens, so we mirror its line style). */}
                       {active && toc.length > 0 && (
-                        <ul className="space-y-0.5 pb-1 pl-4">
+                        <ul className="mb-1 ml-[1.15rem] flex min-w-0 flex-col gap-0.5 border-l border-border py-0.5 pl-2">
                           {toc.map((t) => (
                             <li key={t.id}>
                               <button
                                 type="button"
                                 onClick={() => openAnchor(n, t.id)}
-                                className="flex w-full items-center gap-1.5 rounded-md px-2.5 py-1 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
+                                className="flex h-7 w-full min-w-0 items-center rounded-md px-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
                               >
-                                <CornerDownRight className="h-3 w-3 shrink-0 opacity-50" aria-hidden />
                                 <span className="min-w-0 flex-1 truncate">{t.label}</span>
                               </button>
                             </li>
@@ -1197,52 +1220,36 @@ export function AgentWizard({
                       </div>
                     </div>
                   )}
-                  {/* 4 · MODELS (Customize) — the machinery: architecture,
-                      speed/cost preset, specific models. */}
+                  {/* 4 · MODELS (Customize) — the machinery: pipeline,
+                      specific models, speed/cost preset. Order matters for
+                      scroll stability: the preset block unmounts on MLLM, so
+                      it renders LAST (below every click target); stack edits
+                      mute the spy so the rail doesn't flip during the reflow. */}
                   {n === 4 && (
                     <div className="space-y-8">
                       <div id="wz-4-arch" className="scroll-mt-28">
-                        <StackModelsDetail stack={draft.stack} onChange={(stack) => update({ stack })} showPicker={false} />
+                        <StackModelsDetail stack={draft.stack} onChange={updateStack} showPicker={false} />
                       </div>
                       <div id="wz-4-model" className="scroll-mt-28 space-y-8">
-                        <StackPresetCards stack={draft.stack} onChange={(stack) => update({ stack })} />
-                        <StackModelPicker stack={draft.stack} onChange={(stack) => update({ stack })} />
+                        <StackModelPicker stack={draft.stack} onChange={updateStack} />
+                        <StackPresetCards stack={draft.stack} onChange={updateStack} />
                       </div>
                     </div>
                   )}
                   {/* 5 · KNOWLEDGE & TOOLS (Customize). */}
                   {n === 5 && <SectionKnowledgeTools draft={draft} update={update} />}
-                  {/* 6 · GO LIVE — test, call capture, review & deploy. */}
+                  {/* 6 · GO LIVE — review & deploy. Talk lives in the right
+                      panel; call capture lives on Monitor (owner 2026-07-17:
+                      capture is monitoring content). */}
                   {n === 6 && (
                     <div className="space-y-8">
-                      <div id="wz-6-test" className="scroll-mt-28 flex flex-col gap-2 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                            <Mic className="h-4 w-4" aria-hidden />
-                          </span>
-                          <div>
-                            <p className="text-sm font-medium">Test &amp; talk</p>
-                            <p className="text-xs text-muted-foreground">Try {draft.name || "your agent"} in the browser — free, before any real traffic.</p>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
-                          <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to it
-                        </Button>
-                      </div>
-                      <div id="wz-6-capture" className="scroll-mt-28 space-y-3 border-t border-border pt-6">
-                        <p className="text-sm font-medium">Call capture</p>
-                        <StepAnalysis
-                          value={draft.analysis}
-                          onChange={(analysis) => update({ analysis })}
-                        />
-                      </div>
                       {/* Evals (F-Eval) — future-scope-gated; renders nothing
                           unless the flag is on (parked in the IA, reserved
                           home: Go live › Evals & tests). */}
                       <TestsSection agentName={draft.name || "your agent"} />
                       {/* publishRegionRef feeds graft B: while this in-step
                           go-live CTA is on screen, the rail Deploy demotes. */}
-                      <div id="wz-6-review" ref={publishRegionRef} className="scroll-mt-28 border-t border-border pt-6">
+                      <div id="wz-6-review" ref={publishRegionRef} className="scroll-mt-28">
                         <StepPublish
                           draft={draft}
                           live={isLive}
@@ -1268,10 +1275,10 @@ export function AgentWizard({
             name={draft.name || (isEdit ? existing!.name : "")}
             statusLabel={previewStatus}
             isLive={isLive}
-            statusHint={landing ? "Sample agent — Agora provisioned this free. Testing in-browser costs nothing; it runs the Balanced stack until you change it in Voice & models." : undefined}
+            statusHint={landing ? "Sample agent — live on the Balanced stack until you change it in Models." : undefined}
             latencyMs={cardEst.latencyMs}
             costPerMin={cardEst.costPerMin}
-            stats={previewStats}
+            summary={previewSummary}
             testing={testing}
             warming={!!warming}
             onTalk={() => setTalkOpen(true)}
@@ -1305,7 +1312,7 @@ export function AgentWizard({
                 orb, and could not tell working from broken (user-test 2026-07-09).
                 The real transcript lives behind the future-scope flag. */}
             <p className="text-xs text-muted-foreground">
-              Simulated preview. No live audio in this wireframe, and testing in-browser is free.
+              Simulated preview — no live audio in this wireframe.
             </p>
           </SheetHeader>
           <div className="p-4">

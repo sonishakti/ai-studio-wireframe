@@ -44,7 +44,7 @@ export function StepAnalysis({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Record calls and pull out structured data. You&apos;ll see the results on Monitor and each call.
+        Choose what each call records. Results appear in Call History.
       </p>
 
       {/* Transcription gate */}
