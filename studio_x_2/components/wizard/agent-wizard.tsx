@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, ChevronDown, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, CircleCheck, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -892,6 +892,17 @@ export function AgentWizard({
   // a blocked draft, or an already-deployed code agent gets the outline.
   const deployHot = isLive ? anyEdited : codeDeployed ? false : !blockReason
 
+  // ── Lazyweb design-improve (2026-07-20, report ccf47285) ──────────────────
+  // F1 "Progress Rail": the rail pins the ONE step that moves the draft
+  // forward. Hidden when there is nothing to do (clean live agent, deployed
+  // code agent) — a permanent "Next" with no next reads as a broken promise.
+  const nextUp = codeDeployed ? null : !isLive ? firstIncomplete(draft) : anyEdited ? 7 : null
+  // F2 "Agent Recipe": the build-log strip's validation readout — derived from
+  // the draft (wireframe-honest), listing the artifacts that compile right now.
+  const buildValidated = [typeDone && "channel", promptDone && "prompt", voiceDone && "voice"].filter(
+    Boolean,
+  ) as string[]
+
   // Three-column shell (Figma "Shell Exploration", 2026-07-15): the agent
   // lives in a persistent right preview panel; the header owns identity +
   // Deploy; the rail is pure nav.
@@ -914,6 +925,16 @@ export function AgentWizard({
     estimateLatencyMs: cardEst.latencyMs,
     estimateCostPerMin: cardEst.costPerMin,
     channel: draft.type ? channelLine(draft) : undefined,
+    // Draft↔live linkage (Lazyweb F4): rows that differ from the deployed
+    // config carry a "pending" chip, closing the edit → validate → ship loop.
+    pending: isLive
+      ? {
+          voice: stepDirty(3),
+          models: stepDirty(4),
+          estimate: stepDirty(3) || stepDirty(4),
+          channel: stepDirty(1),
+        }
+      : undefined,
   }
 
   return (
@@ -1032,6 +1053,27 @@ export function AgentWizard({
               to the header and the sphere/Talk to the right preview panel, so
               the rail holds only the CONFIGURE + OPTIONAL section lists. */}
 
+          {/* Pinned "Next: …" card (Lazyweb design-improve F1, safe bet): the
+              rail opens with the one step that moves the draft toward live —
+              orientation without reading the whole outline. A quiet card, not
+              a primary: the one-primary discipline stays with Deploy. */}
+          {nextUp != null && (
+            <button
+              type="button"
+              onClick={() => openRow(nextUp)}
+              className="flex w-full items-center gap-2.5 rounded-md border border-border bg-card px-3 py-2.5 text-left shadow-xs transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block font-mono text-xs uppercase text-muted-foreground opacity-50">Next</span>
+                <span className="block truncate text-sm font-medium">{stepTitle(nextUp, draft)}</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {isLive ? "Redeploy to apply your edits." : NEXT_HINTS[nextUp]}
+                </span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            </button>
+          )}
+
           {/* OUTLINER rail (v3): three journey groups — Set up · Customize ·
               Ship. The ACTIVE section expands to its subsection TOC; clicking
               a TOC entry jumps the RHS straight to that anchor, so everything
@@ -1062,6 +1104,14 @@ export function AgentWizard({
                       >
                         <Icon className={cn("h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
                         <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
+                        {/* Completion tick (Lazyweb F1): the rail owns progress —
+                            devs see where they are without opening anything. */}
+                        {isDone(n) && (
+                          <>
+                            <Check className="h-3.5 w-3.5 shrink-0 text-success/80" aria-hidden />
+                            <span className="sr-only">(done)</span>
+                          </>
+                        )}
                       </button>
                       {/* The section's TOC — the LHS table of contents of the
                           page (v3 ask). Shown for the active section only, so
@@ -1143,6 +1193,10 @@ export function AgentWizard({
         <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l xl:border-r">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => {
             const Icon = STEP_ICONS[n]
+            // The section's compiled output (Lazyweb F2 "Agent Recipe"): each
+            // band reads as a build artifact — "output: inbound · +1 …" — not
+            // a flat form header. Sections 6–7 produce actions, not artifacts.
+            const artifact = n <= 5 ? artifactLine(n, draft, cardVoice?.name) : null
             return (
               <section
                 key={n}
@@ -1170,7 +1224,16 @@ export function AgentWizard({
                   >
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
-                    <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedSteps[n] && "rotate-180")} aria-hidden />
+                    {/* The band's mono output line (Lazyweb F2): what this
+                        section compiles to right now — so a collapsed section
+                        still states its artifact. md+ only; small screens keep
+                        the lean header. */}
+                    {artifact != null && (
+                      <span className="ml-auto hidden min-w-0 shrink truncate text-right font-mono text-xs text-muted-foreground/60 md:block">
+                        output: {artifact || "—"}
+                      </span>
+                    )}
+                    <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", artifact == null ? "ml-auto" : "ml-auto md:ml-0", expandedSteps[n] && "rotate-180")} aria-hidden />
                   </button>
                   {/* LIVE agents only: with autosave there is no Save/Cancel, so
                       this is the one way back to the deployed config. HIDDEN
@@ -1217,6 +1280,7 @@ export function AgentWizard({
                           liveNote={isLive && baseline.current
                             ? `${draft.name || "Your agent"} is live on ${channelTarget(baseline.current)}. Switching sets that aside (undoable) and applies on redeploy.`
                             : undefined}
+                          liveType={isLive ? baseline.current?.type ?? null : null}
                         />
                       </div>
                       {channelTouched && draft.type && (
@@ -1331,6 +1395,25 @@ export function AgentWizard({
               </section>
             )
           })}
+          {/* Build log (Lazyweb F2 "Agent Recipe"): the compile readout closing
+              the config column — which artifacts validate right now, derived
+              live from the draft. The divide-y column gives it its top rule. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3">
+            <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <CircleCheck className="h-3.5 w-3.5" aria-hidden /> Build log
+            </span>
+            <span className="min-w-0 font-mono text-xs text-muted-foreground/60">
+              validated:{" "}
+              {buildValidated.length
+                ? buildValidated.map((v, i) => (
+                    <React.Fragment key={v}>
+                      {i > 0 && " · "}
+                      <span className="text-primary">{v}</span>
+                    </React.Fragment>
+                  ))
+                : "nothing yet — pick a channel to start"}
+            </span>
+          </div>
         </div>
 
         {/* Third column: the persistent agent preview (xl+ only — no phantom
@@ -1641,4 +1724,39 @@ function channelLine(d: AgentDraft): string {
   const label = channelLabel(d)
   const target = channelTarget(d)
   return label === target ? label : `${label} · ${target}`
+}
+
+/** One-line CTA under the rail's pinned "Next" card (Lazyweb F1). Keys are
+ *  exactly firstIncomplete's possible returns. */
+const NEXT_HINTS: Record<number, string> = {
+  1: "Pick how it handles calls.",
+  2: "Write what it says.",
+  3: "Pick its voice.",
+  7: "Review & deploy.",
+}
+
+/** What a section compiles to right now — the band's mono "output:" line
+ *  (Lazyweb design-improve 2026-07-20, Agent Recipe variant: the accordion
+ *  reads as build artifacts, not a flat form). Empty string = nothing yet
+ *  (the band renders an em dash). Sections 6–7 have no artifact. */
+function artifactLine(n: number, d: AgentDraft, voiceName?: string): string {
+  if (n === 1) return d.type ? channelLine(d) : ""
+  if (n === 2) {
+    const parts = [d.systemPrompt.trim() && "system", d.greeting.trim() && "greeting"].filter(Boolean)
+    return parts.join(" · ")
+  }
+  if (n === 3) {
+    const parts = [voiceName, d.stack.language ?? "English"].filter(Boolean)
+    return parts.join(" · ")
+  }
+  if (n === 4) return stackLine(d.stack)
+  if (n === 5) {
+    const parts = [
+      d.knowledge.length && `kb ${d.knowledge.length}`,
+      d.mcp.length && `mcp ${d.mcp.length}`,
+      d.connectors.length && `crm ${d.connectors.length}`,
+    ].filter(Boolean) as string[]
+    return parts.join(" · ")
+  }
+  return ""
 }

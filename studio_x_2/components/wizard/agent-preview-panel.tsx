@@ -29,6 +29,11 @@ export interface AgentPreviewSummary {
   estimateCostPerMin: number
   /** Channel line, e.g. "Inbound · +1 (628) 555-0188" (absent until picked). */
   channel?: string
+  /** Draft↔live linkage (Lazyweb design-improve 2026-07-20, F4): rows whose
+   *  draft value differs from the DEPLOYED config carry a "pending" chip, so
+   *  the summary states what the next redeploy actually changes. Absent for
+   *  agents that aren't live. */
+  pending?: { voice?: boolean; models?: boolean; estimate?: boolean; channel?: boolean }
 }
 
 export function AgentPreviewPanel({
@@ -177,21 +182,29 @@ export function AgentPreviewPanel({
           as the old vendor stats it replaces. */}
       <div className="flex flex-col gap-3 border-t border-border py-4 pl-4 pr-6">
         <p className="font-mono text-xs uppercase text-muted-foreground opacity-50">Deployment summary</p>
-        <SummaryRow label="Voice" value={summary.voice ? `${summary.voice.name}${summary.voice.tagline ? ` · ${summary.voice.tagline}` : ""}` : "Not set"} />
-        <SummaryRow label="Models" value={summary.models} />
-        <SummaryRow label="Estimate" value={`~${summary.estimateLatencyMs} ms to first word · ~$${summary.estimateCostPerMin.toFixed(2)}/min`} />
-        <SummaryRow label="Channel" value={summary.channel ?? "Not set"} />
+        <SummaryRow label="Voice" value={summary.voice ? `${summary.voice.name}${summary.voice.tagline ? ` · ${summary.voice.tagline}` : ""}` : "Not set"} pending={summary.pending?.voice} />
+        <SummaryRow label="Models" value={summary.models} pending={summary.pending?.models} />
+        <SummaryRow label="Estimate" value={`~${summary.estimateLatencyMs} ms to first word · ~$${summary.estimateCostPerMin.toFixed(2)}/min`} pending={summary.pending?.estimate} />
+        <SummaryRow label="Channel" value={summary.channel ?? "Not set"} pending={summary.pending?.channel} />
       </div>
     </aside>
   )
 }
 
 /** Stacked label-over-value row — summary values (voice tagline, full stack
- *  line) are too long for the one-line justify-between StatRow idiom. */
-function SummaryRow({ label, value }: { label: string; value: string }) {
+ *  line) are too long for the one-line justify-between StatRow idiom.
+ *  `pending` marks a row whose draft value awaits a redeploy (Lazyweb F4). */
+function SummaryRow({ label, value, pending }: { label: string; value: string; pending?: boolean }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">{label}</span>
+      <span className="flex items-center gap-1.5">
+        <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">{label}</span>
+        {pending && (
+          <span className="rounded-sm border border-primary/40 bg-primary/10 px-1 font-mono text-xs lowercase text-primary">
+            pending
+          </span>
+        )}
+      </span>
       <span className="text-sm leading-snug text-foreground">{value}</span>
     </div>
   )

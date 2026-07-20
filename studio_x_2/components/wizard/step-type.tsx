@@ -12,32 +12,44 @@ import { typeLabel, type AgentType } from "@/lib/wizard-draft"
  *
  * Radio-cards without icons (Figma direction 2026-07-14): title + one support
  * line + the radio circle carry the choice; the rail owns iconography.
+ *
+ * Decision tiles (Lazyweb design-improve 2026-07-20, F3): the channel pick is
+ * the decision that determines first paid minutes, so each card carries a
+ * "Best for" line and the currently-live channel wears its Live mark ON the
+ * card — the consequence is visible at the point of choice, not buried in a
+ * sentence above.
  */
 
-const TYPES: { id: AgentType; title: string; desc: string }[] = [
+const TYPES: { id: AgentType; title: string; desc: string; bestFor: string }[] = [
   {
     id: "outbound",
     title: typeLabel("outbound"),
     desc: "Calls through a contact list you upload.",
+    bestFor: "Outreach, reminders, surveys",
   },
   {
     id: "inbound",
     title: typeLabel("inbound"),
     desc: "Answers a phone number 24/7, or a web widget.",
+    bestFor: "Support lines, front desk, after-hours",
   },
   {
     id: "code",
     title: typeLabel("code"),
     desc: "Runs inside your own app. No phone number.",
+    bestFor: "In-app assistants, custom stacks",
   },
 ]
 
-export function StepType({ draft, update, liveNote, displayType }: StepProps & {
+export function StepType({ draft, update, liveNote, displayType, liveType }: StepProps & {
   liveNote?: string
   /** UI-level selection override (owner 2026-07-17: never pre-select — the
    *  cards show no choice until the user makes one; `null` = show nothing
    *  selected even when draft.type is set, `undefined` = mirror the draft). */
   displayType?: AgentType | null
+  /** The DEPLOYED channel of a live agent — its card wears the Live mark so
+   *  "which one is carrying traffic" is answered on the tile itself. */
+  liveType?: AgentType | null
 }) {
   return (
     // @container: reflow by the center column's real width (the shell can
@@ -61,7 +73,28 @@ export function StepType({ draft, update, liveNote, displayType }: StepProps & {
         className="gap-4 @2xl:grid-cols-4"
       >
         {TYPES.map((t) => (
-          <RadioCard key={t.id} value={t.id} title={t.title} description={t.desc} />
+          <RadioCard
+            key={t.id}
+            value={t.id}
+            title={
+              t.id === liveType ? (
+                <span className="flex items-center gap-2">
+                  {t.title}
+                  <span className="flex items-center gap-1 text-xs font-medium text-success">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden /> Live
+                  </span>
+                </span>
+              ) : (
+                t.title
+              )
+            }
+            description={
+              <>
+                {t.desc}
+                <span className="mt-1 block text-xs text-muted-foreground/70">Best for: {t.bestFor}</span>
+              </>
+            }
+          />
         ))}
       </RadioCardGroup>
     </div>
