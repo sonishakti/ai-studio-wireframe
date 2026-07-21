@@ -1253,7 +1253,7 @@ export function AgentWizard({
                   {/* 2 · PROMPT — the words, rewritten for the channel. */}
                   {n === 2 && (
                     <SectionRows>
-                      <SectionPrompt draft={draft} update={update} onPickVoice={() => openAnchor(3, "wz-3-voice")} />
+                      <SectionPrompt draft={draft} update={update} />
                     </SectionRows>
                   )}
                   {/* 3 · VOICE & SPEECH (Customize) — voice, language/STT, and

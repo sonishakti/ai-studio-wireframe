@@ -65,7 +65,7 @@ export function stepManifest(n: number, draft: AgentDraft): string {
         : "Pick channel · Phone number"
     return "Batch calls · Inbound · Code / SDK"
   }
-  if (n === 2) return "System prompt · Greeting · Persona"
+  if (n === 2) return "System prompt · Greeting"
   if (n === 3) return "Voice · Language · Turn-taking · Filters"
   if (n === 4) return "Pipeline · Latency vs cost · Models · History"
   if (n === 5) return "Knowledge · MCP · Connectors"
@@ -97,7 +97,6 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     return [
       { id: "wz-2-prompt", label: "System prompt" },
       { id: "wz-2-greeting", label: "Greeting" },
-      { id: "wz-2-persona", label: "Persona" },
     ]
   if (n === 3)
     return [

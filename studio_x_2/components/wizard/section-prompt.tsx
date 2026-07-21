@@ -1,45 +1,26 @@
 "use client"
 
 import * as React from "react"
-import { UserRound } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { extractVars } from "@/lib/campaign-data"
-import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { SectionRow } from "@/components/wizard/section-row"
-import { InfoHint } from "@/components/wizard/info-hint"
 import type { StepProps } from "@/components/wizard/types"
 import { typeLabel } from "@/lib/wizard-draft"
 
 /**
  * Section 2 — Prompt (v3 IA, 2026-07-17). The WORDS, rewritten per channel:
- * system prompt + greeting (moved here from the old Step 3) + the persona
- * (personality/tone — filed under Prompt per the IA even though the edit
- * surface stays the voice editor, tension T3). Sits AFTER Channel because the
- * prompt is channel-shaped — "Thank you for calling…" vs "Hey {{name}}, I'm
- * calling from…" — and batch {{variables}} come from the CSV.
+ * system prompt + greeting. Sits AFTER Channel because the prompt is
+ * channel-shaped — "Thank you for calling…" vs "Hey {{name}}, I'm calling
+ * from…" — and batch {{variables}} come from the CSV. The system prompt is
+ * the ONE behavior definition (owner 2026-07-21 — the Persona block was a
+ * wireframe invention and is gone).
  *
  * Returns a FRAGMENT of SectionRows ([label | content], owner 2026-07-21):
  * the sub-question lives on the LHS, controls on the RHS.
  */
-export function SectionPrompt({
-  draft,
-  update,
-  onPickVoice,
-}: StepProps & {
-  /** Jump to Voice & speech › Voice — the persona block must never be a
-   *  dead end (owner 2026-07-17: it read as "empty and unclickable"). */
-  onPickVoice?: () => void
-}) {
+export function SectionPrompt({ draft, update }: StepProps) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
-
-  // Persona rides the selected voice artifact (customs in localStorage —
-  // load after mount, same idiom as step-voice). Read-only here: voice
-  // customization left the builder (owner 2026-07-17 — selection only).
-  const [voices, setVoices] = React.useState<VoiceArtifact[]>(PRESET_VOICES)
-  React.useEffect(() => { setVoices(allVoices()) }, [])
-  const selected = draft.voice ? voices.find((v) => v.id === draft.voice!.id) : undefined
 
   // Channel-aware helper copy: the greeting example follows the chosen channel
   // (v3 rule 2 — the fork determines the words).
@@ -92,42 +73,10 @@ export function SectionPrompt({
         />
       </SectionRow>
 
-      {/* 3 — Persona (personality · tone). Read-only: it comes with the
-          selected voice. Precedence stated once (user-test 2026-07-21, all 3
-          personas): two behavior definitions on one page must say which wins. */}
-      <SectionRow
-        id="wz-2-persona"
-        label={<span className="flex items-center gap-2"><UserRound className="h-4 w-4 text-muted-foreground" aria-hidden /> Persona</span>}
-        hint={selected ? `Comes with ${selected.name}, the selected voice.` : "Comes with the voice you pick."}
-      >
-        {selected ? (
-          <dl className="space-y-1.5 rounded-lg border border-border bg-card p-4 text-sm">
-            <div className="flex flex-wrap items-baseline gap-x-1.5">
-              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Personality</dt>
-              <dd className="min-w-0">{selected.personality}</dd>
-            </div>
-            <div className="flex flex-wrap items-baseline gap-x-1.5">
-              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tone</dt>
-              <dd>{selected.tone}</dd>
-            </div>
-            {/* Contract copy echoes AT the control it governs, nested behind a
-                dotted hint (owner 2026-07-21: reduce upfront text). */}
-            <div className="border-t border-border pt-2">
-              <InfoHint label="Persona vs system prompt — which wins?">
-                Personality and tone flavor <em>how</em> {selected.name} sounds — your system
-                prompt decides <em>what</em> it says.
-              </InfoHint>
-            </div>
-          </dl>
-        ) : (
-          <p className="text-sm text-muted-foreground">No voice selected yet.</p>
-        )}
-        <div>
-          <Button variant="outline" size="sm" onClick={onPickVoice}>
-            {selected ? "Change voice" : "Pick a voice"}
-          </Button>
-        </div>
-      </SectionRow>
+      {/* NO Persona block (owner 2026-07-21: "we only had system prompt —
+          where did Persona come from?"). The voice-artifact personality/tone
+          seed was a wireframe invention; the ONE behavior definition is the
+          system prompt above. Voice picking lives in Voice & speech. */}
     </>
   )
 }
