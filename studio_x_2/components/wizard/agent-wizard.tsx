@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, CircleCheck, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -901,12 +901,6 @@ export function AgentWizard({
   // a blocked draft, or an already-deployed code agent gets the outline.
   const deployHot = isLive ? anyEdited : codeDeployed ? false : !blockReason
 
-  // ── Lazyweb design-improve (2026-07-20, report ccf47285) ──────────────────
-  // F2 "Agent Recipe": the build-log strip's validation readout — derived from
-  // the draft (wireframe-honest), listing the artifacts that compile right now.
-  const buildValidated = [typeDone && "channel", promptDone && "prompt", voiceDone && "voice"].filter(
-    Boolean,
-  ) as string[]
 
   // Three-column shell (Figma "Shell Exploration", 2026-07-15): the agent
   // lives in a persistent right preview panel; the header owns identity +
@@ -1070,10 +1064,14 @@ export function AgentWizard({
                   {g.label}
                 </p>
                 {g.steps.map((n) => {
-                  const Icon = STEP_ICONS[n]
                   const active = n === selected
                   return (
                     <React.Fragment key={n}>
+                      {/* LEADING check/dot, exactly the Realtime Services list
+                          treatment (Figma 536-20831, owner 2026-07-21): a small
+                          success check for configured sections, a muted dot
+                          otherwise — it replaces both the section icon and the
+                          old trailing tick. */}
                       <button
                         type="button"
                         onClick={() => openRow(n)}
@@ -1084,16 +1082,15 @@ export function AgentWizard({
                           active && "bg-accent/60",
                         )}
                       >
-                        <Icon className={cn("h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
+                        <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
+                          {isDone(n) ? (
+                            <Check className="h-3.5 w-3.5 text-success/80" />
+                          ) : (
+                            <span className="size-1.5 rounded-full bg-muted-foreground/40" />
+                          )}
+                        </span>
                         <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
-                        {/* Completion tick (Lazyweb F1): the rail owns progress —
-                            devs see where they are without opening anything. */}
-                        {isDone(n) && (
-                          <>
-                            <Check className="h-3.5 w-3.5 shrink-0 text-success/80" aria-hidden />
-                            <span className="sr-only">(done)</span>
-                          </>
-                        )}
+                        {isDone(n) && <span className="sr-only">(done)</span>}
                       </button>
                     </React.Fragment>
                   )
@@ -1150,10 +1147,6 @@ export function AgentWizard({
         <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l xl:border-r">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => {
             const Icon = STEP_ICONS[n]
-            // The section's compiled output (Lazyweb F2 "Agent Recipe"): each
-            // band reads as a build artifact — "output: inbound · +1 …" — not
-            // a flat form header. Sections 6–7 produce actions, not artifacts.
-            const artifact = n <= 5 ? artifactLine(n, draft, cardVoice?.name) : null
             return (
               <section
                 key={n}
@@ -1181,16 +1174,9 @@ export function AgentWizard({
                   >
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
-                    {/* The band's mono output line (Lazyweb F2): what this
-                        section compiles to right now — so a collapsed section
-                        still states its artifact. md+ only; small screens keep
-                        the lean header. */}
-                    {artifact != null && (
-                      <span className="ml-auto hidden min-w-0 shrink truncate text-right font-mono text-xs text-muted-foreground/60 md:block">
-                        output: {artifact || "—"}
-                      </span>
-                    )}
-                    <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", artifact == null ? "ml-auto" : "ml-auto md:ml-0", expandedSteps[n] && "rotate-180")} aria-hidden />
+                    {/* No mono "output:" artifact line (owner 2026-07-21: it
+                        complicated every band — compiler-speak out). */}
+                    <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedSteps[n] && "rotate-180")} aria-hidden />
                   </button>
                   {/* LIVE agents only: with autosave there is no Save/Cancel, so
                       this is the one way back to the deployed config. HIDDEN
@@ -1380,25 +1366,8 @@ export function AgentWizard({
               </section>
             )
           })}
-          {/* Build log (Lazyweb F2 "Agent Recipe"): the compile readout closing
-              the config column — which artifacts validate right now, derived
-              live from the draft. The divide-y column gives it its top rule. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3">
-            <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <CircleCheck className="h-3.5 w-3.5" aria-hidden /> Build log
-            </span>
-            <span className="min-w-0 font-mono text-xs text-muted-foreground/60">
-              validated:{" "}
-              {buildValidated.length
-                ? buildValidated.map((v, i) => (
-                    <React.Fragment key={v}>
-                      {i > 0 && " · "}
-                      <span className="text-primary">{v}</span>
-                    </React.Fragment>
-                  ))
-                : "nothing yet — pick a channel to start"}
-            </span>
-          </div>
+          {/* No "Build log / validated:" strip either (owner 2026-07-21: the
+              mono compiler-speak family — output/validated — is out). */}
         </div>
 
         {/* Third column: the persistent agent preview (xl+ only — no phantom
@@ -1722,28 +1691,3 @@ function channelLine(d: AgentDraft): string {
   return label === target ? label : `${label} · ${target}`
 }
 
-/** What a section compiles to right now — the band's mono "output:" line
- *  (Lazyweb design-improve 2026-07-20, Agent Recipe variant: the accordion
- *  reads as build artifacts, not a flat form). Empty string = nothing yet
- *  (the band renders an em dash). Sections 6–7 have no artifact. */
-function artifactLine(n: number, d: AgentDraft, voiceName?: string): string {
-  if (n === 1) return d.type ? channelLine(d) : ""
-  if (n === 2) {
-    const parts = [d.systemPrompt.trim() && "system", d.greeting.trim() && "greeting"].filter(Boolean)
-    return parts.join(" · ")
-  }
-  if (n === 3) {
-    const parts = [voiceName, d.stack.language ?? "English"].filter(Boolean)
-    return parts.join(" · ")
-  }
-  if (n === 4) return stackLine(d.stack)
-  if (n === 5) {
-    const parts = [
-      d.knowledge.length && `kb ${d.knowledge.length}`,
-      d.mcp.length && `mcp ${d.mcp.length}`,
-      d.connectors.length && `crm ${d.connectors.length}`,
-    ].filter(Boolean) as string[]
-    return parts.join(" · ")
-  }
-  return ""
-}

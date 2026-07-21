@@ -209,8 +209,11 @@ function SummaryRow({ label, value, pending }: { label: string; value: string; p
     <div className="flex min-w-0 flex-col gap-0.5">
       <span className="flex items-center gap-1.5">
         <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">{label}</span>
+        {/* Warning tone, NOT primary (owner 2026-07-21: primary chips in the
+            summary competed with the CTA color) — pending = "not live yet",
+            the same amber family as the rail's unsaved-changes line. */}
         {pending && (
-          <span className="rounded-sm border border-primary/40 bg-primary/10 px-1 font-mono text-xs lowercase text-primary">
+          <span className="rounded-sm border border-warning/40 bg-warning/10 px-1 text-xs lowercase text-warning">
             pending
           </span>
         )}
