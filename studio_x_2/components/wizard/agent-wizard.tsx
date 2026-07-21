@@ -1442,6 +1442,7 @@ export function AgentWizard({
             statusLabel={previewStatus}
             isLive={isLive}
             statusHint={landing ? "Sample agent — live on the Balanced stack until you change it in Models." : undefined}
+            statusNote={landing ? "Your sample agent, live on an Agora sandbox line — costs nothing until it takes real traffic." : undefined}
             latencyMs={cardEst.latencyMs}
             costPerMin={cardEst.costPerMin}
             summary={previewSummary}

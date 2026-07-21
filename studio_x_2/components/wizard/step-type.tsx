@@ -114,7 +114,8 @@ export function StepType({ draft, update, liveNote, displayType, liveType }: Ste
         <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
           Resources › Deployment Channels
         </a>
-        . Code / SDK and the web widget need none.
+        . Code / SDK and the web widget need none. The sample agent&apos;s number is an Agora
+        sandbox line — production numbers come in via SIP.
       </p>
     </div>
   )

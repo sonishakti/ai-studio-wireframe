@@ -54,8 +54,8 @@ export function SectionPrompt({
         id="wz-2-prompt"
         label="System prompt"
         hint={draft.type
-          ? `What ${draft.name || "your agent"} says on ${typeLabel(draft.type)}.`
-          : "What your agent says. Pick a channel first to shape the words."}
+          ? `How ${draft.name || "your agent"} behaves on ${typeLabel(draft.type)} — instructions, rules, and what it says.`
+          : "How your agent behaves — instructions, rules, and what it says. Pick a channel first to shape the words."}
       >
         <Textarea
           id="wz-prompt"

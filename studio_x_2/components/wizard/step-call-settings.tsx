@@ -266,8 +266,8 @@ function HangupSettings({ draft, update }: StepProps) {
           />
           <p className="text-xs text-muted-foreground">
             Call ends after {cb.silenceTimeoutSec} seconds of no response. Different from the
-            turn-taking silence in Voice &amp; speech › Advanced — that one shapes when the agent
-            replies; this one ends the call.
+            turn-taking silence in Voice &amp; speech › Turn-taking &amp; interruptions — that one
+            shapes when the agent replies; this one ends the call.
           </p>
         </div>
       )}

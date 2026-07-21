@@ -41,6 +41,7 @@ export function AgentPreviewPanel({
   statusLabel,
   isLive,
   statusHint,
+  statusNote,
   latencyMs,
   costPerMin,
   summary,
@@ -60,6 +61,10 @@ export function AgentPreviewPanel({
   statusLabel: string
   isLive: boolean
   statusHint?: string
+  /** ON-SURFACE provenance line under the badges (user-test 2026-07-21: the
+   *  hover-only statusHint left "Live on a number I never bought — is this
+   *  billing me?" unanswered for skimmers who never hover). */
+  statusNote?: string
   latencyMs: number
   costPerMin: number
   summary: AgentPreviewSummary
@@ -157,6 +162,11 @@ export function AgentPreviewPanel({
             </Badge>
           )}
         </div>
+        {statusNote && (
+          <p className="mx-auto -mt-2 max-w-[280px] pb-2 text-center text-xs text-muted-foreground">
+            {statusNote}
+          </p>
+        )}
 
         {view === "widget" && widgetAgentId ? (
           <WidgetPreviewCard agentId={widgetAgentId} greeting={widgetGreeting} />

@@ -15,6 +15,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
+import { toast } from "sonner"
 import { StateBanner } from "@/components/usage-spend-card"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
@@ -49,12 +50,18 @@ function flaggedTurnIndex(result: EvalCaseResult): number | undefined {
 }
 
 export function TestsSection({ agentName: _agentName = "your agent" }: { agentName?: string }) {
-  const suite = EVAL_SUITE
   const run = EVAL_RUN
   const stats = evalRunStats(run)
+  // The suite is STATE so authored cases actually land in the table —
+  // "Add case" silently discarding work was the round-6 #1 trust break.
+  const [cases, setCases] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
   const [addOpen, setAddOpen] = React.useState(false)
   const [running, setRunning] = React.useState<EvalCase | null>(null)
   const [openResult, setOpenResult] = React.useState<EvalCaseResult | null>(null)
+  // "Run all" runs the SUITE (round-6: opening one case's sheet read as the
+  // other two vanishing) — brief running state, then a summary line.
+  const [runningAll, setRunningAll] = React.useState(false)
+  const [lastRunNote, setLastRunNote] = React.useState<string | null>(null)
   const resultFor = (id: string) => run.results.find((r) => r.caseId === id)
 
   // 2026-07-21 (owner): the Test section IS this feature — test scenarios from
@@ -62,17 +69,39 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
   // sidecar under a "start test call" button. The hosting SectionRow carries
   // the title + description, so the header here is just the actions.
 
+  const runAll = () => {
+    track(Events.suite_run_all, {})
+    setRunningAll(true)
+    window.setTimeout(() => {
+      setRunningAll(false)
+      const notRun = cases.length - run.results.length
+      setLastRunNote(
+        `Last run just now — ${stats.passed} passed · ${stats.total - stats.passed} failed${notRun > 0 ? ` · ${notRun} not run (new case)` : ""}`,
+      )
+      toast(`${stats.total} scenario${stats.total === 1 ? "" : "s"} ran`, {
+        description: `${stats.passed} passed · ${stats.total - stats.passed} failed. Open a row for the transcript.`,
+      })
+    }, 1200)
+  }
+
   return (
     <section className="space-y-3">
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {/* Failing ↔ Deploy relationship, stated where the red pill lives
+            (round-6: the pill sat two sections above Deploy with no stated
+            relationship). */}
+        <p className="text-xs text-muted-foreground">
+          Failing scenarios don&apos;t block deploy — they flag prompt gaps to fix.
+        </p>
         <div className="flex items-center gap-2">
           <Button
             size="sm"
             variant="outline"
             className="gap-1.5"
-            onClick={() => { track(Events.suite_run_all, {}); setRunning(suite.cases[1]) }}
+            disabled={runningAll}
+            onClick={runAll}
           >
-            <Play className="h-3.5 w-3.5" /> Run all ({suite.cases.length})
+            <Play className="h-3.5 w-3.5" /> {runningAll ? "Running…" : `Run all (${cases.length})`}
           </Button>
           <Button size="sm" className="gap-1.5" onClick={() => setAddOpen(true)}>
             <Plus className="h-3.5 w-3.5" /> Add case
@@ -84,11 +113,11 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
       <div className="overflow-hidden rounded-lg border border-border">
         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
           <span className="font-medium">
-            {stats.passed}/{stats.total} passing
+            {stats.passed}/{stats.total} passing{lastRunNote ? <span className="font-normal text-muted-foreground"> · {lastRunNote}</span> : null}
           </span>
-          <StatusPill allPass={stats.allPass} />
+          <StatusPill passed={stats.passed} total={stats.total} />
         </div>
-        {suite.cases.map((c) => {
+        {cases.map((c) => {
           const res = resultFor(c.id)
           return (
             <div key={c.id} className="flex items-center gap-3 border-b border-border px-3 py-2.5 last:border-b-0">
@@ -125,18 +154,27 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
         })}
       </div>
 
-      <AddCaseSheet open={addOpen} onOpenChange={setAddOpen} />
+      <AddCaseSheet
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSave={(c) => {
+          setCases((prev) => [...prev, c])
+          toast.success(`"${c.name}" added to the suite`, { description: "It runs with the next Run all." })
+        }}
+      />
       <RunSheet caseItem={running} onOpenChange={(o) => !o && setRunning(null)} result={running ? resultFor(running.id) : undefined} />
-      <ResultSheet result={openResult} caseItem={openResult ? suite.cases.find((c) => c.id === openResult.caseId) : undefined} onOpenChange={(o) => !o && setOpenResult(null)} />
+      <ResultSheet result={openResult} caseItem={openResult ? cases.find((c) => c.id === openResult.caseId) : undefined} onOpenChange={(o) => !o && setOpenResult(null)} />
     </section>
   )
 }
 
-function StatusPill({ allPass }: { allPass: boolean }) {
+function StatusPill({ passed, total }: { passed: number; total: number }) {
+  const allPass = passed === total
+  const failing = total - passed
   return (
     <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5", allPass ? "text-success" : "text-destructive")}>
       {allPass ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-      {allPass ? "All tests pass" : "1 test failing"}
+      {allPass ? "All tests pass" : `${failing} test${failing === 1 ? "" : "s"} failing`}
     </span>
   )
 }
@@ -251,12 +289,16 @@ export function AddCaseSheet({
   open,
   onOpenChange,
   prefill,
+  onSave,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
   /** Save-a-real-call-as-a-test: pre-fill persona + transcript, ask only for
    *  the assertion (R5 — the whitespace). */
   prefill?: { identity: string; goal: string; personality: string; transcript: EvalTurn[]; callId: string }
+  /** Receives the authored case — the host appends it to its suite. Without
+   *  this the sheet silently discarded work (user-test 2026-07-21 round 6). */
+  onSave?: (c: EvalCase) => void
 }) {
   const [name, setName] = React.useState("")
   const [persona, setPersona] = React.useState({ identity: "", goal: "", personality: "" })
@@ -278,6 +320,13 @@ export function AddCaseSheet({
 
   function save() {
     track(prefill ? Events.save_call_as_test : Events.test_authored, {})
+    onSave?.({
+      id: `ec_${Date.now().toString(36)}`,
+      name: name.trim(),
+      persona: { ...persona },
+      assertions: [{ id: "a1", kind, text: assertion.trim() }],
+      ...(prefill ? { fromCallId: prefill.callId } : {}),
+    })
     onOpenChange(false)
   }
 
