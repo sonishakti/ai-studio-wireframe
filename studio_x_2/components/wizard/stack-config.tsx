@@ -273,7 +273,7 @@ export function StackModelPicker({
                 </Select>
                 {personaName && (
                   <p className="text-xs text-muted-foreground">
-                    The vendor sound {personaName} speaks with. Picking a new voice in Voice &amp; speech resets it.
+                    The vendor sound {personaName} speaks with. Picking a new voice in Voice &amp; speech resets this to that voice&apos;s default sound.
                   </p>
                 )}
               </div>

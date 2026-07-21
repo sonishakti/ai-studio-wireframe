@@ -92,6 +92,12 @@ export function StepVoice({
           </div>
           <p className="text-xs text-muted-foreground">
             Picking a voice fills in the prompt and greeting while they&apos;re empty.
+            {/* Two-layer reconciliation ECHOED here, not only in Models (user-test
+                2026-07-21 verification, S3 residual #8): the persona and its
+                vendor sound must meet on the page where the persona is picked. */}
+            {selected && draft.stack.tts.voice && (
+              <> {selected.name} speaks with the <span className="font-mono capitalize">{draft.stack.tts.voice}</span> TTS sound — swap the sound in Models.</>
+            )}
           </p>
         </div>
 

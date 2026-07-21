@@ -61,9 +61,18 @@ export function StepType({ draft, update, liveNote, displayType, liveType }: Ste
           How will {draft.name || "your agent"} handle calls?
         </h4>
         {/* Pre-click consequence for a LIVE agent: say what switching does BEFORE
-            the click; the stash+Undo toast stays as the recovery layer (user-test
-            P1: "ask me first, don't console me after"). */}
-        {liveNote ? <p className="text-xs text-muted-foreground">{liveNote}</p> : null}
+            the click; the stash+Undo toast stays as the recovery layer. A muted
+            caption was skimmed past (user-test 2026-07-21 verification, P0 #2) —
+            warning-toned so the consequence registers at the point of choice,
+            with the keep-both alternative on the same line. */}
+        {liveNote ? (
+          <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
+            {liveNote}{" "}
+            <a href="/agents/new/edit" className="underline underline-offset-2 text-muted-foreground hover:text-foreground">
+              Want both channels? Create a second agent instead.
+            </a>
+          </p>
+        ) : null}
       </div>
 
       <RadioCardGroup

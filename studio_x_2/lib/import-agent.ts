@@ -27,7 +27,11 @@ export type ImportSource = (typeof IMPORT_SOURCES)[number]
 export interface MappedField {
   /** Source-side path, e.g. `response_engine.general_prompt`. */
   theirs: string
-  /** Where it landed in the builder, e.g. "Prompt · Step 3". */
+  /** Where it landed in the builder, e.g. "System prompt · Prompt". Landing
+   *  labels speak the CURRENT section names (Channel · Prompt · Voice & speech
+   *  · Models · Knowledge & Tools) — "Step N" vocabulary died with the v3
+   *  rebuild and stale labels break the report's honesty contract (user-test
+   *  2026-07-21 verification round, ranked #3). */
   ours: string
   /** Short human preview of the carried value. */
   value: string
@@ -111,12 +115,12 @@ function catalogLlm(model: string | undefined) {
 
 /** Where each carried field lands, in the builder's own vocabulary. */
 const LANDS = {
-  name: "Agent name · Step 1",
-  prompt: "Prompt · Step 3",
-  greeting: "Greeting · Step 3",
-  voice: "Voice · Step 1",
-  llm: "LLM · Step 1 engine",
-  language: "Language · Step 1",
+  name: "Agent name · builder header",
+  prompt: "System prompt · Prompt",
+  greeting: "Greeting · Prompt",
+  voice: "Voice · Voice & speech",
+  llm: "LLM · Models",
+  language: "Language · Voice & speech",
 } as const
 
 interface Found {
@@ -159,7 +163,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
     mapped.push({ theirs: found.name.path, ours: LANDS.name, value: trunc(found.name.value, 40) })
   } else {
     name = `${source === "Generic JSON" ? "Imported" : source} agent`
-    warnings.push(`No agent name in the export — we called it “${name}”. Rename it in Step 1.`)
+    warnings.push(`No agent name in the export — we called it “${name}”. Rename it in the builder header.`)
   }
   if (found.prompt) {
     mapped.push({
@@ -182,7 +186,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.voice) {
     dropped.push({
       theirs: found.voice.path,
-      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Step 1.`,
+      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Voice & speech.`,
     })
   }
   const llm = catalogLlm(found.model?.value)
@@ -191,7 +195,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.model) {
     dropped.push({
       theirs: found.model.path,
-      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Step 1.`,
+      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Models.`,
     })
   }
   const lang = languageLabelFor(found.language?.value)
@@ -200,13 +204,13 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.language) {
     dropped.push({
       theirs: found.language.path,
-      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Step 1.`,
+      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Voice & speech.`,
     })
   }
   if (found.tools?.names.length) {
     dropped.push({
       theirs: `${found.tools.path} (${found.tools.names.length})`,
-      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Step 3 · Resources.`,
+      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Knowledge & Tools.`,
     })
   }
 
@@ -237,7 +241,7 @@ const META_KEYS = new Set([
  *  listed falls back to an honest generic line.
  *
  *  HONESTY RULE (user-test #7 P0): a reason may only point somewhere that
- *  EXISTS — Advanced's turn-taking/speech sections, Step 3 Resources, the
+ *  EXISTS — Advanced's turn-taking/speech sections, Knowledge & Tools, the
  *  Analysis section, Step-1 engine, the deployment's CSV columns, and (since
  *  27025fc) Channel › Call settings & schedule (hang-up · voicemail · silence
  *  · max duration · transfer). Anything without a real landing spot says
@@ -249,9 +253,9 @@ const DROP_REASONS: Record<string, string> = {
   server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverMessages: "Server event streams aren't supported yet.",
-  states: "Conversation states don't port — express the flow in your prompt (Step 3).",
-  starting_state: "Conversation states don't port — express the flow in your prompt (Step 3).",
-  pathway_id: "Bland pathways don't port — express the flow in your prompt (Step 3).",
+  states: "Conversation states don't port — express the flow in your system prompt (the Prompt section).",
+  starting_state: "Conversation states don't port — express the flow in your system prompt (the Prompt section).",
+  pathway_id: "Bland pathways don't port — express the flow in your system prompt (the Prompt section).",
   voicemail_detection: "Voicemail detection re-enables as a toggle in Channel › Call settings — the vendor setting itself doesn't port.",
   voicemailMessage: "Leaving a voicemail message isn't supported — voicemail detection (hang up on machines) is a toggle in Channel › Call settings.",
   voicemailDetection: "Voicemail detection re-enables as a toggle in Channel › Call settings — the vendor setting itself doesn't port.",
@@ -262,11 +266,11 @@ const DROP_REASONS: Record<string, string> = {
   artifactPlan: "Recording settings live in the Analysis section.",
   post_call_analysis_data: "Post-call analysis is configured in the Analysis section.",
   post_call_analysis_model: "Post-call analysis is configured in the Analysis section.",
-  knowledge_base_ids: "Knowledge re-attaches in Step 3 · Resources.",
-  knowledge_base: "Knowledge re-attaches in Step 3 · Resources.",
+  knowledge_base_ids: "Knowledge re-attaches in Knowledge & Tools.",
+  knowledge_base: "Knowledge re-attaches in Knowledge & Tools.",
   platform_settings: "Platform/auth settings stay vendor-specific.",
-  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Step 1.",
-  asr: "ASR maps to Agora's bundled STT — tune it in Step 1.",
+  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Models.",
+  asr: "ASR maps to Agora's bundled STT — tune it in Models.",
   turn: "Turn-taking tuning lives in Advanced.",
   conversation: "Conversation limits stay vendor-specific.",
   ambient_sound: "Ambient audio isn't supported yet.",
@@ -291,10 +295,10 @@ const DROP_REASONS: Record<string, string> = {
   default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns.",
   voice_speed: "Voice tuning stays vendor-specific.",
   voice_temperature: "Voice tuning stays vendor-specific.",
-  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Step 1.",
+  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Models.",
   fallback_voice_ids: "Voice fallbacks stay vendor-specific.",
   volume: "Voice tuning stays vendor-specific.",
-  firstMessageMode: "Who speaks first is part of the greeting (Step 3).",
+  firstMessageMode: "Who speaks first is part of the greeting (the Prompt section).",
   clientMessages: "Client event streams aren't configurable here yet.",
   metadata: "Freeform metadata isn't carried.",
   tags: "Tags aren't carried.",
@@ -431,9 +435,9 @@ function parseElevenLabs(p: Rec): VendorParse {
     for (const k of ["asr", "turn", "conversation"]) {
       if (rec(cc[k])) extra.push({ theirs: `conversation_config.${k}`, reason: DROP_REASONS[k] ?? "Voice-pipeline tuning stays vendor-specific." })
     }
-    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Step 1." })
+    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Models." })
     if (Array.isArray(promptObj?.knowledge_base) && (promptObj!.knowledge_base as unknown[]).length) {
-      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Step 3 · Resources." })
+      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Knowledge & Tools." })
     }
   }
   const consumed = new Set(["name", "conversation_config"])
@@ -455,7 +459,7 @@ function parseBland(p: Rec): VendorParse {
   }
   const extra: DroppedField[] = []
   const tier = str(p.model)
-  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Step 1.` })
+  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Models.` })
   const consumed = new Set(["name", "agent_name", "prompt", "task", "first_sentence", "voice", "voice_id", "language", "tools", "model"])
   return withSweep(assemble(found, "Bland", extra, []), p, consumed)
 }
