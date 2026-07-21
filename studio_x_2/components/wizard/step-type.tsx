@@ -52,28 +52,23 @@ export function StepType({ draft, update, liveNote, displayType, liveType }: Ste
   liveType?: AgentType | null
 }) {
   return (
-    // @container: reflow by the center column's real width (the shell can
-    // leave it ~280px at xl viewports), not the viewport.
-    <div className="@container space-y-5">
-      <div className="space-y-1">
-        {/* The question IS the heading (Figma 2026-07-14). */}
-        <h4 className="text-base font-medium">
-          How will {draft.name || "your agent"} handle calls?
-        </h4>
-        {/* Pre-click consequence for a LIVE agent: say what switching does BEFORE
-            the click; the stash+Undo toast stays as the recovery layer. A muted
-            caption was skimmed past (user-test 2026-07-21 verification, P0 #2) —
-            warning-toned so the consequence registers at the point of choice,
-            with the keep-both alternative on the same line. */}
-        {liveNote ? (
-          <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
-            {liveNote}{" "}
-            <a href="/agents/new/edit" className="underline underline-offset-2 text-muted-foreground hover:text-foreground">
-              Want both channels? Create a second agent instead.
-            </a>
-          </p>
-        ) : null}
-      </div>
+    // The question lives in the row LABEL now ([label | content] anatomy,
+    // owner 2026-07-21) — this component is the pure RHS: consequence banner
+    // (live agents) + the channel cards.
+    <div className="space-y-4">
+      {/* Pre-click consequence for a LIVE agent: say what switching does BEFORE
+          the click; the stash+Undo toast stays as the recovery layer. A muted
+          caption was skimmed past (user-test 2026-07-21 verification, P0 #2) —
+          warning-toned so the consequence registers at the point of choice,
+          with the keep-both alternative on the same line. */}
+      {liveNote ? (
+        <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
+          {liveNote}{" "}
+          <a href="/agents/new/edit" className="underline underline-offset-2 text-muted-foreground hover:text-foreground">
+            Want both channels? Create a second agent instead.
+          </a>
+        </p>
+      ) : null}
 
       <RadioCardGroup
         value={(displayType === undefined ? draft.type : displayType) ?? ""}

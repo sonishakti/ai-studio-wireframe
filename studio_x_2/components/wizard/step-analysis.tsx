@@ -26,6 +26,7 @@ export function StepAnalysis({
   value,
   onChange,
   channel = "call",
+  hideIntro,
 }: {
   value: AnalysisConfig | undefined
   onChange: (next: AnalysisConfig) => void
@@ -33,6 +34,8 @@ export function StepAnalysis({
    *  SESSIONS, not calls, and their transcripts land in Sessions — the same
    *  block must not promise "Call History" to an SDK integrator. */
   channel?: "call" | "session"
+  /** [label | content] hosting (2026-07-21): the row hint carries the intro. */
+  hideIntro?: boolean
 }) {
   const noun = channel
   const home = channel === "session" ? "Sessions" : "Call History"
@@ -52,9 +55,11 @@ export function StepAnalysis({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Choose what each {noun} records. Results appear in {home}.
-      </p>
+      {!hideIntro && (
+        <p className="text-sm text-muted-foreground">
+          Choose what each {noun} records. Results appear in {home}.
+        </p>
+      )}
 
       {/* Transcripts & recording — split toggles (Figma "Transcripts &
           Recording", node 2593-101785): transcripts gate the data points;

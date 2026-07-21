@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DEFAULT_ADVANCED, type AdvancedConfig } from "@/lib/wizard-draft"
+import { SectionRow } from "@/components/wizard/section-row"
 
 /**
  * Speech tuning (was the optional "Advanced" section — dissolved into Voice &
@@ -38,14 +39,15 @@ export function StepAdvanced({
   const patch = (p: Partial<AdvancedConfig>) => onChange({ ...adv, ...p })
 
   return (
-    // @container: preset cards reflow by real column width, not viewport.
-    <div className="@container space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Fine-tune how the agent listens and takes turns.
-      </p>
-
+    // [label | content] rows (owner 2026-07-21): two labeled groups, each its
+    // own row; the host's <SectionRows> owns the container + dividers.
+    <>
       {/* Turn-taking & interruptions (v3 TOC anchor). */}
-      <div id="wz-3-turntaking" className="scroll-mt-28 space-y-4">
+      <SectionRow
+        id="wz-3-turntaking"
+        label="Turn-taking & interruptions"
+        hint="Fine-tune how the agent listens and takes turns. Barge-in tuning lives here (Speaking interrupt duration)."
+      >
       {/* Turn detection */}
       <Sub
         icon={MessagesSquare}
@@ -149,10 +151,14 @@ export function StepAdvanced({
           </Sub>
         </>
       )}
-      </div>
+      </SectionRow>
 
       {/* Attention & filters (v3 TOC anchor). */}
-      <div id="wz-3-attention" className="scroll-mt-28 space-y-4">
+      <SectionRow
+        id="wz-3-attention"
+        label="Attention & filters"
+        hint="Who the agent listens to, and the filler patterns it holds for."
+      >
       {/* Selective attention locking */}
       <Sub
         icon={Lock}
@@ -194,10 +200,14 @@ export function StepAdvanced({
           onChange={(responseWaitMs) => patch({ filterWords: { ...adv.filterWords, responseWaitMs } })}
         />
       </Sub>
-      </div>
+      </SectionRow>
 
-      {showHistory && <HistoryField value={value} onChange={onChange} />}
-    </div>
+      {showHistory && (
+        <SectionRow label="Conversation history">
+          <HistoryField value={value} onChange={onChange} />
+        </SectionRow>
+      )}
+    </>
   )
 }
 
@@ -208,15 +218,23 @@ export function HistoryField({
   value,
   onChange,
   id,
+  bare,
 }: {
   value: AdvancedConfig | undefined
   onChange: (next: AdvancedConfig) => void
   /** Optional TOC scroll anchor (e.g. "wz-5-history"). */
   id?: string
+  /** [label | content] hosting (2026-07-21): the row label already says
+   *  "Conversation history" — render just the field, no card/title. */
+  bare?: boolean
 }) {
   const adv = value ?? DEFAULT_ADVANCED
   return (
-    <section id={id} className="scroll-mt-28 space-y-3 rounded-lg border border-border bg-card p-4">
+    <section
+      id={id}
+      className={bare ? "scroll-mt-28 space-y-3" : "scroll-mt-28 space-y-3 rounded-lg border border-border bg-card p-4"}
+    >
+      {!bare && (
       <div className="flex items-start gap-2.5">
         <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <Gauge className="h-4 w-4" aria-hidden />
@@ -226,6 +244,7 @@ export function HistoryField({
           <p className="text-xs text-muted-foreground">How much conversation the agent keeps in context.</p>
         </div>
       </div>
+      )}
       <div className="max-w-[200px] space-y-1.5">
         <Label htmlFor="adv-history" className="text-xs text-muted-foreground">Max history messages</Label>
         <IntInput

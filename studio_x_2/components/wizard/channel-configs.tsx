@@ -110,11 +110,12 @@ export function publishDeployment({
 
 // ─── Shared frame + button ────────────────────────────────────────────────────
 
-/** A titled card the channel config lives inside. */
-export function ConfigCard({ title, children }: { title: string; children: React.ReactNode }) {
+/** A titled card the channel config lives inside. Title is optional since the
+ *  builder's [label | content] rows carry the name on the LHS (2026-07-21). */
+export function ConfigCard({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-      <p className="text-sm font-semibold">{title}</p>
+      {title && <p className="text-sm font-semibold">{title}</p>}
       {children}
     </section>
   )

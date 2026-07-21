@@ -31,6 +31,7 @@ import {
   effectiveConnectorStatus,
 } from "@/lib/agent-resources"
 import type { StepProps } from "@/components/wizard/types"
+import { SectionRow } from "@/components/wizard/section-row"
 
 /**
  * Section 5 — Knowledge & Tools (v3 IA, 2026-07-17: Customize — only if
@@ -57,17 +58,14 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
   const [configMcp, setConfigMcp] = React.useState<string | null>(null)
 
   return (
-    <div className="space-y-5">
-      {/* No inner h2: the section header above already names this step. */}
-      <p className="text-sm text-muted-foreground">
-        Give {draft.name || "your agent"} docs to answer from and tools to act with.
-      </p>
-
-      <div className="space-y-4">
-        <div id="wz-5-kb" className="scroll-mt-28">
+    // [label | content] rows (owner 2026-07-21): each resource names itself on
+    // the LHS; the host's <SectionRows> owns the container.
+    <>
+        <SectionRow id="wz-5-kb" label="Knowledge base" hint="Ground answers in your docs.">
           <ResourceField
             icon={BookOpen}
             title="Knowledge base"
+            hideHeader
             description="Ground answers in your docs."
             items={kbs.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
             selectedIds={draft.knowledge}
@@ -79,12 +77,13 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
               onCreated: refresh,
             }}
           />
-        </div>
+        </SectionRow>
 
-        <div id="wz-5-mcp" className="scroll-mt-28">
+        <SectionRow id="wz-5-mcp" label="MCP server" hint="Give it tools: CRM, calendar, APIs.">
           <ResourceField
             icon={Plug}
             title="MCP server"
+            hideHeader
             description="Give it tools: CRM, calendar, APIs."
             items={mcps.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools`, config: !!getUserMcpServer(m.id) }))}
             selectedIds={draft.mcp}
@@ -98,12 +97,13 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
             onConfigure={(id) => setConfigMcp(id)}
             onDelete={(id) => { deleteMcpServer(id); update({ mcp: draft.mcp.filter((x) => x !== id) }); refresh() }}
           />
-        </div>
+        </SectionRow>
 
-        <div id="wz-5-connectors" className="scroll-mt-28">
+        <SectionRow id="wz-5-connectors" label="Connectors" hint="Connect apps like HubSpot and Google Calendar.">
           <ResourceField
             icon={Boxes}
             title="Connectors"
+            hideHeader
             description="Connect apps like HubSpot and Google Calendar."
             items={CONNECTORS.map((c) => {
               const s = effectiveConnectorStatus(c)
@@ -127,13 +127,11 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
               </button>
             }
           />
-        </div>
-
-      </div>
+        </SectionRow>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}
       <McpToolsSheet id={configMcp} onClose={() => setConfigMcp(null)} onSaved={refresh} />
-    </div>
+    </>
   )
 }
 
@@ -170,10 +168,14 @@ function ResourceField({
   onConfigure,
   onDelete,
   footer,
+  hideHeader,
 }: {
   icon: React.ComponentType<{ className?: string }>
   title: string
   description: string
+  /** [label | content] hosting (2026-07-21): the row label carries the
+   *  title/description — skip the in-card header. */
+  hideHeader?: boolean
   items: AttachItem[]
   selectedIds: string[]
   onChange: (ids: string[]) => void
@@ -200,6 +202,7 @@ function ResourceField({
 
   return (
     <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+      {!hideHeader && (
       <div className="flex items-start gap-2.5">
         <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
           <Icon className="h-4 w-4" />
@@ -209,6 +212,7 @@ function ResourceField({
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
       </div>
+      )}
 
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

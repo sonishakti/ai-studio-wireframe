@@ -28,6 +28,7 @@ import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
 import { CallSettings } from "@/components/wizard/step-call-settings"
 import { StepAnalysis } from "@/components/wizard/step-analysis"
+import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { StackTradeoffSlider, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { TestsSection } from "@/components/eval-tests"
 import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle, stepToc } from "@/components/wizard/types"
@@ -1305,15 +1306,17 @@ export function AgentWizard({
                 {/* Body renders only when the section is expanded (accordion). */}
                 {expandedSteps[n] && (
                 <div id={`wizard-step-${n}-body`} className="p-5">
-                  <div className={cn("min-w-0", n !== 1 && "max-w-4xl")}>
+                  <div className={cn("min-w-0", n !== 1 && "max-w-5xl")}>
+                  {/* Every section is a stack of [label | content] rows (owner
+                      2026-07-21 screenshot direction): LHS carries ONLY the
+                      sub-question's name, RHS the controls — legibility +
+                      whitespace over density. */}
                   {/* 1 · CHANNEL — the fork. The cards start UNSELECTED (even
                       on a saved agent — the liveNote + panel summary state the
-                      live channel); config flows in below only after a pick,
-                      with NO separators, so it reads as one continuous flow
-                      (owner 2026-07-17). */}
+                      live channel); config rows flow in below after a pick. */}
                   {n === 1 && (
-                    <div className="space-y-6">
-                      <div id="wz-1-pick" className="scroll-mt-28 max-w-4xl">
+                    <SectionRows>
+                      <SectionRow id="wz-1-pick" label={`How will ${draft.name || "your agent"} handle calls?`}>
                         <StepType
                           draft={draft}
                           displayType={channelTouched ? undefined : null}
@@ -1323,122 +1326,142 @@ export function AgentWizard({
                             : undefined}
                           liveType={isLive ? baseline.current?.type ?? null : null}
                         />
-                      </div>
+                      </SectionRow>
                       {channelTouched && draft.type && (
-                        <div id="wz-1-setup" className="scroll-mt-28">
-                          <StepConfigure
-                            draft={draft}
-                            update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
-                            onChooseType={() => openAnchor(1, "wz-1-pick")}
-                          />
-                        </div>
+                        <StepConfigure
+                          draft={draft}
+                          update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
+                          onChooseType={() => openAnchor(1, "wz-1-pick")}
+                        />
                       )}
                       {channelTouched && draft.type === "outbound" && (
-                        <div id="wz-1-callsettings" className="scroll-mt-28 space-y-3">
-                          <p className="text-sm font-medium">Call settings &amp; schedule</p>
-                          <CallSettings draft={draft} update={update} />
-                        </div>
+                        <CallSettings draft={draft} update={update} />
                       )}
-                    </div>
+                    </SectionRows>
                   )}
                   {/* 2 · PROMPT — the words, rewritten for the channel. */}
-                  {n === 2 && <SectionPrompt draft={draft} update={update} onPickVoice={() => openAnchor(3, "wz-3-voice")} />}
+                  {n === 2 && (
+                    <SectionRows>
+                      <SectionPrompt draft={draft} update={update} onPickVoice={() => openAnchor(3, "wz-3-voice")} />
+                    </SectionRows>
+                  )}
                   {/* 3 · VOICE & SPEECH (Customize) — voice, language/STT, and
                       the dissolved Advanced speech tuning. */}
                   {n === 3 && (
-                    <div className="space-y-8">
+                    <SectionRows>
                       <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />
-                      <div className="border-t border-border pt-6">
-                        <StepAdvanced
-                          value={draft.advanced}
-                          onChange={(advanced) => update({ advanced })}
-                          realtime={draft.stack.pipeline === "mllm"}
-                          showHistory={false}
-                        />
-                      </div>
-                    </div>
+                      <StepAdvanced
+                        value={draft.advanced}
+                        onChange={(advanced) => update({ advanced })}
+                        realtime={draft.stack.pipeline === "mllm"}
+                        showHistory={false}
+                      />
+                    </SectionRows>
                   )}
                   {/* 4 · MODELS (Customize) — pipeline, the latency↔cost
                       slider, and the ALWAYS-VISIBLE model selects (owner
                       2026-07-17), plus BYOK. Stack edits go through
                       updateStack (spy mute + scroll pinning). */}
                   {n === 4 && (
-                    <div className="space-y-8">
-                      <div id="wz-4-arch" className="scroll-mt-28">
-                        <StackModelsDetail stack={draft.stack} onChange={updateStack} showPicker={false} />
-                      </div>
-                      <div id="wz-4-model" className="scroll-mt-28 space-y-8">
-                        <StackTradeoffSlider stack={draft.stack} onChange={updateStack} />
-                        <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} />
-                        {/* BYOK lives WITH the model selects — override the
-                            ASR/LLM/TTS vendors with your own keys (owner
-                            2026-07-17; was oddly placed in Knowledge & Tools). */}
-                        <div className="flex items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
-                          <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                          <p className="text-xs text-muted-foreground">
-                            Using your own vendor accounts? Add keys in{" "}
-                            <a href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
-                              Manage › Vendor Credentials
-                            </a>{" "}
-                            — the ASR, LLM, and TTS you pick here will use them.
-                          </p>
+                    <SectionRows>
+                      <SectionRow id="wz-4-arch" label="Pipeline" hint="One model that hears and speaks, or a tunable cascade.">
+                        <StackModelsDetail stack={draft.stack} onChange={updateStack} showPicker={false} hideTitle />
+                      </SectionRow>
+                      <SectionRow
+                        id="wz-4-model"
+                        label={draft.stack.pipeline === "mllm" ? "Realtime model" : "Models"}
+                        hint="Trade latency against cost, then pick each vendor."
+                      >
+                        <div className="space-y-8">
+                          <StackTradeoffSlider stack={draft.stack} onChange={updateStack} />
+                          <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} hideTitle />
+                          {/* BYOK lives WITH the model selects — override the
+                              ASR/LLM/TTS vendors with your own keys (owner
+                              2026-07-17; was oddly placed in Knowledge & Tools). */}
+                          <div className="flex items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
+                            <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                            <p className="text-xs text-muted-foreground">
+                              Using your own vendor accounts? Add keys in{" "}
+                              <a href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
+                                Manage › Vendor Credentials
+                              </a>{" "}
+                              — the ASR, LLM, and TTS you pick here will use them.
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      </SectionRow>
                       {/* Conversation history is MODEL config — how much
                           context the LLM keeps — not a tool (owner
                           2026-07-17: it read as oddly placed in Tools). */}
-                      <HistoryField
-                        id="wz-4-history"
-                        value={draft.advanced}
-                        onChange={(advanced) => update({ advanced })}
-                      />
-                    </div>
+                      <SectionRow id="wz-4-history" label="Conversation history" hint="How much conversation the agent keeps in context.">
+                        <HistoryField
+                          value={draft.advanced}
+                          onChange={(advanced) => update({ advanced })}
+                          bare
+                        />
+                      </SectionRow>
+                    </SectionRows>
                   )}
                   {/* 5 · KNOWLEDGE & TOOLS (Customize). */}
-                  {n === 5 && <SectionKnowledgeTools draft={draft} update={update} />}
+                  {n === 5 && (
+                    <SectionRows>
+                      <SectionKnowledgeTools draft={draft} update={update} />
+                    </SectionRows>
+                  )}
                   {/* 6 · TEST (Ship) — try the agent before deploying: the
                       simulated test call + (gated) eval suites. */}
                   {n === 6 && (
-                    <div className="space-y-8">
-                      <div id="wz-6-test" className="scroll-mt-28 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          Talk to {draft.name || "your agent"} with the current prompt and voice.
-                        </p>
-                        <Button variant="secondary" size="sm" className="shrink-0 gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
-                          <Mic className="h-3.5 w-3.5" aria-hidden /> Start a test call
-                        </Button>
-                      </div>
-                      {/* Evals (F-Eval) — future-scope-gated; renders nothing
-                          unless the flag is on. */}
-                      <TestsSection agentName={draft.name || "your agent"} />
-                    </div>
+                    <SectionRows>
+                      <SectionRow
+                        id="wz-6-test"
+                        label="Test call"
+                        hint={`Talk to ${draft.name || "your agent"} with the current prompt and voice.`}
+                      >
+                        <div>
+                          <Button variant="secondary" size="sm" className="shrink-0 gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
+                            <Mic className="h-3.5 w-3.5" aria-hidden /> Start a test call
+                          </Button>
+                        </div>
+                        {/* Evals (F-Eval) — future-scope-gated; renders nothing
+                            unless the flag is on. */}
+                        <TestsSection agentName={draft.name || "your agent"} />
+                      </SectionRow>
+                    </SectionRows>
                   )}
                   {/* 7 · GO LIVE — what each call records (transcripts ·
                       recording · success eval · data points — the v3 "Analysis
                       → Go live" fold, finally wired 2026-07-21) + review &
                       deploy. */}
                   {n === 7 && (
-                    <div className="space-y-8">
-                      <div id="wz-7-capture" className="scroll-mt-28 space-y-3">
-                        <p className="text-sm font-medium">Transcripts, recording &amp; analysis</p>
+                    <SectionRows>
+                      <SectionRow
+                        id="wz-7-capture"
+                        label="Transcripts, recording & analysis"
+                        hint={draft.type === "code"
+                          ? "Choose what each session records. Results appear in Sessions."
+                          : "Choose what each call records. Results appear in Call History."}
+                      >
                         <StepAnalysis
                           value={draft.analysis}
                           onChange={(analysis) => update({ analysis })}
                           channel={draft.type === "code" ? "session" : "call"}
+                          hideIntro
                         />
-                      </div>
-                      {/* publishRegionRef feeds graft B: while this in-step
-                          go-live CTA is on screen, the rail Deploy demotes. */}
-                      <div id="wz-7-review" ref={publishRegionRef} className="scroll-mt-28 border-t border-border pt-6">
-                        <StepPublish
-                          draft={draft}
-                          live={isLive}
-                          ctaLabel={isLive || codeDeployed ? deployCta : undefined}
-                          onPublish={publish}
-                          onFix={(m) => openRow(m)}
-                        />
-                      </div>
-                    </div>
+                      </SectionRow>
+                      <SectionRow id="wz-7-review" label="Review & deploy">
+                        {/* publishRegionRef feeds graft B: while this in-step
+                            go-live CTA is on screen, the rail Deploy demotes. */}
+                        <div ref={publishRegionRef}>
+                          <StepPublish
+                            draft={draft}
+                            live={isLive}
+                            ctaLabel={isLive || codeDeployed ? deployCta : undefined}
+                            onPublish={publish}
+                            onFix={(m) => openRow(m)}
+                          />
+                        </div>
+                      </SectionRow>
+                    </SectionRows>
                   )}
                   </div>
                 </div>

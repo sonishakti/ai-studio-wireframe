@@ -5,12 +5,12 @@ import { ChevronDown, Play } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
+import { SectionRow } from "@/components/wizard/section-row"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_CATALOG } from "@/lib/campaign-data"
 import type { AgentDraft } from "@/lib/wizard-draft"
@@ -43,12 +43,24 @@ export function StepVoice({
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
 
   return (
-    // @container + the wizard's 4-col system: Voice and Spoken language are
-    // two equal 50% columns on one row (owner 2026-07-17).
-    <div className="@container space-y-8">
-      <div className="grid grid-cols-1 items-start gap-4 @2xl:grid-cols-4">
-        <div id="wz-3-voice" className="min-w-0 scroll-mt-28 space-y-2 @2xl:col-span-2">
-          <Label className="text-sm font-medium">Voice</Label>
+    // [label | content] rows (owner 2026-07-21) — Voice and Spoken language
+    // are each their own row; the host's <SectionRows> owns the container.
+    <>
+      <SectionRow
+        id="wz-3-voice"
+        label="Voice"
+        hint={
+          <>
+            <p>Picking a voice fills in the prompt and greeting while they&apos;re empty.</p>
+            {/* Two-layer reconciliation ECHOED here, not only in Models (user-test
+                2026-07-21 verification, S3 residual #8): the persona and its
+                vendor sound must meet on the page where the persona is picked. */}
+            {selected && draft.stack.tts.voice && (
+              <p>{selected.name} speaks with the <span className="font-mono capitalize">{draft.stack.tts.voice}</span> TTS sound — swap the sound in Models.</p>
+            )}
+          </>
+        }
+      >
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -90,28 +102,17 @@ export function StepVoice({
               <TooltipContent>Preview voice</TooltipContent>
             </Tooltip>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Picking a voice fills in the prompt and greeting while they&apos;re empty.
-            {/* Two-layer reconciliation ECHOED here, not only in Models (user-test
-                2026-07-21 verification, S3 residual #8): the persona and its
-                vendor sound must meet on the page where the persona is picked. */}
-            {selected && draft.stack.tts.voice && (
-              <> {selected.name} speaks with the <span className="font-mono capitalize">{draft.stack.tts.voice}</span> TTS sound — swap the sound in Models.</>
-            )}
-          </p>
-        </div>
+      </SectionRow>
 
-        {/* Spoken language — an agent trait, not a model detail. */}
-        <div id="wz-3-language" className="min-w-0 scroll-mt-28 space-y-2 @2xl:col-span-2">
-          <Label className="text-sm font-medium">Spoken language</Label>
-          <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
-            <SelectTrigger className="w-full text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      {/* Spoken language — an agent trait, not a model detail. */}
+      <SectionRow id="wz-3-language" label="Spoken language">
+        <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
+          <SelectTrigger className="w-full max-w-sm text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </SectionRow>
 
       <VoiceBrowser
         open={browserOpen}
@@ -120,6 +121,6 @@ export function StepVoice({
         selectedId={draft.voice?.id}
         onSelect={onSelectVoice}
       />
-    </div>
+    </>
   )
 }

@@ -120,7 +120,18 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
 
 // ─── Piece 2: pipeline shape + vendor-level control ───────────────────────────
 
-export function StackModelsDetail({ stack, onChange, className, showPicker = true }: StackPieceProps & { showPicker?: boolean }) {
+export function StackModelsDetail({
+  stack,
+  onChange,
+  className,
+  showPicker = true,
+  hideTitle,
+}: StackPieceProps & {
+  showPicker?: boolean
+  /** [label | content] hosting (builder 2026-07-21): the row label already
+   *  says "Pipeline" — suppress the inner h4. Playground keeps it. */
+  hideTitle?: boolean
+}) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
 
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
@@ -152,7 +163,7 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
           No estimate/summary paragraphs here: variable-length text above the
           cards moved them under the cursor on every switch (the model-switch
           jump); the live numbers live in the right panel's summary instead. */}
-      <h4 className="text-base font-medium">Pipeline</h4>
+      {!hideTitle && <h4 className="text-base font-medium">Pipeline</h4>}
       <RadioCardGroup
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
@@ -187,11 +198,14 @@ export function StackModelPicker({
   onChange,
   className,
   personaName,
+  hideTitle,
 }: StackPieceProps & {
   /** Selected voice persona (e.g. "Luna") — named under the TTS voice so the
    *  two voice concepts reconcile on screen: persona "Luna" speaking with the
    *  "rachel" TTS voice read as a bug (user-test 2026-07-21 D2). */
   personaName?: string
+  /** [label | content] hosting: the row label carries "Models". */
+  hideTitle?: boolean
 }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
@@ -205,9 +219,11 @@ export function StackModelPicker({
   return (
     <div className={cn("@container", className)}>
       <div className="space-y-4">
-        <h4 className="text-base font-medium">
-          {pipeline === "mllm" ? "Realtime model" : "Models"}
-        </h4>
+        {!hideTitle && (
+          <h4 className="text-base font-medium">
+            {pipeline === "mllm" ? "Realtime model" : "Models"}
+          </h4>
+        )}
           {pipeline === "stt-llm-tts" ? (
             <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
               <div className="min-w-0 space-y-1.5">

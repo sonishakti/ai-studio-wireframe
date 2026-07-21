@@ -16,6 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
+import { SectionRow } from "@/components/wizard/section-row"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
 import { WidgetStyleConfig } from "@/components/widget-studio"
@@ -40,6 +41,10 @@ import { type StepProps } from "@/components/wizard/types"
  * The prompt + greeting were set in Step 3 and are NOT re-asked here — this
  * block is purely about WHERE/HOW the agent runs. The agent id (for snippets)
  * is the draft's agentId or "new" until published.
+ *
+ * Renders a FRAGMENT of SectionRows ([label | content] anatomy, owner
+ * 2026-07-21) — the host's <SectionRows> owns the container + dividers, each
+ * sub-question here names itself on the LHS.
  */
 export function StepConfigure({
   draft,
@@ -52,38 +57,33 @@ export function StepConfigure({
 }) {
   const agentId = draft.agentId ?? "new"
 
-  return (
-    // @container: the channel blocks reflow by the center column's REAL width
-    // (the three-column shell can starve it), never viewport breakpoints.
-    <div className="@container space-y-5">
-      {/* No inner h2: the section header above already carries the section
-          name. The channel is PICKED above — this block just configures it. */}
-      <p className="text-sm text-muted-foreground">
-        {draft.type === "inbound" && "Choose how callers reach your agent."}
-        {draft.type === "outbound" && "Attach a caller-ID phone number and your contacts."}
-        {draft.type === "code" && "Drop the agent into your own app."}
-      </p>
-
-      {!draft.type && (
-        /* Never an empty step: without a type there is nothing to configure —
-           point at the step that owns the choice instead of duplicating it. */
-        <div className="flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3">
+  if (!draft.type) {
+    return (
+      /* Never an empty step: without a type there is nothing to configure —
+         point at the step that owns the choice instead of duplicating it. */
+      <SectionRow id="wz-1-setup" label="Set up the channel">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3">
           <p className="text-sm text-muted-foreground">
-            Pick how your agent runs in <span className="font-medium text-foreground">Select agent type</span> first — then finish its setup here.
+            Pick how your agent runs above first — then finish its setup here.
           </p>
           <Button variant="outline" size="sm" onClick={onChooseType}>
             Choose agent type
           </Button>
         </div>
-      )}
+      </SectionRow>
+    )
+  }
 
-      {/* Code is a single-column form → capped for readability. Batch calls
-          and the inbound web-widget studio run two-pane splits (settings |
-          reference) and manage their own width. */}
+  return (
+    <>
       {draft.type === "inbound" && <InboundConfigure draft={draft} update={update} agentId={agentId} />}
       {draft.type === "outbound" && <OutboundConfigure draft={draft} update={update} />}
-      {draft.type === "code" && <CodeConfigure agentId={agentId} />}
-    </div>
+      {draft.type === "code" && (
+        <SectionRow id="wz-1-setup" label="Add to your app" hint="Drop the agent into your own app.">
+          <CodeConfigure agentId={agentId} />
+        </SectionRow>
+      )}
+    </>
   )
 }
 
@@ -112,7 +112,7 @@ function InboundConfigure({
     update({ config: { ...draft.config, inbound: { mode, numberId } } })
 
   return (
-    <div className="space-y-4">
+    <SectionRow id="wz-1-setup" label="Choose how callers reach your agent.">
       <RadioCardGroup
         value={mode}
         onValueChange={(v) => v && setMode(v as InboundMode)}
@@ -127,7 +127,7 @@ function InboundConfigure({
         <div>
         <ConfigCard title="Answer a phone number">
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Phone number</Label>
+            <Label className="text-sm font-medium">Link phone number</Label>
             <Select value={draft.config.inbound?.numberId ?? ""} onValueChange={setNumber}>
               <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Choose an available number" />
@@ -170,15 +170,14 @@ function InboundConfigure({
            (owner 2026-07-15: no half-widget crammed in the config). */
         <WidgetStyleConfig agentId={agentId} />
       )}
-    </div>
+    </SectionRow>
   )
 }
 
-// ─── Outbound — settings LEFT, contact list RIGHT (Figma "Create Campaign",
-//     node 360-71898): the list is reference material you check WHILE you
-//     configure, so it earns a parallel pane, not a step below. Its rows scroll
-//     INSIDE the panel — a 500-contact upload must never grow the page between
-//     you and Deploy (owner 2026-07-09). ─────────────────────────────────────
+// ─── Outbound — two [label | content] rows (owner 2026-07-21: LHS names the
+//     section, RHS holds the controls; replaced the settings|contacts panes).
+//     Contact rows still scroll INSIDE their panel — a 500-contact upload must
+//     never grow the page between you and Deploy (owner 2026-07-09). ─────────
 
 function OutboundConfigure({ draft, update }: StepProps) {
   const out = draft.config.outbound
@@ -204,10 +203,13 @@ function OutboundConfigure({ draft, update }: StepProps) {
     update({ config: { ...draft.config, outbound: { ...out, numberId } } })
 
   return (
-    <div className="grid items-start gap-4 @4xl:grid-cols-2">
-      {/* LHS — how the calls run */}
-      <div className="min-w-0 space-y-4">
-        <ConfigCard title="Call setup">
+    <>
+      <SectionRow
+        id="wz-1-setup"
+        label="Call setup"
+        hint="The number your agent dials from."
+      >
+        <ConfigCard>
           <div className="space-y-2">
             <Label className="text-sm font-medium">Caller-ID number</Label>
             <Select value={out?.numberId ?? ""} onValueChange={setNumber}>
@@ -251,11 +253,16 @@ function OutboundConfigure({ draft, update }: StepProps) {
               : "Attach CRM/calendar connectors in Knowledge & Tools to act during calls."}
           </p>
         </div>
-      </div>
+      </SectionRow>
 
-      {/* RHS — who gets called */}
-      <ContactsPanel draft={draft} update={update} />
-    </div>
+      <SectionRow
+        id="wz-1-contacts"
+        label="Contact list"
+        hint={<>Who gets called. Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column.</>}
+      >
+        <ContactsPanel draft={draft} update={update} />
+      </SectionRow>
+    </>
   )
 }
 
@@ -291,8 +298,9 @@ function ContactsPanel({ draft, update }: StepProps) {
 
   return (
     <section className="min-w-0 rounded-lg border border-border bg-card">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-3.5">
-        <p className="text-sm font-semibold">Contact list</p>
+      {/* The row label already says "Contact list" — the header keeps only
+          the template action. */}
+      <header className="flex items-center justify-end gap-3 border-b border-border px-5 py-3.5">
         <button
           type="button"
           onClick={() => toast("Template downloaded", { description: `Columns: ${MOCK_CSV_COLUMNS.join(", ")}` })}
@@ -309,8 +317,10 @@ function ContactsPanel({ draft, update }: StepProps) {
           </span>
           <div>
             <p className="text-sm font-medium">Upload your contacts</p>
+            {/* The {{variable}}↔column contract lives in the row hint now
+                (one fact, one home). */}
             <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
-              A CSV with one row per person. Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column.
+              A CSV with one row per person.
             </p>
           </div>
           <Button size="sm" className="gap-1.5" onClick={attachCsv}>

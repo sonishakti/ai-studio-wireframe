@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
+import { SectionRow } from "@/components/wizard/section-row"
 import { AddLinesSheet } from "@/components/concurrency-card"
 import { CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
 import { useFutureScope } from "@/lib/future-scope"
@@ -28,29 +29,31 @@ import { type StepProps } from "@/components/wizard/types"
  * rules · transfer-to-human. Values live on the DRAFT (config.outbound.launch
  * + draft.callBehavior), never section-local state, so they survive
  * close/reopen and feed the deploy pre-flight manifest.
+ *
+ * Returns a FRAGMENT of SectionRows ([label | content], owner 2026-07-21) —
+ * the host's <SectionRows> owns the container; each group names itself on the
+ * LHS, so the RHS is pure controls.
  */
 export function CallSettings({ draft, update }: StepProps) {
   if (draft.type !== "outbound") {
     // Explorable, not hidden (builder philosophy): say who this is for
     // instead of vanishing the row for non-batch agents.
     return (
-      <p className="text-sm text-muted-foreground">
-        These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> above
-        to schedule the launch, dialing, and hang-up rules.
-      </p>
+      <SectionRow id="wz-1-callsettings" label="Call settings">
+        <p className="text-sm text-muted-foreground">
+          These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> above
+          to schedule the launch, dialing, and hang-up rules.
+        </p>
+      </SectionRow>
     )
   }
   return (
-    // @container: the builder's center column can be far narrower than the
-    // viewport (three-column shell) — the selects must reflow by CONTAINER
-    // width, not window breakpoints (72px selects bug, 2026-07-17).
-    <div className="@container space-y-4">
+    <>
       <LaunchTiming draft={draft} update={update} />
       <DialingSettings draft={draft} update={update} />
-      <OutboundCapacityNote draft={draft} />
       <HangupSettings draft={draft} update={update} />
       <TransferSettings draft={draft} update={update} />
-    </div>
+    </>
   )
 }
 
@@ -68,10 +71,11 @@ function LaunchTiming({ draft, update }: StepProps) {
     update({ config: { ...draft.config, outbound: { ...out, launch: { ...launch, ...p } } } })
 
   return (
-    <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-      <p className="flex items-center gap-2 text-sm font-semibold">
-        <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden /> Launch timing
-      </p>
+    <SectionRow
+      id="wz-1-callsettings"
+      label={<span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden /> Launch timing</span>}
+      hint="When the batch starts dialing."
+    >
       <RadioCardGroup
         value={launch.mode}
         onValueChange={(v) => v && patch({ mode: v as LaunchConfig["mode"] })}
@@ -122,7 +126,7 @@ function LaunchTiming({ draft, update }: StepProps) {
           </p>
         </div>
       )}
-    </section>
+    </SectionRow>
   )
 }
 
@@ -139,8 +143,7 @@ function DialingSettings({ draft, update }: StepProps) {
   const patchCb = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
 
   return (
-    <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-      <p className="text-sm font-semibold">Dialing</p>
+    <SectionRow label="Dialing" hint="Window, concurrency, retries, and pacing.">
       {/* grid-cols-1 is load-bearing: an implicit column is min-content-sized,
           and the nowrap Select values (e.g. "Business hours (9–5…)") would
           force ~300px and overflow a starved center column. */}
@@ -210,7 +213,9 @@ function DialingSettings({ draft, update }: StepProps) {
           One call every {cb.minIntervalMs || 1000} ms ({(1000 / (cb.minIntervalMs || 1000)).toFixed(1)} call{1000 / (cb.minIntervalMs || 1000) === 1 ? "" : "s"} per second).
         </p>
       </div>
-    </section>
+      {/* Capacity comment rides the row that owns max-concurrent. */}
+      <OutboundCapacityNote draft={draft} />
+    </SectionRow>
   )
 }
 
@@ -221,10 +226,10 @@ function HangupSettings({ draft, update }: StepProps) {
   const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
 
   return (
-    <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-      <p className="flex items-center gap-2 text-sm font-semibold">
-        <PhoneOff className="h-4 w-4 text-muted-foreground" aria-hidden /> Hang-up configuration
-      </p>
+    <SectionRow
+      label={<span className="flex items-center gap-2"><PhoneOff className="h-4 w-4 text-muted-foreground" aria-hidden /> Hang-up configuration</span>}
+      hint="How and when calls end."
+    >
       <BehaviorToggle
         label="End call"
         desc="Gives the agent the ability to end the call with the user."
@@ -277,7 +282,7 @@ function HangupSettings({ draft, update }: StepProps) {
         />
         <p className="text-xs text-muted-foreground">Maximum length for a conversation.</p>
       </div>
-    </section>
+    </SectionRow>
   )
 }
 
@@ -288,10 +293,10 @@ function TransferSettings({ draft, update }: StepProps) {
   const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
 
   return (
-    <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-      <p className="flex items-center gap-2 text-sm font-semibold">
-        <PhoneForwarded className="h-4 w-4 text-muted-foreground" aria-hidden /> Transfer to human
-      </p>
+    <SectionRow
+      label={<span className="flex items-center gap-2"><PhoneForwarded className="h-4 w-4 text-muted-foreground" aria-hidden /> Transfer to human</span>}
+      hint="Hand the call to a person when needed."
+    >
       <BehaviorToggle
         label="Transfer call to human"
         desc="Transfers to a human agent when needed or asked for."
@@ -323,7 +328,7 @@ function TransferSettings({ draft, update }: StepProps) {
           </div>
         </>
       )}
-    </section>
+    </SectionRow>
   )
 }
 
