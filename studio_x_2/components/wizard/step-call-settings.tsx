@@ -147,7 +147,7 @@ function DialingSettings({ draft, update }: StepProps) {
       {/* grid-cols-1 is load-bearing: an implicit column is min-content-sized,
           and the nowrap Select values (e.g. "Business hours (9–5…)") would
           force ~300px and overflow a starved center column. */}
-      <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-4">
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Call window</Label>
           <Select

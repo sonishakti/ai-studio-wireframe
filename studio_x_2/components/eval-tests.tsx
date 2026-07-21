@@ -16,7 +16,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { StateBanner } from "@/components/usage-spend-card"
-import { useFutureScope } from "@/lib/future-scope"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
   EVAL_SUITE, EVAL_RUN, evalRunStats,
@@ -49,8 +48,7 @@ function flaggedTurnIndex(result: EvalCaseResult): number | undefined {
   return i >= 0 ? i : undefined
 }
 
-export function TestsSection({ agentName = "your agent" }: { agentName?: string }) {
-  const [future] = useFutureScope()
+export function TestsSection({ agentName: _agentName = "your agent" }: { agentName?: string }) {
   const suite = EVAL_SUITE
   const run = EVAL_RUN
   const stats = evalRunStats(run)
@@ -59,18 +57,14 @@ export function TestsSection({ agentName = "your agent" }: { agentName?: string 
   const [openResult, setOpenResult] = React.useState<EvalCaseResult | null>(null)
   const resultFor = (id: string) => run.results.find((r) => r.caseId === id)
 
-  // F-Eval is future-scope-gated — the whole Tests section hides when off.
-  if (!future) return null
+  // 2026-07-21 (owner): the Test section IS this feature — test scenarios from
+  // the cn2meet roadmap (F-Eval), no longer future-scope-gated and no longer a
+  // sidecar under a "start test call" button. The hosting SectionRow carries
+  // the title + description, so the header here is just the actions.
 
   return (
-    <section className="max-w-3xl space-y-3 border-t border-border pt-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h3 className="text-sm font-medium">Tests</h3>
-          <p className="text-xs text-muted-foreground">
-            Simulated callers that prove {agentName} behaves — before it takes a real call.
-          </p>
-        </div>
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <div className="flex items-center gap-2">
           <Button
             size="sm"

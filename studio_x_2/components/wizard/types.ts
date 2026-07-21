@@ -69,7 +69,7 @@ export function stepManifest(n: number, draft: AgentDraft): string {
   if (n === 3) return "Voice · Language · Turn-taking · Filters"
   if (n === 4) return "Pipeline · Latency vs cost · Models · History"
   if (n === 5) return "Knowledge · MCP · Connectors"
-  if (n === 6) return "Simulated test call · Evals"
+  if (n === 6) return "Test scenarios · Run suites"
   if (n === 7) return "Transcripts & analysis · Review & deploy"
   return ""
 }
@@ -120,7 +120,7 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     ]
   if (n === 6)
     return [
-      { id: "wz-6-test", label: "Test call" },
+      { id: "wz-6-test", label: "Test scenarios" },
     ]
   if (n === 7)
     return [

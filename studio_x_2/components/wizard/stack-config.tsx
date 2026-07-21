@@ -168,7 +168,8 @@ export function StackModelsDetail({
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
         aria-label="Pipeline"
-        className="gap-4 @2xl:grid-cols-4"
+        // Two cards, two tracks — a 4-col track squeezed them (2026-07-21).
+        className="gap-4 @xl:grid-cols-2"
       >
         <RadioCard
           value="stt-llm-tts"
@@ -225,7 +226,7 @@ export function StackModelPicker({
           </h4>
         )}
           {pipeline === "stt-llm-tts" ? (
-            <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-4">
               <div className="min-w-0 space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
                 <Select
@@ -295,7 +296,7 @@ export function StackModelPicker({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-4">
             <div className="min-w-0 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Realtime model</Label>
               <Select

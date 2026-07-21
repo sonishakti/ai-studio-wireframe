@@ -31,7 +31,7 @@ import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { StackTradeoffSlider, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { TestsSection } from "@/components/eval-tests"
-import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle, stepToc } from "@/components/wizard/types"
+import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
@@ -912,10 +912,6 @@ export function AgentWizard({
   const deployHot = isLive ? anyEdited : codeDeployed ? false : !blockReason
 
   // ── Lazyweb design-improve (2026-07-20, report ccf47285) ──────────────────
-  // F1 "Progress Rail": the rail pins the ONE step that moves the draft
-  // forward. Hidden when there is nothing to do (clean live agent, deployed
-  // code agent) — a permanent "Next" with no next reads as a broken promise.
-  const nextUp = codeDeployed ? null : !isLive ? firstIncomplete(draft) : anyEdited ? 7 : null
   // F2 "Agent Recipe": the build-log strip's validation readout — derived from
   // the draft (wireframe-honest), listing the artifacts that compile right now.
   const buildValidated = [typeDone && "channel", promptDone && "prompt", voiceDone && "voice"].filter(
@@ -1095,31 +1091,11 @@ export function AgentWizard({
               to the header and the sphere/Talk to the right preview panel, so
               the rail holds only the CONFIGURE + OPTIONAL section lists. */}
 
-          {/* Pinned "Next: …" card (Lazyweb design-improve F1, safe bet): the
-              rail opens with the one step that moves the draft toward live —
-              orientation without reading the whole outline. A quiet card, not
-              a primary: the one-primary discipline stays with Deploy. */}
-          {nextUp != null && (
-            <button
-              type="button"
-              onClick={() => openRow(nextUp)}
-              className="flex w-full items-center gap-2.5 rounded-md border border-border bg-card px-3 py-2.5 text-left shadow-xs transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block font-mono text-xs uppercase text-muted-foreground opacity-50">Next</span>
-                <span className="block truncate text-sm font-medium">{stepTitle(nextUp, draft)}</span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {isLive ? "Redeploy to apply your edits." : NEXT_HINTS[nextUp]}
-                </span>
-              </span>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-            </button>
-          )}
-
-          {/* OUTLINER rail (v3): three journey groups — Set up · Customize ·
-              Ship. The ACTIVE section expands to its subsection TOC; clicking
-              a TOC entry jumps the RHS straight to that anchor, so everything
-              is navigable from the left panel. */}
+          {/* OUTLINER rail (v3, decluttered 2026-07-21 per owner screenshot):
+              three journey groups — Set up · Customize · Ship — section names
+              ONLY. The pinned "Next" card and the per-section sub-TOC are
+              GONE: the [label | content] rows inside each section carry the
+              sub-questions now, so the rail duplicating them was noise. */}
           <nav aria-label="Build sections" className="space-y-4">
             {SECTION_GROUPS.map((g) => (
               <div key={g.label} className="space-y-0.5">
@@ -1129,9 +1105,6 @@ export function AgentWizard({
                 {g.steps.map((n) => {
                   const Icon = STEP_ICONS[n]
                   const active = n === selected
-                  // Untouched channel → its TOC shows no setup entries yet
-                  // (mirrors the RHS: config appears only after a pick).
-                  const toc = stepToc(n, channelTouched ? draft : { ...draft, type: null })
                   return (
                     <React.Fragment key={n}>
                       <button
@@ -1155,31 +1128,6 @@ export function AgentWizard({
                           </>
                         )}
                       </button>
-                      {/* The section's TOC — the LHS table of contents of the
-                          page (v3 ask). Shown for the active section only, so
-                          the rail stays scannable. One continuous border-l line
-                          for every nested entry (the SidebarMenuSub treatment,
-                          on rail tokens — the component itself is bound to
-                          SidebarProvider tokens, so we mirror its line style). */}
-                      {active && toc.length > 0 && (
-                        <ul className="mb-1 ml-[1.15rem] flex min-w-0 flex-col gap-0.5 border-l border-border py-0.5 pl-2">
-                          {toc.map((t) => (
-                            <li key={t.id}>
-                              <button
-                                type="button"
-                                onClick={() => openAnchor(n, t.id)}
-                                aria-current={activeAnchor === t.id ? "location" : undefined}
-                                className={cn(
-                                  "flex h-7 w-full min-w-0 items-center rounded-md px-2 text-left text-xs transition-colors hover:bg-accent/40 hover:text-foreground",
-                                  activeAnchor === t.id ? "bg-accent/60 text-foreground" : "text-muted-foreground",
-                                )}
-                              >
-                                <span className="min-w-0 flex-1 truncate">{t.label}</span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
                     </React.Fragment>
                   )
                 })}
@@ -1408,22 +1356,18 @@ export function AgentWizard({
                       <SectionKnowledgeTools draft={draft} update={update} />
                     </SectionRows>
                   )}
-                  {/* 6 · TEST (Ship) — try the agent before deploying: the
-                      simulated test call + (gated) eval suites. */}
+                  {/* 6 · TEST (Ship) — TEST SCENARIOS (owner 2026-07-21: this
+                      section is the cn2meet roadmap's eval feature, NOT a
+                      "start test call" button — Talk already lives on the
+                      preview panel/header). Simulated caller scenarios that
+                      prove the agent behaves before real traffic. */}
                   {n === 6 && (
                     <SectionRows>
                       <SectionRow
                         id="wz-6-test"
-                        label="Test call"
-                        hint={`Talk to ${draft.name || "your agent"} with the current prompt and voice.`}
+                        label="Test scenarios"
+                        hint={`Simulated callers that prove ${draft.name || "your agent"} behaves — run them before real traffic.`}
                       >
-                        <div>
-                          <Button variant="secondary" size="sm" className="shrink-0 gap-1.5" disabled={warming} onClick={() => setTalkOpen(true)}>
-                            <Mic className="h-3.5 w-3.5" aria-hidden /> Start a test call
-                          </Button>
-                        </div>
-                        {/* Evals (F-Eval) — future-scope-gated; renders nothing
-                            unless the flag is on. */}
                         <TestsSection agentName={draft.name || "your agent"} />
                       </SectionRow>
                     </SectionRows>
@@ -1845,15 +1789,6 @@ function channelLine(d: AgentDraft): string {
   const label = channelLabel(d)
   const target = channelTarget(d)
   return label === target ? label : `${label} · ${target}`
-}
-
-/** One-line CTA under the rail's pinned "Next" card (Lazyweb F1). Keys are
- *  exactly firstIncomplete's possible returns. */
-const NEXT_HINTS: Record<number, string> = {
-  1: "Pick how it handles calls.",
-  2: "Write what it says.",
-  3: "Pick its voice.",
-  7: "Review & deploy.",
 }
 
 /** What a section compiles to right now — the band's mono "output:" line

@@ -74,7 +74,9 @@ export function StepType({ draft, update, liveNote, displayType, liveType }: Ste
         value={(displayType === undefined ? draft.type : displayType) ?? ""}
         onValueChange={(v) => v && update({ type: v as AgentType })}
         aria-label="Agent type"
-        className="gap-4 @2xl:grid-cols-4"
+        // Three cards → three tracks: a 4-col track left the fourth empty and
+        // squeezed every card into bad wrapping (owner screenshot 2026-07-21).
+        className="gap-4 @xl:grid-cols-3"
       >
         {TYPES.map((t) => (
           <RadioCard

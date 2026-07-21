@@ -117,7 +117,7 @@ function InboundConfigure({
         value={mode}
         onValueChange={(v) => v && setMode(v as InboundMode)}
         aria-label="How callers reach this agent"
-        className="gap-4 @2xl:grid-cols-4"
+        className="gap-4 @xl:grid-cols-2"
       >
         <RadioCard value="phone" title="Phone number" description="Answer calls 24/7" />
         <RadioCard value="web" title="Web widget" description="Embed & style a floating widget" />

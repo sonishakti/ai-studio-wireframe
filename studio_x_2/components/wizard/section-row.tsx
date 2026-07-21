@@ -49,7 +49,13 @@ export function SectionRow({
         <h4 className="text-base font-medium leading-snug">{label}</h4>
         {hint ? <div className="mt-1.5 space-y-1 text-xs leading-relaxed text-muted-foreground">{hint}</div> : null}
       </div>
-      <div className="min-w-0 space-y-4">{children}</div>
+      {/* The RHS is its OWN @container: children's container queries must
+          measure the CONTROL column, not the whole row — measuring the row
+          made card grids claim columns the label rail had already eaten
+          (squeezed channel cards, owner screenshot 2026-07-21). */}
+      <div className="min-w-0 @container">
+        <div className="space-y-4">{children}</div>
+      </div>
     </div>
   )
 }
