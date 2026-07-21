@@ -317,10 +317,11 @@ function ContactsPanel({ draft, update }: StepProps) {
           </span>
           <div>
             <p className="text-sm font-medium">Upload your contacts</p>
-            {/* The {{variable}}↔column contract lives in the row hint now
-                (one fact, one home). */}
+            {/* The {{variable}}↔column contract is ALSO stated here, at the
+                control — the row-hint-only version was skipped by
+                control-scanners (user-test 2026-07-21 layout round). */}
             <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
-              A CSV with one row per person.
+              A CSV with one row per person. Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column.
             </p>
           </div>
           <Button size="sm" className="gap-1.5" onClick={attachCsv}>

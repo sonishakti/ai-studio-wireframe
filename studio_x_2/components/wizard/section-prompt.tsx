@@ -116,6 +116,12 @@ export function SectionPrompt({
               <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tone</dt>
               <dd>{selected.tone}</dd>
             </div>
+            {/* Contract copy echoes AT the control it governs — the label-rail
+                hint alone is skipped by control-scanners (user-test 2026-07-21
+                layout round, D2+D3). */}
+            <p className="border-t border-border pt-2 text-xs text-muted-foreground">
+              This flavors <em>how</em> {selected.name} sounds — your system prompt decides <em>what</em> it says.
+            </p>
           </dl>
         ) : (
           <p className="text-sm text-muted-foreground">No voice selected yet.</p>

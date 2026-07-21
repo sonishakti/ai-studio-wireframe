@@ -101,6 +101,19 @@ export function StepType({ draft, update, liveNote, displayType, liveType }: Ste
           />
         ))}
       </RadioCardGroup>
+
+      {/* BYO-telephony stated BEFORE the channel choice, not as caller-ID fine
+          print mid-flow (repeat S2 across four 2026-07-21 test rounds): a
+          first-timer without a number must learn the wall before investing in
+          prompt + CSV work. */}
+      <p className="text-xs text-muted-foreground">
+        Phone channels are bring-your-own number — Agora doesn&apos;t sell numbers. Connect your
+        carrier&apos;s via SIP in{" "}
+        <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
+          Resources › Deployment Channels
+        </a>
+        . Code / SDK and the web widget need none.
+      </p>
     </div>
   )
 }
