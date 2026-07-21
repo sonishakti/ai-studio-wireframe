@@ -18,7 +18,7 @@
 
 import { STACK_CATALOG, stackFor, type AgentStack, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { newVoiceId, saveVoiceArtifact, defaultPromptFor, type VoiceArtifact } from "@/lib/voice-artifacts"
-import { EMPTY_DRAFT, type AgentDraft } from "@/lib/wizard-draft"
+import { EMPTY_DRAFT, DEFAULT_CALL_BEHAVIOR, type AgentDraft } from "@/lib/wizard-draft"
 
 export const IMPORT_SOURCES = ["Vapi", "Retell", "ElevenLabs", "Bland", "Generic JSON"] as const
 export type ImportSource = (typeof IMPORT_SOURCES)[number]
@@ -133,6 +133,74 @@ interface Found {
   model?: { path: string; value: string }
   language?: { path: string; value: string }
   tools?: { path: string; names: string[] }
+  /** Vendor call-behavior fields, pre-normalized to draft units + their
+   *  report rows (2026-07-21 — the destination shipped in 27025fc). */
+  callBehavior?: { partial: NonNullable<ImportedAgentConfig["callBehavior"]>; rows: MappedField[] }
+}
+
+/** Positive finite number or nothing — vendor exports carry nulls and 0s. */
+const num = (v: unknown): number | undefined =>
+  typeof v === "number" && Number.isFinite(v) && v > 0 ? v : undefined
+
+/** Extract Retell/Vapi call-behavior fields into a draft.callBehavior partial
+ *  (ms→seconds normalized) + their mapped-report rows. The honesty rule runs
+ *  forward too: these rows claim "carried" ONLY for values actually written
+ *  to the draft on import (user-test 2026-07-21, D2's stale-report -2).
+ *  Malformed values fall through to the sweep's honest drop reasons. */
+function extractCallBehavior(p: Rec): { found: NonNullable<Found["callBehavior"]>; consumed: string[] } | undefined {
+  const partial: NonNullable<ImportedAgentConfig["callBehavior"]> = {}
+  const rows: MappedField[] = []
+  const consumed: string[] = []
+  const LAND = "Hang-up configuration · Channel › Call settings"
+
+  // Voicemail detection — Retell boolean / Vapi object (presence = enabled).
+  for (const k of ["voicemail_detection", "voicemailDetection"]) {
+    const v = p[k]
+    if (v !== undefined && v !== null) {
+      const on = typeof v === "boolean" ? v : true
+      partial.voicemailDetection = on
+      rows.push({ theirs: k, ours: LAND, value: on ? "Voicemail detection on" : "Voicemail detection off" })
+      consumed.push(k)
+      break
+    }
+  }
+  // Silence hang-up — Retell milliseconds / Vapi seconds.
+  const endSilenceMs = num(p.end_call_after_silence_ms)
+  const silenceSec = num(p.silenceTimeoutSeconds)
+  if (endSilenceMs !== undefined) {
+    partial.silenceHangup = true
+    partial.silenceTimeoutSec = Math.round(endSilenceMs / 1000)
+    rows.push({ theirs: "end_call_after_silence_ms", ours: LAND, value: `${endSilenceMs.toLocaleString()} ms → ${partial.silenceTimeoutSec} s silence hang-up` })
+    consumed.push("end_call_after_silence_ms")
+  } else if (silenceSec !== undefined) {
+    partial.silenceHangup = true
+    partial.silenceTimeoutSec = Math.round(silenceSec)
+    rows.push({ theirs: "silenceTimeoutSeconds", ours: LAND, value: `${partial.silenceTimeoutSec} s silence hang-up` })
+    consumed.push("silenceTimeoutSeconds")
+  }
+  // Max call duration — Retell milliseconds / Vapi seconds. (Bland's bare
+  // `max_duration` has an ambiguous unit — it stays honestly dropped.)
+  const maxMs = num(p.max_call_duration_ms)
+  const maxSec = num(p.maxDurationSeconds)
+  if (maxMs !== undefined) {
+    partial.maxDurationSec = Math.round(maxMs / 1000)
+    rows.push({ theirs: "max_call_duration_ms", ours: LAND, value: `${maxMs.toLocaleString()} ms → ${partial.maxDurationSec} s max duration` })
+    consumed.push("max_call_duration_ms")
+  } else if (maxSec !== undefined) {
+    partial.maxDurationSec = Math.round(maxSec)
+    rows.push({ theirs: "maxDurationSeconds", ours: LAND, value: `${partial.maxDurationSec} s max duration` })
+    consumed.push("maxDurationSeconds")
+  }
+  // Vapi endCallPhrases — the ABILITY carries (End call on); the phrases
+  // themselves don't port, and the row says both halves.
+  if (Array.isArray(p.endCallPhrases) && (p.endCallPhrases as unknown[]).length) {
+    partial.endCall = true
+    rows.push({ theirs: "endCallPhrases", ours: LAND, value: "End-call ability on — the phrases themselves don't port" })
+    consumed.push("endCallPhrases")
+  }
+
+  if (!rows.length) return undefined
+  return { found: { partial, rows }, consumed }
 }
 
 /** Providers Agora's bundled stack can actually run. A voice from anyone else
@@ -213,6 +281,9 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
       reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Knowledge & Tools.`,
     })
   }
+  // Call-behavior rows claim carried only because the partial below IS
+  // written to the draft (importedAgentToDraft / the wizard's applyImport).
+  if (found.callBehavior) mapped.push(...found.callBehavior.rows)
 
   const config: ImportedAgentConfig = {
     name: name!,
@@ -223,6 +294,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
     llmModel: llm?.model,
     language: found.language?.value,
     tools: found.tools?.names.length ? found.tools.names : undefined,
+    callBehavior: found.callBehavior?.partial,
     source,
   }
   return { config, mapped, dropped, warnings }
@@ -349,6 +421,11 @@ function parseVapi(p: Rec): VendorParse {
   if (!found.prompt && messages.length) warnings.push("model.messages has no system-role message — the prompt didn't carry.")
   else if (!found.prompt && !model) warnings.push("No `model` block found — a Vapi assistant export carries the prompt in model.messages.")
   const consumed = new Set(["name", "model", "voice", "firstMessage", "transcriber", "instructions"])
+  const cb = extractCallBehavior(p)
+  if (cb) {
+    found.callBehavior = cb.found
+    for (const k of cb.consumed) consumed.add(k)
+  }
   return withSweep(assemble(found, "Vapi", [], warnings), p, consumed)
 }
 
@@ -401,6 +478,11 @@ function parseRetell(p: Rec): VendorParse {
     "agent_name", "name", "response_engine", "voice_id", "language",
     "general_prompt", "begin_message", "model", "general_tools", "retell_llm", "llm", "channel",
   ])
+  const cb = extractCallBehavior(p)
+  if (cb) {
+    found.callBehavior = cb.found
+    for (const k of cb.consumed) consumed.add(k)
+  }
   return withSweep(assemble(found, "Retell", [], warnings), p, consumed)
 }
 
@@ -498,6 +580,11 @@ function parseGeneric(p: Rec): VendorParse {
     "first_message", "firstMessage", "greeting", "voice", "tts", "voice_id",
     "llm", "model", "language", "tools", "asr",
   ])
+  const cb = extractCallBehavior(p)
+  if (cb) {
+    found.callBehavior = cb.found
+    for (const k of cb.consumed) consumed.add(k)
+  }
   return withSweep(assemble(found, "Generic JSON", [], []), p, consumed)
 }
 
@@ -647,6 +734,11 @@ export function importedAgentToDraft(config: ImportedAgentConfig, artifact: Voic
     stack: { ...(artifact.stack ?? stackFor("balanced")) },
     systemPrompt: config.systemPrompt ?? defaultPromptFor(artifact),
     greeting: config.firstMessage ?? artifact.firstMessage,
+    // Carried call-behavior fields land on the draft over defaults — the
+    // mapped report's "carried" claim depends on this write (2026-07-21).
+    ...(config.callBehavior
+      ? { callBehavior: { ...DEFAULT_CALL_BEHAVIOR, ...config.callBehavior } }
+      : {}),
   }
 }
 

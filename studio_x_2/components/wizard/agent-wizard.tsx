@@ -44,7 +44,7 @@ import {
   importedConfigToArtifact, importedAgentToDraft, stashImportNotice, takeImportNotice,
 } from "@/lib/import-agent"
 import {
-  EMPTY_DRAFT, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
+  EMPTY_DRAFT, DEFAULT_CALL_BEHAVIOR, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
   publishBlockReason, channelTarget, typeLabel, MOCK_CSV_ROWS, type AgentDraft, type AgentType,
 } from "@/lib/wizard-draft"
 import {
@@ -722,7 +722,16 @@ export function AgentWizard({
     const importedPrompt = !!config.systemPrompt?.trim()
     dirty.current = true
     setDraft((d) => {
-      const seeded = seedFromVoice(d, artifact)
+      let seeded = seedFromVoice(d, artifact)
+      // Carried call-behavior fields apply here too — the import report's
+      // "carried" rows must hold on the apply-into-open-draft path, not just
+      // create-as-new (2026-07-21).
+      if (config.callBehavior) {
+        seeded = {
+          ...seeded,
+          callBehavior: { ...DEFAULT_CALL_BEHAVIOR, ...d.callBehavior, ...config.callBehavior },
+        }
+      }
       if (opts.replacePrompt && importedPrompt) {
         return {
           ...seeded,

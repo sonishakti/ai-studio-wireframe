@@ -351,6 +351,17 @@ export interface ImportedAgentConfig {
   llmModel?: string
   language?: string
   tools?: string[]
+  /** Call-behavior fields carried from the vendor export (2026-07-21) — a
+   *  structural Partial<CallBehaviorConfig> subset, declared inline because
+   *  wizard-draft imports this file (the reverse import would be circular).
+   *  Values are already normalized to the draft's units (seconds). */
+  callBehavior?: {
+    endCall?: boolean
+    voicemailDetection?: boolean
+    silenceHangup?: boolean
+    silenceTimeoutSec?: number
+    maxDurationSec?: number
+  }
   source?: string
 }
 
