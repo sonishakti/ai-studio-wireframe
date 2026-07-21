@@ -238,9 +238,12 @@ const META_KEYS = new Set([
  *
  *  HONESTY RULE (user-test #7 P0): a reason may only point somewhere that
  *  EXISTS — Advanced's turn-taking/speech sections, Step 3 Resources, the
- *  Analysis section, Step-1 engine, the deployment's CSV columns. Anything
- *  without a real landing spot says "isn't supported yet", never a phantom
- *  address (voicemail/call caps pointed at a Step 4 that has neither). */
+ *  Analysis section, Step-1 engine, the deployment's CSV columns, and (since
+ *  27025fc) Channel › Call settings & schedule (hang-up · voicemail · silence
+ *  · max duration · transfer). Anything without a real landing spot says
+ *  "isn't supported yet" — and the reverse holds: once a landing spot ships,
+ *  the reason MUST point at it (user-test 2026-07-21 D2: one stale "isn't
+ *  supported yet" against a visible toggle poisons the whole report). */
 const DROP_REASONS: Record<string, string> = {
   webhook_url: "Webhooks would belong to the deployment, not the agent — deployment webhooks aren't here yet.",
   server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
@@ -249,12 +252,12 @@ const DROP_REASONS: Record<string, string> = {
   states: "Conversation states don't port — express the flow in your prompt (Step 3).",
   starting_state: "Conversation states don't port — express the flow in your prompt (Step 3).",
   pathway_id: "Bland pathways don't port — express the flow in your prompt (Step 3).",
-  voicemail_detection: "Voicemail handling isn't supported yet.",
-  voicemailMessage: "Voicemail handling isn't supported yet.",
-  voicemailDetection: "Voicemail handling isn't supported yet.",
-  endCallMessage: "End-call behavior isn't configurable yet.",
-  endCallPhrases: "End-call behavior isn't configurable yet.",
-  end_call_after_silence_ms: "End-call behavior isn't configurable yet.",
+  voicemail_detection: "Voicemail detection re-enables as a toggle in Channel › Call settings — the vendor setting itself doesn't port.",
+  voicemailMessage: "Leaving a voicemail message isn't supported — voicemail detection (hang up on machines) is a toggle in Channel › Call settings.",
+  voicemailDetection: "Voicemail detection re-enables as a toggle in Channel › Call settings — the vendor setting itself doesn't port.",
+  endCallMessage: "A scripted closing message isn't supported — end-call behavior lives in Channel › Call settings › Hang-up.",
+  endCallPhrases: "End-call phrases don't port — end-call behavior lives in Channel › Call settings › Hang-up.",
+  end_call_after_silence_ms: "Silence hang-up re-configures in Channel › Call settings › Hang-up (in seconds).",
   analysisPlan: "Post-call analysis is configured in the Analysis section.",
   artifactPlan: "Recording settings live in the Analysis section.",
   post_call_analysis_data: "Post-call analysis is configured in the Analysis section.",
@@ -279,9 +282,9 @@ const DROP_REASONS: Record<string, string> = {
   boosted_keywords: "ASR keyword boosting isn't supported yet (Advanced's keywords are wake words, not boosting).",
   keywords: "ASR keyword boosting isn't supported yet (Advanced's keywords are wake words, not boosting).",
   pronunciation_dictionary: "Pronunciation dictionaries aren't supported yet.",
-  max_duration: "Call-duration caps aren't supported yet.",
-  max_call_duration_ms: "Call-duration caps aren't supported yet.",
-  silenceTimeoutSeconds: "Call silence timeouts aren't configurable yet.",
+  max_duration: "Max call duration re-configures in Channel › Call settings › Hang-up.",
+  max_call_duration_ms: "Max call duration re-configures in Channel › Call settings › Hang-up (in seconds).",
+  silenceTimeoutSeconds: "Silence hang-up re-configures in Channel › Call settings › Hang-up.",
   reminder_trigger_ms: "Reminder nudges stay vendor-specific.",
   reminder_max_count: "Reminder nudges stay vendor-specific.",
   dynamic_data: "Dynamic variables move to the deployment's CSV columns.",

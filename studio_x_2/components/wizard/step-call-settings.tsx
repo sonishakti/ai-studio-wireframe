@@ -207,7 +207,7 @@ function DialingSettings({ draft, update }: StepProps) {
           className="max-w-[200px] text-sm font-mono"
         />
         <p className="text-xs text-muted-foreground">
-          Dialing one call every {cb.minIntervalMs || 1000} ms, i.e. {(1000 / (cb.minIntervalMs || 1000)).toFixed(1)} call{1000 / (cb.minIntervalMs || 1000) === 1 ? "" : "s"}/s per second.
+          One call every {cb.minIntervalMs || 1000} ms ({(1000 / (cb.minIntervalMs || 1000)).toFixed(1)} call{1000 / (cb.minIntervalMs || 1000) === 1 ? "" : "s"} per second).
         </p>
       </div>
     </section>
@@ -251,7 +251,7 @@ function HangupSettings({ draft, update }: StepProps) {
       />
       {cb.silenceHangup && (
         <div className="space-y-1.5">
-          <Label htmlFor="hu-silence" className="text-xs text-muted-foreground">Silence timeout (seconds)</Label>
+          <Label htmlFor="hu-silence" className="text-xs text-muted-foreground">Hang-up silence timeout (seconds)</Label>
           <Input
             id="hu-silence"
             type="number"
@@ -259,7 +259,11 @@ function HangupSettings({ draft, update }: StepProps) {
             onChange={(e) => patch({ silenceTimeoutSec: Number(e.target.value) })}
             className="max-w-[200px] text-sm font-mono"
           />
-          <p className="text-xs text-muted-foreground">Call ends after {cb.silenceTimeoutSec} seconds of no response.</p>
+          <p className="text-xs text-muted-foreground">
+            Call ends after {cb.silenceTimeoutSec} seconds of no response. Different from the
+            turn-taking silence in Voice &amp; speech › Advanced — that one shapes when the agent
+            replies; this one ends the call.
+          </p>
         </div>
       )}
       <div className="space-y-1.5">

@@ -1384,6 +1384,7 @@ export function AgentWizard({
                         <StepAnalysis
                           value={draft.analysis}
                           onChange={(analysis) => update({ analysis })}
+                          channel={draft.type === "code" ? "session" : "call"}
                         />
                       </div>
                       {/* publishRegionRef feeds graft B: while this in-step

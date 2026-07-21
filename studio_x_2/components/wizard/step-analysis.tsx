@@ -25,10 +25,17 @@ import { DEFAULT_ANALYSIS, type AnalysisConfig, type DataPoint, type DataPointTy
 export function StepAnalysis({
   value,
   onChange,
+  channel = "call",
 }: {
   value: AnalysisConfig | undefined
   onChange: (next: AnalysisConfig) => void
+  /** Vocabulary switch (user-test 2026-07-21 D3): Code/SDK deployments run
+   *  SESSIONS, not calls, and their transcripts land in Sessions — the same
+   *  block must not promise "Call History" to an SDK integrator. */
+  channel?: "call" | "session"
 }) {
+  const noun = channel
+  const home = channel === "session" ? "Sessions" : "Call History"
   // Merge over defaults so drafts saved before record/successEval existed
   // gain the new fields instead of rendering undefined switches.
   const cfg = { ...DEFAULT_ANALYSIS, ...value }
@@ -46,7 +53,7 @@ export function StepAnalysis({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Choose what each call records. Results appear in Call History.
+        Choose what each {noun} records. Results appear in {home}.
       </p>
 
       {/* Transcripts & recording — split toggles (Figma "Transcripts &
@@ -61,17 +68,17 @@ export function StepAnalysis({
         </div>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium">Store call transcripts</p>
+            <p className="text-sm font-medium">Store {noun} transcripts</p>
             <p className="text-xs text-muted-foreground">Automatically saves the conversation text for review.</p>
           </div>
-          <Switch checked={cfg.transcribe} onCheckedChange={(transcribe) => patch({ transcribe })} aria-label="Store call transcripts" />
+          <Switch checked={cfg.transcribe} onCheckedChange={(transcribe) => patch({ transcribe })} aria-label={`Store ${noun} transcripts`} />
         </div>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium">Store call recording</p>
-            <p className="text-xs text-muted-foreground">Automatically saves the call audio recording for review.</p>
+            <p className="text-sm font-medium">Store {noun} recording</p>
+            <p className="text-xs text-muted-foreground">Automatically saves the audio recording for review.</p>
           </div>
-          <Switch checked={cfg.record} onCheckedChange={(record) => patch({ record })} aria-label="Store call recording" />
+          <Switch checked={cfg.record} onCheckedChange={(record) => patch({ record })} aria-label={`Store ${noun} recording`} />
         </div>
       </section>
 
@@ -81,7 +88,7 @@ export function StepAnalysis({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-sm font-semibold">Success evaluation</p>
-            <p className="text-xs text-muted-foreground">Evaluate whether each call was &ldquo;Successful&rdquo; or &ldquo;Failed&rdquo;.</p>
+            <p className="text-xs text-muted-foreground">Evaluate whether each {noun} was &ldquo;Successful&rdquo; or &ldquo;Failed&rdquo;.</p>
           </div>
           <Switch checked={cfg.successEval} onCheckedChange={(successEval) => patch({ successEval })} aria-label="Success evaluation" />
         </div>
