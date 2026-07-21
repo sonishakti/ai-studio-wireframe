@@ -58,12 +58,69 @@ export interface DataPoint {
   allowedValues?: string[]
 }
 export interface AnalysisConfig {
-  /** Record + transcribe calls (required before data points can be extracted). */
+  /** Store call transcripts (required before data points can be extracted). */
   transcribe: boolean
+  /** Store call audio recordings (Figma splits this from transcripts). */
+  record: boolean
+  /** Judge each call "Successful" / "Failed" against the criteria below. */
+  successEval: boolean
+  evalCriteria: string
   dataPoints: DataPoint[]
 }
 
-export const DEFAULT_ANALYSIS: AnalysisConfig = { transcribe: true, dataPoints: [] }
+export const DEFAULT_ANALYSIS: AnalysisConfig = {
+  transcribe: true,
+  record: true,
+  successEval: false,
+  evalCriteria: "",
+  dataPoints: [],
+}
+
+/** How the agent's calls end + when they hand off to a person (Figma "Call
+ *  Settings" / "Hang-up Configuration" / "Transfer Call to Human", node
+ *  2593-101785). Channel-agnostic core; voicemail/ring/pacing only render for
+ *  Batch calls. Optional on the draft like `advanced` — absent = defaults. */
+export interface CallBehaviorConfig {
+  /** The agent may end the call itself. */
+  endCall: boolean
+  /** Hang up when the conversation concludes naturally. */
+  endOfConversation: boolean
+  /** Outbound: detect answering machines and hang up. */
+  voicemailDetection: boolean
+  silenceHangup: boolean
+  silenceTimeoutSec: number
+  maxDurationSec: number
+  /** Outbound: give up dialing after this many seconds of ringing. */
+  ringDurationSec: number
+  transfer: boolean
+  transferDest: string
+  transferCriteria: string
+  /** Outbound: minimum gap between placed calls (rate pacing). */
+  minIntervalMs: number
+}
+
+export const DEFAULT_CALL_BEHAVIOR: CallBehaviorConfig = {
+  endCall: true,
+  endOfConversation: true,
+  voicemailDetection: true,
+  silenceHangup: true,
+  silenceTimeoutSec: 120,
+  maxDurationSec: 300,
+  ringDurationSec: 30,
+  transfer: false,
+  transferDest: "",
+  transferCriteria: "",
+  minIntervalMs: 1000,
+}
+
+/** When a batch starts dialing (Figma "Launch Timing"). */
+export interface LaunchConfig {
+  mode: "now" | "scheduled"
+  /** Scheduled only — wireframe keeps these as plain strings. */
+  startDate?: string
+  startTime?: string
+  timezone?: string
+}
 
 export interface AgentDraft {
   /** Set when editing an existing agent; absent for a brand-new draft. */
@@ -86,6 +143,8 @@ export interface AgentDraft {
   /** Optional depth — absent until the user opens the section (F1 / F8). */
   advanced?: AdvancedConfig
   analysis?: AnalysisConfig
+  /** Hang-up rules + human handoff — absent until touched (defaults apply). */
+  callBehavior?: CallBehaviorConfig
   /** Step 4 — channel config, branched by `type`. */
   config: {
     inbound?: { mode: InboundMode; numberId?: string }
@@ -97,6 +156,8 @@ export interface AgentDraft {
       callWindow?: "business" | "extended" | "anytime"
       maxConcurrent?: number
       retries?: number
+      /** Launch now vs schedule for later (Figma "Launch Timing"). */
+      launch?: LaunchConfig
     }
     code?: { added?: boolean }
   }
@@ -277,6 +338,10 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
   if (d.type === "outbound") {
     if (!d.config.outbound?.numberId) blocks.push({ reason: "Attach a caller-ID phone number.", step: 1, action: "Set up calls" })
     if (!d.config.outbound?.csvName) blocks.push({ reason: "Upload a contacts CSV.", step: 1, action: "Add contacts" })
+    const launch = d.config.outbound?.launch
+    if (launch?.mode === "scheduled" && !(launch.startDate && launch.startTime && launch.timezone)) {
+      blocks.push({ reason: "Set the start date, time, and timezone for the scheduled launch.", step: 1, action: "Set schedule" })
+    }
   }
   if (d.type === "inbound" && (d.config.inbound?.mode ?? "phone") === "phone" && !d.config.inbound?.numberId) {
     blocks.push({ reason: "Attach a phone number for the agent to answer.", step: 1, action: "Set up the channel" })

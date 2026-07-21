@@ -29,7 +29,9 @@ export function StepAnalysis({
   value: AnalysisConfig | undefined
   onChange: (next: AnalysisConfig) => void
 }) {
-  const cfg = value ?? DEFAULT_ANALYSIS
+  // Merge over defaults so drafts saved before record/successEval existed
+  // gain the new fields instead of rendering undefined switches.
+  const cfg = { ...DEFAULT_ANALYSIS, ...value }
   const patch = (p: Partial<AnalysisConfig>) => onChange({ ...cfg, ...p })
   // null = closed; "new" = add; a DataPoint = edit that one.
   const [editing, setEditing] = React.useState<DataPoint | "new" | null>(null)
@@ -47,18 +49,54 @@ export function StepAnalysis({
         Choose what each call records. Results appear in Call History.
       </p>
 
-      {/* Transcription gate */}
-      <section className="flex items-start justify-between gap-3 rounded-lg border border-border bg-card p-4">
+      {/* Transcripts & recording — split toggles (Figma "Transcripts &
+          Recording", node 2593-101785): transcripts gate the data points;
+          audio recording is its own choice. */}
+      <section className="space-y-4 rounded-lg border border-border bg-card p-4">
         <div className="flex items-start gap-2.5">
           <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
             <FileText className="h-4 w-4" aria-hidden />
           </span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Transcription &amp; recording</p>
-            <p className="text-xs text-muted-foreground">Store the transcript so data points can be extracted.</p>
-          </div>
+          <p className="text-sm font-semibold leading-8">Transcripts &amp; recording</p>
         </div>
-        <Switch checked={cfg.transcribe} onCheckedChange={(transcribe) => patch({ transcribe })} aria-label="Transcription and recording" />
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Store call transcripts</p>
+            <p className="text-xs text-muted-foreground">Automatically saves the conversation text for review.</p>
+          </div>
+          <Switch checked={cfg.transcribe} onCheckedChange={(transcribe) => patch({ transcribe })} aria-label="Store call transcripts" />
+        </div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Store call recording</p>
+            <p className="text-xs text-muted-foreground">Automatically saves the call audio recording for review.</p>
+          </div>
+          <Switch checked={cfg.record} onCheckedChange={(record) => patch({ record })} aria-label="Store call recording" />
+        </div>
+      </section>
+
+      {/* Success evaluation (Figma "Post Call Analysis") — judge each call
+          against plain-language criteria; verdicts land in Call History. */}
+      <section className="space-y-4 rounded-lg border border-border bg-card p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">Success evaluation</p>
+            <p className="text-xs text-muted-foreground">Evaluate whether each call was &ldquo;Successful&rdquo; or &ldquo;Failed&rdquo;.</p>
+          </div>
+          <Switch checked={cfg.successEval} onCheckedChange={(successEval) => patch({ successEval })} aria-label="Success evaluation" />
+        </div>
+        {cfg.successEval && (
+          <div className="space-y-1.5">
+            <Label htmlFor="an-eval" className="text-sm font-medium">Evaluation criteria</Label>
+            <Textarea
+              id="an-eval"
+              value={cfg.evalCriteria}
+              onChange={(e) => patch({ evalCriteria: e.target.value })}
+              placeholder="Evaluate whether the agent's call with the user was successful. Consider whether the issue was resolved, communication clarity, professionalism, and adherence to company policies…"
+              className="min-h-[96px] text-sm"
+            />
+          </div>
+        )}
       </section>
 
       {/* Data points */}

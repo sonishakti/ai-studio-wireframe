@@ -57,7 +57,7 @@ export function stepTitle(n: number, _draft: AgentDraft): string {
  *  the chosen channel so the row predicts its actual contents. */
 export function stepManifest(n: number, draft: AgentDraft): string {
   if (n === 1) {
-    if (draft.type === "outbound") return "Pick channel · Caller ID · Contacts CSV · Call window"
+    if (draft.type === "outbound") return "Pick channel · Caller ID · Contacts CSV · Schedule · Hang-up & transfer"
     if (draft.type === "code") return "Pick channel · SDK snippets"
     if (draft.type === "inbound")
       return draft.config.inbound?.mode === "web"
@@ -70,7 +70,7 @@ export function stepManifest(n: number, draft: AgentDraft): string {
   if (n === 4) return "Pipeline · Latency vs cost · Models · History"
   if (n === 5) return "Knowledge · MCP · Connectors"
   if (n === 6) return "Simulated test call · Evals"
-  if (n === 7) return "Review & deploy"
+  if (n === 7) return "Transcripts & analysis · Review & deploy"
   return ""
 }
 
@@ -88,7 +88,7 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
       })
     if (draft.type === "outbound") {
       toc.push({ id: "wz-1-setup", label: typeLabel("outbound") })
-      toc.push({ id: "wz-1-callsettings", label: "Call window & retries" })
+      toc.push({ id: "wz-1-callsettings", label: "Call settings & schedule" })
     }
     if (draft.type === "code") toc.push({ id: "wz-1-setup", label: typeLabel("code") })
     return toc
@@ -124,6 +124,7 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     ]
   if (n === 7)
     return [
+      { id: "wz-7-capture", label: "Transcripts & analysis" },
       { id: "wz-7-review", label: "Review & deploy" },
     ]
   return []

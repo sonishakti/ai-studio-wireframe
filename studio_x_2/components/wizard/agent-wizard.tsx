@@ -27,6 +27,7 @@ import { SectionKnowledgeTools } from "@/components/wizard/step-build"
 import { StepConfigure } from "@/components/wizard/step-configure"
 import { StepPublish } from "@/components/wizard/step-publish"
 import { CallSettings } from "@/components/wizard/step-call-settings"
+import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { StackTradeoffSlider, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { TestsSection } from "@/components/eval-tests"
 import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle, stepToc } from "@/components/wizard/types"
@@ -1294,7 +1295,7 @@ export function AgentWizard({
                       )}
                       {channelTouched && draft.type === "outbound" && (
                         <div id="wz-1-callsettings" className="scroll-mt-28 space-y-3">
-                          <p className="text-sm font-medium">Call window &amp; retries</p>
+                          <p className="text-sm font-medium">Call settings &amp; schedule</p>
                           <CallSettings draft={draft} update={update} />
                         </div>
                       )}
@@ -1372,13 +1373,22 @@ export function AgentWizard({
                       <TestsSection agentName={draft.name || "your agent"} />
                     </div>
                   )}
-                  {/* 7 · GO LIVE — review & deploy only (capture lives on
-                      Monitor; Test is its own section above). */}
+                  {/* 7 · GO LIVE — what each call records (transcripts ·
+                      recording · success eval · data points — the v3 "Analysis
+                      → Go live" fold, finally wired 2026-07-21) + review &
+                      deploy. */}
                   {n === 7 && (
                     <div className="space-y-8">
+                      <div id="wz-7-capture" className="scroll-mt-28 space-y-3">
+                        <p className="text-sm font-medium">Transcripts, recording &amp; analysis</p>
+                        <StepAnalysis
+                          value={draft.analysis}
+                          onChange={(analysis) => update({ analysis })}
+                        />
+                      </div>
                       {/* publishRegionRef feeds graft B: while this in-step
                           go-live CTA is on screen, the rail Deploy demotes. */}
-                      <div id="wz-7-review" ref={publishRegionRef} className="scroll-mt-28">
+                      <div id="wz-7-review" ref={publishRegionRef} className="scroll-mt-28 border-t border-border pt-6">
                         <StepPublish
                           draft={draft}
                           live={isLive}
@@ -1498,13 +1508,16 @@ export function AgentWizard({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Start calling {MOCK_CSV_ROWS} contacts?
+              {draft.config.outbound?.launch?.mode === "scheduled"
+                ? `Schedule calls to ${MOCK_CSV_ROWS} contacts?`
+                : `Start calling ${MOCK_CSV_ROWS} contacts?`}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
                 <p>
-                  Deploying starts the batch immediately — {draft.name || "your agent"} dials
-                  every contact in {draft.config.outbound?.csvName ?? "your list"}.
+                  {draft.config.outbound?.launch?.mode === "scheduled"
+                    ? `Deploying arms the schedule — ${draft.name || "your agent"} starts dialing ${draft.config.outbound?.csvName ?? "your list"} at the time below.`
+                    : `Deploying starts the batch immediately — ${draft.name || "your agent"} dials every contact in ${draft.config.outbound?.csvName ?? "your list"}.`}
                 </p>
                 <ul className="space-y-1 text-muted-foreground">
                   {/* One agent ↔ one channel: launching the batch takes the
@@ -1516,6 +1529,13 @@ export function AgentWizard({
                       · {draft.name || "Your agent"} stops answering{" "}
                       {PHONE_NUMBERS.find((n) => n.id === baseline.current!.config.inbound?.numberId)?.number ?? "its inbound number"}{" "}
                       while on Batch calls
+                    </li>
+                  )}
+                  {draft.config.outbound?.launch?.mode === "scheduled" && (
+                    <li>
+                      · Starts: {draft.config.outbound.launch.startDate ?? "date not set"}{" "}
+                      {draft.config.outbound.launch.startTime ?? ""}{" "}
+                      {draft.config.outbound.launch.timezone ? `(${draft.config.outbound.launch.timezone})` : ""}
                     </li>
                   )}
                   <li>· Caller ID: {PHONE_NUMBERS.find((n) => n.id === draft.config.outbound?.numberId)?.number ?? "selected number"}</li>
@@ -1550,7 +1570,7 @@ export function AgentWizard({
                 publish()
               }}
             >
-              Start the batch
+              {draft.config.outbound?.launch?.mode === "scheduled" ? "Schedule the batch" : "Start the batch"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

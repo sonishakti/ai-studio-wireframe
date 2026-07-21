@@ -148,6 +148,21 @@ function InboundConfigure({
               .
             </p>
           </div>
+          {/* Inbound call behavior (recording · transfer-to-human · hang-up
+              rules) is NUMBER-level config (Figma node 2592-101281) — link the
+              one place it lives instead of duplicating the form here. */}
+          {currentId && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5">
+              <p className="min-w-0 text-xs text-muted-foreground">
+                Recording, call transcript, transfer-to-human, and hang-up rules are configured on the number itself.
+              </p>
+              <Button variant="outline" size="sm" className="h-7 shrink-0 gap-1 text-xs" asChild>
+                <a href={`/deploy/phone-numbers/${currentId}`}>
+                  Number call settings <ExternalLink className="h-3 w-3" aria-hidden />
+                </a>
+              </Button>
+            </div>
+          )}
         </ConfigCard>
         </div>
       ) : (
