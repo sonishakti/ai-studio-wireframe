@@ -1,0 +1,199 @@
+<title>Graph Loop — Ship→Test→Fix for Studio_X</title>
+<style>
+  :root {
+    --bg: #fdfcfc; --ink: #16181a; --muted: #5c6670; --line: #e4e7ea;
+    --card: #ffffff; --card2: #f4f6f7; --brand: #00658d; --brand-soft: #e3f1f7;
+    --good: #1a7f4b; --warn: #a15c00; --bad: #b3261e; --mono-bg: #f0f3f5;
+  }
+  @media (prefers-color-scheme: dark) { :root {
+    --bg: #050505; --ink: #ececec; --muted: #9aa4ad; --line: #23282c;
+    --card: #0d0f11; --card2: #14171a; --brand: #00c2ff; --brand-soft: #062a38;
+    --good: #4cc38a; --warn: #e0a458; --bad: #f2827a; --mono-bg: #111417;
+  } }
+  :root[data-theme="light"] {
+    --bg: #fdfcfc; --ink: #16181a; --muted: #5c6670; --line: #e4e7ea;
+    --card: #ffffff; --card2: #f4f6f7; --brand: #00658d; --brand-soft: #e3f1f7;
+    --good: #1a7f4b; --warn: #a15c00; --bad: #b3261e; --mono-bg: #f0f3f5;
+  }
+  :root[data-theme="dark"] {
+    --bg: #050505; --ink: #ececec; --muted: #9aa4ad; --line: #23282c;
+    --card: #0d0f11; --card2: #14171a; --brand: #00c2ff; --brand-soft: #062a38;
+    --good: #4cc38a; --warn: #e0a458; --bad: #f2827a; --mono-bg: #111417;
+  }
+  html { background: var(--bg); }
+  body {
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--ink); background: var(--bg); line-height: 1.6; margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 56px 24px 96px; }
+  .mono, code, pre, th { font-family: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+  .eyebrow { font-family: 'Space Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); margin: 0 0 12px; }
+  h1 { font-size: 34px; line-height: 1.15; letter-spacing: -.01em; margin: 0 0 10px; text-wrap: balance; font-weight: 650; }
+  .lede { color: var(--muted); font-size: 16.5px; max-width: 62ch; margin: 0 0 8px; }
+  h2 { font-size: 20px; margin: 56px 0 6px; letter-spacing: -.005em; font-weight: 650; }
+  h2 .n { color: var(--brand); font-family: 'Space Mono', monospace; font-size: 14px; margin-right: 10px; }
+  .sub { color: var(--muted); margin: 0 0 18px; max-width: 68ch; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+  th { text-align: left; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 400; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--card2); white-space: nowrap; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  code { background: var(--mono-bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 12.5px; }
+  pre { background: var(--mono-bg); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font-size: 13px; line-height: 1.55; }
+  pre code { background: none; border: 0; padding: 0; }
+  .pill { display: inline-block; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .04em; border-radius: 999px; padding: 2px 10px; border: 1px solid var(--line); background: var(--card2); white-space: nowrap; }
+  .pill.agent { color: var(--brand); border-color: color-mix(in oklab, var(--brand) 35%, var(--line)); background: var(--brand-soft); }
+  .pill.codep { color: var(--muted); }
+  .exit { color: var(--good); font-weight: 600; }
+  .figure { border: 1px solid var(--line); border-radius: 8px; background: var(--card); padding: 20px 8px 10px; overflow-x: auto; }
+  .figcap { font-size: 12.5px; color: var(--muted); text-align: center; padding: 8px 16px 10px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; background: var(--card); padding: 14px 16px; }
+  .card h3 { margin: 0 0 6px; font-size: 14px; font-weight: 650; }
+  .card p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .src { font-size: 13px; color: var(--muted); }
+  .src a { color: var(--brand); text-decoration: none; }
+  .src a:hover, a:focus-visible { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 2px; }
+  ul { padding-left: 20px; } li { margin: 4px 0; }
+  .done { color: var(--good); } .todo { color: var(--warn); }
+  svg text { font-family: 'Space Mono', ui-monospace, monospace; }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Studio_X · Process infrastructure · 2026-07-21</p>
+  <h1>The Graph Loop: ship → test → fix, closed</h1>
+  <p class="lede">Every standing request in this project — gate, deploy, 3-persona user test, apply P0 fixes, report — was being re-orchestrated by hand each session. This doc audits those repetitive asks, digests what a “graph loop” is, and specs the one now living at <code>.claude/workflows/graph-loop.js</code>.</p>
+
+  <h2><span class="n">01</span>The repetitive-task audit</h2>
+  <p class="sub">Sourced from project memory and standing feedback. Each row was previously a manual, per-session ritual; the right column is where it now lives in the loop.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Standing ask (source)</th><th>Frequency</th><th>Graph-loop node</th></tr>
+    <tr><td><code>pnpm tsc --noEmit</code> green before deploy; drift check <span class="src">(auto-push memory, CLAUDE.md)</span></td><td>every change</td><td><span class="pill agent">GATE</span></td></tr>
+    <tr><td>Commit + push main + <code>vercel deploy --prod --yes</code> — git auto-deploy is broken <span class="src">(auto-push memory)</span></td><td>every change</td><td><span class="pill agent">DEPLOY</span></td></tr>
+    <tr><td>3-persona think-aloud user test after every user-facing deploy <span class="pill">⚑ STANDING</span> <span class="src">(user-testing protocol)</span></td><td>every deploy</td><td><span class="pill agent">TEST</span> <span class="src">(reuses <code>user-test.js</code> as a subgraph)</span></td></tr>
+    <tr><td>Apply P0 + quick-P1 fixes from synthesis, then re-verify <span class="src">(user-testing protocol)</span></td><td>every test round</td><td><span class="pill agent">FIX</span> + the loop edge itself</td></tr>
+    <tr><td>Write report to <code>references/user-tests/</code>, give owner the metrics table <span class="src">(user-testing protocol)</span></td><td>every test</td><td><span class="pill agent">REPORT</span></td></tr>
+    <tr><td>No scope creep; skip ambiguous fixes rather than improvise <span class="src">(verify-sources memory)</span></td><td>always</td><td>FIX-node rules + <span class="pill codep">TRIAGE</span> filter</td></tr>
+  </table></div>
+
+  <h2><span class="n">02</span>What a graph loop is</h2>
+  <p class="sub">Across LangGraph, AWS’s agentic-patterns guidance, and Google’s ADK, the same shape recurs: model the workflow as a <strong>graph</strong> (nodes = steps, edges = transitions) and let one edge point <strong>backwards</strong> — a cycle — so output feeds its own evaluation until a gate passes. Three safeguards keep the cycle from spinning forever:</p>
+  <div class="cards">
+    <div class="card"><h3>Evaluator–optimizer core</h3><p>A generator produces, an evaluator critiques against a rubric, an optimizer revises. Loop repeats until criteria are met — typically converging in 2–3 iterations.</p></div>
+    <div class="card"><h3>Hard exit conditions</h3><p>Max-iteration caps and explicit termination predicates are non-negotiable; ADK’s LoopAgent and LangGraph recursion limits exist precisely to bound cycles.</p></div>
+    <div class="card"><h3>Stall / critic detection</h3><p>A supervisor (often cheap, often pure code) watches the trajectory and force-exits when metrics stop improving — revising without improving is the classic failure mode.</p></div>
+  </div>
+
+  <h2><span class="n">03</span>The Studio_X graph</h2>
+  <p class="sub">Our generator is the whole ship pipeline, our evaluator is the simulated 3-persona focus group, and the rubric is the existing severity/SUS-lite framework — so the graph loop is mostly <em>wiring we already paid for</em>, plus a triage brain and a loop edge.</p>
+
+  <div class="figure">
+    <svg viewBox="0 0 760 300" width="760" height="300" role="img" aria-label="Graph-loop diagram: TEST flows to TRIAGE, which exits on clean, stalled, or max iterations, or flows to FIX, then GATE, then DEPLOY, which loops back to TEST. TEST also feeds REPORT at exit.">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+        </marker>
+        <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--brand)"/>
+        </marker>
+      </defs>
+      <!-- loop edge: DEPLOY back to TEST -->
+      <path d="M 640 96 C 640 30, 120 30, 90 88" fill="none" stroke="var(--brand)" stroke-width="1.8" marker-end="url(#arrB)"/>
+      <text x="365" y="42" text-anchor="middle" font-size="11" fill="var(--brand)">loop edge — re-test the new live build</text>
+      <!-- nodes row -->
+      <g>
+        <rect x="30" y="92" width="120" height="52" rx="8" fill="var(--brand-soft)" stroke="var(--brand)"/>
+        <text x="90" y="114" text-anchor="middle" font-size="13" fill="var(--ink)" font-weight="bold">TEST</text>
+        <text x="90" y="131" text-anchor="middle" font-size="10" fill="var(--muted)">user-test.js ×3+1</text>
+      </g>
+      <line x1="150" y1="118" x2="196" y2="118" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <g>
+        <rect x="200" y="92" width="120" height="52" rx="26" fill="var(--card2)" stroke="var(--line)"/>
+        <text x="260" y="114" text-anchor="middle" font-size="13" fill="var(--ink)" font-weight="bold">TRIAGE</text>
+        <text x="260" y="131" text-anchor="middle" font-size="10" fill="var(--muted)">pure code · $0</text>
+      </g>
+      <line x1="320" y1="118" x2="366" y2="118" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="343" y="106" text-anchor="middle" font-size="10" fill="var(--muted)">P0s</text>
+      <g>
+        <rect x="370" y="92" width="110" height="52" rx="8" fill="var(--card)" stroke="var(--line)"/>
+        <text x="425" y="114" text-anchor="middle" font-size="13" fill="var(--ink)" font-weight="bold">FIX</text>
+        <text x="425" y="131" text-anchor="middle" font-size="10" fill="var(--muted)">P0 + quick P1</text>
+      </g>
+      <line x1="480" y1="118" x2="526" y2="118" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <g>
+        <rect x="530" y="92" width="50" height="52" rx="8" fill="var(--card)" stroke="var(--line)"/>
+        <text x="555" y="122" text-anchor="middle" font-size="12" fill="var(--ink)" font-weight="bold">GATE</text>
+      </g>
+      <line x1="580" y1="118" x2="626" y2="118" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <g>
+        <rect x="630" y="92" width="100" height="52" rx="8" fill="var(--card)" stroke="var(--line)"/>
+        <text x="680" y="114" text-anchor="middle" font-size="12" fill="var(--ink)" font-weight="bold">DEPLOY</text>
+        <text x="680" y="131" text-anchor="middle" font-size="10" fill="var(--muted)">push + vercel</text>
+      </g>
+      <!-- gate self-heal -->
+      <path d="M 545 144 C 520 185, 590 185, 565 146" fill="none" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+      <text x="555" y="200" text-anchor="middle" font-size="10" fill="var(--muted)">fix-build ×1, then abort</text>
+      <!-- exits from triage -->
+      <line x1="260" y1="144" x2="260" y2="196" stroke="var(--good)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <g>
+        <rect x="185" y="200" width="150" height="46" rx="8" fill="var(--card)" stroke="var(--good)"/>
+        <text x="260" y="219" text-anchor="middle" font-size="12" fill="var(--good)" font-weight="bold">EXIT</text>
+        <text x="260" y="235" text-anchor="middle" font-size="10" fill="var(--muted)">clean · stalled · max</text>
+      </g>
+      <line x1="335" y1="223" x2="426" y2="223" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <g>
+        <rect x="430" y="200" width="120" height="46" rx="8" fill="var(--card)" stroke="var(--line)"/>
+        <text x="490" y="219" text-anchor="middle" font-size="12" fill="var(--ink)" font-weight="bold">REPORT</text>
+        <text x="490" y="235" text-anchor="middle" font-size="10" fill="var(--muted)">user-tests/*.md</text>
+      </g>
+    </svg>
+    <p class="figcap">One round ≈ 7 agents (3 personas + moderator + fix + gate + deploy). TRIAGE and stall detection are pure code — free and deterministic.</p>
+  </div>
+
+  <div class="tablewrap" style="margin-top:18px"><table>
+    <tr><th>Node</th><th>Kind</th><th>Does</th><th>Failure edge</th></tr>
+    <tr><td><strong>TEST</strong></td><td><span class="pill agent">subgraph</span></td><td>Runs <code>user-test.js</code> (3 personas in parallel → moderator synthesis) against the live URL</td><td>Null sessions are filtered; synthesis still runs</td></tr>
+    <tr><td><strong>TRIAGE</strong></td><td><span class="pill codep">pure code</span></td><td>Filters synthesis fixes to P0 + quick-effort P1; checks stall (S1 not dropping ∧ SUS-lite not rising) and the iteration cap</td><td>— (deterministic)</td></tr>
+    <tr><td><strong>FIX</strong></td><td><span class="pill agent">agent</span></td><td>Applies exactly the triaged batch in <code>studio_x_2/</code>, tokens-only, skips ambiguity with a reason</td><td>Nothing applicable → exit <code>nothing-applicable</code></td></tr>
+    <tr><td><strong>GATE</strong></td><td><span class="pill agent">agent · low</span></td><td><code>pnpm tsc --noEmit</code> (+ best-effort drift check)</td><td>One <em>fix-build</em> repair bounce, then exit <code>gate-failed</code></td></tr>
+    <tr><td><strong>DEPLOY</strong></td><td><span class="pill agent">agent · low</span></td><td>Commit → push main → <code>vercel deploy --prod --yes</code> (manual deploy is mandatory; git auto-deploy is broken)</td><td>Exit <code>deploy-failed</code>, nothing half-shipped</td></tr>
+    <tr><td><strong>REPORT</strong></td><td><span class="pill agent">agent · low</span></td><td>Per-round metrics table + learnings → <code>references/user-tests/&lt;date&gt;-&lt;slug&gt;.md</code>, committed</td><td>Runs on every exit path</td></tr>
+  </table></div>
+
+  <p class="sub" style="margin-top:18px">Exit conditions, checked in order at TRIAGE: <span class="exit">clean</span> (zero P0/quick-P1 — the goal), <span class="exit">stalled</span> (metrics flat vs last round — stop paying for revision without improvement), <span class="exit">max</span> (default 2 fix rounds; a 3rd test verifies the last batch). Everything left over lands in the report as a P1/P2 backlog, not silently dropped.</p>
+
+  <h2><span class="n">04</span>How to run it</h2>
+<pre><code>Workflow({
+  scriptPath: '.claude/workflows/graph-loop.js',
+  args: {
+    date: '2026-07-21',            // required — workflow scripts can't read the clock
+    focus: 'batch-calls CSV mapping',
+    slug: 'batch-calls-csv',       // report filename slug
+    commit: 'abc1234 one-liner',   // what round 1 tests
+    maxIterations: 2               // fix rounds (default 2)
+  }
+})</code></pre>
+  <p class="sub">Or in plain words: <em>“run the graph loop on what we just shipped.”</em> The old ritual — deploy, run user-test, read synthesis, fix P0s, redeploy, re-test, write the report — is now one invocation.</p>
+
+  <h2><span class="n">05</span>Action items</h2>
+  <ul>
+    <li class="done"><strong>Done</strong> — <code>.claude/workflows/graph-loop.js</code> written; reuses <code>user-test.js</code> unchanged as its TEST subgraph.</li>
+    <li class="done"><strong>Done</strong> — this design doc (repo + Artifact), memory updated so future sessions reach for the loop instead of hand-orchestrating.</li>
+    <li class="todo"><strong>Next</strong> — first live run on the next user-facing commit; calibrate the stall predicate and iteration cap against real convergence.</li>
+    <li class="todo"><strong>Later</strong> — optional: a <code>/loop</code> or scheduled routine that runs the graph loop nightly against HEAD as a regression sweep, and folding the diverge→converge variant harness in as a pre-TEST design node.</li>
+  </ul>
+
+  <h2><span class="n">06</span>Sources</h2>
+  <p class="src">
+    <a href="https://www.sitepoint.com/the-definitive-guide-to-agentic-design-patterns-in-2026/">Agentic design patterns 2026 (SitePoint)</a> ·
+    <a href="https://baeseokjae.github.io/posts/langgraph-tutorial-2026/">LangGraph stateful-graph tutorial 2026</a> ·
+    <a href="https://futureagi.com/blog/langgraph-agent-evaluation-2026/">LangGraph agent evaluation 2026 (Future AGI)</a> ·
+    <a href="https://aireviewzones.com/langgraph-review/">LangGraph production review (cyclical orchestration)</a> ·
+    <a href="https://rajatpandit.com/ai-engineering/optimizing-langgraph-cycles/">Preventing infinite loops in agent cycles (Pandit)</a> ·
+    <a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/agentic-ai-patterns/evaluator-reflect-refine-loop-patterns.html">AWS evaluator / reflect-refine loop patterns</a> ·
+    <a href="https://adk.dev/agents/workflow-agents/loop-agents/">Google ADK LoopAgent</a> ·
+    <a href="https://blog.bytebytego.com/p/top-ai-agentic-workflow-patterns">ByteByteGo: top agentic workflow patterns</a>
+  </p>
+</div>
