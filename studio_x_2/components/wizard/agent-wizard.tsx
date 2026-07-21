@@ -29,6 +29,7 @@ import { StepPublish } from "@/components/wizard/step-publish"
 import { CallSettings } from "@/components/wizard/step-call-settings"
 import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { StackTradeoffSlider, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { TestsSection } from "@/components/eval-tests"
 import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle } from "@/components/wizard/types"
@@ -1278,16 +1279,17 @@ export function AgentWizard({
                           <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} hideTitle />
                           {/* BYOK lives WITH the model selects — override the
                               ASR/LLM/TTS vendors with your own keys (owner
-                              2026-07-17; was oddly placed in Knowledge & Tools). */}
-                          <div className="flex items-center gap-2.5 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
+                              2026-07-17); nested behind a dotted hint (owner
+                              2026-07-21). */}
+                          <div className="flex items-center gap-2">
                             <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                            <p className="text-xs text-muted-foreground">
-                              Using your own vendor accounts? Add keys in{" "}
-                              <a href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
+                            <InfoHint label="Using your own vendor accounts?">
+                              Add keys in{" "}
+                              <a href="/project/vendor-credentials" className="underline underline-offset-2">
                                 Manage › Vendor Credentials
                               </a>{" "}
                               — the ASR, LLM, and TTS you pick here will use them.
-                            </p>
+                            </InfoHint>
                           </div>
                         </div>
                       </SectionRow>

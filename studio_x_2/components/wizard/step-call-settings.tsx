@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { AddLinesSheet } from "@/components/concurrency-card"
 import { CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
 import { useFutureScope } from "@/lib/future-scope"
@@ -121,9 +122,9 @@ function LaunchTiming({ draft, update }: StepProps) {
               </Select>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <InfoHint label="How scheduling meets the call window">
             The batch begins at this time; the call window below still bounds each day&apos;s dialing.
-          </p>
+          </InfoHint>
         </div>
       )}
     </SectionRow>
@@ -265,9 +266,11 @@ function HangupSettings({ draft, update }: StepProps) {
             className="max-w-[200px] text-sm font-mono"
           />
           <p className="text-xs text-muted-foreground">
-            Call ends after {cb.silenceTimeoutSec} seconds of no response. Different from the
-            turn-taking silence in Voice &amp; speech › Turn-taking &amp; interruptions — that one
-            shapes when the agent replies; this one ends the call.
+            Call ends after {cb.silenceTimeoutSec} seconds of no response.{" "}
+            <InfoHint label="Two silence settings?">
+              Different from the turn-taking silence in Voice &amp; speech › Turn-taking &amp;
+              interruptions — that one shapes when the agent replies; this one ends the call.
+            </InfoHint>
           </p>
         </div>
       )}

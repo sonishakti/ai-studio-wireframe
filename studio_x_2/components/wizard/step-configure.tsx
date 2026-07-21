@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
 import { WidgetStyleConfig } from "@/components/widget-studio"
@@ -139,23 +140,26 @@ function InboundConfigure({
               </SelectContent>
             </Select>
             {/* ONE name + ONE link for the BYO-SIP door, same as the batch
-                side — "Numbers" vs "Channels" read as two doors (user-test S3). */}
-            <p className="text-xs text-muted-foreground">
-              No number free? Agora routes your own carrier number — connect one via SIP in{" "}
-              <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
+                side — "Numbers" vs "Channels" read as two doors (user-test S3).
+                Nested behind a dotted hint (owner 2026-07-21). */}
+            <InfoHint label="No number free?">
+              Agora routes your own carrier number — connect one via SIP in{" "}
+              <a href="/integrations?tab=channels" className="underline underline-offset-2">
                 Resources › Deployment Channels
               </a>
               .
-            </p>
+            </InfoHint>
           </div>
           {/* Inbound call behavior (recording · transfer-to-human · hang-up
               rules) is NUMBER-level config (Figma node 2592-101281) — link the
-              one place it lives instead of duplicating the form here. */}
+              one place it lives instead of duplicating the form here. Copy
+              nested behind a dotted hint (owner 2026-07-21). */}
           {currentId && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5">
-              <p className="min-w-0 text-xs text-muted-foreground">
-                Recording, call transcript, transfer-to-human, and hang-up rules are configured on the number itself.
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <InfoHint label="Where are recording, transfer & hang-up rules?">
+                Recording, call transcript, transfer-to-human, and hang-up rules are configured
+                on the number itself — open its call settings.
+              </InfoHint>
               <Button variant="outline" size="sm" className="h-7 shrink-0 gap-1 text-xs" asChild>
                 <a href={`/deploy/phone-numbers/${currentId}`}>
                   Number call settings <ExternalLink className="h-3 w-3" aria-hidden />
@@ -231,27 +235,28 @@ function OutboundConfigure({ draft, update }: StepProps) {
             </Select>
             {/* The no-number path must have a door on the batch side too —
                 inbound already hints SIP/BYO; a dropdown alone is a dead end
-                for an empty account (user-test 2026-07-09 S3). */}
-            <p className="text-xs text-muted-foreground">
-              No number of your own yet? Connect your carrier&apos;s via SIP in{" "}
-              <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
+                for an empty account (user-test 2026-07-09 S3). Nested (owner
+                2026-07-21). */}
+            <InfoHint label="No number of your own yet?">
+              Connect your carrier&apos;s via SIP in{" "}
+              <a href="/integrations?tab=channels" className="underline underline-offset-2">
                 Resources › Deployment Channels
               </a>
               . Agora doesn&apos;t sell numbers — telephony is bring-your-own.
-            </p>
+            </InfoHint>
           </div>
           {/* Call window · concurrency · retries live in the optional CALL
               SETTINGS section now (owner 2026-07-13: four steps, three in
               advanced) — this card is just the connection. */}
         </ConfigCard>
 
-        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2.5">
-          <Plug className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <p className="text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Plug className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          <InfoHint label={draft.mcp.length > 0 ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} active during calls` : "Connectors during calls"}>
             {draft.mcp.length > 0
               ? `${draft.mcp.length} connector${draft.mcp.length > 1 ? "s" : ""} from Knowledge & Tools will run during calls.`
               : "Attach CRM/calendar connectors in Knowledge & Tools to act during calls."}
-          </p>
+          </InfoHint>
         </div>
       </SectionRow>
 
@@ -317,11 +322,14 @@ function ContactsPanel({ draft, update }: StepProps) {
           </span>
           <div>
             <p className="text-sm font-medium">Upload your contacts</p>
-            {/* The {{variable}}↔column contract is ALSO stated here, at the
-                control — the row-hint-only version was skipped by
-                control-scanners (user-test 2026-07-21 layout round). */}
+            {/* The {{variable}}↔column contract stays AT the control but
+                nested (owner 2026-07-21): short line + dotted hint. */}
             <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
-              A CSV with one row per person. Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled from a matching column.
+              A CSV with one row per person.{" "}
+              <InfoHint label={<>How <code className="font-mono">{"{{variables}}"}</code> work</>}>
+                Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled
+                from the CSV column with the same name — upload adds one variable per column.
+              </InfoHint>
             </p>
           </div>
           <Button size="sm" className="gap-1.5" onClick={attachCsv}>
@@ -448,11 +456,10 @@ await client.stop()`
         </p>
         <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
         <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
-        <p className="text-xs text-muted-foreground">
-          Secured-mode channels: the platform mints the agent&apos;s token from your
-          App Certificate on join — your clients keep bringing their own tokens,
-          and the agent needs nothing extra from you.
-        </p>
+        <InfoHint label="Secured-mode channels & tokens">
+          The platform mints the agent&apos;s token from your App Certificate on join — your
+          clients keep bringing their own tokens, and the agent needs nothing extra from you.
+        </InfoHint>
       </ConfigCard>
 
       <ConfigCard title="Stop the agent">

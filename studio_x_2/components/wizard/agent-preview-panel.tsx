@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 
@@ -61,9 +62,8 @@ export function AgentPreviewPanel({
   statusLabel: string
   isLive: boolean
   statusHint?: string
-  /** ON-SURFACE provenance line under the badges (user-test 2026-07-21: the
-   *  hover-only statusHint left "Live on a number I never bought — is this
-   *  billing me?" unanswered for skimmers who never hover). */
+  /** Provenance under the badges — a short dotted trigger, full message in
+   *  its tooltip (owner 2026-07-21: reduce upfront text). */
   statusNote?: string
   latencyMs: number
   costPerMin: number
@@ -163,9 +163,9 @@ export function AgentPreviewPanel({
           )}
         </div>
         {statusNote && (
-          <p className="mx-auto -mt-2 max-w-[280px] pb-2 text-center text-xs text-muted-foreground">
-            {statusNote}
-          </p>
+          <div className="-mt-2 pb-2 text-center">
+            <InfoHint label="Sample agent on a sandbox line">{statusNote}</InfoHint>
+          </div>
         )}
 
         {view === "widget" && widgetAgentId ? (

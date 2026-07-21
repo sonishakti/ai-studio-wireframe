@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { StateBanner } from "@/components/usage-spend-card"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
@@ -87,12 +88,12 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        {/* Failing ↔ Deploy relationship, stated where the red pill lives
-            (round-6: the pill sat two sections above Deploy with no stated
-            relationship). */}
-        <p className="text-xs text-muted-foreground">
-          Failing scenarios don&apos;t block deploy — they flag prompt gaps to fix.
-        </p>
+        {/* Failing ↔ Deploy relationship, nested behind a dotted hint (owner
+            2026-07-21: reduce upfront text). */}
+        <InfoHint label="Do failing scenarios block deploy?">
+          No — failing scenarios never block deploy. They flag prompt gaps to fix before
+          real traffic.
+        </InfoHint>
         <div className="flex items-center gap-2">
           <Button
             size="sm"

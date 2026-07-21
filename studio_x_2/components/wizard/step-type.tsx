@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
+import { InfoHint } from "@/components/wizard/info-hint"
 import type { StepProps } from "@/components/wizard/types"
 import { typeLabel, type AgentType } from "@/lib/wizard-draft"
 
@@ -104,19 +105,16 @@ export function StepType({ draft, update, liveNote, displayType, liveType }: Ste
         ))}
       </RadioCardGroup>
 
-      {/* BYO-telephony stated BEFORE the channel choice, not as caller-ID fine
-          print mid-flow (repeat S2 across four 2026-07-21 test rounds): a
-          first-timer without a number must learn the wall before investing in
-          prompt + CSV work. */}
-      <p className="text-xs text-muted-foreground">
-        Phone channels are bring-your-own number — Agora doesn&apos;t sell numbers. Connect your
-        carrier&apos;s via SIP in{" "}
-        <a href="/integrations?tab=channels" className="underline underline-offset-2 hover:text-foreground">
+      {/* BYO-telephony BEFORE the channel choice, but nested (owner
+          2026-07-21): a short dotted trigger, the full story on hover. */}
+      <InfoHint label="Phone channels are bring-your-own number">
+        Agora doesn&apos;t sell numbers — connect your carrier&apos;s via SIP in{" "}
+        <a href="/integrations?tab=channels" className="underline underline-offset-2">
           Resources › Deployment Channels
         </a>
-        . Code / SDK and the web widget need none. The sample agent&apos;s number is an Agora
-        sandbox line — production numbers come in via SIP.
-      </p>
+        . Code / SDK and the web widget need no number. The sample agent&apos;s number is an
+        Agora sandbox line — production numbers come in via SIP.
+      </InfoHint>
     </div>
   )
 }

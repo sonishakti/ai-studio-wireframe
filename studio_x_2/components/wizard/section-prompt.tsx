@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { extractVars } from "@/lib/campaign-data"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { SectionRow } from "@/components/wizard/section-row"
+import { InfoHint } from "@/components/wizard/info-hint"
 import type { StepProps } from "@/components/wizard/types"
 import { typeLabel } from "@/lib/wizard-draft"
 
@@ -97,14 +98,7 @@ export function SectionPrompt({
       <SectionRow
         id="wz-2-persona"
         label={<span className="flex items-center gap-2"><UserRound className="h-4 w-4 text-muted-foreground" aria-hidden /> Persona</span>}
-        hint={
-          <>
-            <p>{selected ? `Comes with ${selected.name}, the selected voice.` : "Comes with the voice you pick."}</p>
-            <p>
-              Personality and tone flavor <em>how</em> it sounds — your system prompt above decides <em>what</em> it says.
-            </p>
-          </>
-        }
+        hint={selected ? `Comes with ${selected.name}, the selected voice.` : "Comes with the voice you pick."}
       >
         {selected ? (
           <dl className="space-y-1.5 rounded-lg border border-border bg-card p-4 text-sm">
@@ -116,12 +110,14 @@ export function SectionPrompt({
               <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tone</dt>
               <dd>{selected.tone}</dd>
             </div>
-            {/* Contract copy echoes AT the control it governs — the label-rail
-                hint alone is skipped by control-scanners (user-test 2026-07-21
-                layout round, D2+D3). */}
-            <p className="border-t border-border pt-2 text-xs text-muted-foreground">
-              This flavors <em>how</em> {selected.name} sounds — your system prompt decides <em>what</em> it says.
-            </p>
+            {/* Contract copy echoes AT the control it governs, nested behind a
+                dotted hint (owner 2026-07-21: reduce upfront text). */}
+            <div className="border-t border-border pt-2">
+              <InfoHint label="Persona vs system prompt — which wins?">
+                Personality and tone flavor <em>how</em> {selected.name} sounds — your system
+                prompt decides <em>what</em> it says.
+              </InfoHint>
+            </div>
           </dl>
         ) : (
           <p className="text-sm text-muted-foreground">No voice selected yet.</p>
