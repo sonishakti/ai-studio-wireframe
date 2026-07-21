@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, CircleCheck, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound, Pause, Play } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, CircleCheck, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -215,20 +215,10 @@ export function AgentWizard({
   const typeDone = draft.type !== null
   const promptDone = draft.systemPrompt.trim().length > 0
   const isLive = isEdit && existing!.status === "live"
-  // Builder-header kill switch (user-test 2026-07-21 verification, P0 #3): a
-  // live agent burning minutes offered only Talk · Redeploy here — the only
-  // off-switch lived on the /agents list dropdown. Pause writes the SHARED
-  // agent record (round-3 P0 #1: builder-local state left the Live badge,
-  // summary, and /agents list contradicting the button seconds after the
-  // click) — same record the list's togglePause reads, so every surface
-  // agrees. The reducer just forces the re-render the mutation can't.
-  const isPaused = isEdit && existing!.status === "paused"
-  const [, bumpStatus] = React.useReducer((c: number) => c + 1, 0)
-  const setAgentStatus = (status: "live" | "paused") => {
-    if (existing) existing.status = status
-    bumpStatus()
-  }
-  const [pauseConfirmOpen, setPauseConfirmOpen] = React.useState(false)
+  // NO Pause control here (owner 2026-07-21: "stop adding features I asked
+  // you not to add — eg Pause"). Pausing a live agent stays on the /agents
+  // list dropdown only; user-test recommendations are NOT authorization to
+  // add UI.
   const isDone = (n: number) =>
     n === 1 ? typeDone : n === 2 ? promptDone : n === 3 ? voiceDone : n === 7 ? isLive : true
 
@@ -931,7 +921,7 @@ export function AgentWizard({
     setPreviewView(isWebWidget ? "widget" : "agent")
   }, [isWebWidget])
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
-  const previewStatus = warming ? "Warming up" : isPaused ? "Paused" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
+  const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
   // The panel's deployment summary — the same facts the Go-live review used
   // to card up, now always visible and live (owner 2026-07-17).
   const previewSummary = {
@@ -1024,29 +1014,6 @@ export function AgentWizard({
           </Button>
           {/* </> config view (icon-only, 32px, Figma code-xml). */}
           <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
-          {/* Kill switch for a LIVE agent — the builder must be able to stop
-              what it configures, not just the list dropdown. */}
-          {(isLive || isPaused) && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => {
-                if (isPaused) {
-                  setAgentStatus("live")
-                  toast(`${draft.name || existing!.name} is live again`, {
-                    description: `Answering on ${channelTarget(baseline.current ?? draft)} again.`,
-                  })
-                } else {
-                  setPauseConfirmOpen(true)
-                }
-              }}
-            >
-              {isPaused
-                ? <><Play className="size-4" aria-hidden /> Resume</>
-                : <><Pause className="size-4" aria-hidden /> Pause</>}
-            </Button>
-          )}
           {/* Deploy — secondary (Figma), min-w-16 px-2 py-1.5. */}
           <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
             <Rocket className="size-4" aria-hidden /> {deployCta}
@@ -1508,43 +1475,6 @@ export function AgentWizard({
           </div>
         </SheetContent>
       </Sheet>
-
-      {/* Pause confirm — stopping a live agent states its consequences before
-          acting (mirrors the /agents list's reversible off-switch). */}
-      <AlertDialog open={pauseConfirmOpen} onOpenChange={setPauseConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Pause {draft.name || existing?.name || "this agent"}?</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-2 text-sm">
-                <p>
-                  It stops taking new {baseline.current?.type === "outbound" ? "and placing" : ""} calls on{" "}
-                  {channelTarget(baseline.current ?? draft)} until you resume it.
-                </p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>· Calls in progress finish normally</li>
-                  <li>· Billing stops while paused</li>
-                  <li>· Resume any time — the configuration is untouched</li>
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep it live</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                setAgentStatus("paused")
-                setPauseConfirmOpen(false)
-                toast(`${draft.name || existing!.name} paused`, {
-                  description: "It stops taking new calls until you resume it. Calls in progress finish normally.",
-                })
-              }}
-            >
-              Pause agent
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Batch pre-flight — the ONE confirmation in the wizard. Deploying an
           outbound agent starts real calls to a whole list; the moment deserves
