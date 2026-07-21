@@ -1329,7 +1329,7 @@ export function AgentWizard({
                       </div>
                       <div id="wz-4-model" className="scroll-mt-28 space-y-8">
                         <StackTradeoffSlider stack={draft.stack} onChange={updateStack} />
-                        <StackModelPicker stack={draft.stack} onChange={updateStack} />
+                        <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} />
                         {/* BYOK lives WITH the model selects — override the
                             ASR/LLM/TTS vendors with your own keys (owner
                             2026-07-17; was oddly placed in Knowledge & Tools). */}

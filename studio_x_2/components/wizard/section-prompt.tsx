@@ -106,6 +106,12 @@ export function SectionPrompt({
                 <p className="text-xs text-muted-foreground">
                   {selected ? `Comes with ${selected.name}, the selected voice.` : "Comes with the voice you pick."}
                 </p>
+                {/* Precedence, stated once (user-test 2026-07-21, all 3
+                    personas): two behavior definitions on one page must say
+                    which wins. */}
+                <p className="text-xs text-muted-foreground">
+                  Personality and tone flavor <em>how</em> it sounds — your system prompt above decides <em>what</em> it says.
+                </p>
               </div>
             </div>
             <Button variant="outline" size="sm" className="shrink-0" onClick={onPickVoice}>

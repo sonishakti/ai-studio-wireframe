@@ -182,7 +182,17 @@ export function StackModelsDetail({ stack, onChange, className, showPicker = tru
 /** The STT/LLM/TTS (or realtime) vendor pickers — ALWAYS VISIBLE (owner
  *  2026-07-17: "if user has selected cascading, show the asr-tts-llm
  *  selection, don't hide it"). Formerly a collapsed disclosure. */
-export function StackModelPicker({ stack, onChange, className }: StackPieceProps) {
+export function StackModelPicker({
+  stack,
+  onChange,
+  className,
+  personaName,
+}: StackPieceProps & {
+  /** Selected voice persona (e.g. "Luna") — named under the TTS voice so the
+   *  two voice concepts reconcile on screen: persona "Luna" speaking with the
+   *  "rachel" TTS voice read as a bug (user-test 2026-07-21 D2). */
+  personaName?: string
+}) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
 
@@ -261,6 +271,11 @@ export function StackModelPicker({ stack, onChange, className }: StackPieceProps
                     {voiceOptions.map((v) => <SelectItem key={v} value={v} className="capitalize">{v}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {personaName && (
+                  <p className="text-xs text-muted-foreground">
+                    The vendor sound {personaName} speaks with. Picking a new voice in Voice &amp; speech resets it.
+                  </p>
+                )}
               </div>
             </div>
           ) : (
