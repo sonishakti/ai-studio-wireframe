@@ -216,9 +216,17 @@ export function AgentWizard({
   const isLive = isEdit && existing!.status === "live"
   // Builder-header kill switch (user-test 2026-07-21 verification, P0 #3): a
   // live agent burning minutes offered only Talk · Redeploy here — the only
-  // off-switch lived on the /agents list dropdown. Local mock state (same
-  // idiom as the list's togglePause); pause confirms, resume is instant.
-  const [pausedHere, setPausedHere] = React.useState(false)
+  // off-switch lived on the /agents list dropdown. Pause writes the SHARED
+  // agent record (round-3 P0 #1: builder-local state left the Live badge,
+  // summary, and /agents list contradicting the button seconds after the
+  // click) — same record the list's togglePause reads, so every surface
+  // agrees. The reducer just forces the re-render the mutation can't.
+  const isPaused = isEdit && existing!.status === "paused"
+  const [, bumpStatus] = React.useReducer((c: number) => c + 1, 0)
+  const setAgentStatus = (status: "live" | "paused") => {
+    if (existing) existing.status = status
+    bumpStatus()
+  }
   const [pauseConfirmOpen, setPauseConfirmOpen] = React.useState(false)
   const isDone = (n: number) =>
     n === 1 ? typeDone : n === 2 ? promptDone : n === 3 ? voiceDone : n === 7 ? isLive : true
@@ -892,7 +900,10 @@ export function AgentWizard({
     ? codeDeployed ? "Redeploy" : "Deploy"
     : typeChanged && draft.type === "outbound" ? "Launch batch calls"
     : typeChanged && draft.type ? `Deploy ${typeLabel(draft.type)}`
-    : "Redeploy"
+    // A resting "Redeploy" on an untouched live agent asked "redeploy WHAT?"
+    // (round-3 D1) — the clean state names itself; publish()'s no-op guard
+    // already made the click honest, now the label is too.
+    : anyEdited ? "Redeploy" : "Live — no changes"
 
   // Graft A (judge round): the Deploy fill invites action only when acting
   // means something — a ready draft or a dirty live agent. A clean live agent,
@@ -923,7 +934,7 @@ export function AgentWizard({
     setPreviewView(isWebWidget ? "widget" : "agent")
   }, [isWebWidget])
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
-  const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
+  const previewStatus = warming ? "Warming up" : isPaused ? "Paused" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
   // The panel's deployment summary — the same facts the Go-live review used
   // to card up, now always visible and live (owner 2026-07-17).
   const previewSummary = {
@@ -1018,14 +1029,14 @@ export function AgentWizard({
           <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
           {/* Kill switch for a LIVE agent — the builder must be able to stop
               what it configures, not just the list dropdown. */}
-          {isLive && (
+          {(isLive || isPaused) && (
             <Button
               variant="outline"
               size="sm"
               className="gap-1.5"
               onClick={() => {
-                if (pausedHere) {
-                  setPausedHere(false)
+                if (isPaused) {
+                  setAgentStatus("live")
                   toast(`${draft.name || existing!.name} is live again`, {
                     description: `Answering on ${channelTarget(baseline.current ?? draft)} again.`,
                   })
@@ -1034,7 +1045,7 @@ export function AgentWizard({
                 }
               }}
             >
-              {pausedHere
+              {isPaused
                 ? <><Play className="size-4" aria-hidden /> Resume</>
                 : <><Pause className="size-4" aria-hidden /> Pause</>}
             </Button>
@@ -1554,7 +1565,7 @@ export function AgentWizard({
             <AlertDialogCancel>Keep it live</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                setPausedHere(true)
+                setAgentStatus("paused")
                 setPauseConfirmOpen(false)
                 toast(`${draft.name || existing!.name} paused`, {
                   description: "It stops taking new calls until you resume it. Calls in progress finish normally.",
