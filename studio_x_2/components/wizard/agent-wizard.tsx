@@ -1125,10 +1125,12 @@ export function AgentWizard({
             </p>
           )}
 
-          {/* Deploy moved to the HEADER (Figma "Shell Exploration" 2026-07-15).
-              The rail keeps ONLY the validated state signals the header button
-              doesn't carry: the dirty / code-deployed truth lines + Discard
-              (every test round praised these; don't drop them silently). */}
+          {/* Deploy lives at the END of the journey (proposal 2639-102124) —
+              so the dirty warning must carry a RAMP to it, not just Discard:
+              with the header Deploy gone, "redeploy to apply" next to a lone
+              destructive button was the journey test's only near-abandonment
+              (2026-07-22 D1: "if I were 10% more tired I'd have clicked
+              Discard"). */}
           {((isLive && anyEdited) || codeDeployed) && (
             <div className="space-y-2 border-t border-border pt-3">
               {isLive && anyEdited && (
@@ -1138,9 +1140,14 @@ export function AgentWizard({
                 <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
               )}
               {isLive && anyEdited && (
-                <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
-                  Discard edits
-                </Button>
+                <>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => openRow(7)}>
+                    Review &amp; deploy
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
+                    Discard edits
+                  </Button>
+                </>
               )}
             </div>
           )}

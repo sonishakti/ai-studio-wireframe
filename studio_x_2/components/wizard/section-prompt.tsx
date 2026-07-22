@@ -120,6 +120,11 @@ export function SectionPrompt({ draft, update }: StepProps) {
           className="min-h-[64px] text-sm"
           placeholder="Oops, I can't seem to answer that."
         />
+        {/* When it plays — the field arrived with no trigger doc (journey
+            test 2026-07-22 D1: "when does that play?"). */}
+        <p className="text-xs text-muted-foreground">
+          Played when the agent can&apos;t respond — a model error, tool timeout, or dropped connection.
+        </p>
       </div>
     </SectionRow>
   )

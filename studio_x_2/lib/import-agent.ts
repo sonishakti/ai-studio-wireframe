@@ -313,8 +313,8 @@ const META_KEYS = new Set([
  *  listed falls back to an honest generic line.
  *
  *  HONESTY RULE (user-test #7 P0): a reason may only point somewhere that
- *  EXISTS — Advanced's turn-taking/speech sections, Knowledge & Tools, the
- *  Analysis section, Step-1 engine, the deployment's CSV columns, and (since
+ *  EXISTS — Voice & Speech's turn-taking/speech rows, Knowledge & Tools, Go
+ *  Live's capture/analysis rows, Models, the deployment's CSV columns, and (since
  *  27025fc) Channel › Call settings & schedule (hang-up · voicemail · silence
  *  · max duration · transfer). Anything without a real landing spot says
  *  "isn't supported yet" — and the reverse holds: once a landing spot ships,
@@ -334,24 +334,24 @@ const DROP_REASONS: Record<string, string> = {
   endCallMessage: "A scripted closing message isn't supported — end-call behavior lives in Channel › Call settings › Hang-up.",
   endCallPhrases: "End-call phrases don't port — end-call behavior lives in Channel › Call settings › Hang-up.",
   end_call_after_silence_ms: "Silence hang-up re-configures in Channel › Call settings › Hang-up (in seconds).",
-  analysisPlan: "Post-call analysis is configured in the Analysis section.",
-  artifactPlan: "Recording settings live in the Analysis section.",
-  post_call_analysis_data: "Post-call analysis is configured in the Analysis section.",
-  post_call_analysis_model: "Post-call analysis is configured in the Analysis section.",
+  analysisPlan: "Post-call analysis is configured in Go Live › Transcripts, recording and analysis.",
+  artifactPlan: "Recording settings live in Go Live › Transcripts, recording and analysis.",
+  post_call_analysis_data: "Post-call analysis is configured in Go Live › Transcripts, recording and analysis.",
+  post_call_analysis_model: "Post-call analysis is configured in Go Live › Transcripts, recording and analysis.",
   knowledge_base_ids: "Knowledge re-attaches in Knowledge & Tools.",
   knowledge_base: "Knowledge re-attaches in Knowledge & Tools.",
   platform_settings: "Platform/auth settings stay vendor-specific.",
   transcriber: "The transcriber maps to Agora's bundled STT — tune it in Models.",
   asr: "ASR maps to Agora's bundled STT — tune it in Models.",
-  turn: "Turn-taking tuning lives in Advanced.",
+  turn: "Turn-taking tuning lives in Voice & Speech › Turn-taking & interruptions.",
   conversation: "Conversation limits stay vendor-specific.",
   ambient_sound: "Ambient audio isn't supported yet.",
   backgroundSound: "Background audio isn't supported yet.",
-  interruption_sensitivity: "Interruption tuning lives in Advanced (turn-taking).",
-  interruption_threshold: "Interruption tuning lives in Advanced (turn-taking).",
-  responsiveness: "Turn-taking tuning lives in Advanced.",
-  startSpeakingPlan: "Interruption tuning lives in Advanced (turn-taking).",
-  stopSpeakingPlan: "Interruption tuning lives in Advanced (turn-taking).",
+  interruption_sensitivity: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
+  interruption_threshold: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
+  responsiveness: "Turn-taking tuning lives in Voice & Speech › Turn-taking & interruptions.",
+  startSpeakingPlan: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
+  stopSpeakingPlan: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
   enable_backchannel: "Backchannel tuning stays vendor-specific.",
   backchannel_frequency: "Backchannel tuning stays vendor-specific.",
   backchannel_words: "Backchannel tuning stays vendor-specific.",
