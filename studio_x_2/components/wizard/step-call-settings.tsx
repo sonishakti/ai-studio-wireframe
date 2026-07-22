@@ -58,6 +58,68 @@ export function CallSettings({ draft, update }: StepProps) {
   )
 }
 
+/**
+ * Inbound call settings — INLINE in the builder (proposal 2639-102124,
+ * 2026-07-22; supersedes the link-out to the number page): how answered calls
+ * end (end-of-conversation · voicemail detection · max duration · silence
+ * hang-up) + transfer-to-human. Same draft.callBehavior the batch rows use.
+ * Returns SectionRow siblings for the host's <SectionRows>.
+ */
+export function InboundCallSettings({ draft, update }: StepProps) {
+  const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
+  const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
+
+  return (
+    <>
+      <SectionRow label="Inbound Call Settings" hint="How answered calls end.">
+        <BehaviorToggle
+          label="End of conversation"
+          desc="Hang up when the conversation naturally ends."
+          checked={cb.endOfConversation}
+          onChange={(endOfConversation) => patch({ endOfConversation })}
+        />
+        <BehaviorToggle
+          label="Voicemail Detection"
+          desc="Allows the agent to detect voicemail systems and hang up the call."
+          checked={cb.voicemailDetection}
+          onChange={(voicemailDetection) => patch({ voicemailDetection })}
+        />
+        <div className="space-y-1.5">
+          <Label htmlFor="ib-max" className="text-xs text-muted-foreground">Max Call Duration (seconds)</Label>
+          <Input
+            id="ib-max"
+            type="number"
+            value={cb.maxDurationSec}
+            onChange={(e) => patch({ maxDurationSec: Number(e.target.value) })}
+            className="max-w-[200px] text-sm font-mono"
+          />
+          <p className="text-xs text-muted-foreground">Maximum length for a conversation.</p>
+        </div>
+        <BehaviorToggle
+          label="Silence hangup"
+          desc="End the call after a period of silence."
+          checked={cb.silenceHangup}
+          onChange={(silenceHangup) => patch({ silenceHangup })}
+        />
+        {cb.silenceHangup && (
+          <div className="space-y-1.5">
+            <Label htmlFor="ib-silence" className="text-xs text-muted-foreground">Silence Timeout (seconds)</Label>
+            <Input
+              id="ib-silence"
+              type="number"
+              value={cb.silenceTimeoutSec}
+              onChange={(e) => patch({ silenceTimeoutSec: Number(e.target.value) })}
+              className="max-w-[200px] text-sm font-mono"
+            />
+            <p className="text-xs text-muted-foreground">Call ends after {cb.silenceTimeoutSec}s of no response.</p>
+          </div>
+        )}
+      </SectionRow>
+      <TransferSettings draft={draft} update={update} />
+    </>
+  )
+}
+
 // ─── Launch timing — now vs scheduled (Figma "Launch Timing") ─────────────────
 
 const TIMEZONES = [

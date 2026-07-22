@@ -43,6 +43,8 @@ export function AgentPreviewPanel({
   isLive,
   statusHint,
   statusNote,
+  templateName,
+  sessionStats,
   latencyMs,
   costPerMin,
   summary,
@@ -62,6 +64,19 @@ export function AgentPreviewPanel({
   statusLabel: string
   isLive: boolean
   statusHint?: string
+  /** Identity badge — the template picked in Agent Prompt (proposal
+   *  2639-102124: "Friendly Receptionist"); falls back to the agent name. */
+  templateName?: string
+  /** SESSION STATISTICS (proposal): per-stage vendor + latency, then the
+   *  averages. Per-stage ms of 0 (MLLM pipeline) hides that row. */
+  sessionStats?: {
+    llm: { vendor: string; ms: number }
+    asr: { vendor: string; ms: number }
+    tts: { vendor: string; ms: number }
+    e2eMs: number
+    ttftMs: number
+    costPerMin: number
+  }
   /** Provenance under the badges — a short dotted trigger, full message in
    *  its tooltip (owner 2026-07-21: reduce upfront text). */
   statusNote?: string
@@ -103,23 +118,13 @@ export function AgentPreviewPanel({
       className={cn("hidden shrink-0 flex-col xl:flex xl:w-[400px]", className)}
       aria-label="Agent preview"
     >
-      {/* Header — px-5 py-2.5, border-b. ONE collapse toggle (owner
-          2026-07-17: two buttons doing the same thing read as a bug), then a
-          centered gauge/latency · $/price readout (mono 12, 50% opacity). */}
-      <div className="flex items-center gap-4 border-b border-border px-5 py-2.5">
+      {/* Header — "Test Agent" title + close (proposal 2639-102124); the
+          latency/cost readout moved into SESSION STATISTICS below. */}
+      <div className="flex items-center justify-between border-b border-border px-5 py-3">
+        <p className="text-sm font-semibold">Test Agent</p>
         <Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground" onClick={onToggleCollapsed} aria-label="Hide agent preview">
           <PanelRightClose className="size-4" aria-hidden />
         </Button>
-        <div className="flex flex-1 items-center justify-center gap-2 pr-11">
-          <span className="flex items-center gap-1 text-muted-foreground" title="Typical end-to-end latency">
-            <Gauge className="size-4" aria-hidden />
-            <span className="font-mono text-xs opacity-50 tabular-nums">{latencyMs}ms</span>
-          </span>
-          <span className="flex items-center gap-1 text-muted-foreground" title="Estimated cost per minute">
-            <CircleDollarSign className="size-4" aria-hidden />
-            <span className="font-mono text-xs opacity-50 tabular-nums">${costPerMin.toFixed(2)}/min</span>
-          </span>
-        </div>
       </div>
 
       {/* Agent body — pl-4 pr-6 py-4, gap-3. Badges (h-15), then either the
@@ -144,7 +149,7 @@ export function AgentPreviewPanel({
           </div>
         )}
         <div className="flex h-15 items-center justify-center gap-2">
-          <Badge variant="outline" className="max-w-[180px] truncate">{name || "Your agent"}</Badge>
+          <Badge variant="outline" className="max-w-[180px] truncate">{templateName || name || "Your agent"}</Badge>
           {statusHint ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -186,18 +191,53 @@ export function AgentPreviewPanel({
         )}
       </div>
 
-      {/* Deployment summary — border-t, pl-4 pr-6 py-4. The full picture of
-          what deploys (Voice · Models · Estimate · Channel), always visible,
-          updating live as the draft changes. Same quiet mono-label language
-          as the old vendor stats it replaces. */}
-      <div className="flex flex-col gap-3 border-t border-border py-4 pl-4 pr-6">
-        <p className="font-mono text-xs uppercase text-muted-foreground opacity-50">Deployment summary</p>
-        <SummaryRow label="Voice" value={summary.voice ? `${summary.voice.name}${summary.voice.tagline ? ` · ${summary.voice.tagline}` : ""}` : "Not set"} pending={summary.pending?.voice} />
-        <SummaryRow label="Models" value={summary.models} pending={summary.pending?.models} />
-        <SummaryRow label="Estimate" value={`~${summary.estimateLatencyMs} ms to first word · ~$${summary.estimateCostPerMin.toFixed(2)}/min`} pending={summary.pending?.estimate} />
-        <SummaryRow label="Channel" value={summary.channel ?? "Not set"} pending={summary.pending?.channel} />
+      {/* SESSION STATISTICS (proposal 2639-102124) — per-stage vendor +
+          latency, then the averages. Replaces the old Deployment summary
+          block; the deploy-facts receipt lives in Go Live's Review card, and
+          pending-edit truth stays on the rail + band reset buttons. */}
+      <div className="flex flex-col gap-2.5 border-t border-border py-4 pl-4 pr-6">
+        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground opacity-50">Session statistics</p>
+        {sessionStats ? (
+          <>
+            {([["LLM", sessionStats.llm], ["ASR", sessionStats.asr], ["TTS", sessionStats.tts]] as const).map(([label, s]) =>
+              s.ms > 0 ? (
+                <div key={label} className="flex items-baseline gap-2.5">
+                  <span className="w-8 shrink-0 font-mono text-xs uppercase text-muted-foreground opacity-50">{label}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm">{s.vendor}</span>
+                  <span className="font-mono text-xs tabular-nums text-muted-foreground">{s.ms}ms</span>
+                </div>
+              ) : null,
+            )}
+            <div className="space-y-1.5 border-t border-border pt-2.5">
+              <AvgLine label="Avg. E2E latency" value={`${sessionStats.e2eMs} ms`} />
+              {sessionStats.ttftMs > 0 && <AvgLine label="Avg. LLM TTFT" value={`${sessionStats.ttftMs} ms`} />}
+              <AvgLine label="Avg. cost" value={`$${sessionStats.costPerMin.toFixed(2)} / min`} />
+            </div>
+          </>
+        ) : (
+          <div className="space-y-1.5">
+            <AvgLine label="Avg. E2E latency" value={`${latencyMs} ms`} />
+            <AvgLine label="Avg. cost" value={`$${costPerMin.toFixed(2)} / min`} />
+          </div>
+        )}
+        {/* Pending-edit chips ride whichever row changed in the summary the
+            REVIEW card owns now — here we keep one aggregate signal. */}
+        {(summary.pending?.voice || summary.pending?.models || summary.pending?.channel || summary.pending?.estimate) && (
+          <span className="w-fit rounded-sm border border-warning/40 bg-warning/10 px-1 text-xs lowercase text-warning">
+            pending edits — redeploy to apply
+          </span>
+        )}
       </div>
     </aside>
+  )
+}
+
+function AvgLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">{label}</span>
+      <span className="font-mono text-xs tabular-nums">{value}</span>
+    </div>
   )
 }
 

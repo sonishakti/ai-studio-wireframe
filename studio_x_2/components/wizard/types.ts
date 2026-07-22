@@ -17,14 +17,17 @@ export interface StepProps {
  *  from…"), then the words. Voice, models, and knowledge/tools demote to
  *  "Customize — only if you need to". The old Optional trio dissolves:
  *  Advanced → Voice & speech, Analysis → Go live, Call settings → Channel. */
+/** Owner design proposal 2026-07-22 (Figma "Builder-Updated-IA", node
+ *  2639-102124): "Agent Prompt" naming, MODELS BEFORE Voice & Speech, "Go
+ *  Live" capitalization. */
 export const STEP_TITLES = [
   "Channel",
-  "Prompt",
-  "Voice & speech",
+  "Agent Prompt",
   "Models",
+  "Voice & Speech",
   "Knowledge & Tools",
   "Test",
-  "Go live",
+  "Go Live",
 ] as const
 
 export const SECTION_COUNT = STEP_TITLES.length
@@ -41,8 +44,8 @@ export const SECTION_GROUPS: { label: string; steps: number[] }[] = [
 export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string }>> = {
   1: Waypoints,
   2: FileText,
-  3: AudioLines,
-  4: Cpu,
+  3: Cpu,
+  4: AudioLines,
   5: Boxes,
   6: Mic,
   7: Rocket,
@@ -65,9 +68,9 @@ export function stepManifest(n: number, draft: AgentDraft): string {
         : "Pick channel · Phone number"
     return "Batch calls · Inbound · Code / SDK"
   }
-  if (n === 2) return "System prompt · Greeting"
-  if (n === 3) return "Voice · Language · Turn-taking · Filters"
-  if (n === 4) return "Pipeline · Latency vs cost · Models · History"
+  if (n === 2) return "Template · System prompt · Greeting · Failure message"
+  if (n === 3) return "Model architecture · Latency vs cost"
+  if (n === 4) return "Voice · Language · Turn-taking · Filters"
   if (n === 5) return "Knowledge · MCP · Connectors"
   if (n === 6) return "Test scenarios · Run suites"
   if (n === 7) return "Transcripts & analysis · Review & deploy"
@@ -100,16 +103,13 @@ export function stepToc(n: number, draft: AgentDraft): { id: string; label: stri
     ]
   if (n === 3)
     return [
-      { id: "wz-3-voice", label: "Voice" },
-      { id: "wz-3-language", label: "Language & input" },
-      { id: "wz-3-turntaking", label: "Turn-taking & interruptions" },
-      { id: "wz-3-attention", label: "Attention & filters" },
+      { id: "wz-3-arch", label: "Model architecture" },
     ]
   if (n === 4)
     return [
-      { id: "wz-4-arch", label: "Pipeline" },
-      { id: "wz-4-model", label: "Latency vs cost · Models" },
-      { id: "wz-4-history", label: "Conversation history" },
+      { id: "wz-4-voice", label: "Voice & language" },
+      { id: "wz-4-turntaking", label: "Turn-taking & interruptions" },
+      { id: "wz-4-attention", label: "Attention & filters" },
     ]
   if (n === 5)
     return [

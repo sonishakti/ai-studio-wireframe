@@ -163,7 +163,7 @@ export function StackModelsDetail({
           No estimate/summary paragraphs here: variable-length text above the
           cards moved them under the cursor on every switch (the model-switch
           jump); the live numbers live in the right panel's summary instead. */}
-      {!hideTitle && <h4 className="text-base font-medium">Pipeline</h4>}
+      {!hideTitle && <h4 className="text-base font-medium">Model Architecture</h4>}
       <RadioCardGroup
         value={pipeline}
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
@@ -171,15 +171,16 @@ export function StackModelsDetail({
         // Two cards, two tracks — a 4-col track squeezed them (2026-07-21).
         className="gap-4 @xl:grid-cols-2"
       >
+        {/* Proposal 2639-102124 card copy. */}
         <RadioCard
           value="stt-llm-tts"
           title="Cascading Model"
-          description="Speech, then an LLM, then speech. Tune each stage."
+          description="Chains multiple AI models together, best for high efficiency and lower costs"
         />
         <RadioCard
           value="mllm"
-          title="Chained Model (MLLM)"
-          description="Hears and speaks. Faster, fewer knobs."
+          title="Multimodal Large Language Model"
+          description="Single, unified AI model. Best for deep, holistic understanding across multiple data types"
         />
       </RadioCardGroup>
 
@@ -350,29 +351,39 @@ export function StackTradeoffSlider({ stack, onChange, className }: StackPiecePr
     })
   }
 
+  // Proposal 2639-102124: the slider reads Lowest Cost → Fastest left-to-
+  // right, inside a card with a mono "LATENCY VS COST" label and the two
+  // extremes' real numbers at the track ends.
+  const DISPLAY: StackPreset[] = ["cheapest", "balanced", "fastest"]
+  const displayIdx = Math.max(0, DISPLAY.indexOf(SLIDER_ORDER[idx]))
+  const cheapEst = stackEstimateFor(stackFor("cheapest", stack.modality))
+  const fastEst = stackEstimateFor(stackFor("fastest", stack.modality))
+
   return (
-    <section className={cn("@container space-y-3", className)}>
-      <h4 className="text-base font-medium">Latency vs cost</h4>
-      {/* 50% of the 4-col system (owner 2026-07-17 layout normalization). */}
-      <div className="w-full space-y-2 @2xl:w-1/2">
-        <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
-          <span title="Typical time to first word">~{est.latencyMs} ms</span>
-          <span title="Estimated cost per minute">~${est.costPerMin.toFixed(2)}/min</span>
+    <section className={cn("@container space-y-4 rounded-lg border border-border bg-card p-5", className)}>
+      <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Latency vs cost</p>
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className={cn(displayIdx === 0 && "font-medium")}>Lowest Cost</span>
+          <span className={cn(displayIdx === 1 && "font-medium")}>Balanced</span>
+          <span className={cn(displayIdx === 2 && "font-medium")}>Fastest</span>
         </div>
         <Slider
-          value={[idx]}
+          value={[displayIdx]}
           min={0}
-          max={SLIDER_ORDER.length - 1}
+          max={DISPLAY.length - 1}
           step={1}
-          onValueChange={([v]) => setPreset(SLIDER_ORDER[v])}
+          onValueChange={([v]) => setPreset(DISPLAY[v])}
           aria-label="Latency versus cost"
         />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Fastest · costs more</span>
-          <span>{STACK_PRESETS.balanced.label}</span>
-          <span>Cheapest · slower</span>
+        <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
+          <span>{cheapEst.latencyMs} ms · ~${cheapEst.costPerMin.toFixed(2)}/min</span>
+          <span>{fastEst.latencyMs} ms · ~${fastEst.costPerMin.toFixed(2)}/min</span>
         </div>
       </div>
+      <p className="font-mono text-xs tabular-nums text-muted-foreground">
+        Current: ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min
+      </p>
       {diverged && (
         <p className="text-xs text-muted-foreground">
           Custom model mix — moving the slider replaces it with the {STACK_PRESETS[SLIDER_ORDER[idx]].label} defaults.

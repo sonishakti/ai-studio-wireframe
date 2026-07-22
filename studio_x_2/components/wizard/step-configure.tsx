@@ -18,6 +18,7 @@ import {
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
+import { InboundCallSettings } from "@/components/wizard/step-call-settings"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
 import { WidgetStyleConfig } from "@/components/widget-studio"
@@ -113,6 +114,7 @@ function InboundConfigure({
     update({ config: { ...draft.config, inbound: { mode, numberId } } })
 
   return (
+    <>
     <SectionRow id="wz-1-setup" label="Choose how callers reach your agent.">
       <RadioCardGroup
         value={mode}
@@ -150,23 +152,6 @@ function InboundConfigure({
               .
             </InfoHint>
           </div>
-          {/* Inbound call behavior (recording · transfer-to-human · hang-up
-              rules) is NUMBER-level config (Figma node 2592-101281) — link the
-              one place it lives instead of duplicating the form here. Copy
-              nested behind a dotted hint (owner 2026-07-21). */}
-          {currentId && (
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <InfoHint label="Where are recording, transfer & hang-up rules?">
-                Recording, call transcript, transfer-to-human, and hang-up rules are configured
-                on the number itself — open its call settings.
-              </InfoHint>
-              <Button variant="outline" size="sm" className="h-7 shrink-0 gap-1 text-xs" asChild>
-                <a href={`/deploy/phone-numbers/${currentId}`}>
-                  Number call settings <ExternalLink className="h-3 w-3" aria-hidden />
-                </a>
-              </Button>
-            </div>
-          )}
         </ConfigCard>
         </div>
       ) : (
@@ -175,6 +160,12 @@ function InboundConfigure({
         <WidgetStyleConfig agentId={agentId} />
       )}
     </SectionRow>
+
+    {/* Inbound call settings INLINE (proposal 2639-102124 — supersedes the
+        link-out to the number page's settings). Phone mode only: the web
+        widget has no telephony hang-up semantics. */}
+    {mode === "phone" && <InboundCallSettings draft={draft} update={update} />}
+    </>
   )
 }
 

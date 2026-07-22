@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { DEFAULT_ADVANCED, type AdvancedConfig } from "@/lib/wizard-draft"
 import { SectionRow } from "@/components/wizard/section-row"
 
@@ -42,9 +45,10 @@ export function StepAdvanced({
     // [label | content] rows (owner 2026-07-21): two labeled groups, each its
     // own row; the host's <SectionRows> owns the container + dividers.
     <>
-      {/* Turn-taking & interruptions (v3 TOC anchor). */}
+      {/* Turn-taking & interruptions (anchor renumbered: Voice & Speech is
+          section 4 since the 2026-07-22 proposal moved Models to 3). */}
       <SectionRow
-        id="wz-3-turntaking"
+        id="wz-4-turntaking"
         label="Turn-taking & interruptions"
         hint="Fine-tune how the agent listens and takes turns. Barge-in tuning lives here (Speaking interrupt duration)."
       >
@@ -56,6 +60,7 @@ export function StepAdvanced({
         enabled={adv.turnDetection.enabled}
         onToggle={(enabled) => patch({ turnDetection: { ...adv.turnDetection, enabled } })}
       >
+        <Label className="text-xs text-muted-foreground">Quick Presets</Label>
         <div className="grid grid-cols-2 gap-2 @3xl:grid-cols-4">
           {TURN_PRESETS.map((p) => {
             const on = adv.turnDetection.preset === p.id
@@ -80,7 +85,8 @@ export function StepAdvanced({
         {adv.turnDetection.preset === "custom" && (
           <SliderRow
             label="Threshold" value={adv.turnDetection.threshold} min={0} max={100} step={1}
-            helper="How loud the user must speak for the system to detect their voice."
+            helper="How loud does the user need to speak for the system to detect their voice?"
+            ends={["Low (Sensitive)", "High (Noisy Env)"]}
             onChange={(threshold) => patch({ turnDetection: { ...adv.turnDetection, threshold } })}
           />
         )}
@@ -113,11 +119,13 @@ export function StepAdvanced({
             <SliderRow
               label="Speaking interrupt duration" unit="ms" value={adv.startOfSpeech.interruptMs} min={0} max={1500} step={20}
               helper="How long the user must speak while the agent is talking before it interrupts."
+              ends={["Attentive", "Talkative"]}
               onChange={(interruptMs) => patch({ startOfSpeech: { ...adv.startOfSpeech, interruptMs } })}
             />
             <SliderRow
               label="Prefix padding" unit="ms" value={adv.startOfSpeech.prefixPaddingMs} min={0} max={500} step={10}
-              helper="Buffer time so the start of words isn't clipped."
+              helper="Buffer time to avoid cutting off the start or end of words."
+              ends={["Minimal", "Safe"]}
               onChange={(prefixPaddingMs) => patch({ startOfSpeech: { ...adv.startOfSpeech, prefixPaddingMs } })}
             />
           </Sub>
@@ -140,7 +148,8 @@ export function StepAdvanced({
             />
             <SliderRow
               label="Silence duration" unit="ms" value={adv.endOfSpeech.silenceMs} min={0} max={2000} step={20}
-              helper="How long to wait after the user stops before responding."
+              helper="How long should the agent wait after you stop talking before it responds?"
+              ends={["Quick", "Thoughtful"]}
               onChange={(silenceMs) => patch({ endOfSpeech: { ...adv.endOfSpeech, silenceMs } })}
             />
             <SliderRow
@@ -153,31 +162,14 @@ export function StepAdvanced({
       )}
       </SectionRow>
 
-      {/* Attention & filters (v3 TOC anchor). */}
+      {/* Attention & filters (anchor renumbered — section 4). */}
       <SectionRow
-        id="wz-3-attention"
+        id="wz-4-attention"
         label="Attention & filters"
         hint="Who the agent listens to, and the filler patterns it holds for."
       >
-      {/* Selective attention locking */}
-      <Sub
-        icon={Lock}
-        title="Selective attention locking"
-        desc="Whether the agent locks onto one speaker or listens to everyone."
-        enabled={adv.attentionLocking.enabled}
-        onToggle={(enabled) => patch({ attentionLocking: { ...adv.attentionLocking, enabled } })}
-      >
-        <ModeRow
-          value={adv.attentionLocking.mode}
-          onChange={(mode) => patch({ attentionLocking: { ...adv.attentionLocking, mode: mode as "speaker" | "passthrough" } })}
-          options={[
-            { id: "speaker", label: "Lock to speaker", icon: Lock },
-            { id: "passthrough", label: "Listen to all", icon: Fingerprint },
-          ]}
-        />
-      </Sub>
-
-      {/* Filter words */}
+      {/* Filter words (proposal 2639-102124: counter · one-per-line helper ·
+          selection rule). */}
       <Sub
         icon={Settings2}
         title="Filter words"
@@ -186,19 +178,84 @@ export function StepAdvanced({
         onToggle={(enabled) => patch({ filterWords: { ...adv.filterWords, enabled } })}
       >
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Patterns</Label>
+          <div className="flex items-baseline justify-between gap-3">
+            <Label className="text-xs text-muted-foreground">Filler words / phrases</Label>
+            <span className="font-mono text-xs tabular-nums text-muted-foreground">
+              {adv.filterWords.patterns.split("\n").filter((l) => l.trim()).length}/100
+            </span>
+          </div>
           <Textarea
             value={adv.filterWords.patterns}
             onChange={(e) => patch({ filterWords: { ...adv.filterWords, patterns: e.target.value } })}
-            placeholder={"um\nlet me check\none moment"}
-            className="min-h-[72px] font-mono text-xs"
+            placeholder={"sure let me look that up for you,\num,\nuh huh,\nplease wait,"}
+            className="min-h-[88px] font-mono text-xs"
           />
+          <p className="text-xs text-muted-foreground">One per line, separated by a comma, max 100 phrases.</p>
         </div>
         <SliderRow
           label="Response wait threshold" unit="ms" value={adv.filterWords.responseWaitMs} min={0} max={2000} step={20}
-          helper="How long to wait before the agent starts using filler words."
+          helper="How long should the agent wait before it starts using filler words?"
+          ends={["Quick", "Thoughtful"]}
           onChange={(responseWaitMs) => patch({ filterWords: { ...adv.filterWords, responseWaitMs } })}
         />
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Selection Rule</Label>
+          <Select
+            value={adv.filterWords.selectionRule ?? "shuffle"}
+            onValueChange={(v) => patch({ filterWords: { ...adv.filterWords, selectionRule: v as "shuffle" | "in-order" } })}
+          >
+            <SelectTrigger className="w-full max-w-sm text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="shuffle">Shuffle (random, no repeats until exhausted)</SelectItem>
+              <SelectItem value="in-order">In order</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </Sub>
+
+      {/* Selective attention locking — Speaker Lock vs Voiceprint Recognition
+          (proposal; "passthrough" is gone). */}
+      <Sub
+        icon={Lock}
+        title="Selective attention locking"
+        desc="Helps the agent focus on the right voice while filtering out background conversations and noise."
+        enabled={adv.attentionLocking.enabled}
+        onToggle={(enabled) => patch({ attentionLocking: { ...adv.attentionLocking, enabled } })}
+      >
+        <Label className="text-xs text-muted-foreground">SAL Mode</Label>
+        <ModeRow
+          value={adv.attentionLocking.mode}
+          onChange={(mode) => patch({ attentionLocking: { ...adv.attentionLocking, mode: mode as "speaker" | "voiceprint" } })}
+          options={[
+            { id: "speaker", label: "Speaker Lock", icon: Lock },
+            { id: "voiceprint", label: "Voiceprint Recognition", icon: Fingerprint },
+          ]}
+        />
+        {adv.attentionLocking.mode === "voiceprint" && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Name</Label>
+                <Input
+                  value={adv.attentionLocking.voiceprint?.name ?? ""}
+                  onChange={(e) => patch({ attentionLocking: { ...adv.attentionLocking, voiceprint: { name: e.target.value, url: adv.attentionLocking.voiceprint?.url ?? "" } } })}
+                  placeholder="Speaker 1"
+                  className="text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Voiceprint URL</Label>
+                <Input
+                  value={adv.attentionLocking.voiceprint?.url ?? ""}
+                  onChange={(e) => patch({ attentionLocking: { ...adv.attentionLocking, voiceprint: { name: adv.attentionLocking.voiceprint?.name ?? "", url: e.target.value } } })}
+                  placeholder="https://"
+                  className="font-mono text-sm"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">16kHz, 16-bit, mono PCM. Max 2MB.</p>
+          </div>
+        )}
       </Sub>
       </SectionRow>
 
@@ -309,8 +366,12 @@ function ModeRow({ value, onChange, options }: { value: string; onChange: (v: st
   )
 }
 
-function SliderRow({ label, helper, value, min, max, step, unit, onChange }: {
-  label: string; helper: string; value: number; min: number; max: number; step: number; unit?: string; onChange: (v: number) => void
+function SliderRow({ label, helper, value, min, max, step, unit, ends, onChange }: {
+  label: string; helper: string; value: number; min: number; max: number; step: number; unit?: string
+  /** Semantic endpoint labels under the track, e.g. ["Attentive","Talkative"]
+   *  (proposal 2639-102124 — the ends say what the extremes MEAN). */
+  ends?: [string, string]
+  onChange: (v: number) => void
 }) {
   return (
     <div className="space-y-1.5">
@@ -318,11 +379,19 @@ function SliderRow({ label, helper, value, min, max, step, unit, onChange }: {
         <Label className="text-xs text-muted-foreground">{label}</Label>
         <span className="font-mono text-xs tabular-nums text-foreground">{value}{unit ? ` ${unit}` : ""}</span>
       </div>
-      <div className="flex items-center gap-3">
-        <Slider value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} aria-label={label} className="flex-1" />
-        <IntInput value={value} min={min} max={max} step={step} onChange={onChange} className="w-20 text-sm" aria-label={`${label} value`} />
-      </div>
       <p className="text-xs text-muted-foreground">{helper}</p>
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1 space-y-1">
+          <Slider value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} aria-label={label} />
+          {ends && (
+            <div className="flex items-center justify-between text-xs text-muted-foreground/70">
+              <span>{ends[0]}</span>
+              <span>{ends[1]}</span>
+            </div>
+          )}
+        </div>
+        <IntInput value={value} min={min} max={max} step={step} onChange={onChange} className="w-20 self-start text-sm" aria-label={`${label} value`} />
+      </div>
     </div>
   )
 }

@@ -148,7 +148,7 @@ export default function PlaygroundPage() {
           variant="ghost"
           size="sm"
           className="gap-1.5 text-muted-foreground"
-          onClick={() => router.push(originHref("?step=3"))}
+          onClick={() => router.push(originHref("?step=4"))}
         >
           <ArrowLeft className="h-4 w-4" /> Back to your agent
         </Button>

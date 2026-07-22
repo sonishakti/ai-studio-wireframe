@@ -5,6 +5,7 @@ import { ChevronDown, Play } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -43,24 +44,16 @@ export function StepVoice({
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
 
   return (
-    // [label | content] rows (owner 2026-07-21) — Voice and Spoken language
-    // are each their own row; the host's <SectionRows> owns the container.
+    // ONE "Agent Voice and Language" row (proposal 2639-102124): voice select
+    // + spoken language stacked; the host's <SectionRows> owns the container.
     <>
       <SectionRow
-        id="wz-3-voice"
-        label="Voice"
-        hint={
-          <>
-            <p>Picking a voice fills in the prompt and greeting while they&apos;re empty.</p>
-            {/* Two-layer reconciliation ECHOED here, not only in Models (user-test
-                2026-07-21 verification, S3 residual #8): the persona and its
-                vendor sound must meet on the page where the persona is picked. */}
-            {selected && draft.stack.tts.voice && (
-              <p>{selected.name} speaks with the <span className="font-mono capitalize">{draft.stack.tts.voice}</span> TTS sound — swap the sound in Models.</p>
-            )}
-          </>
-        }
+        id="wz-4-voice"
+        label="Agent Voice and Language"
+        hint="Picking a voice fills in the prompt and greeting while they're empty."
       >
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Voice</Label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -102,16 +95,18 @@ export function StepVoice({
               <TooltipContent>Preview voice</TooltipContent>
             </Tooltip>
           </div>
-      </SectionRow>
+        </div>
 
-      {/* Spoken language — an agent trait, not a model detail. */}
-      <SectionRow id="wz-3-language" label="Spoken language">
-        <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
-          <SelectTrigger className="w-full max-w-sm text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        {/* Spoken language — same row (proposal groups voice + language). */}
+        <div id="wz-4-language" className="scroll-mt-28 space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Spoken language</Label>
+          <Select value={draft.stack.language ?? "English"} onValueChange={setLanguage}>
+            <SelectTrigger className="w-full max-w-sm text-sm" aria-label="Spoken language"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {STACK_CATALOG.languages.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
       </SectionRow>
 
       <VoiceBrowser

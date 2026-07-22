@@ -27,13 +27,26 @@ export type InboundMode = "phone" | "web"
 // Both are OPTIONAL on the draft: absent = untouched, render from DEFAULT_*.
 // Only written once the user changes something, so clean drafts stay lean.
 
-/** Advanced voice-interaction tuning (Figma "Advanced" tab, 2026-07-07). */
+/** Advanced voice-interaction tuning (Figma "Advanced" tab, 2026-07-07;
+ *  extended per the 2026-07-22 "Builder-Updated-IA" proposal: filter-word
+ *  selection rule + SAL voiceprint mode). */
 export interface AdvancedConfig {
   turnDetection: { enabled: boolean; preset: "responsive" | "balanced" | "patient" | "custom"; threshold: number }
   startOfSpeech: { enabled: boolean; mode: "vad" | "keyword"; keywords: string[]; interruptMs: number; prefixPaddingMs: number }
   endOfSpeech: { enabled: boolean; mode: "vad" | "semantic"; silenceMs: number; maxWaitMs: number }
-  attentionLocking: { enabled: boolean; mode: "speaker" | "passthrough" }
-  filterWords: { enabled: boolean; patterns: string; responseWaitMs: number }
+  attentionLocking: {
+    enabled: boolean
+    /** Speaker Lock vs Voiceprint Recognition (proposal node 2639-102124). */
+    mode: "speaker" | "voiceprint"
+    voiceprint?: { name: string; url: string }
+  }
+  filterWords: {
+    enabled: boolean
+    patterns: string
+    responseWaitMs: number
+    /** How filler phrases are picked (proposal): shuffle vs in order. */
+    selectionRule?: "shuffle" | "in-order"
+  }
   history: { maxMessages: number }
 }
 
@@ -42,7 +55,7 @@ export const DEFAULT_ADVANCED: AdvancedConfig = {
   startOfSpeech: { enabled: true, mode: "vad", keywords: [], interruptMs: 300, prefixPaddingMs: 120 },
   endOfSpeech: { enabled: true, mode: "vad", silenceMs: 500, maxWaitMs: 8000 },
   attentionLocking: { enabled: false, mode: "speaker" },
-  filterWords: { enabled: false, patterns: "", responseWaitMs: 400 },
+  filterWords: { enabled: false, patterns: "", responseWaitMs: 400, selectionRule: "shuffle" },
   history: { maxMessages: 20 },
 }
 
@@ -136,6 +149,11 @@ export interface AgentDraft {
   /** Step 3. */
   systemPrompt: string
   greeting: string
+  /** What the agent says when it can't answer (proposal 2026-07-22). */
+  failureMessage: string
+  /** The starter template picked in Agent Prompt — also names the preview
+   *  panel's identity badge ("Friendly Receptionist"). */
+  templateName?: string
   knowledge: string[]
   mcp: string[]
   /** Step 3 Actions — attached third-party Connector ids (F6). */
@@ -183,6 +201,7 @@ export const EMPTY_DRAFT: AgentDraft = {
   stack: { ...stackFor("balanced"), ...STACK_DEFAULTS },
   systemPrompt: "",
   greeting: "",
+  failureMessage: "",
   knowledge: [],
   mcp: [],
   connectors: [],
@@ -265,6 +284,8 @@ export function agentToDraft(agent: Agent): AgentDraft {
     stack: { ...STACK_DEFAULTS, ...agent.stack },
     systemPrompt: agent.persona.personality,
     greeting: agent.persona.firstMessage ?? "Hi, thanks for calling. How can I help you today?",
+    failureMessage: "Oops, I can't seem to answer that.",
+    templateName: agent.role,
     knowledge: [...agent.knowledge],
     mcp: [...agent.actions],
     connectors: [...(agent.connectors ?? [])],
@@ -288,11 +309,13 @@ export function templateToDraft(tpl: AgentTemplate): AgentDraft {
     ...EMPTY_DRAFT,
     name: tpl.name === "Blank agent" ? "" : tpl.name,
     voice: { kind: "preset", id: PRESET_VOICES[0].id },
+    templateName: tpl.id === "blank" ? undefined : tpl.name,
     systemPrompt:
       tpl.id === "blank"
         ? ""
         : `You are ${tpl.name}, a voice agent. ${tpl.description}.\n\nBe concise and helpful. Greet the caller, do your job, and escalate to a human if asked.`,
     greeting: tpl.id === "blank" ? "" : `Hi! This is ${tpl.name} from Acme. Do you have a quick moment?`,
+    failureMessage: tpl.id === "blank" ? "" : "Oops, I can't seem to answer that.",
   }
 }
 
@@ -356,7 +379,8 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
     })
   }
 
-  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 3, action: "Pick a voice" })
+  // Voice lives in section 4 since the 2026-07-22 IA (Models moved to 3).
+  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 4, action: "Pick a voice" })
 
   return blocks
 }
@@ -372,7 +396,8 @@ export function publishBlockReason(d: AgentDraft): string | null {
 export function firstIncompleteStep(d: AgentDraft): number {
   if (!d.type) return 1
   if (!d.systemPrompt.trim()) return 2
-  if (!d.voice) return 3
+  // Voice & Speech is section 4 since the 2026-07-22 IA (Models moved to 3).
+  if (!d.voice) return 4
   return 6
 }
 

@@ -99,7 +99,11 @@ export function StepAnalysis({
         </div>
         {cfg.successEval && (
           <div className="space-y-1.5">
-            <Label htmlFor="an-eval" className="text-sm font-medium">Evaluation criteria</Label>
+            <div className="flex items-baseline justify-between gap-3">
+              <Label htmlFor="an-eval" className="text-sm font-medium">Evaluation Criteria</Label>
+              {/* Live counter (proposal 2639-102124: "120/2000"). */}
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">{cfg.evalCriteria.length}/2000</span>
+            </div>
             <Textarea
               id="an-eval"
               value={cfg.evalCriteria}
@@ -111,16 +115,20 @@ export function StepAnalysis({
         )}
       </section>
 
-      {/* Data points */}
+      {/* Post-Call Data Extraction (proposal 2639-102124 naming). */}
       <section className="space-y-3 rounded-lg border border-border bg-card p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-semibold">Data points</p>
-            <p className="text-xs text-muted-foreground">What to extract from each conversation.</p>
+            <p className="text-sm font-semibold">Post-Call Data Extraction</p>
+            <p className="text-xs text-muted-foreground">Automatically extract structured outputs from {noun}s according to business needs.</p>
           </div>
           <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={!cfg.transcribe} onClick={() => setEditing("new")}>
-            <Plus className="h-3.5 w-3.5" aria-hidden /> Add data point
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add
           </Button>
+        </div>
+        <div className="flex items-baseline justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <span>Data points</span>
+          <span>{String(cfg.dataPoints.length).padStart(2, "0")} output{cfg.dataPoints.length === 1 ? "" : "s"}</span>
         </div>
 
         {!cfg.transcribe ? (

@@ -17,6 +17,9 @@ import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 import { InfoHint } from "@/components/wizard/info-hint"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
 import { StateBanner } from "@/components/usage-spend-card"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
@@ -110,7 +113,8 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
         </div>
       </div>
 
-      {/* Suite table — one row per case; the table IS the suite (V1) */}
+      {/* Suite TABLE (proposal 2639-102124): Test Name · Description ·
+          Status · Actions, under a passing/failing header bar. */}
       <div className="overflow-hidden rounded-lg border border-border">
         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
           <span className="font-medium">
@@ -118,41 +122,54 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
           </span>
           <StatusPill passed={stats.passed} total={stats.total} />
         </div>
-        {cases.map((c) => {
-          const res = resultFor(c.id)
-          return (
-            <div key={c.id} className="flex items-center gap-3 border-b border-border px-3 py-2.5 last:border-b-0">
-              <button
-                type="button"
-                className="min-w-0 flex-1 text-left"
-                onClick={() => res && setOpenResult(res)}
-              >
-                <p className="truncate text-sm font-medium">{c.name}</p>
-                <p className="truncate text-xs text-muted-foreground">Caller wants to {c.persona.goal}</p>
-              </button>
-              <span className="flex shrink-0 items-center gap-1">
-                {c.assertions.map((a) => {
-                  const { icon: Icon, label } = KIND_META[a.kind]
-                  return <Icon key={a.id} className="h-3.5 w-3.5 text-muted-foreground" aria-label={label} />
-                })}
-              </span>
-              {res ? (
-                <Badge
-                  variant={res.verdict === "pass" ? "secondary" : "destructive"}
-                  className="shrink-0 gap-1 text-xs"
-                >
-                  {res.verdict === "pass" ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                  {res.verdict === "pass" ? "Pass" : "Fail"}
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="shrink-0 text-xs">Not run</Badge>
-              )}
-              <Button size="sm" variant="ghost" className="h-7 shrink-0 gap-1 text-xs" onClick={() => setRunning(c)}>
-                <Play className="h-3 w-3" /> Run
-              </Button>
-            </div>
-          )
-        })}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Test Name</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {cases.map((c) => {
+              const res = resultFor(c.id)
+              return (
+                <TableRow key={c.id}>
+                  <TableCell className="font-medium">
+                    <button
+                      type="button"
+                      className="rounded text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => res && setOpenResult(res)}
+                    >
+                      {c.name}
+                    </button>
+                  </TableCell>
+                  <TableCell className="max-w-[280px] truncate text-muted-foreground">
+                    Caller wants to {c.persona.goal}
+                  </TableCell>
+                  <TableCell>
+                    {res ? (
+                      <Badge
+                        variant={res.verdict === "pass" ? "secondary" : "destructive"}
+                        className={cn("gap-1 text-xs", res.verdict === "pass" && "bg-success/15 text-success")}
+                      >
+                        {res.verdict === "pass" ? "Pass" : "Fail"}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">Not run</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setRunning(c)}>
+                      Run
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
       </div>
 
       <AddCaseSheet

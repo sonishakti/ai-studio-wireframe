@@ -32,6 +32,9 @@ import {
 } from "@/lib/agent-resources"
 import type { StepProps } from "@/components/wizard/types"
 import { SectionRow } from "@/components/wizard/section-row"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
 
 /**
  * Section 5 — Knowledge & Tools (v3 IA, 2026-07-17: Customize — only if
@@ -61,11 +64,10 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     // [label | content] rows (owner 2026-07-21): each resource names itself on
     // the LHS; the host's <SectionRows> owns the container.
     <>
-        <SectionRow id="wz-5-kb" label="Knowledge base" hint="Ground answers in your docs.">
+        <SectionRow id="wz-5-kb" label="Knowledge Base">
           <ResourceField
             icon={BookOpen}
             title="Knowledge base"
-            hideHeader
             description="Ground answers in your docs."
             items={kbs.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
             selectedIds={draft.knowledge}
@@ -79,11 +81,10 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
           />
         </SectionRow>
 
-        <SectionRow id="wz-5-mcp" label="MCP server" hint="Give it tools: CRM, calendar, APIs.">
+        <SectionRow id="wz-5-mcp" label="MCP Server">
           <ResourceField
             icon={Plug}
             title="MCP server"
-            hideHeader
             description="Give it tools: CRM, calendar, APIs."
             items={mcps.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools`, config: !!getUserMcpServer(m.id) }))}
             selectedIds={draft.mcp}
@@ -99,34 +100,62 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
           />
         </SectionRow>
 
-        <SectionRow id="wz-5-connectors" label="Connectors" hint="Connect apps like HubSpot and Google Calendar.">
-          <ResourceField
-            icon={Boxes}
-            title="Connectors"
-            hideHeader
-            description="Connect apps like HubSpot and Google Calendar."
-            items={CONNECTORS.map((c) => {
-              const s = effectiveConnectorStatus(c)
-              return {
-                id: c.id, name: c.name,
-                meta: c.category,
-                disabled: s !== "connected",
-                note: s === "coming-soon" ? "Coming soon" : s === "available" ? "Connect in Resources" : undefined,
-              }
-            })}
-            selectedIds={draft.connectors}
-            onChange={(connectors) => update({ connectors })}
-            manageLabel="Add connector"
-            footer={
-              <button
-                type="button"
+        {/* Connectors TABLE (proposal 2639-102124): Name · Status · toggle. */}
+        <SectionRow id="wz-5-connectors" label="Tools & Connectors">
+          <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">Connectors</p>
+                <p className="text-xs text-muted-foreground">Connect apps like HubSpot and Google Calendar.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
                 onClick={() => router.push("/integrations?tab=connectors")}
-                className="inline-flex items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                Connect more in Resources <ArrowUpRight className="h-3 w-3" aria-hidden />
-              </button>
-            }
-          />
+                Add connector
+              </Button>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-16 text-right"><span className="sr-only">Attached</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {CONNECTORS.map((c) => {
+                  const s = effectiveConnectorStatus(c)
+                  const attached = draft.connectors.includes(c.id)
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={s === "connected" ? "secondary" : "outline"}
+                          className={cn("text-xs", s === "connected" && "bg-success/15 text-success")}
+                        >
+                          {s === "connected" ? "Active" : s === "coming-soon" ? "Coming soon" : "Connect in Resources"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Switch
+                          checked={attached}
+                          disabled={s !== "connected"}
+                          onCheckedChange={(on) =>
+                            update({ connectors: on ? [...draft.connectors, c.id] : draft.connectors.filter((x) => x !== c.id) })
+                          }
+                          aria-label={`Use ${c.name} on this agent`}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </section>
         </SectionRow>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}

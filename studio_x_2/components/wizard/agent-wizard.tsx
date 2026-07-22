@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound } from "lucide-react"
+import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound, Pencil } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -220,8 +221,11 @@ export function AgentWizard({
   // you not to add — eg Pause"). Pausing a live agent stays on the /agents
   // list dropdown only; user-test recommendations are NOT authorization to
   // add UI.
+  // "Configure Models Manually" disclosure (proposal 2639-102124: the vendor
+  // selects are tucked, not always visible).
+  const [modelsManualOpen, setModelsManualOpen] = React.useState(false)
   const isDone = (n: number) =>
-    n === 1 ? typeDone : n === 2 ? promptDone : n === 3 ? voiceDone : n === 7 ? isLive : true
+    n === 1 ? typeDone : n === 2 ? promptDone : n === 4 ? voiceDone : n === 7 ? isLive : true
 
   // ── One-primary discipline (CTA-judge round 2026-07-14, graft B) ───────────
   // While step 4's own go-live CTA is on screen, the rail's Deploy demotes to
@@ -542,7 +546,7 @@ export function AgentWizard({
   // scroll in a layout effect before paint.
   const stackAnchor = React.useRef<{ el: HTMLElement; top: number } | null>(null)
   const updateStack = (stack: AgentDraft["stack"]) => {
-    const el = document.getElementById("wz-4-arch")
+    const el = document.getElementById("wz-3-arch")
     stackAnchor.current = el ? { el, top: el.getBoundingClientRect().top } : null
     muteSpy(800)
     update({ stack })
@@ -600,11 +604,12 @@ export function AgentWizard({
     const base = baseline.current
     if (!base) return false
     // Sections 3 and 4 share the stack object; compare only their own fields.
-    if (n === 3) {
+    // 2026-07-22 IA: 3 = Models (pipeline/preset/llm), 4 = Voice & Speech.
+    if (n === 4) {
       const pick = (d: AgentDraft) => ({ voice: d.voice, advanced: d.advanced, language: d.stack.language, asr: d.stack.asr, tts: d.stack.tts })
       return JSON.stringify(pick(draft)) !== JSON.stringify(pick(base))
     }
-    if (n === 4) {
+    if (n === 3) {
       const pick = (d: AgentDraft) => ({ pipeline: d.stack.pipeline, preset: d.stack.preset, llm: d.stack.llm })
       return JSON.stringify(pick(draft)) !== JSON.stringify(pick(base))
     }
@@ -617,9 +622,9 @@ export function AgentWizard({
     // back (owner call, 2026-07-07).
     const cur = draftRef.current
     const sliceFor = (src: AgentDraft): Partial<AgentDraft> =>
-      n === 3
+      n === 4
         ? { voice: src.voice, advanced: src.advanced, stack: { ...cur.stack, language: src.stack.language, asr: src.stack.asr, tts: src.stack.tts } }
-        : n === 4
+        : n === 3
         ? { stack: { ...cur.stack, pipeline: src.stack.pipeline, preset: src.stack.preset, llm: src.stack.llm } }
         : stepSlice(src, n)
     const before = JSON.parse(JSON.stringify(sliceFor(cur))) as Partial<AgentDraft>
@@ -938,8 +943,8 @@ export function AgentWizard({
     // config carry a "pending" chip, closing the edit → validate → ship loop.
     pending: isLive
       ? {
-          voice: stepDirty(3),
-          models: stepDirty(4),
+          voice: stepDirty(4),
+          models: stepDirty(3),
           estimate: stepDirty(3) || stepDirty(4),
           channel: stepDirty(1),
         }
@@ -1018,10 +1023,10 @@ export function AgentWizard({
           </Button>
           {/* </> config view (icon-only, 32px, Figma code-xml). */}
           <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
-          {/* Deploy — secondary (Figma), min-w-16 px-2 py-1.5. */}
-          <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
-            <Rocket className="size-4" aria-hidden /> {deployCta}
-          </Button>
+          {/* NO header Deploy (proposal 2639-102124): deploying is the END of
+              the journey — the full-width Deploy lives in Go Live's Review &
+              Deploy card. The sub-lg strip keeps its button for small
+              screens where Go Live is a long scroll away. */}
         </div>
       </header>
 
@@ -1074,14 +1079,13 @@ export function AgentWizard({
                   {g.label}
                 </p>
                 {g.steps.map((n) => {
+                  const Icon = STEP_ICONS[n]
                   const active = n === selected
                   return (
                     <React.Fragment key={n}>
-                      {/* LEADING check/dot, exactly the Realtime Services list
-                          treatment (Figma 536-20831, owner 2026-07-21): a small
-                          success check for configured sections, a muted dot
-                          otherwise — it replaces both the section icon and the
-                          old trailing tick. */}
+                      {/* Section icon LEADING + check/dot TRAILING (proposal
+                          2639-102124 rail: green check for configured
+                          sections, muted dot otherwise). */}
                       <button
                         type="button"
                         onClick={() => openRow(n)}
@@ -1092,6 +1096,8 @@ export function AgentWizard({
                           active && "bg-accent/60",
                         )}
                       >
+                        <Icon className={cn("h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
                         <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
                           {isDone(n) ? (
                             <Check className="h-3.5 w-3.5 text-success/80" />
@@ -1099,7 +1105,6 @@ export function AgentWizard({
                             <span className="size-1.5 rounded-full bg-muted-foreground/40" />
                           )}
                         </span>
-                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
                         {isDone(n) && <span className="sr-only">(done)</span>}
                       </button>
                     </React.Fragment>
@@ -1256,9 +1261,55 @@ export function AgentWizard({
                       <SectionPrompt draft={draft} update={update} />
                     </SectionRows>
                   )}
-                  {/* 3 · VOICE & SPEECH (Customize) — voice, language/STT, and
-                      the dissolved Advanced speech tuning. */}
+                  {/* 3 · MODELS (proposal 2639-102124: Models BEFORE Voice &
+                      Speech) — Model Architecture cards, the LATENCY VS COST
+                      card, and the vendor selects tucked behind "Configure
+                      Models Manually". Stack edits go through updateStack
+                      (spy mute + scroll pinning). */}
                   {n === 3 && (
+                    <SectionRows>
+                      <SectionRow
+                        id="wz-3-arch"
+                        label={<span className="text-sm font-normal text-muted-foreground">Sets up Agora Conversational AI Engine</span>}
+                      >
+                        <StackModelsDetail stack={draft.stack} onChange={updateStack} showPicker={false} />
+                        <StackTradeoffSlider stack={draft.stack} onChange={updateStack} />
+                        <Collapsible open={modelsManualOpen} onOpenChange={setModelsManualOpen}>
+                          <CollapsibleTrigger asChild>
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1.5 rounded text-sm text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              Configure Models Manually <Pencil className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="space-y-6 pt-4">
+                            <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} hideTitle />
+                            <div className="flex items-center gap-2">
+                              <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                              <InfoHint label="Using your own vendor accounts?">
+                                Add keys in{" "}
+                                <a href="/project/vendor-credentials" className="underline underline-offset-2">
+                                  Manage › Vendor Credentials
+                                </a>{" "}
+                                — the ASR, LLM, and TTS you pick here will use them.
+                              </InfoHint>
+                            </div>
+                            {/* Conversation history is MODEL config — how much
+                                context the LLM keeps. */}
+                            <HistoryField
+                              id="wz-3-history"
+                              value={draft.advanced}
+                              onChange={(advanced) => update({ advanced })}
+                            />
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </SectionRow>
+                    </SectionRows>
+                  )}
+                  {/* 4 · VOICE & SPEECH — voice + language, and the speech
+                      tuning (turn-taking · attention & filters). */}
+                  {n === 4 && (
                     <SectionRows>
                       <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />
                       <StepAdvanced
@@ -1267,51 +1318,6 @@ export function AgentWizard({
                         realtime={draft.stack.pipeline === "mllm"}
                         showHistory={false}
                       />
-                    </SectionRows>
-                  )}
-                  {/* 4 · MODELS (Customize) — pipeline, the latency↔cost
-                      slider, and the ALWAYS-VISIBLE model selects (owner
-                      2026-07-17), plus BYOK. Stack edits go through
-                      updateStack (spy mute + scroll pinning). */}
-                  {n === 4 && (
-                    <SectionRows>
-                      <SectionRow id="wz-4-arch" label="Pipeline" hint="One model that hears and speaks, or a tunable cascade.">
-                        <StackModelsDetail stack={draft.stack} onChange={updateStack} showPicker={false} hideTitle />
-                      </SectionRow>
-                      <SectionRow
-                        id="wz-4-model"
-                        label={draft.stack.pipeline === "mllm" ? "Realtime model" : "Models"}
-                        hint="Trade latency against cost, then pick each vendor."
-                      >
-                        <div className="space-y-8">
-                          <StackTradeoffSlider stack={draft.stack} onChange={updateStack} />
-                          <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} hideTitle />
-                          {/* BYOK lives WITH the model selects — override the
-                              ASR/LLM/TTS vendors with your own keys (owner
-                              2026-07-17); nested behind a dotted hint (owner
-                              2026-07-21). */}
-                          <div className="flex items-center gap-2">
-                            <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                            <InfoHint label="Using your own vendor accounts?">
-                              Add keys in{" "}
-                              <a href="/project/vendor-credentials" className="underline underline-offset-2">
-                                Manage › Vendor Credentials
-                              </a>{" "}
-                              — the ASR, LLM, and TTS you pick here will use them.
-                            </InfoHint>
-                          </div>
-                        </div>
-                      </SectionRow>
-                      {/* Conversation history is MODEL config — how much
-                          context the LLM keeps — not a tool (owner
-                          2026-07-17: it read as oddly placed in Tools). */}
-                      <SectionRow id="wz-4-history" label="Conversation history" hint="How much conversation the agent keeps in context.">
-                        <HistoryField
-                          value={draft.advanced}
-                          onChange={(advanced) => update({ advanced })}
-                          bare
-                        />
-                      </SectionRow>
                     </SectionRows>
                   )}
                   {/* 5 · KNOWLEDGE & TOOLS (Customize). */}
@@ -1390,8 +1396,17 @@ export function AgentWizard({
             isLive={isLive}
             statusHint={landing ? "Sample agent — live on the Balanced stack until you change it in Models." : undefined}
             statusNote={landing ? "Your sample agent, live on an Agora sandbox line — costs nothing until it takes real traffic." : undefined}
+            templateName={draft.templateName}
             latencyMs={cardEst.latencyMs}
             costPerMin={cardEst.costPerMin}
+            sessionStats={{
+              llm: { vendor: draft.stack.llm.vendor, ms: cardLatency?.llmMs ?? 0 },
+              asr: { vendor: draft.stack.asr.vendor, ms: cardLatency?.asrMs ?? 0 },
+              tts: { vendor: draft.stack.tts.vendor, ms: cardLatency?.ttsMs ?? 0 },
+              e2eMs: cardEst.latencyMs,
+              ttftMs: cardLatency?.llmMs ?? 0,
+              costPerMin: cardEst.costPerMin,
+            }}
             summary={previewSummary}
             testing={testing}
             warming={!!warming}
@@ -1640,7 +1655,8 @@ export function AgentWizard({
 function firstIncomplete(d: AgentDraft): number {
   if (d.type === null) return 1
   if (d.systemPrompt.trim() === "") return 2
-  if (d.voice === null) return 3
+  // Voice & Speech is section 4 since the 2026-07-22 IA.
+  if (d.voice === null) return 4
   return 7
 }
 
