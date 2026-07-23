@@ -452,7 +452,16 @@ export default function AgentsPage() {
   // from the list is the only route jump (→ /agents/[id]/edit).
   const router = useRouter()
   const [view, setView] = React.useState<"builder" | "list">("builder")
-  const [builderId, setBuilderId] = React.useState("agt_default")
+  // Owner 2026-07-22: /agents lands on the NEW AGENT flow by default — the
+  // edit view is only entered when the user edits an agent (list → Edit →
+  // /agents/[id]/edit). "new" WITHOUT the blank flag restores an in-progress
+  // draft, so returning mid-build never loses work.
+  const [builderId, setBuilderId] = React.useState("new")
+  // Explicit start-over intent ONLY (kebab "New agent") — never implied by
+  // landing, or every visit would wipe the draft. The nonce remounts the
+  // wizard even when builderId is already "new".
+  const [blankIntent, setBlankIntent] = React.useState(false)
+  const [blankNonce, setBlankNonce] = React.useState(0)
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
 
@@ -528,8 +537,10 @@ export default function AgentsPage() {
     setBuilderId("new")
     // Blank intent travels as the `blank` PROP (the wizard remounts before the
     // push commits, so it can't read the URL). Push a CLEAN /agents: a lingering
-    // ?blank=1 confused refreshes, which reset builderId to the default agent
-    // (audit 2026-07-07).
+    // ?blank=1 confused refreshes, which reset builderId (audit 2026-07-07).
+    // The nonce forces a remount when we're ALREADY on the new-agent landing.
+    setBlankIntent(true)
+    setBlankNonce((n) => n + 1)
     router.push("/agents")
   }
   const isBuilder = view === "builder"
@@ -588,15 +599,17 @@ export default function AgentsPage() {
           />
         ) : (
           <AgentWizard
-            key={builderId}
+            key={`${builderId}:${blankNonce}`}
             id={builderId}
             landing={builderId === "agt_default"}
             warming={phase === "warming" && builderId === "agt_default"}
             autoTalk={autoTalk && builderId === "agt_default"}
             // Prop, not URL: startBlank remounts this in the same tick as its
             // router.push, so the mount effect can't rely on reading ?blank=1.
-            blank={builderId === "new"}
-            onCreateNew={builderId === "agt_default" ? startBlank : undefined}
+            // blank = EXPLICIT start-over only (owner 2026-07-22): the default
+            // new-agent landing must restore an in-progress draft, not wipe it.
+            blank={blankIntent}
+            onCreateNew={startBlank}
             onBrowseTemplates={() => setTemplatesOpen(true)}
             onImportAsNew={landImportedDraft}
           />
