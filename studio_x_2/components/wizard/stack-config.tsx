@@ -227,9 +227,9 @@ export function StackModelPicker({
           </h4>
         )}
           {pipeline === "stt-llm-tts" ? (
-            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 @lg:grid-cols-2">
               <div className="min-w-0 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Speech-to-Text (STT)</Label>
+                <Label className="text-sm font-medium">Speech-to-Text (STT)</Label>
                 <Select
                   value={`${stack.asr.vendor}/${stack.asr.model}`}
                   onValueChange={(id) => {
@@ -246,7 +246,7 @@ export function StackModelPicker({
                 </Select>
               </div>
               <div className="min-w-0 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Large Language Model (LLM)</Label>
+                <Label className="text-sm font-medium">Large Language Model (LLM)</Label>
                 <Select
                   value={`${stack.llm.vendor}/${stack.llm.model}`}
                   onValueChange={(id) => {
@@ -263,7 +263,7 @@ export function StackModelPicker({
                 </Select>
               </div>
               <div className="min-w-0 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Text-to-Speech (TTS)</Label>
+                <Label className="text-sm font-medium">Text-to-Speech (TTS)</Label>
                 <Select
                   value={stack.tts.vendor}
                   onValueChange={(vendor) => {
@@ -282,7 +282,7 @@ export function StackModelPicker({
               <div className="min-w-0 space-y-1.5">
                 {/* "TTS voice", not "Voice" — the persona picker sits directly
                     above this on Step 1; two controls named Voice read as a bug. */}
-                <Label className="text-xs text-muted-foreground">TTS voice</Label>
+                <Label className="text-sm font-medium">TTS voice</Label>
                 <Select value={stack.tts.voice} onValueChange={(voice) => patch({ tts: { ...stack.tts, voice } })}>
                   <SelectTrigger className="text-sm capitalize"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -297,9 +297,9 @@ export function StackModelPicker({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 @lg:grid-cols-2">
             <div className="min-w-0 space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Realtime model</Label>
+              <Label className="text-sm font-medium">Realtime model</Label>
               <Select
                 value={`${stack.llm.vendor}/${stack.llm.model}`}
                 onValueChange={(id) => {

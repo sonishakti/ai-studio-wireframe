@@ -85,7 +85,7 @@ export function InboundCallSettings({ draft, update }: StepProps) {
           onChange={(voicemailDetection) => patch({ voicemailDetection })}
         />
         <div className="space-y-1.5">
-          <Label htmlFor="ib-max" className="text-xs text-muted-foreground">Max Call Duration (seconds)</Label>
+          <Label htmlFor="ib-max" className="text-sm font-medium">Max Call Duration (seconds)</Label>
           <Input
             id="ib-max"
             type="number"
@@ -103,7 +103,7 @@ export function InboundCallSettings({ draft, update }: StepProps) {
         />
         {cb.silenceHangup && (
           <div className="space-y-1.5">
-            <Label htmlFor="ib-silence" className="text-xs text-muted-foreground">Silence Timeout (seconds)</Label>
+            <Label htmlFor="ib-silence" className="text-sm font-medium">Silence Timeout (seconds)</Label>
             <Input
               id="ib-silence"
               type="number"
@@ -143,7 +143,7 @@ function LaunchTiming({ draft, update }: StepProps) {
         value={launch.mode}
         onValueChange={(v) => v && patch({ mode: v as LaunchConfig["mode"] })}
         aria-label="When the batch starts"
-        className="gap-4 @2xl:grid-cols-2"
+        className="gap-4 @lg:grid-cols-2"
       >
         <RadioCard value="now" title="Launch on deploy" description="Start calling contacts the moment you deploy" />
         <RadioCard value="scheduled" title="Schedule for later" description="Pick a specific start time" />
@@ -153,9 +153,9 @@ function LaunchTiming({ draft, update }: StepProps) {
         <div className="space-y-4">
           {/* Date · time · timezone are one parallel decision row, not a
               sequence — side-by-side (layout rule 2026-06). */}
-          <div className="grid grid-cols-1 gap-4 @2xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 @lg:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="lt-date" className="text-xs text-muted-foreground">Start date</Label>
+              <Label htmlFor="lt-date" className="text-sm font-medium">Start date</Label>
               <Input
                 id="lt-date"
                 type="date"
@@ -165,7 +165,7 @@ function LaunchTiming({ draft, update }: StepProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="lt-time" className="text-xs text-muted-foreground">Start time</Label>
+              <Label htmlFor="lt-time" className="text-sm font-medium">Start time</Label>
               <Input
                 id="lt-time"
                 type="time"
@@ -175,7 +175,7 @@ function LaunchTiming({ draft, update }: StepProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Timezone</Label>
+              <Label className="text-sm font-medium">Timezone</Label>
               <Select value={launch.timezone ?? ""} onValueChange={(timezone) => patch({ timezone })}>
                 <SelectTrigger className="w-full text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>
@@ -210,9 +210,9 @@ function DialingSettings({ draft, update }: StepProps) {
       {/* grid-cols-1 is load-bearing: an implicit column is min-content-sized,
           and the nowrap Select values (e.g. "Business hours (9–5…)") would
           force ~300px and overflow a starved center column. */}
-      <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 @lg:grid-cols-2">
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Call window</Label>
+          <Label className="text-sm font-medium">Call window</Label>
           <Select
             value={out?.callWindow ?? "business"}
             onValueChange={(v) => patch({ callWindow: v as "business" | "extended" | "anytime" })}
@@ -227,7 +227,7 @@ function DialingSettings({ draft, update }: StepProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Max concurrent</Label>
+          <Label className="text-sm font-medium">Max concurrent</Label>
           <Select
             value={String(out?.maxConcurrent ?? 10)}
             onValueChange={(v) => patch({ maxConcurrent: Number(v) })}
@@ -239,7 +239,7 @@ function DialingSettings({ draft, update }: StepProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
+          <Label className="text-sm font-medium">Retry unanswered</Label>
           <Select
             value={String(out?.retries ?? 1)}
             onValueChange={(v) => patch({ retries: Number(v) })}
@@ -253,7 +253,7 @@ function DialingSettings({ draft, update }: StepProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="dl-ring" className="text-xs text-muted-foreground">Ring duration (seconds)</Label>
+          <Label htmlFor="dl-ring" className="text-sm font-medium">Ring duration (seconds)</Label>
           <Input
             id="dl-ring"
             type="number"
@@ -264,7 +264,7 @@ function DialingSettings({ draft, update }: StepProps) {
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="dl-interval" className="text-xs text-muted-foreground">Minimum interval between calls (ms)</Label>
+        <Label htmlFor="dl-interval" className="text-sm font-medium">Minimum interval between calls (ms)</Label>
         <Input
           id="dl-interval"
           type="number"
@@ -319,7 +319,7 @@ function HangupSettings({ draft, update }: StepProps) {
       />
       {cb.silenceHangup && (
         <div className="space-y-1.5">
-          <Label htmlFor="hu-silence" className="text-xs text-muted-foreground">Hang-up silence timeout (seconds)</Label>
+          <Label htmlFor="hu-silence" className="text-sm font-medium">Hang-up silence timeout (seconds)</Label>
           <Input
             id="hu-silence"
             type="number"
@@ -337,7 +337,7 @@ function HangupSettings({ draft, update }: StepProps) {
         </div>
       )}
       <div className="space-y-1.5">
-        <Label htmlFor="hu-max" className="text-xs text-muted-foreground">Max call duration (seconds)</Label>
+        <Label htmlFor="hu-max" className="text-sm font-medium">Max call duration (seconds)</Label>
         <Input
           id="hu-max"
           type="number"
@@ -371,7 +371,7 @@ function TransferSettings({ draft, update }: StepProps) {
       {cb.transfer && (
         <>
           <div className="space-y-1.5">
-            <Label htmlFor="tr-dest" className="text-xs text-muted-foreground">Transfer destination</Label>
+            <Label htmlFor="tr-dest" className="text-sm font-medium">Transfer destination</Label>
             <Input
               id="tr-dest"
               value={cb.transferDest}
@@ -382,7 +382,7 @@ function TransferSettings({ draft, update }: StepProps) {
             <p className="text-xs text-muted-foreground">Detects automatically between Phone, E.164, and SIP.</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="tr-criteria" className="text-xs text-muted-foreground">Transfer criteria</Label>
+            <Label htmlFor="tr-criteria" className="text-sm font-medium">Transfer criteria</Label>
             <Textarea
               id="tr-criteria"
               value={cb.transferCriteria}

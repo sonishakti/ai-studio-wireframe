@@ -41,7 +41,8 @@ export function SectionRow({
     <div
       id={id}
       className={cn(
-        "grid scroll-mt-28 grid-cols-1 gap-4 py-6 first:pt-0 last:pb-0 @3xl:grid-cols-[240px_minmax(0,1fr)] @3xl:gap-10",
+        // Figma OPT2 rhythm (2698-102829): sections breathe pt-6/pb-9.
+        "grid scroll-mt-28 grid-cols-1 gap-4 pt-6 pb-9 first:pt-0 last:pb-0 @3xl:grid-cols-[240px_minmax(0,1fr)] @3xl:gap-10",
         className,
       )}
     >
@@ -52,9 +53,12 @@ export function SectionRow({
       {/* The RHS is its OWN @container: children's container queries must
           measure the CONTROL column, not the whole row — measuring the row
           made card grids claim columns the label rail had already eaten
-          (squeezed channel cards, owner screenshot 2026-07-21). */}
-      <div className="min-w-0 @container">
-        <div className="space-y-4">{children}</div>
+          (squeezed channel cards, owner screenshot 2026-07-21).
+          Figma OPT2: the control column is a 560px block (fields gap-5) —
+          wide grids restack naturally because the container now measures
+          560. */}
+      <div className="min-w-0 @container max-w-[560px] w-full">
+        <div className="space-y-5">{children}</div>
       </div>
     </div>
   )

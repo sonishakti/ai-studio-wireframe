@@ -124,7 +124,9 @@
     --warning: oklch(0.7686 0.1647 70.08);       /* #f59e0b */
     --success: oklch(0.67 0.1836 142.551);       /* #42b03d */
     --border: oklch(0.2478 0 0);                 /* #212121 */
-    --input: oklch(0.173 0 0);                   /* #101010 */
+    /* Field WELL fill (Figma OPT2 2698-102829, 2026-07-22): inputs sit in
+       solid #050505 wells — the page background — not a grey tint. */
+    --input: oklch(0.1149 0 0);                  /* #050505 */
     --ring: oklch(0.7668 0 0);                   /* #b3b3b3 */
     --chart-1: oklch(0.5461 0.2152 262.881);     /* #2563eb Chart-blue */
     --chart-2: oklch(0.7845 0.1325 181.912);     /* #2dd4bf Chart-teal */

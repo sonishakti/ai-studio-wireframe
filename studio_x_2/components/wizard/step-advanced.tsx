@@ -61,7 +61,7 @@ export function StepAdvanced({
         onToggle={(enabled) => patch({ turnDetection: { ...adv.turnDetection, enabled } })}
       >
         <Label className="text-xs text-muted-foreground">Quick Presets</Label>
-        <div className="grid grid-cols-2 gap-2 @3xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 @lg:grid-cols-4">
           {TURN_PRESETS.map((p) => {
             const on = adv.turnDetection.preset === p.id
             return (
@@ -233,7 +233,7 @@ export function StepAdvanced({
         />
         {adv.attentionLocking.mode === "voiceprint" && (
           <div className="space-y-3">
-            <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Name</Label>
                 <Input
