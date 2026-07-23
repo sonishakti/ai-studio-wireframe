@@ -285,6 +285,16 @@ function ContactsPanel({ draft, update }: StepProps) {
   const out = draft.config.outbound
   const hasCsv = !!out?.csvName
   const missing = outboundMissingVars(draft)
+  // Coverage AHA (UTAUT2 hedonic layer, 2026-07-22): the moment every
+  // {{variable}} finds its column, the green check POPS — the product's
+  // best contract deserves its beat. Keyed so the one-shot replays.
+  const varsCovered = hasCsv && missing.length === 0 && extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
+  const prevCovered = React.useRef(varsCovered)
+  const [coveredFlash, setCoveredFlash] = React.useState(0)
+  React.useEffect(() => {
+    if (varsCovered && !prevCovered.current) setCoveredFlash((k) => k + 1)
+    prevCovered.current = varsCovered
+  }, [varsCovered])
   const attachCsv = () => {
     update({ config: { ...draft.config, outbound: { ...out, csvName: "contacts.csv" } } })
     toast.success("contacts.csv attached", {
@@ -342,8 +352,14 @@ function ContactsPanel({ draft, update }: StepProps) {
               A green check may only assert what exists: with zero {{vars}} in
               the prompt there is nothing "covered" (user-test 2026-07-09 S3). */}
           {missing.length === 0 ? (
-            <div className="flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+            <div
+              key={coveredFlash}
+              className={cn(
+                "flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3",
+                varsCovered && coveredFlash > 0 && "wz-anchor-flash",
+              )}
+            >
+              <Check className={cn("mt-0.5 h-4 w-4 shrink-0 text-success", varsCovered && coveredFlash > 0 && "sx-tick-pop")} />
               <p className="text-xs leading-relaxed text-foreground">
                 {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
                   ? "All prompt variables are covered by your CSV columns. Ready to deploy."

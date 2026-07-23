@@ -29,9 +29,14 @@ export function SectionPrompt({ draft, update }: StepProps) {
   const templates = AGENT_TEMPLATES.filter((t) => t.id !== "blank")
   const selectedTemplate = templates.find((t) => t.name === draft.templateName)
 
+  // Template-applied beat: the prompt editor flashes so the swap visibly
+  // LANDS (reuses the wz-anchor-flash arrival idiom; keyed to replay).
+  const [templateFlash, setTemplateFlash] = React.useState(0)
+
   const applyTemplate = (id: string) => {
     const tpl = templates.find((t) => t.id === id)
     if (!tpl) return
+    setTemplateFlash((k) => k + 1)
     update({
       templateName: tpl.name,
       systemPrompt: `You are ${tpl.name}, a voice agent. ${tpl.description}.\n\nBe concise and helpful. Greet the caller, do your job, and escalate to a human if asked.`,
@@ -62,7 +67,7 @@ export function SectionPrompt({ draft, update }: StepProps) {
       {/* System prompt + Rewrite */}
       <div className="space-y-1.5">
         <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
-        <div className="relative">
+        <div key={templateFlash} className={templateFlash > 0 ? "wz-anchor-flash relative" : "relative"}>
           <Textarea
             id="wz-prompt"
             value={draft.systemPrompt}
@@ -76,7 +81,7 @@ export function SectionPrompt({ draft, update }: StepProps) {
             type="button"
             variant="secondary"
             size="sm"
-            className="absolute bottom-2.5 right-2.5 gap-1.5"
+            className="sx-sparkle-hover absolute bottom-2.5 right-2.5 gap-1.5"
             onClick={() => toast("Simulated preview", { description: "No model runs in this wireframe — Rewrite Prompt would polish your prompt here." })}
           >
             <Sparkles className="h-3.5 w-3.5" aria-hidden /> Rewrite Prompt

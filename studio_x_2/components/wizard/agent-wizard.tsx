@@ -224,8 +224,21 @@ export function AgentWizard({
   // "Configure Models Manually" disclosure (proposal 2639-102124: the vendor
   // selects are tucked, not always visible).
   const [modelsManualOpen, setModelsManualOpen] = React.useState(false)
+
+  // ── Hedonic layer (UTAUT2 hedonic motivation, owner 2026-07-22) ────────────
+  // Completion ticks POP only when a section transitions to done DURING the
+  // session — the all-done sample agent must not fire seven pops on load.
+  const initialDones = React.useRef<Set<number> | null>(null)
+  // Sphere ring per autosave; keyed so the one-shot animation replays.
+  const [savePulse, setSavePulse] = React.useState(0)
+  // Deploy climax overlay — rings + rising rocket for ~900ms before the
+  // navigation publishDeployment performs. Skipped under reduced motion.
+  const [launchBurst, setLaunchBurst] = React.useState(false)
   const isDone = (n: number) =>
     n === 1 ? typeDone : n === 2 ? promptDone : n === 4 ? voiceDone : n === 7 ? isLive : true
+  // First-render capture: which sections were ALREADY done — their ticks
+  // render still; only in-session completions animate (lazy ref init).
+  if (initialDones.current === null) initialDones.current = new Set([1, 2, 3, 4, 5, 6, 7].filter(isDone))
 
   // ── One-primary discipline (CTA-judge round 2026-07-14, graft B) ───────────
   // While step 4's own go-live CTA is on screen, the rail's Deploy demotes to
@@ -466,6 +479,9 @@ export function AgentWizard({
     }
     saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
     setSaveState("saved")
+    // Hedonic beat: the Test Agent sphere rings once per save — "it heard
+    // you". Keyed counter so the panel replays the one-shot ring.
+    setSavePulse((p) => p + 1)
   }, [draft], 600)
 
   // ── Step navigation — one-pager (2026-07-07): every section is always open;
@@ -834,25 +850,41 @@ export function AgentWizard({
     // teleport to Monitor away from them (user-test #7, D3 S2). Monitor rides
     // the success toast as an action instead.
     const stay = draftRef.current.type === "code"
-    publishDeployment({
-      router, agentId, agentName: draft.name || "Your agent",
-      channel: channelLabel(draft), name: draft.name || "Deployment",
-      mode: draft.type ?? undefined,
-      stay,
-    })
-    if (stay) {
-      setCodeDeployedNow(true)
-      const next = { ...draftRef.current, agentId }
-      setDraft(next)
-      draftRef.current = next
-      // The working copy survives (with its minted ID) — persist it so a
-      // refresh keeps the now-real snippets, and re-arm publish for later edits.
-      saveDraft(next, isEdit ? next.agentId : undefined)
-      publishingRef.current = false
+    const doPublish = () => {
+      publishDeployment({
+        router, agentId, agentName: draft.name || "Your agent",
+        channel: channelLabel(draft), name: draft.name || "Deployment",
+        mode: draft.type ?? undefined,
+        stay,
+      })
+      if (stay) {
+        setCodeDeployedNow(true)
+        const next = { ...draftRef.current, agentId }
+        setDraft(next)
+        draftRef.current = next
+        // The working copy survives (with its minted ID) — persist it so a
+        // refresh keeps the now-real snippets, and re-arm publish for later edits.
+        saveDraft(next, isEdit ? next.agentId : undefined)
+        publishingRef.current = false
+        return
+      }
+      // Deploying consumes the working copy — clear whichever slot this was.
+      clearDraft(isEdit ? draft.agentId : undefined)
+    }
+    // Hedonic climax (UTAUT2, owner 2026-07-22): ~900ms of launch rings +
+    // rising rocket before the action completes. publishingRef stays armed
+    // through the delay, so double-clicks can't double-publish; reduced
+    // motion skips straight to the action.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      doPublish()
       return
     }
-    // Deploying consumes the working copy — clear whichever slot this was.
-    clearDraft(isEdit ? draft.agentId : undefined)
+    setLaunchBurst(true)
+    window.setTimeout(() => {
+      doPublish()
+      // Stay-path (Code/SDK) doesn't navigate — retire the overlay itself.
+      if (stay) window.setTimeout(() => setLaunchBurst(false), 300)
+    }, 900)
   }
 
   // ── Left identity card (shared component — keeps the agent present, same as
@@ -1100,7 +1132,9 @@ export function AgentWizard({
                         <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
                         <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
                           {isDone(n) ? (
-                            <Check className="h-3.5 w-3.5 text-success/80" />
+                            /* Pops only for IN-SESSION completions (UTAUT2
+                               hedonic beat) — pre-done ticks render still. */
+                            <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
                           ) : (
                             <span className="size-1.5 rounded-full bg-muted-foreground/40" />
                           )}
@@ -1404,6 +1438,7 @@ export function AgentWizard({
             statusHint={landing ? "Sample agent — live on the Balanced stack until you change it in Models." : undefined}
             statusNote={landing ? "Your sample agent, live on an Agora sandbox line — costs nothing until it takes real traffic." : undefined}
             templateName={draft.templateName}
+            savePulse={savePulse}
             latencyMs={cardEst.latencyMs}
             costPerMin={cardEst.costPerMin}
             sessionStats={{
@@ -1477,6 +1512,22 @@ export function AgentWizard({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Deploy climax (UTAUT2 hedonic layer, 2026-07-22): a ~900ms launch
+          beat — three expanding rings + a rising rocket — between clicking
+          Deploy and the action completing. Purely celebratory: publishing is
+          already committed when this shows. */}
+      {launchBurst && (
+        <div className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-[2px]" aria-hidden>
+          <span className="sx-launch-ring absolute h-40 w-40 rounded-full border-2 border-primary/50" />
+          <span className="sx-launch-ring absolute h-40 w-40 rounded-full border border-primary/35" style={{ animationDelay: "0.15s" }} />
+          <span className="sx-launch-ring absolute h-40 w-40 rounded-full border border-success/40" style={{ animationDelay: "0.3s" }} />
+          <span className="sx-launch-lift flex flex-col items-center gap-2">
+            <Rocket className="h-10 w-10 text-primary" />
+            <span className="text-sm font-semibold">{draft.name || "Your agent"} is going live…</span>
+          </span>
+        </div>
+      )}
 
       {/* Batch pre-flight — the ONE confirmation in the wizard. Deploying an
           outbound agent starts real calls to a whole list; the moment deserves

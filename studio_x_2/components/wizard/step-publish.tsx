@@ -85,7 +85,9 @@ export function StepPublish({
         </dl>
         {/* No hard lock: Deploy is always clickable. If something's unfinished
             the ramp above lists each fix; a toast still points to the first. */}
-        <Button size="lg" className="w-full gap-2" onClick={onPublish}>
+        {/* sx-rocket-hover: the rocket leans into the launch on hover — the
+            commit moment should feel like one (UTAUT2 hedonic layer). */}
+        <Button size="lg" className="sx-rocket-hover w-full gap-2" onClick={onPublish}>
           <Rocket className="h-4 w-4" aria-hidden /> {ctaLabel ?? (live ? "Redeploy" : "Deploy")}
         </Button>
         <p className="text-sm text-muted-foreground">

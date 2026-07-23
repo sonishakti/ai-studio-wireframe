@@ -44,6 +44,7 @@ export function AgentPreviewPanel({
   statusHint,
   statusNote,
   templateName,
+  savePulse = 0,
   sessionStats,
   latencyMs,
   costPerMin,
@@ -67,6 +68,9 @@ export function AgentPreviewPanel({
   /** Identity badge — the template picked in Agent Prompt (proposal
    *  2639-102124: "Friendly Receptionist"); falls back to the agent name. */
   templateName?: string
+  /** Increments on each autosave — the sphere rings once per save ("it heard
+   *  you"; UTAUT2 hedonic layer, 2026-07-22). */
+  savePulse?: number
   /** SESSION STATISTICS (proposal): per-stage vendor + latency, then the
    *  averages. Per-stage ms of 0 (MLLM pipeline) hides that row. */
   sessionStats?: {
@@ -100,6 +104,10 @@ export function AgentPreviewPanel({
   widgetGreeting?: string
   className?: string
 }) {
+  // Count-ups run every render (hooks precede the collapsed early-return).
+  const e2eAnimated = useCountUp(sessionStats?.e2eMs ?? latencyMs)
+  const costAnimated = useCountUp(sessionStats?.costPerMin ?? costPerMin)
+
   if (collapsed) {
     return (
       <aside
@@ -177,7 +185,18 @@ export function AgentPreviewPanel({
           <WidgetPreviewCard agentId={widgetAgentId} greeting={widgetGreeting} />
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-8 pb-6">
-            <AgentSphere size={150} active={testing} />
+            <div className="relative flex items-center justify-center">
+              {/* One ring per autosave (key replays the one-shot animation):
+                  your edit landed, the agent "heard you". */}
+              {savePulse > 0 && (
+                <span
+                  key={savePulse}
+                  className="sx-save-ring absolute h-[150px] w-[150px] rounded-full border border-primary/50"
+                  aria-hidden
+                />
+              )}
+              <AgentSphere size={150} active={testing} />
+            </div>
             <Button variant="secondary" size="sm" className="gap-1.5" disabled={warming} onClick={onTalk}>
               <AudioLines className="size-4" aria-hidden />
               {testing ? "Open test" : `Talk to ${name || "agent"}`}
@@ -209,15 +228,15 @@ export function AgentPreviewPanel({
               ) : null,
             )}
             <div className="space-y-1.5 border-t border-border pt-2.5">
-              <AvgLine label="Avg. E2E latency" value={`${sessionStats.e2eMs} ms`} />
+              <AvgLine label="Avg. E2E latency" value={`${Math.round(e2eAnimated)} ms`} />
               {sessionStats.ttftMs > 0 && <AvgLine label="Avg. LLM TTFT" value={`${sessionStats.ttftMs} ms`} />}
-              <AvgLine label="Avg. cost" value={`$${sessionStats.costPerMin.toFixed(2)} / min`} />
+              <AvgLine label="Avg. cost" value={`$${costAnimated.toFixed(2)} / min`} />
             </div>
           </>
         ) : (
           <div className="space-y-1.5">
-            <AvgLine label="Avg. E2E latency" value={`${latencyMs} ms`} />
-            <AvgLine label="Avg. cost" value={`$${costPerMin.toFixed(2)} / min`} />
+            <AvgLine label="Avg. E2E latency" value={`${Math.round(e2eAnimated)} ms`} />
+            <AvgLine label="Avg. cost" value={`$${costAnimated.toFixed(2)} / min`} />
           </div>
         )}
         {/* Pending-edit chips ride whichever row changed in the summary the
@@ -239,6 +258,36 @@ function AvgLine({ label, value }: { label: string; value: string }) {
       <span className="font-mono text-xs tabular-nums">{value}</span>
     </div>
   )
+}
+
+/** Eased count-up toward a changing target — the SESSION STATISTICS numbers
+ *  roll to their new values when the stack changes instead of snapping, so
+ *  the panel reads as a live instrument (UTAUT2 hedonic layer, 2026-07-22).
+ *  Reduced motion (and the first render) snaps. */
+export function useCountUp(target: number, ms = 400): number {
+  const [value, setValue] = React.useState(target)
+  const prev = React.useRef(target)
+  React.useEffect(() => {
+    const from = prev.current
+    prev.current = target
+    if (from === target) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target)
+      return
+    }
+    const t0 = performance.now()
+    let raf = 0
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - t0) / ms)
+      const eased = 1 - Math.pow(1 - k, 3)
+      setValue(from + (target - from) * eased)
+      if (k < 1) raf = requestAnimationFrame(tick)
+      else setValue(target)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, ms])
+  return value
 }
 
 /** Stacked label-over-value row — summary values (voice tagline, full stack
