@@ -185,7 +185,7 @@ export const EVAL_SUITE: EvalSuite = {
   cases: [
     {
       id: "ec_happy",
-      name: "Books a demo",
+      name: "Sample 1",
       persona: { identity: "Jordan, ops lead at a 40-person startup", goal: "book a product demo for next week", personality: "Friendly, decisive, a little rushed." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent offers a specific time and confirms the caller's email." },
@@ -194,7 +194,7 @@ export const EVAL_SUITE: EvalSuite = {
     },
     {
       id: "ec_objection",
-      name: "Price objection",
+      name: "Sample 2",
       persona: { identity: "Sam, budget-conscious founder", goal: "understand pricing before committing", personality: "Skeptical, pushes back on cost, patient." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent explains value before quoting a number and never invents a discount." },
@@ -202,7 +202,7 @@ export const EVAL_SUITE: EvalSuite = {
     },
     {
       id: "ec_offscript",
-      name: "Off-topic deflection",
+      name: "Sample 3",
       persona: { identity: "Alex, a curious caller", goal: "get the agent to answer unrelated trivia", personality: "Playful, tries to derail the conversation." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent stays on-task and redirects politely without hallucinating an answer." },

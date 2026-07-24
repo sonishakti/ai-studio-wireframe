@@ -387,7 +387,7 @@ function PreviewModeTabs({
   return (
     <Tabs value={mode} onValueChange={(v) => onChange(v as PreviewMode)}>
       <TabsList className="h-9">
-        <TabsTrigger value="collapsed" className="text-xs">Collapsed</TabsTrigger>
+        <TabsTrigger value="collapsed" className="text-xs">Closed</TabsTrigger>
         <TabsTrigger value="voice" className="text-xs">Voice Mode</TabsTrigger>
         <TabsTrigger value="chat" className="text-xs">Chat Mode</TabsTrigger>
       </TabsList>

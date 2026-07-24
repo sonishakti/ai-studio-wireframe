@@ -22,6 +22,7 @@ import {
   Code2,
   CircleDashed,
   Gauge,
+  Mic,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -52,7 +53,9 @@ import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
-import { restoreDraft, saveDraft } from "@/lib/wizard-draft"
+import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT, type AgentType as AgentTypeT } from "@/lib/wizard-draft"
+import { CreateAgentDialog, TEMPLATE_ICONS } from "@/components/wizard/create-agent-dialog"
+import { AgentSphere } from "@/components/agent-test-panel"
 import { toast } from "sonner"
 
 // ─── data ────────────────────────────────────────────────────────────────────
@@ -464,7 +467,12 @@ export default function AgentsPage() {
   // "Create new agent" opens a BLANK builder inline; editing an existing agent
   // from the list is the only route jump (→ /agents/[id]/edit).
   const router = useRouter()
-  const [view, setView] = React.useState<"builder" | "list">("builder")
+  // Owner design set 22–23 Jul: /agents DEFAULTS to the "start" landing
+  // (template gallery + Import + Create-dialog); the builder is entered by
+  // creating/editing, the list via ?view=list.
+  const [view, setView] = React.useState<"start" | "builder" | "list">("start")
+  const [createOpen, setCreateOpen] = React.useState(false)
+  const [createTemplate, setCreateTemplate] = React.useState("blank")
   // Owner 2026-07-22: /agents lands on the NEW AGENT flow by default — the
   // edit view is only entered when the user edits an agent (list → Edit →
   // /agents/[id]/edit). "new" WITHOUT the blank flag restores an in-progress
@@ -486,7 +494,17 @@ export default function AgentsPage() {
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
 
   const onParams = React.useCallback((p: URLSearchParams) => {
-    setView(p.get("view") === "list" ? "list" : "builder")
+    // Default = "start" landing; builder for its explicit param AND for every
+    // legacy builder deep link (?step/?dc/?template/?artifact from ⌘K, deploy
+    // redirects, and the playground round-trip must still land in the wizard).
+    const v = p.get("view")
+    setView(
+      v === "list"
+        ? "list"
+        : v === "builder" || p.get("step") || p.get("dc") || p.get("template") || p.get("artifact") || p.get("blank")
+          ? "builder"
+          : "start",
+    )
     // ⌘K / deep links can open the templates sheet directly (?templates=1).
     if (p.get("templates") === "1") setTemplatesOpen(true)
     const prov = p.get("provision")
@@ -515,10 +533,11 @@ export default function AgentsPage() {
     markProvisioned()
     setPhase(skipped ? "warming" : "ready")
     // "Say hello to Aria" must DELIVER the hello — the ceremony hands you
-    // ARIA, so it must open HER builder (the default landing is the new-agent
-    // flow since f83cec8; without this the autoTalk promise landed on a blank
-    // builder — user-test 2026-07-24 orphan).
+    // ARIA, so it must open HER builder (the default landing is the start
+    // gallery since 22–23 Jul; without this the autoTalk promise landed on a
+    // blank surface — user-test 2026-07-24 orphan).
     setBuilderId("agt_default")
+    setView("builder")
     if (!skipped) setAutoTalk(true)
   }
 
@@ -556,15 +575,23 @@ export default function AgentsPage() {
   }
 
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
-  const startBlank = () => {
+  // Owner design set 22–23 Jul (Figma 2698-109831): "New agent" opens the
+  // CREATE DIALOG (name · type · template) instead of instantly blanking.
+  const startBlank = () => setCreateOpen(true)
+  // Dialog → seed the new-agent draft slot and remount the builder on it —
+  // same landing idiom as import-as-new (write the slot, remount, restore).
+  const createAgent = (v: { name: string; type: AgentTypeT; templateId: string }) => {
+    const tpl = AGENT_TEMPLATES.find((t) => t.id === v.templateId)
+    const base = v.templateId === "blank" || !tpl ? { ...EMPTY_DRAFT } : templateToDraft(tpl)
+    const name = v.name || base.name || "New agent"
+    saveDraft({ ...base, name, type: v.type })
+    // One-shot landing notice: the builder toasts "created" (not "restored")
+    // and opens at the TOP of the journey.
+    stashImportNotice({ name, hadPrompt: !!base.systemPrompt, kind: "create" })
+    setCreateOpen(false)
     setBuilderId("new")
-    // Blank intent travels as the `blank` PROP (the wizard remounts before the
-    // push commits, so it can't read the URL). Push a CLEAN /agents: a lingering
-    // ?blank=1 confused refreshes, which reset builderId (audit 2026-07-07).
-    // The nonce forces a remount when we're ALREADY on the new-agent landing.
-    setBlankIntent(true)
-    setBlankNonce((n) => n + 1)
-    router.push("/agents")
+    setBlankNonce((n) => n + 1) // remount even if already on "new"
+    router.push("/agents?view=builder")
   }
   const isBuilder = view === "builder"
 
@@ -591,9 +618,9 @@ export default function AgentsPage() {
       <PageHeader
         // The builder is a self-contained widget (own heading + view-all/create
         // chrome), so suppress the PageHeader in builder view — it only carries
-        // the title + actions for the managed list.
-        title={isBuilder ? undefined : "Agents"}
-        description={isBuilder ? undefined : "Create and manage your agents here."}
+        // the title + actions for the start landing and the managed list.
+        title={isBuilder ? undefined : view === "start" ? "Deploy your first voice agent" : "Agents"}
+        description={isBuilder ? undefined : view === "start" ? "Start from a template, import one from another platform, or create from scratch." : "Create and manage your agents here."}
         actions={
           isBuilder ? undefined : (
             <div className="flex items-center gap-2">
@@ -613,33 +640,43 @@ export default function AgentsPage() {
         }
       />
 
-      {isBuilder ? (
-        phase === "ceremony" ? (
-          <ProvisioningCeremony
-            stallDemo={stallDemo}
-            onSkip={() => finishCeremony(true)}
-            onDone={() => finishCeremony(false)}
-          />
-        ) : (
-          <AgentWizard
-            key={`${builderId}:${blankNonce}`}
-            id={builderId}
-            landing={builderId === "agt_default"}
-            warming={phase === "warming" && builderId === "agt_default"}
-            autoTalk={autoTalk && builderId === "agt_default"}
-            // Prop, not URL: startBlank remounts this in the same tick as its
-            // router.push, so the mount effect can't rely on reading ?blank=1.
-            // blank = EXPLICIT start-over only (owner 2026-07-22): the default
-            // new-agent landing must restore an in-progress draft, not wipe it.
-            blank={blankIntent}
-            onCreateNew={startBlank}
-            onBrowseTemplates={() => setTemplatesOpen(true)}
-            onImportAsNew={landImportedDraft}
-          />
-        )
-      ) : (
+      {phase === "ceremony" && view !== "list" ? (
+        <ProvisioningCeremony
+          stallDemo={stallDemo}
+          onSkip={() => finishCeremony(true)}
+          onDone={() => finishCeremony(false)}
+        />
+      ) : isBuilder ? (
+        <AgentWizard
+          key={`${builderId}:${blankNonce}`}
+          id={builderId}
+          landing={builderId === "agt_default"}
+          warming={phase === "warming" && builderId === "agt_default"}
+          autoTalk={autoTalk && builderId === "agt_default"}
+          // Prop, not URL: startBlank remounts this in the same tick as its
+          // router.push, so the mount effect can't rely on reading ?blank=1.
+          // blank = EXPLICIT start-over only (owner 2026-07-22): the default
+          // new-agent landing must restore an in-progress draft, not wipe it.
+          blank={blankIntent}
+          onCreateNew={startBlank}
+          onBrowseTemplates={() => setTemplatesOpen(true)}
+          onImportAsNew={landImportedDraft}
+        />
+      ) : view === "list" ? (
         <ListView onBrowseTemplates={() => setTemplatesOpen(true)} />
+      ) : (
+        /* "Start" landing (owner design set 22–23 Jul): template gallery with
+           a live-ish preview panel; Import + Create ride the PageHeader. */
+        <StartView onUseTemplate={(id) => { setCreateTemplate(id); setCreateOpen(true) }} />
       )}
+
+      {/* Create new agent — name · type · template (Figma 2698-109062). */}
+      <CreateAgentDialog
+        open={createOpen}
+        onOpenChange={(o) => { setCreateOpen(o); if (!o) setCreateTemplate("blank") }}
+        defaultTemplateId={createTemplate}
+        onCreate={createAgent}
+      />
 
       {/* Templates sheet — returning users browse without leaving the list */}
       <Sheet open={templatesOpen} onOpenChange={setTemplatesOpen}>
@@ -672,5 +709,90 @@ export default function AgentsPage() {
         </SheetContent>
       </Sheet>
     </div>
+  )
+}
+
+// ─── Start landing (owner design set 22–23 Jul, Figma 2698-108992) ────────────
+// The default /agents surface: template rows on the left, a preview panel on
+// the right (selected template · Agent Ready · orb · Talk · stats). Import +
+// Create New Agent live in the PageHeader above; a row's "Use template" opens
+// the create dialog pre-seeded.
+
+function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => void }) {
+  const templates = AGENT_TEMPLATES.filter((t) => t.id !== "blank")
+  const [selected, setSelected] = React.useState(templates[0].id)
+  const tpl = templates.find((t) => t.id === selected) ?? templates[0]
+  const est = STACK_ESTIMATE["balanced"]
+
+  return (
+    <main className="flex-1 p-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Template rows — click previews on the right; Use opens the dialog. */}
+        <div className="min-w-0 flex-1 space-y-2">
+          {templates.map((t) => {
+            const Icon = TEMPLATE_ICONS[t.id] ?? Bot
+            const on = t.id === selected
+            return (
+              <div
+                key={t.id}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors",
+                  on ? "border-foreground/50 bg-accent/30" : "border-border hover:bg-accent/20",
+                )}
+              >
+                <button type="button" onClick={() => setSelected(t.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-none">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                    <Icon className="h-4 w-4 text-foreground" aria-hidden />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium">{t.name}</span>
+                    <span className="block truncate text-xs text-muted-foreground">{t.description}</span>
+                  </span>
+                </button>
+                <Button variant="outline" size="sm" className="shrink-0" onClick={() => onUseTemplate(t.id)}>
+                  Use template
+                </Button>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Preview panel — 320 (design): selected template · ready badge · orb
+            · simulated Talk · session statistics. */}
+        <aside className="w-full shrink-0 rounded-lg border border-border lg:w-[320px]" aria-label="Template preview">
+          <div className="border-b border-border px-4 py-3">
+            <p className="text-sm font-semibold">Test Agent</p>
+          </div>
+          <div className="flex flex-col items-center gap-6 px-4 py-6">
+            <span className="flex items-center gap-2">
+              <Badge variant="outline" className="max-w-[170px] truncate">{tpl.name}</Badge>
+              <Badge variant="outline" className="gap-1.5 border-success/40 text-success">
+                <span className="size-1.5 rounded-full bg-success" aria-hidden /> Agent Ready
+              </Badge>
+            </span>
+            <AgentSphere size={120} />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => toast("Simulated preview", { description: `No live audio in this wireframe — ${tpl.name} would answer here.` })}
+            >
+              <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to agent
+            </Button>
+          </div>
+          <div className="space-y-1.5 border-t border-border px-4 py-4">
+            <p className="pb-1 font-mono text-xs uppercase tracking-wider text-muted-foreground opacity-50">Session statistics</p>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">Avg. E2E latency</span>
+              <span className="font-mono text-xs tabular-nums">{est.latencyMs} ms</span>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">Avg. cost</span>
+              <span className="font-mono text-xs tabular-nums">${est.costPerMin.toFixed(2)} / min</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
   )
 }

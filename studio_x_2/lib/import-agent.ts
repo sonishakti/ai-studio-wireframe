@@ -758,6 +758,10 @@ export interface ImportNotice {
   hadPrompt: boolean
   /** The unsaved new-agent draft this import replaced — offered back via Undo. */
   prev?: AgentDraft
+  /** "create" = the Create-Agent dialog seeded this draft (22–23 Jul design
+   *  set) — the landing toast says created, and the builder opens at the TOP,
+   *  not at the resume cursor. Default (absent) = import. */
+  kind?: "import" | "create"
   at: number
 }
 

@@ -123,7 +123,9 @@ export function AgentWizard({
   // three Customize sections collapse to their header rows — universal
   // defaults mean nobody has to open them. Opening a rail item or a deep link
   // expands.
-  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 2: true, 6: true, 7: true })
+  // Design set 22–23 Jul (AgentBuilder/DEFAULT): Channel, Test, and Go Live
+  // open; Agent Prompt + the Customize trio collapse to slim rows.
+  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 6: true, 7: true })
   const toggleStep = (n: number) => setExpandedSteps((s) => ({ ...s, [n]: !s[n] }))
   // The Talk panel (identity card + live test) — the ONLY right-side Sheet now.
   const [talkOpen, setTalkOpen] = React.useState(false)
@@ -400,7 +402,15 @@ export function AgentWizard({
       // writes the slot, then remounts the builder) — say THAT, not a generic
       // "Draft restored", and offer the replaced draft back if there was one.
       const notice = takeImportNotice()
-      if (notice) {
+      if (notice?.kind === "create") {
+        // A FRESH creation (dialog → seed slot → remount): creation copy, and
+        // the journey starts at the TOP — a resume cursor pointing at Go Live
+        // read as "restored someone's old work" (owner walkthrough 2026-07-24).
+        toast.success(`${notice.name} created`, {
+          id: "import-landing",
+          description: "Template applied — pick its channel, then deploy.",
+        })
+      } else if (notice) {
         const prev = notice.prev
         // Stable id: the StrictMode replay REPLACES this toast instead of
         // stacking a duplicate.
@@ -421,11 +431,12 @@ export function AgentWizard({
             : undefined,
         })
       } else {
-        toast("Draft restored", { description: `Picked up at Step ${at}: ${STEP_TITLES[at - 1]}.` })
+        toast("Draft restored", { id: "import-landing", description: `Picked up at Step ${at}: ${STEP_TITLES[at - 1]}.` })
       }
       // Land the highlight where the work stopped (the default locked on
-      // first render was computed from the empty draft).
-      if (!stepToOpen && !dc) openLater(at)
+      // first render was computed from the empty draft) — creations land at
+      // the top instead.
+      if (!stepToOpen && !dc) openLater(notice?.kind === "create" ? 1 : at)
     }
     if (dc) {
       const t = dcToType(dc)
@@ -989,6 +1000,15 @@ export function AgentWizard({
     // layout adds NO padding, so the wizard owns all spacing: no card, no
     // outer padding, flush border-divided columns.
     <div data-fluid className="flex flex-col">
+      {/* Breadcrumbs (design set 22–23 Jul, "Custom Code Entry" board): the
+          builder states where it sits — All Agents › {name} › Edit Agent. */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 border-b border-border px-5 py-2 text-xs text-muted-foreground">
+        <a href="/agents?view=list" className="rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">All Agents</a>
+        <ChevronRight className="h-3 w-3" aria-hidden />
+        <span className="max-w-[12rem] truncate text-foreground">{draft.name || (isEdit ? existing!.name : "New agent")}</span>
+        <ChevronRight className="h-3 w-3" aria-hidden />
+        <span>Edit Agent</span>
+      </nav>
       {/* Header — px-5 py-4, border-b, gap-4 items-center (Figma Base/Header). */}
       <header className="flex items-center gap-4 border-b border-border px-5 py-4">
         <AgentSphere size={32} active={testing} />
@@ -1002,6 +1022,8 @@ export function AgentWizard({
               className="max-w-[18rem] rounded-md bg-transparent text-base font-semibold leading-6 outline-none [field-sizing:content] placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
             />
           </h1>
+          {/* Status chip beside the name (design: "Aria [Draft]"). */}
+          <Badge variant="secondary" className="shrink-0 -ml-6 text-xs">{previewStatus === "Warming up" ? "Draft" : previewStatus}</Badge>
           {/* Copyable agent ID — borderless (Figma): bot icon · mono 12/50% ·
               copy icon. Appears once the agent has an id. */}
           {draft.agentId && (
@@ -1049,16 +1071,18 @@ export function AgentWizard({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          {/* Talk on <xl (the right preview panel owns Talk at xl+). */}
-          <Button variant="outline" size="sm" className="gap-1.5 xl:hidden" disabled={warming} onClick={() => setTalkOpen(true)}>
-            <Mic className="size-4" aria-hidden /> Talk
-          </Button>
           {/* </> config view (icon-only, 32px, Figma code-xml). */}
           <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
-          {/* NO header Deploy (proposal 2639-102124): deploying is the END of
-              the journey — the full-width Deploy lives in Go Live's Review &
-              Deploy card. The sub-lg strip keeps its button for small
-              screens where Go Live is a long scroll away. */}
+          {/* Talk — icon button at every size (design set 22–23 Jul header:
+              ⋮ · </> · waveform · Deploy). */}
+          <Button variant="outline" size="icon" className="size-8" disabled={warming} onClick={() => setTalkOpen(true)} aria-label={`Talk to ${draft.name || "your agent"}`}>
+            <Mic className="size-4" aria-hidden />
+          </Button>
+          {/* Header Deploy RESTORED (22–23 Jul boards show it alongside Go
+              Live's full-width Deploy — two doors, one action). */}
+          <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
+            <Rocket className="size-4" aria-hidden /> {deployCta}
+          </Button>
         </div>
       </header>
 

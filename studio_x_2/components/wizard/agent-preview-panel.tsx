@@ -123,7 +123,7 @@ export function AgentPreviewPanel({
 
   return (
     <aside
-      className={cn("hidden shrink-0 flex-col xl:flex xl:w-[400px]", className)}
+      className={cn("hidden shrink-0 flex-col xl:flex xl:w-[320px]", className)}
       aria-label="Agent preview"
     >
       {/* Header — "Test Agent" title + close (proposal 2639-102124); the

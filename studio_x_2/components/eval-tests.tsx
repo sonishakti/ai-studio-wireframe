@@ -23,7 +23,7 @@ import {
 import { StateBanner } from "@/components/usage-spend-card"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
-  EVAL_SUITE, EVAL_RUN, evalRunStats,
+  EVAL_SUITE, EVAL_RUN,
   type EvalCase, type EvalCaseResult, type AssertionKind, type EvalTurn,
 } from "@/lib/campaign-data"
 
@@ -55,7 +55,6 @@ function flaggedTurnIndex(result: EvalCaseResult): number | undefined {
 
 export function TestsSection({ agentName: _agentName = "your agent" }: { agentName?: string }) {
   const run = EVAL_RUN
-  const stats = evalRunStats(run)
   // The suite is STATE so authored cases actually land in the table —
   // "Add case" silently discarding work was the round-6 #1 trust break.
   const [cases, setCases] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
@@ -66,7 +65,13 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
   // other two vanishing) — brief running state, then a summary line.
   const [runningAll, setRunningAll] = React.useState(false)
   const [lastRunNote, setLastRunNote] = React.useState<string | null>(null)
-  const resultFor = (id: string) => run.results.find((r) => r.caseId === id)
+  // Design set 22–23 Jul (AgentBuilder/DEFAULT): sample scenarios ship
+  // UN-RUN — status "–" until the user runs them. No fake failures on first
+  // paint (2026-07-24 P0). Verdicts exist only for cases the user ran.
+  const [ranIds, setRanIds] = React.useState<Set<string>>(new Set())
+  const resultFor = (id: string) => (ranIds.has(id) ? run.results.find((r) => r.caseId === id) : undefined)
+  const ranResults = run.results.filter((r) => ranIds.has(r.caseId))
+  const stats = { passed: ranResults.filter((r) => r.verdict === "pass").length, total: ranResults.length }
 
   // 2026-07-21 (owner): the Test section IS this feature — test scenarios from
   // the cn2meet roadmap (F-Eval), no longer future-scope-gated and no longer a
@@ -78,14 +83,22 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
     setRunningAll(true)
     window.setTimeout(() => {
       setRunningAll(false)
-      const notRun = cases.length - run.results.length
+      setRanIds(new Set(run.results.map((r) => r.caseId)))
+      const results = run.results
+      const passed = results.filter((r) => r.verdict === "pass").length
+      const notRun = cases.length - results.length
       setLastRunNote(
-        `Last run just now — ${stats.passed} passed · ${stats.total - stats.passed} failed${notRun > 0 ? ` · ${notRun} not run (new case)` : ""}`,
+        `Last run just now — ${passed} passed · ${results.length - passed} failed${notRun > 0 ? ` · ${notRun} not run (new case)` : ""}`,
       )
-      toast(`${stats.total} scenario${stats.total === 1 ? "" : "s"} ran`, {
-        description: `${stats.passed} passed · ${stats.total - stats.passed} failed. Open a row for the transcript.`,
+      toast(`${results.length} scenario${results.length === 1 ? "" : "s"} ran`, {
+        description: `${passed} passed · ${results.length - passed} failed. Open a row for the transcript.`,
       })
     }, 1200)
+  }
+  // A single-row run reveals THAT case's verdict when its sheet closes.
+  const runOne = (c: EvalCase) => {
+    setRunning(c)
+    setRanIds((s) => new Set([...s, c.id]))
   }
 
   return (
@@ -118,14 +131,11 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
       <div className="overflow-hidden rounded-lg border border-border">
         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
           <span className="font-medium">
-            {stats.passed}/{stats.total} passing
-            {/* Wireframe honesty (user-test 2026-07-24 P0): with the new-agent
-                landing, a BLANK draft's first paint showed "Price objection:
-                Fail" as if it were the user's own eval — say it's a sample. */}
-            <span className="font-normal text-muted-foreground"> · sample suite — replace with your own cases</span>
+            {stats.total > 0 ? `${stats.passed}/${stats.total} passing` : "Not run yet"}
+            <span className="font-normal text-muted-foreground"> · sample scenarios — replace with your own</span>
             {lastRunNote ? <span className="font-normal text-muted-foreground"> · {lastRunNote}</span> : null}
           </span>
-          <StatusPill passed={stats.passed} total={stats.total} />
+          {stats.total > 0 && <StatusPill passed={stats.passed} total={stats.total} />}
         </div>
         <Table>
           <TableHeader>
@@ -162,11 +172,12 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
                         {res.verdict === "pass" ? "Pass" : "Fail"}
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-xs">Not run</Badge>
+                      /* Design 22–23 Jul: un-run status is a quiet dash. */
+                      <span className="text-muted-foreground">–</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setRunning(c)}>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => runOne(c)}>
                       Run
                     </Button>
                   </TableCell>
