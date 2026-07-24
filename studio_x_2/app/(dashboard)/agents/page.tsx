@@ -44,6 +44,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DestructiveActionDialog } from "@/components/destructive-action-dialog"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
 import { AgentWizard } from "@/components/wizard/agent-wizard"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { ProvisioningCeremony } from "@/components/provisioning-ceremony"
 import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-progress"
 import { useFutureScope, readFutureScope } from "@/lib/future-scope"
@@ -333,9 +334,21 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                       {agent.lastModified}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[agent.status] ?? "secondary"} className="capitalize">
-                        {agent.status}
-                      </Badge>
+                      <span className="flex items-center gap-1.5">
+                        <Badge variant={STATUS_VARIANT[agent.status] ?? "secondary"} className="capitalize">
+                          {agent.status}
+                        </Badge>
+                        {/* Aria's Live badge must be explicable WHERE SHE IS
+                            VISIBLE — the old explanation was gated on a landing
+                            state the new-agent default removed (user-test
+                            2026-07-24 P0). */}
+                        {agent.id === "agt_default" && (
+                          <InfoHint label="sandbox line">
+                            Auto-provisioned sample agent, live on an Agora sandbox line — its call
+                            history is sample data, and it costs nothing until it takes real traffic.
+                          </InfoHint>
+                        )}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {agent.calls.toLocaleString()}
@@ -462,6 +475,13 @@ export default function AgentsPage() {
   // wizard even when builderId is already "new".
   const [blankIntent, setBlankIntent] = React.useState(false)
   const [blankNonce, setBlankNonce] = React.useState(0)
+  // CONSUME-ONCE (user-test 2026-07-24 S1): the flag must die right after the
+  // remount it triggered reads it — left armed, EVERY later wizard remount in
+  // this page mount (Builder↔All agents round-trip, import-as-new landing)
+  // wiped visible work to a blank builder.
+  React.useEffect(() => {
+    if (blankIntent) setBlankIntent(false)
+  }, [blankIntent])
   const [templatesOpen, setTemplatesOpen] = React.useState(false)
   const [selectedId, setSelectedId] = React.useState("appointment-reminder")
 
@@ -494,8 +514,11 @@ export default function AgentsPage() {
   const finishCeremony = (skipped: boolean) => {
     markProvisioned()
     setPhase(skipped ? "warming" : "ready")
-    // "Say hello to Aria" must DELIVER the hello — the landing opens with the
-    // Talk panel already up (user-test S2: promise → form was the #1 break).
+    // "Say hello to Aria" must DELIVER the hello — the ceremony hands you
+    // ARIA, so it must open HER builder (the default landing is the new-agent
+    // flow since f83cec8; without this the autoTalk promise landed on a blank
+    // builder — user-test 2026-07-24 orphan).
+    setBuilderId("agt_default")
     if (!skipped) setAutoTalk(true)
   }
 
