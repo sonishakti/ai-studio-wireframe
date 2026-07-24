@@ -24,7 +24,7 @@ import type { AgentType } from "@/lib/wizard-draft"
 const TYPES: { id: AgentType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "outbound", label: "Batch Calls", icon: Megaphone },
   { id: "inbound", label: "Inbound", icon: PhoneIncoming },
-  { id: "code", label: "Code/ SDK", icon: Braces },
+  { id: "code", label: "Code / SDK", icon: Braces },
 ]
 
 /** Template icons keyed by AGENT_TEMPLATES ids (design shows icon cards).

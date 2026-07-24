@@ -6,6 +6,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { InfoHint } from "@/components/wizard/info-hint"
 import { cn } from "@/lib/utils"
 import {
   publishBlocks, channelTarget, typeLabel, outboundMissingVars,
@@ -222,8 +223,16 @@ export function DeployPreflight({
               up to {out?.maxConcurrent ?? 10} at once
             </li>
             <li className="tabular-nums">
-              · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min — actual cost follows real talk time
+              · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min —{" "}
+              <InfoHint label="what's in this estimate?">
+                Sums the stack&apos;s list prices per minute (speech recognition + model + voice) and
+                Agora platform minutes. Carrier/SIP charges from your own trunk are NOT included.
+                Actual spend appears in Billing › Usage as calls complete.
+              </InfoHint>
             </li>
+            {/* Post-launch orientation (user-test 2026-07-24: the pre-flight
+                committed a 500-call batch without saying where to WATCH it). */}
+            <li>· Watch it live in Monitor › Call History once the batch starts</li>
           </ul>
         )}
 
@@ -236,8 +245,11 @@ export function DeployPreflight({
             allGo ? "text-success" : "text-warning",
           )}
         >
+          {/* Configuration-scoped verdict (user-test 2026-07-24: "All systems
+              go" dressed a client-side config check as server verification —
+              a claim the first real failed deploy would detonate). */}
           {allGo
-            ? "All systems go."
+            ? "Configuration complete — ready to launch."
             : `${warns.length} check${warns.length > 1 ? "s" : ""} need${warns.length > 1 ? "" : "s"} attention before launch.`}
         </p>
 
