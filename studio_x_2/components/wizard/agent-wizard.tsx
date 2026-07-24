@@ -31,6 +31,7 @@ import { CallSettings } from "@/components/wizard/step-call-settings"
 import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
+import { DeployPreflight } from "@/components/wizard/deploy-preflight"
 import { StackTradeoffSlider, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
 import { TestsSection } from "@/components/eval-tests"
 import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle } from "@/components/wizard/types"
@@ -829,12 +830,13 @@ export function AgentWizard({
   const publishingRef = React.useRef(false)
   // Batch pre-flight — a ref (not state) so the confirmed re-entry into
   // publish() can't race the dialog's close render.
-  const batchConfirmedRef = React.useRef(false)
-  const [batchConfirmOpen, setBatchConfirmOpen] = React.useState(false)
+  // Pre-flight (2026-07-24) — the ONE confirmation for every deploy; a ref
+  // (not state) so the confirmed re-entry into publish can't race the
+  // dialog's close render.
+  const preflightConfirmedRef = React.useRef(false)
+  const [preflightOpen, setPreflightOpen] = React.useState(false)
   const publish = () => {
     if (publishingRef.current) return // guard: double-click must not double-publish
-    const reason = publishBlockReason(draftRef.current)
-    if (reason) { toast.error("Not ready to deploy yet", { description: reason }); return }
     // No-op honesty (user-test #10, D1 S3): redeploying an untouched live
     // agent fired a success toast + Monitor hop while nothing changed — a
     // fake success devalues every later toast.
@@ -843,14 +845,18 @@ export function AgentWizard({
       toast("Already live", { description: "No changes since the last deploy." })
       return
     }
-    // Batch pre-flight (user-test 2026-07-09, S2 ×2 personas): one click must
-    // never start dialing a whole contact list silently — confirm the count,
-    // caller ID, window, and an honest cost estimate first.
-    if (draftRef.current.type === "outbound" && !batchConfirmedRef.current) {
-      setBatchConfirmOpen(true)
+    // PRE-FLIGHT for EVERY deploy (owner 2026-07-24: "we need a summary for
+    // the deploy to be validated"): the systems-check dialog verifies the
+    // config row by row — blockers appear IN the checklist with Fix jumps
+    // instead of a scolding toast, and batch keeps its manifest inside it.
+    if (!preflightConfirmedRef.current) {
+      setPreflightOpen(true)
       return
     }
-    batchConfirmedRef.current = false
+    preflightConfirmedRef.current = false
+    // Belt-and-suspenders: the pre-flight only arms its confirm when green.
+    const reason = publishBlockReason(draftRef.current)
+    if (reason) { toast.error("Not ready to deploy yet", { description: reason }); return }
     publishingRef.current = true
     // Disarm any pending debounced autosave BEFORE clearing the slot — a save
     // firing mid-navigation would resurrect the consumed draft (re-eval #16).
@@ -1555,81 +1561,28 @@ export function AgentWizard({
         </div>
       )}
 
-      {/* Batch pre-flight — the ONE confirmation in the wizard. Deploying an
-          outbound agent starts real calls to a whole list; the moment deserves
-          a manifest (count · caller ID · window · honest cost estimate), and
-          "talk to it first" is offered as the safer path. */}
-      <AlertDialog open={batchConfirmOpen} onOpenChange={setBatchConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {draft.config.outbound?.launch?.mode === "scheduled"
-                ? `Schedule calls to ${MOCK_CSV_ROWS} contacts?`
-                : `Start calling ${MOCK_CSV_ROWS} contacts?`}
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-2 text-sm">
-                <p>
-                  {draft.config.outbound?.launch?.mode === "scheduled"
-                    ? `Deploying arms the schedule — ${draft.name || "your agent"} starts dialing ${draft.config.outbound?.csvName ?? "your list"} at the time below.`
-                    : `Deploying starts the batch immediately — ${draft.name || "your agent"} dials every contact in ${draft.config.outbound?.csvName ?? "your list"}.`}
-                </p>
-                <ul className="space-y-1 text-muted-foreground">
-                  {/* One agent ↔ one channel: launching the batch takes the
-                      live inbound line dark — say it at the moment of
-                      commitment, not only in the earlier stash toast
-                      (user-test #7, D1 latent). */}
-                  {isLive && baseline.current?.type === "inbound" && baseline.current.config.inbound?.numberId && (
-                    <li>
-                      · {draft.name || "Your agent"} stops answering{" "}
-                      {PHONE_NUMBERS.find((n) => n.id === baseline.current!.config.inbound?.numberId)?.number ?? "its inbound number"}{" "}
-                      while on Batch calls
-                    </li>
-                  )}
-                  {draft.config.outbound?.launch?.mode === "scheduled" && (
-                    <li>
-                      · Starts: {draft.config.outbound.launch.startDate ?? "date not set"}{" "}
-                      {draft.config.outbound.launch.startTime ?? ""}{" "}
-                      {draft.config.outbound.launch.timezone ? `(${draft.config.outbound.launch.timezone})` : ""}
-                    </li>
-                  )}
-                  <li>· Caller ID: {PHONE_NUMBERS.find((n) => n.id === draft.config.outbound?.numberId)?.number ?? "selected number"}</li>
-                  <li>· Call window: {draft.config.outbound?.callWindow === "anytime" ? "anytime" : draft.config.outbound?.callWindow === "extended" ? "extended hours" : "business hours (contact's local time)"}</li>
-                  {/* Same default the Step-4 select shows — the manifest of
-                      truth must not disagree with the setting (user-test S3). */}
-                  <li>· Up to {draft.config.outbound?.maxConcurrent ?? 10} calls at once</li>
-                  <li className="tabular-nums">
-                    {/* Rate derives from THIS agent's stack — a hardcoded 0.10
-                        overquoted cheaper presets 66% at the moment of spend
-                        approval (user-test 2026-07-09 P0). */}
-                    · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * cardEst.costPerMin)} if every
-                    call runs ~2 min at ${cardEst.costPerMin.toFixed(2)}/min — actual cost
-                    follows real talk time
-                  </li>
-                </ul>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => { setBatchConfirmOpen(false); setTalkOpen(true) }}
-            >
-              Talk to it first
-            </Button>
-            <AlertDialogCancel>Not yet</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                batchConfirmedRef.current = true
-                setBatchConfirmOpen(false)
-                publish()
-              }}
-            >
-              {draft.config.outbound?.launch?.mode === "scheduled" ? "Schedule the batch" : "Start the batch"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Pre-flight — the ONE confirmation for every deploy (owner 2026-07-24):
+          a staggered systems check over the real config; blockers appear IN
+          the checklist with Fix jumps; batch carries its manifest (count ·
+          window · concurrency · honest cost) inside the same surface. */}
+      <DeployPreflight
+        open={preflightOpen}
+        onOpenChange={setPreflightOpen}
+        draft={draft}
+        ctaLabel={
+          draft.type === "outbound"
+            ? draft.config.outbound?.launch?.mode === "scheduled" ? "Schedule the batch" : "Start the batch"
+            : deployCta === "Live — no changes" ? "Deploy" : deployCta
+        }
+        liveInboundNumber={
+          isLive && baseline.current?.type === "inbound" && baseline.current.config.inbound?.numberId && draft.type === "outbound"
+            ? PHONE_NUMBERS.find((n) => n.id === baseline.current!.config.inbound?.numberId)?.number ?? "its inbound number"
+            : undefined
+        }
+        onConfirm={() => { preflightConfirmedRef.current = true; publish() }}
+        onFix={(m) => openRow(m)}
+        onTalkFirst={() => setTalkOpen(true)}
+      />
 
       {/* Import landing — never silent (user-test #6, 2×S1). Phase "dest": a
           saved agent is open, so the import asks where it lands. Phase

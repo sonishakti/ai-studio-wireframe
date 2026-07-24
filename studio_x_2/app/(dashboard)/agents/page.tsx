@@ -574,7 +574,10 @@ export default function AgentsPage() {
     landImportedDraft()
   }
 
-  const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents")
+  // "Builder" must OPEN THE BUILDER (user-test 2026-07-24 S2: it resolved to
+  // the start landing — a no-op that stranded mid-build drafts). It restores
+  // whatever draft is in progress; the start landing has its own segment.
+  const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents?view=builder")
   // Owner design set 22–23 Jul (Figma 2698-109831): "New agent" opens the
   // CREATE DIALOG (name · type · template) instead of instantly blanking.
   const startBlank = () => setCreateOpen(true)
@@ -600,17 +603,23 @@ export default function AgentsPage() {
       <React.Suspense fallback={null}>
         <ParamsSync onParams={onParams} />
       </React.Suspense>
-      {/* Persistent mode switch — you can always SEE which of the two /agents
-          surfaces you're on, and get back (#8). */}
+      {/* Persistent mode switch — you can always SEE which of the THREE
+          /agents surfaces you're on, and get back (#8; the two-segment
+          version left the default landing unrepresented — user-test
+          2026-07-24 S3). */}
       <div className="flex items-center justify-between border-b border-border px-6 py-2">
         <ToggleGroup
           type="single"
           value={view}
-          onValueChange={(v) => v && showList(v === "list")}
+          onValueChange={(v) => {
+            if (!v) return
+            router.push(v === "list" ? "/agents?view=list" : v === "builder" ? "/agents?view=builder" : "/agents")
+          }}
           variant="outline"
           size="sm"
           aria-label="Agents view"
         >
+          <ToggleGroupItem value="start" className="text-xs">Start</ToggleGroupItem>
           <ToggleGroupItem value="builder" className="text-xs">Builder</ToggleGroupItem>
           <ToggleGroupItem value="list" className="text-xs">All agents</ToggleGroupItem>
         </ToggleGroup>
@@ -723,10 +732,44 @@ function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => v
   const [selected, setSelected] = React.useState(templates[0].id)
   const tpl = templates.find((t) => t.id === selected) ?? templates[0]
   const est = STACK_ESTIMATE["balanced"]
+  // In-progress draft (localStorage — read after mount to keep hydration
+  // clean): the landing must offer the way BACK, not only ways to start over
+  // (user-test 2026-07-24 S2: a stranded draft's only visible exits destroyed
+  // it).
+  const [draftName, setDraftName] = React.useState<string | null>(null)
+  React.useEffect(() => {
+    const d = restoreDraft()
+    if (d && (d.name.trim() || d.systemPrompt.trim() || d.type)) setDraftName(d.name.trim() || "Untitled agent")
+  }, [])
 
   return (
     <main className="flex-1 p-6">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row lg:items-start">
+      <div className="mx-auto w-full max-w-6xl space-y-4">
+        {/* The account isn't empty — Aria is live, and a mid-build draft has a
+            door back (2026-07-24 S2: the landing claimed "first agent" while
+            hiding both). */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="size-1.5 rounded-full bg-success" aria-hidden />
+            Aria, your sample agent, is live on +1 (628) 555-0188
+          </span>
+          <InfoHint label="sandbox line">
+            Auto-provisioned for you on an Agora sandbox line — its call history is sample data,
+            and it costs nothing until it takes real traffic.
+          </InfoHint>
+          <Link href="/agents/agt_default/edit" className="underline underline-offset-2 hover:text-foreground">Edit Aria</Link>
+          <Link href="/agents?view=list" className="underline underline-offset-2 hover:text-foreground">All agents</Link>
+          {draftName && (
+            <span className="ml-auto flex items-center gap-2">
+              <span className="text-foreground">Draft in progress: {draftName}</span>
+              <Button asChild variant="outline" size="sm" className="h-6 px-2 text-xs">
+                <Link href="/agents?view=builder">Resume draft</Link>
+              </Button>
+            </span>
+          )}
+        </div>
+
+      <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start">
         {/* Template rows — click previews on the right; Use opens the dialog. */}
         <div className="min-w-0 flex-1 space-y-2">
           {templates.map((t) => {
@@ -766,22 +809,27 @@ function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => v
           <div className="flex flex-col items-center gap-6 px-4 py-6">
             <span className="flex items-center gap-2">
               <Badge variant="outline" className="max-w-[170px] truncate">{tpl.name}</Badge>
-              <Badge variant="outline" className="gap-1.5 border-success/40 text-success">
-                <span className="size-1.5 rounded-full bg-success" aria-hidden /> Agent Ready
-              </Badge>
+              {/* "Template preview", never "Agent Ready" — nothing exists yet
+                  (user-test 2026-07-24: status vocabulary asserting a live
+                  thing that doesn't exist). */}
+              <Badge variant="outline" className="text-muted-foreground">Template preview</Badge>
             </span>
             <AgentSphere size={120} />
-            <Button
-              variant="secondary"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => toast("Simulated preview", { description: `No live audio in this wireframe — ${tpl.name} would answer here.` })}
-            >
-              <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to agent
-            </Button>
+            <div className="flex flex-col items-center gap-1">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => toast("Simulated preview", { description: `No live audio in this wireframe — ${tpl.name} would answer here.` })}
+              >
+                <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to agent
+              </Button>
+              {/* Pre-click honesty — the disclosure must precede the click. */}
+              <p className="text-xs text-muted-foreground/70">Simulated preview</p>
+            </div>
           </div>
           <div className="space-y-1.5 border-t border-border px-4 py-4">
-            <p className="pb-1 font-mono text-xs uppercase tracking-wider text-muted-foreground opacity-50">Session statistics</p>
+            <p className="pb-1 font-mono text-xs uppercase tracking-wider text-muted-foreground opacity-50">Estimated statistics · Balanced stack</p>
             <div className="flex items-baseline justify-between gap-3">
               <span className="font-mono text-xs uppercase text-muted-foreground opacity-50">Avg. E2E latency</span>
               <span className="font-mono text-xs tabular-nums">{est.latencyMs} ms</span>
@@ -792,6 +840,7 @@ function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => v
             </div>
           </div>
         </aside>
+      </div>
       </div>
     </main>
   )

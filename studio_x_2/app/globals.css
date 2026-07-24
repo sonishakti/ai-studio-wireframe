@@ -228,8 +228,19 @@
 .sx-sparkle-hover svg { transition: transform 0.35s ease; }
 .sx-sparkle-hover:hover svg { transform: rotate(90deg) scale(1.15); }
 
+/* Pre-flight systems check (owner 2026-07-24): checklist rows arrive
+   staggered, each verdict ticking in sequence — deploy validation as a
+   launch-countdown beat. Rows start hidden; per-row animation-delay is set
+   inline by index. */
+@keyframes sx-check-in {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.sx-check-in { opacity: 0; animation: sx-check-in 0.32s ease-out forwards; }
+
 @media (prefers-reduced-motion: reduce) {
   .sx-tick-pop, .sx-save-ring, .sx-launch-ring { animation: none; }
   .sx-launch-lift { animation: none; opacity: 1; }
+  .sx-check-in { animation: none; opacity: 1; }
   .sx-rocket-hover svg, .sx-sparkle-hover svg { transition: none; }
 }
