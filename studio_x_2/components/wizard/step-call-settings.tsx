@@ -15,7 +15,6 @@ import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { AddLinesSheet } from "@/components/concurrency-card"
 import { CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
-import { useFutureScope } from "@/lib/future-scope"
 import {
   DEFAULT_CALL_BEHAVIOR,
   type CallBehaviorConfig,
@@ -198,17 +197,19 @@ export function CampaignDialingFields({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Max concurrent</Label>
-          <Select
+          {/* Free entry (user-test 2026-07-28 P1): any count works — 40 is a
+              real answer, not a menu miss. The capacity note below explains
+              queueing when it lands above the account's lines. */}
+          <Label htmlFor={`dl-max-${campaign.id}`} className="text-xs text-muted-foreground">Max concurrent</Label>
+          <Input
+            id={`dl-max-${campaign.id}`}
+            type="number"
+            min={1}
             disabled={disabled}
-            value={String(campaign.maxConcurrent ?? 10)}
-            onValueChange={(v) => onChange({ maxConcurrent: Number(v) })}
-          >
-            <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {["5", "10", "25", "50"].map((c) => <SelectItem key={c} value={c}>{c} calls</SelectItem>)}
-            </SelectContent>
-          </Select>
+            value={campaign.maxConcurrent ?? 10}
+            onChange={(e) => onChange({ maxConcurrent: Math.max(1, Number(e.target.value) || 1) })}
+            className="text-sm font-mono"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
@@ -224,6 +225,23 @@ export function CampaignDialingFields({
               <SelectItem value="2">Twice</SelectItem>
             </SelectContent>
           </Select>
+          {/* One composite decision — "Once, after 30 min". */}
+          {(campaign.retries ?? 1) > 0 && (
+            <Select
+              disabled={disabled}
+              value={String(campaign.retryIntervalMin ?? 30)}
+              onValueChange={(v) => onChange({ retryIntervalMin: Number(v) })}
+            >
+              <SelectTrigger className="w-full text-sm" aria-label="Retry interval"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15">after 15 min</SelectItem>
+                <SelectItem value="30">after 30 min</SelectItem>
+                <SelectItem value="60">after 1 hour</SelectItem>
+                <SelectItem value="240">after 4 hours</SelectItem>
+                <SelectItem value="1440">next day</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
       <CampaignCapacityNote maxConcurrent={campaign.maxConcurrent ?? 10} />
@@ -406,16 +424,14 @@ function BehaviorToggle({
 
 /** At-the-wall purchase moment (A6): picking a max-concurrent above the
  *  project's line capacity is where the limit is FELT — so the unlock lives
- *  here, inline, per campaign. Future-scope-gated. */
+ *  here, inline, per campaign. UN-GATED (user-test 2026-07-28 P1): the
+ *  line-capacity/queueing note always rides beside the free-entry input —
+ *  a typed 40 must never queue silently. */
 function CampaignCapacityNote({ maxConcurrent }: { maxConcurrent: number }) {
   const [purchasedBoost, setPurchasedBoost] = React.useState(0)
   const [linesOpen, setLinesOpen] = React.useState(false)
-  const [future] = useFutureScope()
   const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchasedBoost })
   const overBy = Math.max(0, maxConcurrent - stats.totalLines)
-
-  if (!future) return null
-  if (overBy === 0 && purchasedBoost === 0) return null
 
   return (
     <>

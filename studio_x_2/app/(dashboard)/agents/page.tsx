@@ -54,6 +54,9 @@ import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
 import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT } from "@/lib/wizard-draft"
+import {
+  readSessionAgents, readStatusOverrides, setAgentStatus, subscribeAgentStore, type SessionRun,
+} from "@/lib/agent-store"
 import { CreateAgentDialog, TEMPLATE_ICONS, type CreateAgentValue } from "@/components/wizard/create-agent-dialog"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { toast } from "sonner"
@@ -71,10 +74,14 @@ type Template = (typeof AGENT_TEMPLATES)[number]
 // one stack preset (the cost-vs-speed dimension). channelType drives the filter.
 type AgentChannel = "phone" | "whatsapp" | "web" | "batch" | "code" | "none"
 
-const AGENTS: {
+type AgentRow = {
   id: string; name: string; description: string; status: string
   channelType: AgentChannel; channelLabel: string; stack: StackPreset; calls: number; lastModified: string
-}[] = [
+  /** Session-created agents carry their runs; mock rows read getAgent(). */
+  runs?: SessionRun[]
+}
+
+const AGENTS: AgentRow[] = [
   { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default — live and ready", status: "live",   channelType: "phone",    channelLabel: "+1 (628) 555-0188", stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
   { id: "agt_support_v2", name: "Support Bot v2",       description: "Handles tier-1 support queries via phone",       status: "live",   channelType: "phone",    channelLabel: "+1 (415) 555-0101", stack: "fastest",  calls: 12430, lastModified: "2 hours ago" },
   { id: "agt_appointment_setter", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "web",      channelLabel: "acme.com/booking",  stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
@@ -186,21 +193,34 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
   // Rows in state so Pause/Resume actually flips status — the user-test found
   // the list filters by "Paused" while offering no way to PRODUCE that state:
   // Delete was the only off-switch for a live agent (S2).
-  const [agents, setAgents] = React.useState(AGENTS)
+  const [agents, setAgents] = React.useState<AgentRow[]>(AGENTS)
+
+  // Merge agents deployed THIS session (sessionStorage — read after mount to
+  // keep hydration clean) ABOVE the mock rows, then apply live/paused
+  // overrides written from either surface (this list or the builder header) —
+  // user-test 2026-07-28 P0: a just-deployed agent must EXIST here.
+  const refresh = React.useCallback(() => {
+    const overrides = readStatusOverrides()
+    const merged: AgentRow[] = [...readSessionAgents(), ...AGENTS]
+    setAgents(merged.map((a) => (overrides[a.id] ? { ...a, status: overrides[a.id] } : a)))
+  }, [])
+  React.useEffect(() => {
+    refresh()
+    return subscribeAgentStore(refresh)
+  }, [refresh])
 
   const togglePause = (id: string) => {
-    setAgents((rows) =>
-      rows.map((a) => {
-        if (a.id !== id) return a
-        const paused = a.status === "live"
-        toast(paused ? `${a.name} paused` : `${a.name} is live again`, {
-          description: paused
-            ? "It stops taking new calls until you resume it. Calls in progress finish normally."
-            : `Answering on ${a.channelLabel} again.`,
-        })
-        return { ...a, status: paused ? "paused" : "live" }
-      }),
-    )
+    const a = agents.find((r) => r.id === id)
+    if (!a) return
+    const paused = a.status === "live"
+    // Shared store write — the builder header's Pause/Resume reads the same
+    // slot; the subscription above flips this row.
+    setAgentStatus(id, paused ? "paused" : "live")
+    toast(paused ? `${a.name} paused` : `${a.name} is live again`, {
+      description: paused
+        ? "It stops taking new calls until you resume it. Calls in progress finish normally."
+        : `Answering on ${a.channelLabel} again.`,
+    })
   }
 
   const rows = React.useMemo(() => {
@@ -249,7 +269,7 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
             aria-label="Filter agents by status"
           >
             {STATUS_FILTERS.map((f) => {
-              const count = f.id === "all" ? AGENTS.length : AGENTS.filter((a) => a.status === f.id).length
+              const count = f.id === "all" ? agents.length : agents.filter((a) => a.status === f.id).length
               return (
                 <ToggleGroupItem key={f.id} value={f.id} className="text-xs">
                   {f.label} <span className="tabular-nums text-muted-foreground">{count}</span>
@@ -290,7 +310,8 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                 const est = STACK_ESTIMATE[agent.stack]
                 // Runs model (owner 2026-07-28): no separate campaigns page —
                 // the agent row nests its runs (active · scheduled · completed).
-                const runs = getAgent(agent.id)?.campaigns ?? []
+                // Session-created agents carry their own runs from the deploy.
+                const runs = agent.runs ?? getAgent(agent.id)?.campaigns ?? []
                 return (
                   <React.Fragment key={agent.id}>
                   <TableRow>
@@ -510,7 +531,6 @@ export default function AgentsPage() {
   // creating/editing, the list via ?view=list.
   const [view, setView] = React.useState<"start" | "builder" | "list">("start")
   const [createOpen, setCreateOpen] = React.useState(false)
-  const [createTemplate, setCreateTemplate] = React.useState("blank")
   // Owner 2026-07-22: /agents lands on the NEW AGENT flow by default — the
   // edit view is only entered when the user edits an agent (list → Edit →
   // /agents/[id]/edit). "new" WITHOUT the blank flag restores an in-progress
@@ -620,6 +640,15 @@ export default function AgentsPage() {
   // what you want (mock inference picks template + channels) or pick a
   // template from the radio list.
   const startBlank = () => setCreateOpen(true)
+  // "Use template" SKIPS the describe dialog — the template IS the description
+  // (user-test 2026-07-28 P0: routing a picked template through "describe what
+  // you want" was a redundant wall). It lands straight in a builder seeded via
+  // the existing ?template= mount path (draft-protection + toast included);
+  // the dialog stays for Create New Agent only.
+  const useTemplate = (id: string) => {
+    setBuilderId("new")
+    router.push(`/agents?view=builder&template=${id}`)
+  }
   // Dialog → seed the new-agent draft slot and remount the builder on it —
   // same landing idiom as import-as-new (write the slot, remount, restore).
   const createAgent = (v: CreateAgentValue) => {
@@ -723,14 +752,14 @@ export default function AgentsPage() {
       ) : (
         /* "Start" landing (owner design set 22–23 Jul): template gallery with
            a live-ish preview panel; Import + Create ride the PageHeader. */
-        <StartView onUseTemplate={(id) => { setCreateTemplate(id); setCreateOpen(true) }} />
+        <StartView onUseTemplate={useTemplate} />
       )}
 
-      {/* Create new agent — name · type · template (Figma 2698-109062). */}
+      {/* Create new agent — the describe-it dialog. Create New Agent ONLY:
+          "Use template" bypasses it and seeds the builder directly. */}
       <CreateAgentDialog
         open={createOpen}
-        onOpenChange={(o) => { setCreateOpen(o); if (!o) setCreateTemplate("blank") }}
-        defaultTemplateId={createTemplate}
+        onOpenChange={setCreateOpen}
         onCreate={createAgent}
       />
 

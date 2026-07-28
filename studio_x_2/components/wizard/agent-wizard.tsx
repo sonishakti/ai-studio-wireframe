@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, FlaskConical } from "lucide-react"
+import { Rocket, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, FlaskConical, Pause, Play } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -44,7 +44,11 @@ import {
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  draftToSessionAgent, upsertSessionAgent, readStatusOverrides, setAgentStatus, subscribeAgentStore,
+} from "@/lib/agent-store"
 import { toast } from "sonner"
 
 /**
@@ -144,7 +148,30 @@ export function AgentWizard({
   const channelsDone = draft.channels.length > 0 && (!hasChannel(draft, "inbound") || (draft.config.inbound?.numberIds.length ?? 0) > 0)
   const promptDone = draft.systemPrompt.trim().length > 0
   const isLive = isEdit && existing!.status === "live"
-  // NO Pause control here (owner 2026-07-21). Pausing stays on the list.
+  // Pause/Resume rides the header beside the status chip (user-test 2026-07-28
+  // P0) — the SAME reversible off-switch as the All-agents row action, synced
+  // through the shared session agent store. Pausing keeps the agent deployed
+  // (isLive semantics unchanged); only new calls stop.
+  const [statusOverride, setStatusOverride] = React.useState<"live" | "paused" | null>(null)
+  React.useEffect(() => {
+    if (!isEdit) return
+    const sync = () => setStatusOverride(readStatusOverrides()[existing!.id] ?? null)
+    sync()
+    return subscribeAgentStore(sync)
+  }, [isEdit, existing])
+  const effectiveStatus = statusOverride ?? (isEdit ? existing!.status : null)
+  const pauseAgent = () => {
+    setAgentStatus(existing!.id, "paused")
+    toast(`${existing!.name} paused`, {
+      description: "It stops taking new calls until you resume it. Calls in progress finish normally.",
+    })
+  }
+  const resumeAgent = () => {
+    setAgentStatus(existing!.id, "live")
+    toast(`${existing!.name} is live again`, {
+      description: `Answering on ${channelTarget(draftRef.current)} again.`,
+    })
+  }
 
   // ── Hedonic layer: ticks pop only for IN-SESSION completions. ──────────────
   const initialDones = React.useRef<Set<number> | null>(null)
@@ -682,6 +709,10 @@ export function AgentWizard({
     const doPublish = () => {
       const d = draftRef.current
       const primary = primaryChannel(d)
+      // The list is the ledger (user-test 2026-07-28 P0): a deployed agent
+      // must EXIST in All agents — record it in the shared session store,
+      // runs and all, so it lands at the top of the list.
+      if (!isEdit) upsertSessionAgent(draftToSessionAgent(d, agentId))
       publishDeployment({
         router, agentId, agentName: draft.name || "Your agent",
         channel: d.channels.map(channelLabel).join(" · ") || "—",
@@ -719,8 +750,8 @@ export function AgentWizard({
     [draft.voice],
   )
   const codeDeployed = hasChannel(draft, "code") && !isLive && (codeDeployedNow || (!isEdit && !!draft.agentId))
-  const cardStatus = isEdit
-    ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1)
+  const cardStatus = isEdit && effectiveStatus
+    ? effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1)
     : codeDeployed ? "Deployed" : "Draft"
   const cardStack = stackLine(draft.stack)
   const cardEst = stackEstimateFor(draft.stack)
@@ -757,7 +788,11 @@ export function AgentWizard({
         : `Start run${active.length > 1 ? "s" : ""}`
       : deployCta === "Live — no changes" ? "Deploy" : deployCta
 
-  const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
+  const previewStatus =
+    warming ? "Warming up"
+    : effectiveStatus === "paused" ? "Paused"
+    : isLive || effectiveStatus === "live" ? "Live"
+    : codeDeployed ? "Deployed" : "Draft"
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
 
   return (
@@ -794,6 +829,37 @@ export function AgentWizard({
           />
           {/* Status chip beside the name. */}
           <Badge variant="secondary" className="shrink-0 text-xs">{previewStatus === "Warming up" ? "Draft" : previewStatus}</Badge>
+          {/* Pause/Take offline — the list row's reversible off-switch, HERE
+              too (user-test 2026-07-28 P0: the builder showed "Live" with no
+              way off). Confirmed before pausing; state-synced with the list. */}
+          {isEdit && (effectiveStatus === "live" || effectiveStatus === "paused") && (
+            effectiveStatus === "live" ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 shrink-0 gap-1 px-2 text-xs text-muted-foreground">
+                    <Pause className="h-3.5 w-3.5" aria-hidden /> Pause
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Pause {existing!.name} — take it offline?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      It stops taking new calls until you resume it. Calls in progress finish
+                      normally, and its configuration is kept.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={pauseAgent}>Pause — take offline</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <Button variant="outline" size="sm" className="h-7 shrink-0 gap-1 px-2 text-xs" onClick={resumeAgent}>
+                <Play className="h-3.5 w-3.5" aria-hidden /> Resume
+              </Button>
+            )
+          )}
           {/* Copyable agent ID. */}
           {draft.agentId && (
             <button

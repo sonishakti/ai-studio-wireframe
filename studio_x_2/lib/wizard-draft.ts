@@ -187,6 +187,8 @@ export interface CampaignDraft {
   callWindow?: "business" | "extended" | "anytime"
   maxConcurrent?: number
   retries?: number
+  /** Minutes between retry attempts — renders whenever retries > 0. */
+  retryIntervalMin?: number
   launch?: LaunchConfig
   status: CampaignStatus
   /** RERUN semantics (owner 2026-07-28): a re-run keeps the SAME agent and the
@@ -212,6 +214,7 @@ export function makeCampaign(name: string): CampaignDraft {
     callWindow: "business",
     maxConcurrent: 10,
     retries: 1,
+    retryIntervalMin: 30,
     launch: { mode: "now" },
     status: "draft",
   }

@@ -96,7 +96,8 @@ const client = new AgentClient({
   appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
-await client.joinChannel({ channel: "support-room" })`
+// uid: auto-assigned when omitted; pass your own to override.
+await client.joinChannel({ channel: "support-room", uid: 9001 })`
   const widgetSnippet = `<script
   src="https://cdn.agora.io/agent-widget.js"
   data-agent-id="${agentId}"

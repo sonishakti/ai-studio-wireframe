@@ -350,8 +350,11 @@ const client = new AgentClient({
   appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
-// Add the agent to a live Agora RTC channel
-await client.joinChannel({ channel: "support-room" })`
+// Add the agent to a live Agora RTC channel.
+// uid — the agent's RTC user ID in the channel: auto-assigned when
+// omitted; pass your own (any uint not already in the channel) to
+// control how the agent appears to your other clients.
+await client.joinChannel({ channel: "support-room", uid: 9001 })`
 
   const stop = `// Stop the agent and leave the channel
 await client.leaveChannel()

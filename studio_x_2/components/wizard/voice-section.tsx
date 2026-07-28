@@ -19,7 +19,7 @@ import {
   STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor,
   type StackPreset, type AgentStack,
 } from "@/lib/campaign-data"
-import type { AgentDraft } from "@/lib/wizard-draft"
+import { hasChannel, type AgentDraft } from "@/lib/wizard-draft"
 import type { StepProps } from "@/components/wizard/types"
 
 /**
@@ -229,6 +229,14 @@ export function VoiceSection({
             </p>
           )}
         </div>
+
+        {/* SDK builders skipped this section wholesale (user-test 2026-07-28
+            P1) — say why it still matters to them. */}
+        {hasChannel(draft, "code") && (
+          <p className="text-xs text-muted-foreground">
+            This voice is the TTS stage of your pipeline — it applies to Code / SDK agents too.
+          </p>
+        )}
 
         {/* Spoken language rides the voice handle. */}
         <div className="space-y-1.5">

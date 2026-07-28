@@ -95,20 +95,25 @@ function NavLink({ item }: { item: NavItem }) {
         <Link href={item.href}>
           <item.icon className="h-4 w-4" />
           <span>{item.label}</span>
-          {item.badge && (
-            // Severity, not notifications: destructive styling + a label so the
-            // number explains itself (heuristic-eval #23).
-            <Badge
-              variant="destructive"
-              title={`${item.badge} open critical issues. See Monitor › Diagnostics`}
-              aria-label={`${item.badge} open critical issues. See Monitor Diagnostics`}
-              className="ml-auto text-xs px-1.5 py-0"
-            >
-              {item.badge}
-            </Badge>
-          )}
         </Link>
       </SidebarMenuButton>
+      {item.badge && (
+        // Severity, not notifications: destructive styling + a label so the
+        // number explains itself (heuristic-eval #23). Its OWN link (a badge
+        // nested in the item link can't be one): straight to the
+        // needs-attention queue, pre-filtered to critical (user-test
+        // 2026-07-28 P1 — the bare number was unexplained and unclickable).
+        <Link
+          href="/monitor/diagnostics?sev=critical"
+          title={`${item.badge} calls need attention`}
+          aria-label={`${item.badge} calls need attention — open the needs-attention queue`}
+          className="absolute right-1 top-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
+        >
+          <Badge variant="destructive" className="text-xs px-1.5 py-0">
+            {item.badge}
+          </Badge>
+        </Link>
+      )}
     </SidebarMenuItem>
   )
 }

@@ -22,6 +22,14 @@ export default function DiagnosticsPage() {
   const [sev, setSev] = React.useState<SevFilter>("all")
   const [pageSize, setPageSize] = React.useState(25)
 
+  // Deep link (?sev=critical|warning) — the sidebar's needs-attention badge
+  // lands here pre-filtered. window.location on mount, same idiom as the
+  // wizard's param parsing (no Suspense bail-out).
+  React.useEffect(() => {
+    const s = new URLSearchParams(window.location.search).get("sev")
+    if (s === "critical" || s === "warning") setSev(s)
+  }, [])
+
   const allIssues = React.useMemo(() => allOpenIssues(), [])
 
   // Deployment-level health roll-up for the summary strip.
