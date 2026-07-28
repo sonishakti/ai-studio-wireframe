@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { extractVars } from "@/lib/campaign-data"
 import { SectionRow } from "@/components/wizard/section-row"
-import { hasChannel } from "@/lib/wizard-draft"
+import { hasChannel, greetingSpeaksName } from "@/lib/wizard-draft"
 import type { StepProps } from "@/components/wizard/types"
 
 /**
@@ -123,6 +123,15 @@ export function SectionPrompt({
             ? "Hey {{name}}, I'm calling from Acme about your account…"
             : "Hi, thanks for calling. How can I help you today?"}
         />
+        {/* Rename nudge (user-test 2026-07-28): a functional agent name
+            spoken aloud — "this is Payment Reminder" — sounds wrong to the
+            caller, and nothing pointed that out. */}
+        {greetingSpeaksName(draft) && (
+          <p className="text-xs text-muted-foreground">
+            Your agent introduces itself as &ldquo;{draft.name.trim()}&rdquo; — give it a
+            caller-facing name? Rename it in the header, then update the greeting to match.
+          </p>
+        )}
       </div>
 
       {/* Failure message (proposal — new field). */}

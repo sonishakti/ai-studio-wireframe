@@ -90,8 +90,11 @@ export function ChannelSection({
       if (c === "code") patch.config = { ...draft.config, code: { added: true } }
       update(patch)
       if (conflicting) {
+        const wasLive = liveChannels?.includes(conflicting)
         toast(`${channelLabel(conflicting)} swapped for ${channelLabel(c)}`, {
-          description: "One agent can't handle both inbound and outbound — the context and workflows differ. Duplicate the agent for the other direction; this setup is kept.",
+          description: wasLive
+            ? `${channelLabel(conflicting)} goes offline on your next redeploy — its setup is kept. Duplicate the agent for the other direction.`
+            : "One agent can't handle both inbound and outbound — the context and workflows differ. Duplicate the agent for the other direction; this setup is kept.",
           action: {
             // `draft.channels` here is the PRE-toggle snapshot — restoring it
             // undoes both the add and the swap in one write.
@@ -128,12 +131,16 @@ export function ChannelSection({
         label={`Where does ${draft.name || "your agent"} run?`}
         hint="Pick every channel it should serve. Inbound and Batch calls are exclusive — one agent can't work both directions."
       >
-        {/* Pre-click consequence for a LIVE agent (adding never warns;
-            deselecting a live channel does, at the moment of the click). */}
+        {/* Pre-click consequence for a LIVE agent — BOTH directions warn:
+            deselecting a live channel, AND adding the opposite calling
+            direction (which swaps the live one out). User-test 2026-07-28:
+            the earlier copy only covered de-selecting, so the swap fired on
+            an add click against a live agent with no warning up front. */}
         {liveChannels && liveChannels.length > 0 && (
           <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
             {draft.name || "This agent"} is live on {liveChannels.map(channelLabel).join(" · ")} — deselecting a
-            live channel takes it offline there on your next redeploy. Its setup is kept.
+            live channel, or picking the opposite calling direction (which swaps it out), takes it offline there
+            on your next redeploy. Its setup is kept, and every swap has an Undo.
           </p>
         )}
 

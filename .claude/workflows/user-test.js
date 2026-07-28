@@ -9,7 +9,10 @@ export const meta = {
 }
 
 // args: { date: "YYYY-MM-DD", commit: "sha + one-line", focus: "what just shipped", url?: string }
-const URL = (args && args.url) || 'https://ai-studio-console-redesign.vercel.app'
+// Normalize to the ORIGIN: strip a trailing slash and a trailing /agents so
+// the "${URL}/agents" start URL below never doubles into /agents/agents
+// (2026-07-28 session: two personas opened a dead first click that way).
+const URL = ((args && args.url) || 'https://ai-studio-console-redesign.vercel.app').replace(/\/agents\/?$/, '').replace(/\/+$/, '')
 const FOCUS = (args && args.focus) || 'the latest commit'
 const COMMIT = (args && args.commit) || 'HEAD'
 const REPO = 'studio_x_2'

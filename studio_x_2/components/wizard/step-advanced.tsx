@@ -92,6 +92,16 @@ export function StepAdvanced({
         )}
       </Sub>
 
+      {/* Explain the vanishing knobs (user-test 2026-07-28): switching to a
+          realtime architecture silently dropped Start/End of speech — say
+          where they went instead of leaving a hole. */}
+      {realtime && (
+        <p className="text-xs text-muted-foreground">
+          Realtime multimodal models manage turn-taking natively — the Start/End of speech
+          controls apply to cascading stacks.
+        </p>
+      )}
+
       {!realtime && (
         <>
           {/* Start of speech */}

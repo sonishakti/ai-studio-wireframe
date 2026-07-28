@@ -239,16 +239,23 @@ export function DeployPreflight({
             {liveInboundNumber && (
               <li>· {draft.name || "Your agent"} stops answering {liveInboundNumber} while on Batch calls</li>
             )}
-            {ready.map((c) => (
-              <li key={c.id}>
-                · {c.name}: {PHONE_NUMBERS.find((n) => n.id === c.numberId)?.number ?? "selected number"} ·{" "}
-                {c.launch?.mode === "scheduled"
-                  ? `starts ${c.launch.startDate} ${c.launch.startTime ?? ""} ${c.launch.timezone ? `(${c.launch.timezone})` : ""}`
-                  : "starts on deploy"} ·{" "}
-                {c.callWindow === "anytime" ? "anytime" : c.callWindow === "extended" ? "extended hours" : "business hours"} ·
-                up to {c.maxConcurrent ?? 10} at once
-              </li>
-            ))}
+            {ready.map((c) => {
+              // Per-run cost projection (user-test 2026-07-28: the only money
+              // number anywhere was per-minute — at the moment of dialing a
+              // whole list): contacts × ~2 min × tier $/min.
+              const contacts = c.contacts ?? MOCK_CSV_ROWS
+              return (
+                <li key={c.id} className="tabular-nums">
+                  · {c.name}: {PHONE_NUMBERS.find((n) => n.id === c.numberId)?.number ?? "selected number"} ·{" "}
+                  {c.launch?.mode === "scheduled"
+                    ? `starts ${c.launch.startDate} ${c.launch.startTime ?? ""} ${c.launch.timezone ? `(${c.launch.timezone})` : ""}`
+                    : "starts on deploy"} ·{" "}
+                  {c.callWindow === "anytime" ? "anytime" : c.callWindow === "extended" ? "extended hours" : "business hours"} ·
+                  up to {c.maxConcurrent ?? 10} at once ·{" "}
+                  ≈ ${Math.round(contacts * 2 * est.costPerMin)} ({contacts.toLocaleString()} contacts × ~2 min × ${est.costPerMin.toFixed(2)}/min)
+                </li>
+              )
+            })}
             <li className="tabular-nums">
               · Estimate: ~${Math.round(totalContacts * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min —{" "}
               <InfoHint label="what's in this estimate?">

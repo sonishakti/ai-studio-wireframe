@@ -285,6 +285,14 @@ export function channelsForType(t: AgentType): DeployChannel[] {
   return t === "outbound" ? ["batch"] : t === "code" ? ["code"] : ["inbound"]
 }
 
+/** True when the agent's (often functional) name is SPOKEN in its greeting —
+ *  "Hi, this is Payment Reminder…" — worth a caller-facing-name nudge
+ *  (user-test 2026-07-28). Surfaced in Context and the Test opener line. */
+export function greetingSpeaksName(d: Pick<AgentDraft, "name" | "greeting">): boolean {
+  const name = d.name.trim()
+  return name.length > 1 && d.greeting.toLowerCase().includes(name.toLowerCase())
+}
+
 export const EMPTY_DRAFT: AgentDraft = {
   name: "",
   voice: null,

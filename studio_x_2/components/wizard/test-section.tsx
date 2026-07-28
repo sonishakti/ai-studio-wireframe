@@ -13,7 +13,7 @@ import { TestsSection } from "@/components/eval-tests"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn } from "@/lib/campaign-data"
 import {
-  hasChannel, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
+  hasChannel, greetingSpeaksName, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
@@ -265,6 +265,13 @@ export function TestSection({
                   : `${draft.name || "Your agent"} picks up with:`}
               </p>
               <p className="text-sm text-muted-foreground">“{greeting}”</p>
+              {/* Rename nudge (user-test 2026-07-28) — the opener is where a
+                  functional name spoken aloud is actually HEARD. */}
+              {greetingSpeaksName(draft) && (
+                <p className="text-xs text-muted-foreground">
+                  It introduces itself as &ldquo;{draft.name.trim()}&rdquo; — give it a caller-facing name?
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 Full persona — the prompt, voice, and call behavior you configured all apply.
               </p>
