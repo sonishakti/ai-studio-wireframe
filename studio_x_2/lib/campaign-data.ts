@@ -378,6 +378,27 @@ export interface AgentChannel {
   csvName?: string
 }
 
+/** A seeded batch campaign on an agent — hydrates the builder's Go Live
+ *  campaign list (multi-campaign IA, 2026-07-28: several per agent, own CSV /
+ *  caller ID / language / schedule, re-runnable, parallelizable). */
+export interface AgentCampaignSeed {
+  id: string
+  name: string
+  numberId?: string
+  csvName?: string
+  contacts?: number
+  /** Region/language tag, e.g. "Spanish (MX)". */
+  language?: string
+  callWindow?: "business" | "extended" | "anytime"
+  maxConcurrent?: number
+  retries?: number
+  status: "draft" | "scheduled" | "running" | "completed"
+  /** Scheduled only. */
+  startDate?: string
+  startTime?: string
+  timezone?: string
+}
+
 export interface Agent {
   id: string
   name: string
@@ -385,6 +406,9 @@ export interface Agent {
   /** The channel this agent is (or was last) deployed on. Absent = never
    *  configured — the wizard leaves Step 2 honestly incomplete. */
   channel?: AgentChannel
+  /** Batch campaigns this agent runs (outbound agents) — the builder's Go Live
+   *  panel manages this list. Absent on non-batch agents. */
+  campaigns?: AgentCampaignSeed[]
   persona: AgentPersona
   stack: AgentStack
   /** Attached knowledge bases (Integrations › Knowledge). */
@@ -525,6 +549,14 @@ export const AGENTS: Agent[] = [
     name: "Collections Outreach",
     status: "paused",
     channel: { type: "outbound", numberId: "pn_05", csvName: "q2-collections.csv" },
+    // Multi-campaign demo (2026-07-28 IA): two parallel English runs by
+    // region, a scheduled Spanish one, and a completed Q1 for the Re-run path.
+    campaigns: [
+      { id: "cmp_q2_west", name: "Q2 Collections — EN West", numberId: "pn_05", csvName: "q2-collections-west.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "running" },
+      { id: "cmp_q2_east", name: "Q2 Collections — EN East", numberId: "pn_05", csvName: "q2-collections-east.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "running" },
+      { id: "cmp_q2_es", name: "Cobranza Q2 — ES", numberId: "pn_05", csvName: "cobranza-q2.csv", contacts: 248, language: "Spanish (MX)", callWindow: "extended", maxConcurrent: 5, retries: 2, status: "scheduled", startDate: "2026-08-03", startTime: "09:00", timezone: "US Central (CT)" },
+      { id: "cmp_q1", name: "Q1 Collections", numberId: "pn_05", csvName: "q1-collections.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "completed" },
+    ],
     persona: { personality: "Calm, firm, compliant", tone: "Professional", language: "en-US" },
     stack: stackFor("cheapest"),
     knowledge: ["kb_03"],

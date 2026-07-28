@@ -6,22 +6,42 @@
  * mid-build restores progress — the "auto-save as draft" the spec asks for.
  * Cleared on publish. No backend (wireframe), same `sx:` guard idiom as
  * `lib/analytics.ts`.
+ *
+ * 2026-07-28 IA: the agent is MULTI-CHANNEL (`channels: DeployChannel[]`
+ * replaced the single `type`), inbound links MULTIPLE numbers (`numberIds`),
+ * and batch calling is managed as CAMPAIGNS — several per agent, each with its
+ * own CSV, caller ID, language, and schedule (re-runnable, parallelizable).
+ * `migrateDraft` upgrades stored/imported drafts from the old shape.
  */
 
 import { extractVars, stackFor, PHONE_NUMBERS, type Agent, type AgentStack } from "@/lib/campaign-data"
 import { PRESET_VOICES } from "@/lib/voice-artifacts"
 import { clearWidgetState } from "@/lib/widget-config"
 
+/** Legacy single-channel type — still the vocabulary of the published
+ *  `Agent.channel` mock and `publishDeployment`'s mode. */
 export type AgentType = "inbound" | "outbound" | "code"
 
-/** Pointer to the chosen Step-1 voice (preset or a saved custom artifact). */
+/** The deployment channels an agent can be live on — MULTI-SELECT since
+ *  2026-07-28 (reverses the 06-11 one-agent-one-channel lock, per owner).
+ *  "web" is first-class now (it was inbound's `mode: "web"` sub-state). */
+export type DeployChannel = "inbound" | "batch" | "web" | "code"
+
+/** Priority used when a single-channel summary is needed (the published
+ *  Agent mock stays single-channel; the list shows the primary). */
+export const CHANNEL_PRIORITY: DeployChannel[] = ["inbound", "web", "batch", "code"]
+
+export const hasChannel = (d: AgentDraft, c: DeployChannel) => d.channels.includes(c)
+
+export function primaryChannel(d: AgentDraft): DeployChannel | null {
+  return CHANNEL_PRIORITY.find((c) => d.channels.includes(c)) ?? null
+}
+
+/** Pointer to the chosen voice (preset or a saved custom artifact). */
 export interface VoiceRef {
   kind: "preset" | "custom"
   id: string
 }
-
-/** Inbound sub-mode (Step 4.1): a phone number, or an embeddable web widget. */
-export type InboundMode = "phone" | "web"
 
 // ─── Optional depth: Advanced (voice behaviour) + Analysis (post-call) ─────────
 // Both are OPTIONAL on the draft: absent = untouched, render from DEFAULT_*.
@@ -91,8 +111,8 @@ export const DEFAULT_ANALYSIS: AnalysisConfig = {
 
 /** How the agent's calls end + when they hand off to a person (Figma "Call
  *  Settings" / "Hang-up Configuration" / "Transfer Call to Human", node
- *  2593-101785). Channel-agnostic core; voicemail/ring/pacing only render for
- *  Batch calls. Optional on the draft like `advanced` — absent = defaults. */
+ *  2593-101785). AGENT-LEVEL and channel-agnostic core; voicemail/ring/pacing
+ *  only render for Batch calls. Optional on the draft — absent = defaults. */
 export interface CallBehaviorConfig {
   /** The agent may end the call itself. */
   endCall: boolean
@@ -135,69 +155,119 @@ export interface LaunchConfig {
   timezone?: string
 }
 
+// ─── Campaigns — batch calling is a MANAGED LIST, not a single config ─────────
+//
+// An agent can run several campaigns: different CSVs, different regions/
+// languages, in parallel (e.g. one Spanish + two English by region). A
+// completed campaign can be re-run (duplicated as a fresh draft). Caller ID is
+// ONE number per campaign — load-balancing across numbers is deferred.
+
+export type CampaignStatus = "draft" | "scheduled" | "running" | "completed"
+
+export interface CampaignDraft {
+  id: string
+  name: string
+  /** Caller-ID number — single (load-balancing across numbers is deferred). */
+  numberId?: string
+  csvName?: string | null
+  /** Mock row count of the attached CSV. */
+  contacts?: number
+  /** Region/language tag, e.g. "Spanish (MX)" — labels the row. */
+  language?: string
+  callWindow?: "business" | "extended" | "anytime"
+  maxConcurrent?: number
+  retries?: number
+  launch?: LaunchConfig
+  status: CampaignStatus
+}
+
+let campaignSeq = 0
+export function newCampaignId(): string {
+  campaignSeq += 1
+  return `cmp_${Date.now().toString(36)}${campaignSeq}`
+}
+
+export function makeCampaign(name: string): CampaignDraft {
+  return {
+    id: newCampaignId(),
+    name,
+    language: "English",
+    callWindow: "business",
+    maxConcurrent: 10,
+    retries: 1,
+    launch: { mode: "now" },
+    status: "draft",
+  }
+}
+
+/** Campaigns that still count toward validation + the deploy manifest —
+ *  everything not already completed. */
+export const activeCampaigns = (d: AgentDraft) => d.campaigns.filter((c) => c.status !== "completed")
+
 export interface AgentDraft {
   /** Set when editing an existing agent; absent for a brand-new draft. */
   agentId?: string
   name: string
-  /** Step 1 — gates Step 2 (locked until this is non-null). */
+  /** Section 1 (Voice) — the voice persona. */
   voice: VoiceRef | null
-  /** Step 2 — gates Steps 3–5. */
-  type: AgentType | null
-  /** Step 1 (Voice & models) — the model stack behind the voice. Defaults to the
+  /** Section 2 (Channel) — MULTI-SELECT deployment channels. */
+  channels: DeployChannel[]
+  /** Section 1 (Voice) — the model stack behind the voice. Defaults to the
    *  balanced preset so cost/latency estimates exist from first paint. */
   stack: AgentStack
-  /** Step 3. */
+  /** Section 3 (Context). */
   systemPrompt: string
   greeting: string
   /** What the agent says when it can't answer (proposal 2026-07-22). */
   failureMessage: string
-  /** The starter template picked in Agent Prompt — also names the preview
-   *  panel's identity badge ("Friendly Receptionist"). */
+  /** The starter template applied — shown as the header chip next to the name. */
   templateName?: string
   knowledge: string[]
   mcp: string[]
-  /** Step 3 Actions — attached third-party Connector ids (F6). */
+  /** Context › Actions — attached third-party Connector ids (F6). */
   connectors: string[]
   /** Optional depth — absent until the user opens the section (F1 / F8). */
   advanced?: AdvancedConfig
   analysis?: AnalysisConfig
   /** Hang-up rules + human handoff — absent until touched (defaults apply). */
   callBehavior?: CallBehaviorConfig
-  /** Step 4 — channel config, branched by `type`. */
+  /** Section 4 (Go Live) — batch campaigns, several per agent. */
+  campaigns: CampaignDraft[]
+  /** Per-channel connection state. */
   config: {
-    inbound?: { mode: InboundMode; numberId?: string }
-    outbound?: {
-      numberId?: string
-      csvName?: string | null
-      /** Batch settings — in the draft (not drawer-local state) so they
-       *  survive close/reopen and show up in summaries + the config JSON. */
-      callWindow?: "business" | "extended" | "anytime"
-      maxConcurrent?: number
-      retries?: number
-      /** Launch now vs schedule for later (Figma "Launch Timing"). */
-      launch?: LaunchConfig
-    }
+    /** Inbound links MULTIPLE numbers to one agent (2026-07-28). */
+    inbound?: { numberIds: string[] }
     code?: { added?: boolean }
   }
 }
 
 /** One source for the stack's non-preset defaults — spread by both new drafts
- *  and agentToDraft so the two entry paths can't open with different Step-1
+ *  and agentToDraft so the two entry paths can't open with different
  *  defaults. */
 export const STACK_DEFAULTS = { pipeline: "stt-llm-tts", language: "English" } as const
 
-/** Display name for an agent type — "Batch calls" is the locked term for
+/** Display name for a legacy agent type — "Batch calls" is the locked term for
  *  outbound (LEARNINGS §20) and "Code / SDK" is the one name for the code
- *  channel everywhere (heuristic-eval finding #19); never surface raw
- *  "outbound" or a bare "Embed" to the user. */
+ *  channel everywhere (heuristic-eval finding #19). */
 export function typeLabel(t: AgentType): string {
   return t === "outbound" ? "Batch calls" : t === "code" ? "Code / SDK" : "Inbound"
+}
+
+/** Display name for a deploy channel — same locked vocabulary. */
+export function channelLabel(c: DeployChannel): string {
+  return c === "batch" ? "Batch calls" : c === "code" ? "Code / SDK" : c === "web" ? "Web widget" : "Inbound calls"
+}
+
+/** Old single-channel vocabulary → the channels it means. Used by the create
+ *  dialog and `?dc=` deep links. */
+export function channelsForType(t: AgentType): DeployChannel[] {
+  return t === "outbound" ? ["batch"] : t === "code" ? ["code"] : ["inbound"]
 }
 
 export const EMPTY_DRAFT: AgentDraft = {
   name: "",
   voice: null,
-  type: null,
+  channels: [],
   stack: { ...stackFor("balanced"), ...STACK_DEFAULTS },
   systemPrompt: "",
   greeting: "",
@@ -205,7 +275,79 @@ export const EMPTY_DRAFT: AgentDraft = {
   knowledge: [],
   mcp: [],
   connectors: [],
+  campaigns: [],
   config: {},
+}
+
+// ─── Migration — old drafts (type / inbound.mode / config.outbound) upgrade ───
+
+/** Fields the pre-2026-07-28 draft shape carried. */
+interface LegacyDraftFields {
+  type?: AgentType | null
+  config?: {
+    inbound?: { mode?: "phone" | "web"; numberId?: string; numberIds?: string[] }
+    outbound?: {
+      numberId?: string
+      csvName?: string | null
+      callWindow?: "business" | "extended" | "anytime"
+      maxConcurrent?: number
+      retries?: number
+      launch?: LaunchConfig
+    }
+    code?: { added?: boolean }
+  }
+}
+
+/** Upgrade a stored/imported draft to the multi-channel + campaigns shape.
+ *  New-shape drafts pass through untouched; old `type`/`mode`/`outbound`
+ *  fields are mapped, never dropped silently. */
+export function migrateDraft(raw: Partial<AgentDraft> & LegacyDraftFields): AgentDraft {
+  const legacyType = raw.type
+  const legacyInbound = raw.config?.inbound
+  const legacyOutbound = raw.config?.outbound
+
+  // Channels: keep an explicit new-shape list; otherwise derive from `type`.
+  const channels: DeployChannel[] = Array.isArray(raw.channels)
+    ? raw.channels.filter((c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code")
+    : legacyType === "inbound"
+      ? legacyInbound?.mode === "web" ? ["web"] : ["inbound"]
+      : legacyType === "outbound"
+        ? ["batch"]
+        : legacyType === "code"
+          ? ["code"]
+          : []
+
+  // Inbound numbers: numberIds wins; a legacy single numberId becomes [id].
+  const numberIds = Array.isArray(legacyInbound?.numberIds)
+    ? legacyInbound.numberIds.filter((n): n is string => typeof n === "string")
+    : legacyInbound?.numberId
+      ? [legacyInbound.numberId]
+      : []
+
+  // Campaigns: keep an explicit list; otherwise fold config.outbound into one.
+  const campaigns: CampaignDraft[] = Array.isArray(raw.campaigns)
+    ? raw.campaigns
+    : legacyOutbound && (legacyOutbound.numberId || legacyOutbound.csvName)
+      ? [{
+          ...makeCampaign(raw.name?.trim() ? `${raw.name.trim()} campaign` : "Migrated campaign"),
+          numberId: legacyOutbound.numberId,
+          csvName: legacyOutbound.csvName ?? null,
+          contacts: legacyOutbound.csvName ? MOCK_CSV_ROWS : undefined,
+          callWindow: legacyOutbound.callWindow ?? "business",
+          maxConcurrent: legacyOutbound.maxConcurrent ?? 10,
+          retries: legacyOutbound.retries ?? 1,
+          launch: legacyOutbound.launch ?? { mode: "now" },
+        }]
+      : []
+
+  const config: AgentDraft["config"] = {
+    ...(numberIds.length || channels.includes("inbound") ? { inbound: { numberIds } } : {}),
+    ...(raw.config?.code ? { code: raw.config.code } : {}),
+  }
+
+  const next = { ...EMPTY_DRAFT, ...raw, channels, campaigns, config } as AgentDraft & LegacyDraftFields
+  delete next.type
+  return next
 }
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
@@ -233,8 +375,8 @@ export function restoreDraft(agentId?: string): AgentDraft | null {
   try {
     const raw = window.localStorage.getItem(keyFor(agentId))
     if (!raw) return null
-    // Merge over EMPTY_DRAFT so older/partial drafts gain any new fields.
-    return { ...EMPTY_DRAFT, ...(JSON.parse(raw) as Partial<AgentDraft>) }
+    // Migrate + merge over EMPTY_DRAFT so older/partial drafts gain new fields.
+    return migrateDraft(JSON.parse(raw) as Partial<AgentDraft>)
   } catch {
     return null
   }
@@ -258,29 +400,55 @@ export function hasDraft(agentId?: string): boolean {
 
 /** Map a saved Agent into a draft — hydrating the TRUE channel from
  *  `agent.channel` (never fabricating one: an agent with no channel opens with
- *  Step 2 honestly incomplete, so the checklist can't contradict the Live
- *  badge — heuristic-eval 2026-07-06 finding #2). */
+ *  the Channel section honestly incomplete — heuristic-eval 2026-07-06 #2).
+ *  Campaign seeds on the Agent hydrate the campaigns list; a legacy outbound
+ *  channel without seeds synthesizes one running campaign from its CSV. */
 export function agentToDraft(agent: Agent): AgentDraft {
   // Match a preset voice by its TTS voice; fall back to the first preset.
   const voiceMatch =
     PRESET_VOICES.find((v) => v.ttsVoice === agent.stack.tts.voice) ?? PRESET_VOICES[0]
 
   const ch = agent.channel
-  const type: AgentType | null = ch?.type ?? null
-  const config: AgentDraft["config"] =
+  const channels: DeployChannel[] =
     ch?.type === "inbound"
-      ? { inbound: { mode: ch.mode ?? "phone", numberId: ch.numberId } }
+      ? ch.mode === "web" ? ["web"] : ["inbound"]
       : ch?.type === "outbound"
-      ? { outbound: { numberId: ch.numberId, csvName: ch.csvName ?? null } }
-      : ch?.type === "code"
-      ? { code: { added: true } }
-      : {}
+        ? ["batch"]
+        : ch?.type === "code"
+          ? ["code"]
+          : []
+
+  const campaigns: CampaignDraft[] = agent.campaigns
+    ? agent.campaigns.map((c) => ({
+        id: c.id,
+        name: c.name,
+        numberId: c.numberId,
+        csvName: c.csvName ?? null,
+        contacts: c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : undefined),
+        language: c.language ?? "English",
+        callWindow: c.callWindow ?? "business",
+        maxConcurrent: c.maxConcurrent ?? 10,
+        retries: c.retries ?? 1,
+        launch: c.startDate
+          ? { mode: "scheduled", startDate: c.startDate, startTime: c.startTime, timezone: c.timezone }
+          : { mode: "now" },
+        status: c.status,
+      }))
+    : ch?.type === "outbound"
+      ? [{
+          ...makeCampaign(`${agent.name} campaign`),
+          numberId: ch.numberId,
+          csvName: ch.csvName ?? null,
+          contacts: ch.csvName ? MOCK_CSV_ROWS : undefined,
+          status: agent.status === "live" ? "running" : "draft",
+        }]
+      : []
 
   return {
     agentId: agent.id,
     name: agent.name,
     voice: { kind: "preset", id: voiceMatch.id },
-    type,
+    channels,
     stack: { ...STACK_DEFAULTS, ...agent.stack },
     systemPrompt: agent.persona.personality,
     greeting: agent.persona.firstMessage ?? "Hi, thanks for calling. How can I help you today?",
@@ -289,7 +457,13 @@ export function agentToDraft(agent: Agent): AgentDraft {
     knowledge: [...agent.knowledge],
     mcp: [...agent.actions],
     connectors: [...(agent.connectors ?? [])],
-    config,
+    campaigns,
+    config: {
+      ...(ch?.type === "inbound" && ch.mode !== "web"
+        ? { inbound: { numberIds: ch.numberId ? [ch.numberId] : [] } }
+        : {}),
+      ...(ch?.type === "code" ? { code: { added: true } } : {}),
+    },
   }
 }
 
@@ -322,10 +496,9 @@ export function templateToDraft(tpl: AgentTemplate): AgentDraft {
 // ─── Publish validation ───────────────────────────────────────────────────────
 //
 // The wizard's promise: nothing goes live half-configured. The biggest footgun
-// is OUTBOUND — the system prompt/greeting reference {{dynamic_vars}} that must
-// be supplied by the uploaded CSV's columns. We block Publish until every
-// referenced variable has a matching column (this is the spec's "system-prompt
-// template validation").
+// is BATCH — the prompt/greeting reference {{dynamic_vars}} that must be
+// supplied by each campaign CSV's columns. Deploy stays blocked until every
+// referenced variable has a matching column.
 
 /** Columns a freshly-uploaded contacts CSV is mocked to contain (wireframe). */
 export const MOCK_CSV_COLUMNS = ["name", "account", "balance", "due_date", "phone"]
@@ -334,53 +507,62 @@ export const MOCK_CSV_COLUMNS = ["name", "account", "balance", "due_date", "phon
  *  contacts panel, and the batch pre-flight confirmation (they must agree). */
 export const MOCK_CSV_ROWS = 248
 
-/** {{vars}} the prompt/greeting reference that the attached CSV does NOT supply.
- *  With no CSV yet, every referenced var counts as missing. */
-export function outboundMissingVars(d: AgentDraft): string[] {
+/** {{vars}} the prompt/greeting reference that THIS campaign's CSV does NOT
+ *  supply. With no CSV yet, every referenced var counts as missing. */
+export function campaignMissingVars(d: AgentDraft, c: CampaignDraft): string[] {
   const required = extractVars(`${d.systemPrompt} ${d.greeting}`)
-  if (!d.config.outbound?.csvName) return required
+  if (!c.csvName) return required
   return required.filter((v) => !MOCK_CSV_COLUMNS.includes(v))
 }
 
 export interface PublishBlock {
   /** Plain-language reason this isn't ready. */
   reason: string
-  /** The section (1–6, v3 journey order) that fixes it. */
+  /** The section (1 Voice · 2 Channel · 3 Context · 4 Go Live) that fixes it. */
   step: number
   /** Verb+noun for the "Fix this" button (e.g. "Pick a voice"). */
   action: string
 }
 
 /** Every unmet requirement between the draft and a live agent, in JOURNEY
- *  order (v3: Channel → Prompt → …). Drives the Go-live "Fix this →" ramp;
- *  `publishBlockReason` returns just the first. */
+ *  order (Voice → Channel → Context → Go Live). Drives the Go-live "Fix this
+ *  →" ramp; `publishBlockReason` returns just the first. */
 export function publishBlocks(d: AgentDraft): PublishBlock[] {
   const blocks: PublishBlock[] = []
-  if (!d.type) blocks.push({ reason: "Pick a channel.", step: 1, action: "Pick channel" })
 
-  if (d.type === "outbound") {
-    if (!d.config.outbound?.numberId) blocks.push({ reason: "Attach a caller-ID phone number.", step: 1, action: "Set up calls" })
-    if (!d.config.outbound?.csvName) blocks.push({ reason: "Upload a contacts CSV.", step: 1, action: "Add contacts" })
-    const launch = d.config.outbound?.launch
-    if (launch?.mode === "scheduled" && !(launch.startDate && launch.startTime && launch.timezone)) {
-      blocks.push({ reason: "Set the start date, time, and timezone for the scheduled launch.", step: 1, action: "Set schedule" })
+  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
+
+  if (d.channels.length === 0) {
+    blocks.push({ reason: "Pick at least one channel.", step: 2, action: "Pick channels" })
+  }
+  if (hasChannel(d, "inbound") && !(d.config.inbound?.numberIds.length)) {
+    blocks.push({ reason: "Link a phone number for inbound calls.", step: 2, action: "Link a number" })
+  }
+
+  if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 3, action: "Write the prompt" })
+
+  if (hasChannel(d, "batch")) {
+    const active = activeCampaigns(d)
+    // Zero campaigns blocks only when batch is the SOLE channel — an agent
+    // that also answers inbound can go live "armed but idle" on batch.
+    if (active.length === 0 && d.channels.length === 1) {
+      blocks.push({ reason: "Create a campaign to start batch calling.", step: 4, action: "New campaign" })
+    }
+    for (const c of active) {
+      if (!c.numberId) blocks.push({ reason: `"${c.name}" needs a caller-ID number.`, step: 4, action: "Pick a number" })
+      if (!c.csvName) blocks.push({ reason: `"${c.name}" is missing its contacts CSV.`, step: 4, action: "Add contacts" })
+      if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
+        blocks.push({ reason: `"${c.name}" is scheduled but has no start date, time, and timezone.`, step: 4, action: "Set schedule" })
+      }
+      if (c.csvName) {
+        const missing = campaignMissingVars(d, c)
+        if (missing.length) blocks.push({
+          reason: `"${c.name}"'s CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`,
+          step: 3, action: "Edit prompt",
+        })
+      }
     }
   }
-  if (d.type === "inbound" && (d.config.inbound?.mode ?? "phone") === "phone" && !d.config.inbound?.numberId) {
-    blocks.push({ reason: "Attach a phone number for the agent to answer.", step: 1, action: "Set up the channel" })
-  }
-
-  if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 2, action: "Write the prompt" })
-  if (d.type === "outbound" && d.config.outbound?.csvName) {
-    const missing = outboundMissingVars(d)
-    if (missing.length) blocks.push({
-      reason: `Your contacts CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`,
-      step: 2, action: "Edit prompt",
-    })
-  }
-
-  // Voice lives in section 4 since the 2026-07-22 IA (Models moved to 3).
-  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 4, action: "Pick a voice" })
 
   return blocks
 }
@@ -390,34 +572,37 @@ export function publishBlockReason(d: AgentDraft): string | null {
   return publishBlocks(d)[0]?.reason ?? null
 }
 
-/** The first section (1–6, v3 journey order) still needing input — for
- *  "resume at" affordances. Voice has a working default, so past the prompt
- *  the resume point is Go live. */
+/** The first section (1–4) still needing input — for "resume at" affordances. */
 export function firstIncompleteStep(d: AgentDraft): number {
-  if (!d.type) return 1
-  if (!d.systemPrompt.trim()) return 2
-  // Voice & Speech is section 4 since the 2026-07-22 IA (Models moved to 3).
-  if (!d.voice) return 4
-  return 6
+  if (!d.voice) return 1
+  if (d.channels.length === 0) return 2
+  if (!d.systemPrompt.trim()) return 3
+  return 4
 }
 
 export function canPublish(d: AgentDraft): boolean {
   return publishBlockReason(d) === null
 }
 
-/** Human-readable target of the configured channel — the number, "Web widget",
- *  "SDK / API", or contacts. Shared by the Deploy step's summary and the rail's
- *  step-4 recap so the two never drift. */
+/** Human-readable summary of the configured channels — the numbers, "Web
+ *  widget", campaign count, "SDK / API". Shared by the review summary and the
+ *  rail recap so the two never drift. */
 export function channelTarget(d: AgentDraft): string {
-  if (d.type === "inbound") {
-    if (d.config.inbound?.mode === "web") return "Web widget"
-    const n = PHONE_NUMBERS.find((p) => p.id === d.config.inbound?.numberId)
-    return n ? n.number : "No number yet"
+  const parts: string[] = []
+  if (hasChannel(d, "inbound")) {
+    const ids = d.config.inbound?.numberIds ?? []
+    const first = PHONE_NUMBERS.find((p) => p.id === ids[0])
+    parts.push(
+      ids.length === 0 ? "No number yet"
+      : ids.length === 1 ? first?.number ?? "1 number"
+      : `${first?.number ?? "1 number"} +${ids.length - 1} more`,
+    )
   }
-  if (d.type === "outbound") {
-    const n = PHONE_NUMBERS.find((p) => p.id === d.config.outbound?.numberId)
-    return [n?.number, d.config.outbound?.csvName].filter(Boolean).join(" · ") || "No contacts yet"
+  if (hasChannel(d, "web")) parts.push("Web widget")
+  if (hasChannel(d, "batch")) {
+    const n = activeCampaigns(d).length
+    parts.push(n === 0 ? "No campaigns yet" : `${n} campaign${n > 1 ? "s" : ""}`)
   }
-  if (d.type === "code") return "SDK / API"
-  return "Not set"
+  if (hasChannel(d, "code")) parts.push("SDK / API")
+  return parts.join(" · ") || "Not set"
 }

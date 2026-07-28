@@ -79,16 +79,15 @@ const COMMANDS: Command[] = [
 
   // ── Agent settings — deep links into the wizard drawers, so the palette can
   //    find IN-DRAWER features, not just pages (heuristic-eval #10). ─────────
-  // v3 journey order (2026-07-17): 1 Channel · 2 Prompt · 3 Voice & speech ·
-  // 4 Models · 5 Knowledge & Tools · 6 Go live.
-  { id: "ag-channel",    label: "Set up the channel — number, CSV, widget, SDK", href: "/agents?step=1", wizardStep: 1, icon: Phone, group: "Agent settings", keywords: ["batch calls", "inbound", "outbound", "channel", "phone number", "contacts", "csv", "caller id", "web widget", "widget ui", "call window", "retries", "concurrency"] },
-  { id: "ag-prompt",     label: "Edit agent prompt & greeting", href: "/agents?step=2", wizardStep: 2, icon: Bot, group: "Agent settings", keywords: ["system prompt", "greeting", "failure message", "template", "behavior", "variables"] },
-  {/* 2026-07-22 IA: Models is section 3, Voice & Speech is 4. */
-    id: "ag-models",     label: "Change models or architecture", href: "/agents?step=3", wizardStep: 3, icon: Bot,     group: "Agent settings", keywords: ["llm", "tts", "model", "preset", "multimodal", "mllm", "architecture", "latency", "cost"] },
-  { id: "ag-voice",      label: "Change voice or language", href: "/agents?step=4", wizardStep: 4, icon: Bot,          group: "Agent settings", keywords: ["voice", "language", "spoken", "stt", "turn detection", "interruption", "filter words"] },
-  { id: "ag-tools",      label: "Knowledge, MCP & connectors", href: "/agents?step=5", wizardStep: 5, icon: Bot,       group: "Agent settings", keywords: ["knowledge base", "mcp", "connector", "crm", "tools", "history", "memory"] },
-  { id: "ag-test",       label: "Test the agent",            href: "/agents?step=6", wizardStep: 6,   icon: Bot,                group: "Agent settings", keywords: ["test", "talk", "try", "simulate", "eval"] },
-  { id: "ag-deploy",     label: "Review & deploy the agent", href: "/agents?step=7", wizardStep: 7,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "review"] },
+  // v4 order (2026-07-28): 1 Voice · 2 Channel · 3 Context · 4 Go Live.
+  // wizardStep 6 stays the legacy "Test" sentinel — the wizard opens the
+  // docked Test panel for it instead of scrolling.
+  { id: "ag-voice",      label: "Change voice, tier or language", href: "/agents?step=1", wizardStep: 1, icon: Bot,    group: "Agent settings", keywords: ["voice", "language", "spoken", "tier", "cheapest", "balanced", "best", "llm", "tts", "stt", "model", "preset", "multimodal", "mllm", "architecture", "latency", "cost", "turn detection", "interruption", "filter words"] },
+  { id: "ag-channel",    label: "Set up channels — numbers, widget, SDK", href: "/agents?step=2", wizardStep: 2, icon: Phone, group: "Agent settings", keywords: ["batch calls", "inbound", "outbound", "channel", "phone number", "web widget", "widget ui", "whatsapp", "sdk"] },
+  { id: "ag-prompt",     label: "Edit agent prompt & greeting", href: "/agents?step=3", wizardStep: 3, icon: Bot, group: "Agent settings", keywords: ["system prompt", "greeting", "failure message", "template", "behavior", "variables", "context"] },
+  { id: "ag-tools",      label: "Knowledge, MCP & connectors", href: "/agents?step=3", wizardStep: 3, icon: Bot,       group: "Agent settings", keywords: ["knowledge base", "mcp", "connector", "crm", "tools", "history", "memory"] },
+  { id: "ag-test",       label: "Test the agent",            href: "/agents?step=6", wizardStep: 6,   icon: Bot,                group: "Agent settings", keywords: ["test", "talk", "try", "simulate", "eval", "scenario"] },
+  { id: "ag-deploy",     label: "Go Live — campaigns, outputs, deploy", href: "/agents?step=4", wizardStep: 4,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "review", "campaign", "contacts", "csv", "caller id", "call window", "retries", "concurrency", "structured outputs", "transcripts", "recording"] },
   { id: "ag-getcode",    label: "Get code — SDK & widget snippets (read-only)", href: "/agents", windowEvent: "sx:open-config-drawer", icon: Code2, group: "Agent settings", keywords: ["embed", "snippet", "sdk", "widget code", "copy code", "api", "json", "config"] },
 
   // ── Actions ──────────────────────────────────────────────────────────────

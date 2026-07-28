@@ -1,0 +1,473 @@
+"use client"
+
+import * as React from "react"
+import {
+  Upload, Check, AlertTriangle, Download, EllipsisVertical, Plus, RotateCcw,
+  Pencil, Copy, Trash2,
+} from "lucide-react"
+import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import { InfoHint } from "@/components/wizard/info-hint"
+import { CampaignDialingFields, CampaignLaunchFields } from "@/components/wizard/step-call-settings"
+import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
+import {
+  MOCK_CSV_COLUMNS, MOCK_CSV_ROWS, campaignMissingVars, makeCampaign, newCampaignId,
+  type AgentDraft, type CampaignDraft, type CampaignStatus,
+} from "@/lib/wizard-draft"
+import { type StepProps } from "@/components/wizard/types"
+
+/**
+ * CampaignsCard — batch calling as MANAGED CAMPAIGNS (v4 IA, 2026-07-28):
+ * an agent runs several — different CSVs, regions/languages, in parallel
+ * (e.g. one Spanish + two English by region). Completed campaigns re-run as a
+ * fresh draft. Editing is INLINE (owner: the contacts CSV lays out
+ * half-and-half inside the Go Live panel, never bleeding under the Test
+ * panel) — the editor expands in place, contacts on the right half.
+ */
+
+const STATUS_META: Record<CampaignStatus, { label: string; cls: string; dot?: boolean }> = {
+  draft: { label: "Draft", cls: "bg-secondary text-secondary-foreground" },
+  scheduled: { label: "Scheduled", cls: "border border-border bg-transparent text-foreground" },
+  running: { label: "Running", cls: "bg-success/10 text-success", dot: true },
+  completed: { label: "Completed", cls: "bg-muted text-muted-foreground" },
+}
+
+/** Region-flavored language tags — labels a campaign row (the agent's spoken
+ *  language stays a Voice trait; this is the campaign's audience tag). */
+const CAMPAIGN_LANGUAGES = [
+  "English (US)", "English (UK)", "English (IN)", "Spanish (MX)", "Spanish (ES)",
+  "French (FR)", "German (DE)", "Hindi (IN)", "Mandarin (CN)",
+]
+
+export function CampaignsCard({ draft, update }: StepProps) {
+  const campaigns = draft.campaigns
+  // null = closed · "new" = creating · id = editing that row.
+  const [editing, setEditing] = React.useState<string | null>(null)
+  const [newDraft, setNewDraft] = React.useState<CampaignDraft | null>(null)
+
+  const setCampaigns = (next: CampaignDraft[]) => update({ campaigns: next })
+  const patchCampaign = (id: string, patch: Partial<CampaignDraft>) =>
+    setCampaigns(campaigns.map((c) => (c.id === id ? { ...c, ...patch } : c)))
+
+  const startNew = () => {
+    setNewDraft(makeCampaign(`Campaign ${campaigns.length + 1}`))
+    setEditing("new")
+  }
+  const duplicate = (c: CampaignDraft, rerun?: boolean) => {
+    const copy: CampaignDraft = {
+      ...c,
+      id: newCampaignId(),
+      name: rerun ? `${c.name} (re-run)` : `${c.name} (copy)`,
+      status: "draft",
+      launch: { mode: "now" },
+    }
+    setCampaigns([...campaigns, copy])
+    setEditing(copy.id)
+    toast(rerun ? `Re-running ${c.name}` : `${c.name} duplicated`, {
+      description: rerun
+        ? "Same contacts, caller ID, and settings — starts as a new draft campaign."
+        : "Edit the copy below.",
+    })
+  }
+  const remove = (c: CampaignDraft) => {
+    setCampaigns(campaigns.filter((x) => x.id !== c.id))
+    toast(`${c.name} deleted`, {
+      action: { label: "Undo", onClick: () => setCampaigns([...campaigns]) },
+    })
+  }
+
+  return (
+    <section className="rounded-lg border border-border bg-card">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <p className="text-sm font-semibold">Campaigns</p>
+          <Badge variant="secondary" className="h-5 px-1.5 text-xs">{campaigns.length}</Badge>
+          <InfoHint label="Run several at once">
+            Each campaign has its own contacts, caller ID, language, and schedule — run one
+            Spanish and two English lists in parallel, or re-run a finished one.
+          </InfoHint>
+        </div>
+        <Button size="sm" className="gap-1.5" onClick={startNew} disabled={editing === "new"}>
+          <Plus className="h-3.5 w-3.5" aria-hidden /> New campaign
+        </Button>
+      </header>
+
+      {campaigns.length === 0 && editing !== "new" ? (
+        <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
+          <p className="text-sm font-medium">No campaigns yet</p>
+          <p className="max-w-sm text-xs text-muted-foreground">
+            A campaign is one batch run — a contact list, a caller ID, and a schedule.
+            Create one to start batch calling.
+          </p>
+          <Button size="sm" className="mt-2 gap-1.5" onClick={startNew}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> New campaign
+          </Button>
+        </div>
+      ) : (
+        <ul className="divide-y divide-border">
+          {editing === "new" && newDraft && (
+            <li className="p-4">
+              <CampaignEditor
+                draft={draft}
+                campaign={newDraft}
+                isNew
+                onChange={(p) => setNewDraft((c) => (c ? { ...c, ...p } : c))}
+                onCancel={() => { setEditing(null); setNewDraft(null) }}
+                onSave={() => {
+                  setCampaigns([...campaigns, newDraft])
+                  setEditing(null)
+                  setNewDraft(null)
+                  toast(`${newDraft.name} saved`, {
+                    description: newDraft.launch?.mode === "scheduled"
+                      ? "Scheduled — it arms when you deploy."
+                      : "Starts dialing when you deploy.",
+                  })
+                }}
+              />
+            </li>
+          )}
+          {campaigns.map((c) => {
+            const meta = STATUS_META[c.status]
+            const missing = c.status !== "completed"
+              ? [!c.numberId && "caller ID", !c.csvName && "contacts CSV"].filter(Boolean)
+              : []
+            return (
+              <li key={c.id}>
+                <div className="flex flex-wrap items-center gap-3 px-5 py-3">
+                  <span className={cn("inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium", meta.cls)}>
+                    {meta.dot && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />}
+                    {meta.label}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                      {c.name}
+                      {c.language && <Badge variant="outline" className="h-5 px-1.5 text-xs font-normal">{c.language}</Badge>}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {c.csvName
+                        ? `${c.contacts ?? MOCK_CSV_ROWS} contacts · ${c.csvName}`
+                        : "No contacts yet"}
+                      {c.status === "scheduled" && c.launch?.startDate && (
+                        <> · starts {c.launch.startDate} {c.launch.startTime} {c.launch.timezone ? `(${c.launch.timezone})` : ""}</>
+                      )}
+                    </p>
+                  </div>
+                  {missing.length > 0 && (
+                    <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
+                      <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> needs {missing.join(" + ")}
+                    </span>
+                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={`Actions for ${c.name}`}>
+                        <EllipsisVertical className="h-4 w-4" aria-hidden />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setEditing(editing === c.id ? null : c.id)}>
+                        <Pencil className="size-4" aria-hidden /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => duplicate(c)}>
+                        <Copy className="size-4" aria-hidden /> Duplicate
+                      </DropdownMenuItem>
+                      {c.status === "completed" && (
+                        <DropdownMenuItem onClick={() => duplicate(c, true)}>
+                          <RotateCcw className="size-4" aria-hidden /> Re-run
+                        </DropdownMenuItem>
+                      )}
+                      {c.status === "draft" && (
+                        <DropdownMenuItem variant="destructive" onClick={() => remove(c)}>
+                          <Trash2 className="size-4" aria-hidden /> Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {editing === c.id && (
+                  <div className="border-t border-border bg-muted/20 p-4">
+                    <CampaignEditor
+                      draft={draft}
+                      campaign={c}
+                      onChange={(p) => patchCampaign(c.id, p)}
+                      onCancel={() => setEditing(null)}
+                      onSave={() => { setEditing(null); toast(`${c.name} updated`) }}
+                    />
+                  </div>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+// ─── Inline editor — form on the left half, contacts CSV on the right half ────
+
+function CampaignEditor({
+  draft, campaign, onChange, onSave, onCancel, isNew,
+}: {
+  draft: AgentDraft
+  campaign: CampaignDraft
+  onChange: (patch: Partial<CampaignDraft>) => void
+  onSave: () => void
+  onCancel: () => void
+  isNew?: boolean
+}) {
+  // Caller-ID candidates: unassigned numbers, the current pick, and numbers
+  // already carrying outbound traffic (a shared pool takes more batches).
+  const available = PHONE_NUMBERS.filter(
+    (n) =>
+      n.status === "unassigned" ||
+      n.id === campaign.numberId ||
+      n.assignedTo.some((d) => d.startsWith("dp_ob")),
+  )
+  // Busy inbound lines SHOW, disabled, with the reason — hiding the number the
+  // status line names read as the product hiding something (user-tests #9/#10).
+  const answering = PHONE_NUMBERS.filter(
+    (n) => !available.includes(n) && (n.assignedTo.length > 0 || n.assignedAgent),
+  )
+
+  return (
+    <div className="@container space-y-4 rounded-lg border border-border bg-card p-4">
+      <p className="text-sm font-semibold">{isNew ? "New campaign" : `Edit ${campaign.name}`}</p>
+
+      {/* HALF-AND-HALF (owner 2026-07-28): the run config on the left, the
+          contacts CSV on the right — parallel panes of one decision, sized to
+          the main column so an open Test panel never overlaps them. */}
+      <div className="grid grid-cols-1 gap-5 @3xl:grid-cols-2">
+        <div className="min-w-0 space-y-4">
+          <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor={`cmp-name-${campaign.id}`} className="text-sm font-medium">Campaign name</Label>
+              <Input
+                id={`cmp-name-${campaign.id}`}
+                value={campaign.name}
+                onChange={(e) => onChange({ name: e.target.value })}
+                placeholder="e.g. Q3 Renewals — EN West"
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Language / region</Label>
+              <Select value={campaign.language ?? ""} onValueChange={(language) => onChange({ language })}>
+                <SelectTrigger className="w-full text-sm"><SelectValue placeholder="Tag this list" /></SelectTrigger>
+                <SelectContent>
+                  {CAMPAIGN_LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Caller-ID number</Label>
+            <Select value={campaign.numberId ?? ""} onValueChange={(numberId) => onChange({ numberId })}>
+              <SelectTrigger className="w-full text-sm">
+                <SelectValue placeholder="Choose the number to dial from" />
+              </SelectTrigger>
+              <SelectContent>
+                {available.map((n) => (
+                  <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === campaign.numberId ? " · current" : ""}</SelectItem>
+                ))}
+                {answering.map((n) => (
+                  <SelectItem key={n.id} value={n.id} disabled>
+                    {n.number} · {n.assignedTo.length > 0
+                      ? `answering ${n.label}`
+                      : `assigned to ${n.assignedAgent?.name ?? n.label}`} — a line can&apos;t answer and dial at once
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              One number per campaign — load-balancing across several is coming.
+            </p>
+          </div>
+
+          <CampaignDialingFields campaign={campaign} onChange={onChange} />
+          <CampaignLaunchFields campaign={campaign} onChange={onChange} />
+        </div>
+
+        <CampaignContacts draft={draft} campaign={campaign} onChange={onChange} />
+      </div>
+
+      <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
+        <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button size="sm" disabled={!campaign.name.trim()} onClick={onSave}>
+          {isNew ? "Save campaign" : "Save changes"}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Contacts — the campaign's CSV (upload · coverage · scrolling preview) ────
+
+// Deterministic preview rows (wireframe): enough to show real shape + internal
+// scrolling without ever growing the page.
+const PREVIEW_NAMES = [
+  "Ava Chen", "Liam Patel", "Maya Ortiz", "Noah Kim", "Zoe Ahmed", "Eli Novak",
+  "Ivy Santos", "Owen Brooks", "Lea Fischer", "Max Rivera", "Nia Kowalski", "Theo Lang",
+  "Ana Costa", "Ben Haddad", "Mia Johansson", "Raj Mehta", "Sara Lind", "Tom Baker",
+  "Uma Rao", "Vik Sharma", "Wes Cole", "Ines Duarte", "Yara Aziz", "Zack Moore",
+]
+const PREVIEW_ROWS = PREVIEW_NAMES.map((name, i) => ({
+  phone: `+1 (415) 555-${String(1204 + i * 7).slice(-4)}`,
+  name,
+  account: `AC-${2400 + i * 13}`,
+  balance: `$${(140 + i * 37) % 900}.${String(20 + (i * 7) % 80).padStart(2, "0")}`,
+  dueDate: `2026-08-${String(1 + (i % 28)).padStart(2, "0")}`,
+}))
+
+function CampaignContacts({
+  draft, campaign, onChange,
+}: {
+  draft: AgentDraft
+  campaign: CampaignDraft
+  onChange: (patch: Partial<CampaignDraft>) => void
+}) {
+  const hasCsv = !!campaign.csvName
+  const missing = campaignMissingVars(draft, campaign)
+  // Coverage AHA: the moment every {{variable}} finds its column, the green
+  // check pops. Keyed so the one-shot replays.
+  const varsCovered = hasCsv && missing.length === 0 && extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
+  const prevCovered = React.useRef(varsCovered)
+  const [coveredFlash, setCoveredFlash] = React.useState(0)
+  React.useEffect(() => {
+    if (varsCovered && !prevCovered.current) setCoveredFlash((k) => k + 1)
+    prevCovered.current = varsCovered
+  }, [varsCovered])
+
+  const attachCsv = () => {
+    onChange({ csvName: "contacts.csv", contacts: MOCK_CSV_ROWS })
+    toast.success("contacts.csv attached", {
+      description: `${MOCK_CSV_ROWS} contacts · columns: ${MOCK_CSV_COLUMNS.join(", ")}`,
+    })
+  }
+
+  return (
+    <section className="flex min-w-0 flex-col rounded-lg border border-border bg-background/50">
+      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5">
+        <p className="text-sm font-medium">Contacts</p>
+        <button
+          type="button"
+          onClick={() => toast("Template downloaded", { description: `Columns: ${MOCK_CSV_COLUMNS.join(", ")}` })}
+          className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Download className="h-3.5 w-3.5" aria-hidden /> Download template
+        </button>
+      </header>
+
+      {!hasCsv ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-10 text-center">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <Upload className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-sm font-medium">Upload this campaign&apos;s contacts</p>
+            <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
+              A CSV with one row per person.{" "}
+              <InfoHint label={<>How <code className="font-mono">{"{{variables}}"}</code> work</>}>
+                Each <code className="font-mono">{"{{variable}}"}</code> in your prompt is filled
+                from the CSV column with the same name — upload adds one variable per column.
+              </InfoHint>
+            </p>
+          </div>
+          <Button size="sm" className="gap-1.5" onClick={attachCsv}>
+            <Upload className="h-3.5 w-3.5" aria-hidden /> Upload contacts CSV
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3 p-3">
+          <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{campaign.contacts ?? MOCK_CSV_ROWS} contacts uploaded</p>
+              <p className="truncate font-mono text-xs text-muted-foreground">{campaign.csvName}</p>
+            </div>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={attachCsv}>Replace file</Button>
+          </div>
+
+          {/* Prompt-variable coverage — it's about THIS list, so it lives here. */}
+          {missing.length === 0 ? (
+            <div
+              key={coveredFlash}
+              className={cn(
+                "flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 p-3",
+                varsCovered && coveredFlash > 0 && "wz-anchor-flash",
+              )}
+            >
+              <Check className={cn("mt-0.5 h-4 w-4 shrink-0 text-success", varsCovered && coveredFlash > 0 && "sx-tick-pop")} />
+              <p className="text-xs leading-relaxed text-foreground">
+                {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
+                  ? "All prompt variables are covered by this CSV's columns. Ready to deploy."
+                  : "Contacts ready. Your prompt uses no {{variables}} yet — add some in Context to personalize each call from these columns."}
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-foreground">
+                  This CSV is missing {missing.length} prompt variable{missing.length > 1 ? "s" : ""}:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {missing.map((v) => (
+                    <Badge key={v} variant="outline" className="h-6 border-destructive/40 px-2 font-mono text-xs font-medium text-destructive">{`{{${v}}}`}</Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Add these columns, or remove them from the system prompt. Deploy stays blocked until they match.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Preview scrolls INSIDE the panel: the page length never depends on
+              how many contacts were uploaded. */}
+          <div>
+            <p className="pb-2 text-xs text-muted-foreground">
+              Preview · first {PREVIEW_ROWS.length} of {campaign.contacts ?? MOCK_CSV_ROWS} rows
+            </p>
+            <div className="max-h-[300px] overflow-y-auto rounded-md border border-border">
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-card">
+                  <TableRow>
+                    <TableHead>Phone number</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Account</TableHead>
+                    <TableHead>Balance</TableHead>
+                    <TableHead>Due date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {PREVIEW_ROWS.map((r) => (
+                    <TableRow key={r.phone}>
+                      <TableCell className="font-mono text-xs">{r.phone}</TableCell>
+                      <TableCell className="text-sm">{r.name}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{r.account}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{r.balance}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{r.dueDate}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}

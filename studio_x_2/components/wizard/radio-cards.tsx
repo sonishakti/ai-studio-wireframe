@@ -26,6 +26,63 @@ export function RadioCardGroup({
   )
 }
 
+/** Multi-select sibling of RadioCard — same card anatomy, checkbox semantics
+ *  (aria-pressed + a check indicator instead of the radio circle). Used by the
+ *  Channel section's multi-select grid (2026-07-28 IA). */
+export function ToggleCard({
+  title,
+  description,
+  hint,
+  pressed,
+  onPressedChange,
+  badge,
+  disabled,
+  className,
+}: {
+  title: React.ReactNode
+  description?: React.ReactNode
+  hint?: string
+  pressed: boolean
+  onPressedChange: (on: boolean) => void
+  /** Small trailing chip (e.g. "Soon") — renders beside the title. */
+  badge?: React.ReactNode
+  disabled?: boolean
+  className?: string
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      disabled={disabled}
+      title={hint}
+      onClick={() => onPressedChange(!pressed)}
+      data-state={pressed ? "on" : "off"}
+      className={cn(
+        "group relative flex min-w-0 flex-col items-start gap-1.5 rounded-lg border border-border bg-card p-4 pr-12 text-left shadow-xs outline-none transition-colors",
+        "hover:border-foreground/25 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "data-[state=on]:border-primary disabled:pointer-events-none disabled:opacity-50",
+        className,
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-md border transition-colors",
+          pressed ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50",
+        )}
+      >
+        <svg viewBox="0 0 12 12" className={cn("h-3 w-3 transition-transform", pressed ? "scale-100" : "scale-0")} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 6.5 4.5 9 10 3.5" />
+        </svg>
+      </span>
+      <span className="flex items-center gap-2 text-sm font-medium leading-none">{title}{badge}</span>
+      {description ? (
+        <span className="text-sm leading-snug text-muted-foreground">{description}</span>
+      ) : null}
+    </button>
+  )
+}
+
 export function RadioCard({
   title,
   description,

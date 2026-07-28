@@ -53,8 +53,8 @@ import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
-import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT, type AgentType as AgentTypeT } from "@/lib/wizard-draft"
-import { CreateAgentDialog, TEMPLATE_ICONS } from "@/components/wizard/create-agent-dialog"
+import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT } from "@/lib/wizard-draft"
+import { CreateAgentDialog, TEMPLATE_ICONS, type CreateAgentValue } from "@/components/wizard/create-agent-dialog"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { toast } from "sonner"
 
@@ -369,8 +369,8 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           </DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            {/* ?step=7 lands on Go live (v3 journey order). */}
-                            <Link href={`/agents/${agent.id}/edit?step=7`}>Deploy</Link>
+                            {/* ?step=4 lands on Go Live (v4 order). */}
+                            <Link href={`/agents/${agent.id}/edit?step=4`}>Deploy</Link>
                           </DropdownMenuItem>
                           {/* A reversible off-switch — Delete must never be the
                               only way to stop a live agent (user-test S2). */}
@@ -578,19 +578,28 @@ export default function AgentsPage() {
   // the start landing — a no-op that stranded mid-build drafts). It restores
   // whatever draft is in progress; the start landing has its own segment.
   const showList = (toList: boolean) => router.push(toList ? "/agents?view=list" : "/agents?view=builder")
-  // Owner design set 22–23 Jul (Figma 2698-109831): "New agent" opens the
-  // CREATE DIALOG (name · type · template) instead of instantly blanking.
+  // v4 (2026-07-28): "New agent" opens the AI-FIRST create dialog — describe
+  // what you want (mock inference picks template + channels) or pick a
+  // template from the radio list.
   const startBlank = () => setCreateOpen(true)
   // Dialog → seed the new-agent draft slot and remount the builder on it —
   // same landing idiom as import-as-new (write the slot, remount, restore).
-  const createAgent = (v: { name: string; type: AgentTypeT; templateId: string }) => {
+  const createAgent = (v: CreateAgentValue) => {
     const tpl = AGENT_TEMPLATES.find((t) => t.id === v.templateId)
     const base = v.templateId === "blank" || !tpl ? { ...EMPTY_DRAFT } : templateToDraft(tpl)
     const name = v.name || base.name || "New agent"
-    saveDraft({ ...base, name, type: v.type })
-    // One-shot landing notice: the builder toasts "created" (not "restored")
-    // and opens at the TOP of the journey.
-    stashImportNotice({ name, hadPrompt: !!base.systemPrompt, kind: "create" })
+    const seeded = { ...base, name, channels: v.channels.length ? v.channels : base.channels }
+    // The describe-box text is the user's words — fold it into the prompt
+    // rather than dropping it (blank template: it BECOMES the seed prompt).
+    if (v.description) {
+      seeded.systemPrompt = base.systemPrompt
+        ? `${base.systemPrompt}\n\nWhat the builder asked for: ${v.description}`
+        : `You are a voice agent. ${v.description}\n\nBe concise and helpful. Greet the caller, do your job, and escalate to a human if asked.`
+    }
+    saveDraft(seeded)
+    // One-shot landing notice: the builder toasts "created" (not "restored"),
+    // says what the inference picked, and opens at the TOP of the journey.
+    stashImportNotice({ name, hadPrompt: !!seeded.systemPrompt, kind: "create", inferred: v.inferred })
     setCreateOpen(false)
     setBuilderId("new")
     setBlankNonce((n) => n + 1) // remount even if already on "new"
@@ -739,7 +748,7 @@ function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => v
   const [draftName, setDraftName] = React.useState<string | null>(null)
   React.useEffect(() => {
     const d = restoreDraft()
-    if (d && (d.name.trim() || d.systemPrompt.trim() || d.type)) setDraftName(d.name.trim() || "Untitled agent")
+    if (d && (d.name.trim() || d.systemPrompt.trim() || d.channels.length)) setDraftName(d.name.trim() || "Untitled agent")
   }, [])
 
   return (

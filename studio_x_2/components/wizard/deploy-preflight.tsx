@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { cn } from "@/lib/utils"
 import {
-  publishBlocks, channelTarget, typeLabel, outboundMissingVars,
-  MOCK_CSV_ROWS, DEFAULT_ANALYSIS, type AgentDraft,
+  publishBlocks, channelTarget, campaignMissingVars, activeCampaigns, hasChannel,
+  MOCK_CSV_ROWS, DEFAULT_ANALYSIS, type AgentDraft, type CampaignDraft,
 } from "@/lib/wizard-draft"
 import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS } from "@/lib/campaign-data"
 
@@ -19,13 +19,10 @@ import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS } from "@/lib/c
  * clicks Deploy we need a summary for the deploy to be validated").
  *
  * EVERY deploy — not just batch — opens a pre-flight: a systems check that
- * verifies the real config row by row, ticking in sequence (the launch-
- * countdown aha). Anything unmet appears IN the checklist as an amber row
- * with its own Fix → jump, so validation isn't a scolding toast — it's the
- * interaction. Batch keeps its full manifest (contacts · window · concurrency
- * · honest cost estimate) inside the same surface, with "Talk to it first"
- * as the safer exit. Confirm arms only what's true: "All systems go" or
- * "Review fixes".
+ * verifies the real config row by row, ticking in sequence. Anything unmet
+ * appears IN the checklist as an amber row with its own Fix → jump. Batch
+ * carries one row + manifest line PER CAMPAIGN (multi-campaign IA,
+ * 2026-07-28), with "Talk to it first" as the safer exit.
  */
 
 interface CheckRow {
@@ -34,9 +31,26 @@ interface CheckRow {
   label: string
   value: string
   state: "ok" | "warn"
-  /** Journey section that fixes a warn row. */
+  /** Journey section (1 Voice · 2 Channel · 3 Context · 4 Go Live) that fixes a warn row. */
   fixStep?: number
   fixLabel?: string
+}
+
+function campaignWarn(draft: AgentDraft, c: CampaignDraft): { value: string; fixStep: number; fixLabel: string } | null {
+  if (!c.numberId) return { value: `"${c.name}" needs a caller-ID number.`, fixStep: 4, fixLabel: "Pick a number" }
+  if (!c.csvName) return { value: `"${c.name}" is missing its contacts CSV.`, fixStep: 4, fixLabel: "Add contacts" }
+  if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
+    return { value: `"${c.name}" is scheduled but has no start time.`, fixStep: 4, fixLabel: "Set schedule" }
+  }
+  const missing = campaignMissingVars(draft, c)
+  if (missing.length) {
+    return {
+      value: `"${c.name}": ${missing.length} {{variable}}${missing.length > 1 ? "s" : ""} missing a CSV column`,
+      fixStep: 3,
+      fixLabel: "Edit prompt",
+    }
+  }
+  return null
 }
 
 function buildRows(draft: AgentDraft): CheckRow[] {
@@ -44,34 +58,44 @@ function buildRows(draft: AgentDraft): CheckRow[] {
   const blockFor = (step: number) => blocks.find((b) => b.step === step)
   const rows: CheckRow[] = []
 
-  // 1 · Channel
-  const chBlock = blockFor(1)
+  // Channel(s)
+  const chBlock = blockFor(2)
   rows.push({
-    id: "channel", icon: Waypoints, label: "Channel",
-    value: chBlock ? chBlock.reason : `${draft.type ? typeLabel(draft.type) : ""} · ${channelTarget(draft)}`,
+    id: "channel", icon: Waypoints, label: draft.channels.length > 1 ? "Channels" : "Channel",
+    value: chBlock ? chBlock.reason : channelTarget(draft),
     state: chBlock ? "warn" : "ok",
-    fixStep: chBlock ? 1 : undefined, fixLabel: chBlock?.action,
+    fixStep: chBlock ? 2 : undefined, fixLabel: chBlock?.action,
   })
 
-  // batch · Contacts (its own row — the list is what the deploy DIALS)
-  if (draft.type === "outbound") {
-    const csv = draft.config.outbound?.csvName
-    const missing = csv ? outboundMissingVars(draft) : []
-    rows.push({
-      id: "contacts", icon: Users, label: "Contacts",
-      value: !csv
-        ? "Upload a contacts CSV."
-        : missing.length
-          ? `${missing.length} {{variable}}${missing.length > 1 ? "s" : ""} missing a CSV column`
-          : `${MOCK_CSV_ROWS} contacts · ${csv} · variables covered`,
-      state: !csv || missing.length ? "warn" : "ok",
-      fixStep: !csv ? 1 : missing.length ? 2 : undefined,
-      fixLabel: !csv ? "Add contacts" : missing.length ? "Edit prompt" : undefined,
+  // Batch: one row per active campaign — the lists are what the deploy DIALS.
+  if (hasChannel(draft, "batch")) {
+    const active = activeCampaigns(draft)
+    if (active.length === 0) {
+      rows.push({
+        id: "campaigns", icon: Users, label: "Batch",
+        value: draft.channels.length === 1
+          ? "Create a campaign to start batch calling."
+          : "No campaigns yet — batch stays idle until you create one.",
+        state: draft.channels.length === 1 ? "warn" : "ok",
+        fixStep: draft.channels.length === 1 ? 4 : undefined,
+        fixLabel: draft.channels.length === 1 ? "New campaign" : undefined,
+      })
+    }
+    active.forEach((c, i) => {
+      const warn = campaignWarn(draft, c)
+      rows.push({
+        id: `campaign-${c.id}`, icon: Users, label: i === 0 ? "Batch" : "",
+        value: warn
+          ? warn.value
+          : `${c.name} · ${c.contacts ?? MOCK_CSV_ROWS} contacts · ${c.csvName} · variables covered`,
+        state: warn ? "warn" : "ok",
+        fixStep: warn?.fixStep, fixLabel: warn?.fixLabel,
+      })
     })
   }
 
-  // 2 · Prompt
-  const prBlock = blockFor(2)
+  // Prompt (Context)
+  const prBlock = blockFor(3)
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
   rows.push({
     id: "prompt", icon: FileText, label: "Prompt",
@@ -79,19 +103,19 @@ function buildRows(draft: AgentDraft): CheckRow[] {
       ? prBlock.reason
       : `${draft.systemPrompt.trim().length.toLocaleString()} chars${vars.length ? ` · ${vars.length} {{variable}}${vars.length > 1 ? "s" : ""}` : ""} · greeting ${draft.greeting.trim() ? "set" : "default"}`,
     state: prBlock ? "warn" : "ok",
-    fixStep: prBlock ? 2 : undefined, fixLabel: prBlock?.action,
+    fixStep: prBlock ? 3 : undefined, fixLabel: prBlock?.action,
   })
 
-  // 4 · Voice
-  const vBlock = blockFor(4)
+  // Voice (section 1)
+  const vBlock = blockFor(1)
   rows.push({
     id: "voice", icon: AudioLines, label: "Voice",
     value: vBlock ? vBlock.reason : `${draft.stack.tts.voice} · ${draft.stack.tts.vendor} · ${draft.stack.language ?? "English"}`,
     state: vBlock ? "warn" : "ok",
-    fixStep: vBlock ? 4 : undefined, fixLabel: vBlock?.action,
+    fixStep: vBlock ? 1 : undefined, fixLabel: vBlock?.action,
   })
 
-  // 3 · Models (defaults always validate — the row shows WHAT deploys)
+  // Models (defaults always validate — the row shows WHAT deploys)
   const est = stackEstimateFor(draft.stack)
   rows.push({
     id: "models", icon: Cpu, label: "Models",
@@ -99,10 +123,10 @@ function buildRows(draft: AgentDraft): CheckRow[] {
     state: "ok",
   })
 
-  // 7 · Capture
+  // Structured outputs
   const an = { ...DEFAULT_ANALYSIS, ...draft.analysis }
   rows.push({
-    id: "capture", icon: ClipboardCheck, label: "Capture",
+    id: "capture", icon: ClipboardCheck, label: "Outputs",
     value: [
       an.transcribe ? "transcripts" : null,
       an.record ? "recording" : null,
@@ -130,7 +154,7 @@ export function DeployPreflight({
   draft: AgentDraft
   /** The truthful CTA ("Launch batch calls" / "Redeploy" / "Deploy"). */
   ctaLabel: string
-  /** Set when launching a batch takes a live inbound line dark. */
+  /** Set when a redeploy takes a live inbound line dark. */
   liveInboundNumber?: string
   onConfirm: () => void
   /** Close + jump to the section that fixes a warn row. */
@@ -140,9 +164,10 @@ export function DeployPreflight({
   const rows = React.useMemo(() => (open ? buildRows(draft) : []), [open, draft])
   const warns = rows.filter((r) => r.state === "warn")
   const allGo = warns.length === 0
-  const batch = draft.type === "outbound"
+  const batch = hasChannel(draft, "batch")
+  const ready = batch ? activeCampaigns(draft).filter((c) => !campaignWarn(draft, c)) : []
+  const totalContacts = ready.reduce((sum, c) => sum + (c.contacts ?? MOCK_CSV_ROWS), 0)
   const est = stackEstimateFor(draft.stack)
-  const out = draft.config.outbound
   const stagger = 140
 
   // The footer verdict lands AFTER the last row ticks — the countdown resolves.
@@ -161,11 +186,13 @@ export function DeployPreflight({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Rocket className="h-4 w-4 text-muted-foreground" aria-hidden />
-            {batch ? `Pre-flight check — ${MOCK_CSV_ROWS} contacts` : "Pre-flight check"}
+            {batch && ready.length > 0
+              ? `Pre-flight check — ${ready.length} campaign${ready.length > 1 ? "s" : ""} · ${totalContacts.toLocaleString()} contacts`
+              : "Pre-flight check"}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {batch
-              ? `Deploying starts the batch — ${draft.name || "your agent"} dials every contact in your list. Checking the configuration first:`
+            {batch && ready.length > 0
+              ? `Deploying starts the campaigns — ${draft.name || "your agent"} dials every contact in each list. Checking the configuration first:`
               : `What ${draft.name || "your agent"} goes live with:`}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -205,25 +232,25 @@ export function DeployPreflight({
           ))}
         </ul>
 
-        {/* Batch manifest — the numbers that matter at the moment of spend. */}
-        {batch && (
+        {/* Batch manifest — the numbers that matter at the moment of spend,
+            one line per ready campaign. */}
+        {batch && ready.length > 0 && (
           <ul className="space-y-1 text-sm text-muted-foreground">
             {liveInboundNumber && (
               <li>· {draft.name || "Your agent"} stops answering {liveInboundNumber} while on Batch calls</li>
             )}
-            {out?.launch?.mode === "scheduled" && (
-              <li>
-                · Starts: {out.launch.startDate ?? "date not set"} {out.launch.startTime ?? ""}{" "}
-                {out.launch.timezone ? `(${out.launch.timezone})` : ""}
+            {ready.map((c) => (
+              <li key={c.id}>
+                · {c.name}: {PHONE_NUMBERS.find((n) => n.id === c.numberId)?.number ?? "selected number"} ·{" "}
+                {c.launch?.mode === "scheduled"
+                  ? `starts ${c.launch.startDate} ${c.launch.startTime ?? ""} ${c.launch.timezone ? `(${c.launch.timezone})` : ""}`
+                  : "starts on deploy"} ·{" "}
+                {c.callWindow === "anytime" ? "anytime" : c.callWindow === "extended" ? "extended hours" : "business hours"} ·
+                up to {c.maxConcurrent ?? 10} at once
               </li>
-            )}
-            <li>
-              · Caller ID: {PHONE_NUMBERS.find((n) => n.id === out?.numberId)?.number ?? "selected number"} ·{" "}
-              {out?.callWindow === "anytime" ? "anytime" : out?.callWindow === "extended" ? "extended hours" : "business hours (contact's local time)"} ·
-              up to {out?.maxConcurrent ?? 10} at once
-            </li>
+            ))}
             <li className="tabular-nums">
-              · Estimate: ~${Math.round(MOCK_CSV_ROWS * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min —{" "}
+              · Estimate: ~${Math.round(totalContacts * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min —{" "}
               <InfoHint label="what's in this estimate?">
                 Sums the stack&apos;s list prices per minute (speech recognition + model + voice) and
                 Agora platform minutes. Carrier/SIP charges from your own trunk are NOT included.
@@ -232,7 +259,7 @@ export function DeployPreflight({
             </li>
             {/* Post-launch orientation (user-test 2026-07-24: the pre-flight
                 committed a 500-call batch without saying where to WATCH it). */}
-            <li>· Watch it live in Monitor › Call History once the batch starts</li>
+            <li>· Watch them live in Monitor › Call History once dialing starts</li>
           </ul>
         )}
 
@@ -246,8 +273,7 @@ export function DeployPreflight({
           )}
         >
           {/* Configuration-scoped verdict (user-test 2026-07-24: "All systems
-              go" dressed a client-side config check as server verification —
-              a claim the first real failed deploy would detonate). */}
+              go" dressed a client-side config check as server verification). */}
           {allGo
             ? "Configuration complete — ready to launch."
             : `${warns.length} check${warns.length > 1 ? "s" : ""} need${warns.length > 1 ? "" : "s"} attention before launch.`}

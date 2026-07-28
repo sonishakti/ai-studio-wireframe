@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet"
 import { CodeBlock } from "@/components/code-block"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
-import { channelTarget, type AgentDraft, type AgentType } from "@/lib/wizard-draft"
+import { channelTarget, type AgentDraft, type CampaignDraft, type DeployChannel } from "@/lib/wizard-draft"
 
 /**
  * CustomConfigDrawer — "Custom config": the whole agent as JSON. VIEW by default;
@@ -56,17 +56,19 @@ export function CustomConfigDrawer({
         ? { id: voice.id, name: voice.name, tts_voice: voice.ttsVoice, language: voice.language }
         : null,
       stack: draft.stack,
-      type: draft.type,
-      channel_target: draft.type ? channelTarget(draft) : null,
+      channels: draft.channels,
+      channel_target: draft.channels.length ? channelTarget(draft) : null,
       system_prompt: draft.systemPrompt,
       greeting: draft.greeting,
       knowledge: draft.knowledge,
       mcp: draft.mcp,
       connectors: draft.connectors,
+      campaigns: draft.campaigns,
       config: draft.config,
     }
     if (draft.advanced) config.advanced = draft.advanced
     if (draft.analysis) config.analysis = draft.analysis
+    if (draft.callBehavior) config.call_behavior = draft.callBehavior
     return JSON.stringify(config, null, 2)
   }, [open, draft])
 
@@ -100,11 +102,12 @@ await client.joinChannel({ channel: "support-room" })`
   async
 ></script>`
 
+  // v4 sections (2026-07-28): Voice · Channel · Context · Go Live.
   const sections: { label: string; step: number }[] = [
     { label: "Voice", step: 1 },
-    { label: "Type & channel", step: 2 },
-    { label: "Prompt & tools", step: 3 },
-    { label: "Deploy", step: 4 },
+    { label: "Channel", step: 2 },
+    { label: "Context", step: 3 },
+    { label: "Go Live", step: 4 },
   ]
 
   return (
@@ -153,7 +156,7 @@ await client.joinChannel({ channel: "support-room" })`
               ) : (
                 <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 p-3 text-sm">
                   <Check className="h-4 w-4 shrink-0 text-success" aria-hidden />
-                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, stack, type, knowledge, mcp, connectors, config, advanced, analysis. Voice is read-only here (set it in step 1).</span>
+                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, stack, channels, campaigns, knowledge, mcp, connectors, config, advanced, analysis, call_behavior. Voice is read-only here (pick it in the Voice section).</span>
                 </div>
               )}
             </div>
@@ -220,12 +223,26 @@ function toPatch(parsed: Record<string, unknown>): Partial<AgentDraft> {
   const kn = strArr(parsed.knowledge); if (kn) p.knowledge = kn
   const mc = strArr(parsed.mcp); if (mc) p.mcp = mc
   const co = strArr(parsed.connectors); if (co) p.connectors = co
-  if (parsed.type === null || parsed.type === "inbound" || parsed.type === "outbound" || parsed.type === "code") {
-    p.type = parsed.type as AgentType | null
+  if (Array.isArray(parsed.channels)) {
+    p.channels = (parsed.channels as unknown[]).filter(
+      (c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code",
+    )
+  }
+  if (Array.isArray(parsed.campaigns)) {
+    // Campaigns apply only when every entry carries the fields the Go Live
+    // panel dereferences (id/name/status) — a partial row would break render.
+    const ok = (parsed.campaigns as unknown[]).every(
+      (c) => !!c && typeof c === "object" &&
+        typeof (c as Record<string, unknown>).id === "string" &&
+        typeof (c as Record<string, unknown>).name === "string" &&
+        typeof (c as Record<string, unknown>).status === "string",
+    )
+    if (ok) p.campaigns = parsed.campaigns as CampaignDraft[]
   }
   if (isValidStack(parsed.stack)) p.stack = parsed.stack as AgentDraft["stack"]
   if (parsed.config && typeof parsed.config === "object") p.config = parsed.config as AgentDraft["config"]
   if (parsed.advanced && typeof parsed.advanced === "object") p.advanced = parsed.advanced as AgentDraft["advanced"]
   if (parsed.analysis && typeof parsed.analysis === "object") p.analysis = parsed.analysis as AgentDraft["analysis"]
+  if (parsed.call_behavior && typeof parsed.call_behavior === "object") p.callBehavior = parsed.call_behavior as AgentDraft["callBehavior"]
   return p
 }

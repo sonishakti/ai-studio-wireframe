@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, CalendarClock, PhoneOff, PhoneForwarded } from "lucide-react"
+import { Check, CalendarClock, PhoneOff, PhoneForwarded, Timer } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -19,59 +19,31 @@ import { useFutureScope } from "@/lib/future-scope"
 import {
   DEFAULT_CALL_BEHAVIOR,
   type CallBehaviorConfig,
+  type CampaignDraft,
   type LaunchConfig,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
 /**
- * Call settings — the batch deployment's full run config (Figma "Create New
- * Campaign", node 2593-101785, adopted 2026-07-21): launch timing (now vs
- * scheduled) · dialing (window, concurrency, retries, ring, pacing) · hang-up
- * rules · transfer-to-human. Values live on the DRAFT (config.outbound.launch
- * + draft.callBehavior), never section-local state, so they survive
- * close/reopen and feed the deploy pre-flight manifest.
- *
- * Returns a FRAGMENT of SectionRows ([label | content], owner 2026-07-21) —
- * the host's <SectionRows> owns the container; each group names itself on the
- * LHS, so the RHS is pure controls.
+ * Call settings (v4 IA, 2026-07-28) — split two ways:
+ *   • PER-CAMPAIGN (Go Live › campaign editor): launch timing + dialing
+ *     window/concurrency/retries — `CampaignLaunchFields` / `CampaignDialingFields`
+ *     take `(campaign, onChange)` since a batch agent runs SEVERAL campaigns.
+ *   • AGENT-LEVEL (`draft.callBehavior`): hang-up rules, ring/pacing, and
+ *     transfer-to-human — `HangupSettings` / `PacingSettings` /
+ *     `TransferSettings` render in the Go Live "Batch call behavior" sheet;
+ *     `InboundCallSettings` renders inline in Go Live for inbound agents.
  */
-export function CallSettings({ draft, update }: StepProps) {
-  if (draft.type !== "outbound") {
-    // Explorable, not hidden (builder philosophy): say who this is for
-    // instead of vanishing the row for non-batch agents.
-    return (
-      <SectionRow id="wz-1-callsettings" label="Call settings">
-        <p className="text-sm text-muted-foreground">
-          These settings apply to Batch calls. Pick <span className="font-medium text-foreground">Batch calls</span> above
-          to schedule the launch, dialing, and hang-up rules.
-        </p>
-      </SectionRow>
-    )
-  }
-  return (
-    <>
-      <LaunchTiming draft={draft} update={update} />
-      <DialingSettings draft={draft} update={update} />
-      <HangupSettings draft={draft} update={update} />
-      <TransferSettings draft={draft} update={update} />
-    </>
-  )
-}
 
-/**
- * Inbound call settings — INLINE in the builder (proposal 2639-102124,
- * 2026-07-22; supersedes the link-out to the number page): how answered calls
- * end (end-of-conversation · voicemail detection · max duration · silence
- * hang-up) + transfer-to-human. Same draft.callBehavior the batch rows use.
- * Returns SectionRow siblings for the host's <SectionRows>.
- */
+// ─── Inbound — how answered calls end (inline in Go Live) ─────────────────────
+
 export function InboundCallSettings({ draft, update }: StepProps) {
   const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
   const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
 
   return (
     <>
-      <SectionRow label="Inbound Call Settings" hint="How answered calls end.">
+      <SectionRow id="wz-4-inbound" label="Inbound call settings" hint="How answered calls end.">
         <BehaviorToggle
           label="End of conversation"
           desc="Hang up when the conversation naturally ends."
@@ -120,44 +92,45 @@ export function InboundCallSettings({ draft, update }: StepProps) {
   )
 }
 
-// ─── Launch timing — now vs scheduled (Figma "Launch Timing") ─────────────────
+// ─── Per-campaign: launch timing (now vs scheduled) ───────────────────────────
 
 const TIMEZONES = [
   "US Pacific (PT)", "US Mountain (MT)", "US Central (CT)", "US Eastern (ET)",
   "UTC", "Europe — London", "Europe — Berlin", "India (IST)", "Singapore (SGT)",
 ]
 
-function LaunchTiming({ draft, update }: StepProps) {
-  const out = draft.config.outbound
-  const launch: LaunchConfig = out?.launch ?? { mode: "now" }
-  const patch = (p: Partial<LaunchConfig>) =>
-    update({ config: { ...draft.config, outbound: { ...out, launch: { ...launch, ...p } } } })
+export function CampaignLaunchFields({
+  campaign, onChange,
+}: {
+  campaign: CampaignDraft
+  onChange: (patch: Partial<CampaignDraft>) => void
+}) {
+  const launch: LaunchConfig = campaign.launch ?? { mode: "now" }
+  const patch = (p: Partial<LaunchConfig>) => onChange({ launch: { ...launch, ...p } })
 
   return (
-    <SectionRow
-      id="wz-1-callsettings"
-      label={<span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden /> Launch timing</span>}
-      hint="When the batch starts dialing."
-    >
+    <div className="space-y-3">
+      <Label className="flex items-center gap-2 text-sm font-medium">
+        <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden /> Launch timing
+      </Label>
       <RadioCardGroup
         value={launch.mode}
         onValueChange={(v) => v && patch({ mode: v as LaunchConfig["mode"] })}
-        aria-label="When the batch starts"
-        className="gap-4 @lg:grid-cols-2"
+        aria-label="When the campaign starts"
+        className="gap-3 @lg:grid-cols-2"
       >
-        <RadioCard value="now" title="Launch on deploy" description="Start calling contacts the moment you deploy" />
+        <RadioCard value="now" title="Launch on deploy" description="Start calling the moment you deploy" />
         <RadioCard value="scheduled" title="Schedule for later" description="Pick a specific start time" />
       </RadioCardGroup>
 
       {launch.mode === "scheduled" && (
-        <div className="space-y-4">
-          {/* Date · time · timezone are one parallel decision row, not a
-              sequence — side-by-side (layout rule 2026-06). */}
-          <div className="grid grid-cols-1 gap-4 @lg:grid-cols-3">
+        <div className="space-y-3">
+          {/* Date · time · timezone are one parallel decision row — side-by-side. */}
+          <div className="grid grid-cols-1 gap-3 @lg:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="lt-date" className="text-sm font-medium">Start date</Label>
+              <Label htmlFor={`lt-date-${campaign.id}`} className="text-sm font-medium">Start date</Label>
               <Input
-                id="lt-date"
+                id={`lt-date-${campaign.id}`}
                 type="date"
                 value={launch.startDate ?? ""}
                 onChange={(e) => patch({ startDate: e.target.value })}
@@ -165,9 +138,9 @@ function LaunchTiming({ draft, update }: StepProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="lt-time" className="text-sm font-medium">Start time</Label>
+              <Label htmlFor={`lt-time-${campaign.id}`} className="text-sm font-medium">Start time</Label>
               <Input
-                id="lt-time"
+                id={`lt-time-${campaign.id}`}
                 type="time"
                 value={launch.startTime ?? ""}
                 onChange={(e) => patch({ startTime: e.target.value })}
@@ -185,37 +158,31 @@ function LaunchTiming({ draft, update }: StepProps) {
             </div>
           </div>
           <InfoHint label="How scheduling meets the call window">
-            The batch begins at this time; the call window below still bounds each day&apos;s dialing.
+            The campaign begins at this time; the call window still bounds each day&apos;s dialing.
           </InfoHint>
         </div>
       )}
-    </SectionRow>
+    </div>
   )
 }
 
-// ─── Dialing — window · concurrency · retries · ring · pacing ─────────────────
+// ─── Per-campaign: dialing window · concurrency · retries ─────────────────────
 
-// Batch settings — stored on the DRAFT (not section-local state) so they
-// survive close/reopen and appear in the rail recap, the deploy review, and
-// the config JSON (heuristic-eval finding #7).
-function DialingSettings({ draft, update }: StepProps) {
-  const out = draft.config.outbound
-  const patch = (p: Partial<NonNullable<typeof out>>) =>
-    update({ config: { ...draft.config, outbound: { ...out, ...p } } })
-  const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
-  const patchCb = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
-
+export function CampaignDialingFields({
+  campaign, onChange,
+}: {
+  campaign: CampaignDraft
+  onChange: (patch: Partial<CampaignDraft>) => void
+}) {
   return (
-    <SectionRow label="Dialing" hint="Window, concurrency, retries, and pacing.">
-      {/* grid-cols-1 is load-bearing: an implicit column is min-content-sized,
-          and the nowrap Select values (e.g. "Business hours (9–5…)") would
-          force ~300px and overflow a starved center column. */}
-      <div className="grid grid-cols-1 gap-4 @lg:grid-cols-2">
+    <div className="space-y-3">
+      <Label className="text-sm font-medium">Dialing</Label>
+      <div className="grid grid-cols-1 gap-3 @lg:grid-cols-3">
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Call window</Label>
+          <Label className="text-xs text-muted-foreground">Call window</Label>
           <Select
-            value={out?.callWindow ?? "business"}
-            onValueChange={(v) => patch({ callWindow: v as "business" | "extended" | "anytime" })}
+            value={campaign.callWindow ?? "business"}
+            onValueChange={(v) => onChange({ callWindow: v as CampaignDraft["callWindow"] })}
           >
             <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -227,10 +194,10 @@ function DialingSettings({ draft, update }: StepProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Max concurrent</Label>
+          <Label className="text-xs text-muted-foreground">Max concurrent</Label>
           <Select
-            value={String(out?.maxConcurrent ?? 10)}
-            onValueChange={(v) => patch({ maxConcurrent: Number(v) })}
+            value={String(campaign.maxConcurrent ?? 10)}
+            onValueChange={(v) => onChange({ maxConcurrent: Number(v) })}
           >
             <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -239,10 +206,10 @@ function DialingSettings({ draft, update }: StepProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Retry unanswered</Label>
+          <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
           <Select
-            value={String(out?.retries ?? 1)}
-            onValueChange={(v) => patch({ retries: Number(v) })}
+            value={String(campaign.retries ?? 1)}
+            onValueChange={(v) => onChange({ retries: Number(v) })}
           >
             <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -252,39 +219,15 @@ function DialingSettings({ draft, update }: StepProps) {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="dl-ring" className="text-sm font-medium">Ring duration (seconds)</Label>
-          <Input
-            id="dl-ring"
-            type="number"
-            value={cb.ringDurationSec}
-            onChange={(e) => patchCb({ ringDurationSec: Number(e.target.value) })}
-            className="text-sm font-mono"
-          />
-        </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="dl-interval" className="text-sm font-medium">Minimum interval between calls (ms)</Label>
-        <Input
-          id="dl-interval"
-          type="number"
-          value={cb.minIntervalMs}
-          onChange={(e) => patchCb({ minIntervalMs: Number(e.target.value) })}
-          className="max-w-[200px] text-sm font-mono"
-        />
-        <p className="text-xs text-muted-foreground">
-          One call every {cb.minIntervalMs || 1000} ms ({(1000 / (cb.minIntervalMs || 1000)).toFixed(1)} call{1000 / (cb.minIntervalMs || 1000) === 1 ? "" : "s"} per second).
-        </p>
-      </div>
-      {/* Capacity comment rides the row that owns max-concurrent. */}
-      <OutboundCapacityNote draft={draft} />
-    </SectionRow>
+      <CampaignCapacityNote maxConcurrent={campaign.maxConcurrent ?? 10} />
+    </div>
   )
 }
 
-// ─── Hang-up configuration (Figma "Hang-up Configuration") ────────────────────
+// ─── Agent-level: hang-up · pacing · transfer (the batch-behavior sheet) ──────
 
-function HangupSettings({ draft, update }: StepProps) {
+export function HangupSettings({ draft, update }: StepProps) {
   const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
   const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
 
@@ -330,8 +273,8 @@ function HangupSettings({ draft, update }: StepProps) {
           <p className="text-xs text-muted-foreground">
             Call ends after {cb.silenceTimeoutSec} seconds of no response.{" "}
             <InfoHint label="Two silence settings?">
-              Different from the turn-taking silence in Voice &amp; speech › Turn-taking &amp;
-              interruptions — that one shapes when the agent replies; this one ends the call.
+              Different from the turn-taking silence in Voice › Advanced — that one shapes
+              when the agent replies; this one ends the call.
             </InfoHint>
           </p>
         </div>
@@ -351,9 +294,48 @@ function HangupSettings({ draft, update }: StepProps) {
   )
 }
 
+/** Ring + pacing — agent-level batch dialing rhythm (applies to every
+ *  campaign; per-campaign concurrency lives in the campaign editor). */
+export function PacingSettings({ draft, update }: StepProps) {
+  const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
+  const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
+
+  return (
+    <SectionRow
+      label={<span className="flex items-center gap-2"><Timer className="h-4 w-4 text-muted-foreground" aria-hidden /> Ring &amp; pacing</span>}
+      hint="Applies to every campaign this agent runs."
+    >
+      <div className="space-y-1.5">
+        <Label htmlFor="pc-ring" className="text-sm font-medium">Ring duration (seconds)</Label>
+        <Input
+          id="pc-ring"
+          type="number"
+          value={cb.ringDurationSec}
+          onChange={(e) => patch({ ringDurationSec: Number(e.target.value) })}
+          className="max-w-[200px] text-sm font-mono"
+        />
+        <p className="text-xs text-muted-foreground">Give up dialing after this long ringing.</p>
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="pc-interval" className="text-sm font-medium">Minimum interval between calls (ms)</Label>
+        <Input
+          id="pc-interval"
+          type="number"
+          value={cb.minIntervalMs}
+          onChange={(e) => patch({ minIntervalMs: Number(e.target.value) })}
+          className="max-w-[200px] text-sm font-mono"
+        />
+        <p className="text-xs text-muted-foreground">
+          One call every {cb.minIntervalMs || 1000} ms ({(1000 / (cb.minIntervalMs || 1000)).toFixed(1)} call{1000 / (cb.minIntervalMs || 1000) === 1 ? "" : "s"} per second).
+        </p>
+      </div>
+    </SectionRow>
+  )
+}
+
 // ─── Transfer to human (Figma "Transfer Call to Human") ───────────────────────
 
-function TransferSettings({ draft, update }: StepProps) {
+export function TransferSettings({ draft, update }: StepProps) {
   const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
   const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
 
@@ -416,20 +398,16 @@ function BehaviorToggle({
   )
 }
 
-/** At-the-wall purchase moment (A6, graft from the judge round's variant C):
- *  picking a max-concurrent above the project's line capacity is where the
- *  limit is FELT — so the unlock lives here, inline, not on a billing page
- *  the operator would have to go find. One component owns ALL capacity
- *  communication for batch calls (a split select-suffix + note drifted). */
-function OutboundCapacityNote({ draft }: { draft: StepProps["draft"] }) {
+/** At-the-wall purchase moment (A6): picking a max-concurrent above the
+ *  project's line capacity is where the limit is FELT — so the unlock lives
+ *  here, inline, per campaign. Future-scope-gated. */
+function CampaignCapacityNote({ maxConcurrent }: { maxConcurrent: number }) {
   const [purchasedBoost, setPurchasedBoost] = React.useState(0)
   const [linesOpen, setLinesOpen] = React.useState(false)
   const [future] = useFutureScope()
   const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchasedBoost })
-  const chosen = draft.config.outbound?.maxConcurrent ?? 10
-  const overBy = Math.max(0, chosen - stats.totalLines)
+  const overBy = Math.max(0, maxConcurrent - stats.totalLines)
 
-  // A6 (self-serve concurrency) is future-scope-gated.
   if (!future) return null
   if (overBy === 0 && purchasedBoost === 0) return null
 
@@ -439,7 +417,7 @@ function OutboundCapacityNote({ draft }: { draft: StepProps["draft"] }) {
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.04] px-3 py-2.5">
           <p className="flex-1 min-w-0 text-xs text-muted-foreground">
             <span className="font-medium text-foreground">
-              {chosen} at once is above your {stats.totalLines} concurrent lines.
+              {maxConcurrent} at once is above your {stats.totalLines} concurrent lines.
             </span>{" "}
             Calls beyond {stats.totalLines} queue until a line frees — nothing drops. +{overBy}{" "}
             lines (${overBy * stats.pricePerLineMo}/mo, prorated today) removes the queue.
@@ -452,7 +430,7 @@ function OutboundCapacityNote({ draft }: { draft: StepProps["draft"] }) {
         <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 px-3 py-2.5">
           <Check className="h-4 w-4 shrink-0 text-success" />
           <p className="text-xs text-muted-foreground">
-            {stats.totalLines} concurrent lines — your max of {chosen} runs without queuing.
+            {stats.totalLines} concurrent lines — your max of {maxConcurrent} runs without queuing.
           </p>
         </div>
       )}

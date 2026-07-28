@@ -1,18 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Layers, Gauge, DollarSign } from "lucide-react"
+import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Layers, Gauge, DollarSign, Waypoints } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { publishBlocks, channelTarget, typeLabel, type AgentDraft } from "@/lib/wizard-draft"
+import { publishBlocks, channelTarget, primaryChannel, hasChannel, activeCampaigns, type AgentDraft } from "@/lib/wizard-draft"
 import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 
 /**
- * The Deploy step's REVIEW + GO-LIVE block (below the channel block since
- * 2026-07-13 — deploy is one step, not two). A read-only summary of everything
- * configured + the Deploy CTA. Testing lives on the always-present left
- * identity card ("Talk to…"), so this block is purely review-then-deploy — no
- * duplicate agent widget here. The CTA is gated by `publishBlocks`, surfaced
+ * Go Live's REVIEW + DEPLOY block. A read-only summary of everything
+ * configured + the Deploy CTA. The CTA is gated by `publishBlocks`, surfaced
  * as a "Fix this →" ramp (never a hard-disabled button). Deploy → host fires
  * deployment_went_live + time_to_live, clears the draft, lands on Monitor.
  */
@@ -28,18 +25,19 @@ export function StepPublish({
   /** Agent already deployed: the CTA reads "Redeploy" so this step and the
    *  rail's deploy block never disagree (user-test P0 #3). */
   live?: boolean
-  /** Host-computed CTA label so all three deploy buttons (rail, sub-lg strip,
-   *  this block) say the same thing — e.g. "Launch batch calls" when a live
-   *  agent is being REPOINTED, where a bare "Redeploy" read as re-publishing
-   *  the old channel (user-test #7, D1 S3). */
+  /** Host-computed CTA label so every deploy button says the same thing. */
   ctaLabel?: string
-  /** Jump to the step whose drawer fixes a blocker. */
+  /** Jump to the section that fixes a blocker. */
   onFix: (step: number) => void
 }) {
   const voice = draft.voice ? getVoiceArtifact(draft.voice.id) : undefined
   const agentName = draft.name || voice?.name || "your agent"
   const blocks = publishBlocks(draft)
   const est = stackEstimateFor(draft.stack)
+  const primary = primaryChannel(draft)
+  const batchOnly = primary === "batch"
+  const codeOnly = primary === "code"
+  const campaignCount = activeCampaigns(draft).length
 
   return (
     <div className="space-y-5">
@@ -75,8 +73,8 @@ export function StepPublish({
           the end of this journey, not a header shortcut. */}
       <section className="space-y-4 rounded-lg border border-border bg-card p-5">
         <dl className="space-y-2.5">
-          <ReviewRow icon={typeIcon(draft)} label="Type"
-            value={draft.type ? `${typeLabel(draft.type)} · ${channelTarget(draft)}` : "Not set yet"} />
+          <ReviewRow icon={channelIcon(draft)} label={draft.channels.length > 1 ? "Channels" : "Channel"}
+            value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
           <ReviewRow icon={Layers} label="Models" value={stackLine(draft.stack, { full: true })} />
           <ReviewRow icon={AudioLines} label="Voice"
             value={voice ? `${voice.name} · ${voice.tagline}` : "Not set yet"} />
@@ -85,24 +83,22 @@ export function StepPublish({
         </dl>
         {/* No hard lock: Deploy is always clickable. If something's unfinished
             the ramp above lists each fix; a toast still points to the first. */}
-        {/* sx-rocket-hover: the rocket leans into the launch on hover — the
-            commit moment should feel like one (UTAUT2 hedonic layer). */}
         <Button size="lg" className="sx-rocket-hover w-full gap-2" onClick={onPublish}>
           <Rocket className="h-4 w-4" aria-hidden /> {ctaLabel ?? (live ? "Redeploy" : "Deploy")}
         </Button>
         <p className="text-sm text-muted-foreground">
-          {/* Outcome first, destination second — one sentence each, no
-              narration (owner 2026-07-17). Code deploys stay on this page
-              (the snippets need the minted ID); everything else opens
-              Monitor. The promise always matches the CTA (user-test #12). */}
+          {/* Outcome first, destination second. Code deploys stay on this page
+              (the snippets need the minted ID); everything else opens Monitor. */}
           {live
-            ? draft.type === "outbound"
-              ? `Starts calling your list after one confirmation. Opens Monitor.`
-              : draft.type === "code"
+            ? batchOnly
+              ? `Starts ${campaignCount > 1 ? `${campaignCount} campaigns` : "your campaign"} after one confirmation. Opens Monitor.`
+              : codeOnly
               ? `Updates the agent your app connects to. You stay on this page.`
               : `Your changes take effect on the next call. Opens Monitor.`
-            : draft.type === "code"
+            : codeOnly
             ? `Creates the agent ID for the snippets above. You stay on this page.`
+            : hasChannel(draft, "batch") && campaignCount > 0
+            ? `Puts ${agentName} live${campaignCount > 1 ? ` and starts ${campaignCount} campaigns` : " and starts your campaign"}. Opens Monitor.`
             : `Puts ${agentName} live. Opens Monitor.`}
         </p>
       </section>
@@ -128,9 +124,11 @@ function ReviewRow({
   )
 }
 
-function typeIcon(d: AgentDraft) {
-  if (d.type === "outbound") return PhoneOutgoing
-  if (d.type === "code") return Code2
-  if (d.type === "inbound" && d.config.inbound?.mode === "web") return Globe
+function channelIcon(d: AgentDraft) {
+  if (d.channels.length > 1) return Waypoints
+  const primary = primaryChannel(d)
+  if (primary === "batch") return PhoneOutgoing
+  if (primary === "code") return Code2
+  if (primary === "web") return Globe
   return PhoneIncoming
 }

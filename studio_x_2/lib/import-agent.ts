@@ -27,11 +27,10 @@ export type ImportSource = (typeof IMPORT_SOURCES)[number]
 export interface MappedField {
   /** Source-side path, e.g. `response_engine.general_prompt`. */
   theirs: string
-  /** Where it landed in the builder, e.g. "System prompt · Prompt". Landing
-   *  labels speak the CURRENT section names (Channel · Prompt · Voice & speech
-   *  · Models · Knowledge & Tools) — "Step N" vocabulary died with the v3
-   *  rebuild and stale labels break the report's honesty contract (user-test
-   *  2026-07-21 verification round, ranked #3). */
+  /** Where it landed in the builder, e.g. "System prompt · Context". Landing
+   *  labels speak the CURRENT section names (Voice · Channel · Context · Go
+   *  Live, v4 2026-07-28) — stale labels break the report's honesty contract
+   *  (user-test 2026-07-21 verification round, ranked #3). */
   ours: string
   /** Short human preview of the carried value. */
   value: string
@@ -113,14 +112,15 @@ function catalogLlm(model: string | undefined) {
 
 // ─── report assembly ──────────────────────────────────────────────────────────
 
-/** Where each carried field lands, in the builder's own vocabulary. */
+/** Where each carried field lands, in the builder's own vocabulary (v4
+ *  sections, 2026-07-28: Voice · Channel · Context · Go Live). */
 const LANDS = {
   name: "Agent name · builder header",
-  prompt: "System prompt · Prompt",
-  greeting: "Greeting · Prompt",
-  voice: "Voice · Voice & speech",
-  llm: "LLM · Models",
-  language: "Language · Voice & speech",
+  prompt: "System prompt · Context",
+  greeting: "Greeting · Context",
+  voice: "Voice · Voice",
+  llm: "LLM · Voice › Advanced",
+  language: "Spoken language · Voice",
 } as const
 
 interface Found {
@@ -151,7 +151,7 @@ function extractCallBehavior(p: Rec): { found: NonNullable<Found["callBehavior"]
   const partial: NonNullable<ImportedAgentConfig["callBehavior"]> = {}
   const rows: MappedField[] = []
   const consumed: string[] = []
-  const LAND = "Hang-up configuration · Channel › Call settings"
+  const LAND = "Hang-up configuration · Go Live › call behavior"
 
   // Voicemail detection — Retell boolean / Vapi object (presence = enabled).
   for (const k of ["voicemail_detection", "voicemailDetection"]) {
@@ -254,7 +254,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.voice) {
     dropped.push({
       theirs: found.voice.path,
-      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Voice & speech.`,
+      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Voice.`,
     })
   }
   const llm = catalogLlm(found.model?.value)
@@ -263,7 +263,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.model) {
     dropped.push({
       theirs: found.model.path,
-      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Models.`,
+      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Voice › Advanced.`,
     })
   }
   const lang = languageLabelFor(found.language?.value)
@@ -272,13 +272,13 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.language) {
     dropped.push({
       theirs: found.language.path,
-      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Voice & speech.`,
+      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Voice.`,
     })
   }
   if (found.tools?.names.length) {
     dropped.push({
       theirs: `${found.tools.path} (${found.tools.names.length})`,
-      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Knowledge & Tools.`,
+      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Context › Knowledge & Tools.`,
     })
   }
   // Call-behavior rows claim carried only because the partial below IS
@@ -325,52 +325,52 @@ const DROP_REASONS: Record<string, string> = {
   server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverMessages: "Server event streams aren't supported yet.",
-  states: "Conversation states don't port — express the flow in your system prompt (the Prompt section).",
-  starting_state: "Conversation states don't port — express the flow in your system prompt (the Prompt section).",
-  pathway_id: "Bland pathways don't port — express the flow in your system prompt (the Prompt section).",
-  voicemail_detection: "Voicemail detection re-enables as a toggle in Channel › Call settings — the vendor setting itself doesn't port.",
-  voicemailMessage: "Leaving a voicemail message isn't supported — voicemail detection (hang up on machines) is a toggle in Channel › Call settings.",
-  voicemailDetection: "Voicemail detection re-enables as a toggle in Channel › Call settings — the vendor setting itself doesn't port.",
-  endCallMessage: "A scripted closing message isn't supported — end-call behavior lives in Channel › Call settings › Hang-up.",
-  endCallPhrases: "End-call phrases don't port — end-call behavior lives in Channel › Call settings › Hang-up.",
-  end_call_after_silence_ms: "Silence hang-up re-configures in Channel › Call settings › Hang-up (in seconds).",
-  analysisPlan: "Post-call analysis is configured in Go Live › Transcripts, recording and analysis.",
-  artifactPlan: "Recording settings live in Go Live › Transcripts, recording and analysis.",
-  post_call_analysis_data: "Post-call analysis is configured in Go Live › Transcripts, recording and analysis.",
-  post_call_analysis_model: "Post-call analysis is configured in Go Live › Transcripts, recording and analysis.",
-  knowledge_base_ids: "Knowledge re-attaches in Knowledge & Tools.",
-  knowledge_base: "Knowledge re-attaches in Knowledge & Tools.",
+  states: "Conversation states don't port — express the flow in your system prompt (the Context section).",
+  starting_state: "Conversation states don't port — express the flow in your system prompt (the Context section).",
+  pathway_id: "Bland pathways don't port — express the flow in your system prompt (the Context section).",
+  voicemail_detection: "Voicemail detection re-enables as a toggle in Go Live › call behavior — the vendor setting itself doesn't port.",
+  voicemailMessage: "Leaving a voicemail message isn't supported — voicemail detection (hang up on machines) is a toggle in Go Live › call behavior.",
+  voicemailDetection: "Voicemail detection re-enables as a toggle in Go Live › call behavior — the vendor setting itself doesn't port.",
+  endCallMessage: "A scripted closing message isn't supported — end-call behavior lives in Go Live › call behavior › Hang-up.",
+  endCallPhrases: "End-call phrases don't port — end-call behavior lives in Go Live › call behavior › Hang-up.",
+  end_call_after_silence_ms: "Silence hang-up re-configures in Go Live › call behavior › Hang-up (in seconds).",
+  analysisPlan: "Post-call analysis is configured in Go Live › Structured outputs.",
+  artifactPlan: "Recording settings live in Go Live › Structured outputs.",
+  post_call_analysis_data: "Post-call analysis is configured in Go Live › Structured outputs.",
+  post_call_analysis_model: "Post-call analysis is configured in Go Live › Structured outputs.",
+  knowledge_base_ids: "Knowledge re-attaches in Context › Knowledge & Tools.",
+  knowledge_base: "Knowledge re-attaches in Context › Knowledge & Tools.",
   platform_settings: "Platform/auth settings stay vendor-specific.",
-  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Models.",
-  asr: "ASR maps to Agora's bundled STT — tune it in Models.",
-  turn: "Turn-taking tuning lives in Voice & Speech › Turn-taking & interruptions.",
+  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Voice › Advanced.",
+  asr: "ASR maps to Agora's bundled STT — tune it in Voice › Advanced.",
+  turn: "Turn-taking tuning lives in Voice › Advanced › Speech tuning.",
   conversation: "Conversation limits stay vendor-specific.",
   ambient_sound: "Ambient audio isn't supported yet.",
   backgroundSound: "Background audio isn't supported yet.",
-  interruption_sensitivity: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
-  interruption_threshold: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
-  responsiveness: "Turn-taking tuning lives in Voice & Speech › Turn-taking & interruptions.",
-  startSpeakingPlan: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
-  stopSpeakingPlan: "Interruption tuning lives in Voice & Speech › Turn-taking & interruptions.",
+  interruption_sensitivity: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
+  interruption_threshold: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
+  responsiveness: "Turn-taking tuning lives in Voice › Advanced › Speech tuning.",
+  startSpeakingPlan: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
+  stopSpeakingPlan: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
   enable_backchannel: "Backchannel tuning stays vendor-specific.",
   backchannel_frequency: "Backchannel tuning stays vendor-specific.",
   backchannel_words: "Backchannel tuning stays vendor-specific.",
   boosted_keywords: "ASR keyword boosting isn't supported yet (Advanced's keywords are wake words, not boosting).",
   keywords: "ASR keyword boosting isn't supported yet (Advanced's keywords are wake words, not boosting).",
   pronunciation_dictionary: "Pronunciation dictionaries aren't supported yet.",
-  max_duration: "Max call duration re-configures in Channel › Call settings › Hang-up.",
-  max_call_duration_ms: "Max call duration re-configures in Channel › Call settings › Hang-up (in seconds).",
-  silenceTimeoutSeconds: "Silence hang-up re-configures in Channel › Call settings › Hang-up.",
+  max_duration: "Max call duration re-configures in Go Live › call behavior › Hang-up.",
+  max_call_duration_ms: "Max call duration re-configures in Go Live › call behavior › Hang-up (in seconds).",
+  silenceTimeoutSeconds: "Silence hang-up re-configures in Go Live › call behavior › Hang-up.",
   reminder_trigger_ms: "Reminder nudges stay vendor-specific.",
   reminder_max_count: "Reminder nudges stay vendor-specific.",
   dynamic_data: "Dynamic variables move to the deployment's CSV columns.",
   default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns.",
   voice_speed: "Voice tuning stays vendor-specific.",
   voice_temperature: "Voice tuning stays vendor-specific.",
-  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Models.",
+  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Voice › Advanced.",
   fallback_voice_ids: "Voice fallbacks stay vendor-specific.",
   volume: "Voice tuning stays vendor-specific.",
-  firstMessageMode: "Who speaks first is part of the greeting (the Prompt section).",
+  firstMessageMode: "Who speaks first is part of the greeting (the Context section).",
   clientMessages: "Client event streams aren't configurable here yet.",
   metadata: "Freeform metadata isn't carried.",
   tags: "Tags aren't carried.",
@@ -517,9 +517,9 @@ function parseElevenLabs(p: Rec): VendorParse {
     for (const k of ["asr", "turn", "conversation"]) {
       if (rec(cc[k])) extra.push({ theirs: `conversation_config.${k}`, reason: DROP_REASONS[k] ?? "Voice-pipeline tuning stays vendor-specific." })
     }
-    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Models." })
+    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Voice › Advanced." })
     if (Array.isArray(promptObj?.knowledge_base) && (promptObj!.knowledge_base as unknown[]).length) {
-      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Knowledge & Tools." })
+      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Context › Knowledge & Tools." })
     }
   }
   const consumed = new Set(["name", "conversation_config"])
@@ -541,7 +541,7 @@ function parseBland(p: Rec): VendorParse {
   }
   const extra: DroppedField[] = []
   const tier = str(p.model)
-  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Models.` })
+  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Voice › Advanced.` })
   const consumed = new Set(["name", "agent_name", "prompt", "task", "first_sentence", "voice", "voice_id", "language", "tools", "model"])
   return withSweep(assemble(found, "Bland", extra, []), p, consumed)
 }
@@ -762,6 +762,9 @@ export interface ImportNotice {
    *  set) — the landing toast says created, and the builder opens at the TOP,
    *  not at the resume cursor. Default (absent) = import. */
   kind?: "import" | "create"
+  /** AI-first create (v4, 2026-07-28): what the describe-box inference picked
+   *  — surfaced in the landing toast so the mock inference is transparent. */
+  inferred?: string
   at: number
 }
 

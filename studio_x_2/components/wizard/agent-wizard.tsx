@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Mic, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, KeyRound, Pencil } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Rocket, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, FlaskConical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,30 +10,20 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle,
-} from "@/components/ui/sheet"
-import { AgentIdentityCard } from "@/components/agent-identity-card"
 import { AgentSphere } from "@/components/agent-test-panel"
-import { AgentPreviewPanel } from "@/components/wizard/agent-preview-panel"
 import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
-import { StepVoice } from "@/components/wizard/step-voice"
-import { StepAdvanced, HistoryField } from "@/components/wizard/step-advanced"
-import { StepType } from "@/components/wizard/step-type"
+import { VoiceSection } from "@/components/wizard/voice-section"
+import { ChannelSection } from "@/components/wizard/channel-section"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
 import { SectionKnowledgeTools } from "@/components/wizard/step-build"
-import { StepConfigure } from "@/components/wizard/step-configure"
-import { StepPublish } from "@/components/wizard/step-publish"
-import { CallSettings } from "@/components/wizard/step-call-settings"
-import { StepAnalysis } from "@/components/wizard/step-analysis"
-import { SectionRow, SectionRows } from "@/components/wizard/section-row"
-import { InfoHint } from "@/components/wizard/info-hint"
+import { DeploySection } from "@/components/wizard/deploy-section"
+import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
+import { TemplateMenu } from "@/components/wizard/template-menu"
+import { SectionRows } from "@/components/wizard/section-row"
 import { DeployPreflight } from "@/components/wizard/deploy-preflight"
-import { StackTradeoffSlider, StackModelsDetail, StackModelPicker } from "@/components/wizard/stack-config"
-import { TestsSection } from "@/components/eval-tests"
-import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle } from "@/components/wizard/types"
+import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle, resolveStepParam } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
@@ -47,7 +36,8 @@ import {
 } from "@/lib/import-agent"
 import {
   EMPTY_DRAFT, DEFAULT_CALL_BEHAVIOR, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
-  publishBlockReason, channelTarget, typeLabel, MOCK_CSV_ROWS, type AgentDraft, type AgentType,
+  publishBlockReason, channelTarget, channelLabel, hasChannel, primaryChannel, activeCampaigns,
+  type AgentDraft, type DeployChannel,
 } from "@/lib/wizard-draft"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -58,16 +48,15 @@ import { toast } from "sonner"
 /**
  * AgentWizard — the unified creation surface (new · edit · onboarding · empty).
  *
- * A SCROLL-SPY ONE-PAGER in v3 JOURNEY ORDER (IA doc 2026-07-17): the agent
- * ships working on universal defaults, so the sections run Channel → Prompt
- * (Set up) → Voice & speech · Models · Knowledge & Tools (Customize, collapsed)
- * → Go live (Ship). The rail is an OUTLINER: the active section expands to its
- * subsection TOC, every anchor navigable from the left.
- * NOTHING IS LOCKED — every field is editable at any time, zero clicks to
- * reach any of it. Publish is a HINT, not a gate: the reason is shown, the
- * button still works. Deep-links: `?step=N` scrolls to a section, `?dc=`
- * presets a channel + scrolls to Configure, `?artifact=` selects a custom
- * voice. Draft autosaves; live agents get per-section "Reset to live".
+ * A SCROLL-SPY ONE-PAGER in v4 order (2026-07-28): the hot path is THREE core
+ * sections — VOICE (tier + voice) · CHANNEL (multi-select) · CONTEXT (prompt +
+ * knowledge) — then GO LIVE, the deploy panel (campaigns · inbound settings ·
+ * structured outputs · review & deploy). Everything deeper lives in slide-out
+ * panels; testing lives in the docked, resizable Test panel behind the header
+ * Test button. NOTHING IS LOCKED — every field is editable at any time.
+ * Publish is a HINT, not a gate. Deep-links: `?step=N` (legacy 1–7 mapped),
+ * `?dc=` seeds a channel, `?artifact=` selects a custom voice. Draft
+ * autosaves; live agents get per-section "Reset to live".
  */
 export function AgentWizard({
   id,
@@ -80,28 +69,22 @@ export function AgentWizard({
   onImportAsNew,
 }: {
   id: string
-  /** Rendered inline on /agents (not the standalone edit route) — show the
-   *  first-run chrome (secondary-starts line + inviting heading + create). */
+  /** Rendered inline on /agents (not the standalone edit route). */
   landing?: boolean
-  /** First-run only: the user left the provisioning ceremony early, so Aria
-   *  is still warming — Talk is disabled WITH its promise attached ("this
-   *  exact button flips on"), never silently dead. */
+  /** First-run only: Aria is still warming — Talk is disabled WITH its promise
+   *  attached, never silently dead. */
   warming?: boolean
-  /** Open the Talk panel on mount — the ceremony's "Say hello" CTA must land
+  /** Open the Test panel on mount — the ceremony's "Say hello" CTA must land
    *  IN the conversation, not on a form (user-test 2026-07-09 S2). */
   autoTalk?: boolean
   /** Start truly blank, skipping the draft restore. A PROP (not just ?blank=1)
    *  because "New agent" remounts this component in the same tick as its
-   *  router.push — the mount effect would read the OLD URL and resurrect a
-   *  stale draft (race found in the 2026-07-07 walkthrough). */
+   *  router.push (race found in the 2026-07-07 walkthrough). */
   blank?: boolean
   onCreateNew?: () => void
-  /** Opens the starter-templates sheet — templates must be reachable from the
-   *  default landing, not just the list view (heuristic-eval #4). */
+  /** Opens the starter-templates sheet (heuristic-eval #4). */
   onBrowseTemplates?: () => void
-  /** "Create as new agent" from the import dialog: the host page remounts the
-   *  builder on the seeded new-agent draft INLINE (no page hop). Without it
-   *  (standalone edit route) the wizard falls back to /agents/new/edit. */
+  /** "Create as new agent" from the import dialog (inline landing). */
   onImportAsNew?: () => void
 }) {
   const router = useRouter()
@@ -114,39 +97,35 @@ export function AgentWizard({
     [],
   )
   const [draft, setDraft] = React.useState<AgentDraft>(initialDraft)
-  // Master-detail selection (2026-07-07): the right card ALWAYS shows a step.
-  // null = "no explicit choice yet" — the render falls back to a default
-  // captured once on first render (edit reviews from step 1; a new draft lands
-  // on its first incomplete step). Kept nullable so ?step deep links and the
-  // ⌘K event keep their exact semantics.
+  // Master-detail selection: the rail ALWAYS highlights a step. null = "no
+  // explicit choice yet" — the render falls back to a default captured once.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
-  // Accordion (v3): the SET UP pair + the SHIP pair are expanded on load; the
-  // three Customize sections collapse to their header rows — universal
-  // defaults mean nobody has to open them. Opening a rail item or a deep link
-  // expands.
-  // Design set 22–23 Jul (AgentBuilder/DEFAULT): Channel, Test, and Go Live
-  // open; Agent Prompt + the Customize trio collapse to slim rows.
-  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 6: true, 7: true })
+  // Accordion: all four sections open by default (the hot path is short now).
+  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 2: true, 3: true, 4: true })
   const toggleStep = (n: number) => setExpandedSteps((s) => ({ ...s, [n]: !s[n] }))
-  // The Talk panel (identity card + live test) — the ONLY right-side Sheet now.
-  const [talkOpen, setTalkOpen] = React.useState(false)
+
+  // The docked Test panel (v4: replaces the persistent preview column AND the
+  // Talk sheet) — header Test button toggles it; drag its border to resize.
+  const [testOpen, setTestOpen] = React.useState(false)
+  const [testTab, setTestTab] = React.useState<TestPanelTab>("talk")
+  const openTest = React.useCallback((tab: TestPanelTab) => {
+    setTestTab(tab)
+    setTestOpen(true)
+  }, [])
   React.useEffect(() => {
-    if (autoTalk) setTalkOpen(true)
+    if (autoTalk) openTest("talk")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoTalk])
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
   const [testing, setTesting] = React.useState(false)
-  // Visible autosave status — "the copy promises autosave, so show it working"
-  // (heuristic-eval #6). idle → saving (on change) → saved (after the write).
+  // Visible autosave status (heuristic-eval #6). idle → saving → saved.
   const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved">("idle")
   const dirty = React.useRef(false)
   const draftRef = React.useRef(draft)
   draftRef.current = draft
 
-  // The selection the right card renders. Default is locked on FIRST render —
-  // if it tracked firstIncomplete live, finishing a step inline would yank the
-  // card to the next step mid-edit. The mount effect overrides it for restored
-  // drafts and deep links via setOpenStep.
+  // The selection the rail renders. Default locked on FIRST render — tracking
+  // firstIncomplete live would yank the highlight mid-edit.
   const defaultSelected = React.useRef<number | null>(null)
   if (defaultSelected.current == null) defaultSelected.current = isEdit ? 1 : firstIncomplete(draft)
   const selected = openStep ?? defaultSelected.current
@@ -157,96 +136,24 @@ export function AgentWizard({
     setDraft((d) => ({ ...d, ...patch }))
   }, [])
 
-  // Intent switch (Step 2): stash the departing branch's config instead of
-  // silently dropping it — otherwise an old CSV/number leaks into publish and
-  // dials real contacts on the wrong channel. Undo restores it. A MAP, not a
-  // single slot: two consecutive flips must not discard the first branch's
-  // set-aside config (audit 2026-07-07).
-  const typeStash = React.useRef<Partial<Record<AgentType, AgentDraft["config"]>>>({})
-  // Never pre-select the channel (owner 2026-07-17): the cards show no choice
-  // and no config until the user picks — even on a saved agent, whose live
-  // channel is stated by the liveNote line + the panel summary instead. A
-  // restored NEW draft carries the user's own earlier pick, so it stays shown.
-  const [channelTouched, setChannelTouched] = React.useState(!isEdit)
-  const restoreTypeStash = React.useCallback((t: AgentType) => {
-    const s = typeStash.current[t]
-    if (!s) return
-    setChannelTouched(true)
-    dirty.current = true
-    setDraft((d) => ({ ...d, type: t, config: { ...d.config, ...s } }))
-    delete typeStash.current[t]
-  }, [])
-  const selectType = React.useCallback((next: AgentType) => {
-    setChannelTouched(true)
-    const d = draftRef.current
-    if (d.type === next) return
-    // Flipping back to a type whose config we set aside restores it — the
-    // "set aside, not deleted" promise must not depend on the transient toast.
-    if (typeStash.current[next]) {
-      restoreTypeStash(next)
-      return
-    }
-    dirty.current = true
-    const departing = d.type
-    const hasData =
-      departing === "outbound" ? !!(d.config.outbound?.numberId || d.config.outbound?.csvName)
-      : departing === "inbound" ? !!d.config.inbound?.numberId
-      : departing === "code" ? !!d.config.code?.added
-      : false
-    if (departing && hasData) {
-      typeStash.current[departing] = { [departing]: d.config[departing] } as AgentDraft["config"]
-      const nextConfig = { ...d.config }
-      delete nextConfig[departing]
-      setDraft({ ...d, type: next, config: nextConfig })
-      const nameOf = typeLabel
-      const detail =
-        departing === "outbound" ? "contacts CSV and caller-ID number"
-        : departing === "inbound" ? "phone number" : "code setup"
-      toast(`Switched to ${nameOf(next)}`, {
-        description: `Your ${nameOf(departing)} setup (${detail}) was set aside, not deleted.`,
-        action: { label: "Undo", onClick: () => restoreTypeStash(departing) },
-      })
-    } else {
-      setDraft({ ...d, type: next })
-    }
-  }, [restoreTypeStash])
-
-  // ── Section completion — for the mobile chips + the resume cursor ONLY. It
-  //    never gates access: every section is always openable/editable. Order:
-  //    1 Channel · 2 Prompt · 3 Voice · 4 Models · 5 Tools · 6 Test ·
-  //    7 Go live. Customize + Test run on working defaults → always "done";
-  //    Go live ✓ only when actually live.
+  // ── Section completion — for the mobile chips + the resume cursor ONLY.
+  //    1 Voice · 2 Channel · 3 Context · 4 Go Live (✓ only when live).
   const voiceDone = draft.voice !== null
-  const typeDone = draft.type !== null
+  const channelsDone = draft.channels.length > 0 && (!hasChannel(draft, "inbound") || (draft.config.inbound?.numberIds.length ?? 0) > 0)
   const promptDone = draft.systemPrompt.trim().length > 0
   const isLive = isEdit && existing!.status === "live"
-  // NO Pause control here (owner 2026-07-21: "stop adding features I asked
-  // you not to add — eg Pause"). Pausing a live agent stays on the /agents
-  // list dropdown only; user-test recommendations are NOT authorization to
-  // add UI.
-  // "Configure Models Manually" disclosure (proposal 2639-102124: the vendor
-  // selects are tucked, not always visible).
-  const [modelsManualOpen, setModelsManualOpen] = React.useState(false)
+  // NO Pause control here (owner 2026-07-21). Pausing stays on the list.
 
-  // ── Hedonic layer (UTAUT2 hedonic motivation, owner 2026-07-22) ────────────
-  // Completion ticks POP only when a section transitions to done DURING the
-  // session — the all-done sample agent must not fire seven pops on load.
+  // ── Hedonic layer: ticks pop only for IN-SESSION completions. ──────────────
   const initialDones = React.useRef<Set<number> | null>(null)
-  // Sphere ring per autosave; keyed so the one-shot animation replays.
   const [savePulse, setSavePulse] = React.useState(0)
-  // Deploy climax overlay — rings + rising rocket for ~900ms before the
-  // navigation publishDeployment performs. Skipped under reduced motion.
   const [launchBurst, setLaunchBurst] = React.useState(false)
   const isDone = (n: number) =>
-    n === 1 ? typeDone : n === 2 ? promptDone : n === 4 ? voiceDone : n === 7 ? isLive : true
-  // First-render capture: which sections were ALREADY done — their ticks
-  // render still; only in-session completions animate (lazy ref init).
-  if (initialDones.current === null) initialDones.current = new Set([1, 2, 3, 4, 5, 6, 7].filter(isDone))
+    n === 1 ? voiceDone : n === 2 ? channelsDone : n === 3 ? promptDone : isLive
+  if (initialDones.current === null) initialDones.current = new Set([1, 2, 3, 4].filter(isDone))
 
-  // ── One-primary discipline (CTA-judge round 2026-07-14, graft B) ───────────
-  // While step 4's own go-live CTA is on screen, the rail's Deploy demotes to
-  // outline so exactly ONE filled primary exists at the commit moment — every
-  // judge flagged the duplicate-primary collision on sticky arrangements.
+  // ── One-primary discipline: while Go Live's CTA is on screen, the header
+  //    Deploy demotes so exactly ONE filled primary exists. ───────────────────
   const publishRegionRef = React.useRef<HTMLDivElement>(null)
   const [publishInView, setPublishInView] = React.useState(false)
   React.useEffect(() => {
@@ -256,28 +163,25 @@ export function AgentWizard({
     io.observe(el)
     return () => io.disconnect()
   }, [])
+  void publishInView // reserved for CTA demotion styling
+
+  // Header template chip → prompt-editor flash so the apply visibly lands.
+  const [templateFlash, setTemplateFlash] = React.useState(0)
 
   // ── Mount: time-to-live clock; restore + ?artifact/?dc/?step/?template/?blank ──
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    // Mounted only for the commit that ?view=list is about to replace — do
-    // NOTHING (no toast, no restore, no analytics stamp): a stray "Resuming
-    // unsaved edits" toast over the list had a destructive Discard (re-eval #7).
+    // Mounted only for the commit ?view=list is about to replace — do NOTHING.
     if (params.get("view") === "list") return
     markBuildStart()
     const artifactId = params.get("artifact")
     const dc = params.get("dc")
     const stepParam = parseInt(params.get("step") ?? "", 10)
-    // ?step=N now speaks the v3 journey order (1 Channel … 6 Go live).
-    const stepToOpen = stepParam >= 1 && stepParam <= SECTION_COUNT ? stepParam : null
-    // Highlight + scroll to the deep-linked step once sections have painted.
-    // Scheduled HERE, not via a ref-consuming effect: an [openStep]-keyed
-    // effect cancels its own timeout when the queued setOpenStep commits
-    // (audit 2026-07-07: deep links highlighted but never scrolled).
+    // Legacy 7-section links map onto v4; old step 6 (Test) opens the panel.
+    const wantsTestPanel = stepParam === 6
+    const stepToOpen = Number.isFinite(stepParam) ? resolveStepParam(stepParam) : null
     const openLater = (n: number) => {
       setOpenStep(n)
-      // Accordion: a deep link must EXPAND its section, not just scroll to a
-      // collapsed header (same rule as openRow).
       setExpandedSteps((s) => ({ ...s, [n]: true }))
       muteSpy(1500)
       window.setTimeout(() => scrollToStep(n), 120)
@@ -288,20 +192,16 @@ export function AgentWizard({
       url.searchParams.delete(key)
       window.history.replaceState({}, "", url)
     }
+    if (wantsTestPanel) openTest("scenarios")
 
     if (isEdit) {
-      // Reset baseline for a saved agent = its DEPLOYED config ("Reset to
-      // live"), even when unsaved edits are restored on top.
+      // Reset baseline for a saved agent = its DEPLOYED config.
       baseline.current = agentToDraft(existing!)
-      // Unsaved edits survive a refresh via the per-agent slot (#6) —
-      // offer a way back to the saved agent rather than silently resuming.
+      // Unsaved edits survive a refresh via the per-agent slot (#6).
       const unsaved = restoreDraft(existing!.id)
       if (unsaved) {
         setDraft(unsaved)
-        // Sync the ref NOW: selectType below reads draftRef, which otherwise
-        // still holds the pre-restore snapshot until the next render, and its
-        // non-functional setDraft would clobber the restored edits (audit
-        // 2026-07-07: a ?dc= link silently reverted unsaved prompts).
+        // Sync the ref NOW — the dc path below reads draftRef (audit 2026-07-07).
         draftRef.current = unsaved
         toast("Resuming unsaved edits", {
           description: `${existing!.name} has changes that were never deployed.`,
@@ -325,23 +225,18 @@ export function AgentWizard({
         }
       }
       if (dc) {
-        // Route through the stash/undo machinery — a deep link must not flip a
-        // live agent's channel more silently than the UI would (re-eval #17).
-        const t = dcToType(dc)
-        if (t) {
-          selectType(t)
-          if (dc === "web") setDraft((d) => ({ ...d, config: dcToConfig(dc, d.config) }))
-          dirty.current = true
-        }
-        openLater(1)
+        // Multi-select: a deep link ADDS the channel, never swaps silently.
+        setDraft((d) => applyDc(d, dc))
+        dirty.current = true
+        openLater(2)
       } else if (stepToOpen) {
         openLater(stepToOpen)
       }
       return
     }
 
-    // ?blank=1 — an explicitly blank builder ("Create new agent") must not
-    // resurrect the previous draft (re-eval #4). The saved slot is left intact.
+    // ?blank=1 — an explicitly blank builder must not resurrect the previous
+    // draft (re-eval #4). The saved slot is left intact.
     if (blank || params.get("blank") === "1") {
       setDraft({ ...EMPTY_DRAFT })
       baseline.current = { ...EMPTY_DRAFT }
@@ -350,12 +245,11 @@ export function AgentWizard({
       return
     }
 
-    // Template seeding (?template=) — but NEVER clobber real work: a saved
-    // draft with content wins, with a "Reset to template" way back (re-eval #4).
+    // Template seeding (?template=) — but NEVER clobber real work (re-eval #4).
     const templateId = params.get("template")
     const tpl = templateId ? AGENT_TEMPLATES.find((t) => t.id === templateId) : undefined
     if (tpl) {
-      stripParam("template") // refresh falls through to the normal restore path
+      stripParam("template")
       const saved = restoreDraft()
       const savedHasWork = saved && (saved.name.trim() || saved.systemPrompt.trim() || saved.voice)
       if (savedHasWork) {
@@ -374,10 +268,7 @@ export function AgentWizard({
       } else {
         const seeded = templateToDraft(tpl)
         setDraft(seeded)
-        // Persist NOW, not via the debounced autosave: the standalone edit
-        // route can remount the wizard right after this effect (observed
-        // 2026-07-07); the remount's restore path must find the seed or the
-        // template silently degrades to a blank draft.
+        // Persist NOW, not via the debounced autosave (remount race, 2026-07-07).
         saveDraft(seeded)
         baseline.current = seeded
         dirty.current = true
@@ -399,22 +290,17 @@ export function AgentWizard({
       }
     } else if (restored) {
       const at = firstIncomplete(restored)
-      // An import just landed here ("Create as new agent" / list-view import
-      // writes the slot, then remounts the builder) — say THAT, not a generic
-      // "Draft restored", and offer the replaced draft back if there was one.
+      // An import/creation just landed here — say THAT, not "restored".
       const notice = takeImportNotice()
       if (notice?.kind === "create") {
-        // A FRESH creation (dialog → seed slot → remount): creation copy, and
-        // the journey starts at the TOP — a resume cursor pointing at Go Live
-        // read as "restored someone's old work" (owner walkthrough 2026-07-24).
         toast.success(`${notice.name} created`, {
           id: "import-landing",
-          description: "Template applied — pick its channel, then deploy.",
+          description: notice.inferred
+            ? `${notice.inferred}. Review, then deploy.`
+            : "Template applied — pick its channels, then deploy.",
         })
       } else if (notice) {
         const prev = notice.prev
-        // Stable id: the StrictMode replay REPLACES this toast instead of
-        // stacking a duplicate.
         toast.success(`${notice.name} imported as a new agent`, {
           id: "import-landing",
           description: notice.hadPrompt
@@ -432,55 +318,47 @@ export function AgentWizard({
             : undefined,
         })
       } else {
-        toast("Draft restored", { id: "import-landing", description: `Picked up at Step ${at}: ${STEP_TITLES[at - 1]}.` })
+        toast("Draft restored", { id: "import-landing", description: `Picked up at ${STEP_TITLES[at - 1]}.` })
       }
-      // Land the highlight where the work stopped (the default locked on
-      // first render was computed from the empty draft) — creations land at
-      // the top instead.
       if (!stepToOpen && !dc) openLater(notice?.kind === "create" ? 1 : at)
     }
-    if (dc) {
-      const t = dcToType(dc)
-      if (t) next = { ...next, type: t, config: dcToConfig(dc, next.config) }
-    }
+    if (dc) next = applyDc(next, dc)
     setDraft(next)
-    // Reset baseline = what this visit landed with, never the pre-restore
-    // empty draft (one Reset click must not erase restored work).
     baseline.current = next
-    if (dc) openLater(1)
+    if (dc) openLater(2)
     else if (stepToOpen) openLater(stepToOpen)
     if (artifactId || dc) {
       dirty.current = true
-      // Survive an immediate remount (see the template branch above).
       saveDraft(next)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ⌘K "Agent settings" commands open drawers via this event when a wizard is
-  // already mounted — a same-route ?step push never re-fires the mount parser,
-  // so the palette was inert exactly on /agents (re-eval #2). Refs keep the
-  // listener stable while openRow stays fresh.
+  // ⌘K commands open sections via this event when a wizard is already mounted
+  // (a same-route ?step push never re-fires the mount parser — re-eval #2).
   const openRowRef = React.useRef<(n: number) => void>(() => {})
+  const openTestRef = React.useRef(openTest)
+  openTestRef.current = openTest
   React.useEffect(() => {
     const onOpenStep = (e: Event) => {
-      const n = (e as CustomEvent<number>).detail
-      if (typeof n === "number" && n >= 1 && n <= SECTION_COUNT) {
-        e.preventDefault()
-        openRowRef.current(n)
-      }
+      const raw = (e as CustomEvent<number>).detail
+      if (typeof raw !== "number") return
+      e.preventDefault()
+      // Legacy 6 = Test → the panel; everything else maps to a section.
+      if (raw === 6) { openTestRef.current("scenarios"); return }
+      const n = resolveStepParam(raw)
+      if (n) openRowRef.current(n)
     }
+    const onOpenTest = (e: Event) => { e.preventDefault(); openTestRef.current("talk") }
     window.addEventListener("sx:open-wizard-step", onOpenStep)
-    return () => window.removeEventListener("sx:open-wizard-step", onOpenStep)
+    window.addEventListener("sx:open-test-panel", onOpenTest)
+    return () => {
+      window.removeEventListener("sx:open-wizard-step", onOpenStep)
+      window.removeEventListener("sx:open-test-panel", onOpenTest)
+    }
   }, [])
 
   // Autosave BOTH modes (edit gets a per-agent slot) + drive the status chip.
-  // EDIT mode only: a draft byte-identical to the deployed baseline is NOT
-  // unsaved work — clear the slot so "Reset to live" doesn't leave a ghost
-  // that greets the next visit with a false "Resuming unsaved edits" toast
-  // (audit 2026-07-07). New drafts must NOT get this treatment: a template
-  // seed equals ITS baseline by definition, and clearing would lose it on
-  // refresh.
   useDebouncedEffect(() => {
     if (!dirty.current) return
     if (isEdit && baseline.current && JSON.stringify(draftRef.current) === JSON.stringify(baseline.current)) {
@@ -491,14 +369,10 @@ export function AgentWizard({
     }
     saveDraft(draftRef.current, isEdit ? existing!.id : undefined)
     setSaveState("saved")
-    // Hedonic beat: the Test Agent sphere rings once per save — "it heard
-    // you". Keyed counter so the panel replays the one-shot ring.
     setSavePulse((p) => p + 1)
   }, [draft], 600)
 
-  // ── Step navigation — one-pager (2026-07-07): every section is always open;
-  //    "opening" a step means scrolling it into view. ?step=N mirrors explicit
-  //    navigation only (spy-driven highlight changes stay out of the URL).
+  // ── Step navigation — one-pager: "opening" a step = scrolling to it. ───────
   const syncStepParam = (n: number | null) => {
     const url = new URL(window.location.href)
     if (n == null) url.searchParams.delete("step")
@@ -510,23 +384,16 @@ export function AgentWizard({
     if (!el) return
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
-    // Some environments silently drop smooth scrolls (and reduced-motion users
-    // skip the glide anyway) — guarantee arrival: if the section top isn't
-    // near the reading line shortly after, jump instantly. scroll-mt-24 = 96px.
+    // Guarantee arrival: silently-dropped smooth scrolls jump instantly.
     window.setTimeout(() => {
       if (Math.abs(el.getBoundingClientRect().top - 96) > 120) el.scrollIntoView({ block: "start" })
     }, 450)
   }
-  // While a chosen scroll glides, the spy would re-highlight every section it
-  // passes — mute it for the ride so the clicked step stays selected.
+  // While a chosen scroll glides, mute the spy so the clicked step stays lit.
   const spyMutedUntil = React.useRef(0)
   const muteSpy = (ms: number) => { spyMutedUntil.current = Date.now() + ms }
   const openRow = (n: number) => {
-    // Set the highlight FIRST: on a short page (everything in one fold, the
-    // 4K case) nothing scrolls, so the click must still give feedback.
     setOpenStep(n)
-    // Accordion: opening a section from the rail/deep-link expands it (it may
-    // have been collapsed) so the scroll lands on real content, not a header.
     setExpandedSteps((s) => ({ ...s, [n]: true }))
     syncStepParam(n)
     muteSpy(800)
@@ -534,58 +401,11 @@ export function AgentWizard({
   }
   openRowRef.current = openRow
 
-  // Outliner navigation (v3): a rail TOC entry jumps STRAIGHT to its
-  // subsection anchor — "everything navigable from the left panel, no RHS
-  // scrolling to find anything". Expands the section first so the anchor
-  // exists, then glides.
-  // The TOC entry the user last jumped to — highlighted in the rail so the
-  // outliner shows "you are here" (owner 2026-07-17).
-  const [activeAnchor, setActiveAnchor] = React.useState<string | null>(null)
-  const openAnchor = (n: number, anchorId: string) => {
-    setOpenStep(n)
-    setActiveAnchor(anchorId)
-    setExpandedSteps((s) => ({ ...s, [n]: true }))
-    syncStepParam(n)
-    muteSpy(1500)
-    window.setTimeout(() => {
-      const el = document.getElementById(anchorId)
-      if (!el) { scrollToStep(n); return }
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" })
-      // Arrival feedback: flash the target block so the jump visibly lands —
-      // especially when it was already on screen and nothing scrolled.
-      el.classList.remove("wz-anchor-flash")
-      void el.offsetWidth // restart the animation on repeat clicks
-      el.classList.add("wz-anchor-flash")
-      window.setTimeout(() => el.classList.remove("wz-anchor-flash"), 1500)
-      // Same arrival guarantee as scrollToStep: some environments silently
-      // drop long smooth scrolls — if the anchor isn't near the reading line
-      // shortly after, jump instantly. scroll-mt-28 = 112px.
-      window.setTimeout(() => {
-        if (Math.abs(el.getBoundingClientRect().top - 112) > 140) el.scrollIntoView({ block: "start" })
-      }, 450)
-    }, 120)
-  }
-
-  // Stack edits can collapse/expand content ABOVE the clicked control
-  // (MLLM hides the speech knobs in Voice & speech, the preset block
-  // unmounts), which yanked the viewport around. Pin the Models anchor's
-  // viewport position across the reflow: measure before the update, correct
-  // scroll in a layout effect before paint.
-  const stackAnchor = React.useRef<{ el: HTMLElement; top: number } | null>(null)
+  // Stack writes come from the Voice section + its Advanced sheet.
   const updateStack = (stack: AgentDraft["stack"]) => {
-    const el = document.getElementById("wz-3-arch")
-    stackAnchor.current = el ? { el, top: el.getBoundingClientRect().top } : null
     muteSpy(800)
     update({ stack })
   }
-  React.useLayoutEffect(() => {
-    const a = stackAnchor.current
-    if (!a) return
-    stackAnchor.current = null
-    const delta = a.el.getBoundingClientRect().top - a.top
-    if (Math.abs(delta) > 1) window.scrollBy({ top: delta })
-  }, [draft.stack])
 
   // Scroll-spy: the rail highlights the section under the reading line.
   React.useEffect(() => {
@@ -610,60 +430,32 @@ export function AgentWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Per-section reset — against a stable baseline: the DEPLOYED config for
-  //    a live agent ("Reset to live"), or the state this visit started from
-  //    for a new draft. Set once by the mount effect. Buttons disable when the
-  //    section is clean, so reset is never a silent no-op or a surprise wipe.
+  // ── Per-section reset — against a stable baseline (deployed config for a
+  //    live agent, this visit's landing state for a new draft). v4 slices:
+  //    1 Voice (voice + stack + speech tuning) · 2 Channel (channels + config)
+  //    · 3 Context (words + knowledge/tools) · 4 Go Live (campaigns + outputs
+  //    + call behavior). Section 2's reset must NOT clear campaigns — those
+  //    belong to 4.
   const baseline = React.useRef<AgentDraft | null>(null)
-  // v3 slices: 1 Channel (type + config — coupled) · 2 Prompt (words) ·
-  // 3 Voice & speech (voice + language/STT/TTS + speech tuning; the whole
-  // `advanced` rides here — its history field renders in section 5 but resets
-  // with 3, an accepted draft simplification) · 4 Models (pipeline/preset/LLM)
-  // · 5 Knowledge & Tools · 6 Go live (owns no fields — capture config lives
-  // on Monitor now).
-  // Sections 3 and 4 split the shared stack object — they get their own
-  // pick/apply paths below; this covers the sections that own whole fields.
   const stepSlice = (d: AgentDraft, n: number): Partial<AgentDraft> =>
-    n === 1 ? { type: d.type, config: d.config }
-    : n === 2 ? { systemPrompt: d.systemPrompt, greeting: d.greeting }
-    : n === 5 ? { knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
+    n === 1 ? { voice: d.voice, stack: d.stack, advanced: d.advanced }
+    : n === 2 ? { channels: d.channels, config: d.config }
+    : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, failureMessage: d.failureMessage, knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
+    : n === 4 ? { campaigns: d.campaigns, analysis: d.analysis, callBehavior: d.callBehavior }
     : {}
   const stepDirty = (n: number) => {
     const base = baseline.current
     if (!base) return false
-    // Sections 3 and 4 share the stack object; compare only their own fields.
-    // 2026-07-22 IA: 3 = Models (pipeline/preset/llm), 4 = Voice & Speech.
-    if (n === 4) {
-      const pick = (d: AgentDraft) => ({ voice: d.voice, advanced: d.advanced, language: d.stack.language, asr: d.stack.asr, tts: d.stack.tts })
-      return JSON.stringify(pick(draft)) !== JSON.stringify(pick(base))
-    }
-    if (n === 3) {
-      const pick = (d: AgentDraft) => ({ pipeline: d.stack.pipeline, preset: d.stack.preset, llm: d.stack.llm })
-      return JSON.stringify(pick(draft)) !== JSON.stringify(pick(base))
-    }
     return JSON.stringify(stepSlice(draft, n)) !== JSON.stringify(stepSlice(base, n))
   }
   const resetStep = (n: number) => {
     const base = baseline.current
     if (!base) return
-    // Snapshot what's being wiped: reset is one click and must offer a way
-    // back (owner call, 2026-07-07).
     const cur = draftRef.current
-    const sliceFor = (src: AgentDraft): Partial<AgentDraft> =>
-      n === 4
-        ? { voice: src.voice, advanced: src.advanced, stack: { ...cur.stack, language: src.stack.language, asr: src.stack.asr, tts: src.stack.tts } }
-        : n === 3
-        ? { stack: { ...cur.stack, pipeline: src.stack.pipeline, preset: src.stack.preset, llm: src.stack.llm } }
-        : stepSlice(src, n)
-    const before = JSON.parse(JSON.stringify(sliceFor(cur))) as Partial<AgentDraft>
+    const before = JSON.parse(JSON.stringify(stepSlice(cur, n))) as Partial<AgentDraft>
     dirty.current = true
-    // Channel: type and its setup are coupled — restoring the type WITHOUT the
-    // baseline config would bring back an inbound agent with its number gone
-    // (selectType stashes-and-deletes the departing branch; audit 2026-07-07).
-    const slice = sliceFor(base)
-    if (n === 1) typeStash.current = {}
     // Deep-clone: the baseline must never share references with the live draft.
-    update(JSON.parse(JSON.stringify(slice)) as Partial<AgentDraft>)
+    update(JSON.parse(JSON.stringify(stepSlice(base, n))) as Partial<AgentDraft>)
     toast("Step reset to the live version", {
       action: {
         label: "Undo",
@@ -675,14 +467,12 @@ export function AgentWizard({
     })
   }
 
-  // Whole-agent discard: reverting three edited steps must not take three
-  // clicks. Lives in the deploy block, only when something is pending.
+  // Whole-agent discard: reverting three edited steps must not take three clicks.
   const discardEdits = () => {
     const base = baseline.current
     if (!base) return
     const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
     dirty.current = true
-    typeStash.current = {}
     setDraft(JSON.parse(JSON.stringify(base)) as AgentDraft)
     toast("Edits discarded", {
       description: "Back to the live configuration.",
@@ -696,8 +486,7 @@ export function AgentWizard({
     })
   }
 
-  // Apply an edited-JSON patch from the Custom config drawer (F4). Snapshot
-  // first so a bad paste is one Undo away.
+  // Apply an edited-JSON patch from the Custom config drawer (F4).
   const applyConfigPatch = (patch: Partial<AgentDraft>) => {
     const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
     dirty.current = true
@@ -708,20 +497,13 @@ export function AgentWizard({
     })
   }
 
-  // Picking a voice seeds the draft. No jump: on the one-pager the next step
-  // is already visible right below.
+  // Picking a voice seeds the draft (tier-preserving — see seedFromVoice).
   const selectVoice = (v: VoiceArtifact) => {
     dirty.current = true
     setDraft((d) => seedFromVoice(d, v))
   }
 
-  // ── Import landing (user-test #6, 2×S1) ─────────────────────────────────────
-  // The old path pushed every import through seedFromVoice, whose keep-existing-
-  // prompt rule (right for voice SWITCHING) silently dropped the imported prompt
-  // whenever the open draft (Aria) already had one — while the toast claimed the
-  // prompt was "below". Now the import is routed EXPLICITLY: editing a saved
-  // agent asks where it lands (new agent vs apply here), and applying over a
-  // non-empty prompt asks which prompt wins. Every toast states what happened.
+  // ── Import landing (user-test #6, 2×S1) — routed EXPLICITLY. ───────────────
   const [importPending, setImportPending] = React.useState<
     { config: ImportedAgentConfig; phase: "dest" | "conflict" } | null
   >(null)
@@ -734,7 +516,6 @@ export function AgentWizard({
 
   const onImported = (config: ImportedAgentConfig) => {
     if (isEdit) {
-      // A saved agent is open — the import must never silently rewrite it.
       setImportPending({ config, phase: "dest" })
       return
     }
@@ -747,7 +528,7 @@ export function AgentWizard({
 
   /** Apply the import INTO the open draft. Voice + engine always update;
    *  `replacePrompt` decides whether the imported prompt/greeting overwrite
-   *  non-empty ones (seedFromVoice alone keeps existing text). */
+   *  non-empty ones. */
   const applyImport = (config: ImportedAgentConfig, opts: { replacePrompt: boolean }) => {
     const artifact = importedConfigToArtifact(config)
     const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
@@ -756,9 +537,11 @@ export function AgentWizard({
     dirty.current = true
     setDraft((d) => {
       let seeded = seedFromVoice(d, artifact)
-      // Carried call-behavior fields apply here too — the import report's
-      // "carried" rows must hold on the apply-into-open-draft path, not just
-      // create-as-new (2026-07-21).
+      // Imports carry their ENGINE too (the report's LLM row claims it) —
+      // unlike a plain voice switch, the artifact's whole stack applies.
+      if (artifact.stack) {
+        seeded = { ...seeded, stack: { ...artifact.stack, language: d.stack.language } }
+      }
       if (config.callBehavior) {
         seeded = {
           ...seeded,
@@ -799,14 +582,11 @@ export function AgentWizard({
         },
       },
     )
-    // Review lands where the change is: the prompt when it moved, else voice
-    // (v3 order: Prompt = 2, Voice & speech = 3).
-    openRow(promptChanged ? 2 : 3)
+    // Review lands where the change is: Context when the prompt moved, else Voice.
+    openRow(promptChanged ? 3 : 1)
   }
 
-  /** Land the import as its OWN draft — the open agent stays untouched. Writes
-   *  the new-agent slot, stashes the landing notice (with the replaced draft,
-   *  if any, for Undo), and remounts the builder on it. */
+  /** Land the import as its OWN draft — the open agent stays untouched. */
   const createAsNewFromImport = (config: ImportedAgentConfig) => {
     const artifact = importedConfigToArtifact(config)
     const seeded = importedAgentToDraft(config, artifact)
@@ -822,33 +602,22 @@ export function AgentWizard({
     else router.push("/agents/new/edit")
   }
 
-  // Code/SDK third deploy state (user-test #9, D3 S2): after the stay-branch
-  // deploy the UI still read "Draft + go live" while the toast said deployed.
-  // Session flag + the minted agentId on a NEW draft (persists via saveDraft)
-  // both witness the deploy, so a refresh keeps the truth.
+  // Code/SDK third deploy state (user-test #9, D3 S2).
   const [codeDeployedNow, setCodeDeployedNow] = React.useState(false)
   const publishingRef = React.useRef(false)
-  // Batch pre-flight — a ref (not state) so the confirmed re-entry into
-  // publish() can't race the dialog's close render.
-  // Pre-flight (2026-07-24) — the ONE confirmation for every deploy; a ref
-  // (not state) so the confirmed re-entry into publish can't race the
-  // dialog's close render.
+  // Pre-flight — the ONE confirmation for every deploy (2026-07-24); a ref so
+  // the confirmed re-entry can't race the dialog's close render.
   const preflightConfirmedRef = React.useRef(false)
   const [preflightOpen, setPreflightOpen] = React.useState(false)
   const publish = () => {
-    if (publishingRef.current) return // guard: double-click must not double-publish
-    // No-op honesty (user-test #10, D1 S3): redeploying an untouched live
-    // agent fired a success toast + Monitor hop while nothing changed — a
-    // fake success devalues every later toast.
-    const tChanged = isLive && !!baseline.current && draftRef.current.type !== baseline.current.type
-    if (isLive && !anyEdited && !tChanged) {
+    if (publishingRef.current) return // double-click must not double-publish
+    // No-op honesty (user-test #10, D1 S3).
+    const channelsChanged = isLive && !!baseline.current &&
+      JSON.stringify(draftRef.current.channels) !== JSON.stringify(baseline.current.channels)
+    if (isLive && !anyEdited && !channelsChanged) {
       toast("Already live", { description: "No changes since the last deploy." })
       return
     }
-    // PRE-FLIGHT for EVERY deploy (owner 2026-07-24: "we need a summary for
-    // the deploy to be validated"): the systems-check dialog verifies the
-    // config row by row — blockers appear IN the checklist with Fix jumps
-    // instead of a scolding toast, and batch keeps its manifest inside it.
     if (!preflightConfirmedRef.current) {
       setPreflightOpen(true)
       return
@@ -858,20 +627,20 @@ export function AgentWizard({
     const reason = publishBlockReason(draftRef.current)
     if (reason) { toast.error("Not ready to deploy yet", { description: reason }); return }
     publishingRef.current = true
-    // Disarm any pending debounced autosave BEFORE clearing the slot — a save
-    // firing mid-navigation would resurrect the consumed draft (re-eval #16).
+    // Disarm any pending debounced autosave BEFORE clearing the slot (re-eval #16).
     dirty.current = false
     const agentId = draft.agentId ?? `agt_${Date.now().toString(36)}`
-    // Code/SDK deploys STAY on the step: the snippet card says "deploy first,
-    // then copy", so deploy must mint the ID into the visible snippets, not
-    // teleport to Monitor away from them (user-test #7, D3 S2). Monitor rides
-    // the success toast as an action instead.
-    const stay = draftRef.current.type === "code"
+    // Code/SDK deploys STAY on the step: the snippets need the minted ID
+    // (user-test #7, D3 S2). Monitor rides the success toast instead.
+    const stay = primaryChannel(draftRef.current) === "code"
     const doPublish = () => {
+      const d = draftRef.current
+      const primary = primaryChannel(d)
       publishDeployment({
         router, agentId, agentName: draft.name || "Your agent",
-        channel: channelLabel(draft), name: draft.name || "Deployment",
-        mode: draft.type ?? undefined,
+        channel: d.channels.map(channelLabel).join(" · ") || "—",
+        name: draft.name || "Deployment",
+        mode: primary === "batch" ? "outbound" : primary === "code" ? "code" : "inbound",
         stay,
       })
       if (stay) {
@@ -879,8 +648,6 @@ export function AgentWizard({
         const next = { ...draftRef.current, agentId }
         setDraft(next)
         draftRef.current = next
-        // The working copy survives (with its minted ID) — persist it so a
-        // refresh keeps the now-real snippets, and re-arm publish for later edits.
         saveDraft(next, isEdit ? next.agentId : undefined)
         publishingRef.current = false
         return
@@ -888,10 +655,7 @@ export function AgentWizard({
       // Deploying consumes the working copy — clear whichever slot this was.
       clearDraft(isEdit ? draft.agentId : undefined)
     }
-    // Hedonic climax (UTAUT2, owner 2026-07-22): ~900ms of launch rings +
-    // rising rocket before the action completes. publishingRef stays armed
-    // through the delay, so double-clicks can't double-publish; reduced
-    // motion skips straight to the action.
+    // Hedonic climax: ~900ms launch rings before the action completes.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       doPublish()
       return
@@ -899,115 +663,62 @@ export function AgentWizard({
     setLaunchBurst(true)
     window.setTimeout(() => {
       doPublish()
-      // Stay-path (Code/SDK) doesn't navigate — retire the overlay itself.
       if (stay) window.setTimeout(() => setLaunchBurst(false), 300)
     }, 900)
   }
 
-  // ── Left identity card (shared component — keeps the agent present, same as
-  //    the Agents home, so it never "goes missing" when you enter the builder). ──
-  // One voice lookup per id change — getVoiceArtifact reads localStorage, and
-  // this value is needed by the card subtitle AND the Step-1 row summary.
+  // ── Identity facts the Test panel + header share. ──────────────────────────
   const cardVoice = React.useMemo(
     () => (draft.voice ? getVoiceArtifact(draft.voice.id) : undefined),
     [draft.voice],
   )
-  // "Deployed" ≠ "Live" for Code/SDK: the deploy mints the ID; traffic (and
-  // billing) starts when the app connects. Witnessed by the session flag OR a
-  // minted agentId on a NEW draft (edit-mode drafts always carry an id).
-  const codeDeployed = draft.type === "code" && !isLive && (codeDeployedNow || (!isEdit && !!draft.agentId))
+  const codeDeployed = hasChannel(draft, "code") && !isLive && (codeDeployedNow || (!isEdit && !!draft.agentId))
   const cardStatus = isEdit
     ? existing!.status.charAt(0).toUpperCase() + existing!.status.slice(1)
     : codeDeployed ? "Deployed" : "Draft"
-  // Stats come from the DRAFT's stack (not the saved agent) so the card's
-  // $/min + latency move live as the Step-1 stack config changes — and new
-  // drafts show numbers from first paint (balanced default).
   const cardStack = stackLine(draft.stack)
   const cardEst = stackEstimateFor(draft.stack)
-  // No per-provider breakdown for a single-model pipeline.
   const cardLatency = draft.stack.pipeline === "mllm" ? undefined : presetLatencyBreakdown(draft.stack.preset)
   const toggleTest = () => {
-    if (testing) track(Events.agent_test_ended, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new", duration_sec: 30 })
-    else track(Events.agent_test_started, { channel: draft.type ?? "unknown", agent_id: draft.agentId ?? "new" })
+    const channel = primaryChannel(draft) ?? "unknown"
+    if (testing) track(Events.agent_test_ended, { channel, agent_id: draft.agentId ?? "new", duration_sec: 30 })
+    else track(Events.agent_test_started, { channel, agent_id: draft.agentId ?? "new" })
     setTesting((t) => !t)
   }
 
   const blockReason = publishBlockReason(draft)
-  // Honest deploy-state line: a live agent with pending edits says so (the
-  // missing dirty signal was the top finding in every operator audit run).
-  // The optional Advanced / Analysis sections autosave too, so a live agent
-  // with only optional edits must still read "not live yet" (audit 2026-07-07).
-  // `advanced` rides section 3, so the section slices cover every field the
-  // builder edits (capture/`analysis` is edited on Monitor, not here).
-  const anyEdited = isLive && [1, 2, 3, 4, 5].some(stepDirty)
+  // Honest deploy-state line: a live agent with pending edits says so.
+  const anyEdited = isLive && [1, 2, 3, 4].some(stepDirty)
   const deploySub = isLive
     ? anyEdited
       ? "Edits are not live yet. Redeploy to apply."
       : "Changes apply on your next redeploy."
     : codeDeployed
     ? "Deployed — goes live when your app connects."
-    : blockReason ?? "Review the Deploy step and go live."
-  // "Redeploy" on a live agent being REPOINTED read as re-publishing the OLD
-  // channel at the moment of launching a first batch (user-test #7, D1 S3) —
-  // when the type changed since the live baseline, name what actually starts.
-  const typeChanged = isLive && !!baseline.current && draft.type !== baseline.current.type
+    : blockReason ?? "Review Go Live and deploy."
+  const baselineBatch = !!baseline.current?.channels.includes("batch")
+  const channelsChanged = isLive && !!baseline.current &&
+    JSON.stringify(draft.channels) !== JSON.stringify(baseline.current.channels)
   const deployCta = !isLive
     ? codeDeployed ? "Redeploy" : "Deploy"
-    : typeChanged && draft.type === "outbound" ? "Launch batch calls"
-    : typeChanged && draft.type ? `Deploy ${typeLabel(draft.type)}`
-    // A resting "Redeploy" on an untouched live agent asked "redeploy WHAT?"
-    // (round-3 D1) — the clean state names itself; publish()'s no-op guard
-    // already made the click honest, now the label is too.
-    : anyEdited ? "Redeploy" : "Live — no changes"
+    : channelsChanged && hasChannel(draft, "batch") && !baselineBatch ? "Launch batch calls"
+    : anyEdited || channelsChanged ? "Redeploy" : "Live — no changes"
+  const active = activeCampaigns(draft)
+  const preflightCta =
+    hasChannel(draft, "batch") && active.length > 0
+      ? active.every((c) => c.launch?.mode === "scheduled")
+        ? `Schedule campaign${active.length > 1 ? "s" : ""}`
+        : `Start campaign${active.length > 1 ? "s" : ""}`
+      : deployCta === "Live — no changes" ? "Deploy" : deployCta
 
-  // Graft A (judge round): the Deploy fill invites action only when acting
-  // means something — a ready draft or a dirty live agent. A clean live agent,
-  // a blocked draft, or an already-deployed code agent gets the outline.
-  const deployHot = isLive ? anyEdited : codeDeployed ? false : !blockReason
-
-
-  // Three-column shell (Figma "Shell Exploration", 2026-07-15): the agent
-  // lives in a persistent right preview panel; the header owns identity +
-  // Deploy; the rail is pure nav.
-  const [previewCollapsed, setPreviewCollapsed] = React.useState(false)
-  // The right panel doubles as the web-widget preview (owner 2026-07-15): on a
-  // web-widget channel it shows a [Agent | Widget] toggle and defaults to the
-  // widget view — "here's how your widget looks."
-  const [previewView, setPreviewView] = React.useState<"agent" | "widget">("agent")
-  const isWebWidget = draft.type === "inbound" && draft.config.inbound?.mode === "web"
-  React.useEffect(() => {
-    setPreviewView(isWebWidget ? "widget" : "agent")
-  }, [isWebWidget])
-  const { copied: idCopied, copy: copyId } = useCopyFeedback()
   const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
-  // The panel's deployment summary — the same facts the Go-live review used
-  // to card up, now always visible and live (owner 2026-07-17).
-  const previewSummary = {
-    voice: cardVoice ? { name: cardVoice.name, tagline: cardVoice.tagline } : undefined,
-    models: stackLine(draft.stack, { full: true }),
-    estimateLatencyMs: cardEst.latencyMs,
-    estimateCostPerMin: cardEst.costPerMin,
-    channel: draft.type ? channelLine(draft) : undefined,
-    // Draft↔live linkage (Lazyweb F4): rows that differ from the deployed
-    // config carry a "pending" chip, closing the edit → validate → ship loop.
-    pending: isLive
-      ? {
-          voice: stepDirty(4),
-          models: stepDirty(3),
-          estimate: stepDirty(3) || stepDirty(4),
-          channel: stepDirty(1),
-        }
-      : undefined,
-  }
+  const { copied: idCopied, copy: copyId } = useCopyFeedback()
 
   return (
-    // Full-bleed three-column shell built to the Figma "Shell Exploration"
-    // (node 2508:97094) 20px grid — data-fluid removes the layout cap, the
-    // layout adds NO padding, so the wizard owns all spacing: no card, no
-    // outer padding, flush border-divided columns.
+    // Full-bleed shell — data-fluid removes the layout cap; the wizard owns
+    // all spacing: no card, no outer padding, flush border-divided columns.
     <div data-fluid className="flex flex-col">
-      {/* Breadcrumbs (design set 22–23 Jul, "Custom Code Entry" board): the
-          builder states where it sits — All Agents › {name} › Edit Agent. */}
+      {/* Breadcrumbs: All Agents › {name} › Edit Agent. */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 border-b border-border px-5 py-2 text-xs text-muted-foreground">
         <a href="/agents?view=list" className="rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">All Agents</a>
         <ChevronRight className="h-3 w-3" aria-hidden />
@@ -1015,10 +726,10 @@ export function AgentWizard({
         <ChevronRight className="h-3 w-3" aria-hidden />
         <span>Edit Agent</span>
       </nav>
-      {/* Header — px-5 py-4, border-b, gap-4 items-center (Figma Base/Header). */}
+      {/* Header — identity on the left, Test + Deploy on the right. */}
       <header className="flex items-center gap-4 border-b border-border px-5 py-4">
         <AgentSphere size={32} active={testing} />
-        <div className="flex min-w-0 flex-1 items-center gap-8">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <h1 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 shrink-0">
             <input
               value={draft.name}
@@ -1028,10 +739,16 @@ export function AgentWizard({
               className="max-w-[18rem] rounded-md bg-transparent text-base font-semibold leading-6 outline-none [field-sizing:content] placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
             />
           </h1>
-          {/* Status chip beside the name (design: "Aria [Draft]"). */}
-          <Badge variant="secondary" className="shrink-0 -ml-6 text-xs">{previewStatus === "Warming up" ? "Draft" : previewStatus}</Badge>
-          {/* Copyable agent ID — borderless (Figma): bot icon · mono 12/50% ·
-              copy icon. Appears once the agent has an id. */}
+          {/* Template chip next to the name (v4: the template moved OUT of the
+              prompt section to the top, per owner). */}
+          <TemplateMenu
+            draft={draft}
+            update={update}
+            onApplied={() => { setTemplateFlash((k) => k + 1); openRow(3) }}
+          />
+          {/* Status chip beside the name. */}
+          <Badge variant="secondary" className="shrink-0 text-xs">{previewStatus === "Warming up" ? "Draft" : previewStatus}</Badge>
+          {/* Copyable agent ID. */}
           {draft.agentId && (
             <button
               type="button"
@@ -1048,7 +765,7 @@ export function AgentWizard({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {/* Kebab overflow (Figma): New agent · Import · Template. */}
+          {/* Kebab overflow: New agent · Import · Template. */}
           {(onCreateNew || onBrowseTemplates || !isEdit || landing) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1077,15 +794,21 @@ export function AgentWizard({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          {/* </> config view (icon-only, 32px, Figma code-xml). */}
+          {/* </> config view (icon-only). */}
           <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
-          {/* Talk — icon button at every size (design set 22–23 Jul header:
-              ⋮ · </> · waveform · Deploy). */}
-          <Button variant="outline" size="icon" className="size-8" disabled={warming} onClick={() => setTalkOpen(true)} aria-label={`Talk to ${draft.name || "your agent"}`}>
-            <Mic className="size-4" aria-hidden />
+          {/* Test — toggles the docked, resizable Test panel (v4: replaces the
+              persistent preview column + the mic Talk sheet). */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={warming}
+            onClick={() => (testOpen ? setTestOpen(false) : openTest("talk"))}
+            aria-pressed={testOpen}
+            aria-label={`Test ${draft.name || "your agent"}`}
+          >
+            <FlaskConical className="size-4" aria-hidden /> Test
           </Button>
-          {/* Header Deploy RESTORED (22–23 Jul boards show it alongside Go
-              Live's full-width Deploy — two doors, one action). */}
           <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
             <Rocket className="size-4" aria-hidden /> {deployCta}
           </Button>
@@ -1096,7 +819,7 @@ export function AgentWizard({
           step nav + deploy in the fold (top-12 = the app header height). */}
       <div className="sticky top-12 z-30 flex items-center gap-3 border-b border-border bg-background/95 px-5 py-2 backdrop-blur lg:hidden">
         <span className="flex shrink-0 items-center gap-1" role="group" aria-label="Jump to section">
-          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+          {[1, 2, 3, 4].map((n) => (
             <button
               key={n}
               type="button"
@@ -1118,22 +841,16 @@ export function AgentWizard({
         </Button>
       </div>
 
-      {/* FLUSH three-column grid (Figma "Shell Exploration"): rail 320 · config
-          canvas · preview 400, divided by borders (no card, no gaps, no outer
-          padding). The preview column is `auto` — the panel owns its width. */}
-      <div className="grid grid-cols-1 items-start lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_auto]">
-        {/* Rail — p-5 (20px, Figma), border-r divider; scrolls internally on
-            short viewports so the deploy state stays reachable. */}
+      {/* FLUSH grid: rail 320 · config canvas · (optional) docked Test panel.
+          The Test column is `auto` — the panel owns its width via drag. */}
+      <div
+        className={cn(
+          "grid grid-cols-1 items-start lg:grid-cols-[320px_minmax(0,1fr)]",
+          testOpen && "lg:grid-cols-[320px_minmax(0,1fr)_auto]",
+        )}
+      >
+        {/* Rail — pure nav; scrolls internally on short viewports. */}
         <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
-          {/* Rail = pure nav now (Figma 2026-07-15): the agent identity moved
-              to the header and the sphere/Talk to the right preview panel, so
-              the rail holds only the CONFIGURE + OPTIONAL section lists. */}
-
-          {/* OUTLINER rail (v3, decluttered 2026-07-21 per owner screenshot):
-              three journey groups — Set up · Customize · Ship — section names
-              ONLY. The pinned "Next" card and the per-section sub-TOC are
-              GONE: the [label | content] rows inside each section carry the
-              sub-questions now, so the rail duplicating them was noise. */}
           <nav aria-label="Build sections" className="space-y-4">
             {SECTION_GROUPS.map((g) => (
               <div key={g.label} className="space-y-0.5">
@@ -1142,59 +859,44 @@ export function AgentWizard({
                 </p>
                 {g.steps.map((n) => {
                   const Icon = STEP_ICONS[n]
-                  const active = n === selected
+                  const isActive = n === selected
                   return (
-                    <React.Fragment key={n}>
-                      {/* Section icon LEADING + check/dot TRAILING (proposal
-                          2639-102124 rail: green check for configured
-                          sections, muted dot otherwise). */}
-                      <button
-                        type="button"
-                        onClick={() => openRow(n)}
-                        aria-current={active ? "step" : undefined}
-                        aria-expanded={active}
-                        className={cn(
-                          "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
-                          active && "bg-accent/60",
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => openRow(n)}
+                      aria-current={isActive ? "step" : undefined}
+                      aria-expanded={isActive}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
+                        isActive && "bg-accent/60",
+                      )}
+                    >
+                      <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-foreground" : "text-muted-foreground")} aria-hidden />
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
+                        {isDone(n) ? (
+                          <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
+                        ) : (
+                          <span className="size-1.5 rounded-full bg-muted-foreground/40" />
                         )}
-                      >
-                        <Icon className={cn("h-4 w-4 shrink-0", active ? "text-foreground" : "text-muted-foreground")} aria-hidden />
-                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
-                        <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
-                          {isDone(n) ? (
-                            /* Pops only for IN-SESSION completions (UTAUT2
-                               hedonic beat) — pre-done ticks render still. */
-                            <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
-                          ) : (
-                            <span className="size-1.5 rounded-full bg-muted-foreground/40" />
-                          )}
-                        </span>
-                        {isDone(n) && <span className="sr-only">(done)</span>}
-                      </button>
-                    </React.Fragment>
+                      </span>
+                      {isDone(n) && <span className="sr-only">(done)</span>}
+                    </button>
                   )
                 })}
               </div>
             ))}
           </nav>
 
-          {/* Autosave feedback survives the lean pass for BOTH modes — losing
-              "Saving…/Saved" would un-fix heuristic-eval #6. "DRAFT saved",
-              not "Saved": the bare word one line above "Unsaved changes" read
-              as the product contradicting itself (user-test #11, D1) —
-              saved-as-draft ≠ live. */}
+          {/* Autosave feedback — "DRAFT saved", not "Saved" (user-test #11). */}
           {saveState !== "idle" && (
             <p className="px-2.5 text-xs text-muted-foreground" role="status" aria-live="polite">
               {saveState === "saving" ? "Saving…" : "Draft saved"}
             </p>
           )}
 
-          {/* Deploy lives at the END of the journey (proposal 2639-102124) —
-              so the dirty warning must carry a RAMP to it, not just Discard:
-              with the header Deploy gone, "redeploy to apply" next to a lone
-              destructive button was the journey test's only near-abandonment
-              (2026-07-22 D1: "if I were 10% more tired I'd have clicked
-              Discard"). */}
+          {/* Dirty ramp to Go Live + Discard (2026-07-22 D1). */}
           {((isLive && anyEdited) || codeDeployed) && (
             <div className="space-y-2 border-t border-border pt-3">
               {isLive && anyEdited && (
@@ -1205,7 +907,7 @@ export function AgentWizard({
               )}
               {isLive && anyEdited && (
                 <>
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => openRow(7)}>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => openRow(4)}>
                     Review &amp; deploy
                   </Button>
                   <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
@@ -1217,21 +919,10 @@ export function AgentWizard({
           )}
         </aside>
 
-        {/* RHS pane of the unified card: the steps are borderless sections
-            separated by a divider (the card frame + the LHS border-l give the
-            structure), not nested cards. Sections cap content width so 4K shows
-            structure, not 900px inputs (audit width-discipline fix). */}
-        {/* No overflow-hidden here — it would break the sticky section headers
-            (sticky can't escape a clipped ancestor). The rail is unaffected (it
-            lives in the other grid column). Corners: the first header rounds to
-            match the card's top-right (2026-07-08). */}
-        {/* Full-height column dividers live on the CENTER (owner 2026-07-15:
-            the borders "only reached half the page" because the sticky rail/
-            panel columns are shorter than the content). min-h fills the
-            viewport so the dividers span it even when the accordion is short;
-            border-l = rail divider (lg+), border-r = panel divider (xl+). */}
-        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l xl:border-r">
-          {[1, 2, 3, 4, 5, 6, 7].map((n) => {
+        {/* Center column: borderless sections divided by hairlines. No
+            overflow-hidden (sticky headers need to escape). */}
+        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l">
+          {[1, 2, 3, 4].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
               <section
@@ -1240,16 +931,7 @@ export function AgentWizard({
                 aria-labelledby={`wizard-step-${n}-title`}
                 className="scroll-mt-24"
               >
-                {/* Banded header: an opaque strip + bordered icon chip marks
-                    where each section STARTS — a 1px divider alone read as one
-                    flat page (arrange pass, 2026-07-08). STICKY on desktop
-                    (lg:top-12 = under the app header) so the current section's
-                    title stays anchored while you scroll it; bg must be opaque so
-                    content slides cleanly under. The icon NAMES the section;
-                    never a completion tick (rail + deploy block own progress). */}
-                {/* Accordion header (owner 2026-07-15): the band is a toggle —
-                    clicking it expands/collapses the section; a chevron shows
-                    state. Sticky under the app header while its body scrolls. */}
+                {/* Banded sticky accordion header. */}
                 <header className="z-20 flex items-center gap-1 border-b border-border bg-muted lg:sticky lg:top-12">
                   <button
                     type="button"
@@ -1260,13 +942,9 @@ export function AgentWizard({
                   >
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
-                    {/* No mono "output:" artifact line (owner 2026-07-21: it
-                        complicated every band — compiler-speak out). */}
                     <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedSteps[n] && "rotate-180")} aria-hidden />
                   </button>
-                  {/* LIVE agents only: with autosave there is no Save/Cancel, so
-                      this is the one way back to the deployed config. HIDDEN
-                      until the step differs from live. */}
+                  {/* LIVE agents: the one way back to the deployed config. */}
                   {isLive && stepDirty(n) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -1284,169 +962,52 @@ export function AgentWizard({
                     </Tooltip>
                   )}
                 </header>
-                {/* Section anatomy = [label | content] (Figma 2026-07-14): a
-                    quiet repeat of the step name in a 190px label column at
-                    xl+, the form in a roomy content column. aria-hidden — the
-                    band's h3 already names the section. Steps 1–3 cap at 4xl
-                    for readability; Deploy stays fluid (the batch split + the
-                    widget studio manage their own width). */}
-                {/* Body renders only when the section is expanded (accordion). */}
+                {/* Body renders only when the section is expanded. */}
                 {expandedSteps[n] && (
                 <div id={`wizard-step-${n}-body`} className="p-5">
-                  <div className={cn("min-w-0", n !== 1 && "max-w-5xl")}>
-                  {/* Every section is a stack of [label | content] rows (owner
-                      2026-07-21 screenshot direction): LHS carries ONLY the
-                      sub-question's name, RHS the controls — legibility +
-                      whitespace over density. */}
-                  {/* 1 · CHANNEL — the fork. The cards start UNSELECTED (even
-                      on a saved agent — the liveNote + panel summary state the
-                      live channel); config rows flow in below after a pick. */}
+                  {/* Sections 1–3 cap for readability; Go Live stays fluid
+                      (the campaigns' 50/50 CSV grid manages its own width). */}
+                  <div className={cn("min-w-0", n !== 4 && "max-w-5xl")}>
+                  {/* 1 · VOICE — the two handles: tier (cost) + voice. */}
                   {n === 1 && (
                     <SectionRows>
-                      <SectionRow id="wz-1-pick" label={`How will ${draft.name || "your agent"} handle calls?`}>
-                        <StepType
-                          draft={draft}
-                          displayType={channelTouched ? undefined : null}
-                          update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
-                          liveNote={isLive && baseline.current
-                            ? `Switching channels stops ${draft.name || "your agent"} ${baseline.current.type === "outbound" ? "calling from" : "answering"} ${channelTarget(baseline.current)} when you redeploy — the current setup is saved and undoable.`
-                            : undefined}
-                          liveType={isLive ? baseline.current?.type ?? null : null}
-                        />
-                      </SectionRow>
-                      {channelTouched && draft.type && (
-                        <StepConfigure
-                          draft={draft}
-                          update={(patch) => (patch.type ? selectType(patch.type) : update(patch))}
-                          onChooseType={() => openAnchor(1, "wz-1-pick")}
-                        />
-                      )}
-                      {channelTouched && draft.type === "outbound" && (
-                        <CallSettings draft={draft} update={update} />
-                      )}
-                    </SectionRows>
-                  )}
-                  {/* 2 · PROMPT — the words, rewritten for the channel. */}
-                  {n === 2 && (
-                    <SectionRows>
-                      <SectionPrompt draft={draft} update={update} />
-                    </SectionRows>
-                  )}
-                  {/* 3 · MODELS (proposal 2639-102124: Models BEFORE Voice &
-                      Speech) — Model Architecture cards, the LATENCY VS COST
-                      card, and the vendor selects tucked behind "Configure
-                      Models Manually". Stack edits go through updateStack
-                      (spy mute + scroll pinning). */}
-                  {n === 3 && (
-                    <SectionRows>
-                      <SectionRow
-                        id="wz-3-arch"
-                        label={<span className="text-sm font-normal text-muted-foreground">Sets up Agora Conversational AI Engine</span>}
-                      >
-                        <StackModelsDetail stack={draft.stack} onChange={updateStack} showPicker={false} />
-                        <StackTradeoffSlider stack={draft.stack} onChange={updateStack} />
-                        <Collapsible open={modelsManualOpen} onOpenChange={setModelsManualOpen}>
-                          <CollapsibleTrigger asChild>
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1.5 rounded text-sm text-foreground underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              Configure Models Manually <Pencil className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-                            </button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="space-y-6 pt-4">
-                            <StackModelPicker stack={draft.stack} onChange={updateStack} personaName={cardVoice?.name} hideTitle />
-                            <div className="flex items-center gap-2">
-                              <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                              <InfoHint label="Using your own vendor accounts?">
-                                Add keys in{" "}
-                                <a href="/project/vendor-credentials" className="underline underline-offset-2">
-                                  Manage › Vendor Credentials
-                                </a>{" "}
-                                — the ASR, LLM, and TTS you pick here will use them.
-                              </InfoHint>
-                            </div>
-                            {/* Conversation history is MODEL config — how much
-                                context the LLM keeps. */}
-                            <HistoryField
-                              id="wz-3-history"
-                              value={draft.advanced}
-                              onChange={(advanced) => update({ advanced })}
-                            />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </SectionRow>
-                    </SectionRows>
-                  )}
-                  {/* 4 · VOICE & SPEECH — voice + language, and the speech
-                      tuning (turn-taking · attention & filters). */}
-                  {n === 4 && (
-                    <SectionRows>
-                      <StepVoice draft={draft} update={update} onSelectVoice={selectVoice} />
-                      <StepAdvanced
-                        value={draft.advanced}
-                        onChange={(advanced) => update({ advanced })}
-                        realtime={draft.stack.pipeline === "mllm"}
-                        showHistory={false}
+                      <VoiceSection
+                        draft={draft}
+                        update={update}
+                        onSelectVoice={selectVoice}
+                        onStackChange={updateStack}
                       />
                     </SectionRows>
                   )}
-                  {/* 5 · KNOWLEDGE & TOOLS (Customize). */}
-                  {n === 5 && (
+                  {/* 2 · CHANNEL — multi-select + per-channel connection. */}
+                  {n === 2 && (
                     <SectionRows>
+                      <ChannelSection
+                        draft={draft}
+                        update={update}
+                        liveChannels={isLive ? baseline.current?.channels : undefined}
+                        onGoToStep={openRow}
+                      />
+                    </SectionRows>
+                  )}
+                  {/* 3 · CONTEXT — the words + knowledge & tools. */}
+                  {n === 3 && (
+                    <SectionRows>
+                      <SectionPrompt draft={draft} update={update} templateFlash={templateFlash} />
                       <SectionKnowledgeTools draft={draft} update={update} />
                     </SectionRows>
                   )}
-                  {/* 6 · TEST (Ship) — TEST SCENARIOS (owner 2026-07-21: this
-                      section is the cn2meet roadmap's eval feature, NOT a
-                      "start test call" button — Talk already lives on the
-                      preview panel/header). Simulated caller scenarios that
-                      prove the agent behaves before real traffic. */}
-                  {n === 6 && (
-                    <SectionRows>
-                      <SectionRow
-                        id="wz-6-test"
-                        label="Test scenarios"
-                        hint={`Simulated callers that prove ${draft.name || "your agent"} behaves — run them before real traffic.`}
-                      >
-                        <TestsSection agentName={draft.name || "your agent"} />
-                      </SectionRow>
-                    </SectionRows>
-                  )}
-                  {/* 7 · GO LIVE — what each call records (transcripts ·
-                      recording · success eval · data points — the v3 "Analysis
-                      → Go live" fold, finally wired 2026-07-21) + review &
-                      deploy. */}
-                  {n === 7 && (
-                    <SectionRows>
-                      <SectionRow
-                        id="wz-7-capture"
-                        label="Transcripts, recording & analysis"
-                        hint={draft.type === "code"
-                          ? "Choose what each session records. Results appear in Sessions."
-                          : "Choose what each call records. Results appear in Call History."}
-                      >
-                        <StepAnalysis
-                          value={draft.analysis}
-                          onChange={(analysis) => update({ analysis })}
-                          channel={draft.type === "code" ? "session" : "call"}
-                          hideIntro
-                        />
-                      </SectionRow>
-                      <SectionRow id="wz-7-review" label="Review & deploy">
-                        {/* publishRegionRef feeds graft B: while this in-step
-                            go-live CTA is on screen, the rail Deploy demotes. */}
-                        <div ref={publishRegionRef}>
-                          <StepPublish
-                            draft={draft}
-                            live={isLive}
-                            ctaLabel={isLive || codeDeployed ? deployCta : undefined}
-                            onPublish={publish}
-                            onFix={(m) => openRow(m)}
-                          />
-                        </div>
-                      </SectionRow>
-                    </SectionRows>
+                  {/* 4 · GO LIVE — the deploy panel. */}
+                  {n === 4 && (
+                    <DeploySection
+                      draft={draft}
+                      update={update}
+                      live={isLive}
+                      deployCta={isLive || codeDeployed ? deployCta : undefined}
+                      onPublish={publish}
+                      onFix={openRow}
+                      publishRegionRef={publishRegionRef}
+                    />
                   )}
                   </div>
                 </div>
@@ -1454,101 +1015,43 @@ export function AgentWizard({
               </section>
             )
           })}
-          {/* No "Build log / validated:" strip either (owner 2026-07-21: the
-              mono compiler-speak family — output/validated — is out). */}
         </div>
 
-        {/* Third column: the persistent agent preview (xl+ only — no phantom
-            grid cell below xl). Sticky under the app header. */}
-        <div className="hidden xl:block xl:sticky xl:top-12 xl:max-h-[calc(100vh-3rem)] xl:self-start xl:overflow-hidden">
-          <AgentPreviewPanel
-            name={draft.name || (isEdit ? existing!.name : "")}
-            statusLabel={previewStatus}
-            isLive={isLive}
-            statusHint={landing ? "Sample agent — live on the Balanced stack until you change it in Models." : undefined}
-            statusNote={landing || (isEdit && existing?.id === "agt_default")
-              ? "Your sample agent, live on an Agora sandbox line — costs nothing until it takes real traffic."
-              : undefined}
-            templateName={draft.templateName}
-            savePulse={savePulse}
-            latencyMs={cardEst.latencyMs}
-            costPerMin={cardEst.costPerMin}
-            sessionStats={{
-              llm: { vendor: draft.stack.llm.vendor, ms: cardLatency?.llmMs ?? 0 },
-              asr: { vendor: draft.stack.asr.vendor, ms: cardLatency?.asrMs ?? 0 },
-              tts: { vendor: draft.stack.tts.vendor, ms: cardLatency?.ttsMs ?? 0 },
-              e2eMs: cardEst.latencyMs,
-              ttftMs: cardLatency?.llmMs ?? 0,
-              costPerMin: cardEst.costPerMin,
-            }}
-            summary={previewSummary}
-            testing={testing}
-            warming={!!warming}
-            onTalk={() => setTalkOpen(true)}
-            collapsed={previewCollapsed}
-            onToggleCollapsed={() => setPreviewCollapsed((v) => !v)}
-            view={previewView}
-            onViewChange={setPreviewView}
-            showWidgetToggle={!!isWebWidget}
-            widgetAgentId={draft.agentId ?? "new"}
-            widgetGreeting={draft.greeting.trim() || undefined}
-          />
-        </div>
+        {/* Docked Test panel — the third grid column when open (lg+); a Sheet
+            below lg. Resizable by dragging its left border. */}
+        <TestPanel
+          open={testOpen}
+          onOpenChange={setTestOpen}
+          tab={testTab}
+          onTabChange={setTestTab}
+          agentName={draft.name || (isEdit ? existing!.name : "your agent")}
+          showWidgetTab={hasChannel(draft, "web")}
+          widgetAgentId={draft.agentId ?? "new"}
+          widgetGreeting={draft.greeting.trim() || undefined}
+          identity={{
+            name: draft.name,
+            namePlaceholder: isEdit ? existing!.name : "Your new agent",
+            onNameChange: (v) => update({ name: v }),
+            agentId: draft.agentId,
+            status: cardStatus,
+            subtitle: isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start"),
+            stack: cardStack,
+            language: `${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`,
+            costPerMin: cardEst?.costPerMin,
+            latencyMs: cardEst?.latencyMs,
+            latencyBreakdown: cardLatency,
+            channel: draft.channels.length ? {
+              label: channelTarget(draft),
+              onClick: () => openRow(2),
+            } : undefined,
+            talking: testing,
+            onToggleTalk: toggleTest,
+            talkLabel: `Talk to ${draft.name || "your agent"}`,
+          }}
+        />
       </div>
 
-      {/* Talk panel — the agent's full identity card + live test, on demand.
-          Steps render inline now, so the ONLY job of the right panel is
-          "meet/test your agent" (master-detail direction, 2026-07-07). */}
-      <Sheet open={talkOpen} onOpenChange={setTalkOpen}>
-        {/* Don't autofocus the card's name input — Radix would select its text
-            and one stray keystroke would rename the agent. Esc/tab still work
-            (dismiss listens on the document; the focus trap catches Tab). */}
-        <SheetContent
-          side="right"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md"
-        >
-          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-            <SheetTitle className="text-base">{draft.name || (isEdit ? existing!.name : "Your new agent")}</SheetTitle>
-            <p className="text-sm text-muted-foreground">Agent details & test</p>
-            {/* Say what the test IS. All three personas clicked, watched a silent
-                orb, and could not tell working from broken (user-test 2026-07-09).
-                The real transcript lives behind the future-scope flag. */}
-            <p className="text-xs text-muted-foreground">
-              Simulated preview — no live audio in this wireframe.
-            </p>
-          </SheetHeader>
-          <div className="p-4">
-            <AgentIdentityCard
-              name={draft.name}
-              namePlaceholder={isEdit ? existing!.name : "Your new agent"}
-              onNameChange={(v) => update({ name: v })}
-              agentId={draft.agentId}
-              status={cardStatus}
-              subtitle={isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start")}
-              stack={cardStack}
-              language={`${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`}
-              costPerMin={cardEst?.costPerMin}
-              latencyMs={cardEst?.latencyMs}
-              latencyBreakdown={cardLatency}
-              channel={draft.type ? {
-                label: channelLine(draft),
-                onClick: () => { setTalkOpen(false); openRow(4) },
-              } : undefined}
-              talking={testing}
-              onToggleTalk={toggleTest}
-              talkLabel={`Talk to ${draft.name || "your agent"}`}
-              endLabel="End test"
-              className="border-0 p-2 lg:static"
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Deploy climax (UTAUT2 hedonic layer, 2026-07-22): a ~900ms launch
-          beat — three expanding rings + a rising rocket — between clicking
-          Deploy and the action completing. Purely celebratory: publishing is
-          already committed when this shows. */}
+      {/* Deploy climax — ~900ms launch rings, purely celebratory. */}
       {launchBurst && (
         <div className="pointer-events-none fixed inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-[2px]" aria-hidden>
           <span className="sx-launch-ring absolute h-40 w-40 rounded-full border-2 border-primary/50" />
@@ -1561,33 +1064,26 @@ export function AgentWizard({
         </div>
       )}
 
-      {/* Pre-flight — the ONE confirmation for every deploy (owner 2026-07-24):
-          a staggered systems check over the real config; blockers appear IN
-          the checklist with Fix jumps; batch carries its manifest (count ·
-          window · concurrency · honest cost) inside the same surface. */}
+      {/* Pre-flight — the ONE confirmation for every deploy. */}
       <DeployPreflight
         open={preflightOpen}
         onOpenChange={setPreflightOpen}
         draft={draft}
-        ctaLabel={
-          draft.type === "outbound"
-            ? draft.config.outbound?.launch?.mode === "scheduled" ? "Schedule the batch" : "Start the batch"
-            : deployCta === "Live — no changes" ? "Deploy" : deployCta
-        }
+        ctaLabel={preflightCta}
         liveInboundNumber={
-          isLive && baseline.current?.type === "inbound" && baseline.current.config.inbound?.numberId && draft.type === "outbound"
-            ? PHONE_NUMBERS.find((n) => n.id === baseline.current!.config.inbound?.numberId)?.number ?? "its inbound number"
+          isLive &&
+          baseline.current?.channels.includes("inbound") &&
+          !hasChannel(draft, "inbound") &&
+          hasChannel(draft, "batch")
+            ? PHONE_NUMBERS.find((n) => n.id === baseline.current!.config.inbound?.numberIds[0])?.number ?? "its inbound number"
             : undefined
         }
         onConfirm={() => { preflightConfirmedRef.current = true; publish() }}
         onFix={(m) => openRow(m)}
-        onTalkFirst={() => setTalkOpen(true)}
+        onTalkFirst={() => openTest("talk")}
       />
 
-      {/* Import landing — never silent (user-test #6, 2×S1). Phase "dest": a
-          saved agent is open, so the import asks where it lands. Phase
-          "conflict": applying over a non-empty prompt asks which prompt wins.
-          Cancel aborts the whole import — nothing is written until a choice. */}
+      {/* Import landing — never silent (user-test #6, 2×S1). */}
       <AlertDialog open={!!importPending} onOpenChange={(o) => { if (!o) setImportPending(null) }}>
         <AlertDialogContent>
           {importPending?.phase === "dest" ? (
@@ -1687,71 +1183,49 @@ export function AgentWizard({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** The first section whose completion predicate is unmet — used only for the
- *  restore cursor. Not a gate. v3 journey order: channel first, then the
- *  prompt; voice has a working default, so past the prompt resume at Go live. */
+ *  restore cursor. Not a gate. v4 order: Voice → Channel → Context → Go Live. */
 function firstIncomplete(d: AgentDraft): number {
-  if (d.type === null) return 1
-  if (d.systemPrompt.trim() === "") return 2
-  // Voice & Speech is section 4 since the 2026-07-22 IA.
-  if (d.voice === null) return 4
-  return 7
+  if (d.voice === null) return 1
+  if (d.channels.length === 0) return 2
+  if (d.systemPrompt.trim() === "") return 3
+  return 4
 }
 
+/** Picking a voice adopts its SOUND, not its whole engine (v4: the model tier
+ *  is the Voice section's own cost handle — a voice pick must not silently
+ *  reset it). The TTS slot follows the voice so vendor + voice stay coherent;
+ *  prompt/greeting seed only while empty. */
 function seedFromVoice(d: AgentDraft, v: VoiceArtifact): AgentDraft {
-  // The voice carries its engine (2026-07-07): presets and Playground customs
-  // both ship a COHERENT stack (vendor + voice always match). The builder's
-  // spoken language wins (it's a Step-1 agent trait, not part of the voice).
-  // A legacy custom saved before this change has no stack → keep the current
-  // stack but force an ElevenLabs voice so vendor + voice stay coherent.
-  const stack = v.stack
-    ? { ...v.stack, language: d.stack.language }
-    : { ...d.stack, tts: { vendor: "ElevenLabs", voice: v.ttsVoice } }
+  const tts = v.stack?.tts ?? { vendor: v.provider ?? "ElevenLabs", voice: v.ttsVoice }
   return {
     ...d,
     voice: { kind: v.kind, id: v.id },
     name: d.name || v.name,
-    stack,
+    stack: { ...d.stack, tts },
     systemPrompt: d.systemPrompt.trim() ? d.systemPrompt : v.systemPrompt ?? defaultPromptFor(v),
     greeting: d.greeting.trim() ? d.greeting : v.firstMessage,
   }
 }
 
-/** One-line preview for the prompt-conflict dialog — enough to recognize
- *  which prompt is which, not to read it. */
+/** One-line preview for the prompt-conflict dialog. */
 function truncPrompt(s: string, n = 90): string {
   const flat = s.replace(/\s+/g, " ").trim()
   return flat.length > n ? `${flat.slice(0, n - 1)}…` : flat
 }
 
-function dcToType(dc: string): AgentType | null {
-  if (dc === "inbound" || dc === "web") return "inbound"
-  if (dc === "batch") return "outbound"
-  if (dc === "code") return "code"
-  return null
+/** `?dc=` deep link → ADD that channel to the draft (multi-select: additive,
+ *  never a silent swap) + seed its connection state. */
+function applyDc(d: AgentDraft, dc: string): AgentDraft {
+  const c: DeployChannel | null =
+    dc === "inbound" ? "inbound" : dc === "web" ? "web" : dc === "batch" ? "batch" : dc === "code" ? "code" : null
+  if (!c || d.channels.includes(c)) return d
+  return {
+    ...d,
+    channels: [...d.channels, c],
+    config: {
+      ...d.config,
+      ...(c === "inbound" && !d.config.inbound ? { inbound: { numberIds: [] } } : {}),
+      ...(c === "code" ? { code: { added: true } } : {}),
+    },
+  }
 }
-
-function dcToConfig(dc: string, config: AgentDraft["config"]): AgentDraft["config"] {
-  if (dc === "inbound") return { ...config, inbound: { mode: "phone" } }
-  if (dc === "web") return { ...config, inbound: { mode: "web" } }
-  if (dc === "batch") return { ...config, outbound: { ...config.outbound } }
-  if (dc === "code") return { ...config, code: {} }
-  return config
-}
-
-function channelLabel(d: AgentDraft): string {
-  if (d.type === "outbound") return "Batch calls"
-  // One vocabulary: "Code / SDK" everywhere (heuristic-eval #19) — "embed" is
-  // reserved for the web widget's copy.
-  if (d.type === "code") return "Code / SDK"
-  if (d.type === "inbound" && d.config.inbound?.mode === "web") return "Web widget"
-  return "Inbound"
-}
-
-/** "label · target" — deduped when they coincide (web mode returns
- *  "Web widget" for both; "Web widget · Web widget" read as a bug, re-eval #15). */
-function channelLine(d: AgentDraft): string {
-  const label = channelLabel(d)
-  const target = channelTarget(d)
-  return label === target ? label : `${label} · ${target}`
-}
-
