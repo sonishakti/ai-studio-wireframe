@@ -91,14 +91,14 @@ export function StepPublish({
               (the snippets need the minted ID); everything else opens Monitor. */}
           {live
             ? batchOnly
-              ? `Starts ${campaignCount > 1 ? `${campaignCount} campaigns` : "your campaign"} after one confirmation. Opens Monitor.`
+              ? `Starts ${campaignCount > 1 ? `${campaignCount} campaign runs` : "your campaign run"} after one confirmation. Opens Monitor.`
               : codeOnly
               ? `Updates the agent your app connects to. You stay on this page.`
               : `Your changes take effect on the next call. Opens Monitor.`
             : codeOnly
             ? `Creates the agent ID for the snippets above. You stay on this page.`
             : hasChannel(draft, "batch") && campaignCount > 0
-            ? `Puts ${agentName} live${campaignCount > 1 ? ` and starts ${campaignCount} campaigns` : " and starts your campaign"}. Opens Monitor.`
+            ? `Puts ${agentName} live${campaignCount > 1 ? ` and starts ${campaignCount} campaign runs` : " and starts your campaign run"}. Opens Monitor.`
             : `Puts ${agentName} live. Opens Monitor.`}
         </p>
       </section>

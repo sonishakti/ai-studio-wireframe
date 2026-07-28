@@ -37,10 +37,10 @@ interface CheckRow {
 }
 
 function campaignWarn(draft: AgentDraft, c: CampaignDraft): { value: string; fixStep: number; fixLabel: string } | null {
-  if (!c.numberId) return { value: `"${c.name}" needs a caller-ID number.`, fixStep: 4, fixLabel: "Pick a number" }
-  if (!c.csvName) return { value: `"${c.name}" is missing its contacts CSV.`, fixStep: 4, fixLabel: "Add contacts" }
+  if (!c.numberId) return { value: `"${c.name}" needs a caller-ID number.`, fixStep: 5, fixLabel: "Pick a number" }
+  if (!c.csvName) return { value: `"${c.name}" is missing its contacts CSV.`, fixStep: 5, fixLabel: "Add contacts" }
   if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
-    return { value: `"${c.name}" is scheduled but has no start time.`, fixStep: 4, fixLabel: "Set schedule" }
+    return { value: `"${c.name}" is scheduled but has no start time.`, fixStep: 5, fixLabel: "Set schedule" }
   }
   const missing = campaignMissingVars(draft, c)
   if (missing.length) {
@@ -74,11 +74,11 @@ function buildRows(draft: AgentDraft): CheckRow[] {
       rows.push({
         id: "campaigns", icon: Users, label: "Batch",
         value: draft.channels.length === 1
-          ? "Create a campaign to start batch calling."
-          : "No campaigns yet — batch stays idle until you create one.",
+          ? "Create a campaign run to start batch calling."
+          : "No runs yet — batch stays idle until you create one.",
         state: draft.channels.length === 1 ? "warn" : "ok",
-        fixStep: draft.channels.length === 1 ? 4 : undefined,
-        fixLabel: draft.channels.length === 1 ? "New campaign" : undefined,
+        fixStep: draft.channels.length === 1 ? 5 : undefined,
+        fixLabel: draft.channels.length === 1 ? "New run" : undefined,
       })
     }
     active.forEach((c, i) => {
@@ -187,12 +187,12 @@ export function DeployPreflight({
           <AlertDialogTitle className="flex items-center gap-2">
             <Rocket className="h-4 w-4 text-muted-foreground" aria-hidden />
             {batch && ready.length > 0
-              ? `Pre-flight check — ${ready.length} campaign${ready.length > 1 ? "s" : ""} · ${totalContacts.toLocaleString()} contacts`
+              ? `Pre-flight check — ${ready.length} run${ready.length > 1 ? "s" : ""} · ${totalContacts.toLocaleString()} contacts`
               : "Pre-flight check"}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {batch && ready.length > 0
-              ? `Deploying starts the campaigns — ${draft.name || "your agent"} dials every contact in each list. Checking the configuration first:`
+              ? `Deploying starts the runs — ${draft.name || "your agent"} dials every contact in each list. Checking the configuration first:`
               : `What ${draft.name || "your agent"} goes live with:`}
           </AlertDialogDescription>
         </AlertDialogHeader>

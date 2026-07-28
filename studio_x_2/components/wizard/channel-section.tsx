@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, ExternalLink, Radio, ArrowRight } from "lucide-react"
+import { X, ExternalLink, Radio, ArrowRight, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { CodeBlock } from "@/components/code-block"
 import { ConfigCard } from "@/components/wizard/channel-configs"
+import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
@@ -73,7 +74,14 @@ export function ChannelSection({
 
   const toggleChannel = (c: DeployChannel, on: boolean) => {
     if (on) {
-      const channels = [...draft.channels, c]
+      // INBOUND XOR OUTBOUND (owner 2026-07-28): one agent cannot serve both
+      // directions — a receptionist and an outreach caller need different
+      // context and workflows. Picking one swaps out the other, said out loud.
+      const conflicting: DeployChannel | null =
+        c === "inbound" && draft.channels.includes("batch") ? "batch"
+        : c === "batch" && draft.channels.includes("inbound") ? "inbound"
+        : null
+      const channels = [...draft.channels.filter((x) => x !== conflicting), c]
       const patch: Partial<AgentDraft> = { channels }
       // Seed the connection state the block below reads.
       if (c === "inbound" && !draft.config.inbound) {
@@ -81,6 +89,17 @@ export function ChannelSection({
       }
       if (c === "code") patch.config = { ...draft.config, code: { added: true } }
       update(patch)
+      if (conflicting) {
+        toast(`${channelLabel(conflicting)} swapped for ${channelLabel(c)}`, {
+          description: "One agent can't handle both inbound and outbound — the context and workflows differ. Duplicate the agent for the other direction; this setup is kept.",
+          action: {
+            // `draft.channels` here is the PRE-toggle snapshot — restoring it
+            // undoes both the add and the swap in one write.
+            label: "Undo",
+            onClick: () => update({ channels: draft.channels }),
+          },
+        })
+      }
       return
     }
     const channels = draft.channels.filter((x) => x !== c)
@@ -107,7 +126,7 @@ export function ChannelSection({
       <SectionRow
         id="wz-2-pick"
         label={`Where does ${draft.name || "your agent"} run?`}
-        hint="Pick every channel it should serve — one agent can hold several at once."
+        hint="Pick every channel it should serve. Inbound and Batch calls are exclusive — one agent can't work both directions."
       >
         {/* Pre-click consequence for a LIVE agent (adding never warns;
             deselecting a live channel does, at the moment of the click). */}
@@ -172,27 +191,27 @@ export function ChannelSection({
         <SectionRow
           id="wz-2-batch"
           label="Batch calls"
-          hint="Campaigns — contacts, caller ID, schedule, dialing — are managed in Go Live."
+          hint="Campaign runs — contacts, caller ID, schedule, dialing — are managed in Go Live."
         >
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
             <p className="min-w-0 text-sm text-muted-foreground">
               {activeCampaigns(draft).length > 0
-                ? `${activeCampaigns(draft).length} campaign${activeCampaigns(draft).length > 1 ? "s" : ""} set up — manage them in Go Live.`
-                : "No campaigns yet — create your first in Go Live."}
+                ? `${activeCampaigns(draft).length} run${activeCampaigns(draft).length > 1 ? "s" : ""} set up — manage them in Go Live.`
+                : "No runs yet — create your first in Go Live."}
             </p>
-            <Button variant="outline" size="sm" className="gap-1" onClick={() => onGoToStep(4)}>
-              Manage campaigns <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            <Button variant="outline" size="sm" className="gap-1" onClick={() => onGoToStep(5)}>
+              Manage runs <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Each campaign dials from one caller-ID number — load-balancing across several numbers is coming.
+            Each run dials from one caller-ID number — load-balancing across several numbers is coming.
           </p>
         </SectionRow>
       )}
 
       {hasChannel(draft, "web") && (
-        <SectionRow id="wz-2-web" label="Web widget" hint="Style the widget; grab the embed snippet.">
-          <WidgetStyleConfig agentId={agentId} />
+        <SectionRow id="wz-2-web" label="Web widget" hint="The essentials — grab the embed snippet; deeper styling lives in the Widget studio.">
+          <WidgetStyleConfig agentId={agentId} lean />
         </SectionRow>
       )}
 
@@ -214,14 +233,31 @@ function InboundNumbersBlock({
   const setNumberIds = (ids: string[]) =>
     update({ config: { ...draft.config, inbound: { numberIds: ids } } })
 
+  // Numbers added THIS session via the + accelerator (PHONE_NUMBERS is a
+  // static mock) — merged into every lookup so the just-added number actually
+  // appears and links, instead of the success toast dead-ending (review
+  // 2026-07-28).
+  const [sessionNumbers, setSessionNumbers] = React.useState<{ id: string; number: string; label: string }[]>([])
+  const addedNumber = (n: { number: string; label: string }) => {
+    const id = `pn_new_${Date.now().toString(36)}`
+    setSessionNumbers((s) => [...s, { id, ...n }])
+    setNumberIds([...numberIds, id])
+    toast.success(`${n.number} linked`, {
+      description: `${draft.name || "This agent"} answers it once you deploy.`,
+    })
+  }
+  const lookup = (id: string) =>
+    PHONE_NUMBERS.find((n) => n.id === id) ?? sessionNumbers.find((n) => n.id === id)
+
   // Linkable = free numbers not already on this agent (linked ones render in
   // the list above, not the add-select).
-  const linkable = PHONE_NUMBERS.filter(
-    (n) => n.status === "unassigned" && !numberIds.includes(n.id),
-  )
+  const linkable = [
+    ...PHONE_NUMBERS.filter((n) => n.status === "unassigned" && !numberIds.includes(n.id)),
+    ...sessionNumbers.filter((n) => !numberIds.includes(n.id)),
+  ]
   const linked = numberIds
-    .map((id) => PHONE_NUMBERS.find((n) => n.id === id))
-    .filter((n): n is (typeof PHONE_NUMBERS)[number] => !!n)
+    .map((id) => lookup(id))
+    .filter((n): n is NonNullable<ReturnType<typeof lookup>> => !!n)
 
   return (
     <SectionRow
@@ -253,18 +289,29 @@ function InboundNumbersBlock({
         )}
         <div className="space-y-2">
           <Label className="text-sm font-medium">{linked.length ? "Link another number" : "Link phone number"}</Label>
-          <Select value="" onValueChange={(id) => id && setNumberIds([...numberIds, id])}>
-            <SelectTrigger className="text-sm">
-              <SelectValue placeholder={linkable.length ? "Choose an available number" : "No free numbers — connect one via SIP"} />
-            </SelectTrigger>
-            <SelectContent>
-              {linkable.map((n) => (
-                <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value="" onValueChange={(id) => id && setNumberIds([...numberIds, id])}>
+              <SelectTrigger className="min-w-0 flex-1 basis-56 text-sm">
+                <SelectValue placeholder={linkable.length ? "Choose an available number" : "No free numbers — connect one via SIP"} />
+              </SelectTrigger>
+              <SelectContent>
+                {linkable.map((n) => (
+                  <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* The accelerator (owner 2026-07-28): a first-class + Add door.
+                onAdded keeps the flow IN the builder — the new number lists
+                and links here instead of the sheet routing to a fresh draft. */}
+            <AddPhoneNumberSheet onAdded={addedNumber}>
+              <Button variant="outline" size="sm" className="shrink-0 gap-1">
+                <Plus className="h-3.5 w-3.5" aria-hidden /> Add phone number
+              </Button>
+            </AddPhoneNumberSheet>
+          </div>
           <InfoHint label="No number free?">
-            Agora routes your own carrier number — connect one via SIP in{" "}
+            Agora routes your own carrier number — connect one via SIP with{" "}
+            <span className="font-medium text-foreground">Add phone number</span>, or manage them in{" "}
             <a href="/integrations?tab=channels" className="underline underline-offset-2">
               Resources › Deployment Channels
             </a>
@@ -274,7 +321,7 @@ function InboundNumbersBlock({
       </ConfigCard>
       <p className="text-xs text-muted-foreground">
         How answered calls end — max duration, silence hang-up, transfer — is configured in{" "}
-        <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => onGoToStep(4)}>
+        <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => onGoToStep(5)}>
           Go Live › Inbound call settings
         </button>
         .

@@ -53,11 +53,26 @@ function flaggedTurnIndex(result: EvalCaseResult): number | undefined {
   return i >= 0 ? i : undefined
 }
 
-export function TestsSection({ agentName: _agentName = "your agent" }: { agentName?: string }) {
+export function TestsSection({
+  agentName: _agentName = "your agent",
+  extra = [],
+  headerNote,
+}: {
+  agentName?: string
+  /** Contextual auto-generated cases + their synthesized judge results (v5
+   *  Test section, 2026-07-28) — rendered ABOVE the starter suite; results
+   *  still hide until the case is run. */
+  extra?: { case: EvalCase; result: EvalCaseResult }[]
+  /** One quiet line under the actions — e.g. the judge-model disclosure. */
+  headerNote?: React.ReactNode
+}) {
   const run = EVAL_RUN
   // The suite is STATE so authored cases actually land in the table —
   // "Add case" silently discarding work was the round-6 #1 trust break.
-  const [cases, setCases] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
+  const [authored, setAuthored] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
+  // Generated (contextual) cases lead; the starter suite + authored follow.
+  const cases = React.useMemo(() => [...extra.map((e) => e.case), ...authored], [extra, authored])
+  const setCases = (fn: (prev: EvalCase[]) => EvalCase[]) => setAuthored(fn)
   const [addOpen, setAddOpen] = React.useState(false)
   const [running, setRunning] = React.useState<EvalCase | null>(null)
   const [openResult, setOpenResult] = React.useState<EvalCaseResult | null>(null)
@@ -69,8 +84,12 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
   // UN-RUN — status "–" until the user runs them. No fake failures on first
   // paint (2026-07-24 P0). Verdicts exist only for cases the user ran.
   const [ranIds, setRanIds] = React.useState<Set<string>>(new Set())
-  const resultFor = (id: string) => (ranIds.has(id) ? run.results.find((r) => r.caseId === id) : undefined)
-  const ranResults = run.results.filter((r) => ranIds.has(r.caseId))
+  const resultFor = (id: string) =>
+    ranIds.has(id)
+      ? extra.find((e) => e.case.id === id)?.result ?? run.results.find((r) => r.caseId === id)
+      : undefined
+  const allResults = [...extra.map((e) => e.result), ...run.results]
+  const ranResults = allResults.filter((r) => ranIds.has(r.caseId))
   const stats = { passed: ranResults.filter((r) => r.verdict === "pass").length, total: ranResults.length }
 
   // 2026-07-21 (owner): the Test section IS this feature — test scenarios from
@@ -83,8 +102,8 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
     setRunningAll(true)
     window.setTimeout(() => {
       setRunningAll(false)
-      setRanIds(new Set(run.results.map((r) => r.caseId)))
-      const results = run.results
+      const results = allResults.filter((r) => cases.some((c) => c.id === r.caseId))
+      setRanIds(new Set(results.map((r) => r.caseId)))
       const passed = results.filter((r) => r.verdict === "pass").length
       const notRun = cases.length - results.length
       setLastRunNote(
@@ -125,6 +144,7 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
           </Button>
         </div>
       </div>
+      {headerNote ? <div className="text-xs text-muted-foreground">{headerNote}</div> : null}
 
       {/* Suite TABLE (proposal 2639-102124): Test Name · Description ·
           Status · Actions, under a passing/failing header bar. */}
@@ -132,7 +152,9 @@ export function TestsSection({ agentName: _agentName = "your agent" }: { agentNa
         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
           <span className="font-medium">
             {stats.total > 0 ? `${stats.passed}/${stats.total} passing` : "Not run yet"}
-            <span className="font-normal text-muted-foreground"> · sample scenarios — replace with your own</span>
+            <span className="font-normal text-muted-foreground">
+              {extra.length ? " · generated from your context + sample scenarios" : " · sample scenarios — replace with your own"}
+            </span>
             {lastRunNote ? <span className="font-normal text-muted-foreground"> · {lastRunNote}</span> : null}
           </span>
           {stats.total > 0 && <StatusPill passed={stats.passed} total={stats.total} />}

@@ -79,15 +79,13 @@ const COMMANDS: Command[] = [
 
   // ── Agent settings — deep links into the wizard drawers, so the palette can
   //    find IN-DRAWER features, not just pages (heuristic-eval #10). ─────────
-  // v4 order (2026-07-28): 1 Voice · 2 Channel · 3 Context · 4 Go Live.
-  // wizardStep 6 stays the legacy "Test" sentinel — the wizard opens the
-  // docked Test panel for it instead of scrolling.
+  // v5 order (2026-07-28): 1 Voice · 2 Channel · 3 Context · 4 Test · 5 Go Live.
   { id: "ag-voice",      label: "Change voice, tier or language", href: "/agents?step=1", wizardStep: 1, icon: Bot,    group: "Agent settings", keywords: ["voice", "language", "spoken", "tier", "cheapest", "balanced", "best", "llm", "tts", "stt", "model", "preset", "multimodal", "mllm", "architecture", "latency", "cost", "turn detection", "interruption", "filter words"] },
   { id: "ag-channel",    label: "Set up channels — numbers, widget, SDK", href: "/agents?step=2", wizardStep: 2, icon: Phone, group: "Agent settings", keywords: ["batch calls", "inbound", "outbound", "channel", "phone number", "web widget", "widget ui", "whatsapp", "sdk"] },
   { id: "ag-prompt",     label: "Edit agent prompt & greeting", href: "/agents?step=3", wizardStep: 3, icon: Bot, group: "Agent settings", keywords: ["system prompt", "greeting", "failure message", "template", "behavior", "variables", "context"] },
-  { id: "ag-tools",      label: "Knowledge, MCP & connectors", href: "/agents?step=3", wizardStep: 3, icon: Bot,       group: "Agent settings", keywords: ["knowledge base", "mcp", "connector", "crm", "tools", "history", "memory"] },
-  { id: "ag-test",       label: "Test the agent",            href: "/agents?step=6", wizardStep: 6,   icon: Bot,                group: "Agent settings", keywords: ["test", "talk", "try", "simulate", "eval", "scenario"] },
-  { id: "ag-deploy",     label: "Go Live — campaigns, outputs, deploy", href: "/agents?step=4", wizardStep: 4,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "review", "campaign", "contacts", "csv", "caller id", "call window", "retries", "concurrency", "structured outputs", "transcripts", "recording"] },
+  { id: "ag-tools",      label: "Knowledge, MCP & connectors", href: "/agents?step=3", windowEvent: "sx:open-context-tools", icon: Bot,       group: "Agent settings", keywords: ["knowledge base", "mcp", "connector", "crm", "tools", "history", "memory", "additional context"] },
+  { id: "ag-test",       label: "Test the agent — live test, simulations, A/B", href: "/agents?step=4", wizardStep: 4,   icon: Bot,                group: "Agent settings", keywords: ["test", "talk", "try", "simulate", "eval", "scenario", "a/b", "judge"] },
+  { id: "ag-deploy",     label: "Go Live — campaign runs, outputs, deploy", href: "/agents?step=5", wizardStep: 5,   icon: Activity,           group: "Agent settings", keywords: ["deploy", "go live", "publish", "review", "campaign", "run", "rerun", "contacts", "csv", "caller id", "call window", "retries", "concurrency", "structured outputs", "transcripts", "recording", "version history"] },
   { id: "ag-getcode",    label: "Get code — SDK & widget snippets (read-only)", href: "/agents", windowEvent: "sx:open-config-drawer", icon: Code2, group: "Agent settings", keywords: ["embed", "snippet", "sdk", "widget code", "copy code", "api", "json", "config"] },
 
   // ── Actions ──────────────────────────────────────────────────────────────

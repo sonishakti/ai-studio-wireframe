@@ -19,6 +19,8 @@ import { ChannelSection } from "@/components/wizard/channel-section"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
 import { SectionKnowledgeTools } from "@/components/wizard/step-build"
 import { DeploySection } from "@/components/wizard/deploy-section"
+import { TestSection } from "@/components/wizard/test-section"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
 import { TemplateMenu } from "@/components/wizard/template-menu"
 import { SectionRows } from "@/components/wizard/section-row"
@@ -36,7 +38,7 @@ import {
 } from "@/lib/import-agent"
 import {
   EMPTY_DRAFT, DEFAULT_CALL_BEHAVIOR, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
-  publishBlockReason, channelTarget, channelLabel, hasChannel, primaryChannel, activeCampaigns,
+  publishBlockReason, channelTarget, channelLabel, hasChannel, primaryChannel, activeCampaigns, enforceDirection,
   type AgentDraft, type DeployChannel,
 } from "@/lib/wizard-draft"
 import {
@@ -101,7 +103,7 @@ export function AgentWizard({
   // explicit choice yet" — the render falls back to a default captured once.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
   // Accordion: all four sections open by default (the hot path is short now).
-  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 2: true, 3: true, 4: true })
+  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 2: true, 3: true, 4: true, 5: true })
   const toggleStep = (n: number) => setExpandedSteps((s) => ({ ...s, [n]: !s[n] }))
 
   // The docked Test panel (v4: replaces the persistent preview column AND the
@@ -149,8 +151,8 @@ export function AgentWizard({
   const [savePulse, setSavePulse] = React.useState(0)
   const [launchBurst, setLaunchBurst] = React.useState(false)
   const isDone = (n: number) =>
-    n === 1 ? voiceDone : n === 2 ? channelsDone : n === 3 ? promptDone : isLive
-  if (initialDones.current === null) initialDones.current = new Set([1, 2, 3, 4].filter(isDone))
+    n === 1 ? voiceDone : n === 2 ? channelsDone : n === 3 ? promptDone : n === 4 ? true : isLive
+  if (initialDones.current === null) initialDones.current = new Set([1, 2, 3, 4, 5].filter(isDone))
 
   // ── One-primary discipline: while Go Live's CTA is on screen, the header
   //    Deploy demotes so exactly ONE filled primary exists. ───────────────────
@@ -168,6 +170,23 @@ export function AgentWizard({
   // Header template chip → prompt-editor flash so the apply visibly lands.
   const [templateFlash, setTemplateFlash] = React.useState(0)
 
+  // Context: knowledge/tools live behind a compact "add additional context"
+  // door (owner 2026-07-28) — auto-open when anything is already attached.
+  const contextResources = draft.knowledge.length + draft.mcp.length + draft.connectors.length
+  const [contextOpen, setContextOpen] = React.useState(false)
+  // Tracks hydration too: a restored draft's resources arrive AFTER mount.
+  React.useEffect(() => {
+    if (contextResources > 0) setContextOpen(true)
+  }, [contextResources])
+
+  /** Release a custom-config override — the field becomes editable again. */
+  const unlockOverride = (field: string) => {
+    update({ configOverrides: (draftRef.current.configOverrides ?? []).filter((f) => f !== field) })
+    toast(`${field === "systemPrompt" ? "System prompt" : field === "greeting" ? "Greeting" : "Field"} unlocked`, {
+      description: "Edits here now win over the custom config.",
+    })
+  }
+
   // ── Mount: time-to-live clock; restore + ?artifact/?dc/?step/?template/?blank ──
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -177,8 +196,7 @@ export function AgentWizard({
     const artifactId = params.get("artifact")
     const dc = params.get("dc")
     const stepParam = parseInt(params.get("step") ?? "", 10)
-    // Legacy 7-section links map onto v4; old step 6 (Test) opens the panel.
-    const wantsTestPanel = stepParam === 6
+    // Legacy v3 links (6 Test · 7 Go live) map onto the v5 sections.
     const stepToOpen = Number.isFinite(stepParam) ? resolveStepParam(stepParam) : null
     const openLater = (n: number) => {
       setOpenStep(n)
@@ -192,8 +210,6 @@ export function AgentWizard({
       url.searchParams.delete(key)
       window.history.replaceState({}, "", url)
     }
-    if (wantsTestPanel) openTest("scenarios")
-
     if (isEdit) {
       // Reset baseline for a saved agent = its DEPLOYED config.
       baseline.current = agentToDraft(existing!)
@@ -225,8 +241,13 @@ export function AgentWizard({
         }
       }
       if (dc) {
-        // Multi-select: a deep link ADDS the channel, never swaps silently.
-        setDraft((d) => applyDc(d, dc))
+        // Multi-select: a deep link ADDS the channel; a direction conflict
+        // (inbound XOR batch) swaps — announced, same as the Channel toggle.
+        setDraft((d) => {
+          const next = applyDc(d, dc)
+          announceDcSwap(d, next)
+          return next
+        })
         dirty.current = true
         openLater(2)
       } else if (stepToOpen) {
@@ -322,7 +343,11 @@ export function AgentWizard({
       }
       if (!stepToOpen && !dc) openLater(notice?.kind === "create" ? 1 : at)
     }
-    if (dc) next = applyDc(next, dc)
+    if (dc) {
+      const before = next
+      next = applyDc(next, dc)
+      announceDcSwap(before, next)
+    }
     setDraft(next)
     baseline.current = next
     if (dc) openLater(2)
@@ -344,17 +369,24 @@ export function AgentWizard({
       const raw = (e as CustomEvent<number>).detail
       if (typeof raw !== "number") return
       e.preventDefault()
-      // Legacy 6 = Test → the panel; everything else maps to a section.
-      if (raw === 6) { openTestRef.current("scenarios"); return }
       const n = resolveStepParam(raw)
       if (n) openRowRef.current(n)
     }
     const onOpenTest = (e: Event) => { e.preventDefault(); openTestRef.current("talk") }
+    // Palette "Knowledge, MCP & connectors" — the collapsed add-context door
+    // must OPEN, not just scroll past it.
+    const onOpenContextTools = (e: Event) => {
+      e.preventDefault()
+      setContextOpen(true)
+      openRowRef.current(3)
+    }
     window.addEventListener("sx:open-wizard-step", onOpenStep)
     window.addEventListener("sx:open-test-panel", onOpenTest)
+    window.addEventListener("sx:open-context-tools", onOpenContextTools)
     return () => {
       window.removeEventListener("sx:open-wizard-step", onOpenStep)
       window.removeEventListener("sx:open-test-panel", onOpenTest)
+      window.removeEventListener("sx:open-context-tools", onOpenContextTools)
     }
   }, [])
 
@@ -441,7 +473,7 @@ export function AgentWizard({
     n === 1 ? { voice: d.voice, stack: d.stack, advanced: d.advanced }
     : n === 2 ? { channels: d.channels, config: d.config }
     : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, failureMessage: d.failureMessage, knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
-    : n === 4 ? { campaigns: d.campaigns, analysis: d.analysis, callBehavior: d.callBehavior }
+    : n === 5 ? { campaigns: d.campaigns, analysis: d.analysis, callBehavior: d.callBehavior }
     : {}
   const stepDirty = (n: number) => {
     const base = baseline.current
@@ -486,13 +518,27 @@ export function AgentWizard({
     })
   }
 
-  // Apply an edited-JSON patch from the Custom config drawer (F4).
+  // Apply an edited-JSON patch from the Custom config drawer (F4). Fields the
+  // JSON overrides get FLAGGED + DISABLED in the UI (owner 2026-07-28) until
+  // unlocked — the JSON is their source of truth while listed.
+  const OVERRIDABLE = ["systemPrompt", "greeting", "failureMessage"] as const
   const applyConfigPatch = (patch: Partial<AgentDraft>) => {
     const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
     dirty.current = true
-    setDraft((d) => ({ ...d, ...patch }))
+    // Only fields the JSON actually CHANGED lock — the drawer seeds the full
+    // draft, so mere presence would spuriously lock untouched fields.
+    const overridden = OVERRIDABLE.filter(
+      (k) => patch[k] !== undefined && patch[k] !== draftRef.current[k],
+    )
+    setDraft((d) => ({
+      ...d,
+      ...patch,
+      configOverrides: [...new Set([...(d.configOverrides ?? []), ...overridden])],
+    }))
     toast.success("Config applied", {
-      description: "Your JSON edits are in the draft.",
+      description: overridden.length
+        ? `Your JSON edits are in the draft — ${overridden.length} field${overridden.length > 1 ? "s are" : " is"} now controlled by the custom config (flagged in Context).`
+        : "Your JSON edits are in the draft.",
       action: { label: "Undo", onClick: () => { dirty.current = true; setDraft(before) } },
     })
   }
@@ -688,7 +734,7 @@ export function AgentWizard({
 
   const blockReason = publishBlockReason(draft)
   // Honest deploy-state line: a live agent with pending edits says so.
-  const anyEdited = isLive && [1, 2, 3, 4].some(stepDirty)
+  const anyEdited = isLive && [1, 2, 3, 5].some(stepDirty)
   const deploySub = isLive
     ? anyEdited
       ? "Edits are not live yet. Redeploy to apply."
@@ -707,8 +753,8 @@ export function AgentWizard({
   const preflightCta =
     hasChannel(draft, "batch") && active.length > 0
       ? active.every((c) => c.launch?.mode === "scheduled")
-        ? `Schedule campaign${active.length > 1 ? "s" : ""}`
-        : `Start campaign${active.length > 1 ? "s" : ""}`
+        ? `Schedule run${active.length > 1 ? "s" : ""}`
+        : `Start run${active.length > 1 ? "s" : ""}`
       : deployCta === "Live — no changes" ? "Deploy" : deployCta
 
   const previewStatus = warming ? "Warming up" : isLive ? "Live" : codeDeployed ? "Deployed" : "Draft"
@@ -819,7 +865,7 @@ export function AgentWizard({
           step nav + deploy in the fold (top-12 = the app header height). */}
       <div className="sticky top-12 z-30 flex items-center gap-3 border-b border-border bg-background/95 px-5 py-2 backdrop-blur lg:hidden">
         <span className="flex shrink-0 items-center gap-1" role="group" aria-label="Jump to section">
-          {[1, 2, 3, 4].map((n) => (
+          {[1, 2, 3, 4, 5].map((n) => (
             <button
               key={n}
               type="button"
@@ -907,7 +953,7 @@ export function AgentWizard({
               )}
               {isLive && anyEdited && (
                 <>
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => openRow(4)}>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => openRow(5)}>
                     Review &amp; deploy
                   </Button>
                   <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={discardEdits}>
@@ -922,7 +968,7 @@ export function AgentWizard({
         {/* Center column: borderless sections divided by hairlines. No
             overflow-hidden (sticky headers need to escape). */}
         <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l">
-          {[1, 2, 3, 4].map((n) => {
+          {[1, 2, 3, 4, 5].map((n) => {
             const Icon = STEP_ICONS[n]
             return (
               <section
@@ -967,7 +1013,7 @@ export function AgentWizard({
                 <div id={`wizard-step-${n}-body`} className="p-5">
                   {/* Sections 1–3 cap for readability; Go Live stays fluid
                       (the campaigns' 50/50 CSV grid manages its own width). */}
-                  <div className={cn("min-w-0", n !== 4 && "max-w-5xl")}>
+                  <div className={cn("min-w-0", n <= 3 && "max-w-5xl")}>
                   {/* 1 · VOICE — the two handles: tier (cost) + voice. */}
                   {n === 1 && (
                     <SectionRows>
@@ -990,15 +1036,51 @@ export function AgentWizard({
                       />
                     </SectionRows>
                   )}
-                  {/* 3 · CONTEXT — the words + knowledge & tools. */}
+                  {/* 3 · CONTEXT — the words; knowledge & tools collapse to a
+                      compact "add additional context" door (owner 2026-07-28). */}
                   {n === 3 && (
                     <SectionRows>
-                      <SectionPrompt draft={draft} update={update} templateFlash={templateFlash} />
-                      <SectionKnowledgeTools draft={draft} update={update} />
+                      <SectionPrompt
+                        draft={draft}
+                        update={update}
+                        templateFlash={templateFlash}
+                        onUnlock={unlockOverride}
+                      />
+                      <div className="pt-6">
+                        <Collapsible open={contextOpen} onOpenChange={setContextOpen}>
+                          <CollapsibleTrigger asChild>
+                            <button
+                              type="button"
+                              className="flex w-full items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3 text-left transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <span className="min-w-0">
+                                <span className="block text-sm font-medium">
+                                  {contextOpen ? "Additional context" : "＋ Add additional context"}
+                                </span>
+                                <span className="block text-xs text-muted-foreground">
+                                  {contextResources > 0
+                                    ? `${contextResources} attached — knowledge bases, MCP tools, connectors`
+                                    : "Knowledge bases, MCP tools, and CRM connectors — optional"}
+                                </span>
+                              </span>
+                              <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", contextOpen && "rotate-180")} aria-hidden />
+                            </button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pt-4">
+                            <SectionRows>
+                              <SectionKnowledgeTools draft={draft} update={update} />
+                            </SectionRows>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
                     </SectionRows>
                   )}
-                  {/* 4 · GO LIVE — the deploy panel. */}
+                  {/* 4 · TEST — live contextual test · simulations · A/B. */}
                   {n === 4 && (
+                    <TestSection draft={draft} update={update} onOpenTalk={() => openTest("talk")} />
+                  )}
+                  {/* 5 · GO LIVE — the deploy panel. */}
+                  {n === 5 && (
                     <DeploySection
                       draft={draft}
                       update={update}
@@ -1183,12 +1265,13 @@ export function AgentWizard({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** The first section whose completion predicate is unmet — used only for the
- *  restore cursor. Not a gate. v4 order: Voice → Channel → Context → Go Live. */
+ *  restore cursor. Not a gate. v5 order: Voice → Channel → Context → Test →
+ *  Go Live; Test runs on defaults, so a complete draft resumes at Go Live. */
 function firstIncomplete(d: AgentDraft): number {
   if (d.voice === null) return 1
   if (d.channels.length === 0) return 2
   if (d.systemPrompt.trim() === "") return 3
-  return 4
+  return 5
 }
 
 /** Picking a voice adopts its SOUND, not its whole engine (v4: the model tier
@@ -1213,15 +1296,29 @@ function truncPrompt(s: string, n = 90): string {
   return flat.length > n ? `${flat.slice(0, n - 1)}…` : flat
 }
 
-/** `?dc=` deep link → ADD that channel to the draft (multi-select: additive,
- *  never a silent swap) + seed its connection state. */
+/** Toast when a `?dc=` deep link swapped the direction (inbound XOR batch) —
+ *  the loss must be announced, same as the Channel section's toggle. */
+function announceDcSwap(before: AgentDraft, after: AgentDraft) {
+  const dropped = before.channels.find((c) => !after.channels.includes(c))
+  const added = after.channels.find((c) => !before.channels.includes(c))
+  if (dropped && added && (dropped === "inbound" || dropped === "batch")) {
+    toast(`${channelLabel(dropped)} swapped for ${channelLabel(added)}`, {
+      description: "One agent can't handle both inbound and outbound. The setup is kept — re-select the channel to restore it.",
+    })
+  }
+}
+
+/** `?dc=` deep link → ADD that channel to the draft (multi-select: additive;
+ *  direction conflicts swap, announced by announceDcSwap) + seed its
+ *  connection state. */
 function applyDc(d: AgentDraft, dc: string): AgentDraft {
   const c: DeployChannel | null =
     dc === "inbound" ? "inbound" : dc === "web" ? "web" : dc === "batch" ? "batch" : dc === "code" ? "code" : null
   if (!c || d.channels.includes(c)) return d
   return {
     ...d,
-    channels: [...d.channels, c],
+    // The deep-linked channel wins the direction rule (inbound XOR batch).
+    channels: enforceDirection([...d.channels, c], c === "inbound" || c === "batch" ? c : undefined),
     config: {
       ...d.config,
       ...(c === "inbound" && !d.config.inbound ? { inbound: { numberIds: [] } } : {}),

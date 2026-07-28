@@ -37,6 +37,16 @@ export function primaryChannel(d: AgentDraft): DeployChannel | null {
   return CHANNEL_PRIORITY.find((c) => d.channels.includes(c)) ?? null
 }
 
+/** INBOUND XOR OUTBOUND (owner 2026-07-28): one agent cannot serve both
+ *  directions — different context and workflows. Every write path that can
+ *  set channels (UI toggle, ?dc= links, JSON apply, migration) funnels
+ *  through this: when both appear, the LAST-ADDED direction wins. */
+export function enforceDirection(channels: DeployChannel[], prefer?: "inbound" | "batch"): DeployChannel[] {
+  if (!(channels.includes("inbound") && channels.includes("batch"))) return channels
+  const drop = prefer ? (prefer === "inbound" ? "batch" : "inbound") : "batch"
+  return channels.filter((c) => c !== drop)
+}
+
 /** Pointer to the chosen voice (preset or a saved custom artifact). */
 export interface VoiceRef {
   kind: "preset" | "custom"
@@ -179,6 +189,13 @@ export interface CampaignDraft {
   retries?: number
   launch?: LaunchConfig
   status: CampaignStatus
+  /** RERUN semantics (owner 2026-07-28): a re-run keeps the SAME agent and the
+   *  same run config — only the CSV (and launch timing) change, so aggregated
+   *  analytics stay comparable across runs. Locked runs disable every other
+   *  field in the editor. Distinct from Duplicate (a fully editable copy). */
+  locked?: boolean
+  /** The run this was re-run from — the lineage the analytics aggregate over. */
+  rerunOf?: string
 }
 
 let campaignSeq = 0
@@ -231,8 +248,12 @@ export interface AgentDraft {
   analysis?: AnalysisConfig
   /** Hang-up rules + human handoff — absent until touched (defaults apply). */
   callBehavior?: CallBehaviorConfig
-  /** Section 4 (Go Live) — batch campaigns, several per agent. */
+  /** Go Live — batch campaign runs, several per agent. */
   campaigns: CampaignDraft[]
+  /** Fields the Custom-config JSON drawer has overridden (owner 2026-07-28):
+   *  those fields render disabled + warning-flagged in the UI until unlocked —
+   *  the JSON is their source of truth while listed here. */
+  configOverrides?: string[]
   /** Per-channel connection state. */
   config: {
     /** Inbound links MULTIPLE numbers to one agent (2026-07-28). */
@@ -307,15 +328,20 @@ export function migrateDraft(raw: Partial<AgentDraft> & LegacyDraftFields): Agen
   const legacyOutbound = raw.config?.outbound
 
   // Channels: keep an explicit new-shape list; otherwise derive from `type`.
-  const channels: DeployChannel[] = Array.isArray(raw.channels)
-    ? raw.channels.filter((c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code")
-    : legacyType === "inbound"
-      ? legacyInbound?.mode === "web" ? ["web"] : ["inbound"]
-      : legacyType === "outbound"
-        ? ["batch"]
-        : legacyType === "code"
-          ? ["code"]
-          : []
+  // Direction rule holds on migration too — a hand-edited draft carrying both
+  // inbound and batch keeps inbound (the priority direction).
+  const channels: DeployChannel[] = enforceDirection(
+    Array.isArray(raw.channels)
+      ? raw.channels.filter((c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code")
+      : legacyType === "inbound"
+        ? legacyInbound?.mode === "web" ? ["web"] : ["inbound"]
+        : legacyType === "outbound"
+          ? ["batch"]
+          : legacyType === "code"
+            ? ["code"]
+            : [],
+    "inbound",
+  )
 
   // Inbound numbers: numberIds wins; a legacy single numberId becomes [id].
   const numberIds = Array.isArray(legacyInbound?.numberIds)
@@ -518,7 +544,7 @@ export function campaignMissingVars(d: AgentDraft, c: CampaignDraft): string[] {
 export interface PublishBlock {
   /** Plain-language reason this isn't ready. */
   reason: string
-  /** The section (1 Voice · 2 Channel · 3 Context · 4 Go Live) that fixes it. */
+  /** The section (1 Voice · 2 Channel · 3 Context · 4 Test · 5 Go Live) that fixes it. */
   step: number
   /** Verb+noun for the "Fix this" button (e.g. "Pick a voice"). */
   action: string
@@ -543,16 +569,16 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
 
   if (hasChannel(d, "batch")) {
     const active = activeCampaigns(d)
-    // Zero campaigns blocks only when batch is the SOLE channel — an agent
-    // that also answers inbound can go live "armed but idle" on batch.
+    // Zero runs blocks only when batch is the SOLE channel — an agent that
+    // also serves another channel can go live "armed but idle" on batch.
     if (active.length === 0 && d.channels.length === 1) {
-      blocks.push({ reason: "Create a campaign to start batch calling.", step: 4, action: "New campaign" })
+      blocks.push({ reason: "Create a campaign run to start batch calling.", step: 5, action: "New run" })
     }
     for (const c of active) {
-      if (!c.numberId) blocks.push({ reason: `"${c.name}" needs a caller-ID number.`, step: 4, action: "Pick a number" })
-      if (!c.csvName) blocks.push({ reason: `"${c.name}" is missing its contacts CSV.`, step: 4, action: "Add contacts" })
+      if (!c.numberId) blocks.push({ reason: `"${c.name}" needs a caller-ID number.`, step: 5, action: "Pick a number" })
+      if (!c.csvName) blocks.push({ reason: `"${c.name}" is missing its contacts CSV.`, step: 5, action: "Add contacts" })
       if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
-        blocks.push({ reason: `"${c.name}" is scheduled but has no start date, time, and timezone.`, step: 4, action: "Set schedule" })
+        blocks.push({ reason: `"${c.name}" is scheduled but has no start date, time, and timezone.`, step: 5, action: "Set schedule" })
       }
       if (c.csvName) {
         const missing = campaignMissingVars(d, c)
@@ -572,12 +598,13 @@ export function publishBlockReason(d: AgentDraft): string | null {
   return publishBlocks(d)[0]?.reason ?? null
 }
 
-/** The first section (1–4) still needing input — for "resume at" affordances. */
+/** The first section (1–5) still needing input — for "resume at" affordances.
+ *  Test (4) runs on defaults, so past the prompt the resume point is Go Live. */
 export function firstIncompleteStep(d: AgentDraft): number {
   if (!d.voice) return 1
   if (d.channels.length === 0) return 2
   if (!d.systemPrompt.trim()) return 3
-  return 4
+  return 5
 }
 
 export function canPublish(d: AgentDraft): boolean {

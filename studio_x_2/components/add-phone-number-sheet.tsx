@@ -26,9 +26,15 @@ type Mode = "quick" | "manual"
 
 export function AddPhoneNumberSheet({
   children,
+  onAdded,
   defaultMode = "quick",
 }: {
   children: React.ReactNode
+  /** In-builder mode (Channel › inbound accelerator, 2026-07-28): the success
+   *  phase offers "Link to this agent" instead of the route cards (which
+   *  navigate to a NEW draft — a dead end mid-edit), and the added number is
+   *  handed back so the caller can list + link it. */
+  onAdded?: (n: { number: string; label: string }) => void
   /** Resources › Channels and the wizard SIP hints open the fast path by
    *  default; the manual form stays one toggle away (A3, 2026-07-09). */
   defaultMode?: Mode
@@ -199,6 +205,7 @@ export function AddPhoneNumberSheet({
                 <Summary label="Vendor" value={form.vendor || "Twilio"} />
               </div>
 
+              {!onAdded && (
               <div className="space-y-2 pt-1">
                 <p className="text-sm font-medium">Configure this number?</p>
                 <p className="text-xs text-muted-foreground">Route this number to:</p>
@@ -221,11 +228,30 @@ export function AddPhoneNumberSheet({
                   }}
                 />
               </div>
+              )}
             </div>
 
             <div className="border-t border-border px-5 py-3 space-y-2">
-              <Button variant="outline" className="w-full" onClick={reset}>Import Another</Button>
-              <Button className="w-full" onClick={() => { setOpen(false); reset() }}>Done</Button>
+              {onAdded ? (
+                <>
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      onAdded({ number: form.number || "+1 (555) 789-4734", label: form.displayName || "New number" })
+                      setOpen(false)
+                      reset()
+                    }}
+                  >
+                    Link to this agent
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => { setOpen(false); reset() }}>Done — don&apos;t link yet</Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" onClick={reset}>Import Another</Button>
+                  <Button className="w-full" onClick={() => { setOpen(false); reset() }}>Done</Button>
+                </>
+              )}
             </div>
           </>
         )}

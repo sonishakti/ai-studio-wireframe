@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet"
 import { CodeBlock } from "@/components/code-block"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
-import { channelTarget, type AgentDraft, type CampaignDraft, type DeployChannel } from "@/lib/wizard-draft"
+import { channelTarget, enforceDirection, type AgentDraft, type CampaignDraft, type DeployChannel } from "@/lib/wizard-draft"
 
 /**
  * CustomConfigDrawer — "Custom config": the whole agent as JSON. VIEW by default;
@@ -60,6 +60,7 @@ export function CustomConfigDrawer({
       channel_target: draft.channels.length ? channelTarget(draft) : null,
       system_prompt: draft.systemPrompt,
       greeting: draft.greeting,
+      failure_message: draft.failureMessage,
       knowledge: draft.knowledge,
       mcp: draft.mcp,
       connectors: draft.connectors,
@@ -102,12 +103,12 @@ await client.joinChannel({ channel: "support-room" })`
   async
 ></script>`
 
-  // v4 sections (2026-07-28): Voice · Channel · Context · Go Live.
+  // v5 sections (2026-07-28): Voice · Channel · Context · Test · Go Live.
   const sections: { label: string; step: number }[] = [
     { label: "Voice", step: 1 },
     { label: "Channel", step: 2 },
     { label: "Context", step: 3 },
-    { label: "Go Live", step: 4 },
+    { label: "Go Live", step: 5 },
   ]
 
   return (
@@ -156,7 +157,7 @@ await client.joinChannel({ channel: "support-room" })`
               ) : (
                 <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 p-3 text-sm">
                   <Check className="h-4 w-4 shrink-0 text-success" aria-hidden />
-                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, stack, channels, campaigns, knowledge, mcp, connectors, config, advanced, analysis, call_behavior. Voice is read-only here (pick it in the Voice section).</span>
+                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, failure_message, stack, channels, campaigns, knowledge, mcp, connectors, config, advanced, analysis, call_behavior. Voice is read-only here (pick it in the Voice section).</span>
                 </div>
               )}
             </div>
@@ -220,13 +221,15 @@ function toPatch(parsed: Record<string, unknown>): Partial<AgentDraft> {
   if (typeof parsed.name === "string") p.name = parsed.name
   if (typeof parsed.system_prompt === "string") p.systemPrompt = parsed.system_prompt
   if (typeof parsed.greeting === "string") p.greeting = parsed.greeting
+  if (typeof parsed.failure_message === "string") p.failureMessage = parsed.failure_message
   const kn = strArr(parsed.knowledge); if (kn) p.knowledge = kn
   const mc = strArr(parsed.mcp); if (mc) p.mcp = mc
   const co = strArr(parsed.connectors); if (co) p.connectors = co
   if (Array.isArray(parsed.channels)) {
-    p.channels = (parsed.channels as unknown[]).filter(
+    // Direction rule holds for JSON edits too (inbound XOR batch).
+    p.channels = enforceDirection((parsed.channels as unknown[]).filter(
       (c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code",
-    )
+    ), "inbound")
   }
   if (Array.isArray(parsed.campaigns)) {
     // Campaigns apply only when every entry carries the fields the Go Live
@@ -240,7 +243,20 @@ function toPatch(parsed: Record<string, unknown>): Partial<AgentDraft> {
     if (ok) p.campaigns = parsed.campaigns as CampaignDraft[]
   }
   if (isValidStack(parsed.stack)) p.stack = parsed.stack as AgentDraft["stack"]
-  if (parsed.config && typeof parsed.config === "object") p.config = parsed.config as AgentDraft["config"]
+  if (parsed.config && typeof parsed.config === "object") {
+    // Sanitize per-field — a hand-typed `numberIds: "555"` would white-screen
+    // the Channel section (numberIds.map), same guard class as isValidStack.
+    const cfg = parsed.config as Record<string, unknown>
+    const inbound = cfg.inbound && typeof cfg.inbound === "object" ? (cfg.inbound as Record<string, unknown>) : undefined
+    const numberIds = Array.isArray(inbound?.numberIds)
+      ? inbound.numberIds.filter((n): n is string => typeof n === "string")
+      : undefined
+    const code = cfg.code && typeof cfg.code === "object" ? (cfg.code as Record<string, unknown>) : undefined
+    p.config = {
+      ...(numberIds || inbound ? { inbound: { numberIds: numberIds ?? [] } } : {}),
+      ...(code ? { code: { added: !!code.added } } : {}),
+    }
+  }
   if (parsed.advanced && typeof parsed.advanced === "object") p.advanced = parsed.advanced as AgentDraft["advanced"]
   if (parsed.analysis && typeof parsed.analysis === "object") p.analysis = parsed.analysis as AgentDraft["analysis"]
   if (parsed.call_behavior && typeof parsed.call_behavior === "object") p.callBehavior = parsed.call_behavior as AgentDraft["callBehavior"]

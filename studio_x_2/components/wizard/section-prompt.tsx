@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Lock, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,23 +14,45 @@ import { hasChannel } from "@/lib/wizard-draft"
 import type { StepProps } from "@/components/wizard/types"
 
 /**
- * Context › Prompt (v4 IA, 2026-07-28): system prompt (+ Rewrite) → Greeting →
- * Failure Message. The TEMPLATE picker left this section — it lives in the
- * header as a chip next to the agent name (owner direction: "remove editing
- * the template from the agent prompt and move it to top near agent name").
- * `templateFlash` still lets the header apply visibly land here.
+ * Context › Prompt (v4/v5 IA, 2026-07-28): system prompt (+ Rewrite) →
+ * Greeting → Failure Message. The TEMPLATE picker lives in the header chip.
+ * CUSTOM-CONFIG OVERRIDES (owner, second pass): fields the JSON drawer has
+ * overridden render warning-flagged AND DISABLED — the JSON is their source
+ * of truth until unlocked here.
  */
 export function SectionPrompt({
   draft,
   update,
   templateFlash = 0,
+  onUnlock,
 }: StepProps & {
   /** Bumped by the header's template menu when a template overwrites the
    *  prompt — flashes the editor so the swap visibly lands. */
   templateFlash?: number
+  /** Releases a custom-config override so the field is editable again. */
+  onUnlock?: (field: string) => void
 }) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
   const batch = hasChannel(draft, "batch")
+  const overridden = (field: string) => (draft.configOverrides ?? []).includes(field)
+
+  const OverrideFlag = ({ field }: { field: string }) => (
+    <span className="flex items-center justify-between gap-2 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-1.5 text-xs text-foreground">
+      <span className="flex min-w-0 items-center gap-1.5">
+        <TriangleAlert className="h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
+        Set by custom config — this field is controlled by your JSON edit.
+      </span>
+      {onUnlock && (
+        <button
+          type="button"
+          className="shrink-0 underline underline-offset-2 hover:text-foreground"
+          onClick={() => onUnlock(field)}
+        >
+          Unlock
+        </button>
+      )}
+    </span>
+  )
 
   return (
     <SectionRow
@@ -38,26 +61,36 @@ export function SectionPrompt({
     >
       {/* System prompt + Rewrite */}
       <div className="space-y-1.5">
-        <Label htmlFor="wz-prompt" className="text-sm font-medium">System prompt</Label>
+        <Label htmlFor="wz-prompt" className="flex items-center gap-1.5 text-sm font-medium">
+          System prompt
+          {overridden("systemPrompt") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
+        </Label>
+        {overridden("systemPrompt") && <OverrideFlag field="systemPrompt" />}
         <div key={templateFlash} className={templateFlash > 0 ? "wz-anchor-flash relative" : "relative"}>
           <Textarea
             id="wz-prompt"
             value={draft.systemPrompt}
             onChange={(e) => update({ systemPrompt: e.target.value })}
-            className="min-h-[220px] pb-12 font-mono text-sm leading-relaxed"
+            disabled={overridden("systemPrompt")}
+            className={cn(
+              "min-h-[220px] pb-12 font-mono text-sm leading-relaxed",
+              overridden("systemPrompt") && "border-warning/50 opacity-80",
+            )}
             placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}
           />
           {/* Rewrite Prompt (proposal) — same simulated-disclosure idiom as
               voice previews: no model runs in this wireframe. */}
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="sx-sparkle-hover absolute bottom-2.5 right-2.5 gap-1.5"
-            onClick={() => toast("Simulated preview", { description: "No model runs in this wireframe — Rewrite Prompt would polish your prompt here." })}
-          >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden /> Rewrite Prompt
-          </Button>
+          {!overridden("systemPrompt") && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="sx-sparkle-hover absolute bottom-2.5 right-2.5 gap-1.5"
+              onClick={() => toast("Simulated preview", { description: "No model runs in this wireframe — Rewrite Prompt would polish your prompt here." })}
+            >
+              <Sparkles className="h-3.5 w-3.5" aria-hidden /> Rewrite Prompt
+            </Button>
+          )}
         </div>
         {/* Variable chips: on Batch calls these are filled from each
             campaign's CSV — the dependency runs Go Live → prompt. */}
@@ -75,12 +108,17 @@ export function SectionPrompt({
 
       {/* Greeting */}
       <div id="wz-3-greeting" className="scroll-mt-28 space-y-1.5">
-        <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting Message</Label>
+        <Label htmlFor="wz-greeting" className="flex items-center gap-1.5 text-sm font-medium">
+          Greeting Message
+          {overridden("greeting") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
+        </Label>
+        {overridden("greeting") && <OverrideFlag field="greeting" />}
         <Textarea
           id="wz-greeting"
           value={draft.greeting}
           onChange={(e) => update({ greeting: e.target.value })}
-          className="min-h-[64px] text-sm"
+          disabled={overridden("greeting")}
+          className={cn("min-h-[64px] text-sm", overridden("greeting") && "border-warning/50 opacity-80")}
           placeholder={batch
             ? "Hey {{name}}, I'm calling from Acme about your account…"
             : "Hi, thanks for calling. How can I help you today?"}
@@ -89,12 +127,17 @@ export function SectionPrompt({
 
       {/* Failure message (proposal — new field). */}
       <div className="space-y-1.5">
-        <Label htmlFor="wz-failure" className="text-sm font-medium">Failure Message</Label>
+        <Label htmlFor="wz-failure" className="flex items-center gap-1.5 text-sm font-medium">
+          Failure Message
+          {overridden("failureMessage") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
+        </Label>
+        {overridden("failureMessage") && <OverrideFlag field="failureMessage" />}
         <Textarea
           id="wz-failure"
           value={draft.failureMessage}
           onChange={(e) => update({ failureMessage: e.target.value })}
-          className="min-h-[64px] text-sm"
+          disabled={overridden("failureMessage")}
+          className={cn("min-h-[64px] text-sm", overridden("failureMessage") && "border-warning/50 opacity-80")}
           placeholder="Oops, I can't seem to answer that."
         />
         {/* When it plays — the field arrived with no trigger doc (journey

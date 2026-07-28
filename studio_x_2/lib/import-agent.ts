@@ -278,7 +278,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   if (found.tools?.names.length) {
     dropped.push({
       theirs: `${found.tools.path} (${found.tools.names.length})`,
-      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Context › Knowledge & Tools.`,
+      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Context › Additional context.`,
     })
   }
   // Call-behavior rows claim carried only because the partial below IS
@@ -338,8 +338,8 @@ const DROP_REASONS: Record<string, string> = {
   artifactPlan: "Recording settings live in Go Live › Structured outputs.",
   post_call_analysis_data: "Post-call analysis is configured in Go Live › Structured outputs.",
   post_call_analysis_model: "Post-call analysis is configured in Go Live › Structured outputs.",
-  knowledge_base_ids: "Knowledge re-attaches in Context › Knowledge & Tools.",
-  knowledge_base: "Knowledge re-attaches in Context › Knowledge & Tools.",
+  knowledge_base_ids: "Knowledge re-attaches in Context › Additional context.",
+  knowledge_base: "Knowledge re-attaches in Context › Additional context.",
   platform_settings: "Platform/auth settings stay vendor-specific.",
   transcriber: "The transcriber maps to Agora's bundled STT — tune it in Voice › Advanced.",
   asr: "ASR maps to Agora's bundled STT — tune it in Voice › Advanced.",
@@ -519,7 +519,7 @@ function parseElevenLabs(p: Rec): VendorParse {
     }
     if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Voice › Advanced." })
     if (Array.isArray(promptObj?.knowledge_base) && (promptObj!.knowledge_base as unknown[]).length) {
-      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Context › Knowledge & Tools." })
+      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Context › Additional context." })
     }
   }
   const consumed = new Set(["name", "conversation_config"])

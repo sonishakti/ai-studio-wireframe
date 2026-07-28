@@ -169,10 +169,13 @@ export function CampaignLaunchFields({
 // ─── Per-campaign: dialing window · concurrency · retries ─────────────────────
 
 export function CampaignDialingFields({
-  campaign, onChange,
+  campaign, onChange, disabled,
 }: {
   campaign: CampaignDraft
   onChange: (patch: Partial<CampaignDraft>) => void
+  /** Locked rerun: real `disabled` on every control — a pointer-events wrapper
+   *  alone leaves them keyboard-editable (review 2026-07-28). */
+  disabled?: boolean
 }) {
   return (
     <div className="space-y-3">
@@ -181,6 +184,7 @@ export function CampaignDialingFields({
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Call window</Label>
           <Select
+            disabled={disabled}
             value={campaign.callWindow ?? "business"}
             onValueChange={(v) => onChange({ callWindow: v as CampaignDraft["callWindow"] })}
           >
@@ -196,6 +200,7 @@ export function CampaignDialingFields({
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Max concurrent</Label>
           <Select
+            disabled={disabled}
             value={String(campaign.maxConcurrent ?? 10)}
             onValueChange={(v) => onChange({ maxConcurrent: Number(v) })}
           >
@@ -208,6 +213,7 @@ export function CampaignDialingFields({
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
           <Select
+            disabled={disabled}
             value={String(campaign.retries ?? 1)}
             onValueChange={(v) => onChange({ retries: Number(v) })}
           >

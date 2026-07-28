@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
   Upload, Check, AlertTriangle, Download, EllipsisVertical, Plus, RotateCcw,
-  Pencil, Copy, Trash2,
+  Pencil, Copy, Trash2, Lock,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -63,23 +63,42 @@ export function CampaignsCard({ draft, update }: StepProps) {
     setCampaigns(campaigns.map((c) => (c.id === id ? { ...c, ...patch } : c)))
 
   const startNew = () => {
-    setNewDraft(makeCampaign(`Campaign ${campaigns.length + 1}`))
+    setNewDraft(makeCampaign(`Run ${campaigns.length + 1}`))
     setEditing("new")
   }
-  const duplicate = (c: CampaignDraft, rerun?: boolean) => {
+  const duplicate = (c: CampaignDraft) => {
     const copy: CampaignDraft = {
       ...c,
       id: newCampaignId(),
-      name: rerun ? `${c.name} (re-run)` : `${c.name} (copy)`,
+      name: `${c.name} (copy)`,
       status: "draft",
+      locked: false,
+      rerunOf: undefined,
       launch: { mode: "now" },
     }
     setCampaigns([...campaigns, copy])
     setEditing(copy.id)
-    toast(rerun ? `Re-running ${c.name}` : `${c.name} duplicated`, {
-      description: rerun
-        ? "Same contacts, caller ID, and settings — starts as a new draft campaign."
-        : "Edit the copy below.",
+    toast(`${c.name} duplicated`, { description: "A fully editable copy — change anything." })
+  }
+  /** RERUN (owner 2026-07-28, distinct from Duplicate): SAME agent, SAME
+   *  config — only the contact list (and timing) change, so aggregated
+   *  analytics stay comparable across runs. Everything else locks. */
+  const rerun = (c: CampaignDraft) => {
+    const next: CampaignDraft = {
+      ...c,
+      id: newCampaignId(),
+      name: `${c.name} — rerun`,
+      csvName: null,
+      contacts: undefined,
+      status: "draft",
+      locked: true,
+      rerunOf: c.rerunOf ?? c.id,
+      launch: { mode: "now" },
+    }
+    setCampaigns([...campaigns, next])
+    setEditing(next.id)
+    toast(`Rerunning ${c.name}`, {
+      description: "Config is locked to the original run — upload the new contact list and launch.",
     })
   }
   const remove = (c: CampaignDraft) => {
@@ -93,27 +112,29 @@ export function CampaignsCard({ draft, update }: StepProps) {
     <section className="rounded-lg border border-border bg-card">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3.5">
         <div className="flex items-center gap-2.5">
-          <p className="text-sm font-semibold">Campaigns</p>
+          <p className="text-sm font-semibold">Campaign runs</p>
           <Badge variant="secondary" className="h-5 px-1.5 text-xs">{campaigns.length}</Badge>
-          <InfoHint label="Run several at once">
-            Each campaign has its own contacts, caller ID, language, and schedule — run one
-            Spanish and two English lists in parallel, or re-run a finished one.
+          <InfoHint label="Runs, reruns, and duplicates">
+            Each run has its own contacts, caller ID, language, and schedule — run one Spanish
+            and two English lists in parallel. <span className="font-medium text-foreground">Rerun</span> keeps
+            this agent and its config, swapping only the CSV (analytics aggregate across runs);{" "}
+            <span className="font-medium text-foreground">Duplicate</span> is a fully editable copy.
           </InfoHint>
         </div>
         <Button size="sm" className="gap-1.5" onClick={startNew} disabled={editing === "new"}>
-          <Plus className="h-3.5 w-3.5" aria-hidden /> New campaign
+          <Plus className="h-3.5 w-3.5" aria-hidden /> New run
         </Button>
       </header>
 
       {campaigns.length === 0 && editing !== "new" ? (
         <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
-          <p className="text-sm font-medium">No campaigns yet</p>
+          <p className="text-sm font-medium">No runs yet</p>
           <p className="max-w-sm text-xs text-muted-foreground">
-            A campaign is one batch run — a contact list, a caller ID, and a schedule.
+            A run is one batch pass — a contact list, a caller ID, and a schedule.
             Create one to start batch calling.
           </p>
           <Button size="sm" className="mt-2 gap-1.5" onClick={startNew}>
-            <Plus className="h-3.5 w-3.5" aria-hidden /> New campaign
+            <Plus className="h-3.5 w-3.5" aria-hidden /> New run
           </Button>
         </div>
       ) : (
@@ -155,6 +176,11 @@ export function CampaignsCard({ draft, update }: StepProps) {
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
                       {c.name}
                       {c.language && <Badge variant="outline" className="h-5 px-1.5 text-xs font-normal">{c.language}</Badge>}
+                      {c.locked && (
+                        <Badge variant="outline" className="h-5 gap-1 border-warning/50 px-1.5 text-xs font-normal text-foreground">
+                          <Lock className="h-3 w-3 text-warning" aria-hidden /> rerun — config locked
+                        </Badge>
+                      )}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
                       {c.csvName
@@ -181,11 +207,11 @@ export function CampaignsCard({ draft, update }: StepProps) {
                         <Pencil className="size-4" aria-hidden /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => duplicate(c)}>
-                        <Copy className="size-4" aria-hidden /> Duplicate
+                        <Copy className="size-4" aria-hidden /> Duplicate (editable copy)
                       </DropdownMenuItem>
                       {c.status === "completed" && (
-                        <DropdownMenuItem onClick={() => duplicate(c, true)}>
-                          <RotateCcw className="size-4" aria-hidden /> Re-run
+                        <DropdownMenuItem onClick={() => rerun(c)}>
+                          <RotateCcw className="size-4" aria-hidden /> Rerun with a new CSV
                         </DropdownMenuItem>
                       )}
                       {c.status === "draft" && (
@@ -242,9 +268,28 @@ function CampaignEditor({
     (n) => !available.includes(n) && (n.assignedTo.length > 0 || n.assignedAgent),
   )
 
+  const locked = !!campaign.locked
+
   return (
     <div className="@container space-y-4 rounded-lg border border-border bg-card p-4">
-      <p className="text-sm font-semibold">{isNew ? "New campaign" : `Edit ${campaign.name}`}</p>
+      <p className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+        {isNew ? "New run" : `Edit ${campaign.name}`}
+        {locked && (
+          <span className="inline-flex items-center gap-1 text-xs font-normal text-muted-foreground">
+            <Lock className="h-3 w-3 text-warning" aria-hidden /> rerun
+          </span>
+        )}
+      </p>
+
+      {/* Rerun lock (owner 2026-07-28): same agent, same config — only the
+          list and timing change, so aggregated analytics stay comparable. */}
+      {locked && (
+        <p className="rounded-md border border-warning/50 bg-warning/10 px-3 py-2 text-xs text-foreground">
+          Config is locked to the original run — upload the new contact list and set the timing.
+          Caller ID, language, and dialing stay identical so analytics aggregate across runs.
+          Need changes? Use <span className="font-medium">Duplicate</span> instead.
+        </p>
+      )}
 
       {/* HALF-AND-HALF (owner 2026-07-28): the run config on the left, the
           contacts CSV on the right — parallel panes of one decision, sized to
@@ -253,7 +298,7 @@ function CampaignEditor({
         <div className="min-w-0 space-y-4">
           <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor={`cmp-name-${campaign.id}`} className="text-sm font-medium">Campaign name</Label>
+              <Label htmlFor={`cmp-name-${campaign.id}`} className="text-sm font-medium">Run name</Label>
               <Input
                 id={`cmp-name-${campaign.id}`}
                 value={campaign.name}
@@ -264,7 +309,7 @@ function CampaignEditor({
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-medium">Language / region</Label>
-              <Select value={campaign.language ?? ""} onValueChange={(language) => onChange({ language })}>
+              <Select disabled={locked} value={campaign.language ?? ""} onValueChange={(language) => onChange({ language })}>
                 <SelectTrigger className="w-full text-sm"><SelectValue placeholder="Tag this list" /></SelectTrigger>
                 <SelectContent>
                   {CAMPAIGN_LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
@@ -275,7 +320,7 @@ function CampaignEditor({
 
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Caller-ID number</Label>
-            <Select value={campaign.numberId ?? ""} onValueChange={(numberId) => onChange({ numberId })}>
+            <Select disabled={locked} value={campaign.numberId ?? ""} onValueChange={(numberId) => onChange({ numberId })}>
               <SelectTrigger className="w-full text-sm">
                 <SelectValue placeholder="Choose the number to dial from" />
               </SelectTrigger>
@@ -293,11 +338,11 @@ function CampaignEditor({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              One number per campaign — load-balancing across several is coming.
+              One number per run — load-balancing across several is coming.
             </p>
           </div>
 
-          <CampaignDialingFields campaign={campaign} onChange={onChange} />
+          <CampaignDialingFields campaign={campaign} onChange={onChange} disabled={locked} />
           <CampaignLaunchFields campaign={campaign} onChange={onChange} />
         </div>
 
@@ -306,8 +351,8 @@ function CampaignEditor({
 
       <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
         <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-        <Button size="sm" disabled={!campaign.name.trim()} onClick={onSave}>
-          {isNew ? "Save campaign" : "Save changes"}
+        <Button size="sm" disabled={!campaign.name.trim() || (locked && !campaign.csvName)} onClick={onSave}>
+          {locked ? "Save rerun" : isNew ? "Save run" : "Save changes"}
         </Button>
       </div>
     </div>

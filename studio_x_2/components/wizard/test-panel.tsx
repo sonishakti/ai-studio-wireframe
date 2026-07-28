@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/sheet"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
 import type { StackLatencyBreakdown } from "@/lib/campaign-data"
-import { TestsSection } from "@/components/eval-tests"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 
 /** Below lg (1024) the docked column doesn't exist — the panel falls back to
@@ -35,9 +34,9 @@ function useBelowLg() {
  * dragging its left border (pointer-capture drag, clamped, double-click
  * resets, width persisted). Below lg it falls back to a full-width Sheet.
  *
- * Tabs: Talk (identity card + simulated live test) · Scenarios (the
- * run-simulation eval suite — the reason the drag-wider exists) · Widget
- * (web-widget preview, web channel only).
+ * Tabs: Talk (identity card + simulated live test) · Widget (web-widget
+ * preview, web channel only). Scenario simulations live in the TEST section
+ * of the main column (v5) — this panel is the quick-talk surface.
  */
 
 const WIDTH_KEY = "sx:test_panel_w"
@@ -45,7 +44,7 @@ const MIN_W = 360
 const MAX_W = 720
 const DEFAULT_W = 420
 
-export type TestPanelTab = "talk" | "scenarios" | "widget"
+export type TestPanelTab = "talk" | "widget"
 
 export interface TestPanelIdentity {
   name: string
@@ -125,7 +124,6 @@ export function TestPanel({
       <div className="shrink-0 border-b border-border px-4 py-2.5">
         <TabsList className="h-8">
           <TabsTrigger value="talk" className="text-xs">Talk</TabsTrigger>
-          <TabsTrigger value="scenarios" className="text-xs">Scenarios</TabsTrigger>
           {showWidgetTab && <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>}
         </TabsList>
       </div>
@@ -154,12 +152,6 @@ export function TestPanel({
           endLabel="End test"
           className="border-0 p-2 lg:static"
         />
-      </TabsContent>
-      <TabsContent value="scenarios" className="min-h-0 flex-1 overflow-y-auto p-4">
-        <p className="pb-3 text-xs text-muted-foreground">
-          Simulated callers that prove {agentName} behaves — run them before real traffic.
-        </p>
-        <TestsSection agentName={agentName} />
       </TabsContent>
       {showWidgetTab && (
         <TabsContent value="widget" className="min-h-0 flex-1 overflow-y-auto p-4">

@@ -51,7 +51,7 @@ import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-
 import { useFutureScope, readFutureScope } from "@/lib/future-scope"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
-import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
 import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT } from "@/lib/wizard-draft"
 import { CreateAgentDialog, TEMPLATE_ICONS, type CreateAgentValue } from "@/components/wizard/create-agent-dialog"
@@ -288,8 +288,12 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
               {visible.map((agent) => {
                 const ch = CHANNEL_META[agent.channelType]
                 const est = STACK_ESTIMATE[agent.stack]
+                // Runs model (owner 2026-07-28): no separate campaigns page —
+                // the agent row nests its runs (active · scheduled · completed).
+                const runs = getAgent(agent.id)?.campaigns ?? []
                 return (
-                  <TableRow key={agent.id}>
+                  <React.Fragment key={agent.id}>
+                  <TableRow>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted shrink-0">
@@ -369,8 +373,8 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           </DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            {/* ?step=4 lands on Go Live (v4 order). */}
-                            <Link href={`/agents/${agent.id}/edit?step=4`}>Deploy</Link>
+                            {/* ?step=5 lands on Go Live (v5 order). */}
+                            <Link href={`/agents/${agent.id}/edit?step=5`}>Deploy</Link>
                           </DropdownMenuItem>
                           {/* A reversible off-switch — Delete must never be the
                               only way to stop a live agent (user-test S2). */}
@@ -398,6 +402,40 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
+                  {runs.map((r) => (
+                    <TableRow key={r.id} className="bg-muted/20 hover:bg-muted/30">
+                      <TableCell colSpan={5} className="py-2">
+                        <Link
+                          href={`/agents/${agent.id}/edit?step=5`}
+                          className="flex items-center gap-2.5 pl-11 text-sm"
+                        >
+                          <span className="h-4 w-px bg-border" aria-hidden />
+                          <span
+                            className={cn(
+                              "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
+                              r.status === "running" ? "bg-success/10 text-success"
+                              : r.status === "scheduled" ? "border border-border text-foreground"
+                              : r.status === "completed" ? "bg-muted text-muted-foreground"
+                              : "bg-secondary text-secondary-foreground",
+                            )}
+                          >
+                            {r.status === "running" && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />}
+                            {r.status}
+                          </span>
+                          <span className="min-w-0 truncate font-medium">{r.name}</span>
+                          {r.language && <span className="shrink-0 text-xs text-muted-foreground">{r.language}</span>}
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {r.contacts ? `${r.contacts} contacts` : "no contacts yet"}
+                            {r.status === "scheduled" && r.startDate ? ` · starts ${r.startDate} ${r.startTime ?? ""}` : ""}
+                          </span>
+                        </Link>
+                      </TableCell>
+                      <TableCell colSpan={3} className="py-2 text-right">
+                        <span className="pr-1 text-xs text-muted-foreground">run</span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  </React.Fragment>
                 )
               })}
               {visible.length === 0 && (

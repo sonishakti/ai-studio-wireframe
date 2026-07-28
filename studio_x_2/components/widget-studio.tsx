@@ -325,7 +325,16 @@ export function WidgetStudioEmbedded({ agentId }: { agentId: string }) {
  * 2026-07-15): a single "Web widget" channel whose look you style here, while
  * the LIVE PREVIEW lives in the right-hand agent panel (toggle it to "Widget").
  */
-export function WidgetStyleConfig({ agentId }: { agentId: string }) {
+export function WidgetStyleConfig({
+  agentId,
+  lean,
+}: {
+  agentId: string
+  /** Builder hot-path mode (owner 2026-07-28: "much lighter, simpler setup —
+   *  not constrained by App Builder"): behaviour + appearance + embed only;
+   *  deep styling stays in the Widget studio. */
+  lean?: boolean
+}) {
   const studio = useWidgetState(agentId)
   return (
     <div className="max-w-3xl space-y-4">
@@ -341,7 +350,7 @@ export function WidgetStyleConfig({ agentId }: { agentId: string }) {
         Styling updates live in the <span className="font-medium text-foreground">Widget</span> preview on the right. Re-copy the embed after changes to update your site.
       </div>
       <div className="overflow-hidden rounded-lg border border-border bg-card [&>*:last-child]:border-b-0">
-        <ConfigSections cfg={studio.cfg} set={studio.set} />
+        <ConfigSections cfg={studio.cfg} set={studio.set} lean={lean} />
         <Section title="Embed on your site" defaultOpen>
           <p className="text-sm text-muted-foreground">
             Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
@@ -352,6 +361,15 @@ export function WidgetStyleConfig({ agentId }: { agentId: string }) {
           </CodeBlock>
         </Section>
       </div>
+      {lean && (
+        <p className="text-xs text-muted-foreground">
+          Need colors, semantic states, or UI-element toggles? Deep styling lives in the{" "}
+          <a href="/deploy/web-widget" className="underline underline-offset-2 hover:text-foreground">
+            Widget studio
+          </a>
+          .
+        </p>
+      )}
     </div>
   )
 }
@@ -397,7 +415,7 @@ function PreviewModeTabs({
 
 // ─── The seven config sections (Figma anatomy) — shared by both surfaces ──────
 
-function ConfigSections({ cfg, set }: { cfg: WidgetConfig; set: SetCfg }) {
+function ConfigSections({ cfg, set, lean }: { cfg: WidgetConfig; set: SetCfg; lean?: boolean }) {
   return (
     <>
       <Section title="Behaviour" defaultOpen>
@@ -435,6 +453,7 @@ function ConfigSections({ cfg, set }: { cfg: WidgetConfig; set: SetCfg }) {
         </FieldRow>
       </Section>
 
+      {!lean && (<>
       <Section title="Text" defaultOpen>
         <TextField label="Button label" value={cfg.buttonLabel} onChange={(v) => set("buttonLabel", v)} />
         {/* NO greeting field here (owner 2026-07-15): the greeting is
@@ -511,6 +530,7 @@ function ConfigSections({ cfg, set }: { cfg: WidgetConfig; set: SetCfg }) {
         <ToggleRow label="Close button" checked={cfg.showClose} onChange={(v) => set("showClose", v)} />
         <ToggleRow label='"Powered by Agora" footer' checked={cfg.poweredBy} onChange={(v) => set("poweredBy", v)} />
       </Section>
+      </>)}
     </>
   )
 }
