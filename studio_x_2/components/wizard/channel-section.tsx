@@ -319,6 +319,7 @@ const client = new AgentClient({
 })
 
 // Add the agent to a live Agora RTC channel
+// token minted from your App Certificate on join — clients keep their own
 await client.joinChannel({ channel: "support-room" })`
 
   const stop = `// Stop the agent — releases the channel and stops billing

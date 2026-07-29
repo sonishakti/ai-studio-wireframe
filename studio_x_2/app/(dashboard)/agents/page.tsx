@@ -912,6 +912,19 @@ function StartView({
               </div>
             )
           })}
+          {/* Code/SDK scent (user-test 2026-07-29): the templates all read
+              telephony — the embed-in-my-app path needs one visible line.
+              Points at the builder's Channel section, where Code / SDK is a
+              first-class radio. */}
+          <p className="px-1 pt-1 text-xs text-muted-foreground">
+            Building in your own app?{" "}
+            <Link
+              href="/agents?view=builder&step=2"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              Code / SDK →
+            </Link>
+          </p>
         </div>
 
         {/* Preview panel — 320 (design): selected template · ready badge · orb

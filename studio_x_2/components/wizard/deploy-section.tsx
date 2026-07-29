@@ -24,8 +24,10 @@ import { type StepProps } from "@/components/wizard/types"
 const VERSION_HISTORY: { property: string; date: string; old: string; next: string; by: string }[] = [
   { property: "Model tier", date: "2026-07-24 14:02", old: "Agora Balanced", next: "Agora Cheapest", by: "you" },
   { property: "System prompt", date: "2026-07-21 09:48", old: "…escalate to a human.", next: "…escalate to a human if asked.", by: "you" },
-  { property: "Max call duration", date: "2026-07-18 16:20", old: "240 s", next: "300 s", by: "j.moreno@acme.com" },
-  { property: "Voicemail detection", date: "2026-07-18 16:19", old: "Off", next: "On", by: "j.moreno@acme.com" },
+  // "you" everywhere — a fresh single-user account must never imply a stranger
+  // edited its agent (user-test 2026-07-29; was a seeded teammate email).
+  { property: "Max call duration", date: "2026-07-18 16:20", old: "240 s", next: "300 s", by: "you" },
+  { property: "Voicemail detection", date: "2026-07-18 16:19", old: "Off", next: "On", by: "you" },
   { property: "Voice", date: "2026-07-12 11:05", old: "Aria (ElevenLabs)", next: "Jenny (Azure)", by: "you" },
 ]
 

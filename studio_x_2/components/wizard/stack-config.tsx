@@ -335,6 +335,12 @@ export function StackModelPicker({
  *  owns the whole pipeline). */
 const SLIDER_ORDER: StackPreset[] = ["fastest", "balanced", "cheapest"]
 
+/** "Balanced — Deepgram STT · gpt-4o-mini · ElevenLabs voice": the preset name
+ *  plus the vendors it bundles, from the CURRENT stack so per-slot overrides
+ *  stay truthful ("Custom mix" once diverged). */
+const bundleLine = (s: AgentStack, diverged: boolean) =>
+  `${diverged ? "Custom mix" : STACK_PRESETS[s.preset].label} — ${s.asr.vendor} STT · ${s.llm.model} · ${s.tts.vendor} voice`
+
 export function StackTradeoffSlider({
   stack, onChange, className, lean,
 }: StackPieceProps & {
@@ -393,8 +399,15 @@ export function StackTradeoffSlider({
           </div>
         )}
       </div>
+      {/* Name the bundle, not just its numbers (user-test 2026-07-29): the
+          preset is a VENDOR bundle, and real model control exists — both must
+          read without hovering. Diverged mixes are named honestly. */}
       <p className="font-mono text-xs tabular-nums text-muted-foreground">
-        {lean ? <>~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</> : <>Current: ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>}
+        {lean ? (
+          <>{bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
+        ) : (
+          <>Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
+        )}
       </p>
       {diverged && (
         <p className="text-xs text-muted-foreground">

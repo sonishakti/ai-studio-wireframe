@@ -99,6 +99,11 @@ export function StepPublish({
             ? `Puts ${agentName} live${campaignCount > 1 ? ` and starts ${campaignCount} campaign runs` : " and starts your campaign run"}. Opens Monitor.`
             : `Puts ${agentName} live. Opens Monitor.`}
         </p>
+        {/* Off-switch pointer (user-test 2026-07-29): a header Pause is vetoed,
+            so the fine print names where the existing one lives. */}
+        <p className="text-xs text-muted-foreground/80">
+          To take this agent offline, use Pause on its row in All Agents.
+        </p>
       </section>
     </div>
   )

@@ -130,7 +130,7 @@ export function CreateAgentDialog({
   const validation = !description.trim()
     ? null
     : enough
-      ? { ok: true, msg: "Enough to build from — we'll set up the prompt, template shape, and channels." }
+      ? { ok: true, msg: "Enough to build from — we'll set up the prompt, template shape, and channel." }
       : { ok: false, msg: "Add a bit more — what should it do, and for whom? (e.g. \"Call my customer list about overdue invoices\")" }
 
   const create = () => {
@@ -163,7 +163,7 @@ export function CreateAgentDialog({
               rows={2}
               autoFocus
               className="min-h-[64px] text-sm"
-              placeholder={"Two lines is enough — e.g. \"Call my customer list to remind them about overdue invoices, in English and Spanish.\""}
+              placeholder={"Two lines is enough — e.g. \"Call my customer list to remind them about overdue invoices, in English and Spanish\" — or: \"Add an agent to my RTC app via the SDK.\""}
             />
             {/* One PERSISTENT live region from mount — a region must be live
                 before its content changes to announce reliably. */}
