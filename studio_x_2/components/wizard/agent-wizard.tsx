@@ -347,6 +347,10 @@ export function AgentWizard({
         toast.success(`Started from ${tpl.name}`, {
           description: "Name, prompt, and greeting are pre-filled. Tweak anything.",
         })
+        // Land on the SEEDED draft's first gap (Channel) — the rail's default
+        // was locked from the pre-seed empty draft, parking it on Voice
+        // (user-test 2026-07-29).
+        if (!stepToOpen) openLater(firstIncomplete(seeded))
       }
       if (stepToOpen) openLater(stepToOpen)
       return
