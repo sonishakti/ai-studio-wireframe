@@ -29,12 +29,14 @@ export const meta = {
 //   max     — maxIterations fix rounds already ran
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DATE = args && args.date
+// Some harness versions deliver `args` as a JSON-encoded STRING — tolerate both.
+const ARGS = typeof args === 'string' ? JSON.parse(args) : args
+const DATE = ARGS && ARGS.date
 if (!DATE) throw new Error('args.date ("YYYY-MM-DD") is required — workflow scripts cannot call Date')
-const FOCUS = (args && args.focus) || 'the latest commit'
-const SLUG = (args && args.slug) || 'graph-loop'
-const URL = (args && args.url) || 'https://ai-studio-console-redesign.vercel.app'
-const MAX_ITER = (args && args.maxIterations) || 2
+const FOCUS = (ARGS && ARGS.focus) || 'the latest commit'
+const SLUG = (ARGS && ARGS.slug) || 'graph-loop'
+const URL = (ARGS && ARGS.url) || 'https://ai-studio-console-redesign.vercel.app'
+const MAX_ITER = (ARGS && ARGS.maxIterations) || 2
 const REPO = '/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign'
 const APP = REPO + '/studio_x_2'
 const USER_TEST = '.claude/workflows/user-test.js'
@@ -74,7 +76,7 @@ const stalled = (prev, cur) => {
 }
 
 const iterations = []
-let commitLabel = (args && args.commit) || 'HEAD'
+let commitLabel = (ARGS && ARGS.commit) || 'HEAD'
 let exitReason = 'max'
 
 for (let round = 1; round <= MAX_ITER + 1; round++) {
