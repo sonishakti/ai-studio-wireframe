@@ -218,16 +218,18 @@ export function buildSessionTrace(input: {
     const [agentLine, userLine] = EXCHANGES[i % EXCHANGES.length]
 
     // Agent turn — carries the trace (the user turn is just input).
-    const vad = 120 + Math.round(rnd() * 90)
-    const asr = 90 + Math.round(rnd() * 170)
-    const llmMs = 190 + Math.round(rnd() * 430)
-    const ttsMs = 70 + Math.round(rnd() * 150)
-    const net = 30 + Math.round(rnd() * 60)
+    const vad = 90 + Math.round(rnd() * 70)
+    const asr = 80 + Math.round(rnd() * 120)
+    const llmMs = 170 + Math.round(rnd() * 300)
+    const ttsMs = 70 + Math.round(rnd() * 120)
+    const net = 30 + Math.round(rnd() * 50)
 
-    // A tool call on roughly a third of turns — and occasionally a slow one,
-    // which is the case the whole waterfall exists to make visible.
-    const hasTool = rnd() > 0.66
-    const toolMs = hasTool ? (rnd() > 0.75 ? 1400 + Math.round(rnd() * 3200) : 180 + Math.round(rnd() * 500)) : 0
+    // A tool call on roughly a quarter of turns, and a genuinely slow one only
+    // rarely. The rate matters for more than realism: if most sessions breach
+    // the latency target, the warning colour on the list stops meaning
+    // anything. A slow turn has to be the exception to read as a signal.
+    const hasTool = rnd() > 0.74
+    const toolMs = hasTool ? (rnd() > 0.86 ? 900 + Math.round(rnd() * 1800) : 140 + Math.round(rnd() * 320)) : 0
 
     let cursor = 0
     const spans: TraceSpan[] = []
