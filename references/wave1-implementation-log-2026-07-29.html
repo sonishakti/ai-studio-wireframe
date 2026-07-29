@@ -1,0 +1,258 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave 1 — research, build, and where to test it</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#00658d; --brand-soft:#e3f1f7; --ink:#13202b; --muted:#5a6b77;
+    --paper:#fcfdfe; --card:#ffffff; --line:#dde6ec; --wash:#f3f7fa;
+    --red:#c9184a; --red-bg:#fdeaef;
+    --s1:#b3261e; --s1-bg:#fbebea; --s2:#8a5a00; --s2-bg:#faf1dd;
+    --ok:#1a7f4e; --ok-bg:#e5f3ec;
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --brand:#00c2ff; --brand-soft:#0b2a38; --ink:#e8eef3; --muted:#93a4b0;
+    --paper:#0c141b; --card:#121d26; --line:#22323e; --wash:#101a22;
+    --red:#ff5c8a; --red-bg:#3a1220;
+    --s1:#ff8a80; --s1-bg:#3a1512; --s2:#ffce6b; --s2-bg:#332608;
+    --ok:#6bd39e; --ok-bg:#0d2b1d;
+  }}
+  :root[data-theme="light"]{
+    --brand:#00658d; --brand-soft:#e3f1f7; --ink:#13202b; --muted:#5a6b77;
+    --paper:#fcfdfe; --card:#ffffff; --line:#dde6ec; --wash:#f3f7fa;
+    --red:#c9184a; --red-bg:#fdeaef;
+    --s1:#b3261e; --s1-bg:#fbebea; --s2:#8a5a00; --s2-bg:#faf1dd;
+    --ok:#1a7f4e; --ok-bg:#e5f3ec;
+  }
+  :root[data-theme="dark"]{
+    --brand:#00c2ff; --brand-soft:#0b2a38; --ink:#e8eef3; --muted:#93a4b0;
+    --paper:#0c141b; --card:#121d26; --line:#22323e; --wash:#101a22;
+    --red:#ff5c8a; --red-bg:#3a1220;
+    --s1:#ff8a80; --s1-bg:#3a1512; --s2:#ffce6b; --s2-bg:#332608;
+    --ok:#6bd39e; --ok-bg:#0d2b1d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.6 "Instrument Sans",-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:48px 24px 96px}
+  header.doc{border-bottom:2px solid var(--brand);padding-bottom:24px;margin-bottom:28px}
+  .eyebrow{color:var(--brand);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+  h1{font-size:34px;line-height:1.15;margin:8px 0 12px;text-wrap:balance;font-weight:700}
+  .meta{color:var(--muted);font-size:14px}
+  .meta a{color:var(--brand)}
+  h2{font-size:22px;margin:52px 0 12px;font-weight:700}
+  h2 .no{color:var(--brand);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:28px 0 8px;font-weight:700}
+  p{max-width:74ch}
+  .lead{font-size:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0}
+  .callout{border-left:4px solid var(--brand);background:var(--brand-soft);border-radius:6px;padding:14px 18px;margin:18px 0}
+  .callout.red{border-left-color:var(--s1);background:var(--s1-bg)}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  .tblwrap{overflow-x:auto;margin:12px 0}
+  th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+     border-bottom:2px solid var(--line);padding:8px 10px;white-space:nowrap}
+  td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+  .S1{background:var(--s1-bg);color:var(--s1)} .S2{background:var(--s2-bg);color:var(--s2)}
+  .OK{background:var(--ok-bg);color:var(--ok)} .BR{background:var(--brand-soft);color:var(--brand)}
+  code{background:var(--wash);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px}
+  .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+  @media(max-width:760px){.statrow{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+  .stat b{display:block;font-size:27px;color:var(--brand);font-variant-numeric:tabular-nums}
+  .stat span{font-size:13px;color:var(--muted)}
+  figure{margin:20px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+  figure img{display:block;width:100%;height:auto}
+  figcaption{padding:10px 16px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+  figcaption b{color:var(--ink)}
+  .marker{display:inline-block;background:var(--red);color:#fff;border-radius:4px;
+    padding:0 6px;font-size:12px;font-weight:700;margin-right:4px}
+  ul{padding-left:22px} li{margin:5px 0;max-width:74ch}
+  .test{background:var(--wash);border:1px solid var(--line);border-left:4px solid var(--brand);
+    border-radius:6px;padding:12px 16px;margin:10px 0;font-size:14px}
+  .test b{display:block;margin-bottom:3px}
+  .test a{color:var(--brand)}
+  footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">Studio_X · Wave 1 · 2026-07-29</div>
+  <h1>What research found, what I built, and where to click to test it</h1>
+  <div class="meta">
+    Live: <a href="https://ai-studio-console-redesign.vercel.app">ai-studio-console-redesign.vercel.app</a> ·
+    App: <code>studio_x_2/</code> · Design/FE only, mock data, no backend ·
+    Roadmap: <a href="prd-q3-roadmap-execution-2026-07-29.html">Q3 execution PRD</a> Wave 1
+  </div>
+</header>
+
+<p class="lead">Four research streams ran first — three competitor scans (templates &amp; model selection, call observability, RAG connectors) and a three-persona internal focus group. They agreed on something I hadn't scoped: <b>three of the four Wave-1 features were sitting on top of S1 defects</b>, where the console was showing users things that weren't true. Those got fixed before anything new was built.</p>
+
+<div class="statrow">
+  <div class="stat"><b>4</b><span>research streams</span></div>
+  <div class="stat"><b>3</b><span>S1 defects found &amp; fixed</span></div>
+  <div class="stat"><b>8</b><span>features shipped</span></div>
+  <div class="stat"><b>2</b><span>things research told me NOT to build</span></div>
+</div>
+
+<h2 id="s1"><span class="no">1</span>The three S1 defects</h2>
+<p>Each of these was the console asserting something false. They're listed first because they were the highest-value work in the wave, and none of them was on the original plan.</p>
+
+<div class="tblwrap"><table>
+  <tr><th>What was wrong</th><th>Why it mattered</th><th>Fix</th></tr>
+  <tr>
+    <td><b>Sessions rows looked clickable and went nowhere.</b> Sessions had no detail view at all, while the visually identical Call History rows opened one.</td>
+    <td>All three personas read it as a broken table, not a missing feature. One tried clicking three times.</td>
+    <td>New <code>/sessions/[id]</code> — see <span class="pill BR">§2</span></td>
+  </tr>
+  <tr>
+    <td><b>The model estimate never moved.</b> Latency and cost were keyed to the <i>preset</i>, so overriding the LLM left "~800 ms · ~$0.10/min" unchanged while the label relabelled itself "Custom mix".</td>
+    <td>The UI announced that the stack had changed, then showed a number that hadn't. The tester who caught it stopped believing every other number on the page.</td>
+    <td>Estimates computed per-model — <span class="pill BR">§4</span></td>
+  </tr>
+  <tr>
+    <td><b>Call History invented phone numbers.</b> It looped every deployment and stamped a From/To on each row, so a web-widget deployment appeared as a phone call with a fabricated number.</td>
+    <td>Not ambiguity — fabricated data on an observability surface.</td>
+    <td>Filtered to telephony; web/chat/SIP runs live in Sessions with an honest channel label</td>
+  </tr>
+</table></div>
+
+<div class="callout red">
+  <b>A fourth problem surfaced while fixing the second.</b> Once the estimate computed from real models, the preset definitions stopped making sense: "Fastest" bundled GPT-4o, which has a <i>higher</i> time-to-first-token than the GPT-4o-mini in "Balanced" — so the slider would have shown Fastest as slower than Balanced. The presets were never a real latency/cost frontier; the preset-keyed estimate had been hiding it. They're now monotonic in both axes.
+</div>
+
+<h2 id="sessions"><span class="no">2</span>Session detail — the surface that didn't exist</h2>
+<p>This is the biggest piece of the wave. It merges three roadmap items into one page, and it's channel-agnostic by design: a web or chat run is a first-class session, not a phone call with empty fields.</p>
+
+<figure>
+  <img src="wave1-shots/01-sessions-list.png" alt="Sessions list with red markers on the new Channel column, p95 response column, channel filter, and per-row failure reasons">
+  <figcaption>
+    <b>Sessions list.</b>
+    <span class="marker">1</span>Channel column — sessions are no longer telephony-only.
+    <span class="marker">2</span>p95 on the row, so you can decide what to open without opening it (the observability research called the thin list "the weakest link in the whole flow").
+    <span class="marker">3</span>Channel filter.
+    <span class="marker">4</span>Failed sessions now say <i>why</i> — previously a bare "≤ 0s" with no reason, while a failed <i>call</i> got a full diagnosis.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="wave1-shots/02-session-detail-top.png" alt="Session detail header with markers on jump-to-slowest, trace JSON export, component breakdown, percentile cards, correlation panel and endpoint panel">
+  <figcaption>
+    <b>Session detail, top.</b>
+    <span class="marker">1</span>Jump to slowest turn — all three personas navigated by anomaly, never by aggregate.
+    <span class="marker">2</span>Whole-session JSON export ("I'll grep it").
+    <span class="marker">3</span>Where the time goes, averaged per turn, across all six hops.
+    <span class="marker">4</span>p50 / p95 / slowest against a stated 1000 ms target.
+    <span class="marker">5</span>Correlation block — channel name, agent UID, region, SDK. Without these, an Agora-native developer can't join a session to their own logs.
+    <span class="marker">6</span>Endpoint block, which is the part that changes per channel.
+    Above them, the failure diagnosis is promoted out of a tab into the header.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="wave1-shots/03-session-detail-trace.png" alt="Per-turn waterfall showing endpointing, STT, network, LLM, tool call and TTS spans laid out sequentially under each transcript line">
+  <figcaption>
+    <b>The waterfall.</b>
+    <span class="marker">1</span>Transcript and trace in <i>one</i> view — the old call sheet split them across five tabs, which severs exactly the correlation you need ("the LLM span at 0:42 is why the caller said 'hello?' at 0:44").
+    <span class="marker">2</span>Raw STT/LLM/TTS payloads, inline and collapsed per turn rather than a separate tab.
+    <span class="marker">3</span>Slowest turn flagged.
+    Note the spans run <b>left to right in sequence</b>, not as grouped bars — grouped bars imply the hops are parallel. <code>Tool call crm.lookup_order 415</code> is visible on the slow turn: tool time was previously excluded from end-to-end entirely, even though diagnostics already modelled tool calls up to 5.5 s. Trace and diagnosis now describe the same call. <code>Network 40 modeled</code> is hatched, because a trace that silently mixes measured and modelled values is worse than no trace.
+  </figcaption>
+</figure>
+
+<div class="test">
+  <b>Test it</b>
+  Open <a href="https://ai-studio-console-redesign.vercel.app/sessions">/sessions</a> → click any session ID.
+  Try a <b>Web</b> or <b>Chat</b> row (different endpoint block, and Chat has no recording) and a <b>Failed</b> row (diagnosis block).
+  Inside: hit <b>Jump to slowest turn</b>, expand <b>Payloads</b> on any agent turn, click a timestamp to seek, and click the <b>LLM</b> chip under a waterfall — it routes to the model picker.
+</div>
+
+<h2 id="models"><span class="no">3</span>Model selection — making the numbers true</h2>
+
+<figure>
+  <img src="wave1-shots/10-per-model-metadata.png" alt="Model dropdown showing GPT-4o at 520ms and $0.090/min, GPT-4o mini at 310ms and $0.030/min, Claude Haiku at 260ms and $0.025/min">
+  <figcaption>
+    <b>Per-model latency and cost at the point of choice.</b> Of every competitor scanned, only Vapi shows the tradeoff where the choice is made; ElevenLabs, Synthflow, LiveKit and Cartesia all leave it in docs, so you pick a model and discover the cost later. Non-streaming models (Whisper) are labelled as such — that property is most of why their latency is what it is, and it was previously invisible.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="wave1-shots/11-honest-estimate.png" alt="Builder model tier showing Balanced with Deepgram STT, gpt-4o-mini, Azure voice, 750ms and $0.05/min, plus a sentence defining the measurement boundary">
+  <figcaption>
+    <b>The estimate now computes from the selected models.</b> <code>~750 ms</code> = 130 (Nova-2) + 310 (GPT-4o mini) + 190 (Azure) + 120 overhead. Change any slot and it moves. Underneath, the measurement boundary is stated in one sentence — "caller stops speaking → agent audio starts, measured across our traffic, not a guarantee for your account." A latency number with no stated boundary is unfalsifiable, and every vendor quotes the flattering one.
+  </figcaption>
+</figure>
+
+<div class="test">
+  <b>Test it</b>
+  Open <a href="https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit">Aria → Voice</a>.
+  Drag the <b>Model tier</b> slider and watch the ms/$ line change. Then open <b>Advanced — models, speech &amp; interruptions</b>, switch the LLM to GPT-4o, close the sheet, and confirm the estimate rose to roughly 960 ms / $0.11 and the bundle now reads <b>Custom mix</b>. Before this wave it would have stayed at 750 ms / $0.05.
+</div>
+
+<h2 id="templates"><span class="no">4</span>Templates — a payload, not a sentence</h2>
+<p>Templates used to write four generic lines ("You are X, a voice agent. Be concise and helpful.") and nothing else — no stack, no extraction fields — while each entry declared an LLM vendor that the apply function silently ignored. A tester called the metadata "decorative"; another said he could have typed the prompt faster himself.</p>
+<p>Each of the five templates now carries a worked multi-paragraph prompt with real edge-case handling (what the payment-reminder agent does when someone <i>else</i> answers; the difference between a shipping label being created and a parcel actually shipping), its own greeting and failure line, a speed/cost preset that suits the job, and the fields the run should extract. Applying one shows a diff of exactly what changes.</p>
+
+<div class="test">
+  <b>Test it</b>
+  In the builder, click the <b>Template:</b> chip in the header and pick <b>Payment Reminder</b>. If the agent already has a prompt you'll get the change summary first — prompt, greeting, model stack, extraction fields, and an explicit note that voice, channel and knowledge are untouched. Then open <b>Context</b> to read the prompt it wrote.
+</div>
+
+<h2 id="rag"><span class="no">5</span>External retrieval — generalized, not Couchbase-branded</h2>
+<p>The roadmap item says "integrate Couchbase as a RAG provider". Both the connector research and the focus group independently argued against building that literally: no persona asked for Couchbase by name (they asked not to re-upload 40k docs into a black box), a fourth vendor-named connect-an-external-thing door would deepen the existing Knowledge/MCP/Connectors IA tension, and Couchbase was one of five systems users named. So it's a generic external-retrieval flow with Couchbase as the first provider.</p>
+
+<figure>
+  <img src="wave1-shots/06-external-retrieval.png" alt="Create knowledge base sheet with the external vector index option selected, showing provider picker, Couchbase connection string, credentials, test connection, and a disabled four-level resource cascade">
+  <figcaption>
+    <b>The connect flow.</b>
+    <span class="marker">1</span>A generic option sitting alongside PDF and Website, marked <i>Advanced</i> — a first-time builder who doesn't know what a vector store is should never feel behind for skipping it.
+    <span class="marker">2</span>Provider: Couchbase, Pinecone, or a custom endpoint.
+    <span class="marker">3</span>Test connection.
+    <span class="marker">4</span>Bucket → Scope → Collection → Search index, disabled until credentials verify. Couchbase's hierarchy is genuinely four levels; modelling it as a flat "index name" is wrong, and four free-text boxes are four chances to typo something unverifiable — the likeliest source of "it says connected but returns nothing".
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="wave1-shots/07-retrieval-connected.png" alt="The same sheet after a successful connection test, showing credentials verified, the populated four-level cascade, a masked password reading configured with a Reset button, and the test retrieval step">
+  <figcaption>
+    <b>After connecting.</b>
+    <span class="marker">1</span>Tier 1 names what it <i>found</i> rather than just turning green.
+    <span class="marker">2</span>Tier 2 exists because connected is not the same as working — a wrong embedding-field name produces a perfectly healthy connection that retrieves nothing. Note the resource path is now populated from the connection, and the password reads <code>configured</code> with a Reset, mirroring how Couchbase, Pinecone, Qdrant and Weaviate all behave: none of them can show you a secret twice.
+  </figcaption>
+</figure>
+
+<div class="test">
+  <b>Test it</b>
+  <a href="https://ai-studio-console-redesign.vercel.app/integrations?tab=knowledge">Resources → Knowledge Base</a> → <b>Add KB</b> → <b>Connect an existing vector index</b>.
+  Paste <code>couchbases://cb.demo.cloud.couchbase.com</code>, any username, a password of 8+ characters, then <b>Test connection</b>.
+  Worth trying the failure paths too: an endpoint <i>not</i> starting <code>couchbase</code> returns the IP-allowlist error with a copyable egress IP (the failure nobody anticipates — credentials perfect, connection still times out); a password under 8 characters returns an auth error instead. Every distinguishable failure has a different fix, so "Connection failed" would have been useless.
+  Then pick the four levels and run a test retrieval.
+</div>
+
+<h2 id="notbuilt"><span class="no">6</span>Two things research told me not to build</h2>
+<div class="card">
+  <h3 style="margin-top:0">A template gallery <span class="pill S2">deliberately skipped</span></h3>
+  <p>The competitor scan recommended promoting templates from the header dropdown into a card gallery. The focus group disagreed, and I followed the focus group: one persona found six tiles "the same nothing, just bigger", another didn't want templates at all, and the third wanted a <i>comparison</i> rather than a browse surface. The owner had also deleted the static template grid eleven days earlier in favour of the describe-box. The problem was never the door — it was the payload. So the budget went into the template contents and an apply-diff instead.</p>
+</div>
+<div class="card">
+  <h3 style="margin-top:0">A separate "Raw" payload tab <span class="pill S2">deliberately skipped</span></h3>
+  <p>One persona wanted complete raw payloads; another said flatly he wouldn't cross-reference a separate tab back to turn 14. These aren't in conflict — they're two access paths to one dataset, so both shipped: inline collapsed disclosure per turn, plus a whole-session JSON download.</p>
+</div>
+
+<h2 id="next"><span class="no">7</span>What's left</h2>
+<p>Wave 1 is complete. Carried into Wave 2, from research rather than the original roadmap:</p>
+<ul>
+  <li><b>Interruption and barge-in spans</b> in the waterfall — currently modelled in diagnostics but not traced.</li>
+  <li><b>Deep-link to a turn</b> (<code>/sessions/{id}?turn=7</code>) so a session is pasteable into a bug report.</li>
+  <li><b>Region selection</b> on the stack — latency is a geography problem before it's a model problem, and there's no region control anywhere yet.</li>
+  <li><b>Retrieval as a timed span</b> once external RAG is attached to a live agent. Adding a retrieval source without instrumenting its latency would create a new slow-turn cause with no way to see it.</li>
+  <li><b>A "Smartest" preset</b> — the three presets cover speed and cost, so a user whose agent is getting confused has nothing to reach for.</li>
+</ul>
+
+<footer>
+  Studio_X · Wave 1 implementation log · 2026-07-29 · screenshots captured at 1600×1200 against the live production build; red markers added for this document.
+</footer>
+</div>
