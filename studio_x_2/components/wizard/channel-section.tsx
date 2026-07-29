@@ -151,6 +151,22 @@ export function ChannelSection({
           ))}
         </RadioCardGroup>
 
+        {/* Batch acknowledges the click (user-test 2026-07-29 S2: nothing
+            rendering under the radio read as "did my click register?") —
+            same cross-link idiom as the inbound block's Go Live pointer. */}
+        {current === "batch" && (
+          <p className="text-xs text-muted-foreground">
+            Runs, contacts and dialing live in{" "}
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:text-foreground"
+              onClick={() => onGoToStep(5)}
+            >
+              Go Live →
+            </button>
+          </p>
+        )}
+
         <InfoHint label="Phone channels are bring-your-own number">
           Agora doesn&apos;t sell numbers — connect your carrier&apos;s via SIP with{" "}
           <span className="font-medium text-foreground">Add phone number</span> below, or manage them in{" "}
@@ -208,8 +224,9 @@ export function ChannelSection({
         </SectionRow>
       )}
 
-      {/* BATCH — nothing here on purpose (owner 2026-07-29): contacts, caller
-          ID, schedule, and dialing ALL live in Go Live. */}
+      {/* BATCH — no config here on purpose (owner 2026-07-29): contacts,
+          caller ID, schedule, and dialing ALL live in Go Live. The picker row
+          above carries the one-line cross-link saying so. */}
 
       {current === "code" && (
         <SectionRow id="wz-2-code" label="Code / SDK" hint="Drop the agent into your own app.">

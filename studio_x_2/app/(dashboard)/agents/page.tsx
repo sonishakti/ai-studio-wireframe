@@ -587,6 +587,24 @@ export default function AgentsPage() {
   }, [phase])
 
   const [autoTalk, setAutoTalk] = React.useState(false)
+  // The landing's promise must match the account state (user-test 2026-07-29):
+  // Aria is live from signup, so the start headline talks to HER — not "your
+  // first agent". Mock default = live; the effect folds in pause overrides.
+  const [ariaLive, setAriaLive] = React.useState(getAgent("agt_default")?.status === "live")
+  React.useEffect(() => {
+    const sync = () =>
+      setAriaLive((readStatusOverrides()["agt_default"] ?? getAgent("agt_default")?.status) === "live")
+    sync()
+    return subscribeAgentStore(sync)
+  }, [])
+  // "Talk to Aria" delivers the headline's promise in ONE click — same landing
+  // as the ceremony's "Say hello": her builder, Test section auto-opened.
+  const talkToAria = () => {
+    setBuilderId("agt_default")
+    setAutoTalk(true)
+    setView("builder")
+    router.push("/agents?view=builder")
+  }
   const finishCeremony = (skipped: boolean) => {
     markProvisioned()
     setPhase(skipped ? "warming" : "ready")
@@ -704,7 +722,15 @@ export default function AgentsPage() {
         // The builder is a self-contained widget (own heading + view-all/create
         // chrome), so suppress the PageHeader in builder view — it only carries
         // the title + actions for the start landing and the managed list.
-        title={isBuilder ? undefined : view === "start" ? "Deploy your first voice agent" : "Agents"}
+        title={
+          isBuilder
+            ? undefined
+            : view === "start"
+              ? phase !== "ceremony" && ariaLive
+                ? "Aria is live — talk to it, then make it yours"
+                : "Deploy your first voice agent"
+              : "Agents"
+        }
         description={isBuilder ? undefined : view === "start" ? "Start from a template, import one from another platform, or create from scratch." : "Create and manage your agents here."}
         actions={
           isBuilder ? undefined : (
@@ -752,7 +778,7 @@ export default function AgentsPage() {
       ) : (
         /* "Start" landing (owner design set 22–23 Jul): template gallery with
            a live-ish preview panel; Import + Create ride the PageHeader. */
-        <StartView onUseTemplate={useTemplate} />
+        <StartView onUseTemplate={useTemplate} onTalkToAria={talkToAria} />
       )}
 
       {/* Create new agent — the describe-it dialog. Create New Agent ONLY:
@@ -803,7 +829,15 @@ export default function AgentsPage() {
 // Create New Agent live in the PageHeader above; a row's "Use template" opens
 // the create dialog pre-seeded.
 
-function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => void }) {
+function StartView({
+  onUseTemplate,
+  onTalkToAria,
+}: {
+  onUseTemplate: (templateId: string) => void
+  /** One-click delivery of the promised live agent (user-test 2026-07-29):
+   *  opens Aria's builder with the Test section auto-started. */
+  onTalkToAria: () => void
+}) {
   const templates = AGENT_TEMPLATES.filter((t) => t.id !== "blank")
   const [selected, setSelected] = React.useState(templates[0].id)
   const tpl = templates.find((t) => t.id === selected) ?? templates[0]
@@ -833,6 +867,11 @@ function StartView({ onUseTemplate }: { onUseTemplate: (templateId: string) => v
             Auto-provisioned for you on an Agora sandbox line — its call history is sample data,
             and it costs nothing until it takes real traffic.
           </InfoHint>
+          {/* The promised live agent is ONE click, not an Edit-link detour
+              behind the template-preview mic (user-test 2026-07-29 P0). */}
+          <Button variant="outline" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={onTalkToAria}>
+            <Mic className="h-3 w-3" aria-hidden /> Talk to Aria
+          </Button>
           <Link href="/agents/agt_default/edit" className="underline underline-offset-2 hover:text-foreground">Edit Aria</Link>
           <Link href="/agents?view=list" className="underline underline-offset-2 hover:text-foreground">All agents</Link>
           {draftName && (

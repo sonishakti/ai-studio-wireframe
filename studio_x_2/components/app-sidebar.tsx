@@ -105,8 +105,10 @@ function NavLink({ item }: { item: NavItem }) {
         // 2026-07-28 P1 — the bare number was unexplained and unclickable).
         <Link
           href="/monitor/diagnostics?sev=critical"
-          title={`${item.badge} calls need attention`}
-          aria-label={`${item.badge} calls need attention — open the needs-attention queue`}
+          // "Agent sessions", never RTC telemetry — that's Agora Analytics, a
+          // separate product (locked Monitor naming; user-test 2026-07-29 P1).
+          title={`${item.badge} critical agent sessions`}
+          aria-label={`${item.badge} critical agent sessions — open the needs-attention queue`}
           className="absolute right-1 top-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
         >
           <Badge variant="destructive" className="text-xs px-1.5 py-0">

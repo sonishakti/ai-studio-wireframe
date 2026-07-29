@@ -265,8 +265,15 @@ export function DeployPreflight({
               </InfoHint>
             </li>
             {/* Post-launch orientation (user-test 2026-07-24: the pre-flight
-                committed a 500-call batch without saying where to WATCH it). */}
-            <li>· Watch them live in Monitor › Call History once dialing starts</li>
+                committed a 500-call batch without saying where to WATCH it) —
+                a real link, not a sentence (user-test 2026-07-29 P1). */}
+            <li>
+              · Watch them live in{" "}
+              <a href="/calls" className="underline underline-offset-2 hover:text-foreground">
+                Monitor › Call History
+              </a>{" "}
+              once dialing starts
+            </li>
           </ul>
         )}
 

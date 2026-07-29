@@ -104,6 +104,14 @@ export function SectionPrompt({
             ))}
           </div>
         )}
+        {/* Inbound has no CSV to fill from — name the roadmap item instead of
+            leaving the variables unexplained (user-test 2026-07-29: the
+            Retell-webhook switcher hit silence here). */}
+        {vars.length > 0 && !batch && hasChannel(draft, "inbound") && (
+          <p className="text-xs text-muted-foreground">
+            Inbound agents: per-call variables via API — coming soon.
+          </p>
+        )}
       </div>
 
       {/* Greeting */}

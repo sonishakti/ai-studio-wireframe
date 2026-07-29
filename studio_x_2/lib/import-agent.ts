@@ -321,6 +321,7 @@ const META_KEYS = new Set([
  *  the reason MUST point at it (user-test 2026-07-21 D2: one stale "isn't
  *  supported yet" against a visible toggle poisons the whole report). */
 const DROP_REASONS: Record<string, string> = {
+  channel: "The agent's channel is picked in the builder's Channel section (Inbound · Batch calls · Code / SDK) — the vendor setting itself doesn't port.",
   webhook_url: "Webhooks would belong to the deployment, not the agent — deployment webhooks aren't here yet.",
   server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
@@ -363,8 +364,8 @@ const DROP_REASONS: Record<string, string> = {
   silenceTimeoutSeconds: "Silence hang-up re-configures in Go Live › call behavior › Hang-up.",
   reminder_trigger_ms: "Reminder nudges stay vendor-specific.",
   reminder_max_count: "Reminder nudges stay vendor-specific.",
-  dynamic_data: "Dynamic variables move to the deployment's CSV columns.",
-  default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns.",
+  dynamic_data: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API — coming soon.",
+  default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API — coming soon.",
   voice_speed: "Voice tuning stays vendor-specific.",
   voice_temperature: "Voice tuning stays vendor-specific.",
   voice_model: "TTS runs on Agora's bundled stack — pick the engine in Voice › Advanced.",
@@ -474,9 +475,11 @@ function parseRetell(p: Rec): VendorParse {
         : "No general_prompt found — in Retell the prompt lives on the Retell-LLM object; paste it together with the agent JSON.",
     )
   }
+  // "channel" is NOT consumed (2026-07-29): a consumed-but-unreported key was
+  // the report's one silent exception — the sweep now emits its honest row.
   const consumed = new Set([
     "agent_name", "name", "response_engine", "voice_id", "language",
-    "general_prompt", "begin_message", "model", "general_tools", "retell_llm", "llm", "channel",
+    "general_prompt", "begin_message", "model", "general_tools", "retell_llm", "llm",
   ])
   const cb = extractCallBehavior(p)
   if (cb) {
@@ -575,10 +578,12 @@ function parseGeneric(p: Rec): VendorParse {
       ? { path: "tools", names: toolNames(p.tools) }
       : undefined,
   }
+  // "asr" is NOT consumed (2026-07-29): silently swallowing it broke the
+  // field-by-field honesty contract — the sweep emits its STT-settings row.
   const consumed = new Set([
     "name", "agent_name", "system_prompt", "systemPrompt", "prompt", "instructions",
     "first_message", "firstMessage", "greeting", "voice", "tts", "voice_id",
-    "llm", "model", "language", "tools", "asr",
+    "llm", "model", "language", "tools",
   ])
   const cb = extractCallBehavior(p)
   if (cb) {

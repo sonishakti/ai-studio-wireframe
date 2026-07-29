@@ -175,8 +175,10 @@ export function VoiceSection({
 
         {/* Everything deeper leaves the hot path. */}
         <div>
+          {/* The door names its contents (user-test 2026-07-29 P1): barge-in /
+              turn-taking hunters need "interruptions" ON the label to find it. */}
           <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setAdvancedOpen(true)}>
-            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced — models, custom config &amp; speech tuning
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced — models, custom config, speech &amp; interruptions
           </Button>
         </div>
       </SectionRow>

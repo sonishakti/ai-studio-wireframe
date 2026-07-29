@@ -18,8 +18,9 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { CampaignDialingFields, CampaignLaunchFields } from "@/components/wizard/step-call-settings"
 import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
@@ -266,6 +267,22 @@ function CampaignEditor({
     (n) => !available.includes(n) && (n.assignedTo.length > 0 || n.assignedAgent),
   )
 
+  // Zero-number accounts must not dead-end at the dropdown (user-test
+  // 2026-07-29 P1) — a footer door mirrors the Inbound block's Add phone
+  // number accelerator. Numbers added THIS session are local state
+  // (PHONE_NUMBERS is a static mock), merged into the list + selected.
+  const ADD_NUMBER = "__add_number__"
+  const [addOpen, setAddOpen] = React.useState(false)
+  const [sessionNumbers, setSessionNumbers] = React.useState<{ id: string; number: string; label: string }[]>([])
+  const addedNumber = (n: { number: string; label: string }) => {
+    const id = `pn_new_${Date.now().toString(36)}`
+    setSessionNumbers((s) => [...s, { id, ...n }])
+    onChange({ numberId: id })
+    toast.success(`${n.number} set as caller ID`, {
+      description: "This run dials from it once you deploy.",
+    })
+  }
+
   const locked = !!campaign.locked
 
   return (
@@ -314,12 +331,23 @@ function CampaignEditor({
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Caller-ID number</Label>
-          <Select disabled={locked} value={campaign.numberId ?? ""} onValueChange={(numberId) => onChange({ numberId })}>
+          <Select
+            disabled={locked}
+            value={campaign.numberId ?? ""}
+            onValueChange={(numberId) => {
+              // The footer door is a sentinel, not a pick — open the sheet.
+              if (numberId === ADD_NUMBER) { setAddOpen(true); return }
+              onChange({ numberId })
+            }}
+          >
             <SelectTrigger className="w-full text-sm">
               <SelectValue placeholder="Number to dial from" />
             </SelectTrigger>
             <SelectContent>
               {available.map((n) => (
+                <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === campaign.numberId ? " · current" : ""}</SelectItem>
+              ))}
+              {sessionNumbers.map((n) => (
                 <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}{n.id === campaign.numberId ? " · current" : ""}</SelectItem>
               ))}
               {answering.map((n) => (
@@ -329,8 +357,13 @@ function CampaignEditor({
                     : `assigned to ${n.assignedAgent?.name ?? n.label}`} — a line can&apos;t answer and dial at once
                 </SelectItem>
               ))}
+              <SelectSeparator />
+              <SelectItem value={ADD_NUMBER} className="text-muted-foreground">
+                <Plus className="h-3.5 w-3.5" aria-hidden /> Add phone number (SIP)
+              </SelectItem>
             </SelectContent>
           </Select>
+          <AddPhoneNumberSheet open={addOpen} onOpenChange={setAddOpen} onAdded={addedNumber} />
         </div>
       </div>
 

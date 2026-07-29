@@ -28,8 +28,12 @@ export function AddPhoneNumberSheet({
   children,
   onAdded,
   defaultMode = "quick",
+  open: openProp,
+  onOpenChange,
 }: {
-  children: React.ReactNode
+  /** Trigger element — optional when the sheet is driven via `open` (e.g. the
+   *  caller-ID dropdown's footer door, where a SheetTrigger can't live). */
+  children?: React.ReactNode
   /** In-builder mode (Channel › inbound accelerator, 2026-07-28): the success
    *  phase offers "Link to this agent" instead of the route cards (which
    *  navigate to a NEW draft — a dead end mid-edit), and the added number is
@@ -38,10 +42,19 @@ export function AddPhoneNumberSheet({
   /** Resources › Channels and the wizard SIP hints open the fast path by
    *  default; the manual form stays one toggle away (A3, 2026-07-09). */
   defaultMode?: Mode
+  /** Controlled open (2026-07-29) — omit both to keep the trigger-driven
+   *  behavior every existing call site relies on. */
+  open?: boolean
+  onOpenChange?: (o: boolean) => void
 }) {
   const router = useRouter()
   const [future] = useFutureScope()
-  const [open, setOpen] = React.useState(false)
+  const [openState, setOpenState] = React.useState(false)
+  const open = openProp ?? openState
+  const setOpen = (o: boolean) => {
+    setOpenState(o)
+    onOpenChange?.(o)
+  }
   // A3 Quick connect is future-scope-gated; off = the manual SIP form only.
   const [mode, setMode] = React.useState<Mode>(future ? defaultMode : "manual")
   const [phase, setPhase] = React.useState<Phase>("form")
@@ -75,7 +88,7 @@ export function AddPhoneNumberSheet({
         if (!o) reset()
       }}
     >
-      <SheetTrigger asChild>{children}</SheetTrigger>
+      {children ? <SheetTrigger asChild>{children}</SheetTrigger> : null}
       <SheetContent className="w-full overflow-y-auto p-0 flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="px-5 py-4 border-b border-border">
           <SheetTitle>Add a phone number</SheetTitle>
