@@ -108,6 +108,15 @@ export const Events = {
   monitor_viewed:             "monitor_viewed",
   calls_viewed:               "calls_viewed",
   sessions_viewed:            "sessions_viewed",
+  // Q3 roadmap: session detail beyond telephony + payload/trace inspection.
+  // `session_span_fix_clicked` is the one that matters — it measures whether
+  // the trace actually routes a slow hop to the control that fixes it.
+  session_detail_viewed:      "session_detail_viewed",     // { session_id, channel, turns, p95_ms }
+  session_transcript_seek:    "session_transcript_seek",   // { session_id, turn }
+  session_payload_opened:     "session_payload_opened",    // { session_id, turn }
+  session_trace_exported:     "session_trace_exported",    // { session_id }
+  session_span_fix_clicked:   "session_span_fix_clicked",  // ★ { session_id, span }
+  session_jump_to_slowest:    "session_jump_to_slowest",   // { session_id, turn }
   usage_viewed:               "usage_viewed",
   insights_cross_link_clicked:"insights_cross_link_clicked",  // Monitor → Usage etc.
 
@@ -211,6 +220,12 @@ export type EventPayloads = {
   assertion_failed_viewed:     Record<string, never>
   save_call_as_test:           Record<string, never>
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
+  session_detail_viewed:       { session_id: string; channel: string; turns: number; p95_ms: number }
+  session_transcript_seek:     { session_id: string; turn: number }
+  session_payload_opened:      { session_id: string; turn: number }
+  session_trace_exported:      { session_id: string }
+  session_span_fix_clicked:    { session_id: string; span: string }
+  session_jump_to_slowest:     { session_id: string; turn: number }
   diagnostics_queue_viewed:    { unhealthy: number; degraded: number }
   remediation_link_clicked:    { rule_id: string; severity: string; level: "agent" | "deployment" | "credential"; target_id: string; section: string; surface: "call_sheet" | "queue" | "monitor" }
   remediation_resolved:        { rule_id: string; level: "agent" | "deployment" | "credential"; target_id: string; deployment_id?: string }

@@ -27,7 +27,7 @@ import { STEP_TITLES, SECTION_COUNT, stepTitle, resolveStepParam } from "@/compo
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
-import { getAgent, stackLine, stackEstimateFor, presetLatencyBreakdown, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -774,7 +774,7 @@ export function AgentWizard({
     : codeDeployed ? "Deployed" : "Draft"
   const cardStack = stackLine(draft.stack)
   const cardEst = stackEstimateFor(draft.stack)
-  const cardLatency = draft.stack.pipeline === "mllm" ? undefined : presetLatencyBreakdown(draft.stack.preset)
+  const cardLatency = draft.stack.pipeline === "mllm" ? undefined : stackLatencyDetail(draft.stack)
   const toggleTest = () => {
     const channel = primaryChannel(draft) ?? "unknown"
     if (testing) track(Events.agent_test_ended, { channel, agent_id: draft.agentId ?? "new", duration_sec: 30 })

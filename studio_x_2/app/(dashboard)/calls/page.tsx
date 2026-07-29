@@ -52,7 +52,12 @@ const OUTCOMES: Outcome[] = ["Successful", "Failed", "Cannot Predict"]
 function generate(): CallRow[] {
   const rows: CallRow[] = []
   let n = 1
-  for (const c of DEPLOYMENTS) {
+  // Call History is TELEPHONY only. It used to loop every deployment and stamp
+  // a phone number on each row, so a web-widget deployment appeared here as a
+  // phone call with a fabricated From number — not an ambiguity, invented data
+  // (focus group 2026-07-29, S1). Web/WhatsApp/SMS runs surface in Sessions,
+  // which is channel-aware.
+  for (const c of DEPLOYMENTS.filter((d) => d.channel.kind === "telephony")) {
     const size = c.metrics.calls === 0 ? 1 : Math.min(6, Math.max(2, Math.round(c.metrics.calls / 400)))
     for (let i = 0; i < size; i++) {
       const status = STATUSES[(n + i) % STATUSES.length]

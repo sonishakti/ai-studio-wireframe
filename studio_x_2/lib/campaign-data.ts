@@ -435,25 +435,45 @@ export const CURRENT_CONFIG_VERSION = 45
  *  field stays individually overridable in the Stack tab. */
 export const STACK_PRESETS: Record<
   StackPreset,
-  { label: string; hint: string; llm: AgentStack["llm"]; asr: AgentStack["asr"]; tts: AgentStack["tts"] }
+  {
+    label: string
+    hint: string
+    /** What picking this preset COSTS you — shown next to the upside. */
+    tradeoff: string
+    llm: AgentStack["llm"]
+    asr: AgentStack["asr"]
+    tts: AgentStack["tts"]
+  }
 > = {
+  // Once the estimate started computing from the ACTUAL models (below), the old
+  // preset definitions stopped making sense: "Fastest" bundled gpt-4o, which
+  // has a higher time-to-first-token than the gpt-4o-mini in "Balanced" — so
+  // the slider would have shown Fastest as SLOWER than Balanced. The presets
+  // were never a real latency/cost frontier; the preset-keyed estimate hid it.
+  // These three are now monotonic in both axes: faster costs more, cheaper is
+  // slower. `tradeoff` names what each choice COSTS you — every hint used to
+  // be one-sided upside (competitor scan: Vapi states the downside on all four
+  // of its presets; Bland names the capabilities you lose outright).
   fastest: {
     label: "Fastest",
-    hint: "Lowest latency, premium vendors",
-    llm: { vendor: "OpenAI", model: "gpt-4o" },
+    hint: "Lowest latency for snappy back-and-forth",
+    tradeoff: "Costs the most per minute.",
+    llm: { vendor: "OpenAI", model: "gpt-4o-mini" },
     asr: { vendor: "Deepgram", model: "nova-3" },
     tts: { vendor: "ElevenLabs", voice: "rachel" },
   },
   balanced: {
     label: "Balanced",
     hint: "Good latency at moderate cost",
+    tradeoff: "Not the fastest or the cheapest.",
     llm: { vendor: "OpenAI", model: "gpt-4o-mini" },
     asr: { vendor: "Deepgram", model: "nova-2" },
-    tts: { vendor: "ElevenLabs", voice: "turbo" },
+    tts: { vendor: "Azure", voice: "en-US-Jenny" },
   },
   cheapest: {
     label: "Cheapest",
     hint: "Lowest per-minute cost",
+    tradeoff: "Noticeably slower — the STT doesn't stream.",
     llm: { vendor: "Anthropic", model: "claude-haiku" },
     asr: { vendor: "Whisper", model: "large-v3" },
     tts: { vendor: "Azure", voice: "en-US-Jenny" },
@@ -471,24 +491,42 @@ export function stackFor(preset: StackPreset, modality: AgentStack["modality"] =
  *  (or one multimodal realtime model): see
  *  https://docs.agora.io/en/conversational-ai/overview/product-overview
  *  Wireframe catalog; voices must cover every PRESET_VOICES ttsVoice. */
+/**
+ * The vendor catalog — now carrying PER-MODEL latency + cost.
+ *
+ * Why (the highest-leverage trust fix of the 2026-07-29 round): the estimate
+ * used to be keyed to the PRESET only, so overriding the LLM from gpt-4o-mini
+ * to gpt-4o left "~800 ms · ~$0.10/min" unchanged while the summary line
+ * relabelled itself "Custom mix". The UI announced that the stack had changed
+ * and then showed a number that hadn't. One tester stopped believing every
+ * other number on the page after spotting it.
+ *
+ * `streaming: false` is load-bearing, not trivia — a non-streaming STT can't
+ * emit interim results, which is most of why Whisper's latency is what it is.
+ *
+ * Numbers are wireframe estimates for TYPICAL traffic measured end-to-end at
+ * the Engine, not per-account guarantees; the UI must label them that way
+ * (competitor scan: Vapi ships a static per-model latency figure that users
+ * mistake for their own and then argue with).
+ */
 export const STACK_CATALOG = {
   stt: [
-    { vendor: "Deepgram", model: "nova-3", label: "Deepgram Nova-3" },
-    { vendor: "Deepgram", model: "nova-2", label: "Deepgram Nova-2" },
-    { vendor: "Whisper", model: "large-v3", label: "OpenAI Whisper large-v3" },
+    { vendor: "Deepgram", model: "nova-3", label: "Deepgram Nova-3", latencyMs: 90, costPerMin: 0.006, streaming: true },
+    { vendor: "Deepgram", model: "nova-2", label: "Deepgram Nova-2", latencyMs: 130, costPerMin: 0.004, streaming: true },
+    { vendor: "Whisper", model: "large-v3", label: "OpenAI Whisper large-v3", latencyMs: 480, costPerMin: 0.002, streaming: false },
   ],
   llm: [
-    { vendor: "OpenAI", model: "gpt-4o", label: "OpenAI GPT-4o" },
-    { vendor: "OpenAI", model: "gpt-4o-mini", label: "OpenAI GPT-4o mini" },
-    { vendor: "Anthropic", model: "claude-haiku", label: "Anthropic Claude Haiku" },
+    { vendor: "OpenAI", model: "gpt-4o", label: "OpenAI GPT-4o", latencyMs: 520, costPerMin: 0.09, streaming: true },
+    { vendor: "OpenAI", model: "gpt-4o-mini", label: "OpenAI GPT-4o mini", latencyMs: 310, costPerMin: 0.03, streaming: true },
+    { vendor: "Anthropic", model: "claude-haiku", label: "Anthropic Claude Haiku", latencyMs: 260, costPerMin: 0.025, streaming: true },
   ],
   mllm: [
-    { vendor: "OpenAI", model: "gpt-4o-realtime", label: "OpenAI GPT-4o Realtime" },
-    { vendor: "Google", model: "gemini-2.0-flash-live", label: "Gemini 2.0 Flash Live" },
+    { vendor: "OpenAI", model: "gpt-4o-realtime", label: "OpenAI GPT-4o Realtime", latencyMs: 550, costPerMin: 0.15, streaming: true },
+    { vendor: "Google", model: "gemini-2.0-flash-live", label: "Gemini 2.0 Flash Live", latencyMs: 480, costPerMin: 0.11, streaming: true },
   ],
   tts: [
-    { vendor: "ElevenLabs", label: "ElevenLabs", voices: ["rachel", "turbo", "blake", "adam", "bella", "josh"] },
-    { vendor: "Azure", label: "Azure Neural", voices: ["en-US-Jenny", "en-US-Guy"] },
+    { vendor: "ElevenLabs", label: "ElevenLabs", latencyMs: 140, costPerMin: 0.04, streaming: true, voices: ["rachel", "turbo", "blake", "adam", "bella", "josh"] },
+    { vendor: "Azure", label: "Azure Neural", latencyMs: 190, costPerMin: 0.016, streaming: true, voices: ["en-US-Jenny", "en-US-Guy"] },
   ],
   languages: ["English", "Spanish", "French", "German", "Hindi", "Mandarin"],
 } as const
@@ -576,16 +614,171 @@ export const AGENTS: Agent[] = [
 
 /** Starter templates — shared by the list view's Browse sheet, the builder's
  *  "Start from a template" entry, and the wizard's ?template= seeding. */
-export const AGENT_TEMPLATES = [
+/**
+ * A template is a CONFIG PAYLOAD, not a one-line prompt.
+ *
+ * It previously wrote four generic sentences ("You are X, a voice agent. {desc}.
+ * Be concise and helpful.") and nothing else — no stack, no greeting worth
+ * keeping, no extraction fields — while each entry declared an `llm` vendor that
+ * `apply()` silently ignored. Testers called the metadata "decorative" and said
+ * they could have typed the prompt faster themselves.
+ *
+ * Each template now carries: a worked multi-paragraph prompt with real edge-case
+ * handling, its own greeting, a speed/cost preset that suits the job, and the
+ * structured fields the run should extract. `changes` is what the apply-diff
+ * shows so the user can see what they're about to overwrite.
+ */
+export interface AgentTemplate {
+  id: string
+  name: string
+  description: string
+  preset: StackPreset
+  prompt: string
+  greeting: string
+  failure: string
+  /** Data points the agent should extract — the "what you get back" promise. */
+  extract: string[]
+}
+
+export const AGENT_TEMPLATES: AgentTemplate[] = [
   // Blank goes first — most users won't use a template, they'll start from
   // scratch. Templates are sales-led; blank is product-led.
-  { id: "blank",                name: "Blank agent",           description: "Start from scratch. Define your own prompt, voice, and tools.", llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "appointment-reminder", name: "Appointment Reminder", description: "Automatically call customers to remind them of upcoming appointments", llm: "OpenAI", asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "nps-survey",           name: "NPS Survey",            description: "Gather customer feedback through voice surveys",                       llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "ivr",                  name: "Interactive Voice Response (IVR)", description: "Route callers to the right department automatically",       llm: "Anthropic", asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "payment-reminder",     name: "Payment Reminder",      description: "Follow up with customers about pending payments",                      llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-  { id: "ecommerce",            name: "Customer service for e-commerce", description: "Triage support and refund requests for online retail",        llm: "OpenAI",   asr: "Deepgram", tts: "ElevenLabs" },
-] as const
+  {
+    id: "blank",
+    name: "Blank agent",
+    description: "Start from scratch. Define your own prompt, voice, and tools.",
+    preset: "balanced",
+    prompt: "",
+    greeting: "",
+    failure: "",
+    extract: [],
+  },
+  {
+    id: "appointment-reminder",
+    name: "Appointment Reminder",
+    description: "Call customers to confirm or reschedule an upcoming appointment",
+    preset: "balanced",
+    prompt: `You are calling on behalf of {{business_name}} to confirm an upcoming appointment.
+
+The appointment is on {{appointment_date}} at {{appointment_time}} with {{provider_name}}.
+
+Your job, in order:
+1. Confirm you're speaking to {{customer_name}}. If someone else answers, ask when they'll be available and end politely — never discuss appointment details with anyone else.
+2. State the date, time and provider clearly, then ask them to confirm, reschedule, or cancel.
+3. If they reschedule, offer the next two available slots. If neither works, take their preference and say the office will follow up.
+4. If they cancel, ask once whether they'd like to rebook — do not press a second time.
+
+Rules:
+- Never give medical, legal, or financial advice, even if asked directly. Say you'll have {{provider_name}}'s office call back.
+- If they sound confused about who you are, re-introduce yourself and offer the business's main number.
+- If you reach voicemail, leave the date, time, and callback number once. Do not leave a second message.
+- Keep the whole call under 90 seconds.`,
+    greeting: "Hi, this is a reminder call from {{business_name}} — am I speaking with {{customer_name}}?",
+    failure: "I'm sorry, I didn't catch that. Let me have someone from the office call you back.",
+    extract: ["Confirmed / rescheduled / cancelled", "New preferred time", "Reached voicemail", "Callback requested"],
+  },
+  {
+    id: "nps-survey",
+    name: "NPS Survey",
+    description: "Run a short voice survey and capture the score plus the reason behind it",
+    preset: "cheapest",
+    prompt: `You are running a short satisfaction survey for {{business_name}} about a recent {{interaction_type}}.
+
+Your job:
+1. Ask for 30 seconds of their time. If they say no, thank them and end immediately — never ask twice.
+2. Ask the core question: "On a scale of zero to ten, how likely are you to recommend {{business_name}} to a friend or colleague?"
+3. Accept the number in any form ("an eight", "eight out of ten", "pretty likely" → ask them to pick a number).
+4. Ask ONE follow-up: "What's the main reason for that score?" Let them talk. Do not interrupt.
+5. Thank them and end.
+
+Rules:
+- Never argue with a low score or try to change their mind. Acknowledge and move on.
+- If they raise a specific complaint, say it will be passed to the team — do not promise a resolution or a refund.
+- Do not ask any question beyond the score and the one follow-up.
+- If they ask to be removed from the calling list, confirm you'll action it and record that.`,
+    greeting: "Hi, this is a quick survey call from {{business_name}} — do you have 30 seconds?",
+    failure: "No problem at all — thanks for your time.",
+    extract: ["NPS score (0–10)", "Reason for score", "Complaint raised", "Do-not-call requested"],
+  },
+  {
+    id: "ivr",
+    name: "Interactive Voice Response (IVR)",
+    description: "Understand what the caller needs and route them to the right team",
+    preset: "fastest",
+    prompt: `You are the first point of contact for {{business_name}}. Your only job is to understand what the caller needs and route them correctly. You do not resolve issues yourself.
+
+Departments and what belongs to each:
+- Sales — new orders, pricing, product questions, quotes
+- Support — something already purchased is broken, delayed, or wrong
+- Billing — invoices, payments, refunds, subscription changes
+- Everything else — route to the general queue
+
+Your job:
+1. Ask what they're calling about, in open language. Do not read a numbered menu.
+2. Listen for the intent. If it's clear, confirm it in one short sentence and transfer.
+3. If it's ambiguous, ask ONE clarifying question. Then route on the best available guess.
+4. Before transferring, tell them who they're going to and that there may be a short wait.
+
+Rules:
+- Speed matters more than completeness — do not gather details the receiving team will re-ask.
+- If the caller is angry or asks for a human immediately, route to the general queue without further questions.
+- If they mention a safety issue or an emergency, route to the general queue immediately and say help is coming.
+- Never guess at pricing, order status, or account details.`,
+    greeting: "Thanks for calling {{business_name}}. What can I help you with today?",
+    failure: "Let me put you through to someone who can help.",
+    extract: ["Routed department", "Caller intent", "Asked for a human", "Escalation flagged"],
+  },
+  {
+    id: "payment-reminder",
+    name: "Payment Reminder",
+    description: "Follow up on an overdue balance — compliant, calm, and never pushy",
+    preset: "balanced",
+    prompt: `You are calling on behalf of {{business_name}} about an outstanding balance of {{amount_due}}, originally due on {{due_date}}.
+
+Your job, in order:
+1. Confirm you're speaking to {{customer_name}}. If it's anyone else, do NOT mention a balance, a payment, or a debt — say you'll call back and end.
+2. State that there's an outstanding balance and the amount. Ask if they're able to settle it today.
+3. If yes, direct them to {{payment_url}} or offer to send a payment link by text. Never take card details on the call.
+4. If no, ask what timeframe works and record it. Offer a payment plan only if they raise financial difficulty.
+5. If they dispute the amount, do not argue. Record the dispute and say the billing team will review it and contact them within two business days.
+
+Rules — these are compliance requirements, not preferences:
+- Never take card numbers, bank details, or any payment information by voice.
+- Never threaten legal action, credit consequences, or added fees.
+- If they ask you to stop calling, confirm you'll action it and end the call.
+- If they say they're in financial hardship, drop the collection framing entirely and offer the hardship line.
+- Stay calm regardless of tone. Never match hostility.`,
+    greeting: "Hi, I'm calling from {{business_name}} about your account — am I speaking with {{customer_name}}?",
+    failure: "I'm sorry about that. Let me have our billing team reach out to you directly.",
+    extract: ["Payment promised", "Promised date", "Amount disputed", "Hardship raised", "Do-not-call requested"],
+  },
+  {
+    id: "ecommerce",
+    name: "Customer service for e-commerce",
+    description: "Triage order, delivery, and refund questions for online retail",
+    preset: "balanced",
+    prompt: `You are a support agent for {{business_name}}, an online retailer. You handle order status, delivery problems, returns, and refunds.
+
+Your job:
+1. Ask for the order number. Accept it in any format and read it back to confirm.
+2. Look up the order and state its real status plainly — including when the news is bad.
+3. Handle the four common cases:
+   - Not yet shipped → give the expected ship date, offer a tracking link.
+   - Late → apologise once, give the current estimate, offer to escalate if it's more than 3 days past.
+   - Damaged or wrong item → apologise, start a replacement, no receipt or photo needed under {{auto_replace_limit}}.
+   - Return or refund → confirm eligibility against the {{return_window}} policy and send the return label.
+4. Confirm what will happen next and by when, before ending.
+
+Rules:
+- A shipping label being created is NOT the same as shipped. Say which one it is — customers are routinely confused by this and being vague makes it worse.
+- Never invent a delivery date. If you don't have one, say so and offer to notify them when it updates.
+- Never offer a discount, credit, or goodwill gesture that isn't in the policy above.
+- If the customer has contacted us more than twice about the same order, escalate to a human without being asked.`,
+    greeting: "Thanks for calling {{business_name}} — do you have your order number handy?",
+    failure: "I'm having trouble pulling that up. Let me get you to someone who can look into it properly.",
+    extract: ["Order number", "Issue type", "Resolution offered", "Replacement started", "Escalated to human"],
+  },
+]
 
 export function getAgent(id: string): Agent | undefined {
   return AGENTS.find((a) => a.id === id)
@@ -618,17 +811,82 @@ export function stackSummary(a: Agent): string {
 /** Rough speed + per-minute cost for a stack preset — surfaced on the Go Live
  *  home so users see the latency/cost tradeoff before they test or deploy.
  *  Wireframe estimates (Agora bills per minute; vendor pass-through varies). */
+/** DERIVED from the catalog, not hand-written — a hard-coded table next to a
+ *  computed one is how the estimate drifted out of sync with the models in the
+ *  first place. Defined after `stackEstimateFor` via the initializer below. */
 export const STACK_ESTIMATE: Record<StackPreset, { latencyMs: number; costPerMin: number }> = {
-  fastest: { latencyMs: 600, costPerMin: 0.14 },
-  balanced: { latencyMs: 800, costPerMin: 0.1 },
-  cheapest: { latencyMs: 1100, costPerMin: 0.06 },
+  fastest: { latencyMs: 0, costPerMin: 0 },
+  balanced: { latencyMs: 0, costPerMin: 0 },
+  cheapest: { latencyMs: 0, costPerMin: 0 },
 }
 
-/** Estimate for any stack — preset-based for the cascade, MLLM_ESTIMATE for the
- *  single-model pipeline. Per-slot overrides keep the preset's numbers (the
- *  wireframe has no per-model tables); callers should present them as "~". */
+/** Turn-taking + network overhead the Engine adds on top of the three vendor
+ *  hops. Named so the roll-up below is auditable rather than a magic number. */
+export const PIPELINE_OVERHEAD_MS = 120
+
+/**
+ * Estimate for any stack — computed from the ACTUAL slots, so changing one
+ * model moves the number. Previously this returned `STACK_ESTIMATE[preset]`
+ * regardless of the models chosen, which made the "Custom mix" label a lie.
+ *
+ * Latency sums the three hops (they are sequential) plus pipeline overhead;
+ * cost sums the three per-minute rates. A slot that isn't in the catalog falls
+ * back to the preset's number so an unknown vendor can't produce NaN.
+ */
 export function stackEstimateFor(s: AgentStack): { latencyMs: number; costPerMin: number } {
-  return s.pipeline === "mllm" ? MLLM_ESTIMATE : STACK_ESTIMATE[s.preset]
+  if (s.pipeline === "mllm") {
+    const m = STACK_CATALOG.mllm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+    return m
+      ? { latencyMs: m.latencyMs + PIPELINE_OVERHEAD_MS, costPerMin: m.costPerMin }
+      : MLLM_ESTIMATE
+  }
+  const stt = STACK_CATALOG.stt.find((o) => o.vendor === s.asr.vendor && o.model === s.asr.model)
+  const llm = STACK_CATALOG.llm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+  const tts = STACK_CATALOG.tts.find((o) => o.vendor === s.tts.vendor)
+  // An off-catalog slot (e.g. an imported competitor config) can't be priced —
+  // return zeroes rather than a confident wrong number; callers show "—".
+  if (!stt || !llm || !tts) return { latencyMs: 0, costPerMin: 0 }
+  return {
+    latencyMs: stt.latencyMs + llm.latencyMs + tts.latencyMs + PIPELINE_OVERHEAD_MS,
+    costPerMin: Number((stt.costPerMin + llm.costPerMin + tts.costPerMin).toFixed(3)),
+  }
+}
+
+// Populate the preset table FROM the same function the UI uses, so the two can
+// never disagree again.
+for (const p of Object.keys(STACK_PRESETS) as StackPreset[]) {
+  STACK_ESTIMATE[p] = stackEstimateFor(stackFor(p))
+}
+
+/** Per-hop breakdown for the CURRENT slots — the latency popover and the
+ *  builder both read this, so the parts always add up to the total above. */
+export function stackLatencyParts(s: AgentStack): { label: string; ms: number }[] {
+  if (s.pipeline === "mllm") {
+    const m = STACK_CATALOG.mllm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+    return [
+      { label: "Realtime model", ms: m?.latencyMs ?? MLLM_ESTIMATE.latencyMs },
+      { label: "Turn-taking + network", ms: PIPELINE_OVERHEAD_MS },
+    ]
+  }
+  const stt = STACK_CATALOG.stt.find((o) => o.vendor === s.asr.vendor && o.model === s.asr.model)
+  const llm = STACK_CATALOG.llm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+  const tts = STACK_CATALOG.tts.find((o) => o.vendor === s.tts.vendor)
+  return [
+    { label: "STT", ms: stt?.latencyMs ?? 0 },
+    { label: "LLM", ms: llm?.latencyMs ?? 0 },
+    { label: "TTS", ms: tts?.latencyMs ?? 0 },
+    { label: "Turn-taking + network", ms: PIPELINE_OVERHEAD_MS },
+  ]
+}
+
+/** True when a slot in the stack uses a non-streaming model — the single
+ *  biggest hidden cause of a slow-feeling agent, and invisible today. */
+export function stackNonStreaming(s: AgentStack): string[] {
+  if (s.pipeline === "mllm") return []
+  const out: string[] = []
+  const stt = STACK_CATALOG.stt.find((o) => o.vendor === s.asr.vendor && o.model === s.asr.model)
+  if (stt && !stt.streaming) out.push(stt.label)
+  return out
 }
 
 export function stackEstimate(a: Agent): { latencyMs: number; costPerMin: number } {
@@ -668,17 +926,30 @@ export interface StackLatencyBreakdown {
   bestCaseMs: number
 }
 
-/** Per-provider latency breakdown for a stack preset — STT/LLM/TTS + the
- *  end-to-end total and a best-case floor. The one roll-up rule; both the
- *  agent-shaped helper below and the wizard card call this. */
+/** Per-provider latency breakdown for a STACK — derived from the models that
+ *  are actually selected, so overriding one slot moves both this breakdown and
+ *  the total above. (Was preset-keyed, which is how the two drifted apart.)
+ *  Best case = the same hops with a warm path: no cold start on the LLM. */
+export function stackLatencyDetail(s: AgentStack): StackLatencyBreakdown {
+  const stt = STACK_CATALOG.stt.find((o) => o.vendor === s.asr.vendor && o.model === s.asr.model)
+  const llm = STACK_CATALOG.llm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+  const tts = STACK_CATALOG.tts.find((o) => o.vendor === s.tts.vendor)
+  const asrMs = stt?.latencyMs ?? 0
+  const llmMs = llm?.latencyMs ?? 0
+  const ttsMs = tts?.latencyMs ?? 0
+  const latencyMs = stackEstimateFor(s).latencyMs
+  return { asrMs, llmMs, ttsMs, latencyMs, bestCaseMs: Math.round(latencyMs * 0.78) }
+}
+
+/** Preset-shaped wrapper — kept for callers that only hold a preset. */
 export function presetLatencyBreakdown(preset: StackPreset): StackLatencyBreakdown {
-  return { ...STACK_LATENCY[preset], latencyMs: STACK_ESTIMATE[preset].latencyMs }
+  return stackLatencyDetail(stackFor(preset))
 }
 
 /** Per-provider latency breakdown for an agent's stack. Powers the card's
  *  latency popover. */
 export function stackLatencyBreakdown(a: Agent): StackLatencyBreakdown {
-  return presetLatencyBreakdown(a.stack.preset)
+  return stackLatencyDetail(a.stack)
 }
 
 /** Sandbox DID for the in-product "call in to test" flow — a free test line

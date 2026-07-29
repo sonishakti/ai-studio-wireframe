@@ -51,7 +51,7 @@ import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-
 import { useFutureScope, readFutureScope } from "@/lib/future-scope"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
-import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, stackLine, stackFor, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
 import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT } from "@/lib/wizard-draft"
 import {
@@ -151,10 +151,18 @@ function TemplateRow({
             )}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">{tpl.description}</p>
-          {/* The stack is a feature, not fine print — name what it runs on. */}
+          {/* The stack is a feature, not fine print — name what it runs on.
+              Derived from the template's preset so the card can't advertise a
+              stack the template doesn't actually apply. */}
           {tpl.id !== "blank" && (
             <p className="text-xs text-muted-foreground/80 mt-1 font-mono">
-              {tpl.llm} · {tpl.asr} · {tpl.tts}
+              {stackLine(stackFor(tpl.preset), { full: true })}
+            </p>
+          )}
+          {tpl.extract.length > 0 && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Extracts: {tpl.extract.slice(0, 3).join(" · ")}
+              {tpl.extract.length > 3 ? ` +${tpl.extract.length - 3}` : ""}
             </p>
           )}
         </button>

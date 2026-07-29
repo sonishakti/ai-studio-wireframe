@@ -9,7 +9,7 @@ import {
 import { Slider } from "@/components/ui/slider"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
-  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor,
+  STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackNonStreaming,
   type StackPreset, type AgentStack,
 } from "@/lib/campaign-data"
 
@@ -35,6 +35,28 @@ import {
  */
 
 type Pipeline = NonNullable<AgentStack["pipeline"]>
+
+/** A model row in a picker — name plus what it costs you in latency and money.
+ *  Competitor scan 2026-07-29: only Vapi shows the tradeoff at the point of
+ *  choice; ElevenLabs, Synthflow, LiveKit and Cartesia all leave it in docs, so
+ *  the user picks a model and discovers the cost later. */
+function ModelOption({
+  label, latencyMs, costPerMin, note,
+}: {
+  label: string
+  latencyMs: number
+  costPerMin: number
+  note?: string
+}) {
+  return (
+    <span className="flex w-full min-w-0 items-baseline justify-between gap-3">
+      <span className="truncate">{label}</span>
+      <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+        {note ? `${note} · ` : ""}~{latencyMs} ms · ${costPerMin.toFixed(3)}/min
+      </span>
+    </span>
+  )
+}
 
 interface StackPieceProps {
   stack: AgentStack
@@ -108,8 +130,10 @@ export function StackPresetCards({ stack, onChange, className }: StackPieceProps
             value={p}
             title={preset.label}
             // The numbers ARE the description; the prose rides the tooltip.
+            // The tooltip now carries the DOWNSIDE too — every hint used to be
+            // one-sided upside, so no preset ever looked like a compromise.
             description={`~${pEst.latencyMs} ms · ~$${pEst.costPerMin.toFixed(2)}/min`}
-            hint={preset.hint}
+            hint={`${preset.hint}. ${preset.tradeoff}`}
           />
         )
       })}
@@ -244,7 +268,14 @@ export function StackModelPicker({
                   <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {STACK_CATALOG.stt.map((o) => (
-                      <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+                      <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>
+                        <ModelOption
+                          label={o.label}
+                          latencyMs={o.latencyMs}
+                          costPerMin={o.costPerMin}
+                          note={o.streaming ? undefined : "no streaming"}
+                        />
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -261,7 +292,9 @@ export function StackModelPicker({
                   <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {STACK_CATALOG.llm.map((o) => (
-                      <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>{o.label}</SelectItem>
+                      <SelectItem key={`${o.vendor}/${o.model}`} value={`${o.vendor}/${o.model}`}>
+                        <ModelOption label={o.label} latencyMs={o.latencyMs} costPerMin={o.costPerMin} />
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -279,7 +312,11 @@ export function StackModelPicker({
                 >
                   <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {STACK_CATALOG.tts.map((v) => <SelectItem key={v.vendor} value={v.vendor}>{v.label}</SelectItem>)}
+                    {STACK_CATALOG.tts.map((v) => (
+                      <SelectItem key={v.vendor} value={v.vendor}>
+                        <ModelOption label={v.label} latencyMs={v.latencyMs} costPerMin={v.costPerMin} />
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -354,6 +391,7 @@ export function StackTradeoffSlider({
   const idx = Math.max(0, SLIDER_ORDER.indexOf(stack.preset))
   const diverged = divergedFromPreset(stack)
   const est = stackEstimateFor(stack)
+  const nonStreaming = stackNonStreaming(stack)
 
   const setPreset = (preset: StackPreset) => {
     const base = stackFor(preset, stack.modality)
@@ -401,7 +439,8 @@ export function StackTradeoffSlider({
       </div>
       {/* Name the bundle, not just its numbers (user-test 2026-07-29): the
           preset is a VENDOR bundle, and real model control exists — both must
-          read without hovering. Diverged mixes are named honestly. */}
+          read without hovering. Diverged mixes are named honestly — AND the
+          numbers now move with the models, which they previously did not. */}
       <p className="font-mono text-xs tabular-nums text-muted-foreground">
         {lean ? (
           <>{bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
@@ -409,6 +448,18 @@ export function StackTradeoffSlider({
           <>Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
         )}
       </p>
+      {/* The measurement boundary, stated. A latency figure with no stated
+          boundary is unfalsifiable — every vendor quotes the flattering one. */}
+      <p className="text-xs text-muted-foreground">
+        Typical end-to-end: caller stops speaking → agent audio starts. Measured across our
+        traffic, not a guarantee for your account.
+      </p>
+      {nonStreaming.length > 0 && (
+        <p className="text-xs text-warning">
+          {nonStreaming.join(", ")} doesn&apos;t stream — it transcribes only after the caller
+          stops, which is most of the delay above.
+        </p>
+      )}
       {diverged && (
         <p className="text-xs text-muted-foreground">
           Moving the slider replaces your custom model mix.

@@ -17,7 +17,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { MonitorNav } from "@/components/monitor-nav"
-import { AGENTS, DEPLOYMENTS } from "@/lib/campaign-data"
+import { AGENTS } from "@/lib/campaign-data"
+import { SESSIONS, CHANNEL_LABEL, LATENCY_TARGET_MS } from "@/lib/session-trace"
+import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 
 // Agent sessions = one AI conversation run (Conversational AI Engine join→leave).
@@ -25,54 +27,13 @@ import { track, Events } from "@/lib/analytics"
 // session-quality telemetry of Voice/Video/Live/Chat — that's human↔human comms
 // surfaced as *usage* (Realtime Services → /billing/usage) or Agora Analytics.
 
-type SessionStatus = "Completed" | "Failed"
-interface AgentSession {
-  id: string
-  agent: string
-  startTime: string
-  durationLabel: string
-  status: SessionStatus
-}
-
-const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-function seg(n: number, len = 4): string {
-  let s = ""
-  for (let i = 0; i < len; i++) s += CHARS[(n * 7 + i * 13) % CHARS.length]
-  return s
-}
-
-function genSessions(): AgentSession[] {
-  const agents = ["Customer Support Agent", "Sales Sam", "Support Bot v2", "Sales Qualifier", "—"]
-  const dates = [
-    "Nov 15, 2025, 04:00 PM", "Nov 10, 2025, 09:00 PM", "Oct 20, 2025, 09:00 AM",
-    "Oct 15, 2025, 10:00 AM", "Oct 06, 2025, 02:00 PM",
-  ]
-  // Sessions only exist where deployments have carried traffic. A brand-new
-  // zero-traffic account therefore genuinely sees the first-run empty state.
-  const totalCalls = DEPLOYMENTS.reduce((sum, d) => sum + d.metrics.calls, 0)
-  if (totalCalls === 0) return []
-  const count = Math.min(64, Math.max(8, Math.round(totalCalls / 400)))
-
-  const out: AgentSession[] = []
-  for (let i = 1; i <= count; i++) {
-    const status: SessionStatus = (i * 5) % 7 === 0 ? "Failed" : "Completed"
-    const mins = status === "Failed" ? 0 : (i % 5) + 1
-    out.push({
-      id: `${seg(i)}-${seg(i + 1)}-${seg(i + 2)}-${seg(i + 3, 5)}`,
-      agent: agents[i % agents.length],
-      startTime: dates[i % dates.length],
-      durationLabel: status === "Failed" ? "≤ 0s" : `≤ ${mins}m`,
-      status,
-    })
-  }
-  return out
-}
-
-const SESSIONS = genSessions()
+// Sessions + their channel now come from `lib/session-trace` so the list and
+// the detail route (`/sessions/[id]`) can never disagree about a run.
 
 export default function SessionsPage() {
   const [query, setQuery] = React.useState("")
   const [agent, setAgent] = React.useState("all")
+  const [channel, setChannel] = React.useState("all")
   const [pageSize, setPageSize] = React.useState(25)
   const [page, setPage] = React.useState(1)
 
@@ -84,12 +45,13 @@ export default function SessionsPage() {
     const q = query.trim().toLowerCase()
     return SESSIONS.filter((s) => {
       if (agent !== "all" && s.agent !== agent) return false
+      if (channel !== "all" && s.channel !== channel) return false
       if (q && !s.id.toLowerCase().includes(q) && !s.agent.toLowerCase().includes(q)) return false
       return true
     })
-  }, [query, agent])
+  }, [query, agent, channel])
 
-  React.useEffect(() => { setPage(1) }, [query, agent, pageSize])
+  React.useEffect(() => { setPage(1) }, [query, agent, channel, pageSize])
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize))
   const safePage = Math.min(page, pageCount)
   const visible = rows.slice((safePage - 1) * pageSize, safePage * pageSize)
@@ -135,6 +97,17 @@ export default function SessionsPage() {
               {AGENTS.map((a) => <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>)}
             </SelectContent>
           </Select>
+          {/* Sessions are no longer telephony-only (Q3 roadmap: "session details
+              beyond telephony") — the channel filter is how that becomes visible. */}
+          <Select value={channel} onValueChange={setChannel}>
+            <SelectTrigger className="h-9 w-40 text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All channels</SelectItem>
+              {Object.entries(CHANNEL_LABEL).map(([k, label]) => (
+                <SelectItem key={k} value={k}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Card>
@@ -144,24 +117,56 @@ export default function SessionsPage() {
                 <TableRow>
                   <TableHead>Agent Session ID</TableHead>
                   <TableHead>Agent</TableHead>
+                  <TableHead>Channel</TableHead>
                   <TableHead>Start Time</TableHead>
                   <TableHead className="text-right">Duration</TableHead>
+                  <TableHead className="text-right">p95 response</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {visible.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-mono text-xs">{s.id}</TableCell>
+                  // The row is the affordance — a session had no detail view at
+                  // all before (Q3 roadmap P1, 2026-07).
+                  <TableRow key={s.id} className="cursor-pointer">
+                    <TableCell className="font-mono text-xs">
+                      <Link href={`/sessions/${s.id}`} className="hover:underline underline-offset-4">
+                        {s.id}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-sm">{s.agent}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs font-normal">{CHANNEL_LABEL[s.channel]}</Badge>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground tabular-nums">{s.startTime}</TableCell>
                     <TableCell className="text-right tabular-nums text-sm">{s.durationLabel}</TableCell>
-                    <TableCell><Badge variant={s.status === "Failed" ? "destructive" : "default"}>{s.status}</Badge></TableCell>
+                    <TableCell className="text-right">
+                      {s.p95Ms > 0 ? (
+                        <span className={cn(
+                          "tabular-nums text-sm",
+                          s.p95Ms > LATENCY_TARGET_MS && "font-medium text-warning",
+                        )}>
+                          {s.p95Ms.toLocaleString()} ms
+                        </span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-0.5">
+                        <Badge variant={s.status === "Failed" ? "destructive" : "default"} className="w-fit">
+                          {s.status}
+                        </Badge>
+                        {s.endReason && (
+                          <span className="text-xs text-muted-foreground">{s.endReason}</span>
+                        )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {visible.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
                       <Radio className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
                       No sessions match.
                     </TableCell>

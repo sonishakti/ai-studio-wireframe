@@ -30,6 +30,7 @@ import {
   MCP_TRANSPORT_LABEL, type McpTransport, type McpTool,
   effectiveConnectorStatus,
 } from "@/lib/agent-resources"
+import { ExternalRetrievalForm } from "@/components/external-retrieval-form"
 import type { StepProps } from "@/components/wizard/types"
 import { SectionRow } from "@/components/wizard/section-row"
 import {
@@ -375,36 +376,71 @@ function ResourceField({
 
 // ─── Create forms (rendered inside the ResourceField sheet) ────────────────────
 
+/** The source picker, shared by both bodies so switching to (or away from) the
+ *  external-index flow is one click rather than a dead end. */
+function IngestPicker({
+  ingest, setIngest,
+}: {
+  ingest: KbIngest
+  setIngest: (k: KbIngest) => void
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-sm font-medium">Source</Label>
+      <ToggleGroup
+        type="single"
+        value={ingest}
+        onValueChange={(v) => v && setIngest(v as KbIngest)}
+        className="grid grid-cols-1 gap-2"
+        aria-label="Ingest type"
+      >
+        {(Object.keys(KB_INGEST_LABEL) as KbIngest[]).map((k) => (
+          <ToggleGroupItem
+            key={k}
+            value={k}
+            className="justify-start rounded-lg border border-border px-3 py-2.5 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          >
+            {KB_INGEST_LABEL[k]}
+            {k === "external" && (
+              <span className="ml-auto text-xs text-muted-foreground">Advanced</span>
+            )}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </div>
+  )
+}
+
 export function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
   const [name, setName] = React.useState("")
   const [ingest, setIngest] = React.useState<KbIngest>("pdf")
   const [fileName, setFileName] = React.useState("")
+
+  // "Connect an existing vector index" is a different job with a different
+  // shape (credentials → resource path → test retrieval), so it swaps the body
+  // rather than bolting eight more fields onto the upload form. It is also
+  // NOT a peer tile beside "Upload PDF" — a first-time builder who doesn't
+  // know what a vector store is should never feel behind for skipping it.
+  if (ingest === "external") {
+    return (
+      <div className="space-y-5">
+        <IngestPicker ingest={ingest} setIngest={setIngest} />
+        <ExternalRetrievalForm
+          onCreated={({ name: n, externalSource }) =>
+            onCreated(createKnowledgeBase({ name: n, ingest: "external", externalSource }).id)
+          }
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor="kb-name" className="text-sm font-medium">Name</Label>
         <Input id="kb-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Product docs" />
       </div>
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Source</Label>
-        <ToggleGroup
-          type="single"
-          value={ingest}
-          onValueChange={(v) => v && setIngest(v as KbIngest)}
-          className="grid grid-cols-1 gap-2"
-          aria-label="Ingest type"
-        >
-          {(Object.keys(KB_INGEST_LABEL) as KbIngest[]).map((k) => (
-            <ToggleGroupItem
-              key={k}
-              value={k}
-              className="justify-start rounded-lg border border-border px-3 py-2.5 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary/5"
-            >
-              {KB_INGEST_LABEL[k]}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
+      <IngestPicker ingest={ingest} setIngest={setIngest} />
       {/* Mock file drop — no real upload (wireframe). Typing a name stands in. */}
       <div className="space-y-1.5">
         <Label htmlFor="kb-file" className="text-sm font-medium">File or URL</Label>
