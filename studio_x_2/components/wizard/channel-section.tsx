@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, ExternalLink, Radio, ArrowRight, Plus } from "lucide-react"
+import { X, ExternalLink, Radio, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { ToggleCard } from "@/components/wizard/radio-cards"
+import { RadioCard, RadioCardGroup, ToggleCard } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { CodeBlock } from "@/components/code-block"
@@ -18,38 +18,32 @@ import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
-  channelLabel, hasChannel, activeCampaigns, type AgentDraft, type DeployChannel,
+  channelLabel, hasChannel, inboundSurfaces,
+  type AgentDraft, type DeployChannel, type InboundSurface,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
 /**
- * Section 2 — CHANNEL (v4 IA, 2026-07-28): deployment channels are
- * MULTI-SELECT — one agent can answer inbound calls, run batch campaigns, and
- * live in a web widget at once (reverses the 06-11 one-agent-one-channel
- * lock, per owner). Per-channel connection config renders inline under the
- * grid; the deeper call-behavior settings live in Go Live (the deploy panel),
- * and batch campaign management lives there too. Deselecting keeps the
- * channel's config — nothing is deleted, re-selecting restores it.
+ * Section 2 — CHANNEL (v6, owner 2026-07-29): the channel is ONE choice —
+ * Inbound OR Batch calls OR Code/SDK (radio, not multi-select). Multi-select
+ * lives INSIDE Inbound: an inbound agent can serve several surfaces at once —
+ * phone number(s) · web widget · WhatsApp/Telegram (soon). Batch shows
+ * nothing here (runs, contacts, and dialing all live in Go Live). Switching
+ * the channel keeps the departing one's config — nothing is deleted.
  */
 
 const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string; bestFor: string }[] = [
   {
     id: "inbound",
-    title: "Inbound calls",
-    desc: "Answers phone numbers 24/7 — link one or several.",
+    title: "Inbound",
+    desc: "Answers callers — phone numbers, web widget, more soon.",
     bestFor: "Support lines, front desk, after-hours",
   },
   {
     id: "batch",
     title: "Batch calls",
-    desc: "Calls through contact lists you upload, as campaigns.",
+    desc: "Calls through contact lists you upload, as campaign runs.",
     bestFor: "Outreach, reminders, surveys",
-  },
-  {
-    id: "web",
-    title: "Web widget",
-    desc: "A floating voice widget for your website.",
-    bestFor: "In-product help, lead capture",
   },
   {
     id: "code",
@@ -59,105 +53,90 @@ const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string; bestFor: 
   },
 ]
 
+const SURFACE_CARDS: { id: InboundSurface; title: string; desc: string }[] = [
+  { id: "phone", title: "Phone number", desc: "Answer calls 24/7 — link one or several numbers." },
+  { id: "web", title: "Web widget", desc: "A floating voice widget for your website." },
+]
+
 export function ChannelSection({
   draft,
   update,
   liveChannels,
   onGoToStep,
 }: StepProps & {
-  /** The DEPLOYED channels of a live agent — deselecting one warns. */
+  /** The DEPLOYED channel of a live agent — switching away from it warns. */
   liveChannels?: DeployChannel[]
-  /** Jump to another section (batch/inbound settings live in Go Live). */
+  /** Jump to another section (inbound call settings live in Go Live). */
   onGoToStep: (n: number) => void
 }) {
   const agentId = draft.agentId ?? "new"
+  const current = draft.channels[0] ?? null
+  const surfaces = inboundSurfaces(draft)
 
-  const toggleChannel = (c: DeployChannel, on: boolean) => {
-    if (on) {
-      // INBOUND XOR OUTBOUND (owner 2026-07-28): one agent cannot serve both
-      // directions — a receptionist and an outreach caller need different
-      // context and workflows. Picking one swaps out the other, said out loud.
-      const conflicting: DeployChannel | null =
-        c === "inbound" && draft.channels.includes("batch") ? "batch"
-        : c === "batch" && draft.channels.includes("inbound") ? "inbound"
-        : null
-      const channels = [...draft.channels.filter((x) => x !== conflicting), c]
-      const patch: Partial<AgentDraft> = { channels }
-      // Seed the connection state the block below reads.
-      if (c === "inbound" && !draft.config.inbound) {
-        patch.config = { ...draft.config, inbound: { numberIds: [] } }
-      }
-      if (c === "code") patch.config = { ...draft.config, code: { added: true } }
-      update(patch)
-      if (conflicting) {
-        const wasLive = liveChannels?.includes(conflicting)
-        toast(`${channelLabel(conflicting)} swapped for ${channelLabel(c)}`, {
-          description: wasLive
-            ? `${channelLabel(conflicting)} goes offline on your next redeploy — its setup is kept. Duplicate the agent for the other direction.`
-            : "One agent can't handle both inbound and outbound — the context and workflows differ. Duplicate the agent for the other direction; this setup is kept.",
-          action: {
-            // `draft.channels` here is the PRE-toggle snapshot — restoring it
-            // undoes both the add and the swap in one write.
-            label: "Undo",
-            onClick: () => update({ channels: draft.channels }),
-          },
-        })
-      }
-      return
+  const setChannel = (c: DeployChannel) => {
+    if (c === current) return
+    const patch: Partial<AgentDraft> = { channels: [c] }
+    if (c === "inbound" && !draft.config.inbound) {
+      patch.config = { ...draft.config, inbound: { numberIds: [], surfaces: ["phone"] } }
     }
-    const channels = draft.channels.filter((x) => x !== c)
-    update({ channels })
-    // Deselect keeps the config (numbers, campaigns, widget styling) — say so.
-    if (liveChannels?.includes(c)) {
-      toast(`${channelLabel(c)} will go offline on your next redeploy`, {
-        description: "Its setup is kept, not deleted — re-select the channel to restore it.",
-        action: { label: "Undo", onClick: () => update({ channels: [...channels, c] }) },
-      })
-    } else if (
-      (c === "inbound" && draft.config.inbound?.numberIds.length) ||
-      (c === "batch" && draft.campaigns.length)
-    ) {
-      toast(`${channelLabel(c)} removed`, {
-        description: "Its setup is kept — re-select the channel to restore it.",
-        action: { label: "Undo", onClick: () => update({ channels: [...channels, c] }) },
+    if (c === "code") patch.config = { ...draft.config, code: { added: true } }
+    update(patch)
+    // Switching away from a configured/live channel: say the setup is KEPT.
+    if (current && (liveChannels?.includes(current) ||
+        (current === "inbound" && draft.config.inbound?.numberIds.length) ||
+        (current === "batch" && draft.campaigns.length))) {
+      const wasLive = liveChannels?.includes(current)
+      toast(`Switched to ${channelLabel(c)}`, {
+        description: wasLive
+          ? `${channelLabel(current)} goes offline on your next redeploy — its setup is kept and undoable.`
+          : `Your ${channelLabel(current)} setup is kept, not deleted. Switch back any time.`,
+        action: { label: "Undo", onClick: () => update({ channels: [current] }) },
       })
     }
+  }
+
+  const toggleSurface = (sf: InboundSurface, on: boolean) => {
+    const next = on ? [...surfaces, sf] : surfaces.filter((x) => x !== sf)
+    update({
+      config: {
+        ...draft.config,
+        inbound: { numberIds: draft.config.inbound?.numberIds ?? [], surfaces: next },
+      },
+    })
   }
 
   return (
     <>
       <SectionRow
         id="wz-2-pick"
-        label={`Where does ${draft.name || "your agent"} run?`}
-        hint="Pick every channel it should serve. Inbound and Batch calls are exclusive — one agent can't work both directions."
+        label={`How does ${draft.name || "your agent"} take calls?`}
+        hint="One channel per agent — inbound and outbound need different context and workflows. Duplicate the agent for the other direction."
       >
-        {/* Pre-click consequence for a LIVE agent — BOTH directions warn:
-            deselecting a live channel, AND adding the opposite calling
-            direction (which swaps the live one out). User-test 2026-07-28:
-            the earlier copy only covered de-selecting, so the swap fired on
-            an add click against a live agent with no warning up front. */}
         {liveChannels && liveChannels.length > 0 && (
           <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
-            {draft.name || "This agent"} is live on {liveChannels.map(channelLabel).join(" · ")} — deselecting a
-            live channel, or picking the opposite calling direction (which swaps it out), takes it offline there
-            on your next redeploy. Its setup is kept, and every swap has an Undo.
+            {draft.name || "This agent"} is live on {liveChannels.map(channelLabel).join(" · ")} — switching
+            channels takes it offline there on your next redeploy. The setup is kept, and every switch has an Undo.
           </p>
         )}
 
-        <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2" role="group" aria-label="Deployment channels">
+        <RadioCardGroup
+          value={current ?? ""}
+          onValueChange={(v) => v && setChannel(v as DeployChannel)}
+          aria-label="Channel"
+          className="gap-4 @xl:grid-cols-3"
+        >
           {CHANNEL_CARDS.map((c) => (
-            <ToggleCard
+            <RadioCard
               key={c.id}
-              pressed={hasChannel(draft, c.id)}
-              onPressedChange={(on) => toggleChannel(c.id, on)}
+              value={c.id}
               title={
                 liveChannels?.includes(c.id) ? (
-                  <>
+                  <span className="flex items-center gap-2">
                     {c.title}
                     <span className="flex items-center gap-1 text-xs font-medium text-success">
                       <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden /> Live
                     </span>
-                  </>
+                  </span>
                 ) : (
                   c.title
                 )
@@ -170,19 +149,11 @@ export function ChannelSection({
               }
             />
           ))}
-          {/* WhatsApp — coming, visible, inert. */}
-          <ToggleCard
-            pressed={false}
-            onPressedChange={() => {}}
-            disabled
-            title="WhatsApp"
-            badge={<Badge variant="outline" className="h-5 px-1.5 text-xs uppercase tracking-wide">Soon</Badge>}
-            description="Answer WhatsApp messages with the same agent."
-          />
-        </div>
+        </RadioCardGroup>
 
         <InfoHint label="Phone channels are bring-your-own number">
-          Agora doesn&apos;t sell numbers — connect your carrier&apos;s via SIP in{" "}
+          Agora doesn&apos;t sell numbers — connect your carrier&apos;s via SIP with{" "}
+          <span className="font-medium text-foreground">Add phone number</span> below, or manage them in{" "}
           <a href="/integrations?tab=channels" className="underline underline-offset-2">
             Resources › Deployment Channels
           </a>
@@ -190,39 +161,57 @@ export function ChannelSection({
         </InfoHint>
       </SectionRow>
 
-      {hasChannel(draft, "inbound") && (
-        <InboundNumbersBlock draft={draft} update={update} onGoToStep={onGoToStep} />
-      )}
-
-      {hasChannel(draft, "batch") && (
+      {/* INBOUND — the multi-select lives HERE: several surfaces at once. */}
+      {current === "inbound" && (
         <SectionRow
-          id="wz-2-batch"
-          label="Batch calls"
-          hint="Campaign runs — contacts, caller ID, schedule, dialing — are managed in Go Live."
+          id="wz-2-surfaces"
+          label="Inbound channels"
+          hint="Pick every way callers reach this agent — it can serve several at once."
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
-            <p className="min-w-0 text-sm text-muted-foreground">
-              {activeCampaigns(draft).length > 0
-                ? `${activeCampaigns(draft).length} run${activeCampaigns(draft).length > 1 ? "s" : ""} set up — manage them in Go Live.`
-                : "No runs yet — create your first in Go Live."}
-            </p>
-            <Button variant="outline" size="sm" className="gap-1" onClick={() => onGoToStep(5)}>
-              Manage runs <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Button>
+          <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2" role="group" aria-label="Inbound channels">
+            {SURFACE_CARDS.map((sf) => (
+              <ToggleCard
+                key={sf.id}
+                pressed={surfaces.includes(sf.id)}
+                onPressedChange={(on) => toggleSurface(sf.id, on)}
+                title={sf.title}
+                description={sf.desc}
+              />
+            ))}
+            <ToggleCard
+              pressed={false}
+              onPressedChange={() => {}}
+              disabled
+              title="WhatsApp"
+              badge={<Badge variant="outline" className="h-5 px-1.5 text-xs uppercase tracking-wide">Soon</Badge>}
+              description="Answer WhatsApp messages with the same agent."
+            />
+            <ToggleCard
+              pressed={false}
+              onPressedChange={() => {}}
+              disabled
+              title="Telegram"
+              badge={<Badge variant="outline" className="h-5 px-1.5 text-xs uppercase tracking-wide">Soon</Badge>}
+              description="Answer Telegram messages with the same agent."
+            />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Each run dials from one caller-ID number — load-balancing across several numbers is coming.
-          </p>
         </SectionRow>
       )}
 
-      {hasChannel(draft, "web") && (
+      {current === "inbound" && surfaces.includes("phone") && (
+        <InboundNumbersBlock draft={draft} update={update} onGoToStep={onGoToStep} />
+      )}
+
+      {current === "inbound" && surfaces.includes("web") && (
         <SectionRow id="wz-2-web" label="Web widget" hint="The essentials — grab the embed snippet; deeper styling lives in the Widget studio.">
           <WidgetStyleConfig agentId={agentId} lean />
         </SectionRow>
       )}
 
-      {hasChannel(draft, "code") && (
+      {/* BATCH — nothing here on purpose (owner 2026-07-29): contacts, caller
+          ID, schedule, and dialing ALL live in Go Live. */}
+
+      {current === "code" && (
         <SectionRow id="wz-2-code" label="Code / SDK" hint="Drop the agent into your own app.">
           <CodeConfigure agentId={agentId} />
         </SectionRow>
@@ -238,7 +227,12 @@ function InboundNumbersBlock({
 }: StepProps & { onGoToStep: (n: number) => void }) {
   const numberIds = draft.config.inbound?.numberIds ?? []
   const setNumberIds = (ids: string[]) =>
-    update({ config: { ...draft.config, inbound: { numberIds: ids } } })
+    update({
+      config: {
+        ...draft.config,
+        inbound: { numberIds: ids, surfaces: draft.config.inbound?.surfaces ?? ["phone"] },
+      },
+    })
 
   // Numbers added THIS session via the + accelerator (PHONE_NUMBERS is a
   // static mock) — merged into every lookup so the just-added number actually
@@ -269,7 +263,7 @@ function InboundNumbersBlock({
   return (
     <SectionRow
       id="wz-2-inbound"
-      label="Inbound numbers"
+      label="Phone numbers"
       hint="Link one or several numbers — the agent answers them all."
     >
       <ConfigCard>
@@ -316,14 +310,6 @@ function InboundNumbersBlock({
               </Button>
             </AddPhoneNumberSheet>
           </div>
-          <InfoHint label="No number free?">
-            Agora routes your own carrier number — connect one via SIP with{" "}
-            <span className="font-medium text-foreground">Add phone number</span>, or manage them in{" "}
-            <a href="/integrations?tab=channels" className="underline underline-offset-2">
-              Resources › Deployment Channels
-            </a>
-            .
-          </InfoHint>
         </div>
       </ConfigCard>
       <p className="text-xs text-muted-foreground">
@@ -350,11 +336,8 @@ const client = new AgentClient({
   appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
-// Add the agent to a live Agora RTC channel.
-// uid — the agent's RTC user ID in the channel: auto-assigned when
-// omitted; pass your own (any uint not already in the channel) to
-// control how the agent appears to your other clients.
-await client.joinChannel({ channel: "support-room", uid: 9001 })`
+// Add the agent to a live Agora RTC channel
+await client.joinChannel({ channel: "support-room" })`
 
   const stop = `// Stop the agent and leave the channel
 await client.leaveChannel()

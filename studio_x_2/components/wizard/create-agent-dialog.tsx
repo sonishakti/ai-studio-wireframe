@@ -59,40 +59,43 @@ const INBOUND_WORDS = /inbound|answer|hotline|front desk|reception|24\/7|picks? 
  *  channels", "via the SDK/API" — the Code / SDK channel, no phone number. */
 const CODE_WORDS = /\bsdk\b|\bapi\b|\brtc\b|(my|our|existing) (own )?app|in-app|integrat|embed (it |the agent )?in|pipeline only|no phone number/i
 
-type ChipId = "phone" | "web" | "code"
+/** Direction each template kind implies — ONE channel per agent. */
+const KIND_DIRECTION: Record<string, DeployChannel> = {
+  "appointment-reminder": "batch",
+  "nps-survey": "batch",
+  "payment-reminder": "batch",
+  ivr: "inbound",
+  ecommerce: "inbound",
+}
 
-/** The channel chips offered at setup (owner: Phone Number · Web Widget ·
- *  Code / SDK, with WhatsApp/Telegram as future). Direction (inbound vs
- *  batch) comes from the description — one agent never holds both. */
-const CHANNEL_CHIPS: { id: ChipId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "phone", label: "Phone number", icon: Phone },
-  { id: "web", label: "Web widget", icon: Globe },
-  { id: "code", label: "Code / SDK", icon: Code2 },
-]
-
-function infer(text: string, chips: Set<ChipId>): { templateId: string; channels: DeployChannel[]; inferred: string } {
-  const tpl = TEMPLATE_HINTS.find((t) => t.words.test(text))
-  // Direction: explicit wording wins; else the matched template's; else inbound.
+/** The one channel + template the create resolves to. A picked template KIND
+ *  wins; otherwise the description decides (mock inference). */
+function infer(text: string, kindId: string): { templateId: string; channels: DeployChannel[]; inferred: string } {
+  const described = text.trim().length > 0
+  const kindTpl = kindId !== "blank" ? AGENT_TEMPLATES.find((t) => t.id === kindId) : undefined
+  if (kindTpl) {
+    const dir = KIND_DIRECTION[kindTpl.id] ?? "inbound"
+    return {
+      templateId: kindTpl.id,
+      channels: [dir],
+      inferred: `${kindTpl.name} template · channel: ${channelLabel(dir)}`,
+    }
+  }
+  const tpl = described ? TEMPLATE_HINTS.find((t) => t.words.test(text)) : undefined
   const direction: "inbound" | "batch" = OUTBOUND_WORDS.test(text)
     ? "batch"
     : INBOUND_WORDS.test(text)
       ? "inbound"
       : tpl?.direction ?? "inbound"
-  const codey = CODE_WORDS.test(text)
-  const channels = new Set<DeployChannel>()
-  // The phone channel exists only when its chip is on (or nothing was picked,
-  // where the direction is the sensible default — unless the description
-  // reads SDK/existing-app, where Code / SDK is the sensible default) — a
-  // web-only pick stays web-only even when the description sounds outbound.
-  if (chips.has("phone") || (chips.size === 0 && !codey)) channels.add(direction)
-  if (chips.has("web")) channels.add("web")
-  if (chips.has("code") || (chips.size === 0 && codey)) channels.add("code")
+  const codey = described && CODE_WORDS.test(text)
+  const channels: DeployChannel[] = codey ? ["code"] : [direction]
   const tplName = tpl ? AGENT_TEMPLATES.find((t) => t.id === tpl.id)?.name : undefined
-  const channelWords = [...channels].map(channelLabel)
   return {
     templateId: tpl?.id ?? "blank",
-    channels: [...channels],
-    inferred: `${tplName ? `Generated from your description (closest shape: ${tplName})` : "Generated from your description"} · channels: ${channelWords.join(" + ")}`,
+    channels,
+    inferred: described
+      ? `${tplName ? `Generated from your description (closest shape: ${tplName})` : "Generated from your description"} · channel: ${channels.map(channelLabel).join(" + ")}`
+      : `Blank agent · channel: ${channels.map(channelLabel).join(" + ")}`,
   }
 }
 
@@ -109,15 +112,14 @@ export function CreateAgentDialog({
   defaultTemplateId?: string
 }) {
   const [description, setDescription] = React.useState("")
-  const [chips, setChips] = React.useState<Set<ChipId>>(new Set(["phone"]))
+  const [kindId, setKindId] = React.useState("blank")
 
   // Fresh form each open — a dialog that remembers the last aborted create
-  // reads as someone else's draft. A template row pre-seeds the describe box.
+  // reads as someone else's draft. A Start-landing row pre-seeds the kind.
   React.useEffect(() => {
     if (open) {
-      const tpl = defaultTemplateId !== "blank" ? AGENT_TEMPLATES.find((t) => t.id === defaultTemplateId) : undefined
-      setDescription(tpl ? `${tpl.description}.` : "")
-      setChips(new Set(["phone"]))
+      setDescription("")
+      setKindId(defaultTemplateId)
     }
   }, [open, defaultTemplateId])
 
@@ -131,19 +133,11 @@ export function CreateAgentDialog({
       ? { ok: true, msg: "Enough to build from — we'll set up the prompt, template shape, and channels." }
       : { ok: false, msg: "Add a bit more — what should it do, and for whom? (e.g. \"Call my customer list about overdue invoices\")" }
 
-  const toggleChip = (id: ChipId) =>
-    setChips((s) => {
-      const next = new Set(s)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-
   const create = () => {
-    const inf = infer(description, chips)
+    const inf = infer(description, kindId)
     const tplName = AGENT_TEMPLATES.find((t) => t.id === inf.templateId)?.name
     onCreate({
-      name: inf.templateId !== "blank" && tplName ? tplName : "Custom agent",
+      name: inf.templateId !== "blank" && tplName ? tplName : description.trim() ? "Custom agent" : "",
       channels: inf.channels,
       templateId: inf.templateId,
       description: description.trim(),
@@ -190,47 +184,35 @@ export function CreateAgentDialog({
             </p>
           </div>
 
-          {/* Channels at setup (owner): enable several; inbound vs outbound is
-              read from the description — one agent never holds both. */}
+          {/* Not sure what to type? Pick the KIND instead (owner 2026-07-29:
+              "ask what kind of a template do you want" — a fallback for users
+              unsure about the two lines). */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Where should it run?</Label>
-            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Channels">
-              {CHANNEL_CHIPS.map((c) => {
-                const on = chips.has(c.id)
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => toggleChip(c.id)}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                      on
-                        ? "border-primary bg-primary/[0.06] text-foreground"
-                        : "border-border text-muted-foreground hover:border-foreground/25",
-                    )}
-                  >
-                    <c.icon className="h-3.5 w-3.5" aria-hidden /> {c.label}
-                    {on && <Check className="h-3.5 w-3.5 text-primary" aria-hidden />}
-                  </button>
-                )
-              })}
-              <Badge variant="outline" className="h-8 gap-1.5 rounded-full px-3 font-normal text-muted-foreground">
-                WhatsApp <span className="text-xs uppercase">soon</span>
-              </Badge>
-              <Badge variant="outline" className="h-8 gap-1.5 rounded-full px-3 font-normal text-muted-foreground">
-                Telegram <span className="text-xs uppercase">soon</span>
-              </Badge>
+            <Label className="text-sm font-medium">What kind of a template do you want?</Label>
+            <div role="radiogroup" aria-label="Template kind" className="space-y-1">
+              <KindRow
+                icon={Sparkles}
+                label="Let my description decide"
+                desc="Blank if it can't tell — everything stays editable in the builder."
+                selected={kindId === "blank"}
+                onSelect={() => setKindId("blank")}
+              />
+              {AGENT_TEMPLATES.filter((t) => t.id !== "blank").map((t) => (
+                <KindRow
+                  key={t.id}
+                  icon={TEMPLATE_ICONS[t.id] ?? Smile}
+                  label={t.name}
+                  desc={t.description}
+                  selected={kindId === t.id}
+                  onSelect={() => setKindId(t.id)}
+                />
+              ))}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Whether the phone channel answers or dials is read from your description — one agent
-              can&apos;t handle both inbound and outbound.
-            </p>
           </div>
         </div>
 
         <DialogFooter className="border-t border-border px-6 py-3">
-          <Button onClick={create} disabled={!enough} className="gap-1.5">
+          <Button onClick={create} disabled={!enough && kindId === "blank"} className="gap-1.5">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Create Agent
           </Button>
@@ -240,5 +222,40 @@ export function CreateAgentDialog({
   )
 }
 
-// Smile stays exported-adjacent for TEMPLATE_ICONS fallbacks elsewhere.
-export const FALLBACK_TEMPLATE_ICON = Smile
+function KindRow({
+  icon: Icon, label, desc, selected, onSelect,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  desc: string
+  selected: boolean
+  onSelect: () => void
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
+        selected ? "border-primary bg-primary/[0.03]" : "border-transparent hover:bg-accent/40",
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium">{label}</span>
+        <span className="block truncate text-xs text-muted-foreground">{desc}</span>
+      </span>
+      <span
+        className={cn(
+          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+          selected ? "border-primary" : "border-muted-foreground/50",
+        )}
+        aria-hidden
+      >
+        <span className={cn("h-2 w-2 rounded-full bg-primary transition-transform", selected ? "scale-100" : "scale-0")} />
+      </span>
+    </button>
+  )
+}

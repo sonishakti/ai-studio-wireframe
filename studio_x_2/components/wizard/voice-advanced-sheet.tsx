@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { KeyRound } from "lucide-react"
+import { KeyRound, Code2 } from "lucide-react"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
@@ -54,7 +54,8 @@ export function VoiceAdvancedSheet({
           <section className="space-y-4">
             <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Models &amp; architecture</p>
             <StackModelsDetail stack={draft.stack} onChange={onStackChange} showPicker={false} hideTitle />
-            <StackModelPicker stack={draft.stack} onChange={onStackChange} personaName={persona?.name} hideTitle />
+            {/* STT → LLM → TTS stacked top to bottom (owner 2026-07-29). */}
+            <StackModelPicker stack={draft.stack} onChange={onStackChange} personaName={persona?.name} hideTitle stacked />
             <div className="flex items-center gap-2">
               <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               <InfoHint label="Using your own vendor accounts?">
@@ -70,6 +71,19 @@ export function VoiceAdvancedSheet({
               value={draft.advanced}
               onChange={(advanced) => update({ advanced })}
             />
+            {/* Power door (owner 2026-07-29: "give any advanced setting
+                control here, eg adding custom config"). */}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("sx:open-config-drawer", { cancelable: true }))}
+              className="flex w-full items-center gap-2.5 rounded-lg border border-dashed border-border px-3.5 py-2.5 text-left text-sm transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Code2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+              <span className="min-w-0 flex-1">
+                <span className="block font-medium">Custom config (JSON)</span>
+                <span className="block text-xs text-muted-foreground">Edit the whole agent as JSON — overridden fields lock in the UI.</span>
+              </span>
+            </button>
           </section>
 
           <section className="space-y-4">

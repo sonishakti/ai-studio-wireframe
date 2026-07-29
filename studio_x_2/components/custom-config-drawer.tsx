@@ -252,9 +252,12 @@ function toPatch(parsed: Record<string, unknown>): Partial<AgentDraft> {
     const numberIds = Array.isArray(inbound?.numberIds)
       ? inbound.numberIds.filter((n): n is string => typeof n === "string")
       : undefined
+    const surfaces = Array.isArray(inbound?.surfaces)
+      ? (inbound.surfaces as unknown[]).filter((x): x is "phone" | "web" => x === "phone" || x === "web")
+      : undefined
     const code = cfg.code && typeof cfg.code === "object" ? (cfg.code as Record<string, unknown>) : undefined
     p.config = {
-      ...(numberIds || inbound ? { inbound: { numberIds: numberIds ?? [] } } : {}),
+      ...(numberIds || inbound ? { inbound: { numberIds: numberIds ?? [], ...(surfaces ? { surfaces } : {}) } } : {}),
       ...(code ? { code: { added: !!code.added } } : {}),
     }
   }

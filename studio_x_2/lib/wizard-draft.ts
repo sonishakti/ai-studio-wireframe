@@ -22,14 +22,18 @@ import { clearWidgetState } from "@/lib/widget-config"
  *  `Agent.channel` mock and `publishDeployment`'s mode. */
 export type AgentType = "inbound" | "outbound" | "code"
 
-/** The deployment channels an agent can be live on — MULTI-SELECT since
- *  2026-07-28 (reverses the 06-11 one-agent-one-channel lock, per owner).
- *  "web" is first-class now (it was inbound's `mode: "web"` sub-state). */
+/** The agent's ONE deployment channel (owner 2026-07-29: NOT multi-select —
+ *  Inbound OR Batch calls OR Code/SDK). Multi-select lives INSIDE Inbound as
+ *  surfaces (phone · web widget · WhatsApp/Telegram soon). "web" survives in
+ *  the union only so old stored drafts migrate — it is never produced. */
 export type DeployChannel = "inbound" | "batch" | "web" | "code"
 
-/** Priority used when a single-channel summary is needed (the published
- *  Agent mock stays single-channel; the list shows the primary). */
-export const CHANNEL_PRIORITY: DeployChannel[] = ["inbound", "web", "batch", "code"]
+/** How an INBOUND agent is reached — multi-select (owner 2026-07-29:
+ *  "inside inbound user can have multi, e.g. Telegram + WhatsApp etc"). */
+export type InboundSurface = "phone" | "web"
+
+/** Priority when a stored draft carries several (pre-single-channel data). */
+export const CHANNEL_PRIORITY: DeployChannel[] = ["inbound", "batch", "code"]
 
 export const hasChannel = (d: AgentDraft, c: DeployChannel) => d.channels.includes(c)
 
@@ -37,14 +41,27 @@ export function primaryChannel(d: AgentDraft): DeployChannel | null {
   return CHANNEL_PRIORITY.find((c) => d.channels.includes(c)) ?? null
 }
 
-/** INBOUND XOR OUTBOUND (owner 2026-07-28): one agent cannot serve both
- *  directions — different context and workflows. Every write path that can
- *  set channels (UI toggle, ?dc= links, JSON apply, migration) funnels
- *  through this: when both appear, the LAST-ADDED direction wins. */
-export function enforceDirection(channels: DeployChannel[], prefer?: "inbound" | "batch"): DeployChannel[] {
-  if (!(channels.includes("inbound") && channels.includes("batch"))) return channels
-  const drop = prefer ? (prefer === "inbound" ? "batch" : "inbound") : "batch"
-  return channels.filter((c) => c !== drop)
+/** The inbound surfaces in effect — defaults to phone once inbound is picked. */
+export function inboundSurfaces(d: AgentDraft): InboundSurface[] {
+  if (!hasChannel(d, "inbound")) return []
+  return d.config.inbound?.surfaces ?? ["phone"]
+}
+
+/** Web widget enabled — an inbound surface (v6), plus legacy "web" drafts. */
+export function hasWebWidget(d: AgentDraft): boolean {
+  return inboundSurfaces(d).includes("web") || d.channels.includes("web")
+}
+
+/** ONE channel per agent: collapse any multi-channel list to a single primary
+ *  ("prefer" wins when given — e.g. the channel a deep link asked for).
+ *  Legacy "web" entries count as inbound; the caller moves them to surfaces. */
+export function enforceDirection(channels: DeployChannel[], prefer?: DeployChannel): DeployChannel[] {
+  const normalized = channels.map((c): DeployChannel => (c === "web" ? "inbound" : c))
+  if (prefer && normalized.includes(prefer === "web" ? "inbound" : prefer)) {
+    return [prefer === "web" ? "inbound" : prefer]
+  }
+  const primary = CHANNEL_PRIORITY.find((c) => normalized.includes(c))
+  return primary ? [primary] : []
 }
 
 /** Pointer to the chosen voice (preset or a saved custom artifact). */
@@ -259,8 +276,9 @@ export interface AgentDraft {
   configOverrides?: string[]
   /** Per-channel connection state. */
   config: {
-    /** Inbound links MULTIPLE numbers to one agent (2026-07-28). */
-    inbound?: { numberIds: string[] }
+    /** Inbound links MULTIPLE numbers to one agent (2026-07-28) and can serve
+     *  several surfaces at once (2026-07-29: phone · web widget · more soon). */
+    inbound?: { numberIds: string[]; surfaces?: InboundSurface[] }
     code?: { added?: boolean }
   }
 }
@@ -317,7 +335,7 @@ export const EMPTY_DRAFT: AgentDraft = {
 interface LegacyDraftFields {
   type?: AgentType | null
   config?: {
-    inbound?: { mode?: "phone" | "web"; numberId?: string; numberIds?: string[] }
+    inbound?: { mode?: "phone" | "web"; numberId?: string; numberIds?: string[]; surfaces?: unknown[] }
     outbound?: {
       numberId?: string
       csvName?: string | null
@@ -338,21 +356,34 @@ export function migrateDraft(raw: Partial<AgentDraft> & LegacyDraftFields): Agen
   const legacyInbound = raw.config?.inbound
   const legacyOutbound = raw.config?.outbound
 
-  // Channels: keep an explicit new-shape list; otherwise derive from `type`.
-  // Direction rule holds on migration too — a hand-edited draft carrying both
-  // inbound and batch keeps inbound (the priority direction).
-  const channels: DeployChannel[] = enforceDirection(
-    Array.isArray(raw.channels)
-      ? raw.channels.filter((c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code")
-      : legacyType === "inbound"
-        ? legacyInbound?.mode === "web" ? ["web"] : ["inbound"]
-        : legacyType === "outbound"
-          ? ["batch"]
-          : legacyType === "code"
-            ? ["code"]
-            : [],
-    "inbound",
+  // Channels: ONE primary (v6). A stored "web" channel becomes the inbound
+  // web SURFACE; a multi-channel list collapses by priority.
+  const rawChannels: DeployChannel[] = Array.isArray(raw.channels)
+    ? raw.channels.filter((c): c is DeployChannel => c === "inbound" || c === "batch" || c === "web" || c === "code")
+    : legacyType === "inbound"
+      ? legacyInbound?.mode === "web" ? ["web"] : ["inbound"]
+      : legacyType === "outbound"
+        ? ["batch"]
+        : legacyType === "code"
+          ? ["code"]
+          : []
+  const hadWeb = rawChannels.includes("web")
+  // An EXPLICIT batch pick must not be outranked by a web-derived inbound
+  // (the 07-28 multi-select build could store ["batch","web"]) — the user's
+  // chosen direction wins; the web surface is kept under config.inbound for
+  // whenever they switch back (review 2026-07-29).
+  const channels = enforceDirection(
+    rawChannels,
+    rawChannels.includes("batch") && !rawChannels.includes("inbound") ? "batch" : undefined,
   )
+  const rawSurfaces = Array.isArray(raw.config?.inbound?.surfaces)
+    ? (raw.config!.inbound!.surfaces as unknown[]).filter((x): x is InboundSurface => x === "phone" || x === "web")
+    : undefined
+  const surfaces: InboundSurface[] | undefined = channels.includes("inbound")
+    ? rawSurfaces ?? (hadWeb && !rawChannels.includes("inbound") ? ["web"] : hadWeb ? ["phone", "web"] : ["phone"])
+    : hadWeb
+      ? rawSurfaces ?? ["web"]
+      : undefined
 
   // Inbound numbers: numberIds wins; a legacy single numberId becomes [id].
   const numberIds = Array.isArray(legacyInbound?.numberIds)
@@ -378,7 +409,9 @@ export function migrateDraft(raw: Partial<AgentDraft> & LegacyDraftFields): Agen
       : []
 
   const config: AgentDraft["config"] = {
-    ...(numberIds.length || channels.includes("inbound") ? { inbound: { numberIds } } : {}),
+    ...(numberIds.length || channels.includes("inbound") || surfaces
+      ? { inbound: { numberIds, ...(surfaces ? { surfaces } : {}) } }
+      : {}),
     ...(raw.config?.code ? { code: raw.config.code } : {}),
   }
 
@@ -448,12 +481,14 @@ export function agentToDraft(agent: Agent): AgentDraft {
   const ch = agent.channel
   const channels: DeployChannel[] =
     ch?.type === "inbound"
-      ? ch.mode === "web" ? ["web"] : ["inbound"]
+      ? ["inbound"]
       : ch?.type === "outbound"
         ? ["batch"]
         : ch?.type === "code"
           ? ["code"]
           : []
+  const agentSurfaces: InboundSurface[] | undefined =
+    ch?.type === "inbound" ? (ch.mode === "web" ? ["web"] : ["phone"]) : undefined
 
   const campaigns: CampaignDraft[] = agent.campaigns
     ? agent.campaigns.map((c) => ({
@@ -496,8 +531,8 @@ export function agentToDraft(agent: Agent): AgentDraft {
     connectors: [...(agent.connectors ?? [])],
     campaigns,
     config: {
-      ...(ch?.type === "inbound" && ch.mode !== "web"
-        ? { inbound: { numberIds: ch.numberId ? [ch.numberId] : [] } }
+      ...(ch?.type === "inbound"
+        ? { inbound: { numberIds: ch.numberId && ch.mode !== "web" ? [ch.numberId] : [], surfaces: agentSurfaces } }
         : {}),
       ...(ch?.type === "code" ? { code: { added: true } } : {}),
     },
@@ -570,10 +605,16 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
   if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
 
   if (d.channels.length === 0) {
-    blocks.push({ reason: "Pick at least one channel.", step: 2, action: "Pick channels" })
+    blocks.push({ reason: "Pick a channel.", step: 2, action: "Pick a channel" })
   }
-  if (hasChannel(d, "inbound") && !(d.config.inbound?.numberIds.length)) {
-    blocks.push({ reason: "Link a phone number for inbound calls.", step: 2, action: "Link a number" })
+  if (hasChannel(d, "inbound")) {
+    const surfaces = inboundSurfaces(d)
+    if (surfaces.length === 0) {
+      blocks.push({ reason: "Choose how callers reach your agent.", step: 2, action: "Pick a surface" })
+    }
+    if (surfaces.includes("phone") && !(d.config.inbound?.numberIds.length)) {
+      blocks.push({ reason: "Link a phone number for inbound calls.", step: 2, action: "Link a number" })
+    }
   }
 
   if (!d.systemPrompt.trim()) blocks.push({ reason: "Add a system prompt.", step: 3, action: "Write the prompt" })
@@ -628,18 +669,22 @@ export function canPublish(d: AgentDraft): boolean {
 export function channelTarget(d: AgentDraft): string {
   const parts: string[] = []
   if (hasChannel(d, "inbound")) {
-    const ids = d.config.inbound?.numberIds ?? []
-    const first = PHONE_NUMBERS.find((p) => p.id === ids[0])
-    parts.push(
-      ids.length === 0 ? "No number yet"
-      : ids.length === 1 ? first?.number ?? "1 number"
-      : `${first?.number ?? "1 number"} +${ids.length - 1} more`,
-    )
+    const surfaces = inboundSurfaces(d)
+    if (surfaces.includes("phone")) {
+      const ids = d.config.inbound?.numberIds ?? []
+      const first = PHONE_NUMBERS.find((p) => p.id === ids[0])
+      parts.push(
+        ids.length === 0 ? "No number yet"
+        : ids.length === 1 ? first?.number ?? "1 number"
+        : `${first?.number ?? "1 number"} +${ids.length - 1} more`,
+      )
+    }
+    if (surfaces.includes("web")) parts.push("Web widget")
+    if (surfaces.length === 0) parts.push("No surface yet")
   }
-  if (hasChannel(d, "web")) parts.push("Web widget")
   if (hasChannel(d, "batch")) {
     const n = activeCampaigns(d).length
-    parts.push(n === 0 ? "No campaigns yet" : `${n} campaign${n > 1 ? "s" : ""}`)
+    parts.push(n === 0 ? "No runs yet" : `${n} run${n > 1 ? "s" : ""}`)
   }
   if (hasChannel(d, "code")) parts.push("SDK / API")
   return parts.join(" · ") || "Not set"

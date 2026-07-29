@@ -1,7 +1,7 @@
 import type * as React from "react"
 import { Waypoints, FileText, AudioLines, Rocket, FlaskConical } from "lucide-react"
 import type { AgentDraft } from "@/lib/wizard-draft"
-import { activeCampaigns, hasChannel } from "@/lib/wizard-draft"
+import { activeCampaigns, hasChannel, inboundSurfaces } from "@/lib/wizard-draft"
 
 /** Shared contract every wizard section receives. `update` shallow-merges a
  *  patch into the single AgentDraft the host owns (autosaved + step-gated there). */
@@ -56,29 +56,4 @@ export function resolveStepParam(n: number): number | null {
 
 export function stepTitle(n: number, _draft: AgentDraft): string {
   return STEP_TITLES[n - 1]
-}
-
-/** What lives inside each section — the always-visible content map. Sections
- *  2 and 5 follow the chosen channels so the row predicts its actual contents. */
-export function stepManifest(n: number, draft: AgentDraft): string {
-  if (n === 1) return "Model tier · Voice · Advanced tuning"
-  if (n === 2) {
-    if (draft.channels.length === 0) return "Inbound · Batch calls · Web widget · Code / SDK"
-    return draft.channels
-      .map((c) => (c === "batch" ? "Batch calls" : c === "web" ? "Web widget" : c === "code" ? "Code / SDK" : "Inbound"))
-      .join(" · ")
-  }
-  if (n === 3) return "System prompt · Greeting · Additional context"
-  if (n === 4) return "Live test · Simulations · A/B compare"
-  if (n === 5) {
-    const parts: string[] = []
-    if (hasChannel(draft, "batch")) {
-      const count = activeCampaigns(draft).length
-      parts.push(count > 0 ? `${count} run${count > 1 ? "s" : ""}` : "Campaign runs")
-    }
-    if (hasChannel(draft, "inbound")) parts.push("Inbound call settings")
-    parts.push("Structured outputs", "Review & deploy")
-    return parts.join(" · ")
-  }
-  return ""
 }

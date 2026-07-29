@@ -201,6 +201,7 @@ export function StackModelPicker({
   className,
   personaName,
   hideTitle,
+  stacked,
 }: StackPieceProps & {
   /** Selected voice persona (e.g. "Luna") — named under the TTS voice so the
    *  two voice concepts reconcile on screen: persona "Luna" speaking with the
@@ -208,6 +209,9 @@ export function StackModelPicker({
   personaName?: string
   /** [label | content] hosting: the row label carries "Models". */
   hideTitle?: boolean
+  /** Force ONE column — the Advanced sheet stacks STT → LLM → TTS top to
+   *  bottom (owner 2026-07-29: it's a sequence to read, not parallel picks). */
+  stacked?: boolean
 }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
@@ -227,7 +231,7 @@ export function StackModelPicker({
           </h4>
         )}
           {pipeline === "stt-llm-tts" ? (
-            <div className="grid grid-cols-1 gap-4 @lg:grid-cols-2">
+            <div className={cn("grid grid-cols-1 gap-4", !stacked && "@lg:grid-cols-2")}>
               <div className="min-w-0 space-y-1.5">
                 <Label className="text-sm font-medium">Speech-to-Text (STT)</Label>
                 <Select

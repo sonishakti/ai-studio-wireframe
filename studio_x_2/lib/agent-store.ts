@@ -11,7 +11,7 @@
  */
 
 import { PHONE_NUMBERS, type StackPreset } from "@/lib/campaign-data"
-import { activeCampaigns, primaryChannel, type AgentDraft } from "@/lib/wizard-draft"
+import { activeCampaigns, primaryChannel, inboundSurfaces, hasWebWidget, type AgentDraft } from "@/lib/wizard-draft"
 
 /** Mirrors the list's channel filter vocabulary (`AgentChannel` on /agents). */
 export type SessionAgentChannel = "phone" | "whatsapp" | "web" | "batch" | "code" | "none"
@@ -116,13 +116,20 @@ export function draftToSessionAgent(d: AgentDraft, agentId: string): SessionAgen
         : "Deployed from the builder"),
     // Code/SDK deploys aren't live until the app connects — say "deployed".
     status: primary === "code" ? "deployed" : "live",
-    channelType: primary === "inbound" ? "phone" : primary ?? "none",
+    // Inbound rows follow the SURFACES (v6): a web-only widget agent is a
+    // web row, not a phone row claiming "No number yet" (review 2026-07-29).
+    channelType:
+      primary === "inbound"
+        ? inboundSurfaces(d).includes("phone") ? "phone" : hasWebWidget(d) ? "web" : "phone"
+        : primary ?? "none",
     channelLabel:
-      primary === "inbound" ? number ?? "No number yet"
-      : primary === "batch" ? firstRun?.name ?? "Batch calls"
-      : primary === "web" ? "Embedded widget"
-      : primary === "code" ? "SDK / API"
-      : "Not deployed",
+      primary === "inbound"
+        ? inboundSurfaces(d).includes("phone")
+          ? `${number ?? "No number yet"}${hasWebWidget(d) ? " · Web widget" : ""}`
+          : hasWebWidget(d) ? "Embedded widget" : "No surface yet"
+        : primary === "batch" ? firstRun?.name ?? "Batch calls"
+        : primary === "code" ? "SDK / API"
+        : "Not deployed",
     stack: d.stack.preset,
     calls: 0,
     lastModified: "Just now",

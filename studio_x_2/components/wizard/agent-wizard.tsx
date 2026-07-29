@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, FlaskConical, Pause, Play } from "lucide-react"
+import { Rocket, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, FlaskConical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -19,8 +19,7 @@ import { ChannelSection } from "@/components/wizard/channel-section"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
 import { SectionKnowledgeTools } from "@/components/wizard/step-build"
 import { DeploySection } from "@/components/wizard/deploy-section"
-import { TestSection } from "@/components/wizard/test-section"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { TestSection, type LiveTestIdentity } from "@/components/wizard/test-section"
 import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
 import { TemplateMenu } from "@/components/wizard/template-menu"
 import { SectionRows } from "@/components/wizard/section-row"
@@ -38,16 +37,15 @@ import {
 } from "@/lib/import-agent"
 import {
   EMPTY_DRAFT, DEFAULT_CALL_BEHAVIOR, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
-  publishBlockReason, channelTarget, channelLabel, hasChannel, primaryChannel, activeCampaigns, enforceDirection,
+  publishBlockReason, channelTarget, channelLabel, hasChannel, hasWebWidget, inboundSurfaces, primaryChannel, activeCampaigns,
   type AgentDraft, type DeployChannel,
 } from "@/lib/wizard-draft"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
-  draftToSessionAgent, upsertSessionAgent, readStatusOverrides, setAgentStatus, subscribeAgentStore,
+  draftToSessionAgent, upsertSessionAgent, readStatusOverrides, subscribeAgentStore,
 } from "@/lib/agent-store"
 import { toast } from "sonner"
 
@@ -113,13 +111,15 @@ export function AgentWizard({
   // The docked Test panel (v4: replaces the persistent preview column AND the
   // Talk sheet) — header Test button toggles it; drag its border to resize.
   const [testOpen, setTestOpen] = React.useState(false)
-  const [testTab, setTestTab] = React.useState<TestPanelTab>("talk")
+  const [testTab, setTestTab] = React.useState<TestPanelTab>("simulations")
   const openTest = React.useCallback((tab: TestPanelTab) => {
     setTestTab(tab)
     setTestOpen(true)
   }, [])
   React.useEffect(() => {
-    if (autoTalk) openTest("talk")
+    // The ceremony's "Say hello" lands ON the live contextual test (section 4)
+    // — the talk surface lives there now, not in the panel.
+    if (autoTalk) window.setTimeout(() => openRowRef.current(4), 150)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoTalk])
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
@@ -145,13 +145,16 @@ export function AgentWizard({
   // ── Section completion — for the mobile chips + the resume cursor ONLY.
   //    1 Voice · 2 Channel · 3 Context · 4 Go Live (✓ only when live).
   const voiceDone = draft.voice !== null
-  const channelsDone = draft.channels.length > 0 && (!hasChannel(draft, "inbound") || (draft.config.inbound?.numberIds.length ?? 0) > 0)
+  const channelsDone =
+    draft.channels.length > 0 &&
+    (!hasChannel(draft, "inbound") ||
+      (inboundSurfaces(draft).length > 0 &&
+        (!inboundSurfaces(draft).includes("phone") || (draft.config.inbound?.numberIds.length ?? 0) > 0)))
   const promptDone = draft.systemPrompt.trim().length > 0
   const isLive = isEdit && existing!.status === "live"
-  // Pause/Resume rides the header beside the status chip (user-test 2026-07-28
-  // P0) — the SAME reversible off-switch as the All-agents row action, synced
-  // through the shared session agent store. Pausing keeps the agent deployed
-  // (isLive semantics unchanged); only new calls stop.
+  // Status chip stays truthful when the agent is paused FROM THE LIST — the
+  // shared store syncs it here. NO Pause control in the builder (owner veto,
+  // 2026-07-21, re-confirmed 2026-07-29): pausing lives on the list row only.
   const [statusOverride, setStatusOverride] = React.useState<"live" | "paused" | null>(null)
   React.useEffect(() => {
     if (!isEdit) return
@@ -160,18 +163,6 @@ export function AgentWizard({
     return subscribeAgentStore(sync)
   }, [isEdit, existing])
   const effectiveStatus = statusOverride ?? (isEdit ? existing!.status : null)
-  const pauseAgent = () => {
-    setAgentStatus(existing!.id, "paused")
-    toast(`${existing!.name} paused`, {
-      description: "It stops taking new calls until you resume it. Calls in progress finish normally.",
-    })
-  }
-  const resumeAgent = () => {
-    setAgentStatus(existing!.id, "live")
-    toast(`${existing!.name} is live again`, {
-      description: `Answering on ${channelTarget(draftRef.current)} again.`,
-    })
-  }
 
   // ── Hedonic layer: ticks pop only for IN-SESSION completions. ──────────────
   const initialDones = React.useRef<Set<number> | null>(null)
@@ -196,15 +187,6 @@ export function AgentWizard({
 
   // Header template chip → prompt-editor flash so the apply visibly lands.
   const [templateFlash, setTemplateFlash] = React.useState(0)
-
-  // Context: knowledge/tools live behind a compact "add additional context"
-  // door (owner 2026-07-28) — auto-open when anything is already attached.
-  const contextResources = draft.knowledge.length + draft.mcp.length + draft.connectors.length
-  const [contextOpen, setContextOpen] = React.useState(false)
-  // Tracks hydration too: a restored draft's resources arrive AFTER mount.
-  React.useEffect(() => {
-    if (contextResources > 0) setContextOpen(true)
-  }, [contextResources])
 
   /** Release a custom-config override — the field becomes editable again. */
   const unlockOverride = (field: string) => {
@@ -399,21 +381,12 @@ export function AgentWizard({
       const n = resolveStepParam(raw)
       if (n) openRowRef.current(n)
     }
-    const onOpenTest = (e: Event) => { e.preventDefault(); openTestRef.current("talk") }
-    // Palette "Knowledge, MCP & connectors" — the collapsed add-context door
-    // must OPEN, not just scroll past it.
-    const onOpenContextTools = (e: Event) => {
-      e.preventDefault()
-      setContextOpen(true)
-      openRowRef.current(3)
-    }
+    const onOpenTest = (e: Event) => { e.preventDefault(); openTestRef.current("simulations") }
     window.addEventListener("sx:open-wizard-step", onOpenStep)
     window.addEventListener("sx:open-test-panel", onOpenTest)
-    window.addEventListener("sx:open-context-tools", onOpenContextTools)
     return () => {
       window.removeEventListener("sx:open-wizard-step", onOpenStep)
       window.removeEventListener("sx:open-test-panel", onOpenTest)
-      window.removeEventListener("sx:open-context-tools", onOpenContextTools)
     }
   }, [])
 
@@ -788,6 +761,28 @@ export function AgentWizard({
         : `Start run${active.length > 1 ? "s" : ""}`
       : deployCta === "Live — no changes" ? "Deploy" : deployCta
 
+  // The live contextual test's identity card (Test section, inline).
+  const liveTestIdentity: LiveTestIdentity = {
+    name: draft.name,
+    namePlaceholder: isEdit ? existing!.name : "Your new agent",
+    onNameChange: (v) => update({ name: v }),
+    agentId: draft.agentId,
+    status: cardStatus,
+    subtitle: isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start"),
+    stack: cardStack,
+    language: `${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`,
+    costPerMin: cardEst?.costPerMin,
+    latencyMs: cardEst?.latencyMs,
+    latencyBreakdown: cardLatency,
+    channel: draft.channels.length ? {
+      label: channelTarget(draft),
+      onClick: () => openRow(2),
+    } : undefined,
+    talking: testing,
+    onToggleTalk: toggleTest,
+    talkLabel: `Talk to ${draft.name || "your agent"}`,
+  }
+
   const previewStatus =
     warming ? "Warming up"
     : effectiveStatus === "paused" ? "Paused"
@@ -829,37 +824,6 @@ export function AgentWizard({
           />
           {/* Status chip beside the name. */}
           <Badge variant="secondary" className="shrink-0 text-xs">{previewStatus === "Warming up" ? "Draft" : previewStatus}</Badge>
-          {/* Pause/Take offline — the list row's reversible off-switch, HERE
-              too (user-test 2026-07-28 P0: the builder showed "Live" with no
-              way off). Confirmed before pausing; state-synced with the list. */}
-          {isEdit && (effectiveStatus === "live" || effectiveStatus === "paused") && (
-            effectiveStatus === "live" ? (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 shrink-0 gap-1 px-2 text-xs text-muted-foreground">
-                    <Pause className="h-3.5 w-3.5" aria-hidden /> Pause
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Pause {existing!.name} — take it offline?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      It stops taking new calls until you resume it. Calls in progress finish
-                      normally, and its configuration is kept.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={pauseAgent}>Pause — take offline</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : (
-              <Button variant="outline" size="sm" className="h-7 shrink-0 gap-1 px-2 text-xs" onClick={resumeAgent}>
-                <Play className="h-3.5 w-3.5" aria-hidden /> Resume
-              </Button>
-            )
-          )}
           {/* Copyable agent ID. */}
           {draft.agentId && (
             <button
@@ -915,7 +879,7 @@ export function AgentWizard({
             size="sm"
             className="gap-1.5"
             disabled={warming}
-            onClick={() => (testOpen ? setTestOpen(false) : openTest("talk"))}
+            onClick={() => (testOpen ? setTestOpen(false) : openTest("simulations"))}
             aria-pressed={testOpen}
             aria-label={`Test ${draft.name || "your agent"}`}
           >
@@ -1112,38 +1076,19 @@ export function AgentWizard({
                         templateFlash={templateFlash}
                         onUnlock={unlockOverride}
                       />
-                      <div className="pt-6">
-                        <Collapsible open={contextOpen} onOpenChange={setContextOpen}>
-                          <CollapsibleTrigger asChild>
-                            <button
-                              type="button"
-                              className="flex w-full items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-3 text-left transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              <span className="min-w-0">
-                                <span className="block text-sm font-medium">
-                                  {contextOpen ? "Additional context" : "＋ Add additional context"}
-                                </span>
-                                <span className="block text-xs text-muted-foreground">
-                                  {contextResources > 0
-                                    ? `${contextResources} attached — knowledge bases, MCP tools, connectors`
-                                    : "Knowledge bases, MCP tools, and CRM connectors — optional"}
-                                </span>
-                              </span>
-                              <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", contextOpen && "rotate-180")} aria-hidden />
-                            </button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="pt-4">
-                            <SectionRows>
-                              <SectionKnowledgeTools draft={draft} update={update} />
-                            </SectionRows>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
+                      {/* KB · MCP · connectors UPFRONT (owner 2026-07-29:
+                          "don't nest them"). */}
+                      <SectionKnowledgeTools draft={draft} update={update} />
                     </SectionRows>
                   )}
-                  {/* 4 · TEST — live contextual test · simulations · A/B. */}
+                  {/* 4 · TEST — live contextual test inline; simulations in
+                      the docked panel. */}
                   {n === 4 && (
-                    <TestSection draft={draft} update={update} onOpenTalk={() => openTest("talk")} />
+                    <TestSection
+                      draft={draft}
+                      identity={liveTestIdentity}
+                      onOpenSims={() => openTest("simulations")}
+                    />
                   )}
                   {/* 5 · GO LIVE — the deploy panel. */}
                   {n === 5 && (
@@ -1172,30 +1117,9 @@ export function AgentWizard({
           onOpenChange={setTestOpen}
           tab={testTab}
           onTabChange={setTestTab}
+          draft={draft}
           agentName={draft.name || (isEdit ? existing!.name : "your agent")}
-          showWidgetTab={hasChannel(draft, "web")}
-          widgetAgentId={draft.agentId ?? "new"}
           widgetGreeting={draft.greeting.trim() || undefined}
-          identity={{
-            name: draft.name,
-            namePlaceholder: isEdit ? existing!.name : "Your new agent",
-            onNameChange: (v) => update({ name: v }),
-            agentId: draft.agentId,
-            status: cardStatus,
-            subtitle: isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start"),
-            stack: cardStack,
-            language: `${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`,
-            costPerMin: cardEst?.costPerMin,
-            latencyMs: cardEst?.latencyMs,
-            latencyBreakdown: cardLatency,
-            channel: draft.channels.length ? {
-              label: channelTarget(draft),
-              onClick: () => openRow(2),
-            } : undefined,
-            talking: testing,
-            onToggleTalk: toggleTest,
-            talkLabel: `Talk to ${draft.name || "your agent"}`,
-          }}
         />
       </div>
 
@@ -1228,7 +1152,7 @@ export function AgentWizard({
         }
         onConfirm={() => { preflightConfirmedRef.current = true; publish() }}
         onFix={(m) => openRow(m)}
-        onTalkFirst={() => openTest("talk")}
+        onTalkFirst={() => openRow(4)}
       />
 
       {/* Import landing — never silent (user-test #6, 2×S1). */}
@@ -1367,28 +1291,35 @@ function truncPrompt(s: string, n = 90): string {
 function announceDcSwap(before: AgentDraft, after: AgentDraft) {
   const dropped = before.channels.find((c) => !after.channels.includes(c))
   const added = after.channels.find((c) => !before.channels.includes(c))
-  if (dropped && added && (dropped === "inbound" || dropped === "batch")) {
-    toast(`${channelLabel(dropped)} swapped for ${channelLabel(added)}`, {
-      description: "One agent can't handle both inbound and outbound. The setup is kept — re-select the channel to restore it.",
-    })
-  }
+  if (!dropped || !added) return
+  const directionPair =
+    (dropped === "inbound" && added === "batch") || (dropped === "batch" && added === "inbound")
+  toast(`Switched to ${channelLabel(added)}`, {
+    description: directionPair
+      ? "One agent can't handle both inbound and outbound. The previous setup is kept — switch back in Channel to restore it."
+      : `One channel per agent — your ${channelLabel(dropped)} setup is kept. Switch back in Channel to restore it.`,
+  })
 }
 
 /** `?dc=` deep link → ADD that channel to the draft (multi-select: additive;
  *  direction conflicts swap, announced by announceDcSwap) + seed its
  *  connection state. */
 function applyDc(d: AgentDraft, dc: string): AgentDraft {
-  const c: DeployChannel | null =
-    dc === "inbound" ? "inbound" : dc === "web" ? "web" : dc === "batch" ? "batch" : dc === "code" ? "code" : null
-  if (!c || d.channels.includes(c)) return d
+  const primary: DeployChannel | null =
+    dc === "inbound" || dc === "web" ? "inbound" : dc === "batch" ? "batch" : dc === "code" ? "code" : null
+  if (!primary) return d
+  const surfaces = dc === "web"
+    ? [...new Set([...(d.config.inbound?.surfaces ?? []), "web" as const])]
+    : d.config.inbound?.surfaces ?? ["phone" as const]
   return {
     ...d,
-    // The deep-linked channel wins the direction rule (inbound XOR batch).
-    channels: enforceDirection([...d.channels, c], c === "inbound" || c === "batch" ? c : undefined),
+    channels: [primary],
     config: {
       ...d.config,
-      ...(c === "inbound" && !d.config.inbound ? { inbound: { numberIds: [] } } : {}),
-      ...(c === "code" ? { code: { added: true } } : {}),
+      ...(primary === "inbound"
+        ? { inbound: { numberIds: d.config.inbound?.numberIds ?? [], surfaces } }
+        : {}),
+      ...(primary === "code" ? { code: { added: true } } : {}),
     },
   }
 }
