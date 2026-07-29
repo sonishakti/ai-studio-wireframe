@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, FileText, Smile } from "lucide-react"
+import { ChevronDown, Smile } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -66,8 +66,7 @@ export function TemplateMenu({
             className="h-6 shrink-0 gap-1 rounded-full px-2.5 text-xs font-normal text-muted-foreground"
             aria-label={`Agent template: ${current?.name ?? "Blank"}`}
           >
-            <FileText className="h-3 w-3" aria-hidden />
-            <span className="max-w-[10rem] truncate">{current?.name ?? "Blank"}</span>
+            <span className="max-w-[12rem] truncate">Template: {current?.name ?? "Blank"}</span>
             <ChevronDown className="h-3 w-3" aria-hidden />
           </Button>
         </DropdownMenuTrigger>

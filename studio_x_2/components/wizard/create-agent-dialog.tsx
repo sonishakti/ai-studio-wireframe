@@ -155,10 +155,7 @@ export function CreateAgentDialog({
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
           {/* The one door: describe it, get an agent (AI-generated template). */}
           <div className="space-y-2">
-            <Label htmlFor="ca-desc" className="flex items-center gap-1.5 text-sm font-medium">
-              <Sparkles className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-              What do you want to build?
-            </Label>
+            <Label htmlFor="ca-desc" className="text-sm font-medium">What do you want to build?</Label>
             <Textarea
               id="ca-desc"
               value={description}
@@ -193,7 +190,6 @@ export function CreateAgentDialog({
               <KindRow
                 icon={Sparkles}
                 label="Let my description decide"
-                desc="Blank if it can't tell — everything stays editable in the builder."
                 selected={kindId === "blank"}
                 onSelect={() => setKindId("blank")}
               />
@@ -202,7 +198,6 @@ export function CreateAgentDialog({
                   key={t.id}
                   icon={TEMPLATE_ICONS[t.id] ?? Smile}
                   label={t.name}
-                  desc={t.description}
                   selected={kindId === t.id}
                   onSelect={() => setKindId(t.id)}
                 />
@@ -212,9 +207,8 @@ export function CreateAgentDialog({
         </div>
 
         <DialogFooter className="border-t border-border px-6 py-3">
-          <Button onClick={create} disabled={!enough && kindId === "blank"} className="gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            Create Agent
+          <Button onClick={create} disabled={!enough && kindId === "blank"}>
+            Create agent
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -223,11 +217,10 @@ export function CreateAgentDialog({
 }
 
 function KindRow({
-  icon: Icon, label, desc, selected, onSelect,
+  icon: Icon, label, selected, onSelect,
 }: {
   icon: React.ComponentType<{ className?: string }>
   label: string
-  desc: string
   selected: boolean
   onSelect: () => void
 }) {
@@ -245,7 +238,6 @@ function KindRow({
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{label}</span>
-        <span className="block truncate text-xs text-muted-foreground">{desc}</span>
       </span>
       <span
         className={cn(

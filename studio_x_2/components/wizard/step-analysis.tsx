@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { FileText, Plus, Pencil, Trash2, X, ChevronLeft } from "lucide-react"
+import { Plus, Pencil, Trash2, X, ChevronLeft } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -64,37 +64,22 @@ export function StepAnalysis({
       {/* Transcripts & recording — split toggles (Figma "Transcripts &
           Recording", node 2593-101785): transcripts gate the data points;
           audio recording is its own choice. */}
-      <section className="space-y-4 rounded-lg border border-border bg-card p-4">
-        <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <FileText className="h-4 w-4" aria-hidden />
-          </span>
-          <p className="text-sm font-semibold leading-8">Transcripts &amp; recording</p>
-        </div>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">Store {noun} transcripts</p>
-            <p className="text-xs text-muted-foreground">Automatically saves the conversation text for review.</p>
-          </div>
+      <div className="divide-y divide-border">
+        <div className="flex items-center justify-between gap-3 py-2.5">
+          <p className="text-sm font-medium">Store {noun} transcripts</p>
           <Switch checked={cfg.transcribe} onCheckedChange={(transcribe) => patch({ transcribe })} aria-label={`Store ${noun} transcripts`} />
         </div>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">Store {noun} recording</p>
-            <p className="text-xs text-muted-foreground">Automatically saves the audio recording for review.</p>
-          </div>
+        <div className="flex items-center justify-between gap-3 py-2.5">
+          <p className="text-sm font-medium">Store {noun} recording</p>
           <Switch checked={cfg.record} onCheckedChange={(record) => patch({ record })} aria-label={`Store ${noun} recording`} />
         </div>
-      </section>
+      </div>
 
       {/* Success evaluation (Figma "Post Call Analysis") — judge each call
           against plain-language criteria; verdicts land in Call History. */}
-      <section className="space-y-4 rounded-lg border border-border bg-card p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Success evaluation</p>
-            <p className="text-xs text-muted-foreground">Evaluate whether each {noun} was &ldquo;Successful&rdquo; or &ldquo;Failed&rdquo;.</p>
-          </div>
+      <div className="space-y-3 border-b border-border pb-4">
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <p className="text-sm font-medium">Success evaluation</p>
           <Switch checked={cfg.successEval} onCheckedChange={(successEval) => patch({ successEval })} aria-label="Success evaluation" />
         </div>
         {cfg.successEval && (
@@ -113,22 +98,14 @@ export function StepAnalysis({
             />
           </div>
         )}
-      </section>
+      </div>
 
-      {/* Post-Call Data Extraction (proposal 2639-102124 naming). */}
-      <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">Post-Call Data Extraction</p>
-            <p className="text-xs text-muted-foreground">Automatically extract structured outputs from {noun}s according to business needs.</p>
-          </div>
+          <p className="text-sm font-medium">Data extraction</p>
           <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={!cfg.transcribe} onClick={() => setEditing("new")}>
             <Plus className="h-3.5 w-3.5" aria-hidden /> Add
           </Button>
-        </div>
-        <div className="flex items-baseline justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          <span>Data points</span>
-          <span>{String(cfg.dataPoints.length).padStart(2, "0")} output{cfg.dataPoints.length === 1 ? "" : "s"}</span>
         </div>
 
         {!cfg.transcribe ? (
@@ -161,7 +138,7 @@ export function StepAnalysis({
             ))}
           </div>
         )}
-      </section>
+      </div>
 
       <DataPointSheet
         editing={editing}

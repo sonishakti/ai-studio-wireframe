@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Sparkles, Braces } from "lucide-react"
+import { X, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,6 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { TestsSection } from "@/components/eval-tests"
-import { InfoHint } from "@/components/wizard/info-hint"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 import { generateContextualCases } from "@/components/wizard/test-section"
 import { hasWebWidget, type AgentDraft } from "@/lib/wizard-draft"
@@ -129,7 +128,7 @@ export function TestPanel({
         </TabsList>
       </div>
       <TabsContent value="simulations" className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-border bg-muted/20 px-3.5 py-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="min-w-0 text-sm text-muted-foreground">
             {generated.length
               ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
@@ -143,16 +142,6 @@ export function TestPanel({
           key={generation}
           agentName={agentName}
           extra={generated}
-          headerNote={
-            <span className="inline-flex items-center gap-1.5">
-              <Braces className="h-3.5 w-3.5" aria-hidden />
-              Scored by a judge model returning structured output — {"{verdict, score, reason}"} per assertion.
-              <InfoHint label="How failures point at fixes">
-                When a scenario fails because of a real config gap (transfer off, silence
-                hang-up off), the judge&apos;s reason names the setting and where to change it.
-              </InfoHint>
-            </span>
-          }
         />
       </TabsContent>
       {showWidgetTab && (

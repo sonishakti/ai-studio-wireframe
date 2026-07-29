@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, ExternalLink, Radio, Plus } from "lucide-react"
+import { X, ExternalLink, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,6 @@ import { RadioCard, RadioCardGroup, ToggleCard } from "@/components/wizard/radio
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { CodeBlock } from "@/components/code-block"
-import { ConfigCard } from "@/components/wizard/channel-configs"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
@@ -32,25 +31,10 @@ import { type StepProps } from "@/components/wizard/types"
  * the channel keeps the departing one's config — nothing is deleted.
  */
 
-const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string; bestFor: string }[] = [
-  {
-    id: "inbound",
-    title: "Inbound",
-    desc: "Answers callers — phone numbers, web widget, more soon.",
-    bestFor: "Support lines, front desk, after-hours",
-  },
-  {
-    id: "batch",
-    title: "Batch calls",
-    desc: "Calls through contact lists you upload, as campaign runs.",
-    bestFor: "Outreach, reminders, surveys",
-  },
-  {
-    id: "code",
-    title: "Code / SDK",
-    desc: "Runs inside your own app. No phone number.",
-    bestFor: "In-app assistants, custom stacks",
-  },
+const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string }[] = [
+  { id: "inbound", title: "Inbound", desc: "Answers callers — phone numbers, web widget, more soon." },
+  { id: "batch", title: "Batch calls", desc: "Calls through contact lists you upload, as campaign runs." },
+  { id: "code", title: "Code / SDK", desc: "Runs inside your own app. No phone number." },
 ]
 
 const SURFACE_CARDS: { id: InboundSurface; title: string; desc: string }[] = [
@@ -110,7 +94,7 @@ export function ChannelSection({
       <SectionRow
         id="wz-2-pick"
         label={`How does ${draft.name || "your agent"} take calls?`}
-        hint="One channel per agent — inbound and outbound need different context and workflows. Duplicate the agent for the other direction."
+        hint="One channel per agent — duplicate the agent for the other direction."
       >
         {liveChannels && liveChannels.length > 0 && (
           <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
@@ -119,16 +103,18 @@ export function ChannelSection({
           </p>
         )}
 
+        {/* Plain Form: full-width radio rows over hairlines — no card grid. */}
         <RadioCardGroup
           value={current ?? ""}
           onValueChange={(v) => v && setChannel(v as DeployChannel)}
           aria-label="Channel"
-          className="gap-4 @xl:grid-cols-3"
+          className="gap-0 divide-y divide-border"
         >
           {CHANNEL_CARDS.map((c) => (
             <RadioCard
               key={c.id}
               value={c.id}
+              className="rounded-none border-0 bg-transparent px-1 py-3 shadow-none"
               title={
                 liveChannels?.includes(c.id) ? (
                   <span className="flex items-center gap-2">
@@ -141,12 +127,7 @@ export function ChannelSection({
                   c.title
                 )
               }
-              description={
-                <>
-                  {c.desc}
-                  <span className="mt-1 block text-xs text-muted-foreground/70">Best for: {c.bestFor}</span>
-                </>
-              }
+              description={c.desc}
             />
           ))}
         </RadioCardGroup>
@@ -194,23 +175,8 @@ export function ChannelSection({
                 description={sf.desc}
               />
             ))}
-            <ToggleCard
-              pressed={false}
-              onPressedChange={() => {}}
-              disabled
-              title="WhatsApp"
-              badge={<Badge variant="outline" className="h-5 px-1.5 text-xs uppercase tracking-wide">Soon</Badge>}
-              description="Answer WhatsApp messages with the same agent."
-            />
-            <ToggleCard
-              pressed={false}
-              onPressedChange={() => {}}
-              disabled
-              title="Telegram"
-              badge={<Badge variant="outline" className="h-5 px-1.5 text-xs uppercase tracking-wide">Soon</Badge>}
-              description="Answer Telegram messages with the same agent."
-            />
           </div>
+          <p className="text-xs text-muted-foreground">WhatsApp · Telegram — soon</p>
         </SectionRow>
       )}
 
@@ -283,11 +249,11 @@ function InboundNumbersBlock({
       label="Phone numbers"
       hint="Link one or several numbers — the agent answers them all."
     >
-      <ConfigCard>
+      <div className="space-y-3">
         {linked.length > 0 && (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-border">
             {linked.map((n) => (
-              <li key={n.id} className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2">
+              <li key={n.id} className="flex items-center justify-between gap-3 py-2">
                 <div className="min-w-0">
                   <p className="font-mono text-sm">{n.number}</p>
                   <p className="truncate text-xs text-muted-foreground">{n.label}</p>
@@ -306,7 +272,6 @@ function InboundNumbersBlock({
           </ul>
         )}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">{linked.length ? "Link another number" : "Link phone number"}</Label>
           <div className="flex flex-wrap items-center gap-2">
             <Select value="" onValueChange={(id) => id && setNumberIds([...numberIds, id])}>
               <SelectTrigger className="min-w-0 flex-1 basis-56 text-sm">
@@ -328,7 +293,7 @@ function InboundNumbersBlock({
             </AddPhoneNumberSheet>
           </div>
         </div>
-      </ConfigCard>
+      </div>
       <p className="text-xs text-muted-foreground">
         How answered calls end — max duration, silence hang-up, transfer — is configured in{" "}
         <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => onGoToStep(5)}>
@@ -349,61 +314,38 @@ export function CodeConfigure({ agentId }: { agentId: string }) {
   const connect = `import { AgentClient } from "@agora/agent-sdk"
 
 const client = new AgentClient({
-  agentId: "${agentId}",
+  agentId: "${agentId}",${unpublished ? " // placeholder — deploy to mint the real ID" : ""}
   appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
 // Add the agent to a live Agora RTC channel
 await client.joinChannel({ channel: "support-room" })`
 
-  const stop = `// Stop the agent and leave the channel
+  const stop = `// Stop the agent — releases the channel and stops billing
 await client.leaveChannel()
 await client.stop()`
 
   return (
     <div className="space-y-4">
-      {unpublished && (
-        <p className="text-xs text-warning">
-          This agent&apos;s ID is minted when you deploy — these snippets carry the
-          placeholder <code className="font-mono">&quot;new&quot;</code> until then. Deploy
-          first, then copy.
-        </p>
-      )}
-      <ConfigCard title="Add to your app">
-        <p className="text-sm text-muted-foreground">
-          Install the SDK, then drop the agent into any Agora channel. No phone number needed. It runs wherever your app does.
-        </p>
-        <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
-        <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
-        <InfoHint label="Secured-mode channels & tokens">
-          The platform mints the agent&apos;s token from your App Certificate on join — your
-          clients keep bringing their own tokens, and the agent needs nothing extra from you.
-        </InfoHint>
-      </ConfigCard>
+      <p className="text-sm font-medium">Add to your app</p>
+      <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
+      <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
+      <InfoHint label="Secured-mode channels & tokens">
+        The platform mints the agent&apos;s token from your App Certificate on join — your
+        clients keep bringing their own tokens, and the agent needs nothing extra from you.
+      </InfoHint>
 
-      <ConfigCard title="Stop the agent">
-        <p className="text-sm text-muted-foreground">
-          End the session when you&apos;re done. This releases the channel and stops billing for it.
-        </p>
-        <CodeBlock language="typescript" filename="stop.ts">{stop}</CodeBlock>
-      </ConfigCard>
+      <p className="pt-2 text-sm font-medium">Stop the agent</p>
+      <CodeBlock language="typescript" filename="stop.ts">{stop}</CodeBlock>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <Radio className="h-4 w-4" />
-          </span>
-          <div>
-            <p className="text-sm font-medium">Full SDK reference</p>
-            <p className="text-xs text-muted-foreground">Channels, events, function calling, and more.</p>
-          </div>
-        </div>
-        <Button variant="outline" size="sm" className="gap-1.5" asChild>
-          <a href="https://docs.agora.io/en/ai" target="_blank" rel="noopener noreferrer">
-            Docs Center <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        </Button>
-      </div>
+      <a
+        href="https://docs.agora.io/en/ai"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-sm underline underline-offset-2 hover:text-foreground"
+      >
+        Full SDK reference <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+      </a>
     </div>
   )
 }

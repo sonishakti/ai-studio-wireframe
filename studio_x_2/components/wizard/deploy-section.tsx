@@ -93,8 +93,8 @@ export function DeploySection({
           id="wz-4-outputs"
           label="Structured outputs"
           hint={session
-            ? "What each session records — transcripts, recording, success evaluation, and the data points extracted. Results appear in Sessions."
-            : "What each call records — transcripts, recording, success evaluation, and the data points extracted. Results appear in Call History."}
+            ? "What each session records. Results appear in Sessions."
+            : "What each call records. Results appear in Call History."}
         >
           <StepAnalysis
             value={draft.analysis}

@@ -64,8 +64,9 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     // [label | content] rows (owner 2026-07-21): each resource names itself on
     // the LHS; the host's <SectionRows> owns the container.
     <>
-        <SectionRow id="wz-5-kb" label="Knowledge Base">
+        <SectionRow id="wz-5-kb" label="Knowledge base">
           <ResourceField
+            hideHeader
             icon={BookOpen}
             title="Knowledge base"
             description="Ground answers in your docs."
@@ -81,8 +82,9 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
           />
         </SectionRow>
 
-        <SectionRow id="wz-5-mcp" label="MCP Server">
+        <SectionRow id="wz-5-mcp" label="MCP servers">
           <ResourceField
+            hideHeader
             icon={Plug}
             title="MCP server"
             description="Give it tools: CRM, calendar, APIs."
@@ -101,61 +103,39 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
         </SectionRow>
 
         {/* Connectors TABLE (proposal 2639-102124): Name · Status · toggle. */}
-        <SectionRow id="wz-5-connectors" label="Tools & Connectors">
-          <section className="space-y-3 rounded-lg border border-border bg-card p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold">Connectors</p>
-                <p className="text-xs text-muted-foreground">Connect apps like HubSpot and Google Calendar.</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => router.push("/integrations?tab=connectors")}
-              >
-                Add connector
-              </Button>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-16 text-right"><span className="sr-only">Attached</span></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {CONNECTORS.map((c) => {
-                  const s = effectiveConnectorStatus(c)
-                  const attached = draft.connectors.includes(c.id)
-                  return (
-                    <TableRow key={c.id}>
-                      <TableCell className="font-medium">{c.name}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={s === "connected" ? "secondary" : "outline"}
-                          className={cn("text-xs", s === "connected" && "bg-success/15 text-success")}
-                        >
-                          {s === "connected" ? "Active" : s === "coming-soon" ? "Coming soon" : "Connect in Resources"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Switch
-                          checked={attached}
-                          disabled={s !== "connected"}
-                          onCheckedChange={(on) =>
-                            update({ connectors: on ? [...draft.connectors, c.id] : draft.connectors.filter((x) => x !== c.id) })
-                          }
-                          aria-label={`Use ${c.name} on this agent`}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </section>
+        <SectionRow id="wz-5-connectors" label="Connectors">
+          <div className="space-y-2">
+            <ul className="divide-y divide-border">
+              {CONNECTORS.map((c) => {
+                const s = effectiveConnectorStatus(c)
+                const attached = draft.connectors.includes(c.id)
+                return (
+                  <li key={c.id} className="flex items-center gap-3 py-2.5">
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">{c.name}</span>
+                    <span className={cn("shrink-0 text-xs", s === "connected" ? "text-success" : "text-muted-foreground")}>
+                      {s === "connected" ? "Active" : s === "coming-soon" ? "Coming soon" : "Connect in Resources"}
+                    </span>
+                    <Switch
+                      checked={attached}
+                      disabled={s !== "connected"}
+                      onCheckedChange={(on) =>
+                        update({ connectors: on ? [...draft.connectors, c.id] : draft.connectors.filter((x) => x !== c.id) })
+                      }
+                      aria-label={`Use ${c.name} on this agent`}
+                    />
+                  </li>
+                )
+              })}
+            </ul>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-muted-foreground"
+              onClick={() => router.push("/integrations?tab=connectors")}
+            >
+              <Plus className="h-3.5 w-3.5" /> Add connector
+            </Button>
+          </div>
         </SectionRow>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}
@@ -230,7 +210,7 @@ function ResourceField({
   }
 
   return (
-    <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+    <section className={cn("space-y-3", !hideHeader && "rounded-lg border border-border bg-card p-4")}>
       {!hideHeader && (
       <div className="flex items-start gap-2.5">
         <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -272,7 +252,11 @@ function ResourceField({
 
       <Sheet open={open} onOpenChange={setSheet}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="w-full gap-1.5">
+          <Button
+            variant={hideHeader ? "ghost" : "outline"}
+            size="sm"
+            className={cn("gap-1.5", hideHeader ? "text-muted-foreground" : "w-full")}
+          >
             <Plus className="h-3.5 w-3.5" /> {manageLabel}
           </Button>
         </SheetTrigger>

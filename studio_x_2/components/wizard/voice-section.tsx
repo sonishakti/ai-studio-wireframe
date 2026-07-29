@@ -85,15 +85,14 @@ export function VoiceSection({
       <SectionRow
         id="wz-1-tier"
         label="Model tier"
-        hint="One handle for cost and latency — each stop bundles Agora-tuned speech recognition, model, and voice vendors."
+        hint={<InfoHint label="What each stop changes">Each stop bundles Agora-tuned STT, model, and voice vendors.</InfoHint>}
       >
         {mllm ? (
           <p className="text-sm text-muted-foreground">
-            This agent runs a realtime multimodal model — the tier slider applies to the cascading
-            pipeline. Switch it back under <span className="font-medium text-foreground">Advanced</span> below.
+            Runs a realtime model — no tier slider. Switch pipelines in Advanced.
           </p>
         ) : (
-          <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} />
+          <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} lean />
         )}
       </SectionRow>
 
@@ -101,10 +100,9 @@ export function VoiceSection({
       <SectionRow
         id="wz-1-voice"
         label="Voice"
-        hint="Picking a voice fills in the prompt and greeting while they're empty."
+        hint={<InfoHint label="Seeds prompt & greeting">A voice pick seeds the prompt and greeting while they&apos;re empty.</InfoHint>}
       >
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Voice</Label>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -146,19 +144,13 @@ export function VoiceSection({
               <TooltipContent>Preview voice</TooltipContent>
             </Tooltip>
           </div>
-          {!mllm && (
-            <InfoHint label={`Voices come from ${provider}`}>
-              The tier&apos;s TTS vendor supplies the catalog — moving the slider across vendors
-              remaps your voice to the closest match and says so.
-            </InfoHint>
-          )}
         </div>
 
         {/* SDK builders skipped this section wholesale (user-test 2026-07-28
             P1) — say why it still matters to them. */}
         {hasChannel(draft, "code") && (
           <p className="text-xs text-muted-foreground">
-            This voice is the TTS stage of your pipeline — it applies to Code / SDK agents too.
+            Also applies to Code / SDK agents — it&apos;s the pipeline&apos;s TTS stage.
           </p>
         )}
 
@@ -178,7 +170,7 @@ export function VoiceSection({
           {/* The door names its contents (user-test 2026-07-29 P1): barge-in /
               turn-taking hunters need "interruptions" ON the label to find it. */}
           <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setAdvancedOpen(true)}>
-            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced — models, custom config, speech &amp; interruptions
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced — models, speech &amp; interruptions 
           </Button>
         </div>
       </SectionRow>

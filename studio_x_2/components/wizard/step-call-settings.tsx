@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, CalendarClock, PhoneOff, PhoneForwarded, Timer } from "lucide-react"
+import { PhoneOff, PhoneForwarded, Timer } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -50,13 +50,13 @@ export function InboundCallSettings({ draft, update }: StepProps) {
           onChange={(endOfConversation) => patch({ endOfConversation })}
         />
         <BehaviorToggle
-          label="Voicemail Detection"
+          label="Voicemail detection"
           desc="Allows the agent to detect voicemail systems and hang up the call."
           checked={cb.voicemailDetection}
           onChange={(voicemailDetection) => patch({ voicemailDetection })}
         />
         <div className="space-y-1.5">
-          <Label htmlFor="ib-max" className="text-sm font-medium">Max Call Duration (seconds)</Label>
+          <Label htmlFor="ib-max" className="text-sm font-medium">Max call duration (seconds)</Label>
           <Input
             id="ib-max"
             type="number"
@@ -64,7 +64,6 @@ export function InboundCallSettings({ draft, update }: StepProps) {
             onChange={(e) => patch({ maxDurationSec: Number(e.target.value) })}
             className="max-w-[200px] text-sm font-mono"
           />
-          <p className="text-xs text-muted-foreground">Maximum length for a conversation.</p>
         </div>
         <BehaviorToggle
           label="Silence hangup"
@@ -74,7 +73,7 @@ export function InboundCallSettings({ draft, update }: StepProps) {
         />
         {cb.silenceHangup && (
           <div className="space-y-1.5">
-            <Label htmlFor="ib-silence" className="text-sm font-medium">Silence Timeout (seconds)</Label>
+            <Label htmlFor="ib-silence" className="text-sm font-medium">Silence timeout (seconds)</Label>
             <Input
               id="ib-silence"
               type="number"
@@ -109,17 +108,15 @@ export function CampaignLaunchFields({
 
   return (
     <div className="space-y-3">
-      <Label className="flex items-center gap-2 text-sm font-medium">
-        <CalendarClock className="h-4 w-4 text-muted-foreground" aria-hidden /> Launch timing
-      </Label>
+      <Label className="text-sm font-medium">Launch timing</Label>
       <RadioCardGroup
         value={launch.mode}
         onValueChange={(v) => v && patch({ mode: v as LaunchConfig["mode"] })}
         aria-label="When the campaign starts"
         className="gap-3 @lg:grid-cols-2"
       >
-        <RadioCard value="now" title="Launch on deploy" description="Start calling the moment you deploy" />
-        <RadioCard value="scheduled" title="Schedule for later" description="Pick a specific start time" />
+        <RadioCard value="now" title="Launch on deploy" />
+        <RadioCard value="scheduled" title="Schedule for later" />
       </RadioCardGroup>
 
       {launch.mode === "scheduled" && (
@@ -448,14 +445,7 @@ function CampaignCapacityNote({ maxConcurrent }: { maxConcurrent: number }) {
             Add lines
           </Button>
         </div>
-      ) : (
-        <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 px-3 py-2.5">
-          <Check className="h-4 w-4 shrink-0 text-success" />
-          <p className="text-xs text-muted-foreground">
-            {stats.totalLines} concurrent lines — your max of {maxConcurrent} runs without queuing.
-          </p>
-        </div>
-      )}
+      ) : null}
       <AddLinesSheet
         open={linesOpen}
         onOpenChange={setLinesOpen}

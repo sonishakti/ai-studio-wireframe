@@ -15,7 +15,7 @@ import type { StepProps } from "@/components/wizard/types"
 
 /**
  * Context › Prompt (v4/v5 IA, 2026-07-28): system prompt (+ Rewrite) →
- * Greeting → Failure Message. The TEMPLATE picker lives in the header chip.
+ * Greeting → Failure message. The TEMPLATE picker lives in the header chip.
  * CUSTOM-CONFIG OVERRIDES (owner, second pass): fields the JSON drawer has
  * overridden render warning-flagged AND DISABLED — the JSON is their source
  * of truth until unlocked here.
@@ -40,7 +40,7 @@ export function SectionPrompt({
     <span className="flex items-center justify-between gap-2 rounded-md border border-warning/50 bg-warning/10 px-2.5 py-1.5 text-xs text-foreground">
       <span className="flex min-w-0 items-center gap-1.5">
         <TriangleAlert className="h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
-        Set by custom config — this field is controlled by your JSON edit.
+        Controlled by your custom config JSON.
       </span>
       {onUnlock && (
         <button
@@ -57,7 +57,7 @@ export function SectionPrompt({
   return (
     <SectionRow
       id="wz-3-prompt"
-      label={<span className="text-sm font-normal text-muted-foreground">Decides your agent&apos;s core behaviour</span>}
+      label="Prompt"
     >
       {/* System prompt + Rewrite */}
       <div className="space-y-1.5">
@@ -117,7 +117,7 @@ export function SectionPrompt({
       {/* Greeting */}
       <div id="wz-3-greeting" className="scroll-mt-28 space-y-1.5">
         <Label htmlFor="wz-greeting" className="flex items-center gap-1.5 text-sm font-medium">
-          Greeting Message
+          Greeting
           {overridden("greeting") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
         </Label>
         {overridden("greeting") && <OverrideFlag field="greeting" />}
@@ -145,7 +145,7 @@ export function SectionPrompt({
       {/* Failure message (proposal — new field). */}
       <div className="space-y-1.5">
         <Label htmlFor="wz-failure" className="flex items-center gap-1.5 text-sm font-medium">
-          Failure Message
+          Failure message
           {overridden("failureMessage") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
         </Label>
         {overridden("failureMessage") && <OverrideFlag field="failureMessage" />}

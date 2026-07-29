@@ -40,10 +40,10 @@ import { type StepProps } from "@/components/wizard/types"
  */
 
 const STATUS_META: Record<CampaignStatus, { label: string; cls: string; dot?: boolean }> = {
-  draft: { label: "Draft", cls: "bg-secondary text-secondary-foreground" },
-  scheduled: { label: "Scheduled", cls: "border border-border bg-transparent text-foreground" },
-  running: { label: "Running", cls: "bg-success/10 text-success", dot: true },
-  completed: { label: "Completed", cls: "bg-muted text-muted-foreground" },
+  draft: { label: "Draft", cls: "text-muted-foreground" },
+  scheduled: { label: "Scheduled", cls: "text-foreground" },
+  running: { label: "Running", cls: "text-success", dot: true },
+  completed: { label: "Completed", cls: "text-muted-foreground" },
 }
 
 /** Region-flavored language tags — labels a campaign row (the agent's spoken
@@ -110,17 +110,16 @@ export function CampaignsCard({ draft, update }: StepProps) {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3.5">
+    <section>
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
         <div className="flex items-center gap-2.5">
-          <p className="text-sm font-semibold">Campaign runs</p>
-          <Badge variant="secondary" className="h-5 px-1.5 text-xs">{campaigns.length}</Badge>
+          <p className="text-sm font-semibold">Campaign runs ({campaigns.length})</p>
           <InfoHint label="Runs vs reruns">
             A run = one contact list + schedule; several can run in parallel.{" "}
             <span className="font-medium text-foreground">Rerun</span> keeps the config, swaps the CSV.
           </InfoHint>
         </div>
-        <Button size="sm" className="gap-1.5" onClick={startNew} disabled={editing === "new"}>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={startNew} disabled={editing === "new"}>
           <Plus className="h-3.5 w-3.5" aria-hidden /> New run
         </Button>
       </header>
@@ -132,7 +131,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
             A run is one batch pass — a contact list, a caller ID, and a schedule.
             Create one to start batch calling.
           </p>
-          <Button size="sm" className="mt-2 gap-1.5" onClick={startNew}>
+          <Button size="sm" variant="outline" className="mt-2 gap-1.5" onClick={startNew}>
             <Plus className="h-3.5 w-3.5" aria-hidden /> New run
           </Button>
         </div>
@@ -166,15 +165,15 @@ export function CampaignsCard({ draft, update }: StepProps) {
               : []
             return (
               <li key={c.id}>
-                <div className="flex flex-wrap items-center gap-3 px-5 py-3">
-                  <span className={cn("inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium", meta.cls)}>
+                <div className="flex flex-wrap items-center gap-3 py-3">
+                  <span className={cn("inline-flex w-20 shrink-0 items-center gap-1.5 text-xs font-medium", meta.cls)}>
                     {meta.dot && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />}
                     {meta.label}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
                       {c.name}
-                      {c.language && <Badge variant="outline" className="h-5 px-1.5 text-xs font-normal">{c.language}</Badge>}
+                      {c.language && <span className="text-xs font-normal text-muted-foreground">{c.language}</span>}
                       {c.locked && (
                         <Badge variant="outline" className="h-5 gap-1 border-warning/50 px-1.5 text-xs font-normal text-foreground">
                           <Lock className="h-3 w-3 text-warning" aria-hidden /> rerun — config locked
@@ -222,7 +221,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
                   </DropdownMenu>
                 </div>
                 {editing === c.id && (
-                  <div className="border-t border-border bg-muted/20 p-4">
+                  <div className="border-t border-border py-4">
                     <CampaignEditor
                       draft={draft}
                       campaign={c}
@@ -429,29 +428,21 @@ function CampaignContacts({
 
   if (!hasCsv) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-          <Upload className="h-5 w-5" aria-hidden />
-        </span>
-        <div>
-          <p className="text-sm font-medium">Upload this run&apos;s contacts</p>
-          <p className="mx-auto mt-1 max-w-xs text-xs text-muted-foreground">
-            A CSV with one row per person — each column becomes a{" "}
-            <code className="font-mono">{"{{variable}}"}</code> your prompt can use.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button size="sm" className="gap-1.5" onClick={attachCsv}>
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Contacts CSV</Label>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={attachCsv}>
             <Upload className="h-3.5 w-3.5" aria-hidden /> Upload contacts CSV
           </Button>
           <button
             type="button"
             onClick={() => toast("Template downloaded", { description: `Columns: ${MOCK_CSV_COLUMNS.join(", ")}` })}
-            className="inline-flex items-center gap-1.5 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <Download className="h-3.5 w-3.5" aria-hidden /> Download template
+            Download template
           </button>
         </div>
+        <p className="text-xs text-muted-foreground">One row per contact — columns become {"{{variables}}"}.</p>
       </div>
     )
   }
@@ -474,20 +465,19 @@ function CampaignContacts({
 
       {/* Prompt-variable coverage — it's about THIS list, so it lives here. */}
       {missing.length === 0 ? (
-        <div
+        <p
           key={coveredFlash}
           className={cn(
-            "flex items-start gap-2.5 rounded-md border border-success/40 bg-success/5 px-3 py-2",
+            "flex items-start gap-1.5 text-xs",
+            varsCovered ? "text-foreground" : "text-muted-foreground",
             varsCovered && coveredFlash > 0 && "wz-anchor-flash",
           )}
         >
-          <Check className={cn("mt-0.5 h-4 w-4 shrink-0 text-success", varsCovered && coveredFlash > 0 && "sx-tick-pop")} />
-          <p className="text-xs leading-relaxed text-foreground">
-            {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
-              ? "All prompt variables are covered by this CSV's columns."
-              : "Contacts ready. Your prompt uses no {{variables}} yet — add some in Context to personalize each call."}
-          </p>
-        </div>
+          {varsCovered && <Check className={cn("mt-0.5 h-3.5 w-3.5 shrink-0 text-success", coveredFlash > 0 && "sx-tick-pop")} />}
+          {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
+            ? `${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length}/${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length} {{variables}} covered.`
+            : "No {{variables}} in your prompt yet — add them in Context to personalize each call."}
+        </p>
       ) : (
         <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />

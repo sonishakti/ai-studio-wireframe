@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, ArrowRight, AudioLines, PhoneIncoming, PhoneOutgoing, Globe, Code2, Layers, Gauge, DollarSign, Waypoints } from "lucide-react"
+import { Rocket, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { publishBlocks, channelTarget, primaryChannel, hasChannel, activeCampaigns, type AgentDraft } from "@/lib/wizard-draft"
 import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
@@ -72,14 +72,12 @@ export function StepPublish({
           right-aligned, the full-width Deploy INSIDE the card — deploying is
           the end of this journey, not a header shortcut. */}
       <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-        <dl className="space-y-2.5">
-          <ReviewRow icon={channelIcon(draft)} label={draft.channels.length > 1 ? "Channels" : "Channel"}
-            value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
-          <ReviewRow icon={Layers} label="Models" value={stackLine(draft.stack, { full: true })} />
-          <ReviewRow icon={AudioLines} label="Voice"
-            value={voice ? `${voice.name} · ${voice.tagline}` : "Not set yet"} />
-          <ReviewRow icon={DollarSign} label="Cost" value={`~$${est.costPerMin.toFixed(2)}/min`} />
-          <ReviewRow icon={Gauge} label="Latency" value={`~${est.latencyMs} ms to first word`} />
+        <dl className="divide-y divide-border">
+          <ReviewRow label="Channel" value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
+          <ReviewRow label="Models" value={stackLine(draft.stack, { full: true })} />
+          <ReviewRow label="Voice" value={voice ? `${voice.name} · ${voice.tagline}` : "Not set yet"} />
+          <ReviewRow label="Cost" value={`~$${est.costPerMin.toFixed(2)}/min`} />
+          <ReviewRow label="Latency" value={`~${est.latencyMs} ms to first word`} />
         </dl>
         {/* No hard lock: Deploy is always clickable. If something's unfinished
             the ramp above lists each fix; a toast still points to the first. */}
@@ -106,29 +104,12 @@ export function StepPublish({
   )
 }
 
-/** Mono uppercase label + right-aligned value (proposal review card). */
-function ReviewRow({
-  icon: Icon, label, value,
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  value: string
-}) {
+/** Quiet label + right-aligned value over hairlines (Plain Form review). */
+function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline gap-2.5">
-      <dt className="flex min-w-0 shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-        <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden /> {label}
-      </dt>
+    <div className="flex items-baseline gap-2.5 py-2 first:pt-0 last:pb-0">
+      <dt className="min-w-0 shrink-0 text-xs text-muted-foreground">{label}</dt>
       <dd className="min-w-0 flex-1 text-right text-sm">{value}</dd>
     </div>
   )
-}
-
-function channelIcon(d: AgentDraft) {
-  if (d.channels.length > 1) return Waypoints
-  const primary = primaryChannel(d)
-  if (primary === "batch") return PhoneOutgoing
-  if (primary === "code") return Code2
-  if (primary === "web") return Globe
-  return PhoneIncoming
 }

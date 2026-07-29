@@ -125,9 +125,9 @@ export function TestsSection({
       <div className="flex flex-wrap items-center justify-between gap-2">
         {/* Failing ↔ Deploy relationship, nested behind a dotted hint (owner
             2026-07-21: reduce upfront text). */}
-        <InfoHint label="Do failing scenarios block deploy?">
-          No — failing scenarios never block deploy. They flag prompt gaps to fix before
-          real traffic.
+        <InfoHint label="How scoring works">
+          A judge model scores each run — {"{verdict, score, reason}"} per assertion. A failure
+          caused by a real config gap names the setting to fix. Failing scenarios never block deploy.
         </InfoHint>
         <div className="flex items-center gap-2">
           <Button
@@ -162,10 +162,9 @@ export function TestsSection({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Test Name</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>Test name</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right"><span className="sr-only">Actions</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -181,9 +180,6 @@ export function TestsSection({
                     >
                       {c.name}
                     </button>
-                  </TableCell>
-                  <TableCell className="max-w-[280px] truncate text-muted-foreground">
-                    Caller wants to {c.persona.goal}
                   </TableCell>
                   <TableCell>
                     {res ? (

@@ -49,6 +49,7 @@ export function AgentIdentityCard({
   talkLabel,
   endLabel = "End call",
   secondary,
+  lean,
   className,
 }: {
   name: string
@@ -77,6 +78,10 @@ export function AgentIdentityCard({
   endLabel?: string
   /** Extra action under the Talk button (e.g. "Edit agent" on the home). */
   secondary?: React.ReactNode
+  /** Builder Test-section mode (Plain Form, 2026-07-29): sphere + Talk + one
+   *  muted meta line — no duplicate name input, status chip, or fact ledger.
+   *  Home/Playground defaults unchanged. */
+  lean?: boolean
   className?: string
 }) {
   const displayName = name || namePlaceholder
@@ -89,9 +94,10 @@ export function AgentIdentityCard({
   }
 
   return (
-    <section className={cn("flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6", className)}>
+    <section className={cn("flex flex-col rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6", lean && "border-0 bg-transparent p-0 lg:static", className)}>
       <div className="flex flex-col items-center gap-3 text-center">
-        <AgentSphere size={talking ? 64 : 104} active={talking} />
+        <AgentSphere size={talking ? 64 : lean ? 72 : 104} active={talking} />
+        {!lean && (
         <div className="w-full space-y-1">
           <div className="flex items-center justify-center gap-2">
             {onNameChange ? (
@@ -109,6 +115,12 @@ export function AgentIdentityCard({
           </div>
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
+        )}
+        {lean && (
+          <p className="text-xs text-muted-foreground">
+            {[stack, language, costPerMin != null ? `~$${costPerMin.toFixed(2)}/min` : null, latencyMs != null ? `~${latencyMs} ms` : null].filter(Boolean).join(" · ")}
+          </p>
+        )}
       </div>
 
       {/* Talk test = proof of work, not a pulsing orb: a "Simulated" banner,
@@ -125,7 +137,7 @@ export function AgentIdentityCard({
         </div>
       )}
 
-      {hasStats && (
+      {!lean && hasStats && (
         // Labeled fast-facts <dl> (variant-audit harvest: V3's label:value
         // anatomy) — every number gets a NAMED home; no unlabeled mono runs.
         <dl className="mt-5 space-y-1.5 border-t border-border pt-4">

@@ -1,13 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { ArrowRight, FlaskConical } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { AgentIdentityCard } from "@/components/agent-identity-card"
 import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn, type StackLatencyBreakdown } from "@/lib/campaign-data"
 import {
-  hasChannel, greetingSpeaksName, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
+  hasChannel, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
@@ -246,7 +246,7 @@ export function TestSection({
           ? "The agent opens the call the way the campaign will — you play the contact."
           : "A call comes in — the agent picks up in full persona; you play the caller."}
       >
-        <div className="space-y-1 rounded-lg border border-border bg-muted/20 px-4 py-3">
+        <div className="space-y-1">
           <p className="text-sm">
             <span className="font-medium">
               {outbound && !inboundish
@@ -255,13 +255,6 @@ export function TestSection({
             </span>
             <span className="text-muted-foreground">“{greeting}”</span>
           </p>
-          {/* Rename nudge (user-test 2026-07-28) — the opener is where a
-              functional name spoken aloud is actually HEARD. */}
-          {greetingSpeaksName(draft) && (
-            <p className="text-xs text-muted-foreground">
-              It introduces itself as &ldquo;{draft.name.trim()}&rdquo; — give it a caller-facing name?
-            </p>
-          )}
         </div>
         <AgentIdentityCard
           name={identity.name}
@@ -280,7 +273,7 @@ export function TestSection({
           onToggleTalk={identity.onToggleTalk}
           talkLabel={identity.talkLabel}
           endLabel="End test"
-          className="lg:static"
+          lean
         />
         <p className="text-xs text-muted-foreground">
           Simulated preview — no live audio in this wireframe.
@@ -293,14 +286,8 @@ export function TestSection({
         label="Simulations"
         hint="Auto-generated from your prompt, channels, and call behavior — scored by a judge model."
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <FlaskConical className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-            <p className="min-w-0 text-sm text-muted-foreground">
-              ~12 contextual scenarios, judge-scored with structured output — run them in the Test panel.
-            </p>
-          </div>
-          <Button variant="outline" size="sm" className="shrink-0 gap-1" onClick={onOpenSims}>
+        <div>
+          <Button variant="outline" size="sm" className="gap-1" onClick={onOpenSims}>
             Open simulations <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </Button>
         </div>

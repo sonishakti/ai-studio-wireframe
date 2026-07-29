@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Plus, Undo2, ChevronDown, ChevronRight, Bot, Copy, Check, EllipsisVertical, Upload, FileText, FlaskConical } from "lucide-react"
+import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { AgentSphere } from "@/components/agent-test-panel"
 import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
@@ -24,7 +23,7 @@ import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
 import { TemplateMenu } from "@/components/wizard/template-menu"
 import { SectionRows } from "@/components/wizard/section-row"
 import { DeployPreflight } from "@/components/wizard/deploy-preflight"
-import { STEP_TITLES, STEP_ICONS, SECTION_GROUPS, SECTION_COUNT, stepTitle, resolveStepParam } from "@/components/wizard/types"
+import { STEP_TITLES, SECTION_COUNT, stepTitle, resolveStepParam } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
@@ -69,7 +68,6 @@ export function AgentWizard({
   autoTalk,
   blank,
   onCreateNew,
-  onBrowseTemplates,
   onImportAsNew,
 }: {
   id: string
@@ -86,8 +84,6 @@ export function AgentWizard({
    *  router.push (race found in the 2026-07-07 walkthrough). */
   blank?: boolean
   onCreateNew?: () => void
-  /** Opens the starter-templates sheet (heuristic-eval #4). */
-  onBrowseTemplates?: () => void
   /** "Create as new agent" from the import dialog (inline landing). */
   onImportAsNew?: () => void
 }) {
@@ -104,9 +100,6 @@ export function AgentWizard({
   // Master-detail selection: the rail ALWAYS highlights a step. null = "no
   // explicit choice yet" — the render falls back to a default captured once.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
-  // Accordion: all four sections open by default (the hot path is short now).
-  const [expandedSteps, setExpandedSteps] = React.useState<Record<number, boolean>>({ 1: true, 2: true, 3: true, 4: true, 5: true })
-  const toggleStep = (n: number) => setExpandedSteps((s) => ({ ...s, [n]: !s[n] }))
 
   // The docked Test panel (v4: replaces the persistent preview column AND the
   // Talk sheet) — header Test button toggles it; drag its border to resize.
@@ -209,7 +202,6 @@ export function AgentWizard({
     const stepToOpen = Number.isFinite(stepParam) ? resolveStepParam(stepParam) : null
     const openLater = (n: number) => {
       setOpenStep(n)
-      setExpandedSteps((s) => ({ ...s, [n]: true }))
       muteSpy(1500)
       window.setTimeout(() => scrollToStep(n), 120)
     }
@@ -426,7 +418,6 @@ export function AgentWizard({
   const muteSpy = (ms: number) => { spyMutedUntil.current = Date.now() + ms }
   const openRow = (n: number) => {
     setOpenStep(n)
-    setExpandedSteps((s) => ({ ...s, [n]: true }))
     syncStepParam(n)
     muteSpy(800)
     scrollToStep(n)
@@ -738,10 +729,11 @@ export function AgentWizard({
 
   const blockReason = publishBlockReason(draft)
   // Honest deploy-state line: a live agent with pending edits says so.
-  const anyEdited = isLive && [1, 2, 3, 5].some(stepDirty)
+  const dirtyCount = isLive ? [1, 2, 3, 5].filter(stepDirty).length : 0
+  const anyEdited = dirtyCount > 0
   const deploySub = isLive
     ? anyEdited
-      ? "Edits are not live yet. Redeploy to apply."
+      ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live`
       : "Changes apply on your next redeploy."
     : codeDeployed
     ? "Deployed — goes live when your app connects."
@@ -799,12 +791,9 @@ export function AgentWizard({
         <a href="/agents?view=list" className="rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">All Agents</a>
         <ChevronRight className="h-3 w-3" aria-hidden />
         <span className="max-w-[12rem] truncate text-foreground">{draft.name || (isEdit ? existing!.name : "New agent")}</span>
-        <ChevronRight className="h-3 w-3" aria-hidden />
-        <span>Edit Agent</span>
       </nav>
       {/* Header — identity on the left, Test + Deploy on the right. */}
       <header className="flex items-center gap-4 border-b border-border px-5 py-4">
-        <AgentSphere size={32} active={testing} />
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <h1 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 shrink-0">
             <input
@@ -842,7 +831,7 @@ export function AgentWizard({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {/* Kebab overflow: New agent · Import · Template. */}
-          {(onCreateNew || onBrowseTemplates || !isEdit || landing) && (
+          {(onCreateNew || !isEdit || landing) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="size-9" aria-label="More actions">
@@ -851,21 +840,12 @@ export function AgentWizard({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {onCreateNew && (
-                  <DropdownMenuItem onClick={onCreateNew}>
-                    <Plus className="size-4" aria-hidden /> New agent
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onCreateNew}>New agent</DropdownMenuItem>
                 )}
                 {(!isEdit || landing) && (
                   <ImportAgentSheet onImported={onImported}>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <Upload className="size-4" aria-hidden /> Import an existing agent
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Import an existing agent</DropdownMenuItem>
                   </ImportAgentSheet>
-                )}
-                {onBrowseTemplates && (
-                  <DropdownMenuItem onClick={onBrowseTemplates}>
-                    <FileText className="size-4" aria-hidden /> Start from a template
-                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -883,10 +863,10 @@ export function AgentWizard({
             aria-pressed={testOpen}
             aria-label={`Test ${draft.name || "your agent"}`}
           >
-            <FlaskConical className="size-4" aria-hidden /> Test
+            Test
           </Button>
           <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
-            <Rocket className="size-4" aria-hidden /> {deployCta}
+            {deployCta}
           </Button>
         </div>
       </header>
@@ -913,7 +893,7 @@ export function AgentWizard({
         </span>
         <p className="min-w-0 flex-1 truncate text-sm text-muted-foreground">{deploySub}</p>
         <Button size="sm" className="shrink-0 gap-1.5" onClick={publish}>
-          <Rocket className="h-3.5 w-3.5" aria-hidden /> {deployCta}
+          {deployCta}
         </Button>
       </div>
 
@@ -927,42 +907,32 @@ export function AgentWizard({
       >
         {/* Rail — pure nav; scrolls internally on short viewports. */}
         <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
-          <nav aria-label="Build sections" className="space-y-4">
-            {SECTION_GROUPS.map((g) => (
-              <div key={g.label} className="space-y-0.5">
-                <p className="px-2.5 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
-                  {g.label}
-                </p>
-                {g.steps.map((n) => {
-                  const Icon = STEP_ICONS[n]
-                  const isActive = n === selected
-                  return (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => openRow(n)}
-                      aria-current={isActive ? "step" : undefined}
-                      aria-expanded={isActive}
-                      className={cn(
-                        "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
-                        isActive && "bg-accent/60",
-                      )}
-                    >
-                      <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-foreground" : "text-muted-foreground")} aria-hidden />
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
-                        {isDone(n) ? (
-                          <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
-                        ) : (
-                          <span className="size-1.5 rounded-full bg-muted-foreground/40" />
-                        )}
-                      </span>
-                      {isDone(n) && <span className="sr-only">(done)</span>}
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
+          <nav aria-label="Build sections" className="space-y-0.5">
+            {[1, 2, 3, 4, 5].map((n) => {
+              const isActive = n === selected
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => openRow(n)}
+                  aria-current={isActive ? "step" : undefined}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
+                    isActive && "bg-accent/60",
+                  )}
+                >
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
+                    {isDone(n) ? (
+                      <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
+                    ) : (
+                      <span className="size-1.5 rounded-full bg-muted-foreground/40" />
+                    )}
+                  </span>
+                  {isDone(n) && <span className="sr-only">(done)</span>}
+                </button>
+              )
+            })}
           </nav>
 
           {/* Autosave feedback — "DRAFT saved", not "Saved" (user-test #11). */}
@@ -976,7 +946,7 @@ export function AgentWizard({
           {((isLive && anyEdited) || codeDeployed) && (
             <div className="space-y-2 border-t border-border pt-3">
               {isLive && anyEdited && (
-                <p className="px-0.5 text-xs text-warning">Unsaved changes — redeploy to apply.</p>
+                <p className="px-0.5 text-xs text-warning">{dirtyCount} section{dirtyCount > 1 ? "s" : ""} edited · not live</p>
               )}
               {codeDeployed && (
                 <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
@@ -999,7 +969,6 @@ export function AgentWizard({
             overflow-hidden (sticky headers need to escape). */}
         <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l">
           {[1, 2, 3, 4, 5].map((n) => {
-            const Icon = STEP_ICONS[n]
             return (
               <section
                 key={n}
@@ -1007,19 +976,12 @@ export function AgentWizard({
                 aria-labelledby={`wizard-step-${n}-title`}
                 className="scroll-mt-24"
               >
-                {/* Banded sticky accordion header. */}
-                <header className="z-20 flex items-center gap-1 border-b border-border bg-muted lg:sticky lg:top-12">
-                  <button
-                    type="button"
-                    onClick={() => toggleStep(n)}
-                    aria-expanded={!!expandedSteps[n]}
-                    aria-controls={`wizard-step-${n}-body`}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 px-5 py-3 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                    <h3 id={`wizard-step-${n}-title`} className="truncate text-sm font-semibold">{stepTitle(n, draft)}</h3>
-                    <ChevronDown className={cn("ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedSteps[n] && "rotate-180")} aria-hidden />
-                  </button>
+                {/* Plain sticky heading over a hairline (Plain Form winner —
+                    the accordion is gone; the rail is the only nav). */}
+                <header className="z-20 flex items-center gap-1 border-b border-border bg-background lg:sticky lg:top-12">
+                  <h3 id={`wizard-step-${n}-title`} className="min-w-0 flex-1 truncate px-5 py-3 text-sm font-semibold">
+                    {stepTitle(n, draft)}
+                  </h3>
                   {/* LIVE agents: the one way back to the deployed config. */}
                   {isLive && stepDirty(n) && (
                     <Tooltip>
@@ -1038,8 +1000,6 @@ export function AgentWizard({
                     </Tooltip>
                   )}
                 </header>
-                {/* Body renders only when the section is expanded. */}
-                {expandedSteps[n] && (
                 <div id={`wizard-step-${n}-body`} className="p-5">
                   {/* Sections 1–3 cap for readability; Go Live stays fluid
                       (the campaigns' 50/50 CSV grid manages its own width). */}
@@ -1104,7 +1064,6 @@ export function AgentWizard({
                   )}
                   </div>
                 </div>
-                )}
               </section>
             )
           })}

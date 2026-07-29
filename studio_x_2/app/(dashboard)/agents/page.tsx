@@ -770,7 +770,6 @@ export default function AgentsPage() {
           // new-agent landing must restore an in-progress draft, not wipe it.
           blank={blankIntent}
           onCreateNew={startBlank}
-          onBrowseTemplates={() => setTemplatesOpen(true)}
           onImportAsNew={landImportedDraft}
         />
       ) : view === "list" ? (

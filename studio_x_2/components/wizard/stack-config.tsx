@@ -335,7 +335,13 @@ export function StackModelPicker({
  *  owns the whole pipeline). */
 const SLIDER_ORDER: StackPreset[] = ["fastest", "balanced", "cheapest"]
 
-export function StackTradeoffSlider({ stack, onChange, className }: StackPieceProps) {
+export function StackTradeoffSlider({
+  stack, onChange, className, lean,
+}: StackPieceProps & {
+  /** Builder hot-path mode (Plain Form winner, 2026-07-29): no card chrome,
+   *  no mono label, one estimate line. The Playground default is unchanged. */
+  lean?: boolean
+}) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   if (pipeline === "mllm") return null
 
@@ -364,8 +370,8 @@ export function StackTradeoffSlider({ stack, onChange, className }: StackPiecePr
   const fastEst = stackEstimateFor(stackFor("fastest", stack.modality))
 
   return (
-    <section className={cn("@container space-y-4 rounded-lg border border-border bg-card p-5", className)}>
-      <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Latency vs cost</p>
+    <section className={cn("@container space-y-4", !lean && "rounded-lg border border-border bg-card p-5", className)}>
+      {!lean && <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Latency vs cost</p>}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className={cn(displayIdx === 0 && "font-medium")}>Lowest Cost</span>
@@ -380,17 +386,19 @@ export function StackTradeoffSlider({ stack, onChange, className }: StackPiecePr
           onValueChange={([v]) => setPreset(DISPLAY[v])}
           aria-label="Latency versus cost"
         />
-        <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
-          <span>{cheapEst.latencyMs} ms · ~${cheapEst.costPerMin.toFixed(2)}/min</span>
-          <span>{fastEst.latencyMs} ms · ~${fastEst.costPerMin.toFixed(2)}/min</span>
-        </div>
+        {!lean && (
+          <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
+            <span>{cheapEst.latencyMs} ms · ~${cheapEst.costPerMin.toFixed(2)}/min</span>
+            <span>{fastEst.latencyMs} ms · ~${fastEst.costPerMin.toFixed(2)}/min</span>
+          </div>
+        )}
       </div>
       <p className="font-mono text-xs tabular-nums text-muted-foreground">
-        Current: ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min
+        {lean ? <>~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</> : <>Current: ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>}
       </p>
       {diverged && (
         <p className="text-xs text-muted-foreground">
-          Custom model mix — moving the slider replaces it with the {STACK_PRESETS[SLIDER_ORDER[idx]].label} defaults.
+          Moving the slider replaces your custom model mix.
         </p>
       )}
     </section>
