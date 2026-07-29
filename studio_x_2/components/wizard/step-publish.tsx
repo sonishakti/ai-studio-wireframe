@@ -102,7 +102,7 @@ export function StepPublish({
         {/* Off-switch pointer (user-test 2026-07-29): a header Pause is vetoed,
             so the fine print names where the existing one lives. */}
         <p className="text-xs text-muted-foreground/80">
-          To take this agent offline, use Pause on its row in All Agents.
+          To take this agent offline, use Pause in the ⋯ menu on its row in All Agents.
         </p>
       </section>
     </div>

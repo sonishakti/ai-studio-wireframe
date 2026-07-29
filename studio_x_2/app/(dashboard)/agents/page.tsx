@@ -380,6 +380,12 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {agent.calls.toLocaleString()}
+                      {/* Sample-data mark at a glance (user-test 2026-07-29):
+                          the count itself must say it — the InfoHint keeps the
+                          full story. */}
+                      {agent.id === "agt_default" && (
+                        <span className="ml-1 text-xs text-muted-foreground">sample calls</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -860,7 +866,9 @@ function StartView({
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-success" aria-hidden />
-            Aria, your sample agent, is live on +1 (628) 555-0188
+            {/* "42 sample calls" marks the data as seeded at a glance
+                (user-test 2026-07-29); the InfoHint keeps the full story. */}
+            Aria, your sample agent, is live on +1 (628) 555-0188 · 42 sample calls
           </span>
           <InfoHint label="sandbox line">
             Auto-provisioned for you on an Agora sandbox line — its call history is sample data,

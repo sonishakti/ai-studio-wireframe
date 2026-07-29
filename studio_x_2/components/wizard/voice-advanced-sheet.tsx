@@ -60,8 +60,8 @@ export function VoiceAdvancedSheet({
               <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               <InfoHint label="Using your own vendor accounts?">
                 Add keys in{" "}
-                <a href="/project/vendor-credentials" className="underline underline-offset-2">
-                  Manage › Vendor Credentials
+                <a href="/integrations?tab=credentials" className="underline underline-offset-2">
+                  Resources › Credentials
                 </a>{" "}
                 — the ASR, LLM, and TTS you pick here will use them.
               </InfoHint>

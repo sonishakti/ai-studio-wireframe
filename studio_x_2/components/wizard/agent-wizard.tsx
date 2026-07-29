@@ -785,7 +785,8 @@ export function AgentWizard({
   const deploySub = isLive
     ? anyEdited
       ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live`
-      : "Changes apply on your next redeploy."
+      : // Clean state must not imply pending changes (user-test 2026-07-29).
+        "Live — edits stay draft until you redeploy."
     : codeDeployed
     ? "Deployed — goes live when your app connects."
     : blockReason ?? "Review Go Live and deploy."
