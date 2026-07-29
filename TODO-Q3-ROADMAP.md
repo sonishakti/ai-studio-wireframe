@@ -3,6 +3,7 @@
 > Source: ClickUp [Q3 Roadmap — Month × Module](https://agora.clickup.com/8556478/v/l/6-901114080734-1) (Product / Convo AI), read in full 2026-07-29.
 > Execution mapping: `references/prd-q3-roadmap-execution-2026-07-29.html` — 7 epics (A–G), 4 waves (Jul→Oct 2026).
 > Legend: `P0/P1/P2` priority · `YYYY-MM` due month · `→A..G` PRD epic (console-facing) · `[infra]` = backend/internal, no Studio_X surface · `(+N)` unexpanded subtasks in ClickUp.
+> Wave 1 shipped 2026-07-29 — see `references/wave1-implementation-log-2026-07-29.html`.
 > Check off items as their **console surface ships in studio_x_2** (infra items: check when Engine/SIP delivers).
 
 ## Engine (45)
@@ -25,9 +26,9 @@
 - [ ] Add configurable background sound to agents →A
 - [ ] Run AI-selected traffic replay regression across Engine APIs, regions, and call scenarios [infra]
 - [ ] After-session Recover and Rehearsal →B
-- [ ] Deliver timestamp-aligned recordings and transcripts in session UI →C
+- [x] Deliver timestamp-aligned recordings and transcripts in session UI →C — **shipped 2026-07-29 (Wave 1)**
 - [ ] Deliver recordings reliably to customer OSS buckets [infra]
-- [ ] Expose STT, LLM, and TTS payloads in session logs →C
+- [x] Expose STT, LLM, and TTS payloads in session logs →C — **shipped 2026-07-29 (Wave 1)**
 - [ ] Infer /join feature flags from provided configuration — P1 · 2026-09 [infra]
 - [ ] Make RTC token and UID optional in the /join API — P1 · 2026-09 [infra]
 - [ ] Define normalized provider and integration controls (+3) →E
@@ -37,7 +38,7 @@
 - [x] Expose component-level latency metrics to developers — P0 · 2026-07 · **DELIVERED (Production-GA)** — console render still open →C
 - [ ] Define the TTS pronunciation and voice control schema — P1 · 2026-09 →A
 - [ ] [POC] Define the normalized RAG provider contract — P1 · 2026-09 · Hilton →E
-- [ ] Show Studio Engine session details and logs beyond telephony — P1 · 2026-07 →C
+- [x] Show Studio Engine session details and logs beyond telephony — P1 · 2026-07 →C — **shipped 2026-07-29 (Wave 1)**
 - [ ] Launch Tier-3 Supernode (owned algorithms, SIP direct connection, regional GPU planning) — P0 · 2026-09 [infra]
 - [ ] Decide how the /join API should support string UIDs — P1 · 2026-09 [infra]
 - [ ] Decide whether Convo AI should support dynamic code-defined pipelines — P2 · Cresta →F
@@ -85,9 +86,9 @@
 - [ ] Write an observability support-model recommendation (self-serve / white-glove / tiered) [internal]
 - [ ] Agent to review production recordings and suggest improvements (e.g. IPA) →B
 - [ ] Score production calls on resolution, sentiment, quality, and business outcomes →B
-- [ ] Improve default agent templates and model selection — P0 · 2026-07 →G
+- [x] Improve default agent templates and model selection — P0 · 2026-07 →G — **shipped 2026-07-29 (Wave 1)**
 - [ ] Remove the first-agent Convo AI provisioning delay — P0 · 2026-08 →G
-- [ ] [UI] Integrate Couchbase as a RAG provider — P1 · 2026-07 (+2) →E
+- [x] [UI] Integrate Couchbase as a RAG provider — P1 · 2026-07 (+2) →E — **shipped 2026-07-29 (Wave 1)**
 - [ ] Ability to add AI disclaimer in front of the greeting — P1 →A
 - [ ] Studio API Webhook — P0 →C (/developer/webhooks)
 - [ ] Replace LLM in structured output to save cost — P1 · 2026-07 · Taiwan Survey [infra]
