@@ -57,6 +57,7 @@ export function TestsSection({
   agentName: _agentName = "your agent",
   extra = [],
   headerNote,
+  onRunSummary,
 }: {
   agentName?: string
   /** Contextual auto-generated cases + their synthesized judge results (v5
@@ -65,6 +66,8 @@ export function TestsSection({
   extra?: { case: EvalCase; result: EvalCaseResult }[]
   /** One quiet line under the actions — e.g. the judge-model disclosure. */
   headerNote?: React.ReactNode
+  /** Reports each completed "Run all" — feeds the builder's Test strip verdict. */
+  onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
 }) {
   const run = EVAL_RUN
   // The suite is STATE so authored cases actually land in the table —
@@ -109,6 +112,7 @@ export function TestsSection({
       setLastRunNote(
         `Last run just now — ${passed} passed · ${results.length - passed} failed${notRun > 0 ? ` · ${notRun} not run (new case)` : ""}`,
       )
+      onRunSummary?.({ passed, failed: results.length - passed, total: results.length })
       toast(`${results.length} scenario${results.length === 1 ? "" : "s"} ran`, {
         description: `${passed} passed · ${results.length - passed} failed. Open a row for the transcript.`,
       })

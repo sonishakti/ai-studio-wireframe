@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical } from "lucide-react"
+import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, Mic } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -55,8 +55,11 @@ import { toast } from "sonner"
  * sections — VOICE (tier + voice) · CHANNEL (multi-select) · CONTEXT (prompt +
  * knowledge) — then GO LIVE, the deploy panel (campaigns · inbound settings ·
  * structured outputs · review & deploy). Everything deeper lives in slide-out
- * panels; testing lives in the docked, resizable Test panel behind the header
- * Test button. NOTHING IS LOCKED — every field is editable at any time.
+ * panels. v8 "Test Strip" (judge round 2026-07-29): sections are COLLAPSIBLE
+ * (multi-open, all open by default, folded rows recap their values) and a
+ * sticky TEST STRIP under the header carries Talk · Run simulations · the
+ * last verdict, so testing is first-class at the top of the page.
+ * NOTHING IS LOCKED — every field is editable at any time.
  * Publish is a HINT, not a gate. Deep-links: `?step=N` (legacy 1–7 mapped),
  * `?dc=` seeds a channel, `?artifact=` selects a custom voice. Draft
  * autosaves; live agents get per-section "Reset to live".
@@ -100,6 +103,53 @@ export function AgentWizard({
   // Master-detail selection: the rail ALWAYS highlights a step. null = "no
   // explicit choice yet" — the render falls back to a default captured once.
   const [openStep, setOpenStep] = React.useState<number | null>(null)
+
+  // ── Collapsible sections (Test Strip layout, judge round 2026-07-29) ───────
+  // Default = ALL OPEN (the v7 one-pager stays the first-run experience;
+  // collapse is opt-in focus, not hiding). Deterministic: user toggles persist
+  // per agent slot and are restored verbatim — no auto-collapse heuristics.
+  // Bodies stay MOUNTED when collapsed (hidden) so section-local state — the
+  // live talk test, campaign editors — survives a fold.
+  const collapseKey = `sx:wizard_collapsed:${isEdit ? existing!.id : "new"}`
+  const [collapsedSet, setCollapsedSet] = React.useState<Set<number>>(new Set())
+  React.useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(collapseKey)
+      if (raw) {
+        const nums = (JSON.parse(raw) as number[]).filter((n) => n >= 1 && n <= SECTION_COUNT)
+        if (nums.length) setCollapsedSet(new Set(nums))
+      }
+    } catch { /* wireframe only */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const persistCollapsed = (s: Set<number>) => {
+    try { window.localStorage.setItem(collapseKey, JSON.stringify([...s])) } catch { /* ignore */ }
+  }
+  const toggleSection = (n: number) =>
+    setCollapsedSet((s) => {
+      const next = new Set(s)
+      if (next.has(n)) next.delete(n)
+      else next.add(n)
+      persistCollapsed(next)
+      return next
+    })
+  /** Deep links, rail clicks, and fix-flows EXPAND their target first. */
+  const expandSection = (n: number) =>
+    setCollapsedSet((s) => {
+      if (!s.has(n)) return s
+      const next = new Set(s)
+      next.delete(n)
+      persistCollapsed(next)
+      return next
+    })
+  const setAllCollapsed = (collapse: boolean) => {
+    const next = collapse ? new Set([1, 2, 3, 4, 5]) : new Set<number>()
+    persistCollapsed(next)
+    setCollapsedSet(next)
+  }
+
+  // The Test strip's verdict line — fed by the sims panel's "Run all".
+  const [simSummary, setSimSummary] = React.useState<{ passed: number; failed: number; total: number } | null>(null)
 
   // The docked Test panel (v4: replaces the persistent preview column AND the
   // Talk sheet) — header Test button toggles it; drag its border to resize.
@@ -417,6 +467,7 @@ export function AgentWizard({
   const spyMutedUntil = React.useRef(0)
   const muteSpy = (ms: number) => { spyMutedUntil.current = Date.now() + ms }
   const openRow = (n: number) => {
+    expandSection(n)
     setOpenStep(n)
     syncStepParam(n)
     muteSpy(800)
@@ -782,6 +833,41 @@ export function AgentWizard({
     : codeDeployed ? "Deployed" : "Draft"
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
 
+  // Strip Talk = the button does what it says: expand + scroll to the live
+  // contextual test AND start it (a teleport that lands mid-action was the
+  // judges' disorientation flag — arriving in a started test resolves it).
+  const stripTalk = () => {
+    openRow(4)
+    if (!testing) toggleTest()
+  }
+
+  /** One-line value recap a COLLAPSED section shows in its heading row —
+   *  recognition over recall while folded (Concertina graft). Live agents
+   *  append "· edited" so dirtiness never hides inside a closed section. */
+  const sectionRecap = (n: number): string => {
+    const edited = isLive && stepDirty(n) ? " · edited" : ""
+    if (n === 1)
+      return draft.voice
+        ? `${cardVoice?.name ?? "Custom voice"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label} · ${draft.stack.language ?? "English"}${edited}`
+        : "No voice yet"
+    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No channel yet"
+    if (n === 3) {
+      if (!draft.systemPrompt.trim()) return "No prompt yet"
+      const parts = ["Prompt set"]
+      if (draft.knowledge.length) parts.push(`${draft.knowledge.length} knowledge`)
+      const tools = draft.mcp.length + draft.connectors.length
+      if (tools) parts.push(`${tools} tool${tools > 1 ? "s" : ""}`)
+      return parts.join(" · ") + edited
+    }
+    if (n === 4)
+      return simSummary
+        ? `${simSummary.passed}/${simSummary.total} sims passed · simulated`
+        : "Not tested yet"
+    return isLive
+      ? anyEdited ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live` : "Live"
+      : codeDeployed ? "Deployed" : blockReason ?? "Ready to deploy"
+  }
+
   return (
     // Full-bleed shell — data-fluid removes the layout cap; the wizard owns
     // all spacing: no card, no outer padding, flush border-divided columns.
@@ -852,24 +938,49 @@ export function AgentWizard({
           )}
           {/* </> config view (icon-only). */}
           <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
-          {/* Test — toggles the docked, resizable Test panel (v4: replaces the
-              persistent preview column + the mic Talk sheet). */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            disabled={warming}
-            onClick={() => (testOpen ? setTestOpen(false) : openTest("simulations"))}
-            aria-pressed={testOpen}
-            aria-label={`Test ${draft.name || "your agent"}`}
-          >
-            Test
-          </Button>
           <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
             {deployCta}
           </Button>
         </div>
       </header>
+
+      {/* TEST STRIP (judge-round winner 2026-07-29) — testing is ambient, not a
+          destination: both test modes + the freshest verdict live in one slim
+          bar directly under the header, sticky at lg+ so "does it work yet?"
+          is answerable at every scroll depth. Replaces the header Test button. */}
+      <div className="z-30 flex h-12 items-center gap-2 border-b border-border bg-background/95 px-5 backdrop-blur lg:sticky lg:top-12">
+        <Button
+          size="sm"
+          className="shrink-0 gap-1.5"
+          disabled={warming}
+          onClick={stripTalk}
+          aria-label={`Talk to ${draft.name || "your agent"} — opens the live test`}
+        >
+          <Mic className="h-3.5 w-3.5" aria-hidden />
+          <span className="max-w-[14rem] truncate">
+            {testing ? "Talking — jump to test" : `Talk to ${draft.name || "your agent"}`}
+          </span>
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="shrink-0 text-muted-foreground"
+          onClick={() => (testOpen ? setTestOpen(false) : openTest("simulations"))}
+          aria-pressed={testOpen}
+        >
+          Run simulations
+        </Button>
+        {/* Verdict line — the standing "simulated" disclosure rides it. */}
+        <button
+          type="button"
+          onClick={() => openTest("simulations")}
+          className="ml-auto hidden min-w-0 truncate rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:block"
+        >
+          {simSummary
+            ? `Last run: ${simSummary.passed}/${simSummary.total} passed · simulated`
+            : "No test runs yet · simulated preview"}
+        </button>
+      </div>
 
       {/* Below lg the rail stacks above the sections; a slim sticky strip keeps
           step nav + deploy in the fold (top-12 = the app header height). */}
@@ -906,7 +1017,7 @@ export function AgentWizard({
         )}
       >
         {/* Rail — pure nav; scrolls internally on short viewports. */}
-        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
+        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
           <nav aria-label="Build sections" className="space-y-0.5">
             {[1, 2, 3, 4, 5].map((n) => {
               const isActive = n === selected
@@ -934,6 +1045,15 @@ export function AgentWizard({
               )
             })}
           </nav>
+
+          {/* Fold control — "Expand all" whenever anything is folded. */}
+          <button
+            type="button"
+            onClick={() => setAllCollapsed(collapsedSet.size === 0)}
+            className="rounded px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {collapsedSet.size > 0 ? "Expand all" : "Collapse all"}
+          </button>
 
           {/* Autosave feedback — "DRAFT saved", not "Saved" (user-test #11). */}
           {saveState !== "idle" && (
@@ -967,8 +1087,9 @@ export function AgentWizard({
 
         {/* Center column: borderless sections divided by hairlines. No
             overflow-hidden (sticky headers need to escape). */}
-        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-7rem)] lg:border-l">
+        <div className="min-w-0 divide-y divide-border border-t border-border lg:border-t-0 lg:min-h-[calc(100vh-10rem)] lg:border-l">
           {[1, 2, 3, 4, 5].map((n) => {
+            const folded = collapsedSet.has(n)
             return (
               <section
                 key={n}
@@ -976,11 +1097,31 @@ export function AgentWizard({
                 aria-labelledby={`wizard-step-${n}-title`}
                 className="scroll-mt-24"
               >
-                {/* Plain sticky heading over a hairline (Plain Form winner —
-                    the accordion is gone; the rail is the only nav). */}
-                <header className="z-20 flex items-center gap-1 border-b border-border bg-background lg:sticky lg:top-12">
-                  <h3 id={`wizard-step-${n}-title`} className="min-w-0 flex-1 truncate px-5 py-3 text-sm font-semibold">
-                    {stepTitle(n, draft)}
+                {/* Plain sticky heading over a hairline — now the collapse
+                    toggle too (Test Strip winner): the whole row is the
+                    button, a bare chevron is the only added chrome, and a
+                    folded section recaps its values inline. */}
+                <header className="z-20 flex items-center gap-1 border-b border-border bg-background lg:sticky lg:top-24">
+                  <h3 id={`wizard-step-${n}-title`} className="min-w-0 flex-1">
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(n)}
+                      aria-expanded={!folded}
+                      aria-controls={`wizard-step-${n}-body`}
+                      className="flex w-full min-w-0 items-center gap-2 px-5 py-3 text-left transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                    >
+                      <ChevronRight
+                        className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", !folded && "rotate-90")}
+                        aria-hidden
+                      />
+                      <span className="shrink-0 text-sm font-semibold">{stepTitle(n, draft)}</span>
+                      {isDone(n) && <Check className="h-3.5 w-3.5 shrink-0 text-success/80" aria-hidden />}
+                      {folded && (
+                        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                          {sectionRecap(n)}
+                        </span>
+                      )}
+                    </button>
                   </h3>
                   {/* LIVE agents: the one way back to the deployed config. */}
                   {isLive && stepDirty(n) && (
@@ -1000,7 +1141,9 @@ export function AgentWizard({
                     </Tooltip>
                   )}
                 </header>
-                <div id={`wizard-step-${n}-body`} className="p-5">
+                {/* Folded ≠ unmounted: section-local state (the live talk
+                    test, campaign editors) must survive a fold. */}
+                <div id={`wizard-step-${n}-body`} className={cn("p-5", folded && "hidden")}>
                   {/* Sections 1–3 cap for readability; Go Live stays fluid
                       (the campaigns' 50/50 CSV grid manages its own width). */}
                   <div className={cn("min-w-0", n <= 3 && "max-w-5xl")}>
@@ -1079,6 +1222,7 @@ export function AgentWizard({
           draft={draft}
           agentName={draft.name || (isEdit ? existing!.name : "your agent")}
           widgetGreeting={draft.greeting.trim() || undefined}
+          onRunSummary={setSimSummary}
         />
       </div>
 

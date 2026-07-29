@@ -56,6 +56,7 @@ export function TestPanel({
   draft,
   agentName,
   widgetGreeting,
+  onRunSummary,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
@@ -64,6 +65,8 @@ export function TestPanel({
   draft: AgentDraft
   agentName: string
   widgetGreeting?: string
+  /** Bubbles each completed "Run all" up to the Test strip's verdict line. */
+  onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
 }) {
   const isMobile = useBelowLg()
   const showWidgetTab = hasWebWidget(draft)
@@ -142,6 +145,7 @@ export function TestPanel({
           key={generation}
           agentName={agentName}
           extra={generated}
+          onRunSummary={onRunSummary}
         />
       </TabsContent>
       {showWidgetTab && (
@@ -179,7 +183,7 @@ export function TestPanel({
 
   return (
     <div
-      className="relative hidden lg:block lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start"
+      className="relative hidden lg:block lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:self-start"
       style={{ width }}
       role="complementary"
       aria-label={`Test ${agentName}`}
@@ -202,7 +206,7 @@ export function TestPanel({
         <span className="absolute inset-y-0 left-0 w-px bg-border transition-colors group-hover:bg-primary/50" aria-hidden />
       </div>
 
-      <div className="flex h-full max-h-[calc(100vh-3rem)] flex-col pl-1.5">
+      <div className="flex h-full max-h-[calc(100vh-6rem)] flex-col pl-1.5">
         <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-2.5">
           <p className="min-w-0 truncate text-sm font-semibold">Test {agentName}</p>
           <Button
