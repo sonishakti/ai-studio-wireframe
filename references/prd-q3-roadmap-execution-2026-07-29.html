@@ -1,0 +1,310 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRD — Q3 Convo AI Roadmap → Studio_X Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#00658d; --brand-soft:#e3f1f7; --ink:#13202b; --muted:#5a6b77;
+    --paper:#fcfdfe; --card:#ffffff; --line:#dde6ec; --wash:#f3f7fa;
+    --p0:#b3261e; --p0-bg:#fbebea; --p1:#8a5a00; --p1-bg:#faf1dd; --p2:#4a5a66; --p2-bg:#eceff2;
+    --ok:#1a7f4e; --ok-bg:#e5f3ec;
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --brand:#00c2ff; --brand-soft:#0b2a38; --ink:#e8eef3; --muted:#93a4b0;
+    --paper:#0c141b; --card:#121d26; --line:#22323e; --wash:#101a22;
+    --p0:#ff8a80; --p0-bg:#3a1512; --p1:#ffce6b; --p1-bg:#332608; --p2:#a8b6c0; --p2-bg:#1c2831;
+    --ok:#6bd39e; --ok-bg:#0d2b1d;
+  }}
+  :root[data-theme="light"]{
+    --brand:#00658d; --brand-soft:#e3f1f7; --ink:#13202b; --muted:#5a6b77;
+    --paper:#fcfdfe; --card:#ffffff; --line:#dde6ec; --wash:#f3f7fa;
+    --p0:#b3261e; --p0-bg:#fbebea; --p1:#8a5a00; --p1-bg:#faf1dd; --p2:#4a5a66; --p2-bg:#eceff2;
+    --ok:#1a7f4e; --ok-bg:#e5f3ec;
+  }
+  :root[data-theme="dark"]{
+    --brand:#00c2ff; --brand-soft:#0b2a38; --ink:#e8eef3; --muted:#93a4b0;
+    --paper:#0c141b; --card:#121d26; --line:#22323e; --wash:#101a22;
+    --p0:#ff8a80; --p0-bg:#3a1512; --p1:#ffce6b; --p1-bg:#332608; --p2:#a8b6c0; --p2-bg:#1c2831;
+    --ok:#6bd39e; --ok-bg:#0d2b1d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.6 "Instrument Sans",-apple-system,"Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:48px 24px 96px}
+  header.doc{border-bottom:2px solid var(--brand);padding-bottom:24px;margin-bottom:32px}
+  .eyebrow{color:var(--brand);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+  h1{font-size:34px;line-height:1.15;margin:8px 0 12px;text-wrap:balance;font-weight:700}
+  .meta{color:var(--muted);font-size:14px}
+  .meta a{color:var(--brand)}
+  h2{font-size:22px;margin:48px 0 12px;padding-top:8px;font-weight:700}
+  h2 .no{color:var(--brand);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:16px;margin:24px 0 8px;font-weight:700}
+  p{max-width:72ch}
+  .lead{font-size:18px;color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 24px;margin:16px 0}
+  .callout{border-left:4px solid var(--p0);background:var(--p0-bg);border-radius:6px;padding:14px 18px;margin:16px 0}
+  .callout.ok{border-left-color:var(--ok);background:var(--ok-bg)}
+  .callout.brand{border-left-color:var(--brand);background:var(--brand-soft)}
+  table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+  .tblwrap{overflow-x:auto;margin:12px 0}
+  th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+     border-bottom:2px solid var(--line);padding:8px 10px;white-space:nowrap}
+  td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+  .P0{background:var(--p0-bg);color:var(--p0)} .P1{background:var(--p1-bg);color:var(--p1)}
+  .P2{background:var(--p2-bg);color:var(--p2)} .OK{background:var(--ok-bg);color:var(--ok)}
+  .BR{background:var(--brand-soft);color:var(--brand)}
+  code{background:var(--wash);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+  .stat b{display:block;font-size:28px;color:var(--brand);font-variant-numeric:tabular-nums}
+  .stat span{font-size:13px;color:var(--muted)}
+  .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+  @media(max-width:720px){.statrow{grid-template-columns:repeat(2,1fr)}}
+  .bar{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13px}
+  .bar .lbl{width:150px;flex:none;color:var(--muted)}
+  .bar .trk{flex:1;background:var(--wash);border-radius:4px;height:18px;overflow:hidden;display:flex}
+  .bar .seg{height:100%}
+  .bar .n{width:70px;flex:none;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+  .seg.in{background:var(--brand)} .seg.out{background:var(--line)}
+  .legend{display:flex;gap:18px;font-size:12px;color:var(--muted);margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+  ul{padding-left:22px} li{margin:4px 0;max-width:72ch}
+  .toc{columns:2;column-gap:32px;font-size:14px}
+  @media(max-width:720px){.toc{columns:1}}
+  .toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--line)}
+  .toc a:hover{color:var(--brand)}
+  footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">Studio_X · PRD · 2026-07-29</div>
+  <h1>Executing the Convo AI Q3 Roadmap in the Studio_X Console</h1>
+  <div class="meta">
+    Source: ClickUp list <a href="https://agora.clickup.com/8556478/v/l/6-901114080734-1">Q3 Roadmap — Month × Module</a> (Product / Convo AI) ·
+    Target: <code>studio_x_2</code> (live canonical app, mock data, no backend) ·
+    Supersedes surface-mapping in <code>references/roadmap-features-prd-2026-07-09.md</code> where they conflict
+  </div>
+</header>
+
+<p class="lead">The Q3 roadmap holds <b>111 tasks</b> across four modules — Engine (45), Studio (38), SIP (16), and cross-cutting (12). Roughly <b>66 of them have a customer-facing console surface</b>; the rest are backend, telco ops, or internal tooling. This PRD screens the list, groups the console-facing work into <b>7 design epics</b>, and phases it into <b>4 waves aligned to the roadmap's own due months</b> (July→October), so each wave ships through the standing graph-loop (build → deploy → user-test → fix).</p>
+
+<div class="statrow">
+  <div class="stat"><b>111</b><span>roadmap tasks read</span></div>
+  <div class="stat"><b>66</b><span>have a console UI surface</span></div>
+  <div class="stat"><b>7</b><span>design epics</span></div>
+  <div class="stat"><b>4</b><span>execution waves (Jul–Oct)</span></div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Console-facing share by module</h3>
+  <div class="bar"><span class="lbl">Engine</span><div class="trk"><div class="seg in" style="width:49%"></div><div class="seg out" style="width:51%"></div></div><span class="n">22 / 45</span></div>
+  <div class="bar"><span class="lbl">Studio</span><div class="trk"><div class="seg in" style="width:92%"></div><div class="seg out" style="width:8%"></div></div><span class="n">35 / 38</span></div>
+  <div class="bar"><span class="lbl">SIP</span><div class="trk"><div class="seg in" style="width:44%"></div><div class="seg out" style="width:56%"></div></div><span class="n">7 / 16</span></div>
+  <div class="bar"><span class="lbl">Cross-cutting</span><div class="trk"><div class="seg in" style="width:17%"></div><div class="seg out" style="width:83%"></div></div><span class="n">2 / 12</span></div>
+  <div class="legend"><span><i style="background:var(--brand)"></i>Designable in Studio_X</span><span><i style="background:var(--line)"></i>Backend / infra / internal (out of scope)</span></div>
+</div>
+
+<nav class="card">
+  <h3 style="margin-top:0">Contents</h3>
+  <div class="toc">
+    <div><a href="#problem">1 · Problem statement</a></div>
+    <div><a href="#reversals">2 · Fact-check reversals ⚠</a></div>
+    <div><a href="#goals">3 · Goals &amp; non-goals</a></div>
+    <div><a href="#epics">4 · The seven epics</a></div>
+    <div><a href="#waves">5 · Execution waves</a></div>
+    <div><a href="#metrics">6 · Success metrics</a></div>
+    <div><a href="#questions">7 · Open questions</a></div>
+  </div>
+</nav>
+
+<h2 id="problem"><span class="no">1</span>Problem statement</h2>
+<p>The Q3 roadmap defines what Engine, Studio, and SIP will ship — but almost none of it has a designed console surface. If the wireframe doesn't get ahead of it, each feature lands as an API-first afterthought bolted onto the UI, repeating the Console↔Studio seam failure the whole project exists to fix. Studio_X's job this quarter: <b>design the console expression of every customer-facing roadmap item before engineering ships it</b>, validated by simulated user tests, so the north star — signup → first live deployment carrying traffic → first paid usage — has a coherent surface at every step.</p>
+
+<h2 id="reversals"><span class="no">2</span>Fact-check reversals — the roadmap overrides three prior locks</h2>
+<div class="callout">
+  <b>Three assumptions from the 2026-07-09 roadmap PRD are now reversed by this roadmap.</b> These were load-bearing fact-checks; the official Q3 list explicitly contradicts them, so the roadmap wins.
+</div>
+<div class="tblwrap"><table>
+  <tr><th>Old lock (07-09)</th><th>Q3 roadmap says</th><th>Consequence for Studio_X</th></tr>
+  <tr><td>"Agora sells no phone numbers — telephony is BYO SIP"</td><td><span class="pill P0">P0</span> Phone Number Resell (2026-09) + "Let developers purchase and assign phone numbers in Studio" (P0, 2026-09)</td><td>Design a number purchase/assignment flow; the BYO-SIP-only framing of <code>/deploy/phone-numbers</code> is obsolete</td></tr>
+  <tr><td>"No live monitoring exists or is planned"</td><td>"Show live sentiment trends and let operators monitor active calls" (Studio) + live-call overseer prototype (P1, 2026-10)</td><td>Monitor gains a live view; previously rejected as vaporware, now roadmap-backed</td></tr>
+  <tr><td>"No WhatsApp support"</td><td><span class="pill P0">P0</span> Productize WhatsApp voice (customer: Moveo)</td><td><code>/deploy/whatsapp</code> graduates from redirect stub to a real channel surface</td></tr>
+</table></div>
+
+<h2 id="goals"><span class="no">3</span>Goals &amp; non-goals</h2>
+<div class="grid2">
+<div class="card"><h3 style="margin-top:0">Goals</h3>
+<ul>
+  <li>Every <b>P0 roadmap item with a UI surface</b> has a designed, user-tested console expression before its due month ends.</li>
+  <li>The builder's <b>Test Strip becomes the quality loop's front door</b> — simulations at scale, scoring, and human join-in are one continuous surface.</li>
+  <li><b>Observability closes the loop</b>: any session failure is diagnosable (payloads, latency waterfall, SIP ladder) and routes to a fix.</li>
+  <li><b>Commerce is self-serve</b>: numbers, concurrency, and capacity SKUs are purchasable in-console without a sales call.</li>
+</ul></div>
+<div class="card"><h3 style="margin-top:0">Non-goals</h3>
+<ul>
+  <li><b>Internal tooling</b> — operator console for key rotation, telco ops dashboard (ASR/NER/PDD), SIP tracing internal tool. Different audience.</li>
+  <li><b>Backend-only work</b> — /join API changes, traffic replay regression, Tier-3 Supernode, provider contract normalization (UI consumes, doesn't design).</li>
+  <li><b>Docs site work</b> — AI doc assistant, deprecated-field cleanup live in docs.agora.io, not the console.</li>
+  <li><b>Physical AI builder</b> — P2 scoping task only; parking lot.</li>
+  <li><b>Any real backend</b> — Studio_X stays mock-data, per project charter.</li>
+</ul></div>
+</div>
+
+<h2 id="epics"><span class="no">4</span>The seven epics</h2>
+
+<h3>Epic A — Builder completion: conversation feel &amp; behavior <span class="pill BR">builder v8</span></h3>
+<p>The v8 builder's five sections absorb the roadmap's agent-behavior controls. All land as new rows inside existing collapsible sections — no new chrome.</p>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Module</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Active-listening backchannels · dynamic filler words · background sound</td><td>Engine</td><td><span class="pill P1">P1</span></td><td>—</td><td>Voice § "Conversation feel" group (new)</td></tr>
+  <tr><td>Tool-based Filler Words</td><td>Engine</td><td><span class="pill P1">P1</span></td><td>2026-09</td><td>Voice § Conversation feel</td></tr>
+  <tr><td>Let user speak first option</td><td>Engine</td><td><span class="pill P1">P1</span></td><td>—</td><td>Voice § greeting controls</td></tr>
+  <tr><td>AI disclaimer in front of the greeting</td><td>Studio</td><td><span class="pill P1">P1</span></td><td>—</td><td>Voice § greeting controls (compliance toggle)</td></tr>
+  <tr><td>Agent personality and tone controls</td><td>Studio</td><td><span class="pill P2">P2</span></td><td>—</td><td>Voice § persona</td></tr>
+  <tr><td>Compare and recommend voices per use case · voice cloning</td><td>Studio</td><td><span class="pill P1">P1</span></td><td>—</td><td>Voice picker (compare view + "Clone a voice" entry)</td></tr>
+  <tr><td>STT custom dictionaries &amp; keyword boosting · TTS pronunciation schema</td><td>Engine</td><td><span class="pill P1">P1</span></td><td>2026-09</td><td>Voice § advanced (domain vocabulary editor)</td></tr>
+  <tr><td>No-code GET/POST HTTP tools in voice agents</td><td>Engine</td><td><span class="pill P1">P1</span></td><td>—</td><td>Context § Tools (HTTP tool form)</td></tr>
+  <tr><td>Route handoffs by skill, condition, context (Entel, Concentrix)</td><td>Studio</td><td><span class="pill P1">P1</span></td><td>—</td><td>Context § Handoffs (new)</td></tr>
+  <tr><td>Warm transfer w/ LLM in-call summary</td><td>Engine+SIP</td><td><span class="pill P1">P1</span></td><td>2026-08</td><td>Context § Handoffs + call detail view</td></tr>
+  <tr><td>Voicemail detection → leave a message</td><td>Studio</td><td><span class="pill P1">P1</span></td><td>—</td><td>Batch-call config</td></tr>
+</table></div>
+
+<h3>Epic B — Simulation &amp; the quality loop <span class="pill BR">Test Strip → Quality</span></h3>
+<p>The Test Strip already owns "Talk · Run simulations · verdict". The roadmap scales it into a closed loop: simulate at scale, score, let humans join, then carry the same scoring onto production calls.</p>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Run agent-to-agent voice simulations at scale</td><td><span class="pill P1">P1</span></td><td>2026-08</td><td>Test Strip → "Run simulations" batch view</td></tr>
+  <tr><td>Score simulated calls (pronunciation, flow, handoffs, interruptions, regressions)</td><td><span class="pill P1">P1</span></td><td>—</td><td>Simulation report card per run</td></tr>
+  <tr><td>Let humans join simulated calls (edge cases, tone)</td><td><span class="pill P1">P1</span></td><td>—</td><td>"Join this sim" from a running simulation row</td></tr>
+  <tr><td>Score production calls (resolution, sentiment, quality, outcomes)</td><td><span class="pill P1">P1</span></td><td>—</td><td>Monitor › Calls — score column + detail</td></tr>
+  <tr><td>Agent reviews production recordings, suggests fixes (e.g. IPA)</td><td><span class="pill P1">P1</span></td><td>—</td><td>Call detail → "Suggested fixes" panel</td></tr>
+  <tr><td>Detect recurring failures; propose or apply fixes</td><td><span class="pill P2">P2</span></td><td>—</td><td>Monitor › Diagnostics (extends session-doctor)</td></tr>
+  <tr><td>Live-call overseer (drift detection + nudge) — prototype</td><td><span class="pill P1">P1</span></td><td>2026-10</td><td>Monitor › live view (Wave 4)</td></tr>
+</table></div>
+
+<h3>Epic C — Observability deep-dive <span class="pill BR">Monitor · Sessions</span></h3>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Show Studio Engine session details &amp; logs beyond telephony</td><td><span class="pill P1">P1</span></td><td>2026-07</td><td>Sessions detail — all channels, not just calls</td></tr>
+  <tr><td>Expose STT / LLM / TTS payloads in session logs</td><td><span class="pill P1">P1</span></td><td>—</td><td>Session detail › Logs (per-turn payload inspector)</td></tr>
+  <tr><td>Timestamp-aligned recordings + transcripts in session UI</td><td><span class="pill P1">P1</span></td><td>—</td><td>Session detail — synced player + transcript</td></tr>
+  <tr><td>Component-level latency metrics <span class="pill OK">delivered in Engine</span></td><td><span class="pill P0">P0</span></td><td>2026-07</td><td>Session detail — latency waterfall (render it)</td></tr>
+  <tr><td>Surface SIP error codes &amp; CPS-limit failures in Studio</td><td><span class="pill P0">P0</span></td><td>2026-08</td><td>Needs-attention loop + call detail error chips</td></tr>
+  <tr><td>SIP signaling visual ladder diagrams</td><td><span class="pill P0">P0</span></td><td>2026-08</td><td>Call detail › SIP trace tab</td></tr>
+  <tr><td>Auto-detect errors and failures</td><td><span class="pill P1">P1</span></td><td>2026-10</td><td>Monitor › Diagnostics feed</td></tr>
+  <tr><td>Live sentiment trends + monitor active calls</td><td><span class="pill P1">P1</span></td><td>—</td><td>Monitor › Live (new surface — see reversal §2)</td></tr>
+  <tr><td>Inbound pilot metrics: FCR, answer speed, handle time, escalation, sentiment</td><td><span class="pill P2">P2</span></td><td>—</td><td>Inbound deployment › Overview KPIs</td></tr>
+  <tr><td>Recording lifecycle webhooks (NCS)</td><td><span class="pill P1">P1</span></td><td>—</td><td><code>/developer/webhooks</code> — event catalog rows</td></tr>
+</table></div>
+
+<h3>Epic D — Telephony &amp; capacity commerce <span class="pill BR">numbers · billing</span></h3>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Phone Number Resell + purchase/assign numbers in Studio</td><td><span class="pill P0">P0</span></td><td>2026-09</td><td>Phone Numbers — "Get a number" flow (search, buy, assign)</td></tr>
+  <tr><td>Self-service phone number CPS</td><td><span class="pill P0">P0</span></td><td>2026-09</td><td>Number detail — CPS slider + limits</td></tr>
+  <tr><td>Self-service agent concurrency + capacity-aware safeguards</td><td><span class="pill P1">P1</span></td><td>2026-09</td><td>Concurrency card → purchase flow with guardrails</td></tr>
+  <tr><td>Package and sell capacity-based SKUs</td><td><span class="pill P0">P0</span></td><td>2026-08</td><td>Billing › Plans — capacity SKU cards</td></tr>
+  <tr><td>Metering and SKU for MLLM</td><td><span class="pill P1">P1</span></td><td>2026-10</td><td>Billing › Usage — MLLM meter row</td></tr>
+  <tr><td>SIP direct connection metering (Taiwan Survey)</td><td><span class="pill P0">P0</span></td><td>2026-08</td><td>Billing › Usage — SIP-DC meter</td></tr>
+  <tr><td>DTMF menu entry &amp; inbound queue before AI triage</td><td><span class="pill P2">P2</span></td><td>—</td><td>Inbound deployment config</td></tr>
+  <tr><td>Throttle outbound by trunk capacity; queue retries</td><td><span class="pill P1">P1</span></td><td>—</td><td>Batch-call detail — queue state, not dropped-call errors</td></tr>
+</table></div>
+
+<h3>Epic E — Managed mode &amp; the resource catalog <span class="pill BR">Resources</span></h3>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Studio managed mode using Engine reseller mode</td><td><span class="pill P0">P0</span></td><td>2026-08</td><td>Vendor credentials — "Managed by Agora" vs BYO keys, per provider</td></tr>
+  <tr><td>Add MLLM vendors to the managed reseller catalog</td><td><span class="pill P1">P1</span></td><td>—</td><td>Resources › model catalog</td></tr>
+  <tr><td>[UI] Integrate Couchbase as a RAG provider</td><td><span class="pill P1">P1</span></td><td>2026-07</td><td>Resources › Knowledge — Couchbase connector (explicit UI task)</td></tr>
+  <tr><td>Web crawling &amp; retrieval tuning for knowledge bases</td><td><span class="pill P2">P2</span></td><td>—</td><td>Knowledge base detail — crawl source + tuning</td></tr>
+  <tr><td>Native + MCP connector marketplace</td><td><span class="pill P2">P2</span></td><td>—</td><td>Resources › Connectors gallery</td></tr>
+  <tr><td>Keep Studio and Engine vendor support aligned</td><td><span class="pill P1">P1</span></td><td>—</td><td>Catalog parity badge (design constraint, not a page)</td></tr>
+</table></div>
+
+<h3>Epic F — Composer &amp; multi-agent <span class="pill BR">/composer</span></h3>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Conversational AI Composer for agent configuration</td><td><span class="pill P1">P1</span></td><td>—</td><td><code>/composer</code> exists — wire to builder sections (roadmap-backed now)</td></tr>
+  <tr><td>Visual graph editor for multi-agent workflows</td><td><span class="pill P1">P1</span></td><td>—</td><td>New surface; pairs with Epic A handoff routing</td></tr>
+  <tr><td>Deterministic multi-agent workflows</td><td><span class="pill P1">P1</span></td><td>—</td><td>Graph editor node semantics</td></tr>
+  <tr><td>Text-only agents on the same pipeline (no voice leg)</td><td><span class="pill P2">P2</span></td><td>—</td><td>Channel section — "Text only" option</td></tr>
+</table></div>
+
+<h3>Epic G — Onboarding &amp; growth <span class="pill BR">first-run funnel</span></h3>
+<div class="tblwrap"><table>
+  <tr><th>Roadmap item</th><th>Pri</th><th>Due</th><th>Lands in</th></tr>
+  <tr><td>Improve default agent templates and model selection</td><td><span class="pill P0">P0</span></td><td>2026-07</td><td>Template gallery + smarter model defaults in builder</td></tr>
+  <tr><td>Remove the first-agent Convo AI provisioning delay</td><td><span class="pill P0">P0</span></td><td>2026-08</td><td>First-run — no spinner wall (Aria auto-provisioning already aligns)</td></tr>
+  <tr><td>Reduce Studio project creation time</td><td><span class="pill P1">P1</span></td><td>—</td><td>Project create flow trim</td></tr>
+  <tr><td>Instrument Studio onboarding and optimize conversion</td><td><span class="pill P1">P1</span></td><td>—</td><td>Event taxonomy pass (pairs with <code>references/event-taxonomy-review.md</code>)</td></tr>
+  <tr><td>Import agents from Vapi, Bland, Retell <span class="pill OK">already designed</span></td><td><span class="pill P1">P1</span></td><td>—</td><td><code>import-agent-sheet.tsx</code> — was our whitespace bet, now on the official roadmap</td></tr>
+  <tr><td>Productize WhatsApp voice (Moveo)</td><td><span class="pill P0">P0</span></td><td>—</td><td><code>/deploy/whatsapp</code> — real channel surface (see reversal §2)</td></tr>
+  <tr><td>Ship the inbound call-center MVP</td><td><span class="pill P2">P2</span></td><td>—</td><td><code>/deploy/inbound</code> — extend with queue + pilot metrics</td></tr>
+</table></div>
+
+<h2 id="waves"><span class="no">5</span>Execution waves — phased by the roadmap's own due months</h2>
+<p>Each wave is 1–2 graph-loop cycles on <code>studio_x_2</code>: build the slice → deploy → 3-persona user test → triage → fix → gate. P0s anchor each wave; P1s fill remaining capacity.</p>
+
+<div class="card">
+<h3 style="margin-top:0">Wave 1 — now → mid-Aug <span class="pill P0">July P0s (already due)</span></h3>
+<ul>
+  <li><b>Templates + model selection</b> (P0 2026-07) — template gallery, per-use-case model defaults</li>
+  <li><b>Latency waterfall</b> in session detail (P0 2026-07, Engine already delivered the data)</li>
+  <li><b>Session details beyond telephony</b> (P1 2026-07) + per-turn STT/LLM/TTS payload inspector</li>
+  <li><b>Couchbase RAG connector UI</b> (P1 2026-07, explicit UI task)</li>
+</ul></div>
+
+<div class="card">
+<h3 style="margin-top:0">Wave 2 — Aug <span class="pill P0">5 P0s due 2026-08</span></h3>
+<ul>
+  <li><b>Managed mode</b> — managed-vs-BYO provider credentials (P0)</li>
+  <li><b>Provisioning delay removal</b> — first-run flow without the wait wall (P0)</li>
+  <li><b>SIP errors + CPS-limit failures surfaced</b> in needs-attention + call detail (P0)</li>
+  <li><b>SIP ladder diagrams</b> in call detail (P0)</li>
+  <li><b>Capacity SKU cards</b> in Billing › Plans + SIP-DC meter (P0)</li>
+  <li>Simulations at scale + scoring report card (P1) · Warm transfer config + call-summary display (P1) · WhatsApp voice channel surface (P0, no due month)</li>
+</ul></div>
+
+<div class="card">
+<h3 style="margin-top:0">Wave 3 — Sep <span class="pill P0">commerce P0s due 2026-09</span></h3>
+<ul>
+  <li><b>Phone number purchase &amp; assignment</b> flow (P0) + <b>self-serve CPS</b> on number detail (P0)</li>
+  <li><b>Concurrency self-serve</b> with capacity-aware safeguards (P1)</li>
+  <li>Conversation-feel controls: tool-based filler words, backchannels, background sound (P1) · STT dictionaries + TTS pronunciation editor (P1) · Voice cloning entry (P1) · Stable Studio API surface in <code>/developer</code> (P1)</li>
+</ul></div>
+
+<div class="card">
+<h3 style="margin-top:0">Wave 4 — Oct <span class="pill P1">quality loop closes</span></h3>
+<ul>
+  <li><b>Auto-detected errors feed</b> in Diagnostics (P1) · <b>MLLM metering</b> row in Usage (P1)</li>
+  <li><b>Live monitor</b> — sentiment trends, active calls, overseer prototype (P1)</li>
+  <li>Production call scoring + recording-review suggestions (P1) · Recurring-failure fixer (P2) · Graph editor first cut (P1, if capacity)</li>
+</ul></div>
+
+<h2 id="metrics"><span class="no">6</span>Success metrics</h2>
+<div class="tblwrap"><table>
+  <tr><th>Metric</th><th>Type</th><th>Target</th><th>Measured via</th></tr>
+  <tr><td>P0 roadmap items with a designed, tested console surface by due month</td><td>Leading</td><td>100% (11 of 11 in-scope P0s)</td><td>Wave checklist vs ClickUp due months</td></tr>
+  <tr><td>User-test task completion per wave (3-persona graph-loop)</td><td>Leading</td><td>≥ 2/3 personas complete the wave's core task, zero P0 findings at gate</td><td><code>.claude/workflows/graph-loop.js</code></td></tr>
+  <tr><td>Failure-to-fix path coverage: % of mock error states that link to a remediation</td><td>Leading</td><td>100% of new error surfaces (SIP, CPS, diagnostics)</td><td>Needs-attention loop audit</td></tr>
+  <tr><td>Signup → first live deployment carrying traffic (north star, post-handoff)</td><td>Lagging</td><td>Instrumented in Epic G taxonomy; targets set by PM once real funnel exists</td><td>Onboarding instrumentation item</td></tr>
+</table></div>
+
+<h2 id="questions"><span class="no">7</span>Open questions</h2>
+<ul>
+  <li><b>Phone-number resell scope</b> (PM/legal, blocking Wave 3): which countries, and does BYO SIP remain a parallel path? The purchase flow design needs the answer for its empty/unavailable states.</li>
+  <li><b>Managed-mode billing</b> (PM/finance, blocking Wave 2): does reseller-mode usage bill through existing postpaid, or a new SKU? Determines what the credentials surface promises.</li>
+  <li><b>Subtask expansion</b> (PM, non-blocking): five Studio parents hide 31 subtasks (Accelerate setup ×14, Integrations ×6, Quality loop ×4, Simulation ×4, Inbound MVP ×3) not expanded in this read. Expand in ClickUp and slot into waves — likely refines Epics A/B/G but shouldn't add new surfaces.</li>
+  <li><b>Composer vs graph editor</b> (design, non-blocking): one surface with two views, or two entries? Decide before the Wave 4 graph-editor cut.</li>
+  <li><b>Live-monitoring privacy</b> (legal, non-blocking): operator listen-in needs consent framing; pairs with the PII-redaction Engine item.</li>
+</ul>
+
+<footer>
+  Studio_X · PRD 2026-07-29 · source list read in full (111 tasks; subtasks unexpanded) · repo copy: <code>references/prd-q3-roadmap-execution-2026-07-29.html</code>
+</footer>
+</div>
