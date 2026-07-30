@@ -18,7 +18,7 @@ Same audience across the two products being merged; different modes. Sourced fro
 | **P4 — Engineering Manager / Founder** | Infrequent, low IA familiarity | At-a-glance account health · incident context |
 | **Legacy — RTE Developer** | First-class but no longer primary | Build video / voice / live-streaming on the Agora SDK |
 
-**P1 is broader than Agora's traditional developer base.** P1 is any hustler who has considered or used LiveKit, ElevenLabs, Retell.ai, or Vapi. The competitive frame is AI-agent platforms, not RTC consoles — which raises the bar on time-to-first-agent well above Agora's historical norm.
+**P1 is broader than Agora's traditional developer base.** P1 is any hustler who has considered or used LiveKit, ElevenLabs, Retell.ai, or Vapi. The competitive frame is AI-agent platforms rather than RTC consoles, which puts time-to-first-agent well above Agora's historical bar.
 
 ## Product Purpose
 
@@ -37,25 +37,25 @@ This is a **funnel rescue project that happens to require product consolidation.
 | Login → agent-creation started | ~93% (686 of ~10,113) — **the seam** |
 | Create-Agent opened → published | 77.7% (153 of 686) |
 
-**Product north star (locked 2026-06-17):** Signup → first live deployment carrying traffic → first paid usage. This supersedes the earlier "Signup → First Agent Published" — publishing an agent earns Agora $0; revenue is minutes consumed on a live deployment. The old funnel ended exactly where revenue starts.
+**Product north star (locked 2026-06-17):** Signup → first live deployment carrying traffic → first paid usage. This supersedes the earlier "Signup → First Agent Published." Publishing an agent earns Agora $0; revenue is minutes consumed on a live deployment, which the earlier metric never reached.
 
-**Success for this artifact:** it is a living design reference, not a project with a finish line. It stays the canonical, continuously deployed expression of Studio_X's IA and UX, absorbing roadmap waves as they land. It is not aiming at stakeholder sign-off as an end state, nor at being a frozen engineering handoff spec.
+**Success for this artifact:** Studio_X is a living design reference with no finish line. It is the canonical deployed expression of the IA and UX, updated as roadmap waves land. Stakeholder sign-off and a frozen engineering handoff spec were both considered as end states and rejected.
 
 ## Positioning
 
-- **One record, two UIs — not two products.** Console and Studio already share one Okta SSO client and cookie, one account → one project → one App ID consumed by every Agora product. Verified by code audit. The seam is **wayfinding**, not authentication or data integration. No competitor can copy this because no competitor is carrying two mature products over one backend.
-- **Agora owns both halves of the pipeline** — the real-time transport layer *and* the agent orchestration on top of it. Competitors own one or rent the other. This is the source of the load-bearing whitespace: e.g. correlating the SIP/telephony ladder and the agent pipeline waterfall on a single time axis, which nobody in the category can do.
-- **300 free minutes/month** is materially more generous than Retell's $10 credit or ElevenLabs' unspecified tier — and is currently under-leveraged in messaging.
+- **One record displayed in two UIs.** Console and Studio already share one Okta SSO client and cookie, one account → one project → one App ID consumed by every Agora product. Verified by code audit. The seam is a wayfinding problem rather than an auth or data-integration one. Competitors have no equivalent, because none of them carry two mature products on one backend.
+- **Agora owns both the real-time transport layer and the agent orchestration on top of it.** Competitors own one half and rent the other. That ownership is what makes certain designs available here and nowhere else: correlating the SIP/telephony ladder with the agent pipeline waterfall on one time axis requires both halves.
+- **300 free minutes/month** is materially more generous than Retell's $10 credit or ElevenLabs' unspecified tier, and is currently under-leveraged in messaging.
 
 Competitive benchmark set (P1's actual comparison set): ElevenLabs Conversational AI ("5 min" to first agent), LiveKit Agents ("<10 min"), Retell AI ("go live in minutes"), Vapi ("try in minutes, deploy in days").
 
 ## Operating Context
 
-- **Where the work happens:** the developer is mid-integration, usually with an IDE and docs open, often on a deadline. Studio_X is a task tool they pass through, not a place they stay.
+- **Where the work happens:** the developer is mid-integration, usually with an IDE and docs open, often on a deadline. Studio_X is something they pass through on the way to shipping.
 - **The lifecycle the product must serve:** Land → Believe → Connect → Consume → Convert. A default agent (Aria) is auto-provisioned and live on signup; first-run is *talk to it, then put it to work* (believe-then-scale), with campaign as the flagship channel. There is deliberately no build-an-agent-first wall.
 - **Agent vs. Deployment (2026-06-11 architecture):** an **Agent** is a reusable Stack + Persona (no prompt, no vars); a **Deployment** carries the full prompt, custom code, and CSV-derived dynamic variables. One agent ↔ one channel; multichannel orchestration was dropped.
 - **Deploy is intent-first:** Inbound · Batch Calls · Phone Numbers · Code.
-- **Vendor reality:** LLM / TTS / ASR are per-component **managed or BYO** (`credential_mode` is per asr/llm/tts, never global). Managed *includes* vendor usage, making managed cheaper than BYO — the inverse of every competitor's pricing model. Telephony is BYO SIP.
+- **Vendor reality:** LLM / TTS / ASR are per-component **managed or BYO** (`credential_mode` is per asr/llm/tts, never global). Managed includes vendor usage in the $0.10/min rate, so managed costs less than BYO. Every competitor prices this the other way round, which makes the comparison easy to get wrong. Telephony is BYO SIP.
 - **External dependencies:** Okta · Stripe (or equivalent) · LLM providers · TTS/ASR vendors · email/notifications · global RTC edge.
 
 ## Capabilities and Constraints
@@ -65,12 +65,12 @@ Competitive benchmark set (P1's actual comparison set): ElevenLabs Conversationa
 1. **Studio UI is frozen.** 9+ months of production work behind it. Every intervention is **additive only** — net-new surfaces consuming existing backend data. Don't restyle, remove, or rename existing Studio flows.
 2. **Mock data only. No backend, ever.** This is an IA + UX artifact. Every screen runs on fixtures.
 3. **Solo designer / small team.** Every deliverable must be scoped for one person to ship.
-4. **Regulated:** HIPAA · GDPR · SOC 2 · EU AI Act trajectory. Applies at every stage, not just at the end.
+4. **Regulated:** HIPAA · GDPR · SOC 2 · EU AI Act trajectory. Applies at every stage of every flow.
 5. **Time-on-page, session length, and DAU-without-task-completion are rejected as KPIs.** Utility-first: success is the user accomplishing the goal and leaving.
 6. **Cite `docs.agora.io/en/` for any Agora-primitive design call.** Training data on Agora APIs is likely outdated.
 7. **Design tokens only** — no hardcoded colors, no arbitrary `text-[Npx]`. `buoy drift check` validates.
 
-**What ships next is decided by the Q3 roadmap; how it's designed is decided by LEARNINGS.md.** The official Convo AI Q3 roadmap (111 ClickUp tasks → 7 epics → 4 waves) sets sequence and scope. LEARNINGS.md's constraints, personas, voice, and anti-decisions govern execution. Where the two conflict on *what*, the roadmap wins; where they conflict on *how*, LEARNINGS wins.
+**Two authorities, split by question (confirmed 2026-07-30).** The official Convo AI Q3 roadmap (111 ClickUp tasks → 7 epics → 4 waves) sets scope and sequence. LEARNINGS.md's constraints, personas, voice, and anti-decisions govern how any of it gets designed. A conflict over what to build resolves to the roadmap. A conflict over how to build it resolves to LEARNINGS.
 
 **Verified terminology (do not re-litigate):**
 
@@ -81,7 +81,7 @@ Competitive benchmark set (P1's actual comparison set): ElevenLabs Conversationa
 - **Sessions** = agent conversation runs. **Chat History** = text-channel agent conversations. **RTE** = per-minute usage, not sessions.
 - Builder section labels (locked 2026-07-30): **Voice & Models · Deployment · Prompt & knowledge · Test · Go Live.** Never reintroduce "Channel" or "Context."
 
-**Explicitly undecided — record, don't invent:**
+**Explicitly undecided.** Carry these forward as open questions; don't invent answers for them.
 
 - Entitlements model — plan / org / role / trial gating.
 - Which regulated verticals and jurisdictions specifically.
@@ -106,11 +106,11 @@ Competitive benchmark set (P1's actual comparison set): ElevenLabs Conversationa
 
 **Ethical stance:** utility-first, no engagement optimization that conflicts with user goals. Highest-risk anti-patterns for this product, all rejected: Hidden Costs (usage-based pricing invites deferred cost disclosure), Forced Continuity, Prechecked Consent, Inaccessible Unsubscribe, Undisclosed AI Decisions, Simulated Understanding (agents appearing more competent than they are causes downstream harm), Permission Harassment, Notification Spam, Confirmshaming, Missing Feedback, Destructive Defaults, Broken Error Recovery.
 
-Studio_X's users build for end-users who may include vulnerable populations — disclosure, consent, and moderation affordances must be surfaced so users can treat *their* users ethically.
+Studio_X's users build for end-users who may include vulnerable populations, so disclosure, consent, and moderation affordances need to be surfaced well enough that users can treat *their* users ethically.
 
 ## Evidence on Hand
 
-- **`LEARNINGS.md`** — funnel data, personas, hypothesis stack, competitive benchmark, service blueprint, decision log. Paid for in research; don't re-derive.
+- **`LEARNINGS.md`** — funnel data, personas, hypothesis stack, competitive benchmark, service blueprint, decision log. Already researched; read it instead of re-deriving it.
 - **`references/prd-q3-roadmap-execution-2026-07-29.html`** + `TODO-Q3-ROADMAP.md` — the official Q3 roadmap mapped to epics and waves.
 - **`references/ia-mapping.md`** — Console → Studio 56/56 URL coverage. **`references/sitemap.md`** — original Console structure. **`references/realtime-services-blueprint.md`** — 13-service Real-Time map.
 - **`references/ia-revamp-agent-vs-deployment.md`** — the Agent/Deployment split blueprint.
@@ -118,25 +118,25 @@ Studio_X's users build for end-users who may include vulnerable populations — 
 - **`studio_x_2/`** — the live app, deployed at https://ai-studio-console-redesign.vercel.app. `studio-x/` is the previous app (reference only); `wireframes/app.html` is the superseded origin.
 - **Simulated user-testing transcripts** — three developer personas, run per shipped commit (`references/user-testing-protocol.md`).
 
-**Absences future work must not fabricate:** there are no real customers, testimonials, case studies, benchmarks, or press for Studio_X — it is an unreleased internal redesign. There is no live backend and no real usage data beyond the funnel table above. Agora does not currently sell or port phone numbers (telephony is BYO SIP), and there is no published concurrency or CPS ceiling.
+**Absences future work must not fabricate.** Studio_X is an unreleased internal redesign, so it has no real customers, testimonials, case studies, benchmarks, or press. There is no live backend and no real usage data beyond the funnel table above. Agora does not currently sell or port phone numbers (telephony is BYO SIP), and there is no published concurrency or CPS ceiling.
 
 ## Product Principles
 
-1. **Get out of the way.** This is a task tool, not an engagement product. The user's win is finishing and leaving.
-2. **Credentials are sacred.** App IDs, keys, and tokens must be findable, masked, copyable, and never ambiguous about which of the three kinds of "credential" is meant.
-3. **Surface problems before they become crises.** Billing thresholds, expiries, and failures appear early and in context — not in a place the user has to think to visit.
-4. **Density over decoration.** Information density is a feature for this audience. Whitespace that costs a developer a scroll is a tax.
+1. **Get out of the way.** Optimize for task completion rather than time spent. A user who finishes fast and leaves is the success case.
+2. **Credentials are sacred.** App IDs, keys, and tokens must be findable, masked, copyable, and always explicit about which of the three kinds of "credential" is meant.
+3. **Surface problems before they become crises.** Billing thresholds, expiries, and failures appear early and in context, rather than in a section the user has to remember to check.
+4. **Density over decoration.** Information density is a feature for this audience; whitespace that adds a scroll costs them time.
 5. **No visible seams.** Handoffs between building an agent and managing the project, billing, or credentials must read as one product.
-6. **Revenue is minutes, not milestones.** Every surface is judged on whether it moves the user toward live traffic — not toward a completed form.
+6. **Judge surfaces on live traffic, not on completed forms.** Revenue is minutes consumed, so a flow that produces a finished configuration and no traffic has not worked.
 
 ## Accessibility & Inclusion
 
 **Target: WCAG 2.2 AA.** Chosen as the enterprise/regulated-SaaS baseline and the EAA-aligned bar, consistent with the product's SOC 2 / GDPR / EU AI Act posture.
 
-Known gaps to close rather than defend:
+Known gaps against that target:
 
 - Chart SVGs currently lack `aria-label`s and accessible text alternatives.
 - Mobile, RTL, and voice-control support were explicitly deferred in the resilience pass and remain unaddressed.
 - Focus appearance and dragging alternatives (2.2-specific criteria) have not been audited.
 
-Conformance has not been formally tested or certified — do not claim it.
+Conformance has not been formally tested or certified. Don't claim it.
