@@ -1,0 +1,218 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave 2 — managed mode, honest pricing, SIP truth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#00658d; --brand-soft:#e3f1f7; --ink:#13202b; --muted:#5a6b77;
+    --paper:#fcfdfe; --card:#ffffff; --line:#dde6ec; --wash:#f3f7fa;
+    --red:#c9184a; --s1:#b3261e; --s1-bg:#fbebea; --s2:#8a5a00; --s2-bg:#faf1dd;
+    --ok:#1a7f4e; --ok-bg:#e5f3ec;
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --brand:#00c2ff; --brand-soft:#0b2a38; --ink:#e8eef3; --muted:#93a4b0;
+    --paper:#0c141b; --card:#121d26; --line:#22323e; --wash:#101a22;
+    --red:#ff5c8a; --s1:#ff8a80; --s1-bg:#3a1512; --s2:#ffce6b; --s2-bg:#332608;
+    --ok:#6bd39e; --ok-bg:#0d2b1d;
+  }}
+  :root[data-theme="light"]{
+    --brand:#00658d; --brand-soft:#e3f1f7; --ink:#13202b; --muted:#5a6b77;
+    --paper:#fcfdfe; --card:#ffffff; --line:#dde6ec; --wash:#f3f7fa;
+    --red:#c9184a; --s1:#b3261e; --s1-bg:#fbebea; --s2:#8a5a00; --s2-bg:#faf1dd;
+    --ok:#1a7f4e; --ok-bg:#e5f3ec;
+  }
+  :root[data-theme="dark"]{
+    --brand:#00c2ff; --brand-soft:#0b2a38; --ink:#e8eef3; --muted:#93a4b0;
+    --paper:#0c141b; --card:#121d26; --line:#22323e; --wash:#101a22;
+    --red:#ff5c8a; --s1:#ff8a80; --s1-bg:#3a1512; --s2:#ffce6b; --s2-bg:#332608;
+    --ok:#6bd39e; --ok-bg:#0d2b1d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.6 "Instrument Sans",-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:48px 24px 96px}
+  header.doc{border-bottom:2px solid var(--brand);padding-bottom:24px;margin-bottom:28px}
+  .eyebrow{color:var(--brand);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+  h1{font-size:34px;line-height:1.15;margin:8px 0 12px;text-wrap:balance;font-weight:700}
+  .meta{color:var(--muted);font-size:14px}
+  .meta a{color:var(--brand)}
+  h2{font-size:22px;margin:52px 0 12px;font-weight:700}
+  h2 .no{color:var(--brand);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:28px 0 8px;font-weight:700}
+  p{max-width:74ch}
+  .lead{font-size:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0}
+  .callout{border-left:4px solid var(--s1);background:var(--s1-bg);border-radius:6px;padding:14px 18px;margin:18px 0}
+  .callout.brand{border-left-color:var(--brand);background:var(--brand-soft)}
+  .callout.ok{border-left-color:var(--ok);background:var(--ok-bg)}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  .tblwrap{overflow-x:auto;margin:12px 0}
+  th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+     border-bottom:2px solid var(--line);padding:8px 10px;white-space:nowrap}
+  td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+  .S1{background:var(--s1-bg);color:var(--s1)} .S2{background:var(--s2-bg);color:var(--s2)}
+  .OK{background:var(--ok-bg);color:var(--ok)} .BR{background:var(--brand-soft);color:var(--brand)}
+  code{background:var(--wash);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px}
+  .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+  @media(max-width:760px){.statrow{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+  .stat b{display:block;font-size:27px;color:var(--brand);font-variant-numeric:tabular-nums}
+  .stat span{font-size:13px;color:var(--muted)}
+  figure{margin:20px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+  figure img{display:block;width:100%;height:auto}
+  figcaption{padding:10px 16px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+  figcaption b{color:var(--ink)}
+  .marker{display:inline-block;background:var(--red);color:#fff;border-radius:4px;
+    padding:0 6px;font-size:12px;font-weight:700;margin-right:4px}
+  ul{padding-left:22px} li{margin:5px 0;max-width:74ch}
+  .test{background:var(--wash);border:1px solid var(--line);border-left:4px solid var(--brand);
+    border-radius:6px;padding:12px 16px;margin:10px 0;font-size:14px}
+  .test b{display:block;margin-bottom:3px}
+  .test a{color:var(--brand)}
+  .math{font-variant-numeric:tabular-nums;background:var(--wash);border:1px solid var(--line);
+    border-radius:8px;padding:12px 16px;margin:12px 0;font-size:15px}
+  footer{margin-top:64px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">Studio_X · Wave 2 · 2026-07-30</div>
+  <h1>Managed mode was already live. Nobody had told the console.</h1>
+  <div class="meta">
+    Live: <a href="https://ai-studio-console-redesign.vercel.app">ai-studio-console-redesign.vercel.app</a> ·
+    App: <code>studio_x_2/</code> · Design/FE only, mock data ·
+    Roadmap: <a href="prd-q3-roadmap-execution-2026-07-29.html">Q3 PRD</a> Wave 2 ·
+    Prior: <a href="wave1-implementation-log-2026-07-29.html">Wave 1 log</a>
+  </div>
+</header>
+
+<p class="lead">Five research streams ran first — four competitor scans and a three-persona focus group. They found something bigger than the planned features: <b>Agora already ships managed mode at the API layer, it is cheaper than bringing your own keys, and the console says nothing about it.</b> They also caught a two-times under-quote in the batch preflight that I introduced in Wave 1.</p>
+
+<div class="statrow">
+  <div class="stat"><b>5</b><span>research streams</span></div>
+  <div class="stat"><b>3</b><span>S1 defects fixed first</span></div>
+  <div class="stat"><b>2×</b><span>the preflight was under-quoting</span></div>
+  <div class="stat"><b>2</b><span>features research killed</span></div>
+</div>
+
+<h2 id="pricing"><span class="no">1</span>The pricing bug, and the fact that explains it</h2>
+
+<div class="callout">
+  <b>I introduced half of this in Wave 1.</b> Making the estimate compute from real models was right; labelling the vendor subtotal as the total was not. The batch preflight quoted a 5,000-contact run at <b>$500</b> when it would bill <b>$1,000+</b> — inside the very screen built to prevent bill shock.
+</div>
+
+<p>The builder was showing ~$0.05/min (the summed vendor list price) while billing ran on $0.10/min. Two authoritative-looking numbers, one product. One tester stopped believing every other figure on the page after spotting it — and then handed over the insight that resolved it: <i>the gap isn't a bug, it's the feature you haven't built. $0.05 is what the vendors cost. $0.10 is Agora's rate. The delta is managed mode's price.</i></p>
+
+<p>Verified against Agora's published Conversational AI pricing, and it is genuinely unusual:</p>
+
+<div class="math">
+  Agora charges <b>$0.10/min either way</b> — the docs state you pay the same price even when you bring your own key.<br>
+  Under <b>managed</b>, ASR/LLM/TTS usage is <b>included</b> in that rate.<br>
+  So: <b>managed = $0.10/min all in</b> · <b>your own keys = $0.10/min + your vendor bills (~$0.15 total)</b>.
+</div>
+
+<p><b>Managed is the cheaper option.</b> Every competitor prices the opposite way — Deepgram discounts BYO into a named cheaper SKU, Retell removes the line item entirely, OpenRouter charges a BYO fee. Agora is alone in subsidising the managed path, and it was invisible in the UI. Pricing now flows from one constant: <code>AGORA_RATE_PER_MIN</code>, which <code>PAYG_RATE</code> aliases rather than duplicating, since two hand-written copies of one rate is exactly how they drifted apart.</p>
+
+<figure>
+  <img src="wave2-shots/02-honest-cost.png" alt="Builder model tier showing a single all-in per-minute total plus a stated measurement boundary, both marked in red">
+  <figcaption>
+    <span class="marker">1</span><b>One honest total.</b> Under managed it reads as one number with the vendors named as included. Switch any slot to your own key and it becomes arithmetic — Agora's rate <i>plus</i> your vendor's, with the sum spelled out and an explicit note that switching back to managed costs less.
+    <span class="marker">2</span>The measurement boundary, stated, so the latency figure is falsifiable.
+  </figcaption>
+</figure>
+
+<h2 id="managed"><span class="no">2</span>Managed mode — per component, never global</h2>
+
+<p>Agora's own API scopes <code>credential_mode</code> <i>inside</i> each of the asr, llm and tts blocks independently, and every competitor scanned does the same. A global toggle would have been wrong on day one. It also matches how people actually work: the common real config is managed LLM plus your own cloned ElevenLabs voice.</p>
+
+<figure>
+  <img src="wave2-shots/01-managed-vs-byo.png" alt="Advanced models sheet showing Agora managed and Your own key toggles beneath each of the STT, LLM and TTS pickers, with Azure noted as bring-your-own-key only">
+  <figcaption>
+    <span class="marker">1</span><b>A mode control under each slot.</b>
+    <span class="marker">2</span><b>The economics lead the copy</b> — "Included — no key to add, no vendor bill."
+    Note the TTS row: <b>Azure is bring-your-own-key only</b>, so it renders that fact instead of offering a mode Agora can't honour. Every scanned competitor has a ragged managed/BYO matrix and none of them says so; a symmetric toggle everywhere would be a lie.
+  </figcaption>
+</figure>
+
+<div class="test">
+  <b>Test it</b>
+  <a href="https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit">Aria → Voice → Advanced — models, speech &amp; interruptions</a>.
+  Flip the <b>LLM</b> to <b>Your own key</b> and watch the cost line become an addition rather than a single number. Then look at the TTS row, which refuses the choice because Agora doesn't resell Azure.
+</div>
+
+<h2 id="sip"><span class="no">3</span>SIP — the answer before the evidence</h2>
+
+<p>Two P0s here: surface SIP error codes and CPS-limit failures, and add a signalling ladder. The personas split hard on how. The first-time builder wanted the code translated away entirely ("if you show me 503 I'll paste it into a ticket and go do something else"); the Agora veteran wanted it left raw, and gave the reason that settled it: a 503 from your carrier and a 503 from our own capacity ceiling need <i>opposite</i> remediations, and flattening both to "your carrier rejected some calls" sends you to debug the wrong company.</p>
+
+<p><b>The resolution was to layer, not choose.</b> Plain language and fault attribution on top; raw headers, verbatim, underneath.</p>
+
+<figure>
+  <img src="wave2-shots/05-sip-ladder.png" alt="Call detail SIP tab showing a 408 Request Timeout explanation with a Your carrier badge and a fix line, above a ladder diagram with four participant columns and per-message header disclosures">
+  <figcaption>
+    <span class="marker">1</span><b>The answer first</b> — what happened in plain language, a <b>whose-fault</b> badge, then what to do. The badge is the load-bearing part: config / carrier / callee / capacity are four different next actions.
+    <span class="marker">2</span><b>The SIP Call-ID is promoted out of the headers</b> with a copy button, because it's the first thing a carrier ticket asks for.
+    <span class="marker">3</span><b>The ladder is the evidence underneath.</b> Four participant columns (caller · carrier · Agora SBC · agent) — not two, because most failures live in the hop a two-column diagram erases. Time runs down the gutter, failures render in the destructive colour, and every message expands to verbatim headers.
+  </figcaption>
+</figure>
+
+<div class="callout brand">
+  <b>Worth knowing where this sits competitively.</b> Of seven voice-AI platforms scanned, five ship a PCAP download and tell you to open Wireshark. Only two render a ladder in-product, and neither offers click-through to raw headers or names whose fault it was. The nearest reference implementations are Homer and Wireshark themselves.
+</div>
+
+<div class="test">
+  <b>Test it</b>
+  <a href="https://ai-studio-console-redesign.vercel.app/calls">Monitor → Call History</a> → open any row with a <b>Failed</b> outcome → the <b>SIP</b> tab (it carries the response code as a badge).
+  Different calls produce different codes, so open a few: 486 and 480 blame the callee and tell you there's nothing to fix; 403 blames your config and links to the trunk; 503 explicitly says it means two different things and to check which. Expand <b>Headers</b> on any message.
+</div>
+
+<h2 id="smaller"><span class="no">4</span>The smaller truths</h2>
+
+<figure>
+  <img src="wave2-shots/04-plans-free-tier.png" alt="Plans page Free tier card now reading 300 minutes per month">
+  <figcaption>
+    <span class="marker">1</span><b>The free tier said 200 on Plans and 300 on Usage</b> — same account, two tabs. 300 is correct and verified. A tester named this as his standard check for whether a company's billing and product teams talk to each other.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="wave2-shots/03-usage-sip-meter.png" alt="Usage page quota meters including a new SIP direct connection row positioned next to RTC concurrent channels">
+  <figcaption>
+    <span class="marker">1</span><b>A SIP direct-connection meter</b>, deliberately adjacent to RTC concurrent channels. Without a real row, readers hunting for their SIP capacity misread the RTC line as it — a different product entirely.
+  </figcaption>
+</figure>
+
+<p>Also fixed: the seeded Anthropic credential was warning that it would expire on a date two months in the past, which teaches people to ignore expiry warnings; and managed providers are now excluded from expiry checks altogether, since there is no key of yours to lapse.</p>
+
+<h2 id="notbuilt"><span class="no">5</span>What research killed</h2>
+<div class="card">
+  <h3 style="margin-top:0">New capacity SKUs <span class="pill S2">dropped</span></h3>
+  <p>The roadmap asked for capacity-based SKUs. The focus group's verdict was that we already shipped this and didn't notice: the concurrency card does prorated self-serve lines with included and purchased kept separate, queue-don't-drop at the wall, and line fees explicitly excluded from the spend cap. One tester rated it above Retell's equivalent. A second capacity product would fracture the one clean money story in the app — and a CPS upsell is worse, because on a bring-your-own-SIP platform the binding limit is usually the customer's own carrier, which Agora cannot sell more of. <b>The answer is to attribute capacity limits, not sell them.</b></p>
+</div>
+<div class="card">
+  <h3 style="margin-top:0">Provisioning-delay work <span class="pill OK">already done</span></h3>
+  <p>All three personas independently rated the existing first-run ceremony as finished — staged, named, honest elapsed counter, retry that re-runs only the failed stage, and a breakable wall. One called it the best-considered thing he saw. Closed, with two P2 nits noted below.</p>
+</div>
+
+<h2 id="next"><span class="no">6</span>What's next</h2>
+<p>The strongest finding of the whole round is a gap nobody in the category has filled:</p>
+<div class="callout brand">
+  <b>No voice-AI platform correlates carrier signalling and pipeline stages on one time axis.</b> The products with a SIP ladder have no pipeline spans; the products with pipeline traces have no SIP spans. "Why was this call slow or broken" lives in two views everywhere. <b>Wave 1 built the pipeline waterfall and Wave 2 built the SIP ladder — merging them onto one axis is genuinely novel and we already own both halves.</b>
+</div>
+<p>Also carried forward, in the order the focus group recommended:</p>
+<ul>
+  <li><b>Schema before UI for SIP</b> — the diagnosis engine has no place to put a carrier failure. <code>CallSignals</code> is entirely media- and model-plane, and <code>FixTarget</code> has no <code>channel</code> level, so a SIP rule can't be routed anywhere. Fix that before adding more SIP surfaces or it rots as a special case.</li>
+  <li><b>Attribute CPS</b> — a dial-rate tile that doesn't say whether the ceiling is your carrier's or ours labels two opposite remediations identically.</li>
+  <li><b>A <code>carrier-failed</code> filter in Call History</b> — the cheapest high-value item in the wave and the stated competitive parity bar.</li>
+  <li><b>Trunk health on the phone-number detail route</b>, so the existing "Check the trunk" button stops dead-ending on a static channel list.</li>
+  <li><b>The live-switch boundary</b> — "applies to calls started after 14:03; 40 in-flight calls finish on the current config." The config-version machinery already exists.</li>
+  <li><b>A project-level BYO-only policy</b>, which is what converts a regulated customer from blocker to advocate.</li>
+  <li><b>A busy-hour sizing calculator</b> for concurrency, and a recommendation drawn from observed peak — only two of eleven products help you size at all, and none uses your own telemetry.</li>
+</ul>
+
+<footer>
+  Studio_X · Wave 2 implementation log · 2026-07-30 · screenshots captured against the live production build at 1600×1200 via <code>scripts/annotate-shots.mjs</code>; red markers carry the design rationale per the <a href="ship-protocol.html">ship protocol</a>.
+</footer>
+</div>

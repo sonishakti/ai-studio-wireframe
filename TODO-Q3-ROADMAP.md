@@ -3,7 +3,8 @@
 > Source: ClickUp [Q3 Roadmap — Month × Module](https://agora.clickup.com/8556478/v/l/6-901114080734-1) (Product / Convo AI), read in full 2026-07-29.
 > Execution mapping: `references/prd-q3-roadmap-execution-2026-07-29.html` — 7 epics (A–G), 4 waves (Jul→Oct 2026).
 > Legend: `P0/P1/P2` priority · `YYYY-MM` due month · `→A..G` PRD epic (console-facing) · `[infra]` = backend/internal, no Studio_X surface · `(+N)` unexpanded subtasks in ClickUp.
-> Wave 1 shipped 2026-07-29 — see `references/wave1-implementation-log-2026-07-29.html`.
+> Wave 1 shipped 2026-07-29; Wave 2 (managed mode · pricing · SIP) 2026-07-30 — see `references/wave2-implementation-log-2026-07-30.html`.
+> Wave 1 detail — see `references/wave1-implementation-log-2026-07-29.html`.
 > Check off items as their **console surface ships in studio_x_2** (infra items: check when Engine/SIP delivers).
 
 ## Engine (45)
@@ -75,7 +76,7 @@
 - [ ] Build a conversational AI Composer for agent configuration — P1 →F (/composer exists)
 - [ ] Build a visual graph editor for multi-agent workflows — P1 →F
 - [ ] Add agent personality and tone controls — P2 →A
-- [ ] Implement Studio managed mode using Engine reseller mode — P0 · 2026-08 →E
+- [x] Implement Studio managed mode using Engine reseller mode — P0 · 2026-08 →E — **shipped 2026-07-30 (Wave 2)**
 - [ ] Let developers purchase and assign phone numbers in Studio — P0 · 2026-09 (+1) →D ⚠️ reverses BYO-SIP-only lock
 - [ ] Show live sentiment trends and let operators monitor active calls →C ⚠️ reverses no-live-monitoring lock
 - [ ] Define inbound pilot metrics (FCR, answer speed, handle time, escalation, sentiment) →C
@@ -87,7 +88,7 @@
 - [ ] Agent to review production recordings and suggest improvements (e.g. IPA) →B
 - [ ] Score production calls on resolution, sentiment, quality, and business outcomes →B
 - [x] Improve default agent templates and model selection — P0 · 2026-07 →G — **shipped 2026-07-29 (Wave 1)**
-- [ ] Remove the first-agent Convo AI provisioning delay — P0 · 2026-08 →G
+- [x] Remove the first-agent Convo AI provisioning delay — P0 · 2026-08 →G — **already solved (ceremony); closed 2026-07-30**
 - [x] [UI] Integrate Couchbase as a RAG provider — P1 · 2026-07 (+2) →E — **shipped 2026-07-29 (Wave 1)**
 - [ ] Ability to add AI disclaimer in front of the greeting — P1 →A
 - [ ] Studio API Webhook — P0 →C (/developer/webhooks)
@@ -106,7 +107,7 @@
 - [ ] Build a telco operations dashboard (ASR, NER, PDD; dynamic routing) — P1 [internal]
 - [ ] Support DTMF menu entry and inbound queue handling before AI triage — P2 →D
 - [ ] [POC] Define a separate SIP video optimization path for AMN — P1 · AMN [infra]
-- [ ] Add SIP signaling visual ladder diagrams — P0 · 2026-08 →C
+- [x] Add SIP signaling visual ladder diagrams — P0 · 2026-08 →C — **shipped 2026-07-30 (Wave 2)**
 - [ ] [SIP] Warm Transfer w/ LLM-based in-call summary — P1 · 2026-08 →A
 - [ ] Phone Number Resell — P0 · 2026-09 →D ⚠️ reverses "Agora sells no numbers"
 - [ ] Self-service phone number CPS — P0 · 2026-09 →D
