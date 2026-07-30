@@ -20,16 +20,25 @@ import { hasChannel } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
 /** Wireframe seed for the version-history table (property · when · old → new
- *  · who) — the shape the owner proposed 2026-07-28. */
-const VERSION_HISTORY: { property: string; date: string; old: string; next: string; by: string }[] = [
-  { property: "Model tier", date: "2026-07-24 14:02", old: "Agora Balanced", next: "Agora Cheapest", by: "you" },
-  { property: "System prompt", date: "2026-07-21 09:48", old: "…escalate to a human.", next: "…escalate to a human if asked.", by: "you" },
+ *  · who) — the shape the owner proposed 2026-07-28. Dates are OFFSETS from
+ *  now, resolved at render, so a mock agent's history always postdates its
+ *  existence; a never-deployed draft shows NO rows — fixed "by you" dates had
+ *  fresh drafts showing edits that predate the agent (user-test 2026-07-30). */
+const VERSION_SEED: { property: string; hoursAgo: number; old: string; next: string; by: string }[] = [
+  { property: "Model tier", hoursAgo: 26, old: "Agora Balanced", next: "Agora Cheapest", by: "you" },
+  { property: "System prompt", hoursAgo: 78, old: "…escalate to a human.", next: "…escalate to a human if asked.", by: "you" },
   // "you" everywhere — a fresh single-user account must never imply a stranger
   // edited its agent (user-test 2026-07-29; was a seeded teammate email).
-  { property: "Max call duration", date: "2026-07-18 16:20", old: "240 s", next: "300 s", by: "you" },
-  { property: "Voicemail detection", date: "2026-07-18 16:19", old: "Off", next: "On", by: "you" },
-  { property: "Voice", date: "2026-07-12 11:05", old: "Aria (ElevenLabs)", next: "Jenny (Azure)", by: "you" },
+  { property: "Max call duration", hoursAgo: 140, old: "240 s", next: "300 s", by: "you" },
+  { property: "Voicemail detection", hoursAgo: 141, old: "Off", next: "On", by: "you" },
+  { property: "Voice", hoursAgo: 305, old: "Aria (ElevenLabs)", next: "Jenny (Azure)", by: "you" },
 ]
+
+/** "2026-07-30 14:02" — the table's existing date idiom, local time. */
+function fmtWhen(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, "0")
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+}
 
 /**
  * Section 4 — GO LIVE, the DEPLOY PANEL (v4 IA, 2026-07-28): everything
@@ -57,6 +66,16 @@ export function DeploySection({
 }) {
   const [behaviorOpen, setBehaviorOpen] = React.useState(false)
   const [historyOpen, setHistoryOpen] = React.useState(false)
+  // A draft that has never deployed has no versions — an agentId is only
+  // minted by the first deploy, so its presence is the honest signal.
+  const deployedBefore = !!draft.agentId
+  const versionRows = React.useMemo(
+    () =>
+      deployedBefore
+        ? VERSION_SEED.map((v) => ({ ...v, date: fmtWhen(new Date(Date.now() - v.hoursAgo * 3_600_000)) }))
+        : [],
+    [deployedBefore],
+  )
   const batch = hasChannel(draft, "batch")
   const inbound = hasChannel(draft, "inbound")
   const session = hasChannel(draft, "code") && draft.channels.length === 1
@@ -137,31 +156,38 @@ export function DeploySection({
             </p>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-            <div className="overflow-hidden rounded-lg border border-border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Property</TableHead>
-                    <TableHead>Changed</TableHead>
-                    <TableHead>Old → New</TableHead>
-                    <TableHead>By</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {VERSION_HISTORY.map((v) => (
-                    <TableRow key={`${v.property}-${v.date}`}>
-                      <TableCell className="font-medium">{v.property}</TableCell>
-                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{v.date}</TableCell>
-                      <TableCell className="max-w-[220px] text-xs text-muted-foreground">
-                        <span className="line-through decoration-muted-foreground/50">{v.old}</span>{" "}
-                        <span className="text-foreground">→ {v.next}</span>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{v.by}</TableCell>
+            {versionRows.length > 0 ? (
+              <div className="overflow-hidden rounded-lg border border-border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Changed</TableHead>
+                      <TableHead>Old → New</TableHead>
+                      <TableHead>By</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {versionRows.map((v) => (
+                      <TableRow key={`${v.property}-${v.date}`}>
+                        <TableCell className="font-medium">{v.property}</TableCell>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{v.date}</TableCell>
+                        <TableCell className="max-w-[220px] text-xs text-muted-foreground">
+                          <span className="line-through decoration-muted-foreground/50">{v.old}</span>{" "}
+                          <span className="text-foreground">→ {v.next}</span>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{v.by}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              // Fresh draft: nothing has deployed, so nothing predates it.
+              <p className="text-sm text-muted-foreground">
+                No versions yet — your first deploy records version 1.
+              </p>
+            )}
             <p className="pt-3 text-xs text-muted-foreground">
               Wireframe data — versions are recorded on every deploy, one row per changed property.
             </p>

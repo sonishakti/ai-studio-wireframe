@@ -855,10 +855,10 @@ export function AgentWizard({
       return draft.voice
         ? `${cardVoice?.name ?? "Custom voice"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label} · ${draft.stack.language ?? "English"}${edited}`
         : "No voice yet"
-    // "No channel picked yet", never "No deployment yet" — on this screen
-    // "deployment" describes LIVE state (the header chip), not a config gap
-    // (user-test 2026-07-29).
-    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No channel picked yet"
+    // "No deployment TYPE picked yet", never "No deployment yet" — on this
+    // screen bare "deployment" describes LIVE state (the header chip), not a
+    // config gap (user-test 2026-07-29; vocabulary sweep 2026-07-30).
+    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No deployment type picked yet"
     if (n === 3) {
       if (!draft.systemPrompt.trim()) return "No prompt yet"
       const parts = ["Prompt set"]
@@ -978,7 +978,9 @@ export function AgentWizard({
         >
           Run simulations
         </Button>
-        {/* Verdict line — the standing "simulated" disclosure rides it. */}
+        {/* Verdict line — states split (user-test 2026-07-30): "· simulated"
+            tags actual RESULTS only; pre-run is a plain "No sim runs yet".
+            The wireframe-wide disclosure is the standing note beside it. */}
         <button
           type="button"
           onClick={() => openTest("simulations")}
@@ -986,8 +988,11 @@ export function AgentWizard({
         >
           {simSummary
             ? `Last run: ${simSummary.passed}/${simSummary.total} passed · simulated`
-            : "No test runs yet · simulated preview"}
+            : "No sim runs yet"}
         </button>
+        <span className="hidden shrink-0 text-xs text-muted-foreground/70 lg:inline">
+          Wireframe — all runs are simulated
+        </span>
       </div>
 
       {/* Below lg the rail stacks above the sections; a slim sticky strip keeps
@@ -1067,14 +1072,17 @@ export function AgentWizard({
             ))}
           </nav>
 
-          {/* Fold control — "Expand all" whenever anything is folded. */}
-          <button
-            type="button"
+          {/* Fold control — "Expand all" whenever anything is folded. A real
+              ghost button, not a footnote link: it's load-bearing now that
+              fold state persists per agent (user-test 2026-07-30). */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
             onClick={() => setAllCollapsed(collapsedSet.size === 0)}
-            className="rounded px-2.5 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {collapsedSet.size > 0 ? "Expand all" : "Collapse all"}
-          </button>
+          </Button>
 
           {/* Autosave feedback — "DRAFT saved", not "Saved" (user-test #11). */}
           {saveState !== "idle" && (
@@ -1179,16 +1187,24 @@ export function AgentWizard({
                       />
                     </SectionRows>
                   )}
-                  {/* 2 · CHANNEL — multi-select + per-channel connection. */}
+                  {/* 2 · DEPLOYMENT — pick the type + per-type connection. */}
                   {n === 2 && (
-                    <SectionRows>
-                      <ChannelSection
-                        draft={draft}
-                        update={update}
-                        liveChannels={isLive ? baseline.current?.channels : undefined}
-                        onGoToStep={openRow}
-                      />
-                    </SectionRows>
+                    <>
+                      {/* Deployment vs Go Live disambiguation (user-test
+                          2026-07-30): the TYPE is chosen here; the launch
+                          lives in Go Live. Owner-locked labels untouched. */}
+                      <p className="pb-5 text-sm text-muted-foreground">
+                        Where your agent takes calls — launch it in Go Live.
+                      </p>
+                      <SectionRows>
+                        <ChannelSection
+                          draft={draft}
+                          update={update}
+                          liveChannels={isLive ? baseline.current?.channels : undefined}
+                          onGoToStep={openRow}
+                        />
+                      </SectionRows>
+                    </>
                   )}
                   {/* 3 · CONTEXT — the words; knowledge & tools collapse to a
                       compact "add additional context" door (owner 2026-07-28). */}

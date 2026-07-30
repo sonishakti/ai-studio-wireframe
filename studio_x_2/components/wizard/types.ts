@@ -52,6 +52,14 @@ export function resolveStepParam(n: number): number | null {
   return null
 }
 
-export function stepTitle(n: number, _draft: AgentDraft): string {
+export function stepTitle(n: number, draft: AgentDraft): string {
+  // §5 echoes the chosen deployment type — "Go Live · Batch" — so Deployment
+  // (pick the type) and Go Live (launch it) read as one flow (user-test
+  // 2026-07-30). Owner-locked labels themselves are untouched.
+  if (n === 5) {
+    const c = draft.channels[0]
+    const echo = c === "batch" ? "Batch" : c === "inbound" ? "Inbound" : c === "code" ? "Code" : null
+    return echo ? `${STEP_TITLES[4]} · ${echo}` : STEP_TITLES[4]
+  }
   return STEP_TITLES[n - 1]
 }

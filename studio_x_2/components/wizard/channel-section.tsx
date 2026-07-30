@@ -94,12 +94,12 @@ export function ChannelSection({
       <SectionRow
         id="wz-2-pick"
         label={`How does ${draft.name || "your agent"} take calls?`}
-        hint="One channel per agent — duplicate the agent for the other direction."
+        hint="One deployment type per agent — duplicate the agent for the other direction."
       >
         {liveChannels && liveChannels.length > 0 && (
           <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
             {draft.name || "This agent"} is live on {liveChannels.map(channelLabel).join(" · ")} — switching
-            channels takes it offline there on your next redeploy. The setup is kept, and every switch has an Undo.
+            deployment types takes it offline there on your next redeploy. The setup is kept, and every switch has an Undo.
           </p>
         )}
 
@@ -107,7 +107,7 @@ export function ChannelSection({
         <RadioCardGroup
           value={current ?? ""}
           onValueChange={(v) => v && setChannel(v as DeployChannel)}
-          aria-label="Channel"
+          aria-label="Deployment type"
           className="gap-0 divide-y divide-border"
         >
           {CHANNEL_CARDS.map((c) => (
@@ -134,16 +134,16 @@ export function ChannelSection({
 
         {/* Batch acknowledges the click (user-test 2026-07-29 S2: nothing
             rendering under the radio read as "did my click register?") —
-            same cross-link idiom as the inbound block's Go Live pointer. */}
+            parity with the inbound block's Go Live pointer (2026-07-30). */}
         {current === "batch" && (
           <p className="text-xs text-muted-foreground">
-            Runs, contacts and dialing live in{" "}
+            Contacts, caller ID &amp; schedule live in{" "}
             <button
               type="button"
               className="underline underline-offset-2 hover:text-foreground"
               onClick={() => onGoToStep(5)}
             >
-              Go Live →
+              Go Live ↓
             </button>
           </p>
         )}
