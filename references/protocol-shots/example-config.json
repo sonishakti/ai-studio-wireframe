@@ -1,0 +1,13 @@
+[{
+ "name":"protocol-demo",
+ "url":"https://ai-studio-console-redesign.vercel.app/sessions",
+ "wait":4500,
+ "marks":[
+  {"text":"Channel","tags":"th","name":"Channel column",
+   "why":"Sessions carry web/chat/SIP runs too — the column is what makes that visible."},
+  {"text":"p95 response","tags":"th","name":"p95 on the row",
+   "why":"Triage happens in the list. Without it you must open a session to learn it was fine."},
+  {"text":"Caller hung up","tags":"span","name":"Failure reason inline",
+   "why":"A failed session used to show a bare 0s while a failed call got a full diagnosis."}
+ ]
+}]

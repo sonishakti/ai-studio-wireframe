@@ -2,12 +2,38 @@
 
 > Auto-loaded each session. Full handoff is in `HANDOFF-2026-06-18.md` (latest — what just shipped + what's next; older: `HANDOFF-2026-06-02.md`); this file is the 60-second orientation so a fresh chat doesn't re-derive context.
 
+## ⚑ Ship protocol — the default loop for EVERY request
+
+> **Standing, user-directed 2026-07-30. Full detail: [`references/ship-protocol.md`](references/ship-protocol.md).**
+> Reusable research prompts + workflow commands: [`references/prompt-library.md`](references/prompt-library.md).
+
+```
+research (if the ask is new) → build → tsc + next build → commit + push
+   → vercel deploy --prod --yes → annotated screenshots → HTML log
+```
+
+Every step runs **without being asked**. Skip one only if the user says so *in that request* —
+and say which you skipped and why. Specifically:
+
+1. **Commit + push every time.** The user reviews the live site, not the working tree.
+2. **Deploy every time** — `vercel deploy --prod --yes` from the **repo root**. Git auto-deploy
+   is BROKEN; a push alone leaves the site stale. Verify the route returns 200 afterwards.
+3. **Annotated screenshots every time**, red-marked, against the live build:
+   `node scripts/annotate-shots.mjs <config.json> references/<feature>-shots`
+   Each marker carries a **name** (what it is) *and* a **why** (the design rationale). Both are
+   required — a red box with no rationale doesn't tell a reviewer what decision they're judging.
+4. **A log** at `references/<feature>-implementation-log-<date>.html` — styled self-contained
+   HTML, plus an Artifact copy with images inlined. Never a markdown dump.
+
 ## Live preview
 
-- **App (start here):** https://ai-studio-console-redesign.vercel.app — the live **Next.js app** in `studio-x/`
-- Source: `studio-x/` — Next.js App Router, **59 routes** (grows as pages are added; `pnpm tsc --noEmit` clean, `pnpm next build` green)
-- Legacy: `wireframes/app.html` — the original vanilla HTML wireframe, **superseded by `studio-x/`** (reference only; don't edit for new work)
-- ⚠️ **Vercel git auto-deploy is BROKEN** — after `git push origin main` you MUST run `vercel deploy --prod --yes` manually or the live site goes stale (see `HANDOFF-2026-06-02.md` §2)
+- **App (start here):** https://ai-studio-console-redesign.vercel.app
+- ⚠️ **The live app is `studio_x_2/`** — the wizard fork became canonical when the prod project's
+  Root Directory was repointed `studio-x/` → `studio_x_2/`. Deploy from the **repo root**.
+  Older text in this file that says `studio-x/` is the live app is STALE.
+- `studio-x/` — the previous app; still builds, no longer deployed. Reference only.
+- Legacy: `wireframes/app.html` — the original vanilla HTML wireframe. Superseded; don't edit.
+- Gate before every commit: `cd studio_x_2 && pnpm tsc --noEmit && pnpm next build`
 
 ## What this is
 
@@ -17,13 +43,15 @@ This is a **funnel rescue project** that happens to require product consolidatio
 
 ## Read order
 
-1. `HANDOFF-2026-06-18.md` — **latest** state, commits, deploy, the shipped Diagnostics feature + the next slice (§4); `HANDOFF-2026-06-02.md` is the prior one
-2. `LEARNINGS.md` — strategic frame, funnel data, personas, hypothesis stack, decision log (paid for in research — **don't re-litigate**)
-3. `references/roadmap-activation-strategy-2026-07-09.md` + `references/roadmap-features-prd-2026-07-09.md` — **the cn2meet roadmap (42 features) reframed as an activation engine** + design-ready PRD (register, P0/P1 cards, per-feature "run this skill next"). Load-bearing fact-checks inside (300-min free tier NOT 10k; Agora sells no numbers; MLLM+MCP already ship; postpaid billing; no live-monitoring/WhatsApp). Proposal — not yet built.
-4. `references/ia-mapping.md` — Console → Studio 56/56 URL coverage
-5. `references/sitemap.md` — original Agora Console structure
-5. `references/realtime-services-blueprint.md` — 13-service Real-Time map
-6. `studio-x/` — the live Next.js app (the wireframe itself); `wireframes/app.html` is the superseded HTML origin
+0. `references/ship-protocol.md` — **how every request ships** (commit · deploy · annotated shots · log) + `references/prompt-library.md` for the research prompts and workflow reruns
+1. `references/prd-q3-roadmap-execution-2026-07-29.html` + `TODO-Q3-ROADMAP.md` — the **official Convo AI Q3 roadmap** (111 ClickUp tasks) mapped to 7 epics / 4 waves. **Wave 1 shipped 2026-07-29** — see `references/wave1-implementation-log-2026-07-29.html`. ⚠️ It reverses three older fact-checks: Agora **will** resell phone numbers (P0, Sep), live monitoring **is** planned, WhatsApp voice **is** P0.
+2. `HANDOFF-2026-06-18.md` — prior state, commits, deploy, the shipped Diagnostics feature + the next slice (§4); `HANDOFF-2026-06-02.md` is the one before
+3. `LEARNINGS.md` — strategic frame, funnel data, personas, hypothesis stack, decision log (paid for in research — **don't re-litigate**)
+4. `references/roadmap-activation-strategy-2026-07-09.md` + `references/roadmap-features-prd-2026-07-09.md` — **the cn2meet roadmap (42 features) reframed as an activation engine** + design-ready PRD (register, P0/P1 cards, per-feature "run this skill next"). Load-bearing fact-checks inside (300-min free tier NOT 10k; Agora sells no numbers; MLLM+MCP already ship; postpaid billing; no live-monitoring/WhatsApp). Proposal — not yet built.
+5. `references/ia-mapping.md` — Console → Studio 56/56 URL coverage
+6. `references/sitemap.md` — original Agora Console structure
+7. `references/realtime-services-blueprint.md` — 13-service Real-Time map
+8. `studio_x_2/` — **the live app**; `studio-x/` is the previous one, `wireframes/app.html` the superseded HTML origin
 
 ## Current sidebar (LOCKED 2026-06-05 — labeled groups; Build folds in deploy)
 
@@ -140,20 +168,22 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 
 ## Tech stack
 
-- **Current app (`studio-x/`):** Next.js 16 (App Router) · React 19 · Tailwind v4 · shadcn/ui · oklch design tokens · cyan primary · DM Sans · Lucide icons · Light/Dark/System theme. Build with `pnpm` (`pnpm tsc --noEmit`, `pnpm next build`). **Mock data only — no backend.**
+- **Current app (`studio_x_2/`):** Next.js 16 (App Router) · React 19 · Tailwind v4 · shadcn/ui · oklch design tokens · cyan primary · DM Sans · Lucide icons · Light/Dark/System theme. Build with `pnpm` (`pnpm tsc --noEmit`, `pnpm next build`). **Mock data only — no backend.**
 - **Legacy origin:** `wireframes/app.html` — the original vanilla HTML/CSS/JS wireframe the app was ported from. Superseded; don't edit for new work.
-- **Token parity:** the same `--primary` / `--foreground` / `--ring` CSS variables carry from the legacy wireframe into `studio-x/` unchanged.
+- **Token parity:** the same `--primary` / `--foreground` / `--ring` CSS variables carry from the legacy wireframe into `studio_x_2/` unchanged.
 
 ## Where things live
 
 | What | Where |
 |---|---|
-| App routes (pages) | `studio-x/app/(dashboard)/**/page.tsx` |
-| Components | `studio-x/components/` |
-| Mock data + helpers | `studio-x/lib/campaign-data.ts` |
-| Analytics taxonomy | `studio-x/lib/analytics.ts` |
+| App routes (pages) | `studio_x_2/app/(dashboard)/**/page.tsx` |
+| Components | `studio_x_2/components/` |
+| Mock data + helpers | `studio_x_2/lib/campaign-data.ts` |
+| Analytics taxonomy | `studio_x_2/lib/analytics.ts` |
 | Reference screenshots | `screenshots/` (newest), `references/console_map/` |
-| Open work checklist | `HANDOFF-2026-06-02.md` §5 |
+| Open work checklist | `TODO-Q3-ROADMAP.md` (roadmap backlog) · `HANDOFF-2026-06-02.md` §5 |
+| Ship protocol + prompts | `references/ship-protocol.md` · `references/prompt-library.md` |
+| Annotated screenshot tool | `scripts/annotate-shots.mjs` |
 | Reference docs | `references/*.md` |
 | Legacy HTML wireframe | `wireframes/app.html` (superseded) |
 | Recent commits | `git log --oneline -20` |
@@ -163,7 +193,7 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 - Cite `docs.agora.io/en/` URLs for any Agora-primitive design call.
 - Commits are the truth — docs cite them. If a doc is stale, fix the doc; don't second-guess the wireframe.
 - Keep a decision log entry (LEARNINGS.md §20 pattern) for any non-trivial choice.
-- `studio-x/` is the source of truth; the legacy `wireframes/app.html` is reference-only. Design tokens only — no hardcoded colors / arbitrary `text-[Npx]`; `buoy drift check` validates.
+- `studio_x_2/` is the source of truth; `studio-x/` and the legacy `wireframes/app.html` are reference-only. Design tokens only — no hardcoded colors / arbitrary `text-[Npx]`; `buoy drift check` validates.
 
 ## Skills to reach for
 
