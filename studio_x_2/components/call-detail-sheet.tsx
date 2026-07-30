@@ -20,6 +20,8 @@ import { toast } from "sonner"
 import { getAgent, getDeployment } from "@/lib/campaign-data"
 import { buildSignals, diagnoseCall, healthOf, fixHref, type Issue } from "@/lib/diagnostics"
 import { SeverityBadge } from "@/components/severity-badge"
+import { SipLadder } from "@/components/sip-ladder"
+import { buildSipTrace } from "@/lib/sip-trace"
 import { HealthDot } from "@/components/health-dot"
 import {
   track, Events, remediationKey, recordRemediation, listRemediations, clearRemediation,
@@ -148,6 +150,16 @@ function CallDetailBody({ call }: { call: CallDetail }) {
   const latency = React.useMemo(() => buildLatency(call.id), [call])
   const structured = React.useMemo(() => buildStructured(call), [call])
   const events = React.useMemo(() => buildEvents(call), [call])
+  const sipTrace = React.useMemo(
+    () => buildSipTrace({
+      callId: call.id,
+      direction: call.type,
+      failed: call.outcome === "Failed",
+      from: call.from,
+      to: call.to,
+    }),
+    [call],
+  )
 
   // Diagnosis — rule-based, seeded by call id so it's stable. Resolves the
   // deployment + agent so each issue's "Fix this" can deep-link to the config.
@@ -272,6 +284,16 @@ function CallDetailBody({ call }: { call: CallDetail }) {
             <Badge variant="secondary" className="h-5 px-1.5 text-xs tabular-nums">{events.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="latency">Latency</TabsTrigger>
+          {/* SIP trace — telephony only. A web session has no signaling leg,
+              so the tab doesn't exist there rather than showing an empty one. */}
+          <TabsTrigger value="sip" className="gap-1.5">
+            SIP
+            {sipTrace.failure && (
+              <Badge variant="destructive" className="h-5 px-1.5 text-xs tabular-nums">
+                {sipTrace.failure.code}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* Diagnosis — rule-based issues + suggested fixes (the remediation atom) */}
@@ -394,6 +416,11 @@ function CallDetailBody({ call }: { call: CallDetail }) {
               </TableBody>
             </Table>
           </div>
+        </TabsContent>
+
+        {/* SIP signaling ladder */}
+        <TabsContent value="sip" className="mt-3">
+          <SipLadder trace={sipTrace} />
         </TabsContent>
       </Tabs>
     </div>

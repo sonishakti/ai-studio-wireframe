@@ -1607,6 +1607,17 @@ export const CHANNEL_LABEL: Record<ChannelKind, string> = {
 
 export type CredentialStatus = "valid" | "expiring" | "expired"
 
+/**
+ * How a provider is paid for (Q3 roadmap P0, 2026-08: "Implement Studio managed
+ * mode using Engine reseller mode").
+ *   • `byo`     — your own key with the vendor; you're billed by them directly.
+ *   • `managed` — Agora resells the capacity; it lands on your Agora invoice
+ *                 and there is no key to rotate or let expire.
+ * The choice is PER PROVIDER, not per project: a team will happily let Agora
+ * resell TTS while keeping their own negotiated LLM contract.
+ */
+export type CredentialMode = "byo" | "managed"
+
 export interface VendorCredential {
   id: string
   vendor: string
@@ -1619,24 +1630,46 @@ export interface VendorCredential {
   added: string
   /** Human date the key lapses — shown when status is expiring/expired. */
   expiresOn?: string
+  mode: CredentialMode
+  /** Managed only — the per-minute rate Agora charges to resell this vendor. */
+  managedRatePerMin?: number
+}
+
+/** Providers Agora can resell, with the rate. A provider absent from this list
+ *  is BYO-only, and the UI must say so rather than offering a mode it can't
+ *  honour. Telephony is deliberately absent — Agora does not resell trunks. */
+export const MANAGED_PROVIDERS: Record<string, number> = {
+  OpenAI: 0.034,
+  Anthropic: 0.029,
+  Deepgram: 0.005,
+  ElevenLabs: 0.046,
 }
 
 export const VENDOR_CREDENTIALS: VendorCredential[] = [
-  { id: "vc_01", vendor: "OpenAI",     category: "LLM",       name: "Production API Key",       keyHint: "sk-proj-••••••••••••xK3a", status: "valid",    usedBy: 3, added: "Feb 2, 2026" },
-  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Voice API Key",            keyHint: "el_••••••••••••8f2b",      status: "valid",    usedBy: 3, added: "Feb 2, 2026" },
-  { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026" },
-  { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026" },
-  { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "May 31, 2026" },
+  { id: "vc_01", vendor: "OpenAI",     category: "LLM",       name: "Production API Key",       keyHint: "sk-proj-••••••••••••xK3a", status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "byo" },
+  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Managed by Agora",         keyHint: "—",                        status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "managed", managedRatePerMin: 0.046 },
+  { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026", mode: "byo" },
+  { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026", mode: "byo" },
+  { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "May 31, 2026", mode: "byo" },
 ]
+
+/** A managed provider can't expire — there's no key of yours to lapse. Rules
+ *  that flag expiry must skip these, or managed mode inherits a warning it
+ *  structurally cannot have. */
+export function canExpire(c: VendorCredential): boolean {
+  return c.mode === "byo"
+}
 
 /** Does this agent's stack reference the given vendor (LLM/ASR/TTS)? */
 export function agentUsesVendor(a: Agent, vendor: string): boolean {
   return a.stack.llm.vendor === vendor || a.stack.asr.vendor === vendor || a.stack.tts.vendor === vendor
 }
 
-/** Credentials that are expiring or already expired — the ones worth flagging. */
+/** Credentials that are expiring or already expired — the ones worth flagging.
+ *  Managed providers are excluded: there is no key of yours to lapse, so a
+ *  managed row must never inherit an expiry warning. */
 export function expiringCredentials(): VendorCredential[] {
-  return VENDOR_CREDENTIALS.filter((c) => c.status === "expiring" || c.status === "expired")
+  return VENDOR_CREDENTIALS.filter((c) => canExpire(c) && (c.status === "expiring" || c.status === "expired"))
 }
 
 /** Live-ish deployments whose backing agent depends on a vendor — so an expiring
