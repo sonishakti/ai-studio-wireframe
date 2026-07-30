@@ -148,6 +148,8 @@ export function DeployPreflight({
   onConfirm,
   onFix,
   onTalkFirst,
+  simSummary,
+  onViewSims,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
@@ -160,6 +162,12 @@ export function DeployPreflight({
   /** Close + jump to the section that fixes a warn row. */
   onFix: (step: number) => void
   onTalkFirst: () => void
+  /** The Test strip's last sim verdict — echoed here so the gate and the
+   *  strip tell the SAME story (user-test 2026-07-29: nobody deploys past a
+   *  red run unseen). */
+  simSummary?: { passed: number; failed: number; total: number } | null
+  /** Close + open the sims panel. */
+  onViewSims?: () => void
 }) {
   const rows = React.useMemo(() => (open ? buildRows(draft) : []), [open, draft])
   const warns = rows.filter((r) => r.state === "warn")
@@ -231,6 +239,25 @@ export function DeployPreflight({
             </li>
           ))}
         </ul>
+
+        {/* Sim verdict echo — same line the Test strip carries, linked to the
+            sims panel. A red run must be visible AT the gate, not only above it. */}
+        {onViewSims && (
+          <button
+            type="button"
+            onClick={() => { onOpenChange(false); onViewSims() }}
+            className={cn(
+              "self-start rounded text-left text-xs underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              simSummary && simSummary.failed > 0
+                ? "text-warning hover:text-warning"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {simSummary
+              ? `Last run: ${simSummary.passed}/${simSummary.total} passed · simulated`
+              : "No test runs yet · simulated preview"}
+          </button>
+        )}
 
         {/* Batch manifest — the numbers that matter at the moment of spend,
             one line per ready campaign. */}

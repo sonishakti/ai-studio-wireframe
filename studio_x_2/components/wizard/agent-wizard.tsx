@@ -855,7 +855,10 @@ export function AgentWizard({
       return draft.voice
         ? `${cardVoice?.name ?? "Custom voice"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label} · ${draft.stack.language ?? "English"}${edited}`
         : "No voice yet"
-    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No deployment yet"
+    // "No channel picked yet", never "No deployment yet" — on this screen
+    // "deployment" describes LIVE state (the header chip), not a config gap
+    // (user-test 2026-07-29).
+    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No channel picked yet"
     if (n === 3) {
       if (!draft.systemPrompt.trim()) return "No prompt yet"
       const parts = ["Prompt set"]
@@ -1274,6 +1277,8 @@ export function AgentWizard({
         onConfirm={() => { preflightConfirmedRef.current = true; publish() }}
         onFix={(m) => openRow(m)}
         onTalkFirst={() => openRow(4)}
+        simSummary={simSummary}
+        onViewSims={() => openTest("simulations")}
       />
 
       {/* Import landing — never silent (user-test #6, 2×S1). */}

@@ -322,7 +322,7 @@ const META_KEYS = new Set([
  *  the reason MUST point at it (user-test 2026-07-21 D2: one stale "isn't
  *  supported yet" against a visible toggle poisons the whole report). */
 const DROP_REASONS: Record<string, string> = {
-  channel: "The agent's channel is picked in the builder's Channel section (Inbound · Batch calls · Code / SDK) — the vendor setting itself doesn't port.",
+  channel: "The agent's channel is picked in the builder's Deployment section (Inbound · Batch calls · Code / SDK) — the vendor setting itself doesn't port.",
   webhook_url: "Webhooks would belong to the deployment, not the agent — deployment webhooks aren't here yet.",
   server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",

@@ -1,9 +1,38 @@
 "use client"
 
+import * as React from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { AgentWizard } from "@/components/wizard/agent-wizard"
+import { getAgent } from "@/lib/campaign-data"
+import { readSessionAgents } from "@/lib/agent-store"
+import { restoreDraft } from "@/lib/wizard-draft"
 
 /** Client half of the editor route — the server page resolves params. */
 export function AgentEditorClient({ id }: { id: string }) {
+  const router = useRouter()
+  // Build-time-known ids ("new" + the AGENTS mock) mount immediately — SSR
+  // parity with generateStaticParams. Everything else lives in browser
+  // storage (agents deployed this session, per-agent draft slots), so the
+  // verdict waits for mount.
+  const staticKnown = id === "new" || !!getAgent(id)
+  const [clientKnown, setClientKnown] = React.useState(false)
+  React.useEffect(() => {
+    if (staticKnown) return
+    const known = readSessionAgents().some((a) => a.id === id) || !!restoreDraft(id)
+    if (known) {
+      setClientKnown(true)
+      return
+    }
+    // Unknown id → back to the list with a notice (user-test 2026-07-29 S2):
+    // an EDIT URL must never silently mount a blank new-agent wizard.
+    toast.error("Agent not found", {
+      description: `No agent "${id}" in this project — it may have been deleted. Showing all agents.`,
+    })
+    router.replace("/agents?view=list")
+  }, [staticKnown, id, router])
+  if (!staticKnown && !clientKnown) return null
+
   return (
     <AgentWizard
       id={id}

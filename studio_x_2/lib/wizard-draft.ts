@@ -602,7 +602,17 @@ export interface PublishBlock {
 export function publishBlocks(d: AgentDraft): PublishBlock[] {
   const blocks: PublishBlock[] = []
 
-  if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
+  if (!d.voice) {
+    blocks.push({
+      // Code-path builders skip the voice story, so say WHY it still gates
+      // (user-test 2026-07-29): the voice is half of the served pipeline.
+      reason: hasChannel(d, "code")
+        ? "Choose a voice — it's the TTS half of the agent's pipeline."
+        : "Choose a voice.",
+      step: 1,
+      action: "Pick a voice",
+    })
+  }
 
   if (d.channels.length === 0) {
     blocks.push({ reason: "Choose a deployment.", step: 2, action: "Choose deployment" })
