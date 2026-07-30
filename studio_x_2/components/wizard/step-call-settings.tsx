@@ -294,7 +294,7 @@ export function HangupSettings({ draft, update }: StepProps) {
           <p className="text-xs text-muted-foreground">
             Call ends after {cb.silenceTimeoutSec} seconds of no response.{" "}
             <InfoHint label="Two silence settings?">
-              Different from the turn-taking silence in Voice › Advanced — that one shapes
+              Different from the turn-taking silence in Voice & Models › Advanced — that one shapes
               when the agent replies; this one ends the call.
             </InfoHint>
           </p>

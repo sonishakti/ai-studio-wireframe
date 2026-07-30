@@ -10,28 +10,26 @@ export interface StepProps {
   update: (patch: Partial<AgentDraft>) => void
 }
 
-/** FIVE sections (v5 IA, 2026-07-28 — owner direction, second pass): the hot
- *  path is three core decisions — VOICE (tier + voice) · CHANNEL (multi-select
- *  where it runs) · CONTEXT (what it knows and says) — then TEST (live
- *  contextual test + auto-generated simulations + A/B) sits between Context
- *  and GO LIVE, the deploy panel (campaigns/runs for outbound, call analytics
- *  for inbound, review & deploy). Advanced/orthogonal workflows stay in
- *  slide-out panels, off the hot path. */
+/** FIVE sections. Labels renamed to industry-standard developer vocabulary
+ *  (owner mock, 2026-07-30): "Context" → "Prompt & knowledge" ("context" reads
+ *  as context-window to devs; every competitor says Prompt), "Channel" →
+ *  "Deployment" (Retell/industry word for phone · web · SIP/code), "Voice" →
+ *  "Voice & Models" (the section owns both handles). Structure unchanged:
+ *  three core decisions, then TEST, then GO LIVE (the deploy panel). */
 export const STEP_TITLES = [
-  "Voice",
-  "Channel",
-  "Context",
+  "Voice & Models",
+  "Deployment",
+  "Prompt & knowledge",
   "Test",
   "Go Live",
 ] as const
 
 export const SECTION_COUNT = STEP_TITLES.length
 
-/** LHS rail groups — Set up → Test → Deploy. */
+/** LHS rail groups (owner mock 2026-07-30) — Customize → Ship. */
 export const SECTION_GROUPS: { label: string; steps: number[] }[] = [
-  { label: "Set up", steps: [1, 2, 3] },
-  { label: "Test", steps: [4] },
-  { label: "Deploy", steps: [5] },
+  { label: "Customize", steps: [1, 2, 3] },
+  { label: "Ship", steps: [4, 5] },
 ]
 
 export const STEP_ICONS: Record<number, React.ComponentType<{ className?: string }>> = {

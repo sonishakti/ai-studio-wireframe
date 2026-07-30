@@ -104,11 +104,11 @@ await client.joinChannel({ channel: "support-room", uid: 9001 })`
   async
 ></script>`
 
-  // v5 sections (2026-07-28): Voice · Channel · Context · Test · Go Live.
+  // v8 sections (2026-07-30): Voice & Models · Deployment · Prompt & knowledge · Test · Go Live.
   const sections: { label: string; step: number }[] = [
-    { label: "Voice", step: 1 },
-    { label: "Channel", step: 2 },
-    { label: "Context", step: 3 },
+    { label: "Voice & Models", step: 1 },
+    { label: "Deployment", step: 2 },
+    { label: "Prompt & knowledge", step: 3 },
     { label: "Go Live", step: 5 },
   ]
 
@@ -158,7 +158,7 @@ await client.joinChannel({ channel: "support-room", uid: 9001 })`
               ) : (
                 <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/5 p-3 text-sm">
                   <Check className="h-4 w-4 shrink-0 text-success" aria-hidden />
-                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, failure_message, stack, channels, campaigns, knowledge, mcp, connectors, config, advanced, analysis, call_behavior. Voice is read-only here (pick it in the Voice section).</span>
+                  <span className="text-muted-foreground">Valid JSON. These apply: name, system_prompt, greeting, failure_message, stack, channels, campaigns, knowledge, mcp, connectors, config, advanced, analysis, call_behavior. Voice is read-only here (pick it in the Voice & Models section).</span>
                 </div>
               )}
             </div>

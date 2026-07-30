@@ -605,7 +605,7 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
   if (!d.voice) blocks.push({ reason: "Choose a voice.", step: 1, action: "Pick a voice" })
 
   if (d.channels.length === 0) {
-    blocks.push({ reason: "Pick a channel.", step: 2, action: "Pick a channel" })
+    blocks.push({ reason: "Choose a deployment.", step: 2, action: "Choose deployment" })
   }
   if (hasChannel(d, "inbound")) {
     const surfaces = inboundSurfaces(d)

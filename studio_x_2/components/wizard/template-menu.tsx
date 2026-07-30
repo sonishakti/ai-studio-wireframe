@@ -50,7 +50,7 @@ export function TemplateMenu({
       stack: stackFor(tpl.preset, draft.stack.modality),
     })
     toast(`${tpl.name} template applied`, {
-      description: `Prompt, greeting, and the ${STACK_PRESETS[tpl.preset].label} model stack are set — edit anything in Context.`,
+      description: `Prompt, greeting, and the ${STACK_PRESETS[tpl.preset].label} model stack are set — edit anything in Prompt & knowledge.`,
     })
     onApplied?.()
   }

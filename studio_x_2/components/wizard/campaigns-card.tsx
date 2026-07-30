@@ -476,7 +476,7 @@ function CampaignContacts({
           {varsCovered && <Check className={cn("mt-0.5 h-3.5 w-3.5 shrink-0 text-success", coveredFlash > 0 && "sx-tick-pop")} />}
           {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
             ? `${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length}/${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length} {{variables}} covered.`
-            : "No {{variables}} in your prompt yet — add them in Context to personalize each call."}
+            : "No {{variables}} in your prompt yet — add them in Prompt & knowledge to personalize each call."}
         </p>
       ) : (
         <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2">

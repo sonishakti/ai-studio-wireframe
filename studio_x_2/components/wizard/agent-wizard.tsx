@@ -23,7 +23,7 @@ import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
 import { TemplateMenu } from "@/components/wizard/template-menu"
 import { SectionRows } from "@/components/wizard/section-row"
 import { DeployPreflight } from "@/components/wizard/deploy-preflight"
-import { STEP_TITLES, SECTION_COUNT, stepTitle, resolveStepParam } from "@/components/wizard/types"
+import { STEP_TITLES, SECTION_COUNT, SECTION_GROUPS, STEP_ICONS, stepTitle, resolveStepParam } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events } from "@/lib/analytics"
@@ -583,7 +583,7 @@ export function AgentWizard({
     }))
     toast.success("Config applied", {
       description: overridden.length
-        ? `Your JSON edits are in the draft — ${overridden.length} field${overridden.length > 1 ? "s are" : " is"} now controlled by the custom config (flagged in Context).`
+        ? `Your JSON edits are in the draft — ${overridden.length} field${overridden.length > 1 ? "s are" : " is"} now controlled by the custom config (flagged in Prompt & knowledge).`
         : "Your JSON edits are in the draft.",
       action: { label: "Undo", onClick: () => { dirty.current = true; setDraft(before) } },
     })
@@ -855,7 +855,7 @@ export function AgentWizard({
       return draft.voice
         ? `${cardVoice?.name ?? "Custom voice"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label} · ${draft.stack.language ?? "English"}${edited}`
         : "No voice yet"
-    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No channel yet"
+    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No deployment yet"
     if (n === 3) {
       if (!draft.systemPrompt.trim()) return "No prompt yet"
       const parts = ["Prompt set"]
@@ -1023,32 +1023,45 @@ export function AgentWizard({
       >
         {/* Rail — pure nav; scrolls internally on short viewports. */}
         <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
-          <nav aria-label="Build sections" className="space-y-0.5">
-            {[1, 2, 3, 4, 5].map((n) => {
-              const isActive = n === selected
-              return (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => openRow(n)}
-                  aria-current={isActive ? "step" : undefined}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
-                    isActive && "bg-accent/60",
-                  )}
-                >
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
-                    {isDone(n) ? (
-                      <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
-                    ) : (
-                      <span className="size-1.5 rounded-full bg-muted-foreground/40" />
-                    )}
-                  </span>
-                  {isDone(n) && <span className="sr-only">(done)</span>}
-                </button>
-              )
-            })}
+          {/* Grouped rail (owner mock 2026-07-30): CUSTOMIZE · SHIP headers +
+              per-row icons over the same rows. */}
+          <nav aria-label="Build sections" className="space-y-3">
+            {SECTION_GROUPS.map((group) => (
+              <div key={group.label}>
+                <p className="px-2.5 pb-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </p>
+                <div className="space-y-0.5">
+                  {group.steps.map((n) => {
+                    const isActive = n === selected
+                    const Icon = STEP_ICONS[n]
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => openRow(n)}
+                        aria-current={isActive ? "step" : undefined}
+                        className={cn(
+                          "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/40",
+                          isActive && "bg-accent/60",
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
+                        <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
+                          {isDone(n) ? (
+                            <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
+                          ) : (
+                            <span className="size-1.5 rounded-full bg-muted-foreground/40" />
+                          )}
+                        </span>
+                        {isDone(n) && <span className="sr-only">(done)</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* Fold control — "Expand all" whenever anything is folded. */}
@@ -1404,8 +1417,8 @@ function announceDcSwap(before: AgentDraft, after: AgentDraft) {
     (dropped === "inbound" && added === "batch") || (dropped === "batch" && added === "inbound")
   toast(`Switched to ${channelLabel(added)}`, {
     description: directionPair
-      ? "One agent can't handle both inbound and outbound. The previous setup is kept — switch back in Channel to restore it."
-      : `One channel per agent — your ${channelLabel(dropped)} setup is kept. Switch back in Channel to restore it.`,
+      ? "One agent can't handle both inbound and outbound. The previous setup is kept — switch back in Deployment to restore it."
+      : `One deployment per agent — your ${channelLabel(dropped)} setup is kept. Switch back in Deployment to restore it.`,
   })
 }
 

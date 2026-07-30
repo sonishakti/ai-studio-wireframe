@@ -61,7 +61,7 @@ function buildRows(draft: AgentDraft): CheckRow[] {
   // Channel(s)
   const chBlock = blockFor(2)
   rows.push({
-    id: "channel", icon: Waypoints, label: draft.channels.length > 1 ? "Channels" : "Channel",
+    id: "channel", icon: Waypoints, label: "Deployment",
     value: chBlock ? chBlock.reason : channelTarget(draft),
     state: chBlock ? "warn" : "ok",
     fixStep: chBlock ? 2 : undefined, fixLabel: chBlock?.action,

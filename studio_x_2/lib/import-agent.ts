@@ -27,8 +27,8 @@ export type ImportSource = (typeof IMPORT_SOURCES)[number]
 export interface MappedField {
   /** Source-side path, e.g. `response_engine.general_prompt`. */
   theirs: string
-  /** Where it landed in the builder, e.g. "System prompt · Context". Landing
-   *  labels speak the CURRENT section names (Voice · Channel · Context · Go
+  /** Where it landed in the builder, e.g. "System prompt · Prompt & knowledge".
+   *  Landing labels speak the CURRENT section names (Voice & Models · Deployment · Prompt & knowledge · Go
    *  Live, v4 2026-07-28) — stale labels break the report's honesty contract
    *  (user-test 2026-07-21 verification round, ranked #3). */
   ours: string
@@ -112,15 +112,16 @@ function catalogLlm(model: string | undefined) {
 
 // ─── report assembly ──────────────────────────────────────────────────────────
 
-/** Where each carried field lands, in the builder's own vocabulary (v4
- *  sections, 2026-07-28: Voice · Channel · Context · Go Live). */
+/** Where each carried field lands, in the builder's own vocabulary (v8
+ *  sections, 2026-07-30: Voice & Models · Deployment · Prompt & knowledge ·
+ *  Test · Go Live). */
 const LANDS = {
   name: "Agent name · builder header",
-  prompt: "System prompt · Context",
-  greeting: "Greeting · Context",
-  voice: "Voice · Voice",
-  llm: "LLM · Voice › Advanced",
-  language: "Spoken language · Voice",
+  prompt: "System prompt · Prompt & knowledge",
+  greeting: "Greeting · Prompt & knowledge",
+  voice: "Voice · Voice & Models",
+  llm: "LLM · Voice & Models › Advanced",
+  language: "Spoken language · Voice & Models",
 } as const
 
 interface Found {
@@ -254,7 +255,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.voice) {
     dropped.push({
       theirs: found.voice.path,
-      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Voice.`,
+      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Voice & Models.`,
     })
   }
   const llm = catalogLlm(found.model?.value)
@@ -263,7 +264,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.model) {
     dropped.push({
       theirs: found.model.path,
-      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Voice › Advanced.`,
+      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Voice & Models › Advanced.`,
     })
   }
   const lang = languageLabelFor(found.language?.value)
@@ -272,13 +273,13 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.language) {
     dropped.push({
       theirs: found.language.path,
-      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Voice.`,
+      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Voice & Models.`,
     })
   }
   if (found.tools?.names.length) {
     dropped.push({
       theirs: `${found.tools.path} (${found.tools.names.length})`,
-      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Context › Additional context.`,
+      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Prompt & knowledge › Additional context.`,
     })
   }
   // Call-behavior rows claim carried only because the partial below IS
@@ -326,9 +327,9 @@ const DROP_REASONS: Record<string, string> = {
   server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
   serverMessages: "Server event streams aren't supported yet.",
-  states: "Conversation states don't port — express the flow in your system prompt (the Context section).",
-  starting_state: "Conversation states don't port — express the flow in your system prompt (the Context section).",
-  pathway_id: "Bland pathways don't port — express the flow in your system prompt (the Context section).",
+  states: "Conversation states don't port — express the flow in your system prompt (the Prompt & knowledge section).",
+  starting_state: "Conversation states don't port — express the flow in your system prompt (the Prompt & knowledge section).",
+  pathway_id: "Bland pathways don't port — express the flow in your system prompt (the Prompt & knowledge section).",
   voicemail_detection: "Voicemail detection re-enables as a toggle in Go Live › call behavior — the vendor setting itself doesn't port.",
   voicemailMessage: "Leaving a voicemail message isn't supported — voicemail detection (hang up on machines) is a toggle in Go Live › call behavior.",
   voicemailDetection: "Voicemail detection re-enables as a toggle in Go Live › call behavior — the vendor setting itself doesn't port.",
@@ -339,20 +340,20 @@ const DROP_REASONS: Record<string, string> = {
   artifactPlan: "Recording settings live in Go Live › Structured outputs.",
   post_call_analysis_data: "Post-call analysis is configured in Go Live › Structured outputs.",
   post_call_analysis_model: "Post-call analysis is configured in Go Live › Structured outputs.",
-  knowledge_base_ids: "Knowledge re-attaches in Context › Additional context.",
-  knowledge_base: "Knowledge re-attaches in Context › Additional context.",
+  knowledge_base_ids: "Knowledge re-attaches in Prompt & knowledge › Additional context.",
+  knowledge_base: "Knowledge re-attaches in Prompt & knowledge › Additional context.",
   platform_settings: "Platform/auth settings stay vendor-specific.",
-  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Voice › Advanced.",
-  asr: "ASR maps to Agora's bundled STT — tune it in Voice › Advanced.",
-  turn: "Turn-taking tuning lives in Voice › Advanced › Speech tuning.",
+  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Voice & Models › Advanced.",
+  asr: "ASR maps to Agora's bundled STT — tune it in Voice & Models › Advanced.",
+  turn: "Turn-taking tuning lives in Voice & Models › Advanced › Speech tuning.",
   conversation: "Conversation limits stay vendor-specific.",
   ambient_sound: "Ambient audio isn't supported yet.",
   backgroundSound: "Background audio isn't supported yet.",
-  interruption_sensitivity: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
-  interruption_threshold: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
-  responsiveness: "Turn-taking tuning lives in Voice › Advanced › Speech tuning.",
-  startSpeakingPlan: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
-  stopSpeakingPlan: "Interruption tuning lives in Voice › Advanced › Speech tuning.",
+  interruption_sensitivity: "Interruption tuning lives in Voice & Models › Advanced › Speech tuning.",
+  interruption_threshold: "Interruption tuning lives in Voice & Models › Advanced › Speech tuning.",
+  responsiveness: "Turn-taking tuning lives in Voice & Models › Advanced › Speech tuning.",
+  startSpeakingPlan: "Interruption tuning lives in Voice & Models › Advanced › Speech tuning.",
+  stopSpeakingPlan: "Interruption tuning lives in Voice & Models › Advanced › Speech tuning.",
   enable_backchannel: "Backchannel tuning stays vendor-specific.",
   backchannel_frequency: "Backchannel tuning stays vendor-specific.",
   backchannel_words: "Backchannel tuning stays vendor-specific.",
@@ -368,10 +369,10 @@ const DROP_REASONS: Record<string, string> = {
   default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API — coming soon.",
   voice_speed: "Voice tuning stays vendor-specific.",
   voice_temperature: "Voice tuning stays vendor-specific.",
-  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Voice › Advanced.",
+  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Voice & Models › Advanced.",
   fallback_voice_ids: "Voice fallbacks stay vendor-specific.",
   volume: "Voice tuning stays vendor-specific.",
-  firstMessageMode: "Who speaks first is part of the greeting (the Context section).",
+  firstMessageMode: "Who speaks first is part of the greeting (the Prompt & knowledge section).",
   clientMessages: "Client event streams aren't configurable here yet.",
   metadata: "Freeform metadata isn't carried.",
   tags: "Tags aren't carried.",
@@ -520,9 +521,9 @@ function parseElevenLabs(p: Rec): VendorParse {
     for (const k of ["asr", "turn", "conversation"]) {
       if (rec(cc[k])) extra.push({ theirs: `conversation_config.${k}`, reason: DROP_REASONS[k] ?? "Voice-pipeline tuning stays vendor-specific." })
     }
-    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Voice › Advanced." })
+    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Voice & Models › Advanced." })
     if (Array.isArray(promptObj?.knowledge_base) && (promptObj!.knowledge_base as unknown[]).length) {
-      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Context › Additional context." })
+      extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Prompt & knowledge › Additional context." })
     }
   }
   const consumed = new Set(["name", "conversation_config"])
@@ -544,7 +545,7 @@ function parseBland(p: Rec): VendorParse {
   }
   const extra: DroppedField[] = []
   const tier = str(p.model)
-  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Voice › Advanced.` })
+  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Voice & Models › Advanced.` })
   const consumed = new Set(["name", "agent_name", "prompt", "task", "first_sentence", "voice", "voice_id", "language", "tools", "model"])
   return withSweep(assemble(found, "Bland", extra, []), p, consumed)
 }
