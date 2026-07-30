@@ -7,10 +7,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
   STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackNonStreaming,
-  type StackPreset, type AgentStack,
+  stackCost, slotMode, MANAGED_PROVIDERS, AGORA_RATE_PER_MIN,
+  type StackPreset, type AgentStack, type CredentialMode,
 } from "@/lib/campaign-data"
 
 /**
@@ -35,6 +37,67 @@ import {
  */
 
 type Pipeline = NonNullable<AgentStack["pipeline"]>
+
+/**
+ * Who supplies the key for one slot — the control Agora's own API already has
+ * (`credential_mode`, scoped per asr/llm/tts block) and the console never
+ * surfaced. Per component, never global: the common real-world config is
+ * managed LLM plus your own cloned ElevenLabs voice.
+ *
+ * The copy leads with the economics because Agora's are the inverse of every
+ * competitor's: the platform rate is the same either way, and managed absorbs
+ * the vendor bill. Everywhere else BYO saves you money; here it costs more.
+ */
+function SlotMode({
+  slot, vendor, mode, onChange,
+}: {
+  slot: "asr" | "llm" | "tts"
+  vendor: string
+  mode: CredentialMode
+  onChange: (m: CredentialMode) => void
+}) {
+  const resellable = vendor in MANAGED_PROVIDERS
+  const rate = MANAGED_PROVIDERS[vendor]
+
+  // A provider Agora can't resell must not offer a mode it can't honour.
+  if (!resellable) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        {vendor} is bring-your-own-key only — Agora doesn&apos;t resell it.
+      </p>
+    )
+  }
+
+  return (
+    <div className="space-y-1">
+      <ToggleGroup
+        type="single"
+        value={mode}
+        onValueChange={(v) => v && onChange(v as CredentialMode)}
+        aria-label={`${slot.toUpperCase()} credentials`}
+        className="grid grid-cols-2 gap-1"
+      >
+        <ToggleGroupItem
+          value="managed"
+          className="h-7 rounded-md border border-border px-2 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+        >
+          Agora managed
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          value="byo"
+          className="h-7 rounded-md border border-border px-2 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+        >
+          Your own key
+        </ToggleGroupItem>
+      </ToggleGroup>
+      <p className="text-xs text-muted-foreground">
+        {mode === "managed"
+          ? "Included — no key to add, no vendor bill."
+          : `You add a ${vendor} key and they bill you directly (~$${rate.toFixed(3)}/min on top of Agora's rate).`}
+      </p>
+    </div>
+  )
+}
 
 /** A model row in a picker — name plus what it costs you in latency and money.
  *  Competitor scan 2026-07-29: only Vapi shows the tradeoff at the point of
@@ -239,6 +302,9 @@ export function StackModelPicker({
 }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const patch = (s: Partial<AgentStack>) => onChange({ ...stack, ...s })
+  const modes = {
+    asr: slotMode(stack, "asr"), llm: slotMode(stack, "llm"), tts: slotMode(stack, "tts"),
+  }
 
   const ttsVendor = STACK_CATALOG.tts.find((v) => v.vendor === stack.tts.vendor) ?? STACK_CATALOG.tts[0]
   const vendorVoices = ttsVendor.voices as readonly string[]
@@ -279,6 +345,10 @@ export function StackModelPicker({
                     ))}
                   </SelectContent>
                 </Select>
+                <SlotMode
+                  slot="asr" vendor={stack.asr.vendor} mode={slotMode(stack, "asr")}
+                  onChange={(m) => patch({ credentialMode: { ...modes, asr: m } })}
+                />
               </div>
               <div className="min-w-0 space-y-1.5">
                 <Label className="text-sm font-medium">Large Language Model (LLM)</Label>
@@ -298,6 +368,10 @@ export function StackModelPicker({
                     ))}
                   </SelectContent>
                 </Select>
+                <SlotMode
+                  slot="llm" vendor={stack.llm.vendor} mode={slotMode(stack, "llm")}
+                  onChange={(m) => patch({ credentialMode: { ...modes, llm: m } })}
+                />
               </div>
               <div className="min-w-0 space-y-1.5">
                 <Label className="text-sm font-medium">Text-to-Speech (TTS)</Label>
@@ -319,6 +393,10 @@ export function StackModelPicker({
                     ))}
                   </SelectContent>
                 </Select>
+                <SlotMode
+                  slot="tts" vendor={stack.tts.vendor} mode={slotMode(stack, "tts")}
+                  onChange={(m) => patch({ credentialMode: { ...modes, tts: m } })}
+                />
               </div>
               <div className="min-w-0 space-y-1.5">
                 {/* "TTS voice", not "Voice" — the persona picker sits directly
@@ -391,6 +469,7 @@ export function StackTradeoffSlider({
   const idx = Math.max(0, SLIDER_ORDER.indexOf(stack.preset))
   const diverged = divergedFromPreset(stack)
   const est = stackEstimateFor(stack)
+  const cost = stackCost(stack)
   const nonStreaming = stackNonStreaming(stack)
 
   const setPreset = (preset: StackPreset) => {
@@ -448,6 +527,32 @@ export function StackTradeoffSlider({
           <>Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
         )}
       </p>
+      {/* Where the money actually goes. Agora charges its platform rate either
+          way and managed absorbs the vendor bill, so managed is CHEAPER — the
+          inverse of every competitor, and previously invisible. Arithmetic, not
+          adjectives: the two numbers and their sum. */}
+      <div className="rounded-lg border border-border bg-muted/30 p-2.5 text-xs">
+        {cost.allManaged ? (
+          <p>
+            <span className="font-medium">${cost.totalPerMin.toFixed(2)}/min, all in.</span>{" "}
+            Speech, model, and voice are included in Agora&apos;s rate — no vendor keys, no second bill.
+          </p>
+        ) : (
+          <div className="space-y-0.5">
+            <p className="tabular-nums">
+              Agora ${cost.platformPerMin.toFixed(2)}/min
+              {" + "}
+              your {cost.byoSlots.join(" and ")} vendor{cost.byoSlots.length > 1 ? "s" : ""} ~${cost.vendorPerMin.toFixed(2)}/min
+              {" = "}
+              <span className="font-medium">~${cost.totalPerMin.toFixed(2)}/min</span>
+            </p>
+            <p className="text-muted-foreground">
+              Agora&apos;s rate is the same either way, so your own key adds a bill rather than
+              replacing one. Switch {cost.byoSlots.join("/")} to managed to pay only ${AGORA_RATE_PER_MIN.toFixed(2)}/min.
+            </p>
+          </div>
+        )}
+      </div>
       {/* The measurement boundary, stated. A latency figure with no stated
           boundary is unfalsifiable — every vendor quotes the flattering one. */}
       <p className="text-xs text-muted-foreground">

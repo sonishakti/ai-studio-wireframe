@@ -323,6 +323,17 @@ export interface AgentStack {
   llm: { vendor: string; model: string }
   asr: { vendor: string; model: string }
   tts: { vendor: string; voice: string }
+  /** Who supplies the key, PER COMPONENT. Agora's own API scopes
+   *  `credential_mode` inside each of the asr/llm/tts blocks independently, and
+   *  every competitor does the same — a global toggle would be wrong on day
+   *  one. Undefined = managed, because managed is the cheaper default and the
+   *  auto-provisioned agent already runs that way. */
+  credentialMode?: { asr: CredentialMode; llm: CredentialMode; tts: CredentialMode }
+}
+
+/** Read a slot's mode with the managed default applied. */
+export function slotMode(s: AgentStack, slot: "asr" | "llm" | "tts"): CredentialMode {
+  return s.credentialMode?.[slot] ?? "managed"
 }
 
 export interface AgentPersona {
@@ -825,6 +836,37 @@ export const STACK_ESTIMATE: Record<StackPreset, { latencyMs: number; costPerMin
 export const PIPELINE_OVERHEAD_MS = 120
 
 /**
+ * Agora's own per-minute charge for a Conversational AI audio task.
+ *
+ * Verified 2026-07-30 against docs.agora.io/en/conversational-ai/overview/pricing:
+ *   • $0.10 / min for the Conversational AI Engine audio task
+ *   • "You are charged the same price even if you bring your own key (BYOK)"
+ *   • "Usage of ASR, LLM, and TTS providers is included in the unit price when
+ *      using an Agora managed key"
+ *   • First 300 minutes free
+ *
+ * The consequence is the single most important pricing fact in the product and
+ * it is the inverse of every competitor: MANAGED IS CHEAPER. Same platform
+ * rate either way, and under managed the vendor bill is absorbed. Under BYO you
+ * pay this rate *and* your own vendors.
+ */
+export const AGORA_RATE_PER_MIN = 0.1
+
+export interface StackCost {
+  latencyMs: number
+  /** Agora's charge. Identical in both modes — that is the whole point. */
+  platformPerMin: number
+  /** What your vendors bill you directly. Zero under managed. */
+  vendorPerMin: number
+  /** What you actually pay, all in. This is the number to quote. */
+  totalPerMin: number
+  /** True when every slot in the pipeline is Agora-managed. */
+  allManaged: boolean
+  /** Slots running on your own keys, by label — drives the BYO explanation. */
+  byoSlots: string[]
+}
+
+/**
  * Estimate for any stack — computed from the ACTUAL slots, so changing one
  * model moves the number. Previously this returned `STACK_ESTIMATE[preset]`
  * regardless of the models chosen, which made the "Custom mix" label a lie.
@@ -833,23 +875,69 @@ export const PIPELINE_OVERHEAD_MS = 120
  * cost sums the three per-minute rates. A slot that isn't in the catalog falls
  * back to the preset's number so an unknown vendor can't produce NaN.
  */
-export function stackEstimateFor(s: AgentStack): { latencyMs: number; costPerMin: number } {
+/**
+ * Full cost breakdown for a stack.
+ *
+ * The rule that matters: Agora charges its platform rate either way, and under
+ * managed the vendor usage is *included*. So a BYO slot doesn't save you the
+ * platform fee — it adds a vendor bill on top of it.
+ *
+ * This corrects a real under-quote: the estimate used to return the summed
+ * vendor list price (~$0.05) and callers rendered it as the total, so the
+ * batch preflight quoted a 5,000-contact run at half what it would bill.
+ */
+export function stackCost(s: AgentStack): StackCost {
+  const latencyMs = stackLatencyMs(s)
+  const platformPerMin = AGORA_RATE_PER_MIN
+
   if (s.pipeline === "mllm") {
     const m = STACK_CATALOG.mllm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
-    return m
-      ? { latencyMs: m.latencyMs + PIPELINE_OVERHEAD_MS, costPerMin: m.costPerMin }
-      : MLLM_ESTIMATE
+    const managed = slotMode(s, "llm") === "managed"
+    const vendorPerMin = managed ? 0 : (m?.costPerMin ?? 0)
+    return {
+      latencyMs, platformPerMin, vendorPerMin,
+      totalPerMin: Number((platformPerMin + vendorPerMin).toFixed(3)),
+      allManaged: managed,
+      byoSlots: managed ? [] : ["Realtime model"],
+    }
+  }
+
+  const stt = STACK_CATALOG.stt.find((o) => o.vendor === s.asr.vendor && o.model === s.asr.model)
+  const llm = STACK_CATALOG.llm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+  const tts = STACK_CATALOG.tts.find((o) => o.vendor === s.tts.vendor)
+
+  let vendorPerMin = 0
+  const byoSlots: string[] = []
+  if (slotMode(s, "asr") === "byo") { vendorPerMin += stt?.costPerMin ?? 0; byoSlots.push("STT") }
+  if (slotMode(s, "llm") === "byo") { vendorPerMin += llm?.costPerMin ?? 0; byoSlots.push("LLM") }
+  if (slotMode(s, "tts") === "byo") { vendorPerMin += tts?.costPerMin ?? 0; byoSlots.push("TTS") }
+
+  return {
+    latencyMs, platformPerMin,
+    vendorPerMin: Number(vendorPerMin.toFixed(3)),
+    totalPerMin: Number((platformPerMin + vendorPerMin).toFixed(3)),
+    allManaged: byoSlots.length === 0,
+    byoSlots,
+  }
+}
+
+function stackLatencyMs(s: AgentStack): number {
+  if (s.pipeline === "mllm") {
+    const m = STACK_CATALOG.mllm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
+    return (m?.latencyMs ?? MLLM_ESTIMATE.latencyMs) + PIPELINE_OVERHEAD_MS
   }
   const stt = STACK_CATALOG.stt.find((o) => o.vendor === s.asr.vendor && o.model === s.asr.model)
   const llm = STACK_CATALOG.llm.find((o) => o.vendor === s.llm.vendor && o.model === s.llm.model)
   const tts = STACK_CATALOG.tts.find((o) => o.vendor === s.tts.vendor)
-  // An off-catalog slot (e.g. an imported competitor config) can't be priced —
-  // return zeroes rather than a confident wrong number; callers show "—".
-  if (!stt || !llm || !tts) return { latencyMs: 0, costPerMin: 0 }
-  return {
-    latencyMs: stt.latencyMs + llm.latencyMs + tts.latencyMs + PIPELINE_OVERHEAD_MS,
-    costPerMin: Number((stt.costPerMin + llm.costPerMin + tts.costPerMin).toFixed(3)),
-  }
+  if (!stt || !llm || !tts) return 0
+  return stt.latencyMs + llm.latencyMs + tts.latencyMs + PIPELINE_OVERHEAD_MS
+}
+
+/** Back-compat shape for the many callers that just want "the number to show".
+ *  `costPerMin` is now the TOTAL the customer pays, not the vendor subtotal. */
+export function stackEstimateFor(s: AgentStack): { latencyMs: number; costPerMin: number } {
+  const c = stackCost(s)
+  return { latencyMs: c.latencyMs, costPerMin: c.totalPerMin }
 }
 
 // Populate the preset table FROM the same function the UI uses, so the two can
@@ -1012,9 +1100,10 @@ export const PLAN_USAGE: PlanUsage = {
   periodDaysTotal: 31,
 }
 
-/** PAYG usage rate ($/min, managed mode bundles ASR+LLM+TTS — docs pricing).
- *  THE one rate constant: every $-per-minute figure derives from it. */
-export const PAYG_RATE = 0.1
+/** PAYG usage rate ($/min). Aliases AGORA_RATE_PER_MIN rather than repeating
+ *  the literal — two hand-written copies of the same rate is exactly how the
+ *  builder ended up quoting $0.05 while billing ran on $0.10. */
+export const PAYG_RATE = AGORA_RATE_PER_MIN
 
 // ─── Concurrent lines (A6) ───────────────────────────────────────────────────
 //
@@ -1650,7 +1739,7 @@ export const VENDOR_CREDENTIALS: VendorCredential[] = [
   { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Managed by Agora",         keyHint: "—",                        status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "managed", managedRatePerMin: 0.046 },
   { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026", mode: "byo" },
   { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026", mode: "byo" },
-  { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "May 31, 2026", mode: "byo" },
+  { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "Aug 14, 2026", mode: "byo" },
 ]
 
 /** A managed provider can't expire — there's no key of yours to lapse. Rules

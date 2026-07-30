@@ -177,6 +177,10 @@ const QUOTA_METERS = [
   { label: "Voice minutes (RTC)",       used: 4218,  limit: 10000, unit: "min" },
   { label: "Cloud Recording",           used: 1.42,  limit: 5,     unit: "GB-hrs" },
   { label: "Real-Time STT",             used: 312,   limit: 1000,  unit: "min" },
+  // SIP direct connection — a distinct product from RTC channels, and it sits
+  // deliberately ADJACENT to it: without a real row here, readers hunting for
+  // their SIP capacity misread the RTC line as it, every time.
+  { label: "SIP direct connection",     used: 2140,  limit: 5000,  unit: "min" },
   // RTC channel concurrency (a different product's quota) — agent CONCURRENT
   // LINES live on Billing › Concurrent lines; two meters, two meanings.
   { label: "RTC concurrent channels",   used: 12,    limit: 50,    unit: "ch" },
