@@ -37,8 +37,10 @@ import {
 import {
   EMPTY_DRAFT, DEFAULT_CALL_BEHAVIOR, agentToDraft, templateToDraft, restoreDraft, saveDraft, clearDraft,
   publishBlockReason, channelTarget, channelLabel, hasChannel, hasWebWidget, inboundSurfaces, primaryChannel, activeCampaigns,
+  draftHosting,
   type AgentDraft, type DeployChannel,
 } from "@/lib/wizard-draft"
+import { hostingSummary, isPinned } from "@/lib/hosting-regions"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -64,6 +66,9 @@ import { toast } from "sonner"
  * `?dc=` seeds a channel, `?artifact=` selects a custom voice. Draft
  * autosaves; live agents get per-section "Reset to live".
  */
+/** An explicit close of the right rail is remembered; reopening forgets it. */
+const RAIL_CLOSED_KEY = "sx:wizard_rail_closed"
+
 export function AgentWizard({
   id,
   landing,
@@ -151,14 +156,30 @@ export function AgentWizard({
   // The Test strip's verdict line — fed by the sims panel's "Run all".
   const [simSummary, setSimSummary] = React.useState<{ passed: number; failed: number; total: number } | null>(null)
 
-  // The docked Test panel (v4: replaces the persistent preview column AND the
-  // Talk sheet) — header Test button toggles it; drag its border to resize.
+  // The docked Test panel — the RIGHT RAIL (Figma 2861-52041). It opens by
+  // default at lg+ so the rail is part of the layout rather than a surface you
+  // have to know exists; closing it is remembered per browser. Below lg it is
+  // a Sheet, so it must stay closed there or it would cover the builder.
   const [testOpen, setTestOpen] = React.useState(false)
   const [testTab, setTestTab] = React.useState<TestPanelTab>("simulations")
+  React.useEffect(() => {
+    try {
+      if (window.localStorage.getItem(RAIL_CLOSED_KEY) === "1") return
+    } catch { /* wireframe only */ }
+    if (window.matchMedia("(min-width: 1024px)").matches) setTestOpen(true)
+  }, [])
+  /** Remember an explicit close; reopening clears the memory. */
+  const setRailOpen = React.useCallback((o: boolean) => {
+    setTestOpen(o)
+    try {
+      if (o) window.localStorage.removeItem(RAIL_CLOSED_KEY)
+      else window.localStorage.setItem(RAIL_CLOSED_KEY, "1")
+    } catch { /* ignore */ }
+  }, [])
   const openTest = React.useCallback((tab: TestPanelTab) => {
     setTestTab(tab)
-    setTestOpen(true)
-  }, [])
+    setRailOpen(true)
+  }, [setRailOpen])
   React.useEffect(() => {
     // The ceremony's "Say hello" lands ON the live contextual test (section 4)
     // — the talk surface lives there now, not in the panel.
@@ -517,7 +538,7 @@ export function AgentWizard({
   const baseline = React.useRef<AgentDraft | null>(null)
   const stepSlice = (d: AgentDraft, n: number): Partial<AgentDraft> =>
     n === 1 ? { voice: d.voice, stack: d.stack, advanced: d.advanced }
-    : n === 2 ? { channels: d.channels, config: d.config }
+    : n === 2 ? { channels: d.channels, config: d.config, hosting: d.hosting }
     : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, failureMessage: d.failureMessage, knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
     : n === 5 ? { campaigns: d.campaigns, analysis: d.analysis, callBehavior: d.callBehavior }
     : {}
@@ -858,7 +879,14 @@ export function AgentWizard({
     // "No deployment TYPE picked yet", never "No deployment yet" — on this
     // screen bare "deployment" describes LIVE state (the header chip), not a
     // config gap (user-test 2026-07-29; vocabulary sweep 2026-07-30).
-    if (n === 2) return draft.channels.length ? `${channelTarget(draft)}${edited}` : "No deployment type picked yet"
+    if (n === 2) {
+      // A pinned region is a compliance decision — it must stay visible when
+      // the section is folded. Automatic is the default, so it stays quiet.
+      const region = isPinned(draftHosting(draft)) ? ` · ${hostingSummary(draftHosting(draft))}` : ""
+      return draft.channels.length
+        ? `${channelTarget(draft)}${region}${edited}`
+        : `No deployment type picked yet${region}`
+    }
     if (n === 3) {
       if (!draft.systemPrompt.trim()) return "No prompt yet"
       const parts = ["Prompt set"]
@@ -973,7 +1001,7 @@ export function AgentWizard({
           size="sm"
           variant="ghost"
           className="shrink-0 text-muted-foreground"
-          onClick={() => (testOpen ? setTestOpen(false) : openTest("simulations"))}
+          onClick={() => (testOpen ? setRailOpen(false) : openTest("simulations"))}
           aria-pressed={testOpen}
         >
           Run simulations
@@ -1253,13 +1281,18 @@ export function AgentWizard({
             below lg. Resizable by dragging its left border. */}
         <TestPanel
           open={testOpen}
-          onOpenChange={setTestOpen}
+          onOpenChange={setRailOpen}
           tab={testTab}
           onTabChange={setTestTab}
           draft={draft}
           agentName={draft.name || (isEdit ? existing!.name : "your agent")}
           widgetGreeting={draft.greeting.trim() || undefined}
           onRunSummary={setSimSummary}
+          // ONE talk state across the rail and the inline section-4 test —
+          // two independent "is a call up?" flags would contradict each other.
+          talking={testing}
+          onToggleTalk={toggleTest}
+          talkDisabled={warming}
         />
       </div>
 

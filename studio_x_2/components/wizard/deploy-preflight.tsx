@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, Check, AlertTriangle, ArrowRight, Waypoints, FileText, AudioLines, Cpu, ClipboardCheck, Users } from "lucide-react"
+import { Rocket, Check, AlertTriangle, ArrowRight, Waypoints, FileText, AudioLines, Cpu, ClipboardCheck, Users, Globe } from "lucide-react"
 import {
   AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { cn } from "@/lib/utils"
 import {
-  publishBlocks, channelTarget, campaignMissingVars, activeCampaigns, hasChannel,
+  publishBlocks, channelTarget, campaignMissingVars, activeCampaigns, hasChannel, draftHosting,
   MOCK_CSV_ROWS, DEFAULT_ANALYSIS, type AgentDraft, type CampaignDraft,
 } from "@/lib/wizard-draft"
+import { hostingSummary, isPinned } from "@/lib/hosting-regions"
 import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS } from "@/lib/campaign-data"
 
 /**
@@ -120,6 +121,18 @@ function buildRows(draft: AgentDraft): CheckRow[] {
   rows.push({
     id: "models", icon: Cpu, label: "Models",
     value: `${stackLine(draft.stack)} · ~${est.latencyMs} ms · ~$${est.costPerMin.toFixed(2)}/min`,
+    state: "ok",
+  })
+
+  // Hosting region — never a blocker (Automatic is valid), but a deploy that
+  // silently ignores a residency requirement is exactly the mistake a
+  // pre-flight exists to catch, so it always shows what will ship.
+  const hosting = draftHosting(draft)
+  rows.push({
+    id: "hosting", icon: Globe, label: "Hosting",
+    value: isPinned(hosting)
+      ? `${hostingSummary(hosting)} — the agent will not start outside it`
+      : hostingSummary(hosting),
     state: "ok",
   })
 

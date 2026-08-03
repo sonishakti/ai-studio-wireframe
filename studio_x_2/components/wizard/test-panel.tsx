@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Sparkles } from "lucide-react"
+import { X, Sparkles, Mic, PhoneOff } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -10,10 +10,15 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { TestsSection } from "@/components/eval-tests"
+import { AgentSphere } from "@/components/agent-test-panel"
+import { SimTranscript, SimulatedBanner, AgentStateChips, type SimState } from "@/components/sim-transcript"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 import { generateContextualCases } from "@/components/wizard/test-section"
-import { hasWebWidget, type AgentDraft } from "@/lib/wizard-draft"
-import type { EvalCase, EvalCaseResult } from "@/lib/campaign-data"
+import { hasWebWidget, draftHosting, type AgentDraft } from "@/lib/wizard-draft"
+import { hostingSummary } from "@/lib/hosting-regions"
+import {
+  stackEstimateFor, stackLatencyDetail, type EvalCase, type EvalCaseResult, type EvalTurn,
+} from "@/lib/campaign-data"
 
 /** Below lg (1024) the docked column doesn't exist — the panel falls back to
  *  a Sheet. Must match the grid's `lg:` breakpoint, NOT useIsMobile's 768. */
@@ -30,15 +35,27 @@ function useBelowLg() {
 }
 
 /**
- * TestPanel — the SIMULATIONS surface (v6, owner 2026-07-29: "the RHS Test
- * panel should have simulations, NOT the agent call"): the header Test button
- * toggles this DOCKED panel holding the auto-generated contextual scenario
- * suite; the live talk test lives in the TEST section of the main column.
- * Docked, not an overlay — it takes a real grid column so the main column
- * flexes beside it. RESIZABLE by dragging its left border (pointer-capture
- * drag, clamped, double-click resets, width persisted). Below lg it falls
- * back to a full-width Sheet. A Widget tab previews the web widget when that
- * surface is enabled.
+ * TestPanel — the builder's right rail (Figma 2861-52041).
+ *
+ * Two peers behind one segmented control:
+ *  · SIMULATIONS — the auto-generated contextual scenario suite. Still the
+ *    DEFAULT tab: the owner lock (2026-07-29, "the RHS Test panel should have
+ *    simulations, NOT the agent call") decides what you land on, and the Figma
+ *    decides what else is reachable. Both hold.
+ *  · TEST AGENT — the orb + Talk, so the rail can answer "does it sound right?"
+ *    without scrolling to section 4. The inline live test in section 4 is
+ *    unchanged; this is an additional door to the same mock, not a move.
+ *  · WIDGET — appears only when the web surface is on.
+ *
+ * SESSION STATISTICS sits under all three, always visible: which vendor is in
+ * each pipeline slot, what each contributes to first-word latency, and the
+ * cost per minute. It is the fastest read of "what am I actually shipping?"
+ * and it is what makes the model-tier slider's trade-off legible while you use
+ * any tab.
+ *
+ * Docked, not an overlay — a real grid column, so the main column flexes
+ * beside it. RESIZABLE by dragging its left border. Below lg it falls back to
+ * a full-width Sheet.
  */
 
 const WIDTH_KEY = "sx:test_panel_w"
@@ -46,7 +63,17 @@ const MIN_W = 360
 const MAX_W = 720
 const DEFAULT_W = 460
 
-export type TestPanelTab = "simulations" | "widget"
+export type TestPanelTab = "simulations" | "agent" | "widget"
+
+/** The scripted exchange the rail's Talk mock plays — evidence of a working
+ *  agent rather than a silent orb (the top recurring break in user tests). */
+const RAIL_TALK: EvalTurn[] = [
+  { role: "agent", text: "Hi! Thanks for calling — how can I help today?" },
+  { role: "caller", text: "I wanted to check on my order." },
+  { role: "agent", text: "Happy to help. What's the order number?" },
+  { role: "caller", text: "It's 4471." },
+  { role: "agent", text: "Got it — order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
+]
 
 export function TestPanel({
   open,
@@ -57,6 +84,9 @@ export function TestPanel({
   agentName,
   widgetGreeting,
   onRunSummary,
+  talking,
+  onToggleTalk,
+  talkDisabled,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
@@ -67,6 +97,12 @@ export function TestPanel({
   widgetGreeting?: string
   /** Bubbles each completed "Run all" up to the Test strip's verdict line. */
   onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
+  /** Host-owned talk state — SHARED with the inline section-4 test so the two
+   *  surfaces can never disagree about whether a call is up. */
+  talking?: boolean
+  onToggleTalk?: () => void
+  /** First run: Aria is still warming. Disabled WITH its reason, never dead. */
+  talkDisabled?: boolean
 }) {
   const isMobile = useBelowLg()
   const showWidgetTab = hasWebWidget(draft)
@@ -123,37 +159,59 @@ export function TestPanel({
   const activeTab = tab === "widget" && !showWidgetTab ? "simulations" : tab
 
   const body = (
-    <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as TestPanelTab)} className="flex min-h-0 flex-1 flex-col gap-0">
-      <div className="shrink-0 border-b border-border px-4 py-2.5">
-        <TabsList className="h-8">
-          <TabsTrigger value="simulations" className="text-xs">Simulations</TabsTrigger>
-          {showWidgetTab && <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>}
-        </TabsList>
-      </div>
-      <TabsContent value="simulations" className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="min-w-0 text-sm text-muted-foreground">
-            {generated.length
-              ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
-              : "Generate ~12 scenarios from your prompt, channel, and call behavior."}
-          </p>
-          <Button size="sm" variant={generated.length ? "outline" : "default"} className="gap-1.5" disabled={generating} onClick={generate}>
-            <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Auto-generate"}
-          </Button>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => onTabChange(v as TestPanelTab)}
+        className="flex min-h-0 flex-1 flex-col gap-0"
+      >
+        <div className="shrink-0 border-b border-border px-4 py-2.5">
+          <TabsList className="h-8">
+            <TabsTrigger value="simulations" className="text-xs">Simulations</TabsTrigger>
+            <TabsTrigger value="agent" className="text-xs">Test agent</TabsTrigger>
+            {showWidgetTab && <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>}
+          </TabsList>
         </div>
-        <TestsSection
-          key={generation}
-          agentName={agentName}
-          extra={generated}
-          onRunSummary={onRunSummary}
-        />
-      </TabsContent>
-      {showWidgetTab && (
-        <TabsContent value="widget" className="min-h-0 flex-1 overflow-y-auto p-4">
-          <WidgetPreviewCard agentId={draft.agentId ?? "new"} greeting={widgetGreeting} />
+
+        <TabsContent value="simulations" className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="min-w-0 text-sm text-muted-foreground">
+              {generated.length
+                ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
+                : "Generate ~12 scenarios from your prompt, channel, and call behavior."}
+            </p>
+            <Button size="sm" variant={generated.length ? "outline" : "default"} className="gap-1.5" disabled={generating} onClick={generate}>
+              <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Auto-generate"}
+            </Button>
+          </div>
+          <TestsSection
+            key={generation}
+            agentName={agentName}
+            extra={generated}
+            onRunSummary={onRunSummary}
+          />
         </TabsContent>
-      )}
-    </Tabs>
+
+        <TabsContent value="agent" className="min-h-0 flex-1 overflow-y-auto p-4">
+          <TalkTab
+            agentName={agentName}
+            greeting={draft.greeting.trim() || undefined}
+            talking={!!talking}
+            onToggleTalk={onToggleTalk}
+            disabled={talkDisabled}
+          />
+        </TabsContent>
+
+        {showWidgetTab && (
+          <TabsContent value="widget" className="min-h-0 flex-1 overflow-y-auto p-4">
+            <WidgetPreviewCard agentId={draft.agentId ?? "new"} greeting={widgetGreeting} />
+          </TabsContent>
+        )}
+      </Tabs>
+
+      {/* Under every tab — what this agent actually costs and how fast it is. */}
+      <SessionStatistics draft={draft} />
+    </div>
   )
 
   if (isMobile) {
@@ -221,6 +279,115 @@ export function TestPanel({
         </header>
         {body}
       </div>
+    </div>
+  )
+}
+
+// ─── Test agent — the orb + Talk (Figma's right-rail default state) ───────────
+
+function TalkTab({
+  agentName, greeting, talking, onToggleTalk, disabled,
+}: {
+  agentName: string
+  greeting?: string
+  talking: boolean
+  onToggleTalk?: () => void
+  disabled?: boolean
+}) {
+  const [state, setState] = React.useState<SimState>("listening")
+  const turns = React.useMemo<EvalTurn[]>(
+    () => (greeting ? [{ role: "agent" as const, text: greeting }, ...RAIL_TALK.slice(1)] : RAIL_TALK),
+    [greeting],
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col items-center gap-4 py-6">
+        <AgentSphere size={132} active={talking} />
+        <Button
+          size="sm"
+          variant={talking ? "outline" : "default"}
+          className="gap-1.5"
+          disabled={disabled || !onToggleTalk}
+          onClick={onToggleTalk}
+        >
+          {talking
+            ? <><PhoneOff className="h-3.5 w-3.5" aria-hidden /> End test</>
+            : <><Mic className="h-3.5 w-3.5" aria-hidden /> Talk to {agentName}</>}
+        </Button>
+        {disabled && (
+          <p className="text-xs text-muted-foreground">
+            {agentName} is still warming up — this unlocks in a moment.
+          </p>
+        )}
+      </div>
+
+      {talking ? (
+        <div className="space-y-2.5">
+          <SimulatedBanner />
+          <AgentStateChips state={state} />
+          <SimTranscript turns={turns} stream onState={setState} compact />
+        </div>
+      ) : (
+        <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          A one-off call in full persona. For coverage across awkward callers — interruptions,
+          jailbreaks, silence — run <span className="font-medium text-foreground">Simulations</span> instead.
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ─── Session statistics — the pipeline, priced and timed ──────────────────────
+
+function SessionStatistics({ draft }: { draft: AgentDraft }) {
+  const est = stackEstimateFor(draft.stack)
+  const lat = stackLatencyDetail(draft.stack)
+  const mllm = draft.stack.pipeline === "mllm"
+
+  const slots = mllm
+    ? [{ slot: "MLLM", name: `${draft.stack.llm.vendor} ${draft.stack.llm.model}`, ms: est.latencyMs }]
+    : [
+        { slot: "ASR", name: `${draft.stack.asr.vendor} ${draft.stack.asr.model}`, ms: lat.asrMs },
+        { slot: "LLM", name: `${draft.stack.llm.vendor} ${draft.stack.llm.model}`, ms: lat.llmMs },
+        { slot: "TTS", name: `${draft.stack.tts.vendor}`, ms: lat.ttsMs },
+      ]
+
+  return (
+    <section
+      className="shrink-0 border-t border-border px-4 py-3"
+      aria-label="Session statistics"
+    >
+      <h4 className="pb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        Session statistics
+      </h4>
+      <dl className="space-y-1">
+        {slots.map((s) => (
+          <div key={s.slot} className="flex items-baseline gap-2">
+            <dt className="w-9 shrink-0 font-mono text-xs uppercase text-muted-foreground">{s.slot}</dt>
+            <dd className="min-w-0 flex-1 truncate text-sm">{s.name}</dd>
+            <dd className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{s.ms}ms</dd>
+          </div>
+        ))}
+      </dl>
+      <dl className="mt-2.5 space-y-1 border-t border-border pt-2.5">
+        <StatRow label="Avg. e2e latency" value={`${est.latencyMs} ms`} />
+        <StatRow label="Best case (warm)" value={`${lat.bestCaseMs} ms`} />
+        <StatRow label="Est. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
+        <StatRow label="Hosting" value={hostingSummary(draftHosting(draft))} />
+      </dl>
+      <p className="pt-2 text-xs text-muted-foreground/70">Wireframe estimates.</p>
+    </section>
+  )
+}
+
+function StatRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <dt className="min-w-0 flex-1 truncate font-mono text-xs uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
+      <dd className="shrink-0 font-mono text-xs tabular-nums">{value}</dd>
     </div>
   )
 }

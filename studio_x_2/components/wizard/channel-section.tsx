@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { X, ExternalLink, Plus } from "lucide-react"
+import { X, ExternalLink, Plus, ArrowRight, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -12,23 +13,35 @@ import {
 import { RadioCard, RadioCardGroup, ToggleCard } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
+import { HostingRegionRow } from "@/components/wizard/hosting-region"
 import { CodeBlock } from "@/components/code-block"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
-  channelLabel, hasChannel, inboundSurfaces,
-  type AgentDraft, type DeployChannel, type InboundSurface,
+  channelLabel, hasChannel, inboundSurfaces, campaignRollup, campaignDialed,
+  MOCK_CSV_ROWS,
+  type AgentDraft, type CampaignDraft, type DeployChannel, type InboundSurface,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
 /**
- * Section 2 — CHANNEL (v6, owner 2026-07-29): the channel is ONE choice —
+ * Section 2 — DEPLOYMENT (v6, owner 2026-07-29): the channel is ONE choice —
  * Inbound OR Batch calls OR Code/SDK (radio, not multi-select). Multi-select
  * lives INSIDE Inbound: an inbound agent can serve several surfaces at once —
- * phone number(s) · web widget · WhatsApp/Telegram (soon). Batch shows
- * nothing here (runs, contacts, and dialing all live in Go Live). Switching
- * the channel keeps the departing one's config — nothing is deleted.
+ * phone number(s) · web widget · WhatsApp/Telegram (soon). Switching the
+ * channel keeps the departing one's config — nothing is deleted.
+ *
+ * v9 (2026-08-03, Figma 2861-52041 parity pass):
+ *  · AGENT HOSTING REGION leads the section — it applies to all three channel
+ *    types, so it can't live inside one of them.
+ *  · Every channel now has a SELECTED STATE. Batch and Code/SDK previously
+ *    rendered a one-line pointer and a snippet block respectively against
+ *    Inbound's full connection UI, so picking them read as "nothing happened".
+ *    Batch gets a RUNS SUMMARY (the multi-campaign answer at the point of
+ *    decision); Code/SDK gets a connection row framed like the other two.
+ *    The owner lock holds: campaign EDITING still lives only in Go Live — this
+ *    is a read-only roll-up with doors into it, not a second editor.
  */
 
 const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string }[] = [
@@ -91,6 +104,9 @@ export function ChannelSection({
 
   return (
     <>
+      {/* Hosting FIRST — a process-level property, above the channel choice. */}
+      <HostingRegionRow draft={draft} update={update} />
+
       <SectionRow
         id="wz-2-pick"
         label={`How does ${draft.name || "your agent"} take calls?`}
@@ -131,22 +147,6 @@ export function ChannelSection({
             />
           ))}
         </RadioCardGroup>
-
-        {/* Batch acknowledges the click (user-test 2026-07-29 S2: nothing
-            rendering under the radio read as "did my click register?") —
-            parity with the inbound block's Go Live pointer (2026-07-30). */}
-        {current === "batch" && (
-          <p className="text-xs text-muted-foreground">
-            Contacts, caller ID &amp; schedule live in{" "}
-            <button
-              type="button"
-              className="underline underline-offset-2 hover:text-foreground"
-              onClick={() => onGoToStep(5)}
-            >
-              Go Live ↓
-            </button>
-          </p>
-        )}
 
         <InfoHint label="Phone channels are bring-your-own number">
           Agora doesn&apos;t sell numbers — connect your carrier&apos;s via SIP with{" "}
@@ -190,16 +190,184 @@ export function ChannelSection({
         </SectionRow>
       )}
 
-      {/* BATCH — no config here on purpose (owner 2026-07-29): contacts,
-          caller ID, schedule, and dialing ALL live in Go Live. The picker row
-          above carries the one-line cross-link saying so. */}
+      {/* BATCH — a READ-ONLY roll-up of the runs, plus doors into Go Live.
+          Editing still lives only in Go Live (owner lock 2026-07-29); what
+          changed is that picking Batch no longer renders an empty section. */}
+      {current === "batch" && (
+        <BatchRunsBlock draft={draft} onGoToStep={onGoToStep} />
+      )}
 
       {current === "code" && (
-        <SectionRow id="wz-2-code" label="Code / SDK" hint="Drop the agent into your own app.">
+        <SectionRow
+          id="wz-2-code"
+          label="Connect your app"
+          hint="No phone number and no campaign — your app joins a channel and the agent joins it too."
+        >
           <CodeConfigure agentId={agentId} />
         </SectionRow>
       )}
     </>
+  )
+}
+
+// ─── Batch — the multi-run roll-up (Deployment's answer to "I have several") ───
+
+const RUN_STATUS: Record<CampaignDraft["status"], { label: string; cls: string; dot?: boolean }> = {
+  draft: { label: "Draft", cls: "text-muted-foreground" },
+  scheduled: { label: "Scheduled", cls: "text-foreground" },
+  running: { label: "Running", cls: "text-success", dot: true },
+  completed: { label: "Completed", cls: "text-muted-foreground" },
+}
+
+function BatchRunsBlock({
+  draft, onGoToStep,
+}: Pick<StepProps, "draft"> & { onGoToStep: (n: number) => void }) {
+  const runs = draft.campaigns
+  const roll = campaignRollup(draft)
+
+  // Long lists must not push Prompt & knowledge off the screen — show the four
+  // that need a decision soonest and count the rest, with Go Live as the door
+  // to all of them. Order: needs-attention → running → scheduled → draft → done.
+  const rank = (c: CampaignDraft) =>
+    !c.numberId || !c.csvName ? 0
+    : c.status === "running" ? 1
+    : c.status === "scheduled" ? 2
+    : c.status === "draft" ? 3 : 4
+  const sorted = [...runs].sort((a, b) => rank(a) - rank(b))
+  const shown = sorted.slice(0, 4)
+  const hidden = sorted.length - shown.length
+
+  if (runs.length === 0) {
+    return (
+      <SectionRow
+        id="wz-2-batch"
+        label="Who does this agent call?"
+        hint="Batch calling dials a contact list you upload. Each list is one run — an agent can have several."
+      >
+        <div className="flex flex-col items-start gap-2 rounded-md border border-dashed border-border px-3.5 py-4">
+          <p className="text-sm font-medium">No campaign runs yet</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            A run is one contact list, one caller ID, and one schedule. Create several to dial
+            different lists — or the same list in different languages — in parallel from this agent.
+          </p>
+          <Button size="sm" variant="outline" className="mt-1 gap-1.5" onClick={() => onGoToStep(5)}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Create the first run
+          </Button>
+        </div>
+      </SectionRow>
+    )
+  }
+
+  return (
+    <SectionRow
+      id="wz-2-batch"
+      label="Who does this agent call?"
+      hint={
+        <>
+          <p>One row per run — several can dial at once from this one agent.</p>
+          <InfoHint label="Where runs are edited">
+            Contacts, caller ID, schedule, concurrency, and retries all live on the run itself, in{" "}
+            <span className="font-medium text-foreground">Go Live</span>. This roll-up is read-only
+            so the two never disagree.
+          </InfoHint>
+        </>
+      }
+    >
+      {/* Roll-up first: the one-line answer to "what is this agent dialing?" */}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
+        <p className="text-sm font-medium">
+          {roll.total} run{roll.total > 1 ? "s" : ""}
+        </p>
+        <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+          {[
+            roll.running && `${roll.running} dialing`,
+            roll.scheduled && `${roll.scheduled} scheduled`,
+            roll.draft && `${roll.draft} draft`,
+            roll.completed && `${roll.completed} completed`,
+          ].filter(Boolean).join(" · ")}
+          {roll.queuedContacts > 0 && ` · ${roll.queuedContacts.toLocaleString()} contacts still to dial`}
+        </p>
+        {roll.needsAttention > 0 && (
+          <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
+            <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+            {roll.needsAttention} need{roll.needsAttention === 1 ? "s" : ""} input
+          </span>
+        )}
+      </div>
+
+      <ul className="divide-y divide-border">
+        {shown.map((c) => {
+          const meta = RUN_STATUS[c.status]
+          const total = c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)
+          const dialed = campaignDialed(c)
+          const missing = [!c.numberId && "caller ID", !c.csvName && "contacts"].filter(Boolean)
+          return (
+            <li key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5">
+              <span className={cn("inline-flex w-[5.5rem] shrink-0 items-center gap-1.5 text-xs font-medium", meta.cls)}>
+                {meta.dot && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />}
+                {meta.label}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{c.name}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {c.status === "running" && total
+                    ? `${dialed.toLocaleString()} of ${total.toLocaleString()} dialed`
+                    : total
+                      ? `${total.toLocaleString()} contacts`
+                      : "No contacts yet"}
+                  {c.language ? ` · ${c.language}` : ""}
+                  {c.status === "scheduled" && c.launch?.startDate
+                    ? ` · starts ${c.launch.startDate} ${c.launch.startTime ?? ""}`
+                    : ""}
+                </p>
+                {/* Progress only where it means something — a running run. */}
+                {c.status === "running" && total > 0 && (
+                  <div
+                    className="mt-1.5 h-1 w-full max-w-56 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-valuenow={Math.round((dialed / total) * 100)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${c.name} dial progress`}
+                  >
+                    <span
+                      className="block h-full rounded-full bg-success"
+                      style={{ width: `${Math.round((dialed / total) * 100)}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+              {missing.length > 0 && (
+                <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
+                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> needs {missing.join(" + ")}
+                </span>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 shrink-0 gap-1 text-xs text-muted-foreground"
+                onClick={() => onGoToStep(5)}
+              >
+                Open <ArrowRight className="h-3 w-3" aria-hidden />
+              </Button>
+            </li>
+          )
+        })}
+      </ul>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onGoToStep(5)}>
+          <Plus className="h-3.5 w-3.5" aria-hidden /> New run
+        </Button>
+        <Button size="sm" variant="ghost" className="gap-1 text-muted-foreground" onClick={() => onGoToStep(5)}>
+          {hidden > 0 ? `Manage all ${runs.length} runs in Go Live` : "Manage runs in Go Live"}{" "}
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </Button>
+      </div>
+      {roll.running > 0 && (
+        <p className="text-xs text-muted-foreground/80">Wireframe — dial progress is simulated.</p>
+      )}
+    </SectionRow>
   )
 }
 

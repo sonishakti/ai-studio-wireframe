@@ -26,6 +26,7 @@ import { CampaignDialingFields, CampaignLaunchFields } from "@/components/wizard
 import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
 import {
   MOCK_CSV_COLUMNS, MOCK_CSV_ROWS, campaignMissingVars, makeCampaign, newCampaignId,
+  campaignRollup, campaignDialed,
   type AgentDraft, type CampaignDraft, type CampaignStatus,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
@@ -37,6 +38,12 @@ import { type StepProps } from "@/components/wizard/types"
  * fresh draft. Editing is INLINE (owner: the contacts CSV lays out
  * half-and-half inside the Go Live panel, never bleeding under the Test
  * panel) — the editor expands in place, contacts on the right half.
+ *
+ * v9 (2026-08-03): the list scales past three runs. A ROLL-UP bar answers
+ * "what is this agent dialing right now?" without expanding anything, running
+ * runs carry DIAL PROGRESS, and a STATUS FILTER appears once the list is long
+ * enough to hide the row you came for. Every one of those is read-only — the
+ * editing model (inline, one open at a time) is unchanged.
  */
 
 const STATUS_META: Record<CampaignStatus, { label: string; cls: string; dot?: boolean }> = {
@@ -53,21 +60,38 @@ const CAMPAIGN_LANGUAGES = [
   "French (FR)", "German (DE)", "Hindi (IN)", "Mandarin (CN)",
 ]
 
+/** Filter chips appear only once a list can actually hide something. */
+const FILTER_THRESHOLD = 4
+type RunFilter = "all" | CampaignStatus
+
 export function CampaignsCard({ draft, update }: StepProps) {
   const campaigns = draft.campaigns
   // null = closed · "new" = creating · id = editing that row.
   const [editing, setEditing] = React.useState<string | null>(null)
   const [newDraft, setNewDraft] = React.useState<CampaignDraft | null>(null)
+  const [filter, setFilter] = React.useState<RunFilter>("all")
+
+  const roll = campaignRollup(draft)
+  const showFilter = campaigns.length >= FILTER_THRESHOLD
+  const visible = showFilter && filter !== "all"
+    ? campaigns.filter((c) => c.status === filter)
+    : campaigns
+  const filterCount = (f: RunFilter) =>
+    f === "all" ? roll.total : campaigns.filter((c) => c.status === f).length
 
   const setCampaigns = (next: CampaignDraft[]) => update({ campaigns: next })
   const patchCampaign = (id: string, patch: Partial<CampaignDraft>) =>
     setCampaigns(campaigns.map((c) => (c.id === id ? { ...c, ...patch } : c)))
 
+  // Creating/copying a run while a filter is on would open an editor the list
+  // is hiding — clear the filter so the new row is always the one you land on.
   const startNew = () => {
+    setFilter("all")
     setNewDraft(makeCampaign(`Run ${campaigns.length + 1}`))
     setEditing("new")
   }
   const duplicate = (c: CampaignDraft) => {
+    setFilter("all")
     const copy: CampaignDraft = {
       ...c,
       id: newCampaignId(),
@@ -85,6 +109,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
    *  config — only the contact list (and timing) change, so aggregated
    *  analytics stay comparable across runs. Everything else locks. */
   const rerun = (c: CampaignDraft) => {
+    setFilter("all")
     const next: CampaignDraft = {
       ...c,
       id: newCampaignId(),
@@ -124,6 +149,56 @@ export function CampaignsCard({ draft, update }: StepProps) {
         </Button>
       </header>
 
+      {/* Roll-up — the state of every run in one line, without opening any of
+          them. The row a user needs is usually the one that "needs input", so
+          that count is the only thing allowed to shout. */}
+      {campaigns.length > 0 && (
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border py-2.5">
+          <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+            {[
+              roll.running && `${roll.running} dialing`,
+              roll.scheduled && `${roll.scheduled} scheduled`,
+              roll.draft && `${roll.draft} draft`,
+              roll.completed && `${roll.completed} completed`,
+            ].filter(Boolean).join(" · ")}
+            {roll.queuedContacts > 0 && ` · ${roll.queuedContacts.toLocaleString()} contacts still to dial`}
+            {roll.dialedContacts > 0 && ` · ${roll.dialedContacts.toLocaleString()} dialed`}
+          </p>
+          {roll.needsAttention > 0 && (
+            <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
+              <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+              {roll.needsAttention} run{roll.needsAttention > 1 ? "s" : ""} need
+              {roll.needsAttention === 1 ? "s" : ""} input before deploy
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Status filter — only once the list is long enough to hide a row. */}
+      {showFilter && (
+        <div className="flex flex-wrap items-center gap-1 border-b border-border py-2" role="group" aria-label="Filter runs by status">
+          {(["all", "running", "scheduled", "draft", "completed"] as RunFilter[])
+            .filter((f) => f === "all" || filterCount(f) > 0)
+            .map((f) => (
+              <Button
+                key={f}
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-pressed={filter === f}
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "h-7 px-2.5 text-xs font-normal text-muted-foreground",
+                  filter === f && "bg-accent/60 font-medium text-foreground",
+                )}
+              >
+                {f === "all" ? "All" : STATUS_META[f as CampaignStatus].label}
+                <span className="ml-1 tabular-nums opacity-60">{filterCount(f)}</span>
+              </Button>
+            ))}
+        </div>
+      )}
+
       {campaigns.length === 0 && editing !== "new" ? (
         <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
           <p className="text-sm font-medium">No runs yet</p>
@@ -158,11 +233,13 @@ export function CampaignsCard({ draft, update }: StepProps) {
               />
             </li>
           )}
-          {campaigns.map((c) => {
+          {visible.map((c) => {
             const meta = STATUS_META[c.status]
             const missing = c.status !== "completed"
               ? [!c.numberId && "caller ID", !c.csvName && "contacts CSV"].filter(Boolean)
               : []
+            const total = c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)
+            const dialed = campaignDialed(c)
             return (
               <li key={c.id}>
                 <div className="flex flex-wrap items-center gap-3 py-3">
@@ -182,12 +259,31 @@ export function CampaignsCard({ draft, update }: StepProps) {
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
                       {c.csvName
-                        ? `${c.contacts ?? MOCK_CSV_ROWS} contacts · ${c.csvName}`
+                        ? c.status === "running"
+                          ? `${dialed.toLocaleString()} of ${total.toLocaleString()} dialed · ${c.csvName}`
+                          : `${total.toLocaleString()} contacts · ${c.csvName}`
                         : "No contacts yet"}
                       {c.status === "scheduled" && c.launch?.startDate && (
                         <> · starts {c.launch.startDate} {c.launch.startTime} {c.launch.timezone ? `(${c.launch.timezone})` : ""}</>
                       )}
                     </p>
+                    {/* Progress belongs to a RUNNING run only — a bar on a
+                        draft would imply dialing that hasn't started. */}
+                    {c.status === "running" && total > 0 && (
+                      <div
+                        className="mt-1.5 h-1 w-full max-w-64 overflow-hidden rounded-full bg-muted"
+                        role="progressbar"
+                        aria-valuenow={Math.round((dialed / total) * 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${c.name} dial progress`}
+                      >
+                        <span
+                          className="block h-full rounded-full bg-success"
+                          style={{ width: `${Math.round((dialed / total) * 100)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                   {missing.length > 0 && (
                     <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
@@ -234,7 +330,24 @@ export function CampaignsCard({ draft, update }: StepProps) {
               </li>
             )
           })}
+          {/* A filter that hides everything must offer its own way out. */}
+          {visible.length === 0 && editing !== "new" && (
+            <li className="flex flex-col items-start gap-2 py-6">
+              <p className="text-sm text-muted-foreground">
+                No {filter === "all" ? "" : STATUS_META[filter as CampaignStatus].label.toLowerCase()} runs.
+              </p>
+              <Button variant="outline" size="sm" onClick={() => setFilter("all")}>
+                Show all {roll.total} runs
+              </Button>
+            </li>
+          )}
         </ul>
+      )}
+
+      {roll.running > 0 && (
+        <p className="pt-2.5 text-xs text-muted-foreground/80">
+          Wireframe — dial progress is simulated.
+        </p>
       )}
     </section>
   )

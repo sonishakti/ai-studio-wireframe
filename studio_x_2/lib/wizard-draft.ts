@@ -17,6 +17,7 @@
 import { extractVars, stackFor, PHONE_NUMBERS, type Agent, type AgentStack } from "@/lib/campaign-data"
 import { PRESET_VOICES } from "@/lib/voice-artifacts"
 import { clearWidgetState } from "@/lib/widget-config"
+import { DEFAULT_HOSTING, normalizeHosting, type HostingConfig } from "@/lib/hosting-regions"
 
 /** Legacy single-channel type — still the vocabulary of the published
  *  `Agent.channel` mock and `publishDeployment`'s mode. */
@@ -241,14 +242,75 @@ export function makeCampaign(name: string): CampaignDraft {
  *  everything not already completed. */
 export const activeCampaigns = (d: AgentDraft) => d.campaigns.filter((c) => c.status !== "completed")
 
+/** Deterministic stand-in for dial progress (wireframe — there is no backend).
+ *  Derived from the run id so a row's progress never jitters between renders,
+ *  and always disclosed as simulated where it renders. Same hash idiom as the
+ *  simulation generator in test-section.tsx. */
+export function campaignDialed(c: CampaignDraft): number {
+  const total = c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)
+  if (!total) return 0
+  if (c.status === "completed") return total
+  if (c.status !== "running") return 0
+  let h = 0
+  for (let i = 0; i < c.id.length; i++) h = (h * 31 + c.id.charCodeAt(i)) % 977
+  // 15–85% through — never 0 (a "running" run that has dialed nobody would
+  // read as broken) and never 100% (that's "completed").
+  return Math.max(1, Math.round(total * (0.15 + (h % 70) / 100)))
+}
+
+/** Roll-up across an agent's runs — the "can I manage several from here?"
+ *  answer. Shared by the Deployment summary block and the Go Live list so the
+ *  two can never report different totals. */
+export interface CampaignRollup {
+  total: number
+  running: number
+  scheduled: number
+  draft: number
+  completed: number
+  /** Contacts across runs that have NOT finished — what is still to dial. */
+  queuedContacts: number
+  /** Contacts already dialed across running + completed runs. */
+  dialedContacts: number
+  /** Runs missing a caller ID, a CSV, or a schedule. */
+  needsAttention: number
+}
+
+export function campaignRollup(d: AgentDraft): CampaignRollup {
+  const cs = d.campaigns
+  const pending = cs.filter((c) => c.status !== "completed")
+  return {
+    total: cs.length,
+    running: cs.filter((c) => c.status === "running").length,
+    scheduled: cs.filter((c) => c.status === "scheduled").length,
+    draft: cs.filter((c) => c.status === "draft").length,
+    completed: cs.filter((c) => c.status === "completed").length,
+    queuedContacts: pending.reduce(
+      (n, c) => n + Math.max(0, (c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)) - campaignDialed(c)),
+      0,
+    ),
+    dialedContacts: cs.reduce((n, c) => n + campaignDialed(c), 0),
+    needsAttention: pending.filter(
+      (c) =>
+        !c.numberId ||
+        !c.csvName ||
+        (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)),
+    ).length,
+  }
+}
+
 export interface AgentDraft {
   /** Set when editing an existing agent; absent for a brand-new draft. */
   agentId?: string
   name: string
   /** Section 1 (Voice) — the voice persona. */
   voice: VoiceRef | null
-  /** Section 2 (Channel) — MULTI-SELECT deployment channels. */
+  /** Section 2 (Deployment) — MULTI-SELECT deployment channels. */
   channels: DeployChannel[]
+  /** Section 2 (Deployment) — WHERE the agent process runs (Agora's
+   *  `properties.geofence`). Absent = Automatic: the engine picks the nearest
+   *  region and fails over. Applies to every channel, which is why it sits
+   *  ABOVE the channel picker rather than inside one. */
+  hosting?: HostingConfig
   /** Section 1 (Voice) — the model stack behind the voice. Defaults to the
    *  balanced preset so cost/latency estimates exist from first paint. */
   stack: AgentStack
@@ -417,8 +479,14 @@ export function migrateDraft(raw: Partial<AgentDraft> & LegacyDraftFields): Agen
 
   const next = { ...EMPTY_DRAFT, ...raw, channels, campaigns, config } as AgentDraft & LegacyDraftFields
   delete next.type
+  // An exclusion is only legal under GLOBAL — a stored draft that predates that
+  // rule (or was hand-edited in the JSON drawer) must not ship an invalid pair.
+  if (next.hosting) next.hosting = normalizeHosting(next.hosting)
   return next
 }
+
+/** The hosting config in effect — absent means Automatic, never "unset". */
+export const draftHosting = (d: AgentDraft): HostingConfig => d.hosting ?? DEFAULT_HOSTING
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
 //

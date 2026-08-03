@@ -3,8 +3,9 @@
 import * as React from "react"
 import { Rocket, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { publishBlocks, channelTarget, primaryChannel, hasChannel, activeCampaigns, type AgentDraft } from "@/lib/wizard-draft"
+import { publishBlocks, channelTarget, primaryChannel, hasChannel, activeCampaigns, draftHosting, type AgentDraft } from "@/lib/wizard-draft"
 import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
+import { hostingSummary } from "@/lib/hosting-regions"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
 
 /**
@@ -74,6 +75,7 @@ export function StepPublish({
       <section className="space-y-4 rounded-lg border border-border bg-card p-5">
         <dl className="divide-y divide-border">
           <ReviewRow label="Channel" value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
+          <ReviewRow label="Hosting" value={hostingSummary(draftHosting(draft))} />
           <ReviewRow label="Models" value={stackLine(draft.stack, { full: true })} />
           <ReviewRow label="Voice" value={voice ? `${voice.name} · ${voice.tagline}` : "Not set yet"} />
           <ReviewRow label="Cost" value={`~$${est.costPerMin.toFixed(2)}/min`} />
