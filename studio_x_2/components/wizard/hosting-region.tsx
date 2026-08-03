@@ -117,7 +117,7 @@ export function HostingRegionRow({ draft, update }: StepProps) {
       )}
 
       {/* The consequence of the choice, stated where the choice is made. */}
-      <dl className="divide-y divide-border rounded-md border border-border bg-muted/30 px-3.5">
+      <dl id="wz-hosting-consequences" className="divide-y divide-border rounded-md border border-border bg-muted/30 px-3.5">
         <Consequence
           icon={ShieldCheck}
           term="Data residency"

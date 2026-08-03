@@ -153,7 +153,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
           them. The row a user needs is usually the one that "needs input", so
           that count is the only thing allowed to shout. */}
       {campaigns.length > 0 && (
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border py-2.5">
+        <div id="wz-5-runs-rollup" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-border py-2.5">
           <p className="min-w-0 flex-1 text-xs text-muted-foreground">
             {[
               roll.running && `${roll.running} dialing`,
@@ -176,7 +176,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
 
       {/* Status filter — only once the list is long enough to hide a row. */}
       {showFilter && (
-        <div className="flex flex-wrap items-center gap-1 border-b border-border py-2" role="group" aria-label="Filter runs by status">
+        <div id="wz-5-runs-filter" className="flex flex-wrap items-center gap-1 border-b border-border py-2" role="group" aria-label="Filter runs by status">
           {(["all", "running", "scheduled", "draft", "completed"] as RunFilter[])
             .filter((f) => f === "all" || filterCount(f) > 0)
             .map((f) => (

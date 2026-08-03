@@ -274,7 +274,7 @@ function BatchRunsBlock({
       }
     >
       {/* Roll-up first: the one-line answer to "what is this agent dialing?" */}
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
+      <div id="wz-2-batch-rollup" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
         <p className="text-sm font-medium">
           {roll.total} run{roll.total > 1 ? "s" : ""}
         </p>
@@ -295,7 +295,7 @@ function BatchRunsBlock({
         )}
       </div>
 
-      <ul className="divide-y divide-border">
+      <ul id="wz-2-batch-runs" className="divide-y divide-border">
         {shown.map((c) => {
           const meta = RUN_STATUS[c.status]
           const total = c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)
