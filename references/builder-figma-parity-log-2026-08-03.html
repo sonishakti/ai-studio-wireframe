@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Builder — Figma parity: hosting region, batch &amp; code states, simulations rail</title>
+<style>@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+  /* Neutrals are pulled toward the console's own teal rather than left pure —
+     the page and the product it documents should feel like one surface. */
+  :root{
+    --brand:#00658d; --brand-ink:#00658d;
+    --bg:#fbfcfd; --fg:#0c1519; --muted:#54666e; --line:#dfe7eb;
+    --card:#f2f6f8; --raise:#ffffff; --warn:#9c5c06;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --brand:#00c2ff; --brand-ink:#00c2ff;
+      --bg:#080e11; --fg:#e6eef2; --muted:#8ba1aa; --line:#1b262c;
+      --card:#0f181d; --raise:#131e24; --warn:#e0a052; }
+  }
+  /* The viewer's own toggle must win over the OS preference, both directions. */
+  :root[data-theme="dark"]{
+    --brand:#00c2ff; --brand-ink:#00c2ff;
+    --bg:#080e11; --fg:#e6eef2; --muted:#8ba1aa; --line:#1b262c;
+    --card:#0f181d; --raise:#131e24; --warn:#e0a052;
+  }
+  :root[data-theme="light"]{
+    --brand:#00658d; --brand-ink:#00658d;
+    --bg:#fbfcfd; --fg:#0c1519; --muted:#54666e; --line:#dfe7eb;
+    --card:#f2f6f8; --raise:#ffffff; --warn:#9c5c06;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
+    font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:64px 24px 104px;
+    display:flex;flex-direction:column;gap:0}
+  code,.mono{font-family:"Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  code{font-size:.82em;background:var(--card);border:1px solid var(--line);
+    border-radius:4px;padding:1px 5px;white-space:nowrap}
+  a{color:var(--brand-ink);text-underline-offset:2px}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+  .eyebrow{font-family:"Space Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--brand-ink);margin:0 0 12px}
+  h1{font-size:clamp(30px,5vw,44px);line-height:1.12;letter-spacing:-.022em;
+    margin:0 0 16px;font-weight:700;text-wrap:balance;max-width:20ch}
+  .lede{font-size:19.5px;color:var(--muted);margin:0 0 32px;max-width:62ch}
+
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;list-style:none}
+  .meta li{font-family:"Space Mono",monospace;font-size:11.5px;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:5px 13px;background:var(--card)}
+
+  h2{font-size:27px;letter-spacing:-.015em;margin:64px 0 10px;font-weight:650;
+     padding-top:24px;border-top:1px solid var(--line);text-wrap:balance}
+  h3{font-size:18.5px;margin:36px 0 8px;font-weight:600}
+  p{margin:0 0 15px;max-width:70ch}
+
+  /* The four asks arrived numbered, and every section below maps to one —
+     the numerals carry that mapping, they aren't decoration. */
+  .asks{display:flex;flex-direction:column;gap:12px;margin:26px 0 0;padding:0;list-style:none}
+  .ask{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--card);
+    display:grid;grid-template-columns:32px 1fr;gap:15px;align-items:start}
+  .ask .n{font-family:"Space Mono",monospace;font-size:13px;color:var(--brand-ink);
+    width:32px;height:32px;display:grid;place-items:center;
+    background:var(--raise);border:1px solid var(--line);border-radius:8px}
+  .ask b{display:block;font-weight:600;margin-bottom:3px}
+  .ask span{color:var(--muted);font-size:15px;display:block;max-width:68ch}
+
+  figure{margin:34px 0 0;display:flex;flex-direction:column;gap:12px}
+  figure img{width:100%;height:auto;display:block;border:1px solid var(--line);
+    border-radius:10px;background:var(--card)}
+  figcaption{font-size:15px;color:var(--muted);max-width:74ch}
+  figcaption b{color:var(--fg);font-weight:600}
+
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:24px 0 0}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--card)}
+  .stat .k{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-size:21px;font-weight:650;margin-top:5px;letter-spacing:-.015em}
+  .stat .s{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+
+  .scroll{overflow-x:auto;margin:22px 0 0}
+  table{width:100%;border-collapse:collapse;font-size:15px;
+    font-variant-numeric:tabular-nums;min-width:520px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--muted);font-weight:400}
+  tbody tr:last-child td{border-bottom:0}
+
+  /* Asides read as a margin note, not a card: a rule and a hanging label. */
+  .note{margin:26px 0 0;padding:0 0 0 20px;border-left:2px solid var(--line);max-width:74ch}
+  .note .lbl{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--warn);display:block;margin-bottom:6px}
+  .note p:last-child{margin-bottom:0}
+
+  ul.plain{padding-left:20px;margin:16px 0 0;max-width:70ch;
+    display:flex;flex-direction:column;gap:9px}
+
+  footer{margin-top:76px;padding-top:24px;border-top:1px solid var(--line);
+    font-size:13.5px;color:var(--muted);max-width:74ch}
+
+  @media (max-width:640px){
+    .wrap{padding:40px 18px 72px}
+    .ask{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <p class="eyebrow">Studio_X · Agent builder · implementation log</p>
+  <h1>Figma parity: hosting region, batch &amp; code states, simulations rail</h1>
+  <p class="lede">
+    Four gaps between the builder and the reference frame, closed and shipped. One of them —
+    agent hosting region — turned out to be a real Agora primitive nobody had surfaced yet.
+  </p>
+
+  <ul class="meta">
+    <li>2026-08-03</li>
+    <li>studio_x_2</li>
+    <li>Figma 2861-52041</li>
+    <li>tsc + next build clean</li>
+    <li>11 annotated shots · live build</li>
+  </ul>
+
+  <h2>What was asked</h2>
+  <ol class="asks">
+    <li class="ask"><span class="n">1</span><div>
+      <b>The simulations tab on the right is missing</b>
+      <span>The frame shows a <em>Simulations · Test Agent</em> segmented control, but only Test Agent has designed content.</span>
+    </div></li>
+    <li class="ask"><span class="n">2</span><div>
+      <b>It's not clear how multiple campaigns can be managed from here</b>
+      <span>The frame's Campaign Runs table carries Status, Name, and a kebab. Nothing about contacts, schedule, progress, or what still blocks a deploy.</span>
+    </div></li>
+    <li class="ask"><span class="n">3</span><div>
+      <b>“Agent Hosting region” also missing</b>
+      <span>Absent from the frame and from the build — no region control existed anywhere in the app.</span>
+    </div></li>
+    <li class="ask"><span class="n">4</span><div>
+      <b>Deployment channel: Inbound is there, Batch Call and Code/SDK are missing</b>
+      <span>All three radios exist, but only Inbound has a designed selected state. Picking the other two showed nothing.</span>
+    </div></li>
+  </ol>
+
+  <h2>1 · Agent hosting region</h2>
+  <p>
+    This is not a wireframe invention. Agora's Conversational AI Engine accepts
+    <code>properties.geofence</code> when an agent starts, and the shape of that object drove the
+    shape of the control.
+  </p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Field</th><th>Values</th><th>What it forced in the UI</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>area</code></td>
+        <td><code>GLOBAL</code> <code>NORTH_AMERICA</code> <code>EUROPE</code> <code>ASIA</code> <code>INDIA</code> <code>JAPAN</code></td>
+        <td>Six options plus <b>Automatic</b> — which is the <em>absence</em> of a geofence, not a seventh area.</td>
+      </tr>
+      <tr>
+        <td><code>exclude_area</code></td>
+        <td>The five non-global areas — valid <b>only when <code>area</code> is <code>GLOBAL</code></b></td>
+        <td>The “Never route to” select renders only under Global. Switching away clears it, and says so.</td>
+      </tr>
+      <tr>
+        <td>unset</td>
+        <td>—</td>
+        <td>The engine picks the nearest server from the LLM endpoint's IP and fails over. So <b>Automatic is the default</b>, not a pinned region.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="lbl">The caveat the docs make, carried into the UI</span>
+    <p>
+      Pinning the engine does <b>not</b> pin your vendors. LLM, TTS and ASR process data wherever
+      their endpoint lives — ElevenLabs' EU URL, for instance — and that is set on the credential,
+      not here. The row says so and links to Vendor Credentials, because a buyer who pins
+      <code>EUROPE</code> and assumes they are GDPR-clean has been actively misled.
+    </p>
+  </div>
+
+  <h3>Where it lives, and why</h3>
+  <p>
+    First row of <b>Deployment</b>, above “How does your agent take calls?”. Hosting is a property of
+    the agent <em>process</em>, so it applies identically to Inbound, Batch calls and Code/SDK.
+    Nesting it inside a channel would imply the other two run somewhere else. It reads out in three
+    further places — the folded section recap (only when pinned), the review card, and the deploy
+    pre-flight — all from one <code>hostingSummary()</code>, so they cannot drift apart.
+  </p>
+
+  <figure>
+      <img src="builder-figma-parity-shots/01-hosting-region.png" alt="The Agent hosting region row leading the Deployment section, outlined in red" loading="lazy">
+      <figcaption><b>Agent hosting region leads Deployment.</b> The region row sits above the channel picker. Hosting is a property of the agent process, so it applies identically to Inbound, Batch calls and Code/SDK — nesting it under one would imply the other two run somewhere else.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/02-hosting-consequences.png" alt="The residency, latency and failover consequence panel under the region select" loading="lazy">
+      <figcaption><b>The choice states its own cost.</b> Residency, out-of-region latency, and the failover a pin gives up. A bare dropdown would make the buyer read the API docs to learn that pinning disables failover; this says it where the decision is made.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/03-hosting-global-exclusion.png" alt="The Never route to select, visible only when the region is Global" loading="lazy">
+      <figcaption><b>“Never route to” appears only under Global.</b> Agora's geofence accepts <code>exclude_area</code> only when <code>area</code> is <code>GLOBAL</code>. Rendering the field unconditionally would be a control that silently fails at deploy; rendering it here makes the API rule legible. Switching away from Global clears the exclusion and says so.</figcaption>
+    </figure>
+
+  <h2>2 · Batch Calls and Code/SDK get selected states</h2>
+  <p>
+    All three radios were already there — the gap was what happened after the click. Inbound
+    revealed a full “Link phone number” block; Batch revealed one line of grey text, and Code/SDK a
+    bare snippet with no framing. Two of the three deployment types read as dead ends.
+  </p>
+  <p>
+    Batch now shows a <b>read-only roll-up of its runs</b>. That is deliberate: the standing rule is
+    that campaign editing lives only in Go Live, and two editors over one object is how they drift.
+    This is a summary with doors into the editor, not a second editor. Code/SDK gets the same
+    framing as its peers — a labelled “Connect your app” row rather than a naked code block.
+  </p>
+
+  <figure>
+      <img src="builder-figma-parity-shots/04-deployment-batch-rollup.png" alt="The Batch Calls roll-up bar inside the Deployment section" loading="lazy">
+      <figcaption><b>Batch Calls now has a selected state.</b> Before this, picking Batch rendered one line of grey text next to Inbound's full connection UI — the click read as a no-op. The roll-up answers “what is this agent dialing?” without leaving the section.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/05-deployment-batch-runs.png" alt="Four campaign runs listed under the Deployment section with status and progress" loading="lazy">
+      <figcaption><b>Several runs, visible at the point of decision.</b> One row per run, ordered needs-input first, then running, scheduled, draft, done. Capped at four with a door to the rest, so a long list can't push Prompt &amp; knowledge off screen. Read-only — editing still lives only in Go Live.</figcaption>
+    </figure>
+
+  <h2>3 · Managing several campaigns</h2>
+  <p>
+    The reference frame's Campaign Runs table has two columns and a kebab. That is enough to
+    <em>list</em> runs and not enough to <em>manage</em> them — you cannot tell which one is dialing,
+    which is behind, or which is about to block the Deploy button.
+  </p>
+  <p>Three additions, all read-only, all sharing one helper with the Deployment roll-up:</p>
+  <ul class="plain">
+    <li><b>Roll-up line</b> — dialing / scheduled / draft / completed, contacts outstanding, and a
+      count of runs that still need input before deploy. That last one is the only element using the
+      warning colour, because it is the only one that blocks.</li>
+    <li><b>Dial progress</b> on running runs — “82 of 248 dialed” and a bar. Drafts get no bar; a bar
+      on a draft would imply dialing that hasn't started.</li>
+    <li><b>Status filter</b>, appearing at four runs — the point where the list can genuinely hide the
+      row you came for. Creating, duplicating or re-running clears it, so a new row never opens into
+      a filtered-out state.</li>
+  </ul>
+
+  <div class="note">
+    <span class="lbl">Deliberately not built</span>
+    <p>
+      No Pause or Stop control on a run. A Pause in the builder was vetoed on 2026-07-21 and
+      re-confirmed on 07-29 — pausing lives on the All Agents row. A per-run stop here would reopen
+      that decision sideways, so it stayed out and is flagged instead.
+    </p>
+  </div>
+
+  <figure>
+      <img src="builder-figma-parity-shots/06-golive-campaign-management.png" alt="The Go Live campaign roll-up bar above the run list" loading="lazy">
+      <figcaption><b>Go Live: roll-up before rows.</b> Dialing, scheduled, draft, completed and contacts outstanding in one line. “Needs input before deploy” is the only part allowed to shout, because it is the only part that blocks the button.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/07-golive-run-filter.png" alt="Status filter chips above the campaign run list" loading="lazy">
+      <figcaption><b>Status filter past four runs.</b> Appears only once the list can genuinely hide the row you came for. Creating, duplicating or re-running clears the filter, so a new row never opens into a state the list is filtering out.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/08-run-progress.png" alt="Dial progress bars on the two running campaign runs" loading="lazy">
+      <figcaption><b>Dial progress on running runs only.</b> “82 of 248 dialed” and a bar — the difference between a run that is working and one merely armed. Drafts get no bar; a bar would imply dialing that hasn't started. The simulation is disclosed beside the numbers, not in a footer.</figcaption>
+    </figure>
+
+  <h2>4 · The simulations rail</h2>
+  <p>
+    The frame shows a <em>Simulations · Test Agent</em> segmented control over a persistent
+    <span class="mono">SESSION STATISTICS</span> footer, with only Test Agent designed. There was
+    also a standing lock pointing the other way: the right panel is for simulations, <em>not</em> the
+    agent call.
+  </p>
+  <p>
+    Both hold. The rail carries both tabs, and <b>Simulations is the default</b> — so the lock decides
+    what you land on and the frame decides what else is reachable. Test agent is an extra door to the
+    same mock the inline Test section drives; it shares that section's single talk flag, because two
+    independent “is a call up?” booleans will eventually disagree on screen.
+  </p>
+  <p>
+    The rail now <b>opens by default at 1024px and wider</b>, so it reads as part of the layout rather
+    than a surface you have to know exists. An explicit close is remembered.
+  </p>
+
+  <div class="grid">
+    <div class="stat"><div class="k">Per slot</div><div class="v">ASR · LLM · TTS</div><div class="s">Vendor, model, and its share of first-word latency</div></div>
+    <div class="stat"><div class="k">End to end</div><div class="v">Typical &amp; warm</div><div class="s">Both, so a warm-path number can't pose as typical</div></div>
+    <div class="stat"><div class="k">Also</div><div class="v">Cost · Hosting</div><div class="s">Per-minute rate and the region, under every tab</div></div>
+  </div>
+
+  <figure>
+      <img src="builder-figma-parity-shots/09-rail-simulations.png" alt="The right rail on the Simulations tab with the session statistics panel beneath it" loading="lazy">
+      <figcaption><b>Simulations · Test agent — the frame's segmented rail.</b> Simulations stays the default tab, per the standing lock that the rail is for coverage rather than one phone call. Session statistics sit under every tab: vendor per pipeline slot, each slot's share of first-word latency, price per minute, and the hosting region.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/10-rail-test-agent.png" alt="The right rail on the Test agent tab, showing the agent orb and a Talk button" loading="lazy">
+      <figcaption><b>Test agent — one talk state across two surfaces.</b> The orb and Talk from the frame. It shares the host's single talk flag with the inline Test section; two independent “is a call up?” booleans would sooner or later disagree on screen. The statistics footer survives the tab switch — it describes the agent, not the tab.</figcaption>
+    </figure>
+  <figure>
+      <img src="builder-figma-parity-shots/11-deploy-review-hosting.png" alt="The Review and deploy card showing a Hosting row" loading="lazy">
+      <figcaption><b>Hosting in the review card.</b> A residency requirement set three sections up and never restated is a requirement that ships wrong. The deploy pre-flight carries the same row from the same helper, so the two cannot disagree.</figcaption>
+    </figure>
+
+  <h2>What changed, by file</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><code>lib/hosting-regions.ts</code></td><td><b>New.</b> Region catalogue, the Global-only exclusion rule, <code>hostingSummary()</code>, <code>normalizeHosting()</code>.</td></tr>
+      <tr><td><code>lib/wizard-draft.ts</code></td><td><code>hosting</code> on the draft; <code>campaignDialed()</code> and <code>campaignRollup()</code>; migration normalises an illegal area/exclusion pair.</td></tr>
+      <tr><td><code>components/wizard/hosting-region.tsx</code></td><td><b>New.</b> The region row, its consequence panel, and the vendor-residency caveat.</td></tr>
+      <tr><td><code>components/wizard/channel-section.tsx</code></td><td>Hosting row first; Batch runs roll-up; Code/SDK framed as a peer row.</td></tr>
+      <tr><td><code>components/wizard/campaigns-card.tsx</code></td><td>Roll-up bar, dial progress, status filter, empty-filter escape.</td></tr>
+      <tr><td><code>components/wizard/test-panel.tsx</code></td><td>Simulations · Test agent tabs; persistent session-statistics footer.</td></tr>
+      <tr><td><code>components/wizard/agent-wizard.tsx</code></td><td>Rail open by default at lg+ with remembered close; shared talk state; hosting in the folded recap and the section-2 reset slice.</td></tr>
+      <tr><td><code>components/wizard/step-publish.tsx</code> · <code>deploy-preflight.tsx</code></td><td>Hosting row in the review card and the pre-flight checklist.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Left alone on purpose</h2>
+  <ul class="plain">
+    <li><b>Radio order.</b> The frame lists Batch Calls · Inbound · Code/SDK; the build keeps Inbound
+      first. Reordering a locked surface was not part of the ask, and it changes which option reads
+      as the default.</li>
+    <li><b>Card chrome.</b> The frame draws bordered radio cards; the build keeps the flat Plain Form
+      rows that were locked earlier. Content parity is what was asked for, not the chassis.</li>
+    <li><b>Per-run Pause / Stop.</b> An existing veto — see above.</li>
+  </ul>
+
+  <footer>
+    Wireframe — no backend. Latency, cost and dial-progress figures are estimates, disclosed as such
+    in the UI itself. Region behaviour follows
+    <a href="https://docs.agora.io/en/conversational-ai/best-practices/regional-restrictions">Agora's
+    regional-restrictions guide</a>. Screenshots captured against the live production build at
+    1600×1200.
+  </footer>
+
+</div>
+</body>
+</html>
