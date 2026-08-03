@@ -305,6 +305,7 @@ function TalkTab({
       <div className="flex flex-col items-center gap-4 py-6">
         <AgentSphere size={132} active={talking} />
         <Button
+          id="wz-rail-talk"
           size="sm"
           variant={talking ? "outline" : "default"}
           className="gap-1.5"
