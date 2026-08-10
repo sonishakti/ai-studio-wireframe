@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "instrument sans",
+        "createdAt": "2026-08-10T06:47:51.458Z",
+        "reason": "User standing direction (memory feedback_html_doc_outputs): all doc deliverables use Instrument Sans + brand cyan"
+      }
+    ]
+  }
+}
