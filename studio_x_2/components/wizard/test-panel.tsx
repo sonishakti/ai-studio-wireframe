@@ -14,8 +14,7 @@ import { AgentSphere } from "@/components/agent-test-panel"
 import { SimTranscript, SimulatedBanner, AgentStateChips, type SimState } from "@/components/sim-transcript"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 import { generateContextualCases } from "@/components/wizard/test-section"
-import { hasWebWidget, draftHosting, type AgentDraft } from "@/lib/wizard-draft"
-import { hostingSummary } from "@/lib/hosting-regions"
+import { hasWebWidget, type AgentDraft } from "@/lib/wizard-draft"
 import {
   stackEstimateFor, stackLatencyDetail, type EvalCase, type EvalCaseResult, type EvalTurn,
 } from "@/lib/campaign-data"
@@ -143,6 +142,9 @@ export function TestPanel({
   const [generated, setGenerated] = React.useState<{ case: EvalCase; result: EvalCaseResult }[]>([])
   const [generating, setGenerating] = React.useState(false)
   const [generation, setGeneration] = React.useState(0)
+  // Figma 2974-91538: after a run, the Simulations tab's footer swaps from
+  // SESSION STATISTICS to SIMULATION RESULTS (passed/failed counts).
+  const [lastRun, setLastRun] = React.useState<{ passed: number; failed: number; total: number } | null>(null)
   const generate = () => {
     setGenerating(true)
     window.setTimeout(() => {
@@ -168,7 +170,7 @@ export function TestPanel({
         <div className="shrink-0 border-b border-border px-4 py-2.5">
           <TabsList id="wz-rail-tabs" className="h-8">
             <TabsTrigger value="simulations" className="text-xs">Simulations</TabsTrigger>
-            <TabsTrigger value="agent" className="text-xs">Test agent</TabsTrigger>
+            <TabsTrigger value="agent" className="text-xs">Test Agent</TabsTrigger>
             {showWidgetTab && <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>}
           </TabsList>
         </div>
@@ -178,17 +180,17 @@ export function TestPanel({
             <p className="min-w-0 text-sm text-muted-foreground">
               {generated.length
                 ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
-                : "Generate ~12 scenarios from your prompt, channel, and call behavior."}
+                : "Autogenerate simulation from your prompt, channel, and call behavior."}
             </p>
             <Button size="sm" variant={generated.length ? "outline" : "default"} className="gap-1.5" disabled={generating} onClick={generate}>
-              <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Auto-generate"}
+              <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Autogenerate"}
             </Button>
           </div>
           <TestsSection
             key={generation}
             agentName={agentName}
             extra={generated}
-            onRunSummary={onRunSummary}
+            onRunSummary={(s) => { setLastRun(s); onRunSummary?.(s) }}
           />
         </TabsContent>
 
@@ -209,8 +211,11 @@ export function TestPanel({
         )}
       </Tabs>
 
-      {/* Under every tab — what this agent actually costs and how fast it is. */}
-      <SessionStatistics draft={draft} />
+      {/* Footer is contextual (Figma): Simulations tab shows its results once
+          a run exists; every other state shows the pipeline stats. */}
+      {activeTab === "simulations" && lastRun
+        ? <SimulationResults passed={lastRun.passed} failed={lastRun.failed} />
+        : <SessionStatistics draft={draft} />}
     </div>
   )
 
@@ -345,12 +350,15 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
   const est = stackEstimateFor(draft.stack)
   const lat = stackLatencyDetail(draft.stack)
   const mllm = draft.stack.pipeline === "mllm"
+  // Figma 2861-52655 orders the pipeline rows LLM · ASR · TTS and reads out
+  // avg e2e latency, avg LLM TTFT, and avg cost — nothing else.
+  const ttftMs = Math.max(15, Math.round(lat.llmMs * 0.18))
 
   const slots = mllm
     ? [{ slot: "MLLM", name: `${draft.stack.llm.vendor} ${draft.stack.llm.model}`, ms: est.latencyMs }]
     : [
-        { slot: "ASR", name: `${draft.stack.asr.vendor} ${draft.stack.asr.model}`, ms: lat.asrMs },
         { slot: "LLM", name: `${draft.stack.llm.vendor} ${draft.stack.llm.model}`, ms: lat.llmMs },
+        { slot: "ASR", name: `${draft.stack.asr.vendor} ${draft.stack.asr.model}`, ms: lat.asrMs },
         { slot: "TTS", name: `${draft.stack.tts.vendor}`, ms: lat.ttsMs },
       ]
 
@@ -374,11 +382,32 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
       </dl>
       <dl className="mt-2.5 space-y-1 border-t border-border pt-2.5">
         <StatRow label="Avg. e2e latency" value={`${est.latencyMs} ms`} />
-        <StatRow label="Best case (warm)" value={`${lat.bestCaseMs} ms`} />
-        <StatRow label="Est. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
-        <StatRow label="Hosting" value={hostingSummary(draftHosting(draft))} />
+        <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} />
+        <StatRow label="Avg. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
       </dl>
       <p className="pt-2 text-xs text-muted-foreground/70">Wireframe estimates.</p>
+    </section>
+  )
+}
+
+/** Figma 2974-91538 — the rail footer once a suite run completes. */
+function SimulationResults({ passed, failed }: { passed: number; failed: number }) {
+  const pad2 = (n: number) => String(n).padStart(2, "0")
+  return (
+    <section className="shrink-0 border-t border-border px-4 py-3" aria-label="Simulation results">
+      <h4 className="pb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+        Simulation results
+      </h4>
+      <dl className="space-y-1">
+        <div className="flex items-baseline gap-2">
+          <dt className="min-w-0 flex-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">Passed</dt>
+          <dd className="shrink-0 font-mono text-xs tabular-nums text-success">{pad2(passed)}</dd>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <dt className="min-w-0 flex-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">Failed</dt>
+          <dd className={cn("shrink-0 font-mono text-xs tabular-nums", failed > 0 ? "text-destructive" : "text-muted-foreground")}>{pad2(failed)}</dd>
+        </div>
+      </dl>
     </section>
   )
 }

@@ -98,6 +98,39 @@ export interface AdvancedConfig {
   history: { maxMessages: number }
 }
 
+/** The Custom Config override blocks — the engine's own property sections
+ *  (Agora Conversational AI `properties`; Figma 2919-56980). */
+export const CUSTOM_CONFIG_SECTIONS = [
+  "asr", "llm", "tts", "avatar", "turn_detection", "interruption", "conversation", "sal",
+] as const
+
+export const CUSTOM_CONFIG_SKELETON = `{
+  "asr": {},
+  "llm": {},
+  "tts": {},
+  "avatar": {},
+  "turn_detection": {},
+  "interruption": {},
+  "conversation": {},
+  "sal": {}
+}`
+
+/** Section names whose object carries ≥1 property — the overriding ones.
+ *  Throws on invalid JSON (callers surface the parse error). */
+export function customConfigSections(raw: string): string[] {
+  const parsed = JSON.parse(raw) as Record<string, unknown>
+  return CUSTOM_CONFIG_SECTIONS.filter((k) => {
+    const v = parsed[k]
+    return !!v && typeof v === "object" && !Array.isArray(v) && Object.keys(v as object).length > 0
+  })
+}
+
+/** The sections a draft's applied Custom Config currently overrides. */
+export function overriddenSections(d: Pick<AgentDraft, "customConfig">): string[] {
+  if (!d.customConfig) return []
+  try { return customConfigSections(d.customConfig) } catch { return [] }
+}
+
 export const DEFAULT_ADVANCED: AdvancedConfig = {
   turnDetection: { enabled: true, preset: "balanced", threshold: 50 },
   startOfSpeech: { enabled: true, mode: "vad", keywords: [], interruptMs: 300, prefixPaddingMs: 120 },
@@ -134,7 +167,10 @@ export const DEFAULT_ANALYSIS: AnalysisConfig = {
   record: true,
   successEval: false,
   evalCriteria: "",
-  dataPoints: [],
+  // Figma 2867-111374 seeds one extraction: "Call Outcome · Boolean".
+  dataPoints: [
+    { id: "dp_call_outcome", name: "Call Outcome", type: "boolean", description: "Whether the call achieved its purpose." },
+  ],
 }
 
 /** How the agent's calls end + when they hand off to a person (Figma "Call
@@ -336,12 +372,19 @@ export interface AgentDraft {
    *  those fields render disabled + warning-flagged in the UI until unlocked —
    *  the JSON is their source of truth while listed here. */
   configOverrides?: string[]
+  /** Raw Custom Config JSON (Figma 2919-56980) — per-section engine-property
+   *  overrides (asr · llm · tts · …). Sections with properties lock their
+   *  visual controls, which flag "Overridden by Custom Config". */
+  customConfig?: string
   /** Per-channel connection state. */
   config: {
     /** Inbound links MULTIPLE numbers to one agent (2026-07-28) and can serve
      *  several surfaces at once (2026-07-29: phone · web widget · more soon). */
     inbound?: { numberIds: string[]; surfaces?: InboundSurface[] }
     code?: { added?: boolean }
+    /** Batch — the agent-level caller ID (Figma 2875-83511: "Choose how
+     *  callers reach your agent"); runs can still override per run. */
+    batch?: { callerId?: string }
   }
 }
 

@@ -69,13 +69,13 @@ export function StepPublish({
         </div>
       )}
 
-      {/* Review card (proposal 2639-102124): mono-labeled facts, values
+      {/* Deployment Summary (Figma 2867-111374): mono-labeled facts, values
           right-aligned, the full-width Deploy INSIDE the card — deploying is
           the end of this journey, not a header shortcut. */}
       <section className="space-y-4 rounded-lg border border-border bg-card p-5">
+        <h4 className="text-sm font-semibold">Deployment Summary</h4>
         <dl className="divide-y divide-border">
-          <ReviewRow label="Channel" value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
-          <ReviewRow label="Hosting" value={hostingSummary(draftHosting(draft))} />
+          <ReviewRow label="Deployed to" value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
           <ReviewRow label="Models" value={stackLine(draft.stack, { full: true })} />
           <ReviewRow label="Voice" value={voice ? `${voice.name} · ${voice.tagline}` : "Not set yet"} />
           <ReviewRow label="Cost" value={`~$${est.costPerMin.toFixed(2)}/min`} />
@@ -111,11 +111,11 @@ export function StepPublish({
   )
 }
 
-/** Quiet label + right-aligned value over hairlines (Plain Form review). */
+/** Mono uppercase label + right-aligned value over hairlines (Figma). */
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline gap-2.5 py-2 first:pt-0 last:pb-0">
-      <dt className="min-w-0 shrink-0 text-xs text-muted-foreground">{label}</dt>
+      <dt className="min-w-0 shrink-0 font-mono text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
       <dd className="min-w-0 flex-1 text-right text-sm">{value}</dd>
     </div>
   )

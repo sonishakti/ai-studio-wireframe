@@ -1,11 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { ArrowRight } from "lucide-react"
+import { Sparkles } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
-import { AgentIdentityCard } from "@/components/agent-identity-card"
-import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn, type StackLatencyBreakdown } from "@/lib/campaign-data"
+import { TestsSection } from "@/components/eval-tests"
+import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn } from "@/lib/campaign-data"
 import {
   hasChannel, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
 } from "@/lib/wizard-draft"
@@ -202,95 +203,59 @@ export function generateContextualCases(d: AgentDraft): { case: EvalCase; result
   })
 }
 
-// ─── The section — live contextual test + a door to the simulations panel ────
-
-/** The identity-card facts the live test renders — built by the host. */
-export interface LiveTestIdentity {
-  name: string
-  namePlaceholder: string
-  onNameChange: (v: string) => void
-  agentId?: string
-  status: string
-  subtitle: string
-  stack: string
-  language: string
-  costPerMin?: number
-  latencyMs?: number
-  latencyBreakdown?: StackLatencyBreakdown
-  channel?: { label: string; onClick: () => void }
-  talking: boolean
-  onToggleTalk: () => void
-  talkLabel: string
-}
+// ─── The section — the simulation suite inline (Figma 2867-110660) ───────────
 
 export function TestSection({
   draft,
-  identity,
-  onOpenSims,
+  agentName,
+  onRunSummary,
 }: Pick<StepProps, "draft"> & {
-  identity: LiveTestIdentity
-  /** Opens the docked SIMULATIONS panel (the header Test button's surface). */
-  onOpenSims: () => void
+  agentName: string
+  /** Bubbles each completed run up to the Test strip's verdict line. */
+  onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
 }) {
-  const inboundish = hasChannel(draft, "inbound")
-  const outbound = hasChannel(draft, "batch")
-  const greeting = draft.greeting.trim() || "Hi, thanks for calling. How can I help you today?"
+  const [generated, setGenerated] = React.useState<{ case: EvalCase; result: EvalCaseResult }[]>([])
+  const [generating, setGenerating] = React.useState(false)
+  const [generation, setGeneration] = React.useState(0)
+  const generate = () => {
+    setGenerating(true)
+    window.setTimeout(() => {
+      const cases = generateContextualCases(draft)
+      setGenerated(cases)
+      setGeneration((g) => g + 1)
+      setGenerating(false)
+      toast(`${cases.length} scenarios generated from your context`, {
+        description: "Built from the prompt, greeting, channel, and call behavior. Run them to score.",
+      })
+    }, 900)
+  }
 
   return (
     <SectionRows>
-      {/* Live contextual test — full persona, direction-aware, talk INLINE. */}
-      <SectionRow
-        id="wz-4-live"
-        label="Live contextual test"
-        hint={outbound && !inboundish
-          ? "The agent opens the call the way the campaign will — you play the contact."
-          : "A call comes in — the agent picks up in full persona; you play the caller."}
-      >
-        <div className="space-y-1">
-          <p className="text-sm">
-            <span className="font-medium">
-              {outbound && !inboundish
-                ? `${draft.name || "Your agent"} opens with: `
-                : `${draft.name || "Your agent"} picks up with: `}
-            </span>
-            <span className="text-muted-foreground">“{greeting}”</span>
-          </p>
-        </div>
-        <AgentIdentityCard
-          name={identity.name}
-          namePlaceholder={identity.namePlaceholder}
-          onNameChange={identity.onNameChange}
-          agentId={identity.agentId}
-          status={identity.status}
-          subtitle={identity.subtitle}
-          stack={identity.stack}
-          language={identity.language}
-          costPerMin={identity.costPerMin}
-          latencyMs={identity.latencyMs}
-          latencyBreakdown={identity.latencyBreakdown}
-          channel={identity.channel}
-          talking={identity.talking}
-          onToggleTalk={identity.onToggleTalk}
-          talkLabel={identity.talkLabel}
-          endLabel="End test"
-          lean
-        />
-        <p className="text-xs text-muted-foreground">
-          Simulated preview — no live audio in this wireframe.
-        </p>
-      </SectionRow>
-
-      {/* Simulations live in the docked panel — this is their door. */}
       <SectionRow
         id="wz-4-sims"
         label="Simulations"
-        hint="Auto-generated from your prompt, channels, and call behavior — scored by a judge model."
+        hint="Run contextual simulations built from your agent's own context and workflows."
       >
-        <div>
-          <Button variant="outline" size="sm" className="gap-1" onClick={onOpenSims}>
-            Open simulations <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-          </Button>
-        </div>
+        <TestsSection
+          key={generation}
+          variant="section"
+          agentName={agentName}
+          extra={generated}
+          onRunSummary={onRunSummary}
+          leadingActions={
+            <Button
+              size="sm"
+              variant={generated.length ? "outline" : "secondary"}
+              className="gap-1.5"
+              disabled={generating}
+              onClick={generate}
+            >
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              {generating ? "Generating…" : generated.length ? "Regenerate Simulations" : "Autogenerate Simulations"}
+            </Button>
+          }
+        />
       </SectionRow>
     </SectionRows>
   )

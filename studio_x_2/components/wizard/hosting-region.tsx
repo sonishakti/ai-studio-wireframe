@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { ExternalLink, Globe, Gauge, ShieldCheck } from "lucide-react"
+import { ExternalLink, Globe, Gauge, Plus, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -39,6 +40,8 @@ export function HostingRegionRow({ draft, update }: StepProps) {
   const opt = hostingOption(hosting.area)
   const pinned = isPinned(hosting)
   const base = stackEstimateFor(draft.stack).latencyMs
+  // Figma 2919-59124: exclusions hide behind "+ Add Exclusions" until asked for.
+  const [exclusionsOpen, setExclusionsOpen] = React.useState(!!hosting.excludeArea)
 
   const setArea = (area: HostingSelection) => {
     if (area === hosting.area) return
@@ -61,7 +64,7 @@ export function HostingRegionRow({ draft, update }: StepProps) {
   return (
     <SectionRow
       id="wz-2-hosting"
-      label="Agent hosting region"
+      label="Hosting Region"
       hint={
         <>
           <p>Where the agent process runs — the same for every deployment type below.</p>
@@ -93,8 +96,15 @@ export function HostingRegionRow({ draft, update }: StepProps) {
       </div>
 
       {/* Global is the ONLY area that accepts a blocklist (Agora API rule) —
-          so the second control appears only there, never as a dead field. */}
-      {hosting.area === "GLOBAL" && (
+          the "+ Add Exclusions" door (Figma) appears only there, never dead. */}
+      {hosting.area === "GLOBAL" && !exclusionsOpen && (
+        <div>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setExclusionsOpen(true)}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add Exclusions
+          </Button>
+        </div>
+      )}
+      {hosting.area === "GLOBAL" && exclusionsOpen && (
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground" htmlFor="wz-hosting-exclude">
             Never route to

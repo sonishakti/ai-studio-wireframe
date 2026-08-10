@@ -82,6 +82,15 @@ export function StepAdvanced({
             )
           })}
         </div>
+        {/* The chosen preset, characterized (Figma 2916-3435): a one-line
+            description plus its Response Speed / Naturalness read-out. */}
+        <p className="text-xs text-muted-foreground">
+          {PRESET_DESC[adv.turnDetection.preset].text}
+        </p>
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span>Response Speed <Badge variant="secondary" className="ml-1 text-xs">{PRESET_DESC[adv.turnDetection.preset].speed}</Badge></span>
+          <span>Naturalness <Badge variant="secondary" className="ml-1 text-xs">{PRESET_DESC[adv.turnDetection.preset].naturalness}</Badge></span>
+        </p>
         {adv.turnDetection.preset === "custom" && (
           <SliderRow
             label="Threshold" value={adv.turnDetection.threshold} min={0} max={100} step={1}
@@ -334,6 +343,14 @@ const TURN_PRESETS: { id: AdvancedConfig["turnDetection"]["preset"]; label: stri
   { id: "patient", label: "Patient", hint: "Waits longer", icon: Ear },
   { id: "custom", label: "Custom", hint: "Set a threshold", icon: Settings2 },
 ]
+
+/** Per-preset characterization (Figma 2916-3435). */
+const PRESET_DESC: Record<AdvancedConfig["turnDetection"]["preset"], { text: string; speed: string; naturalness: string }> = {
+  responsive: { text: "Answers the moment the caller pauses. Best for quick, transactional calls.", speed: "Fast", naturalness: "Direct" },
+  balanced: { text: "Good mix of responsiveness and naturalness. Ideal for most use-cases.", speed: "Moderate", naturalness: "Natural" },
+  patient: { text: "Waits out longer pauses before replying. Best for thoughtful or elderly callers.", speed: "Slow", naturalness: "Very natural" },
+  custom: { text: "Your own threshold — tune how loud the caller must be to take the turn.", speed: "Custom", naturalness: "Custom" },
+}
 
 function Sub({
   icon: Icon, title, desc, enabled, onToggle, children,

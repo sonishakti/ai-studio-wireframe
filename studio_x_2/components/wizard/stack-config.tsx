@@ -1,11 +1,18 @@
 "use client"
 
 import * as React from "react"
+import { ChevronDown, RotateCcw, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
@@ -441,6 +448,236 @@ export function StackModelPicker({
   )
 }
 
+// ─── Configure a slot (Figma 2962-91425): vendor · credential · model ─────────
+
+const SLOT_LABEL = { asr: "STT", llm: "LLM", tts: "TTS" } as const
+
+/** "Configure LLM" — the per-slot sheet behind each model row's ⚙ button:
+ *  Vendor, Credential (managed vs your own key — Agora's `credential_mode`,
+ *  per slot), Model (or a Custom id), Save changes. */
+function ConfigureSlotSheet({
+  slot, stack, onChange, open, onOpenChange,
+}: {
+  slot: "asr" | "llm" | "tts"
+  stack: AgentStack
+  onChange: (next: AgentStack) => void
+  open: boolean
+  onOpenChange: (o: boolean) => void
+}) {
+  const current = stack[slot]
+  const vendors = React.useMemo(() => {
+    const list = slot === "tts" ? STACK_CATALOG.tts : slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm
+    return [...new Set(list.map((o) => o.vendor))]
+  }, [slot])
+
+  const [vendor, setVendor] = React.useState(current.vendor)
+  const [model, setModel] = React.useState(slot === "tts" ? stack.tts.voice : (current as { model: string }).model)
+  const [mode, setMode] = React.useState<CredentialMode>(slotMode(stack, slot))
+  const [custom, setCustom] = React.useState(false)
+  React.useEffect(() => {
+    if (open) {
+      setVendor(current.vendor)
+      setModel(slot === "tts" ? stack.tts.voice : (current as { model: string }).model)
+      setMode(slotMode(stack, slot))
+      setCustom(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  const models: string[] = React.useMemo(() => {
+    if (slot === "tts") return [...(STACK_CATALOG.tts.find((v) => v.vendor === vendor)?.voices ?? [])]
+    const list = slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm
+    return list.filter((o) => o.vendor === vendor).map((o) => o.model)
+  }, [slot, vendor])
+
+  const resellable = vendor in MANAGED_PROVIDERS
+
+  const save = () => {
+    const modes = { asr: slotMode(stack, "asr"), llm: slotMode(stack, "llm"), tts: slotMode(stack, "tts") }
+    const next: AgentStack = {
+      ...stack,
+      credentialMode: { ...modes, [slot]: resellable ? mode : "byo" },
+      ...(slot === "tts"
+        ? { tts: { vendor, voice: model } }
+        : slot === "asr"
+        ? { asr: { vendor, model } }
+        : { llm: { vendor, model } }),
+    }
+    onChange(next)
+    onOpenChange(false)
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md">
+        <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+          <SheetTitle className="text-base">Configure {SLOT_LABEL[slot]}</SheetTitle>
+        </SheetHeader>
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Vendor</Label>
+            <Select value={vendor} onValueChange={(v) => {
+              setVendor(v)
+              const first = slot === "tts"
+                ? STACK_CATALOG.tts.find((x) => x.vendor === v)?.voices[0]
+                : (slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm).find((x) => x.vendor === v)?.model
+              if (first) setModel(first)
+            }}>
+              <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {vendors.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Credential</Label>
+              <a
+                href="/integrations?tab=credentials"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline"
+              >
+                Manage <span aria-hidden>↗</span>
+              </a>
+            </div>
+            <Select
+              value={resellable ? mode : "byo"}
+              onValueChange={(v) => setMode(v as CredentialMode)}
+              disabled={!resellable}
+            >
+              <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {resellable && <SelectItem value="managed">Agora managed (included)</SelectItem>}
+                <SelectItem value="byo">my-{vendor.toLowerCase().replace(/\s+/g, "-")}-{slot}-credential</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {!resellable
+                ? `${vendor} is bring-your-own-key only — Agora doesn't resell it.`
+                : mode === "managed"
+                ? "Included — no key to add, no vendor bill."
+                : `You add a ${vendor} key and they bill you directly, on top of Agora's rate.`}
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">{slot === "tts" ? "Voice" : "Model"}</Label>
+            {custom ? (
+              <Input
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder={slot === "tts" ? "custom-voice-id" : "custom-model-id"}
+                className="font-mono text-sm"
+              />
+            ) : (
+              <Select value={models.includes(model) ? model : models[0]} onValueChange={setModel}>
+                <SelectTrigger className="w-full text-sm capitalize"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {models.map((m) => <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
+            <label className="flex items-center gap-2 pt-1 text-sm text-muted-foreground">
+              <Checkbox checked={custom} onCheckedChange={(c) => setCustom(!!c)} aria-label="Custom model id" />
+              Custom
+            </label>
+          </div>
+        </div>
+        <div className="shrink-0 border-t border-border px-5 py-3">
+          <Button className="w-full" onClick={save}>Save changes</Button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+/** "Or Configure models manually" (Figma 2998-93809) — the inline expander:
+ *  Custom Stack recap + Reset, the architecture cards, then one row per model
+ *  slot with a ⚙ door to its Configure sheet. */
+export function ManualStackConfig({ stack, onChange, className }: StackPieceProps) {
+  const [openSlot, setOpenSlot] = React.useState<"asr" | "llm" | "tts" | null>(null)
+  const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
+  const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
+
+  const slotValue = (slot: "asr" | "llm" | "tts") => {
+    if (slot === "tts") {
+      const v = STACK_CATALOG.tts.find((x) => x.vendor === stack.tts.vendor)
+      return `${v?.label ?? stack.tts.vendor} ${stack.tts.voice}`
+    }
+    const list = slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm
+    const cur = stack[slot] as { vendor: string; model: string }
+    return list.find((o) => o.vendor === cur.vendor && o.model === cur.model)?.label ?? `${cur.vendor} ${cur.model}`
+  }
+
+  const reset = () => {
+    const base = stackFor(stack.preset, stack.modality)
+    onChange({ ...base, pipeline: "stt-llm-tts", language: stack.language })
+  }
+
+  return (
+    <div className={cn("space-y-4", className)}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm">
+          <span className="font-medium">Custom Stack</span>{" "}
+          <span className="font-mono text-xs text-muted-foreground">
+            {stack.asr.vendor} + {stack.llm.model} + {stack.tts.vendor}
+            {diverged ? "" : " (preset defaults)"}
+          </span>
+        </p>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground" onClick={reset}>
+          <RotateCcw className="h-3.5 w-3.5" aria-hidden /> Reset
+        </Button>
+      </div>
+
+      <StackModelsDetail stack={stack} onChange={onChange} showPicker={false} />
+
+      {pipeline === "stt-llm-tts" ? (
+        <div className="space-y-4">
+          {(["asr", "llm", "tts"] as const).map((slot) => (
+            <div key={slot} className="min-w-0 space-y-1.5">
+              <Label className="text-sm font-medium">
+                {slot === "asr" ? "Speech-to-Text (STT)" : slot === "llm" ? "Large Language Model (LLM)" : "Text-to-Speech (TTS)"}
+              </Label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOpenSlot(slot)}
+                  className="flex h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={`Configure ${SLOT_LABEL[slot]}`}
+                >
+                  <span className="truncate capitalize">{slotValue(slot)}</span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                </button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="size-9 shrink-0"
+                  aria-label={`Configure ${SLOT_LABEL[slot]} vendor and credential`}
+                  onClick={() => setOpenSlot(slot)}
+                >
+                  <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <StackModelPicker stack={stack} onChange={onChange} hideTitle stacked />
+      )}
+
+      {openSlot && (
+        <ConfigureSlotSheet
+          slot={openSlot}
+          stack={stack}
+          onChange={onChange}
+          open={!!openSlot}
+          onOpenChange={(o) => !o && setOpenSlot(null)}
+        />
+      )}
+    </div>
+  )
+}
+
 // ─── The latency ↔ cost tradeoff slider ───────────────────────────────────────
 
 /** One slider instead of three preset cards (owner 2026-07-17): drag toward
@@ -520,13 +757,22 @@ export function StackTradeoffSlider({
           preset is a VENDOR bundle, and real model control exists — both must
           read without hovering. Diverged mixes are named honestly — AND the
           numbers now move with the models, which they previously did not. */}
-      <p className="font-mono text-xs tabular-nums text-muted-foreground">
-        {lean ? (
-          <>{bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
-        ) : (
-          <>Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min</>
-        )}
-      </p>
+      {lean ? (
+        /* Figma 2861-61019: "Agora Balanced:  Deepgram Nova + GPT-5 nano +
+           Flash v2.5 (250 ms, ~$0.10/min)" — name the bundle, then its parts. */
+        <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+          <span className="font-medium">
+            {diverged ? "Custom Stack:" : `Agora ${STACK_PRESETS[stack.preset].label}:`}
+          </span>
+          <span className="font-mono text-xs tabular-nums text-muted-foreground">
+            {stack.asr.vendor} + {stack.llm.model} + {stack.tts.vendor} ({est.latencyMs} ms, ~${est.costPerMin.toFixed(2)}/min)
+          </span>
+        </p>
+      ) : (
+        <p className="font-mono text-xs tabular-nums text-muted-foreground">
+          Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min
+        </p>
+      )}
       {/* Where the money actually goes. Agora charges its platform rate either
           way and managed absorbs the vendor bill, so managed is CHEAPER — the
           inverse of every competitor, and previously invisible. Arithmetic, not

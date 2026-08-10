@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import {
-  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft,
+  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft, Search,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -65,36 +65,45 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     // [label | content] rows (owner 2026-07-21): each resource names itself on
     // the LHS; the host's <SectionRows> owns the container.
     <>
-        <SectionRow id="wz-5-kb" label="Knowledge base">
+        <SectionRow id="wz-5-kb" label="Knowledge Base">
           <ResourceField
             hideHeader
             icon={BookOpen}
-            title="Knowledge base"
+            title="Add Knowledge Base"
             description="Ground answers in your docs."
-            items={kbs.map((k) => ({ id: k.id, name: k.name, meta: k.status === "ready" ? `${k.chunks} chunks` : "Indexing…" }))}
+            emptyTitle="No knowledge base added"
+            emptyDesc="Create new or add an existing one"
+            items={kbs.map((k) => ({
+              id: k.id,
+              name: k.name,
+              meta: k.size ?? (k.status === "ready" ? `${k.chunks} chunks` : "Indexing…"),
+              status: k.status === "ready" ? ("active" as const) : ("processing" as const),
+            }))}
             selectedIds={draft.knowledge}
             onChange={(knowledge) => update({ knowledge })}
-            manageLabel="Add knowledge base"
+            manageLabel="Add Knowledge base"
             create={{
-              label: "Create knowledge base",
+              label: "Create New Knowledge Base",
               render: (onCreated) => <KnowledgeCreateForm onCreated={onCreated} />,
               onCreated: refresh,
             }}
           />
         </SectionRow>
 
-        <SectionRow id="wz-5-mcp" label="MCP servers">
+        <SectionRow id="wz-5-mcp" label="MCP Server">
           <ResourceField
             hideHeader
             icon={Plug}
-            title="MCP server"
+            title="Add MCP Servers"
             description="Give it tools: CRM, calendar, APIs."
+            emptyTitle="No MCP servers added"
+            emptyDesc="Create new or add an existing one"
             items={mcps.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools`, config: !!getUserMcpServer(m.id) }))}
             selectedIds={draft.mcp}
             onChange={(mcp) => update({ mcp })}
             manageLabel="Add MCP server"
             create={{
-              label: "Create MCP server",
+              label: "Create New MCP Server",
               render: (onCreated) => <McpCreateForm onCreated={onCreated} />,
               onCreated: refresh,
             }}
@@ -103,9 +112,27 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
           />
         </SectionRow>
 
-        {/* Connectors TABLE (proposal 2639-102124): Name · Status · toggle. */}
-        <SectionRow id="wz-5-connectors" label="Connectors">
-          <div className="space-y-2">
+        {/* Tools & Connectors (Figma 2867-53592): count header · Name/Status
+            table with per-row toggles · + Add Connector. */}
+        <SectionRow id="wz-5-connectors" label="Tools & Connectors">
+          <div className="space-y-2 rounded-lg border border-border p-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                {String(draft.connectors.length).padStart(2, "0")} connectors added
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => router.push("/integrations?tab=connectors")}
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Connector
+              </Button>
+            </div>
+            <div className="flex items-baseline justify-between border-b border-border pb-1.5 text-xs text-muted-foreground">
+              <span>Name</span>
+              <span className="pr-12">Status</span>
+            </div>
             <ul className="divide-y divide-border">
               {CONNECTORS.map((c) => {
                 const s = effectiveConnectorStatus(c)
@@ -113,9 +140,13 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
                 return (
                   <li key={c.id} className="flex items-center gap-3 py-2.5">
                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{c.name}</span>
-                    <span className={cn("shrink-0 text-xs", s === "connected" ? "text-success" : "text-muted-foreground")}>
-                      {s === "connected" ? "Active" : s === "coming-soon" ? "Coming soon" : "Connect in Resources"}
-                    </span>
+                    {s === "connected" ? (
+                      <Badge variant="secondary" className="shrink-0 bg-success/15 text-xs text-success">Active</Badge>
+                    ) : (
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {s === "coming-soon" ? "Coming soon" : "Connect in Resources"}
+                      </span>
+                    )}
                     <Switch
                       checked={attached}
                       disabled={s !== "connected"}
@@ -128,14 +159,6 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
                 )
               })}
             </ul>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-muted-foreground"
-              onClick={() => router.push("/integrations?tab=connectors")}
-            >
-              <Plus className="h-3.5 w-3.5" /> Add connector
-            </Button>
           </div>
         </SectionRow>
 
@@ -158,6 +181,8 @@ interface AttachItem {
   note?: string
   /** User-created item that carries a per-row menu (configure / delete). */
   config?: boolean
+  /** Figma 2932-86261: Active vs Processing badge in the attach sheet. */
+  status?: "active" | "processing"
 }
 
 interface CreateSlot {
@@ -170,6 +195,8 @@ function ResourceField({
   icon: Icon,
   title,
   description,
+  emptyTitle,
+  emptyDesc,
   items,
   selectedIds,
   onChange,
@@ -186,6 +213,10 @@ function ResourceField({
   /** [label | content] hosting (2026-07-21): the row label carries the
    *  title/description — skip the in-card header. */
   hideHeader?: boolean
+  /** Figma empty-state card copy ("No knowledge base added" / "Create new or
+   *  add an existing one"). */
+  emptyTitle?: string
+  emptyDesc?: string
   items: AttachItem[]
   selectedIds: string[]
   onChange: (ids: string[]) => void
@@ -197,18 +228,33 @@ function ResourceField({
 }) {
   const [open, setOpen] = React.useState(false)
   const [view, setView] = React.useState<"list" | "create">("list")
+  const [query, setQuery] = React.useState("")
+  // Staged selection (Figma: toggles + a Save footer) — applied on Save, so
+  // half-flipped switches don't ship if the sheet is dismissed.
+  const [pending, setPending] = React.useState<string[]>(selectedIds)
   const selected = items.filter((i) => selectedIds.includes(i.id))
-  const toggle = (id: string) =>
-    onChange(selectedIds.includes(id) ? selectedIds.filter((x) => x !== id) : [...selectedIds, id])
+  const togglePending = (id: string, on: boolean) =>
+    setPending((p) => (on ? [...new Set([...p, id])] : p.filter((x) => x !== id)))
 
-  // Reset to the list whenever the sheet closes, so it never reopens mid-form.
-  const setSheet = (o: boolean) => { setOpen(o); if (!o) setView("list") }
+  // Reset to the list whenever the sheet opens/closes.
+  const setSheet = (o: boolean) => {
+    setOpen(o)
+    if (o) { setPending(selectedIds); setQuery("") }
+    if (!o) setView("list")
+  }
+  const save = () => {
+    onChange(pending)
+    setOpen(false)
+  }
   const handleCreated = (id: string) => {
     if (!selectedIds.includes(id)) onChange([...selectedIds, id])
+    setPending((p) => [...new Set([...p, id])])
     create?.onCreated?.()
     setView("list")
-    toast.success("Added and attached", { description: `Created and attached to ${title.toLowerCase()}.` })
+    toast.success("Added and attached", { description: `Created and attached.` })
   }
+
+  const visible = items.filter((i) => i.name.toLowerCase().includes(query.trim().toLowerCase()))
 
   return (
     <section className={cn("space-y-3", !hideHeader && "rounded-lg border border-border bg-card p-4")}>
@@ -240,7 +286,7 @@ function ResourceField({
               {i.name}
               <button
                 type="button"
-                onClick={() => toggle(i.id)}
+                onClick={() => onChange(selectedIds.filter((x) => x !== i.id))}
                 aria-label={`Remove ${i.name}`}
                 className="rounded-sm text-muted-foreground transition-colors hover:text-foreground"
               >
@@ -252,15 +298,30 @@ function ResourceField({
       )}
 
       <Sheet open={open} onOpenChange={setSheet}>
-        <SheetTrigger asChild>
-          <Button
-            variant={hideHeader ? "ghost" : "outline"}
-            size="sm"
-            className={cn("gap-1.5", hideHeader ? "text-muted-foreground" : "w-full")}
-          >
-            <Plus className="h-3.5 w-3.5" /> {manageLabel}
-          </Button>
-        </SheetTrigger>
+        {selected.length === 0 && emptyTitle ? (
+          /* Figma 2867-53592: the empty state IS the row — copy card + door. */
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{emptyTitle}</p>
+              <p className="text-xs text-muted-foreground">{emptyDesc}</p>
+            </div>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="shrink-0 gap-1.5">
+                <Plus className="h-3.5 w-3.5" /> {manageLabel}
+              </Button>
+            </SheetTrigger>
+          </div>
+        ) : (
+          <SheetTrigger asChild>
+            <Button
+              variant={hideHeader ? "ghost" : "outline"}
+              size="sm"
+              className={cn("gap-1.5", hideHeader ? "text-muted-foreground" : "w-full")}
+            >
+              <Plus className="h-3.5 w-3.5" /> {manageLabel}
+            </Button>
+          </SheetTrigger>
+        )}
         <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
           {view === "create" && create ? (
             <>
@@ -282,90 +343,102 @@ function ResourceField({
             <>
               <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
                 <SheetTitle>{title}</SheetTitle>
-                <SheetDescription>Attach to this agent, or create a new one.</SheetDescription>
+                <SheetDescription className="sr-only">Attach to this agent, or create a new one.</SheetDescription>
               </SheetHeader>
-              <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-5 py-4">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
+                {/* Figma 2932-86261: search first, then the roster. */}
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search by name…"
+                    className="pl-8 text-sm"
+                    aria-label={`Search ${title}`}
+                  />
+                </div>
+
+                <div className="overflow-hidden rounded-lg border border-border">
+                  <div className="flex items-baseline justify-between border-b border-border bg-muted/40 px-3.5 py-2 text-xs text-muted-foreground">
+                    <span>Name</span>
+                    <span className="pr-11">Status</span>
+                  </div>
+                  <ul className="divide-y divide-border">
+                    {visible.map((i) => {
+                      const on = pending.includes(i.id)
+                      return (
+                        <li key={i.id} className={cn("flex items-center gap-3 px-3.5 py-2.5", i.disabled && "opacity-70")}>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">{i.name}</p>
+                            <p className="text-xs text-muted-foreground">{i.meta}</p>
+                          </div>
+                          {i.status && (
+                            <Badge
+                              variant="secondary"
+                              className={cn(
+                                "shrink-0 text-xs",
+                                i.status === "active" ? "bg-success/15 text-success" : "text-muted-foreground",
+                              )}
+                            >
+                              {i.status === "active" ? "Active" : "Processing"}
+                            </Badge>
+                          )}
+                          {i.note && <span className="shrink-0 text-xs text-muted-foreground">{i.note}</span>}
+                          {!i.disabled && (
+                            <Switch
+                              checked={on}
+                              disabled={i.status === "processing" && !on}
+                              onCheckedChange={(v) => togglePending(i.id, v)}
+                              aria-label={`Attach ${i.name}`}
+                            />
+                          )}
+                          {i.config && (onConfigure || onDelete) && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" aria-label={`${i.name} options`}>
+                                  <MoreVertical className="h-4 w-4" aria-hidden />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {onConfigure && (
+                                  <DropdownMenuItem onSelect={() => { onConfigure(i.id); setSheet(false) }}>
+                                    <Settings2 className="h-4 w-4" aria-hidden /> Configure tools
+                                  </DropdownMenuItem>
+                                )}
+                                {onDelete && (
+                                  <DropdownMenuItem variant="destructive" onSelect={() => onDelete(i.id)}>
+                                    <Trash2 className="h-4 w-4" aria-hidden /> Delete
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  {visible.length === 0 && (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                      {query ? "No matches." : "Nothing here yet."}
+                    </p>
+                  )}
+                </div>
+
+                {/* Create-new sits UNDER the roster (Figma). */}
                 {create && (
                   <button
                     type="button"
                     onClick={() => setView("create")}
-                    className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border px-3.5 py-3 text-left text-sm font-medium transition-colors hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-3.5 py-3 text-sm font-medium transition-colors hover:border-primary/50 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Plus className="h-4 w-4 text-muted-foreground" aria-hidden /> {create.label}
                   </button>
                 )}
-                {items.map((i) => {
-                  const on = selectedIds.includes(i.id)
-                  if (i.disabled) {
-                    return (
-                      <div
-                        key={i.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3 opacity-70"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{i.name}</p>
-                          <p className="text-xs text-muted-foreground">{i.meta}</p>
-                        </div>
-                        {i.note && <span className="shrink-0 text-xs text-muted-foreground">{i.note}</span>}
-                      </div>
-                    )
-                  }
-                  return (
-                    <div
-                      key={i.id}
-                      className={cn(
-                        "flex items-center gap-2 rounded-lg border px-1.5 transition-colors",
-                        on ? "border-primary bg-primary/5" : "border-border hover:bg-accent/40",
-                      )}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => toggle(i.id)}
-                        aria-pressed={on}
-                        className="flex min-w-0 flex-1 items-center justify-between gap-3 px-2 py-3 text-left"
-                      >
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium">{i.name}</span>
-                          <span className="block text-xs text-muted-foreground">{i.meta}</span>
-                        </span>
-                        <span
-                          className={cn(
-                            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
-                            on ? "border-primary bg-primary text-primary-foreground" : "border-border",
-                          )}
-                        >
-                          {on && <Check className="h-3 w-3" />}
-                        </span>
-                      </button>
-                      {i.config && (onConfigure || onDelete) && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" aria-label={`${i.name} options`}>
-                              <MoreVertical className="h-4 w-4" aria-hidden />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {onConfigure && (
-                              <DropdownMenuItem onSelect={() => { onConfigure(i.id); setSheet(false) }}>
-                                <Settings2 className="h-4 w-4" aria-hidden /> Configure tools
-                              </DropdownMenuItem>
-                            )}
-                            {onDelete && (
-                              <DropdownMenuItem variant="destructive" onSelect={() => onDelete(i.id)}>
-                                <Trash2 className="h-4 w-4" aria-hidden /> Delete
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
-                  )
-                })}
-                {items.length === 0 && (
-                  <p className="py-6 text-center text-sm text-muted-foreground">Nothing here yet.</p>
-                )}
               </div>
               {footer && <div className="shrink-0 border-t border-border px-5 py-3">{footer}</div>}
+              <div className="shrink-0 border-t border-border px-5 py-3">
+                <Button className="w-full" onClick={save}>Save</Button>
+              </div>
             </>
           )}
         </SheetContent>

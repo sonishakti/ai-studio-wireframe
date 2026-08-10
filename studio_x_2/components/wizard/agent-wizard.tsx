@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, Mic } from "lucide-react"
+import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, Mic, AudioLines } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +18,7 @@ import { ChannelSection } from "@/components/wizard/channel-section"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
 import { SectionKnowledgeTools } from "@/components/wizard/step-build"
 import { DeploySection } from "@/components/wizard/deploy-section"
-import { TestSection, type LiveTestIdentity } from "@/components/wizard/test-section"
+import { TestSection } from "@/components/wizard/test-section"
 import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
 import { TemplateMenu } from "@/components/wizard/template-menu"
 import { SectionRows } from "@/components/wizard/section-row"
@@ -181,9 +181,9 @@ export function AgentWizard({
     setRailOpen(true)
   }, [setRailOpen])
   React.useEffect(() => {
-    // The ceremony's "Say hello" lands ON the live contextual test (section 4)
-    // — the talk surface lives there now, not in the panel.
-    if (autoTalk) window.setTimeout(() => openRowRef.current(4), 150)
+    // The ceremony's "Say hello" lands on the rail's Test Agent tab — the talk
+    // surface lives there (Figma 2861-52655).
+    if (autoTalk) window.setTimeout(() => openTest("agent"), 150)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoTalk])
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
@@ -585,27 +585,17 @@ export function AgentWizard({
     })
   }
 
-  // Apply an edited-JSON patch from the Custom config drawer (F4). Fields the
-  // JSON overrides get FLAGGED + DISABLED in the UI (owner 2026-07-28) until
-  // unlocked — the JSON is their source of truth while listed.
-  const OVERRIDABLE = ["systemPrompt", "greeting", "failureMessage"] as const
-  const applyConfigPatch = (patch: Partial<AgentDraft>) => {
+  // Apply the Custom Config JSON (Figma 2919-56980): the raw text persists on
+  // the draft; sections with properties lock their visual controls, which flag
+  // "Overridden by Custom Config" until the section is emptied again.
+  const applyCustomConfig = (raw: string, sections: string[]) => {
     const before = JSON.parse(JSON.stringify(draftRef.current)) as AgentDraft
     dirty.current = true
-    // Only fields the JSON actually CHANGED lock — the drawer seeds the full
-    // draft, so mere presence would spuriously lock untouched fields.
-    const overridden = OVERRIDABLE.filter(
-      (k) => patch[k] !== undefined && patch[k] !== draftRef.current[k],
-    )
-    setDraft((d) => ({
-      ...d,
-      ...patch,
-      configOverrides: [...new Set([...(d.configOverrides ?? []), ...overridden])],
-    }))
+    setDraft((d) => ({ ...d, customConfig: raw }))
     toast.success("Config applied", {
-      description: overridden.length
-        ? `Your JSON edits are in the draft — ${overridden.length} field${overridden.length > 1 ? "s are" : " is"} now controlled by the custom config (flagged in Prompt & knowledge).`
-        : "Your JSON edits are in the draft.",
+      description: sections.length
+        ? `${sections.length} section${sections.length > 1 ? "s" : ""} now overridden by your custom config: ${sections.join(", ")}.`
+        : "No sections carry properties — the visual editor stays in control.",
       action: { label: "Undo", onClick: () => { dirty.current = true; setDraft(before) } },
     })
   }
@@ -830,28 +820,6 @@ export function AgentWizard({
         : `Start run${active.length > 1 ? "s" : ""}`
       : deployCta === "Live — no changes" ? "Deploy" : deployCta
 
-  // The live contextual test's identity card (Test section, inline).
-  const liveTestIdentity: LiveTestIdentity = {
-    name: draft.name,
-    namePlaceholder: isEdit ? existing!.name : "Your new agent",
-    onNameChange: (v) => update({ name: v }),
-    agentId: draft.agentId,
-    status: cardStatus,
-    subtitle: isEdit ? (existing!.role ?? "Voice agent") : (cardVoice?.name ?? "Pick a voice to start"),
-    stack: cardStack,
-    language: `${draft.stack.language ?? "English"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label}`,
-    costPerMin: cardEst?.costPerMin,
-    latencyMs: cardEst?.latencyMs,
-    latencyBreakdown: cardLatency,
-    channel: draft.channels.length ? {
-      label: channelTarget(draft),
-      onClick: () => openRow(2),
-    } : undefined,
-    talking: testing,
-    onToggleTalk: toggleTest,
-    talkLabel: `Talk to ${draft.name || "your agent"}`,
-  }
-
   const previewStatus =
     warming ? "Warming up"
     : effectiveStatus === "paused" ? "Paused"
@@ -859,11 +827,11 @@ export function AgentWizard({
     : codeDeployed ? "Deployed" : "Draft"
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
 
-  // Strip Talk = the button does what it says: expand + scroll to the live
-  // contextual test AND start it (a teleport that lands mid-action was the
-  // judges' disorientation flag — arriving in a started test resolves it).
+  // Strip Talk = the button does what it says: open the rail's Test Agent tab
+  // AND start the call (Figma 2861-52655 — the talk surface lives in the rail;
+  // the Test section is the simulation suite).
   const stripTalk = () => {
-    openRow(4)
+    openTest("agent")
     if (!testing) toggleTest()
   }
 
@@ -912,7 +880,10 @@ export function AgentWizard({
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 border-b border-border px-5 py-2 text-xs text-muted-foreground">
         <a href="/agents?view=list" className="rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">All Agents</a>
         <ChevronRight className="h-3 w-3" aria-hidden />
-        <span className="max-w-[12rem] truncate text-foreground">{draft.name || (isEdit ? existing!.name : "New agent")}</span>
+        <span className="max-w-[12rem] truncate">{draft.name || (isEdit ? existing!.name : "New agent")}</span>
+        {/* Figma 2861-52655: the builder is its own crumb. */}
+        <ChevronRight className="h-3 w-3" aria-hidden />
+        <span className="text-foreground">{isEdit ? "Edit Agent" : "Create Agent"}</span>
       </nav>
       {/* Header — identity on the left, Test + Deploy on the right. */}
       <header className="flex items-center gap-4 border-b border-border px-5 py-4">
@@ -926,14 +897,8 @@ export function AgentWizard({
               className="max-w-[18rem] rounded-md bg-transparent text-base font-semibold leading-6 outline-none [field-sizing:content] placeholder:font-normal placeholder:text-muted-foreground/60 focus:bg-muted/50"
             />
           </h1>
-          {/* Template chip next to the name (v4: the template moved OUT of the
-              prompt section to the top, per owner). */}
-          <TemplateMenu
-            draft={draft}
-            update={update}
-            onApplied={() => { setTemplateFlash((k) => k + 1); openRow(3) }}
-          />
-          {/* Status chip beside the name. */}
+          {/* Status chip beside the name. (The template picker moved into
+              Prompt & knowledge — Figma 2867-53592 "Choose an Agent Template".) */}
           <Badge variant="secondary" className="shrink-0 text-xs">{previewStatus === "Warming up" ? "Draft" : previewStatus}</Badge>
           {/* Copyable agent ID. */}
           {draft.agentId && (
@@ -973,7 +938,18 @@ export function AgentWizard({
             </DropdownMenu>
           )}
           {/* </> config view (icon-only). */}
-          <CustomConfigDrawer draft={draft} onEditStep={openRow} onApply={applyConfigPatch} iconOnly />
+          <CustomConfigDrawer draft={draft} onApply={applyCustomConfig} iconOnly />
+          {/* Waveform — the test rail's header door (Figma 2919-56680). */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-9"
+            aria-label="Test agent — voice panel"
+            aria-pressed={testOpen}
+            onClick={() => (testOpen ? setRailOpen(false) : openTest("agent"))}
+          >
+            <AudioLines className="size-4" aria-hidden />
+          </Button>
           <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
             {deployCta}
           </Button>
@@ -1243,6 +1219,13 @@ export function AgentWizard({
                         update={update}
                         templateFlash={templateFlash}
                         onUnlock={unlockOverride}
+                        templateSlot={
+                          <TemplateMenu
+                            draft={draft}
+                            update={update}
+                            onApplied={() => { setTemplateFlash((k) => k + 1); openRow(3) }}
+                          />
+                        }
                       />
                       {/* KB · MCP · connectors UPFRONT (owner 2026-07-29:
                           "don't nest them"). */}
@@ -1254,8 +1237,8 @@ export function AgentWizard({
                   {n === 4 && (
                     <TestSection
                       draft={draft}
-                      identity={liveTestIdentity}
-                      onOpenSims={() => openTest("simulations")}
+                      agentName={draft.name || "your agent"}
+                      onRunSummary={setSimSummary}
                     />
                   )}
                   {/* 5 · GO LIVE — the deploy panel. */}

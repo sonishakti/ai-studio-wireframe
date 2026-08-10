@@ -58,6 +58,8 @@ export function TestsSection({
   extra = [],
   headerNote,
   onRunSummary,
+  variant = "rail",
+  leadingActions,
 }: {
   agentName?: string
   /** Contextual auto-generated cases + their synthesized judge results (v5
@@ -68,6 +70,11 @@ export function TestsSection({
   headerNote?: React.ReactNode
   /** Reports each completed "Run all" — feeds the builder's Test strip verdict. */
   onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
+  /** Figma 2861-52041: the rail table is Name·Status only; the Test section
+   *  adds a Description column + the mono "02/03 PASSING" header bar. */
+  variant?: "rail" | "section"
+  /** Rendered before Run all — the section slots Autogenerate here. */
+  leadingActions?: React.ReactNode
 }) {
   const run = EVAL_RUN
   // The suite is STATE so authored cases actually land in the table —
@@ -94,6 +101,7 @@ export function TestsSection({
   const allResults = [...extra.map((e) => e.result), ...run.results]
   const ranResults = allResults.filter((r) => ranIds.has(r.caseId))
   const stats = { passed: ranResults.filter((r) => r.verdict === "pass").length, total: ranResults.length }
+  const hasRun = ranIds.size > 0
 
   // 2026-07-21 (owner): the Test section IS this feature — test scenarios from
   // the cn2meet roadmap (F-Eval), no longer future-scope-gated and no longer a
@@ -128,12 +136,13 @@ export function TestsSection({
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         {/* Failing ↔ Deploy relationship, nested behind a dotted hint (owner
-            2026-07-21: reduce upfront text). */}
-        <InfoHint label="How scoring works">
+            2026-07-21: reduce upfront text). Figma copy: a question link. */}
+        <InfoHint label={variant === "section" ? "Do failing scenarios block deploy?" : "How scoring works?"}>
           A judge model scores each run — {"{verdict, score, reason}"} per assertion. A failure
           caused by a real config gap names the setting to fix. Failing scenarios never block deploy.
         </InfoHint>
         <div className="flex items-center gap-2">
+          {leadingActions}
           <Button
             size="sm"
             variant="outline"
@@ -141,7 +150,8 @@ export function TestsSection({
             disabled={runningAll}
             onClick={runAll}
           >
-            <Play className="h-3.5 w-3.5" /> {runningAll ? "Running…" : `Run all (${cases.length})`}
+            <Play className="h-3.5 w-3.5" />{" "}
+            {runningAll ? "Running…" : hasRun ? `Re-Run (${cases.length})` : `Run all (${cases.length})`}
           </Button>
           <Button size="sm" className="gap-1.5" onClick={() => setAddOpen(true)}>
             <Plus className="h-3.5 w-3.5" /> Add case
@@ -150,23 +160,32 @@ export function TestsSection({
       </div>
       {headerNote ? <div className="text-xs text-muted-foreground">{headerNote}</div> : null}
 
-      {/* Suite TABLE (proposal 2639-102124): Test Name · Description ·
-          Status · Actions, under a passing/failing header bar. */}
+      {/* Suite TABLE (Figma 2861-52041): rail = Test Name · Status · run;
+          section adds Description + the mono "02/03 PASSING · 01 FAILED" bar. */}
       <div className="overflow-hidden rounded-lg border border-border">
-        <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
-          <span className="font-medium">
-            {stats.total > 0 ? `${stats.passed}/${stats.total} passing` : "Not run yet"}
-            <span className="font-normal text-muted-foreground">
-              {extra.length ? " · generated from your context + sample scenarios" : " · sample scenarios — replace with your own"}
+        {variant === "section" ? (
+          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 font-mono text-xs uppercase tracking-wider">
+            <span className={cn(stats.total > 0 ? "text-foreground" : "text-muted-foreground")}>
+              {stats.total > 0 ? `${pad2(stats.passed)}/${pad2(cases.length)} passing` : "Not run yet"}
             </span>
-            {lastRunNote ? <span className="font-normal text-muted-foreground"> · {lastRunNote}</span> : null}
-          </span>
-          {stats.total > 0 && <StatusPill passed={stats.passed} total={stats.total} />}
-        </div>
+            {stats.total > 0 && stats.total - stats.passed > 0 && (
+              <span className="text-destructive">{pad2(stats.total - stats.passed)} failed</span>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
+            <span className="font-medium">
+              {stats.total > 0 ? `${stats.passed}/${stats.total} passing` : "Not run yet"}
+              {lastRunNote ? <span className="font-normal text-muted-foreground"> · {lastRunNote}</span> : null}
+            </span>
+            {stats.total > 0 && <StatusPill passed={stats.passed} total={stats.total} />}
+          </div>
+        )}
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Test name</TableHead>
+              <TableHead>Test Name</TableHead>
+              {variant === "section" && <TableHead>Description</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead className="text-right"><span className="sr-only">Actions</span></TableHead>
             </TableRow>
@@ -185,6 +204,11 @@ export function TestsSection({
                       {c.name}
                     </button>
                   </TableCell>
+                  {variant === "section" && (
+                    <TableCell className="max-w-[260px] truncate text-muted-foreground">
+                      Caller wants to {c.persona.goal || "—"}
+                    </TableCell>
+                  )}
                   <TableCell>
                     {res ? (
                       <Badge
@@ -194,13 +218,19 @@ export function TestsSection({
                         {res.verdict === "pass" ? "Pass" : "Fail"}
                       </Badge>
                     ) : (
-                      /* Design 22–23 Jul: un-run status is a quiet dash. */
-                      <span className="text-muted-foreground">–</span>
+                      /* Figma: un-run rows carry a quiet "Not Run" badge. */
+                      <Badge variant="secondary" className="text-xs text-muted-foreground">Not Run</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => runOne(c)}>
-                      Run
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-7"
+                      aria-label={`Run ${c.name}`}
+                      onClick={() => runOne(c)}
+                    >
+                      <Play className="h-3.5 w-3.5" aria-hidden />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -223,6 +253,8 @@ export function TestsSection({
     </section>
   )
 }
+
+const pad2 = (n: number) => String(n).padStart(2, "0")
 
 function StatusPill({ passed, total }: { passed: number; total: number }) {
   const allPass = passed === total
@@ -278,7 +310,7 @@ function RunSheet({
           {done && result && (
             <StateBanner tone={result.verdict === "pass" ? "success" : "destructive"} icon={result.verdict === "pass" ? CheckCircle2 : XCircle}>
               <p className="text-sm font-medium">
-                {result.verdict === "pass" ? "Passed" : "Failed"} — {result.assertions.filter((a) => a.verdict === "pass").length}/{result.assertions.length} checks
+                {result.verdict === "pass" ? "Passed" : "Failed"} ({result.assertions.filter((a) => a.verdict === "pass").length}/{result.assertions.length} checks)
               </p>
               {result.assertions.filter((a) => a.verdict === "fail").map((a) => (
                 <p key={a.id} className="text-xs text-muted-foreground">{a.reasoning}</p>
@@ -315,7 +347,7 @@ function ResultSheet({
             <>
               <StateBanner tone={result.verdict === "pass" ? "success" : "destructive"} icon={result.verdict === "pass" ? CheckCircle2 : XCircle}>
                 <p className="text-sm font-medium">
-                  {result.verdict === "pass" ? "Passed" : "Failed"} — {result.assertions.filter((a) => a.verdict === "pass").length}/{result.assertions.length} checks
+                  {result.verdict === "pass" ? "Passed" : "Failed"} ({result.assertions.filter((a) => a.verdict === "pass").length}/{result.assertions.length} checks)
                 </p>
               </StateBanner>
               <div className="space-y-1.5" onClick={() => track(Events.assertion_failed_viewed, {})}>

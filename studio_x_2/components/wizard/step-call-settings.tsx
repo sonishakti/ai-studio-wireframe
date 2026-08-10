@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { PhoneOff, PhoneForwarded, Timer } from "lucide-react"
+import { PhoneOff, PhoneForwarded, SlidersHorizontal, Timer } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,36 @@ import { type StepProps } from "@/components/wizard/types"
  *     `InboundCallSettings` renders inline in Go Live for inbound agents.
  */
 
-// ─── Inbound — how answered calls end (inline in Go Live) ─────────────────────
+// ─── Inbound — the Go Live hot path (Figma 2919-59124) ────────────────────────
+
+/** "End call" toggle + the Advanced Settings door — everything else about how
+ *  answered calls end lives in the sheet, off the hot path. */
+export function InboundEndCallRow({
+  draft, update, onOpenAdvanced,
+}: StepProps & { onOpenAdvanced: () => void }) {
+  const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
+  const patch = (p: Partial<CallBehaviorConfig>) => update({ callBehavior: { ...cb, ...p } })
+
+  return (
+    <SectionRow
+      id="wz-4-inbound"
+      label="Inbound Settings and Structured Outputs"
+      hint="How answered calls end, and what each call records."
+    >
+      <BehaviorToggle
+        label="End call"
+        desc="Allow agent to hang up the call."
+        checked={cb.endCall}
+        onChange={(endCall) => patch({ endCall })}
+      />
+      <div>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={onOpenAdvanced}>
+          <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced Settings
+        </Button>
+      </div>
+    </SectionRow>
+  )
+}
 
 export function InboundCallSettings({ draft, update }: StepProps) {
   const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
@@ -50,13 +79,13 @@ export function InboundCallSettings({ draft, update }: StepProps) {
           onChange={(endOfConversation) => patch({ endOfConversation })}
         />
         <BehaviorToggle
-          label="Voicemail detection"
+          label="Voicemail Detection"
           desc="Allows the agent to detect voicemail systems and hang up the call."
           checked={cb.voicemailDetection}
           onChange={(voicemailDetection) => patch({ voicemailDetection })}
         />
         <div className="space-y-1.5">
-          <Label htmlFor="ib-max" className="text-sm font-medium">Max call duration (seconds)</Label>
+          <Label htmlFor="ib-max" className="text-sm font-medium">Max Call Duration (seconds)</Label>
           <Input
             id="ib-max"
             type="number"
@@ -73,7 +102,7 @@ export function InboundCallSettings({ draft, update }: StepProps) {
         />
         {cb.silenceHangup && (
           <div className="space-y-1.5">
-            <Label htmlFor="ib-silence" className="text-sm font-medium">Silence timeout (seconds)</Label>
+            <Label htmlFor="ib-silence" className="text-sm font-medium">Silence Timeout (seconds)</Label>
             <Input
               id="ib-silence"
               type="number"
@@ -270,7 +299,7 @@ export function HangupSettings({ draft, update }: StepProps) {
         onChange={(endOfConversation) => patch({ endOfConversation })}
       />
       <BehaviorToggle
-        label="Voicemail detection"
+        label="Voicemail Detection"
         desc="Detect answering machines and hang up instead of leaving dead air."
         checked={cb.voicemailDetection}
         onChange={(voicemailDetection) => patch({ voicemailDetection })}
@@ -283,7 +312,7 @@ export function HangupSettings({ draft, update }: StepProps) {
       />
       {cb.silenceHangup && (
         <div className="space-y-1.5">
-          <Label htmlFor="hu-silence" className="text-sm font-medium">Hang-up silence timeout (seconds)</Label>
+          <Label htmlFor="hu-silence" className="text-sm font-medium">Silence Timeout (seconds)</Label>
           <Input
             id="hu-silence"
             type="number"
@@ -301,7 +330,7 @@ export function HangupSettings({ draft, update }: StepProps) {
         </div>
       )}
       <div className="space-y-1.5">
-        <Label htmlFor="hu-max" className="text-sm font-medium">Max call duration (seconds)</Label>
+        <Label htmlFor="hu-max" className="text-sm font-medium">Max Call Duration (seconds)</Label>
         <Input
           id="hu-max"
           type="number"
@@ -327,7 +356,7 @@ export function PacingSettings({ draft, update }: StepProps) {
       hint="Applies to every campaign this agent runs."
     >
       <div className="space-y-1.5">
-        <Label htmlFor="pc-ring" className="text-sm font-medium">Ring duration (seconds)</Label>
+        <Label htmlFor="pc-ring" className="text-sm font-medium">Ring Duration (seconds)</Label>
         <Input
           id="pc-ring"
           type="number"
@@ -366,7 +395,7 @@ export function TransferSettings({ draft, update }: StepProps) {
       hint="Hand the call to a person when needed."
     >
       <BehaviorToggle
-        label="Transfer call to human"
+        label="Transfer Call to Human"
         desc="Transfers to a human agent when needed or asked for."
         checked={cb.transfer}
         onChange={(transfer) => patch({ transfer })}
@@ -374,7 +403,7 @@ export function TransferSettings({ draft, update }: StepProps) {
       {cb.transfer && (
         <>
           <div className="space-y-1.5">
-            <Label htmlFor="tr-dest" className="text-sm font-medium">Transfer destination</Label>
+            <Label htmlFor="tr-dest" className="text-sm font-medium">Transfer Destination</Label>
             <Input
               id="tr-dest"
               value={cb.transferDest}
@@ -385,7 +414,7 @@ export function TransferSettings({ draft, update }: StepProps) {
             <p className="text-xs text-muted-foreground">Detects automatically between Phone, E.164, and SIP.</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="tr-criteria" className="text-sm font-medium">Transfer criteria</Label>
+            <Label htmlFor="tr-criteria" className="text-sm font-medium">Transfer Criteria</Label>
             <Textarea
               id="tr-criteria"
               value={cb.transferCriteria}

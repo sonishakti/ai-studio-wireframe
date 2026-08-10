@@ -1,27 +1,23 @@
 "use client"
 
 import * as React from "react"
-import { X, ExternalLink, Plus, ArrowRight, AlertTriangle } from "lucide-react"
+import { X, ExternalLink, Info, Phone, Plus } from "lucide-react"
 import { toast } from "sonner"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup, ToggleCard } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
-import { HostingRegionRow } from "@/components/wizard/hosting-region"
 import { CodeBlock } from "@/components/code-block"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
-  channelLabel, hasChannel, inboundSurfaces, campaignRollup, campaignDialed,
-  MOCK_CSV_ROWS,
-  type AgentDraft, type CampaignDraft, type DeployChannel, type InboundSurface,
+  channelLabel, inboundSurfaces,
+  type AgentDraft, type DeployChannel, type InboundSurface,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
@@ -44,9 +40,10 @@ import { type StepProps } from "@/components/wizard/types"
  *    is a read-only roll-up with doors into it, not a second editor.
  */
 
+/* Figma 2861-61462 order + copy: Batch Calls → Inbound → Code / SDK. */
 const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string }[] = [
-  { id: "inbound", title: "Inbound", desc: "Answers callers — phone numbers, web widget, more soon." },
-  { id: "batch", title: "Batch calls", desc: "Calls through contact lists you upload, as campaign runs." },
+  { id: "batch", title: "Batch Calls", desc: "Calls through a contact list you upload." },
+  { id: "inbound", title: "Inbound", desc: "Answers a phone number 24/7, or a web widget." },
   { id: "code", title: "Code / SDK", desc: "Runs inside your own app. No phone number." },
 ]
 
@@ -104,12 +101,9 @@ export function ChannelSection({
 
   return (
     <>
-      {/* Hosting FIRST — a process-level property, above the channel choice. */}
-      <HostingRegionRow draft={draft} update={update} />
-
       <SectionRow
         id="wz-2-pick"
-        label={`How does ${draft.name || "your agent"} take calls?`}
+        label="How will this agent handle calls?"
         hint="One deployment type per agent — duplicate the agent for the other direction."
       >
         {liveChannels && liveChannels.length > 0 && (
@@ -119,18 +113,18 @@ export function ChannelSection({
           </p>
         )}
 
-        {/* Plain Form: full-width radio rows over hairlines — no card grid. */}
+        {/* Figma 2875-83511: bordered radio cards, stacked full width, with a
+            designed selected state (ring + filled radio). */}
         <RadioCardGroup
           value={current ?? ""}
           onValueChange={(v) => v && setChannel(v as DeployChannel)}
           aria-label="Deployment type"
-          className="gap-0 divide-y divide-border"
+          className="gap-3"
         >
           {CHANNEL_CARDS.map((c) => (
             <RadioCard
               key={c.id}
               value={c.id}
-              className="rounded-none border-0 bg-transparent px-1 py-3 shadow-none"
               title={
                 liveChannels?.includes(c.id) ? (
                   <span className="flex items-center gap-2">
@@ -185,16 +179,15 @@ export function ChannelSection({
       )}
 
       {current === "inbound" && surfaces.includes("web") && (
-        <SectionRow id="wz-2-web" label="Web widget" hint="The essentials — grab the embed snippet; deeper styling lives in the Widget studio.">
-          <WidgetStyleConfig agentId={agentId} lean />
+        <SectionRow id="wz-2-web" label="Widget Settings" hint="How visitors talk to your agent — behaviour, branding, text, and the embed snippet.">
+          <WidgetStyleConfig agentId={agentId} />
         </SectionRow>
       )}
 
-      {/* BATCH — a READ-ONLY roll-up of the runs, plus doors into Go Live.
-          Editing still lives only in Go Live (owner lock 2026-07-29); what
-          changed is that picking Batch no longer renders an empty section. */}
+      {/* BATCH (Figma 2875-83511) — the agent-level caller ID; runs and their
+          schedules live in Go Live. */}
       {current === "batch" && (
-        <BatchRunsBlock draft={draft} onGoToStep={onGoToStep} />
+        <BatchCallerIdBlock draft={draft} update={update} />
       )}
 
       {current === "code" && (
@@ -210,164 +203,96 @@ export function ChannelSection({
   )
 }
 
-// ─── Batch — the multi-run roll-up (Deployment's answer to "I have several") ───
+// ─── Batch — the agent-level caller ID (Figma 2875-83511) ─────────────────────
 
-const RUN_STATUS: Record<CampaignDraft["status"], { label: string; cls: string; dot?: boolean }> = {
-  draft: { label: "Draft", cls: "text-muted-foreground" },
-  scheduled: { label: "Scheduled", cls: "text-foreground" },
-  running: { label: "Running", cls: "text-success", dot: true },
-  completed: { label: "Completed", cls: "text-muted-foreground" },
-}
-
-function BatchRunsBlock({
-  draft, onGoToStep,
-}: Pick<StepProps, "draft"> & { onGoToStep: (n: number) => void }) {
-  const runs = draft.campaigns
-  const roll = campaignRollup(draft)
-
-  // Long lists must not push Prompt & knowledge off the screen — show the four
-  // that need a decision soonest and count the rest, with Go Live as the door
-  // to all of them. Order: needs-attention → running → scheduled → draft → done.
-  const rank = (c: CampaignDraft) =>
-    !c.numberId || !c.csvName ? 0
-    : c.status === "running" ? 1
-    : c.status === "scheduled" ? 2
-    : c.status === "draft" ? 3 : 4
-  const sorted = [...runs].sort((a, b) => rank(a) - rank(b))
-  const shown = sorted.slice(0, 4)
-  const hidden = sorted.length - shown.length
-
-  if (runs.length === 0) {
-    return (
-      <SectionRow
-        id="wz-2-batch"
-        label="Who does this agent call?"
-        hint="Batch calling dials a contact list you upload. Each list is one run — an agent can have several."
-      >
-        <div className="flex flex-col items-start gap-2 rounded-md border border-dashed border-border px-3.5 py-4">
-          <p className="text-sm font-medium">No campaign runs yet</p>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            A run is one contact list, one caller ID, and one schedule. Create several to dial
-            different lists — or the same list in different languages — in parallel from this agent.
-          </p>
-          <Button size="sm" variant="outline" className="mt-1 gap-1.5" onClick={() => onGoToStep(5)}>
-            <Plus className="h-3.5 w-3.5" aria-hidden /> Create the first run
-          </Button>
-        </div>
-      </SectionRow>
-    )
-  }
+function BatchCallerIdBlock({ draft, update }: StepProps) {
+  const callerId = draft.config.batch?.callerId
+  const setCallerId = (id: string) =>
+    update({ config: { ...draft.config, batch: { callerId: id } } })
 
   return (
     <SectionRow
       id="wz-2-batch"
-      label="Who does this agent call?"
-      hint={
-        <>
-          <p>One row per run — several can dial at once from this one agent.</p>
-          <InfoHint label="Where runs are edited">
-            Contacts, caller ID, schedule, concurrency, and retries all live on the run itself, in{" "}
-            <span className="font-medium text-foreground">Go Live</span>. This roll-up is read-only
-            so the two never disagree.
-          </InfoHint>
-        </>
-      }
+      label="Choose how callers reach your agent"
+      hint="The caller ID your contacts see — runs can override it per run in Go Live."
     >
-      {/* Roll-up first: the one-line answer to "what is this agent dialing?" */}
-      <div id="wz-2-batch-rollup" className="flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md border border-border bg-muted/30 px-3.5 py-2.5">
-        <p className="text-sm font-medium">
-          {roll.total} run{roll.total > 1 ? "s" : ""}
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">Phone number</Label>
+        <PhoneNumberSelect
+          value={callerId}
+          onChange={setCallerId}
+          placeholder="Choose a phone number"
+        />
+        <p className="text-xs text-muted-foreground">
+          The agent will use this number to dial outbound calls.
         </p>
-        <p className="min-w-0 flex-1 text-xs text-muted-foreground">
-          {[
-            roll.running && `${roll.running} dialing`,
-            roll.scheduled && `${roll.scheduled} scheduled`,
-            roll.draft && `${roll.draft} draft`,
-            roll.completed && `${roll.completed} completed`,
-          ].filter(Boolean).join(" · ")}
-          {roll.queuedContacts > 0 && ` · ${roll.queuedContacts.toLocaleString()} contacts still to dial`}
-        </p>
-        {roll.needsAttention > 0 && (
-          <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
-            <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-            {roll.needsAttention} need{roll.needsAttention === 1 ? "s" : ""} input
-          </span>
-        )}
       </div>
-
-      <ul id="wz-2-batch-runs" className="divide-y divide-border">
-        {shown.map((c) => {
-          const meta = RUN_STATUS[c.status]
-          const total = c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)
-          const dialed = campaignDialed(c)
-          const missing = [!c.numberId && "caller ID", !c.csvName && "contacts"].filter(Boolean)
-          return (
-            <li key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5">
-              <span className={cn("inline-flex w-[5.5rem] shrink-0 items-center gap-1.5 text-xs font-medium", meta.cls)}>
-                {meta.dot && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden />}
-                {meta.label}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{c.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {c.status === "running" && total
-                    ? `${dialed.toLocaleString()} of ${total.toLocaleString()} dialed`
-                    : total
-                      ? `${total.toLocaleString()} contacts`
-                      : "No contacts yet"}
-                  {c.language ? ` · ${c.language}` : ""}
-                  {c.status === "scheduled" && c.launch?.startDate
-                    ? ` · starts ${c.launch.startDate} ${c.launch.startTime ?? ""}`
-                    : ""}
-                </p>
-                {/* Progress only where it means something — a running run. */}
-                {c.status === "running" && total > 0 && (
-                  <div
-                    className="mt-1.5 h-1 w-full max-w-56 overflow-hidden rounded-full bg-muted"
-                    role="progressbar"
-                    aria-valuenow={Math.round((dialed / total) * 100)}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label={`${c.name} dial progress`}
-                  >
-                    <span
-                      className="block h-full rounded-full bg-success"
-                      style={{ width: `${Math.round((dialed / total) * 100)}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-              {missing.length > 0 && (
-                <span className="flex shrink-0 items-center gap-1 text-xs text-warning">
-                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> needs {missing.join(" + ")}
-                </span>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 shrink-0 gap-1 text-xs text-muted-foreground"
-                onClick={() => onGoToStep(5)}
-              >
-                Open <ArrowRight className="h-3 w-3" aria-hidden />
-              </Button>
-            </li>
-          )
-        })}
-      </ul>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onGoToStep(5)}>
-          <Plus className="h-3.5 w-3.5" aria-hidden /> New run
-        </Button>
-        <Button size="sm" variant="ghost" className="gap-1 text-muted-foreground" onClick={() => onGoToStep(5)}>
-          {hidden > 0 ? `Manage all ${runs.length} runs in Go Live` : "Manage runs in Go Live"}{" "}
-          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-        </Button>
-      </div>
-      {roll.running > 0 && (
-        <p className="text-xs text-muted-foreground/80">Wireframe — dial progress is simulated.</p>
-      )}
     </SectionRow>
+  )
+}
+
+// ─── Phone-number dropdown (Figma 2994-93628: empty state + Add New inside) ───
+
+const ADD_SENTINEL = "__add_number__"
+
+function PhoneNumberSelect({
+  value, onChange, placeholder, exclude = [], ariaLabel,
+}: {
+  value?: string
+  onChange: (id: string) => void
+  placeholder: string
+  /** Ids hidden from the options (already linked elsewhere). */
+  exclude?: string[]
+  ariaLabel?: string
+}) {
+  const [addOpen, setAddOpen] = React.useState(false)
+  const [session, setSession] = React.useState<{ id: string; number: string; label: string }[]>([])
+  const all = [
+    ...PHONE_NUMBERS.filter((n) => n.status === "unassigned").map((n) => ({ id: n.id, number: n.number, label: n.label })),
+    ...session,
+  ]
+  const options = all.filter((n) => !exclude.includes(n.id) || n.id === value)
+
+  return (
+    <>
+      <Select
+        value={value ?? ""}
+        onValueChange={(v) => {
+          if (v === ADD_SENTINEL) setAddOpen(true)
+          else if (v) onChange(v)
+        }}
+      >
+        <SelectTrigger className="w-full text-sm" aria-label={ariaLabel ?? placeholder}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.length === 0 && (
+            <div className="flex flex-col items-center gap-1 px-3 py-5 text-center">
+              <Phone className="h-4 w-4 text-muted-foreground" aria-hidden />
+              <p className="text-sm text-muted-foreground">No phone numbers found</p>
+            </div>
+          )}
+          {options.map((n) => (
+            <SelectItem key={n.id} value={n.id}>{n.number} – {n.label}</SelectItem>
+          ))}
+          <SelectSeparator />
+          <SelectItem value={ADD_SENTINEL}>
+            <span className="flex items-center gap-1.5">
+              <Plus className="h-3.5 w-3.5" aria-hidden /> Add New Phone Number
+            </span>
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <AddPhoneNumberSheet
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onAdded={(n) => {
+          const id = `pn_new_${Date.now().toString(36)}`
+          setSession((s) => [...s, { id, ...n }])
+          onChange(id)
+        }}
+      />
+    </>
   )
 }
 
@@ -385,87 +310,83 @@ function InboundNumbersBlock({
       },
     })
 
-  // Numbers added THIS session via the + accelerator (PHONE_NUMBERS is a
-  // static mock) — merged into every lookup so the just-added number actually
-  // appears and links, instead of the success toast dead-ending (review
-  // 2026-07-28).
-  const [sessionNumbers, setSessionNumbers] = React.useState<{ id: string; number: string; label: string }[]>([])
-  const addedNumber = (n: { number: string; label: string }) => {
-    const id = `pn_new_${Date.now().toString(36)}`
-    setSessionNumbers((s) => [...s, { id, ...n }])
-    setNumberIds([...numberIds, id])
-    toast.success(`${n.number} linked`, {
-      description: `${draft.name || "This agent"} answers it once you deploy.`,
-    })
-  }
-  const lookup = (id: string) =>
-    PHONE_NUMBERS.find((n) => n.id === id) ?? sessionNumbers.find((n) => n.id === id)
+  // Figma 2994-93628 "Inbound Deployments Allow Multiple Lines": one labelled
+  // select per linked line, plus "+ Add another inbound line" for the next.
+  const [addingLine, setAddingLine] = React.useState(false)
+  const multi = numberIds.length > 1 || (numberIds.length >= 1 && addingLine)
 
-  // Linkable = free numbers not already on this agent (linked ones render in
-  // the list above, not the add-select).
-  const linkable = [
-    ...PHONE_NUMBERS.filter((n) => n.status === "unassigned" && !numberIds.includes(n.id)),
-    ...sessionNumbers.filter((n) => !numberIds.includes(n.id)),
-  ]
-  const linked = numberIds
-    .map((id) => lookup(id))
-    .filter((n): n is NonNullable<ReturnType<typeof lookup>> => !!n)
+  const slotLabel = (i: number) =>
+    multi ? `Phone number ${String(i + 1).padStart(2, "0")}` : "Phone number"
 
   return (
     <SectionRow
       id="wz-2-inbound"
-      label="Phone numbers"
+      label="Choose how callers reach your agent"
       hint="Link one or several numbers — the agent answers them all."
     >
-      <div className="space-y-3">
-        {linked.length > 0 && (
-          <ul className="divide-y divide-border">
-            {linked.map((n) => (
-              <li key={n.id} className="flex items-center justify-between gap-3 py-2">
-                <div className="min-w-0">
-                  <p className="font-mono text-sm">{n.number}</p>
-                  <p className="truncate text-xs text-muted-foreground">{n.label}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 shrink-0 text-muted-foreground"
-                  onClick={() => setNumberIds(numberIds.filter((id) => id !== n.id))}
-                  aria-label={`Unlink ${n.number}`}
-                >
-                  <X className="h-3.5 w-3.5" aria-hidden />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value="" onValueChange={(id) => id && setNumberIds([...numberIds, id])}>
-              <SelectTrigger className="min-w-0 flex-1 basis-56 text-sm">
-                <SelectValue placeholder={linkable.length ? "Choose an available number" : "No free numbers — connect one via SIP"} />
-              </SelectTrigger>
-              <SelectContent>
-                {linkable.map((n) => (
-                  <SelectItem key={n.id} value={n.id}>{n.number} · {n.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {/* The accelerator (owner 2026-07-28): a first-class + Add door.
-                onAdded keeps the flow IN the builder — the new number lists
-                and links here instead of the sheet routing to a fresh draft. */}
-            <AddPhoneNumberSheet onAdded={addedNumber}>
-              <Button variant="outline" size="sm" className="shrink-0 gap-1">
-                <Plus className="h-3.5 w-3.5" aria-hidden /> Add phone number
+      <div className="space-y-4">
+        {numberIds.map((id, i) => (
+          <div key={id} className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">{slotLabel(i)}</Label>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6 text-muted-foreground"
+                onClick={() => setNumberIds(numberIds.filter((x) => x !== id))}
+                aria-label={`Unlink ${slotLabel(i)}`}
+              >
+                <X className="h-3.5 w-3.5" aria-hidden />
               </Button>
-            </AddPhoneNumberSheet>
+            </div>
+            <PhoneNumberSelect
+              value={id}
+              exclude={numberIds}
+              placeholder="Choose a phone number"
+              ariaLabel={slotLabel(i)}
+              onChange={(next) => setNumberIds(numberIds.map((x) => (x === id ? next : x)))}
+            />
+            <p className="text-xs text-muted-foreground">
+              The agent will use this number to receive inbound calls.
+            </p>
           </div>
-        </div>
+        ))}
+
+        {(numberIds.length === 0 || addingLine) && (
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">{slotLabel(numberIds.length)}</Label>
+            <PhoneNumberSelect
+              exclude={numberIds}
+              placeholder="Choose a phone number"
+              ariaLabel={slotLabel(numberIds.length)}
+              onChange={(id) => {
+                setNumberIds([...numberIds, id])
+                setAddingLine(false)
+                toast.success("Number linked", {
+                  description: `${draft.name || "This agent"} answers it once you deploy.`,
+                })
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              The agent will use this number to receive inbound calls.
+            </p>
+          </div>
+        )}
+
+        {numberIds.length > 0 && !addingLine && (
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAddingLine(true)}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add another inbound line
+          </Button>
+        )}
       </div>
       <p className="text-xs text-muted-foreground">
-        How answered calls end — max duration, silence hang-up, transfer — is configured in{" "}
+        Agora routes your own carrier number via SIP — manage numbers in{" "}
+        <a href="/integrations?tab=channels" className="underline underline-offset-2">
+          Resources › Deployment Channels
+        </a>
+        . How answered calls end is configured in{" "}
         <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => onGoToStep(5)}>
-          Go Live › Inbound call settings
+          Go Live › Advanced Settings
         </button>
         .
       </p>
@@ -496,7 +417,27 @@ await client.stop()`
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium">Add to your app</p>
+      {/* Figma 2917-85476: the ID-minting caveat is a first-class note box. */}
+      {unpublished && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/30 px-3.5 py-3">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          <div className="min-w-0 text-sm">
+            <p className="font-medium">Please Note</p>
+            <p className="text-muted-foreground">
+              This agent&apos;s ID is minted when you deploy — these snippets carry the
+              placeholder &quot;new&quot; until then.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-1">
+        <p className="text-sm font-medium">Add to your app</p>
+        <p className="text-xs text-muted-foreground">
+          Install the SDK, then drop the agent into any Agora channel. No phone number
+          needed. It runs wherever your app does.
+        </p>
+      </div>
       <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
       <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
       <InfoHint label="Secured-mode channels & tokens">
@@ -504,17 +445,26 @@ await client.stop()`
         clients keep bringing their own tokens, and the agent needs nothing extra from you.
       </InfoHint>
 
-      <p className="pt-2 text-sm font-medium">Stop the agent</p>
+      <div className="space-y-1 pt-2">
+        <p className="text-sm font-medium">Stop the agent</p>
+        <p className="text-xs text-muted-foreground">
+          End the session when you&apos;re done. This releases the channel and stops billing for it.
+        </p>
+      </div>
       <CodeBlock language="typescript" filename="stop.ts">{stop}</CodeBlock>
 
-      <a
-        href="https://docs.agora.io/en/ai"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-sm underline underline-offset-2 hover:text-foreground"
-      >
-        Full SDK reference <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-      </a>
+      {/* Figma: a framed docs row with an explicit Go to Docs door. */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">Full SDK reference</p>
+          <p className="text-xs text-muted-foreground">Channels, events, function calling, and more.</p>
+        </div>
+        <Button variant="outline" size="sm" className="shrink-0 gap-1.5" asChild>
+          <a href="https://docs.agora.io/en/ai" target="_blank" rel="noopener noreferrer">
+            Go to Docs <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+          </a>
+        </Button>
+      </div>
     </div>
   )
 }

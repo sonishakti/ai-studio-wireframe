@@ -185,7 +185,7 @@ export const EVAL_SUITE: EvalSuite = {
   cases: [
     {
       id: "ec_happy",
-      name: "Sample 1",
+      name: "Books a demo",
       persona: { identity: "Jordan, ops lead at a 40-person startup", goal: "book a product demo for next week", personality: "Friendly, decisive, a little rushed." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent offers a specific time and confirms the caller's email." },
@@ -194,7 +194,7 @@ export const EVAL_SUITE: EvalSuite = {
     },
     {
       id: "ec_objection",
-      name: "Sample 2",
+      name: "Price objection",
       persona: { identity: "Sam, budget-conscious founder", goal: "understand pricing before committing", personality: "Skeptical, pushes back on cost, patient." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent explains value before quoting a number and never invents a discount." },
@@ -202,7 +202,7 @@ export const EVAL_SUITE: EvalSuite = {
     },
     {
       id: "ec_offscript",
-      name: "Sample 3",
+      name: "Off-topic deflection",
       persona: { identity: "Alex, a curious caller", goal: "get the agent to answer unrelated trivia", personality: "Playful, tries to derail the conversation." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent stays on-task and redirects politely without hallucinating an answer." },
@@ -1631,12 +1631,17 @@ export interface KnowledgeBase {
   source: string
   chunks: number
   status: "ready" | "indexing"
+  /** Display size (Figma 2932-86261 lists Mb/Kb per base). */
+  size?: string
 }
 
+// Figma 2932-86261 roster: sizes + Active/Processing states.
 export const KNOWLEDGE_BASES: KnowledgeBase[] = [
-  { id: "kb_01", name: "Product Docs", source: "Upload", chunks: 1240, status: "ready" },
-  { id: "kb_02", name: "FAQs v3", source: "Upload", chunks: 320, status: "ready" },
-  { id: "kb_03", name: "Policy Handbook", source: "URL Crawl", chunks: 0, status: "indexing" },
+  { id: "kb_01", name: "Compliance Laws v2", source: "Upload", chunks: 1240, status: "ready", size: "11.4 Mb" },
+  { id: "kb_02", name: "Data Protection Guidelines", source: "Upload", chunks: 320, status: "ready", size: "5.2 Mb" },
+  { id: "kb_03", name: "User Privacy Policies", source: "Upload", chunks: 210, status: "ready", size: "3.8 Mb" },
+  { id: "kb_04", name: "GDPR Laws", source: "URL Crawl", chunks: 0, status: "indexing", size: "5.2 Mb" },
+  { id: "kb_05", name: "User Survey2", source: "Upload", chunks: 0, status: "indexing", size: "8 Kb" },
 ]
 
 export interface McpServer {
@@ -1646,9 +1651,12 @@ export interface McpServer {
   tools: number
 }
 
+// Figma 2935-88754 roster.
 export const MCP_SERVERS: McpServer[] = [
-  { id: "mcp_01", name: "CRM Connector", url: "https://mcp.acme.com/crm", tools: 8 },
-  { id: "mcp_02", name: "Calendar API", url: "https://mcp.acme.com/calendar", tools: 5 },
+  { id: "mcp_01", name: "Deepwiki", url: "https://mcp.deepwiki.com", tools: 8 },
+  { id: "mcp_02", name: "Shopify MCP", url: "https://mcp.shopify.dev", tools: 12 },
+  { id: "mcp_03", name: "Notion MCP", url: "https://mcp.notion.so", tools: 6 },
+  { id: "mcp_04", name: "Test MCP", url: "https://mcp.test.local", tools: 2 },
 ]
 
 /** Third-party OAuth apps ("Connectors") — the canonical catalog shared by the
@@ -1666,11 +1674,11 @@ export interface Connector {
 }
 
 export const CONNECTORS: Connector[] = [
-  { id: "conn_hubspot", name: "HubSpot", category: "CRM", description: "Sync contacts and log deals in your CRM.", initials: "HS", status: "available" },
+  { id: "conn_hubspot", name: "HubSpot", category: "CRM", description: "Sync contacts and log deals in your CRM.", initials: "HS", status: "connected" },
   { id: "conn_salesforce", name: "Salesforce", category: "CRM", description: "Read and update leads and opportunities.", initials: "SF", status: "available" },
   { id: "conn_gcal", name: "Google Calendar", category: "Scheduling", description: "Check availability and book meetings.", initials: "GC", status: "available" },
   { id: "conn_zendesk", name: "Zendesk", category: "Support", description: "Open and track support tickets automatically.", initials: "ZD", status: "available" },
-  { id: "conn_slack", name: "Slack", category: "Messaging", description: "Post updates and alerts to a channel.", initials: "SL", status: "available" },
+  { id: "conn_slack", name: "Slack", category: "Messaging", description: "Post updates and alerts to a channel.", initials: "SL", status: "connected" },
   { id: "conn_stripe", name: "Stripe", category: "Payments", description: "Take payments and check order status.", initials: "ST", status: "coming-soon" },
 ]
 

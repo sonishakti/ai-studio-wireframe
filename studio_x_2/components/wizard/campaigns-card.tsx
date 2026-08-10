@@ -487,7 +487,7 @@ function CampaignEditor({
       <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
         <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
         <Button size="sm" disabled={!campaign.name.trim() || (locked && !campaign.csvName)} onClick={onSave}>
-          {locked ? "Save rerun" : isNew ? "Save run" : "Save changes"}
+          {locked ? "Save Rerun" : isNew ? "Save Run" : "Save Changes"}
         </Button>
       </div>
     </div>
@@ -552,10 +552,20 @@ function CampaignContacts({
             onClick={() => toast("Template downloaded", { description: `Columns: ${MOCK_CSV_COLUMNS.join(", ")}` })}
             className="rounded text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Download template
+            Download CSV Template
           </button>
         </div>
-        <p className="text-xs text-muted-foreground">One row per contact — columns become {"{{variables}}"}.</p>
+        <p className="text-xs text-muted-foreground">
+          One row per contact — columns become {"{{variables}}"}.{" "}
+          <a
+            href="https://docs.agora.io/en/conversational-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            Learn how {"{{dynamic vars}}"} work
+          </a>
+        </p>
       </div>
     )
   }

@@ -79,8 +79,11 @@ export function StepAnalysis({
           against plain-language criteria; verdicts land in Call History. */}
       <div className="space-y-3 border-b border-border pb-4">
         <div className="flex items-center justify-between gap-3 pt-1">
-          <p className="text-sm font-medium">Success evaluation</p>
-          <Switch checked={cfg.successEval} onCheckedChange={(successEval) => patch({ successEval })} aria-label="Success evaluation" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Success Evaluation</p>
+            <p className="text-xs text-muted-foreground">Evaluate whether the call with a user was “Successful” or “Failed”</p>
+          </div>
+          <Switch checked={cfg.successEval} onCheckedChange={(successEval) => patch({ successEval })} aria-label="Success Evaluation" />
         </div>
         {cfg.successEval && (
           <div className="space-y-1.5">
@@ -101,8 +104,13 @@ export function StepAnalysis({
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-medium">Data extraction</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">Post-Call Data Extraction</p>
+            <p className="text-xs text-muted-foreground">
+              Automatically extract structured outputs from calls according to business needs.
+            </p>
+          </div>
           <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={!cfg.transcribe} onClick={() => setEditing("new")}>
             <Plus className="h-3.5 w-3.5" aria-hidden /> Add
           </Button>
@@ -119,12 +127,16 @@ export function StepAnalysis({
           </p>
         ) : (
           <div className="space-y-2">
+            <div className="flex items-baseline justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              <span>Data points</span>
+              <span>{String(cfg.dataPoints.length).padStart(2, "0")} output{cfg.dataPoints.length === 1 ? "" : "s"}</span>
+            </div>
             {cfg.dataPoints.map((dp) => (
               <div key={dp.id} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5">
                 <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-2 text-sm font-medium">
                     <span className="truncate">{dp.name}</span>
-                    <Badge variant="secondary" className="shrink-0 font-normal">{dp.type}</Badge>
+                    <Badge variant="secondary" className="shrink-0 font-normal">{TYPE_BADGE[dp.type]}</Badge>
                   </p>
                   {dp.description && <p className="line-clamp-1 text-xs text-muted-foreground">{dp.description}</p>}
                 </div>
@@ -147,6 +159,11 @@ export function StepAnalysis({
       />
     </div>
   )
+}
+
+/** Row-badge vocabulary (Figma 2867-111374: "Call Outcome [Boolean]"). */
+const TYPE_BADGE: Record<DataPointType, string> = {
+  text: "Text", number: "Number", boolean: "Boolean", enum: "Enum",
 }
 
 const TYPES: { id: DataPointType; label: string }[] = [

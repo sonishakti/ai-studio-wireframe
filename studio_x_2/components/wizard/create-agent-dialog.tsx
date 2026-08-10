@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  CalendarClock, Smile, Phone, BellRing, ShoppingBag, BarChart3, Sparkles, Globe, Check, Code2,
+  CalendarClock, Smile, Phone, BellRing, ShoppingBag, BarChart3, Check,
 } from "lucide-react"
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -177,29 +177,22 @@ export function CreateAgentDialog({
               {validation?.ok && <Check className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />}
               {validation
                 ? validation.msg
-                : "We generate the template from your description — no picking from a list. Everything stays editable in the builder."}
+                : "Agent will be generated from your description"}
             </p>
           </div>
 
-          {/* Not sure what to type? Pick the KIND instead (owner 2026-07-29:
-              "ask what kind of a template do you want" — a fallback for users
-              unsure about the two lines). */}
+          {/* Or pick a template outright (Figma 2861-59988): typing a
+              description deselects — the two paths are alternatives. */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">What kind of a template do you want?</Label>
-            <div role="radiogroup" aria-label="Template kind" className="space-y-1">
-              <KindRow
-                icon={Sparkles}
-                label="Let my description decide"
-                selected={kindId === "blank"}
-                onSelect={() => setKindId("blank")}
-              />
+            <Label className="text-sm font-medium">Or choose from a template</Label>
+            <div role="radiogroup" aria-label="Agent template" className="space-y-1.5">
               {AGENT_TEMPLATES.filter((t) => t.id !== "blank").map((t) => (
                 <KindRow
                   key={t.id}
                   icon={TEMPLATE_ICONS[t.id] ?? Smile}
                   label={t.name}
                   selected={kindId === t.id}
-                  onSelect={() => setKindId(t.id)}
+                  onSelect={() => setKindId(kindId === t.id ? "blank" : t.id)}
                 />
               ))}
             </div>
@@ -208,7 +201,7 @@ export function CreateAgentDialog({
 
         <DialogFooter className="border-t border-border px-6 py-3">
           <Button onClick={create} disabled={!enough && kindId === "blank"}>
-            Create agent
+            Create Agent
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -232,7 +225,7 @@ function KindRow({
       onClick={onSelect}
       className={cn(
         "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
-        selected ? "border-primary bg-primary/[0.03]" : "border-transparent hover:bg-accent/40",
+        selected ? "border-primary bg-primary/[0.03]" : "border-border hover:bg-accent/40",
       )}
     >
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />

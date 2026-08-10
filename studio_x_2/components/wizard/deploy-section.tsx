@@ -12,8 +12,9 @@ import {
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { CampaignsCard } from "@/components/wizard/campaigns-card"
 import {
-  InboundCallSettings, HangupSettings, PacingSettings, TransferSettings,
+  InboundCallSettings, InboundEndCallRow, HangupSettings, PacingSettings, TransferSettings,
 } from "@/components/wizard/step-call-settings"
+import { HostingRegionRow } from "@/components/wizard/hosting-region"
 import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { StepPublish } from "@/components/wizard/step-publish"
 import { hasChannel } from "@/lib/wizard-draft"
@@ -65,6 +66,7 @@ export function DeploySection({
   publishRegionRef: React.Ref<HTMLDivElement>
 }) {
   const [behaviorOpen, setBehaviorOpen] = React.useState(false)
+  const [inboundAdvOpen, setInboundAdvOpen] = React.useState(false)
   const [historyOpen, setHistoryOpen] = React.useState(false)
   // A draft that has never deployed has no versions — an agentId is only
   // minted by the first deploy, so its presence is the honest signal.
@@ -88,7 +90,7 @@ export function DeploySection({
           <CampaignsCard draft={draft} update={update} />
           <div className="flex flex-wrap items-center gap-1">
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setBehaviorOpen(true)}>
-              <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Batch call behavior — hang-up, pacing &amp; transfer
+              <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced Settings
             </Button>
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setHistoryOpen(true)}>
               <History className="h-3.5 w-3.5" aria-hidden /> Version history
@@ -105,14 +107,20 @@ export function DeploySection({
       )}
 
       <SectionRows>
-        {/* Inbound settings live in the deploy panel (owner 2026-07-28: "the
-            settings that came after selecting the phone number" move here). */}
-        {inbound && <InboundCallSettings draft={draft} update={update} />}
+        {/* Inbound hot path (Figma 2919-59124): End call + the Advanced
+            Settings door — the full rules live in the sheet. */}
+        {inbound && (
+          <InboundEndCallRow draft={draft} update={update} onOpenAdvanced={() => setInboundAdvOpen(true)} />
+        )}
+
+        {/* Hosting Region lives in Go Live for inbound + code (Figma
+            2919-59124 / 2919-59592); batch runs carry their own numbers. */}
+        {!batch && <HostingRegionRow draft={draft} update={update} />}
 
         {/* Structured outputs — what each call/session records and extracts. */}
         <SectionRow
           id="wz-4-outputs"
-          label="Structured outputs"
+          label={session ? "Deployment and Structured Output Settings" : "Structured outputs"}
           hint={session
             ? "What each session records. Results appear in Sessions."
             : "What each call records. Results appear in Call History."}
@@ -195,7 +203,7 @@ export function DeploySection({
         </SheetContent>
       </Sheet>
 
-      {/* Agent-level batch behavior — off the hot path. */}
+      {/* Agent-level batch behavior — off the hot path (Figma 2872-2895). */}
       <Sheet open={behaviorOpen} onOpenChange={setBehaviorOpen}>
         <SheetContent
           side="right"
@@ -203,7 +211,7 @@ export function DeploySection({
           className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl"
         >
           <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-            <SheetTitle className="text-base">Batch call behavior</SheetTitle>
+            <SheetTitle className="text-base">Advanced Settings</SheetTitle>
             <p className="text-sm text-muted-foreground">
               Agent-level rules every campaign follows — per-campaign window, concurrency,
               and retries live on each campaign.
@@ -215,6 +223,33 @@ export function DeploySection({
               <PacingSettings draft={draft} update={update} />
               <TransferSettings draft={draft} update={update} />
             </SectionRows>
+          </div>
+          <div className="shrink-0 border-t border-border px-5 py-3">
+            <Button className="w-full" onClick={() => setBehaviorOpen(false)}>Done</Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Inbound advanced settings (Figma 2924-104389). */}
+      <Sheet open={inboundAdvOpen} onOpenChange={setInboundAdvOpen}>
+        <SheetContent
+          side="right"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl"
+        >
+          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+            <SheetTitle className="text-base">Advanced Settings</SheetTitle>
+            <p className="text-sm text-muted-foreground">
+              Agent-level rules that every inbound call follows.
+            </p>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+            <SectionRows>
+              <InboundCallSettings draft={draft} update={update} />
+            </SectionRows>
+          </div>
+          <div className="shrink-0 border-t border-border px-5 py-3">
+            <Button className="w-full" onClick={() => setInboundAdvOpen(false)}>Done</Button>
           </div>
         </SheetContent>
       </Sheet>
