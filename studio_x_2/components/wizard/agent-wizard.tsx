@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, Mic, AudioLines } from "lucide-react"
+import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, AudioLines } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +20,7 @@ import { SectionKnowledgeTools } from "@/components/wizard/step-build"
 import { DeploySection } from "@/components/wizard/deploy-section"
 import { TestSection } from "@/components/wizard/test-section"
 import { TestPanel, type TestPanelTab } from "@/components/wizard/test-panel"
+import { AgentSphere } from "@/components/agent-test-panel"
 import { TemplateMenu } from "@/components/wizard/template-menu"
 import { SectionRows } from "@/components/wizard/section-row"
 import { DeployPreflight } from "@/components/wizard/deploy-preflight"
@@ -189,6 +190,37 @@ export function AgentWizard({
   }, [autoTalk])
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
   const [testing, setTesting] = React.useState(false)
+
+  // Scroll crumb (owner 2026-08-10): which section + [label|content] row the
+  // viewport is inside, so the stuck section header can say "› Row". rAF-
+  // throttled scroll read; offset ≈ topbar (48) + stuck header (44).
+  const [scrollCrumb, setScrollCrumb] = React.useState<{ section: number; label: string } | null>(null)
+  React.useEffect(() => {
+    let raf = 0
+    const OFFSET = 100
+    const read = () => {
+      raf = 0
+      let next: { section: number; label: string } | null = null
+      for (const n of [1, 2, 3, 4, 5]) {
+        const sec = document.getElementById(`wizard-step-${n}`)
+        if (!sec) continue
+        const r = sec.getBoundingClientRect()
+        if (r.top >= OFFSET || r.bottom <= OFFSET) continue
+        let label = ""
+        for (const el of sec.querySelectorAll<HTMLElement>("[data-wz-row-label]")) {
+          if (el.getBoundingClientRect().top < OFFSET + 40) label = el.textContent?.trim() ?? ""
+        }
+        // Only once the header is actually stuck (section top scrolled past).
+        next = r.top < 0 && label ? { section: n, label } : null
+        break
+      }
+      setScrollCrumb((prev) =>
+        prev?.section === next?.section && prev?.label === next?.label ? prev : next)
+    }
+    const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(read) }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => { window.removeEventListener("scroll", onScroll); if (raf) window.cancelAnimationFrame(raf) }
+  }, [])
   // Visible autosave status (heuristic-eval #6). idle → saving → saved.
   const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved">("idle")
   const dirty = React.useRef(false)
@@ -828,14 +860,6 @@ export function AgentWizard({
     : codeDeployed ? "Deployed" : "Draft"
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
 
-  // Strip Talk = the button does what it says: open the rail's Test Agent tab
-  // AND start the call (Figma 2861-52655 — the talk surface lives in the rail;
-  // the Test section is the simulation suite).
-  const stripTalk = () => {
-    openTest("agent")
-    if (!testing) toggleTest()
-  }
-
   /** One-line value recap a COLLAPSED section shows in its heading row —
    *  recognition over recall while folded (Concertina graft). Live agents
    *  append "· edited" so dirtiness never hides inside a closed section. */
@@ -878,17 +902,13 @@ export function AgentWizard({
     // all spacing: no card, no outer padding, flush border-divided columns.
     <div data-fluid className="flex flex-col">
       {/* Breadcrumbs: All Agents › {name} › Edit Agent. */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 border-b border-border px-5 py-2 text-xs text-muted-foreground">
-        <a href="/agents?view=list" className="rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">All Agents</a>
-        <ChevronRight className="h-3 w-3" aria-hidden />
-        <span className="max-w-[12rem] truncate">{draft.name || (isEdit ? existing!.name : "New agent")}</span>
-        {/* Figma 2861-52655: the builder is its own crumb. */}
-        <ChevronRight className="h-3 w-3" aria-hidden />
-        <span className="text-foreground">{isEdit ? "Edit Agent" : "Create Agent"}</span>
-      </nav>
+      {/* Breadcrumb row REMOVED (owner 2026-08-10) — the topbar already
+          carries location; a second nav row was scan noise. */}
       {/* Header — identity on the left, Test + Deploy on the right. */}
       <header className="flex items-center gap-4 border-b border-border px-5 py-4">
         <div className="flex min-w-0 flex-1 items-center gap-3">
+          {/* The agent's face (Figma 2861-52655: orb beside the name). */}
+          <AgentSphere size={24} active={testing} />
           <h1 aria-label={draft.name || (isEdit ? existing!.name : "Your new agent")} className="min-w-0 shrink-0">
             <input
               value={draft.name}
@@ -957,48 +977,8 @@ export function AgentWizard({
         </div>
       </header>
 
-      {/* TEST STRIP (judge-round winner 2026-07-29) — testing is ambient, not a
-          destination: both test modes + the freshest verdict live in one slim
-          bar directly under the header, sticky at lg+ so "does it work yet?"
-          is answerable at every scroll depth. Replaces the header Test button. */}
-      <div className="z-30 flex h-12 items-center gap-2 border-b border-border bg-background/95 px-5 backdrop-blur lg:sticky lg:top-12">
-        <Button
-          size="sm"
-          className="shrink-0 gap-1.5"
-          disabled={warming}
-          onClick={stripTalk}
-          aria-label={`Talk to ${draft.name || "your agent"} — opens the live test`}
-        >
-          <Mic className="h-3.5 w-3.5" aria-hidden />
-          <span className="max-w-[14rem] truncate">
-            {testing ? "Talking — jump to test" : `Talk to ${draft.name || "your agent"}`}
-          </span>
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="shrink-0 text-muted-foreground"
-          onClick={() => (testOpen ? setRailOpen(false) : openTest("simulations"))}
-          aria-pressed={testOpen}
-        >
-          Run simulations
-        </Button>
-        {/* Verdict line — states split (user-test 2026-07-30): "· simulated"
-            tags actual RESULTS only; pre-run is a plain "No sim runs yet".
-            The wireframe-wide disclosure is the standing note beside it. */}
-        <button
-          type="button"
-          onClick={() => openTest("simulations")}
-          className="ml-auto hidden min-w-0 truncate rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:block"
-        >
-          {simSummary
-            ? `Last run: ${simSummary.passed}/${simSummary.total} passed · simulated`
-            : "No sim runs yet"}
-        </button>
-        <span className="hidden shrink-0 text-xs text-muted-foreground/70 lg:inline">
-          Wireframe — all runs are simulated
-        </span>
-      </div>
+      {/* Test strip REMOVED (owner 2026-08-10, matching Figma): testing lives
+          in the collapsible RHS panel; the header waveform button reopens it. */}
 
       {/* Below lg the rail stacks above the sections; a slim sticky strip keeps
           step nav + deploy in the fold (top-12 = the app header height). */}
@@ -1035,7 +1015,7 @@ export function AgentWizard({
         )}
       >
         {/* Rail — pure nav; scrolls internally on short viewports. */}
-        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
+        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
           {/* Grouped rail (owner mock 2026-07-30): CUSTOMIZE · SHIP headers +
               per-row icons over the same rows. */}
           <nav aria-label="Build sections" className="space-y-3">
@@ -1135,7 +1115,7 @@ export function AgentWizard({
                     toggle too (Test Strip winner): the whole row is the
                     button, a bare chevron is the only added chrome, and a
                     folded section recaps its values inline. */}
-                <header className="z-20 flex items-center gap-1 border-b border-border bg-background lg:sticky lg:top-24">
+                <header className="z-20 flex items-center gap-1 border-b border-border bg-background lg:sticky lg:top-12">
                   <h3 id={`wizard-step-${n}-title`} className="min-w-0 flex-1">
                     <button
                       type="button"
@@ -1150,6 +1130,14 @@ export function AgentWizard({
                       />
                       <span className="shrink-0 text-sm font-semibold">{stepTitle(n, draft)}</span>
                       {isDone(n) && <Check className="h-3.5 w-3.5 shrink-0 text-success/80" aria-hidden />}
+                      {/* Scroll crumb (owner 2026-08-10): while deep in a
+                          section, the stuck header names the row you're in —
+                          "Voice & Models › Model Architecture". */}
+                      {!folded && scrollCrumb?.section === n && scrollCrumb.label && (
+                        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                          › {scrollCrumb.label}
+                        </span>
+                      )}
                       {folded && (
                         <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                           {sectionRecap(n)}

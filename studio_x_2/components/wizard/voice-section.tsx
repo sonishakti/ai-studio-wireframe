@@ -176,7 +176,7 @@ export function VoiceSection({
                 onClick={() => setBrowserOpen(true)}
                 aria-label="Browse voices"
                 className={cn(
-                  "flex h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex h-9 min-w-0 flex-1 items-center justify-between gap-2 rounded-md border border-stroke bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 )}
               >
                 {selected ? (

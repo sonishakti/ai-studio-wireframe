@@ -109,7 +109,7 @@ export function RadioCard({
     >
       <span
         aria-hidden
-        className="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full border border-muted-foreground/50 transition-colors group-data-[state=checked]:border-primary"
+        className="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full border border-stroke transition-colors group-data-[state=checked]:border-primary"
       >
         <span className="h-2.5 w-2.5 scale-0 rounded-full bg-primary transition-transform group-data-[state=checked]:scale-100 motion-reduce:transition-none" />
       </span>

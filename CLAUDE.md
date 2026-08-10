@@ -196,6 +196,11 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
   go behind progressive disclosure (InfoHint, tooltip, `title`), never inline. Design for
   F-pattern scanning: max ONE short line under a control, never repeat a caption per row,
   and prefer deleting words over qualifying them. Figma copy is the ceiling, not the floor.
+- **⛔ CONTROL STROKES (standing, user-repeated, P0 2026-08-10): every input,
+  select, textarea, checkbox, radio, and switch boundary uses the `--stroke`
+  token (≥3:1 vs its surface in BOTH themes, WCAG 1.4.11) — never `--border`
+  (decorative hairline) or `--input` (well fill). New form controls must use
+  `border-stroke`; check dark AND light before shipping.**
 - Cite `docs.agora.io/en/` URLs for any Agora-primitive design call.
 - Commits are the truth — docs cite them. If a doc is stale, fix the doc; don't second-guess the wireframe.
 - Keep a decision log entry (LEARNINGS.md §20 pattern) for any non-trivial choice.

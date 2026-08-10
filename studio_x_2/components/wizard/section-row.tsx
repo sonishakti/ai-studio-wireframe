@@ -47,7 +47,9 @@ export function SectionRow({
       )}
     >
       <div className="min-w-0">
-        <h4 className="text-base font-medium leading-snug">{label}</h4>
+        {/* data-wz-row-label feeds the sticky header's "Section › Row" crumb
+            (owner 2026-08-10) — the scroll tracker reads its textContent. */}
+        <h4 data-wz-row-label className="text-base font-medium leading-snug">{label}</h4>
         {hint ? <div className="mt-1.5 space-y-1 text-xs leading-relaxed text-muted-foreground">{hint}</div> : null}
       </div>
       {/* The RHS is its OWN @container: children's container queries must

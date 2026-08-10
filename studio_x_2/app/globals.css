@@ -27,6 +27,7 @@
     --color-chart-1: var(--chart-1);
     --color-ring: var(--ring);
     --color-input: var(--input);
+    --color-stroke: var(--stroke);
     --color-border: var(--border);
     --color-destructive: var(--destructive);
     --color-warning: var(--warning);
@@ -87,6 +88,10 @@
     --success: oklch(0.568 0.1597 142.542);      /* #308d2c */
     --border: oklch(0.9257 0.0011 17.179);       /* #e7e6e6 */
     --input: oklch(0.9918 0.0011 17.178);        /* #fdfcfc */
+    /* Control STROKE — WCAG 1.4.11 needs 3:1 against the adjacent surface
+       for input/select/checkbox boundaries; --border is a decorative
+       hairline and stays quiet. #949494 on white = 3.0:1. (P0 2026-08-10) */
+    --stroke: oklch(0.64 0 0);                   /* #949494 */
     --ring: oklch(0.5624 0 0);                   /* #757575 */
     --chart-1: oklch(0.4882 0.2172 264.376);     /* #1d4ed8 Chart-blue */
     --chart-2: oklch(0.6002 0.1038 184.704);     /* #0d9488 Chart-teal */
@@ -127,6 +132,8 @@
     /* Field WELL fill (Figma OPT2 2698-102829, 2026-07-22): inputs sit in
        solid #050505 wells — the page background — not a grey tint. */
     --input: oklch(0.1149 0 0);                  /* #050505 */
+    /* #6b6b6b on the #050505 well / #0a0a0c page ≥ 3:1. (P0 2026-08-10) */
+    --stroke: oklch(0.52 0 0);                   /* #6b6b6b */
     --ring: oklch(0.7668 0 0);                   /* #b3b3b3 */
     --chart-1: oklch(0.5461 0.2152 262.881);     /* #2563eb Chart-blue */
     --chart-2: oklch(0.7845 0.1325 181.912);     /* #2dd4bf Chart-teal */

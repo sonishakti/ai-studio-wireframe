@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { useSidebar } from "@/components/ui/sidebar"
 import { AgentWizard } from "@/components/wizard/agent-wizard"
 import { getAgent } from "@/lib/campaign-data"
 import { readSessionAgents } from "@/lib/agent-store"
@@ -11,6 +12,16 @@ import { restoreDraft } from "@/lib/wizard-draft"
 /** Client half of the editor route — the server page resolves params. */
 export function AgentEditorClient({ id }: { id: string }) {
   const router = useRouter()
+  // The builder has its own section rail — auto-collapse the app sidebar so
+  // there's ONE left nav (owner 2026-08-10); restore it on the way out.
+  const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebar()
+  const wasOpen = React.useRef(sidebarOpen)
+  React.useEffect(() => {
+    const restore = wasOpen.current
+    setSidebarOpen(false)
+    return () => setSidebarOpen(restore)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   // Build-time-known ids ("new" + the AGENTS mock) mount immediately — SSR
   // parity with generateStaticParams. Everything else lives in browser
   // storage (agents deployed this session, per-agent draft slots), so the

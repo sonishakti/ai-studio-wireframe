@@ -88,7 +88,7 @@ export function SectionPrompt({
             onChange={(e) => update({ systemPrompt: e.target.value })}
             disabled={overridden("systemPrompt")}
             className={cn(
-              "min-h-[220px] pb-12 font-mono text-sm leading-relaxed",
+              "min-h-[220px] pb-12 text-sm leading-relaxed",
               overridden("systemPrompt") && "border-warning/50 opacity-80",
             )}
             placeholder={"You are a helpful voice agent for Acme.\nBe concise. Greet the caller, resolve their request, and escalate to a human if asked.\nUse {{name}} and {{account}} when available."}

@@ -235,7 +235,7 @@ function KindRow({
       <span
         className={cn(
           "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
-          selected ? "border-primary" : "border-muted-foreground/50",
+          selected ? "border-primary" : "border-stroke",
         )}
         aria-hidden
       >

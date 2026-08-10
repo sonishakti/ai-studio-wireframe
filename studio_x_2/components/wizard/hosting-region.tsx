@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ExternalLink, Globe, Gauge, Plus, ShieldCheck } from "lucide-react"
+import { Plus } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -66,14 +66,18 @@ export function HostingRegionRow({ draft, update }: StepProps) {
       id="wz-2-hosting"
       label="Hosting Region"
       hint={
-        <>
-          <p>Where the agent process runs — the same for every deployment type below.</p>
-          <InfoHint label="When you need to pin this">
-            Pin a region when a contract or regulation says conversation data must stay inside it
-            (GDPR, India&apos;s DPDP, Japan&apos;s APPI). Otherwise leave it automatic — Agora places the
-            agent nearest your model endpoint and fails over when a region degrades.
-          </InfoHint>
-        </>
+        /* ONE disclosure holds everything (owner 2026-08-10: the inline
+           consequences list + vendor paragraph read as "super complex"). */
+        <InfoHint label="What pinning changes">
+          Pin a region when a contract or regulation says conversation data must stay inside it
+          (GDPR, DPDP, APPI). Automatic runs the agent nearest your model endpoint with failover;
+          pinning turns failover off. This pins Agora&apos;s engine only — LLM/TTS/ASR vendors
+          process data at their own endpoints (set regional URLs in{" "}
+          <a href="/project/vendor-credentials" className="underline underline-offset-2">Vendor Credentials</a>).{" "}
+          <a href={HOSTING_DOCS_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+            Agora region docs
+          </a>
+        </InfoHint>
       }
     >
       <div className="space-y-1.5">
@@ -126,69 +130,13 @@ export function HostingRegionRow({ draft, update }: StepProps) {
         </div>
       )}
 
-      {/* The consequence of the choice, stated where the choice is made. */}
-      <dl id="wz-hosting-consequences" className="divide-y divide-border rounded-md border border-border bg-muted/30 px-3.5">
-        <Consequence
-          icon={ShieldCheck}
-          term="Data residency"
-          desc={opt.residency}
-        />
-        <Consequence
-          icon={Gauge}
-          term="Latency"
-          desc={
-            pinned
-              ? `~${base} ms to first word in region · about +${opt.outOfRegionMs} ms for callers outside ${areaLabel(hosting.area)}. Wireframe estimate.`
-              : `~${base} ms to first word — the engine keeps the agent near your model endpoint. Wireframe estimate.`
-          }
-        />
-        <Consequence
-          icon={Globe}
-          term="Failover"
-          desc={
-            pinned
-              ? `Disabled. If ${areaLabel(hosting.area)} is unavailable the agent will not start elsewhere — that is the point of a pin.`
-              : "Enabled. If a region degrades, the agent moves to the nearest available one."
-          }
-        />
-      </dl>
-
-      {/* The doc's own caveat — pinning the engine does NOT pin your vendors. */}
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        This pins Agora&apos;s engine only. Your LLM, TTS, and ASR vendors process data wherever their
-        endpoint lives — set their regional URLs on the key in{" "}
-        <a href="/project/vendor-credentials" className="underline underline-offset-2 hover:text-foreground">
-          Vendor Credentials
-        </a>
-        .{" "}
-        <a
-          href={HOSTING_DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
-        >
-          Agora region docs <ExternalLink className="h-3 w-3" aria-hidden />
-        </a>
-      </p>
+      {/* One line, only when the choice has a consequence worth stating. */}
+      {pinned && (
+        <p className="text-xs text-muted-foreground">
+          Failover off — the agent runs only in {areaLabel(hosting.area)} (~{base} ms in region).
+        </p>
+      )}
     </SectionRow>
-  )
-}
-
-function Consequence({
-  icon: Icon, term, desc,
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  term: string
-  desc: string
-}) {
-  return (
-    <div className="flex items-start gap-2.5 py-2.5">
-      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
-      <div className="min-w-0">
-        <dt className="text-xs font-medium">{term}</dt>
-        <dd className="text-xs leading-relaxed text-muted-foreground">{desc}</dd>
-      </div>
-    </div>
   )
 }
 
