@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figma sweep — 2861-52041 parity, 2026-08-10</title>
+<style>
+  :root{
+    --brand:#00658d; --brand-bright:#00c2ff;
+    --bg:#ffffff; --fg:#16181d; --muted:#5b6472; --line:#e5e8ee; --card:#f7f9fb;
+    --ok:#158452; --warn:#9a6700; --bad:#c0392b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0b0d10; --fg:#e8ebf0; --muted:#98a1ae; --line:#23272e; --card:#12151a; --ok:#3ecf8e; --warn:#e2b93d; --bad:#ff6b5e; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.55}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 24px 96px}
+  h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:44px 0 12px;letter-spacing:-.005em}
+  h3{font-size:15px;margin:26px 0 8px}
+  .kicker{color:var(--brand-bright);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+  .meta{color:var(--muted);font-size:14px}
+  .meta code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+  p{margin:8px 0}
+  .lead{font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0}
+  th{color:var(--muted);font-weight:600;text-align:left;padding:7px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .pill{display:inline-block;font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap}
+  .pill.built{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+  .pill.flag{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+  .pill.kept{background:color-mix(in srgb,var(--brand-bright) 14%,transparent);color:var(--brand)}
+  @media (prefers-color-scheme: dark){ .pill.kept{color:var(--brand-bright)} }
+  figure{margin:22px 0}
+  figure img{width:100%;border:1px solid var(--line);border-radius:10px;display:block}
+  figcaption{font-size:13px;color:var(--muted);margin-top:8px}
+  figcaption b{color:var(--fg)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  .flagged li{margin:9px 0}
+  a{color:var(--brand)} @media (prefers-color-scheme: dark){ a{color:var(--brand-bright)} }
+  .footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Studio_X · Agent Builder</div>
+  <h1>Figma parity sweep — the whole “Jul 29–Aug 4” board</h1>
+  <p class="meta">2026-08-10 · Figma <code>2861-52041</code> (28 frames) · commit <code>19255b2</code> · live at
+    <a href="https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit">ai-studio-console-redesign.vercel.app</a> ·
+    gate: <code>tsc --noEmit</code> + <code>next build</code> clean</p>
+
+  <h2>What was asked</h2>
+  <p class="lead">“See the designs and work through these, flag what’s missing, and fix the rest. Don’t add extra stuff.”
+  The 2026-08-03 pass answered four targeted asks against this same node; this pass audited <b>all 28 frames</b> of the
+  section frame-by-frame against the live builder, fixed every fixable divergence, and flagged what was deliberately not
+  copied (each with the reason).</p>
+
+  <h2>The audit, in one table</h2>
+  <table>
+    <tr><th>Surface</th><th>Verdict</th><th>What changed</th></tr>
+    <tr><td>Test rail — Test Agent tab</td><td><span class="pill built">fixed</span></td><td>“Test Agent” caps; session stats reordered LLM→ASR→TTS; <b>Avg. LLM TTFT</b> row added; Best-case/Hosting rows dropped (not in frame)</td></tr>
+    <tr><td>Test rail — Simulations</td><td><span class="pill built">fixed</span></td><td>“Autogenerate” copy + button; <b>Re-Run (N)</b> after a run; “Not Run” badges; play-icon runs; <b>SIMULATION RESULTS</b> footer (passed/failed) replaces stats after a run</td></tr>
+    <tr><td>Simulated-call detail</td><td><span class="pill kept">aligned</span></td><td>Verdict string now “Passed (2/2 checks)”; detail stays a right-edge sheet (same location as the frame’s docked panel, adds focus) with the Listening·Thinking·Speaking strip it already had</td></tr>
+    <tr><td>Voice &amp; Models</td><td><span class="pill built">rebuilt</span></td><td>Row labels per frame; “Choose your Model Stack” heading + “Agora Balanced: …” bundle line; inline <b>“Or Configure models manually”</b> expander (architecture cards + STT/LLM/TTS + per-slot <b>Configure</b> sheets with vendor·credential·model·custom); Voice | Spoken language side-by-side; <b>Advanced Speech Settings</b> button</td></tr>
+    <tr><td>Agent Speech Settings</td><td><span class="pill built">fixed</span></td><td>Sheet retitled, speech-only (models moved inline), preset description + Response&nbsp;Speed/Naturalness chips, explicit <b>Done</b></td></tr>
+    <tr><td>Custom Config</td><td><span class="pill built">rebuilt</span></td><td>New concept per frame: per-section engine overrides (<code>asr·llm·tts·avatar·turn_detection·interruption·conversation·sal</code>), line-numbered editor, Valid JSON badge, <b>Import Existing</b>, <b>Reset</b>, <b>Apply Config</b>; non-empty sections raise the orange <b>“Overridden by Custom Config”</b> banner in Voice &amp; Models and lock those controls</td></tr>
+    <tr><td>Deployment</td><td><span class="pill built">rebuilt</span></td><td>Bordered radio cards in Figma order <b>Batch Calls → Inbound → Code/SDK</b> with the frame’s copy; batch gets the agent-level caller-ID select; inbound numbers become numbered lines with in-dropdown empty state + “Add New Phone Number” + <b>“Add another inbound line”</b>; Widget Settings render in full inline; Code/SDK gets the <b>“Please Note”</b> ID box and the framed <b>Go to Docs</b> row</td></tr>
+    <tr><td>Prompt &amp; knowledge</td><td><span class="pill built">fixed</span></td><td><b>“Choose an Agent Template”</b> moved in-section (header chip retired); <b>Rewrite Prompt modal</b> (instruction + Rewrite); “Greeting Message” / “Failure Message”; KB/MCP attach sheets rebuilt (search · size · Active/Processing · toggles · Create New · Save) with the frame’s rosters; <b>Tools &amp; Connectors</b> count header + Name/Status table + “Add Connector”</td></tr>
+    <tr><td>Test section</td><td><span class="pill built">rebuilt</span></td><td>The suite table now lives <b>inline</b>: Description column, mono “02/03 PASSING · 01 FAILED” bar, <b>Autogenerate Simulations</b>, “Do failing scenarios block deploy?”; the separate live-test row retired — Talk lives in the rail + test strip (same shared state)</td></tr>
+    <tr><td>Go Live</td><td><span class="pill built">rebuilt</span></td><td>Inbound: <b>End call</b> + <b>Advanced Settings</b> sheet (rules moved off the hot path); <b>Hosting Region moved here</b> for inbound/code with a “+ Add Exclusions” door; batch sheet retitled <b>Advanced Settings</b>; Title-Case behavior labels; <b>Post-Call Data Extraction</b> + DATA&nbsp;POINTS header + seeded “Call Outcome · Boolean”; <b>Deployment Summary</b> card = Deployed&nbsp;to · Models · Voice · Cost · Latency</td></tr>
+    <tr><td>Create-agent dialog</td><td><span class="pill built">fixed</span></td><td>“Agent will be generated from your description” · “Or choose from a template” (5 bordered radio rows, typing deselects) · <b>Create Agent</b></td></tr>
+    <tr><td>Header / chrome</td><td><span class="pill built">fixed</span></td><td>Waveform icon button (opens the rail’s Test Agent tab) between <code>&lt;/&gt;</code> and Deploy; “Edit Agent” breadcrumb; sample sims renamed (Books a demo · Price objection · Off-topic deflection)</td></tr>
+  </table>
+
+  <h2>Flagged — in the designs but deliberately not copied</h2>
+  <div class="card flagged"><ul>
+    <li><span class="pill flag">flag</span> <b>Hosting-region helper copy.</b> The frames say “We’ll store your project’s data in this region. Regions cannot be changed later.” That is Console’s project-storage rule, not Agora’s agent geofence — the geofence is per-agent, changeable, engine-only, and exclusions only exist under Global (verified 2026-08-03 against docs.agora.io). The build keeps the verified copy and the Global-only exclusion rule under the frame’s “+ Add Exclusions” affordance.</li>
+    <li><span class="pill flag">flag</span> <b>Model names.</b> Frames illustrate “GPT-5 nano + Flash v2.5”, but the same board’s Deployment Summary shows “gpt-4o-mini · nova-2 · turbo”. The frames disagree with themselves, so the mock catalog (GPT-4o family) was left alone rather than churned.</li>
+    <li><span class="pill flag">flag</span> <b>Test strip.</b> Not in these frames, but it’s the 2026-07-30 owner lock (Talk · Run simulations · verdict, sticky under the header) — kept. Its Talk button now lands on the rail’s Test Agent tab, which IS the frames’ talk surface.</li>
+    <li><span class="pill flag">flag</span> <b>New Campaign modal (3023-103726).</b> The board carries two patterns — this modal and the inline run editor (2867-111374). The build keeps the richer inline editor (also Figma) and aligned its vocabulary (Download CSV Template, “Learn how {{dynamic vars}} work”, Save Run). The modal’s “Call delay (ms)” lives as agent-level “Minimum interval between calls (ms)” in Advanced Settings.</li>
+    <li><span class="pill flag">flag</span> <b>Create-agent backdrop (2861-59988).</b> Behind the dialog the frame shows an /agents landing (“Deploy your first AI agent in minutes”, Import Agent · Create Blank Agent, a sidebar with “RTE Analytics”, a “Concierge” topbar). Frame sidebars are non-canonical per project memory, and that landing is a different surface from today’s locked /agents — only the dialog itself was aligned. Needs an owner call before touching the landing.</li>
+    <li><span class="pill flag">flag</span> <b>Speech-sheet extras.</b> Filter words, Selective attention locking, and Max wait duration ship today but aren’t in frame 2916-3435. Kept (below the frame’s fields — the sheet scrolls); deleting shipped controls wasn’t in the ask.</li>
+  </ul></div>
+
+  <h2>The shots</h2>
+
+  <figure><img src="figma-sweep-shots/01-rail-test-agent.png" alt="Test rail, Test Agent tab"><figcaption><b>01 · Rail — Test Agent.</b> Segmented control caps per frame; session statistics read LLM · ASR · TTS with per-slot ms, then Avg. e2e latency, <b>Avg. LLM TTFT</b>, Avg. cost.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/02-rail-simulation-results.png" alt="Rail simulations after a run"><figcaption><b>02 · Rail — after a run.</b> Run all becomes <b>Re-Run (3)</b>, rows carry Pass/Fail badges, and the footer swaps to <b>SIMULATION RESULTS</b> with padded PASSED/FAILED counts.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/03-voice-models.png" alt="Voice and Models section"><figcaption><b>03 · Voice &amp; Models.</b> “Choose your Model Stack” + the Agora-tier bundle line; the manual door and the speech-settings door both named per the frames.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/04-manual-model-config.png" alt="Manual model config expanded"><figcaption><b>04 · Configure models manually.</b> Custom Stack recap + Reset, the architecture cards, and one row per slot — each with a ⚙ door to its Configure sheet (vendor · credential · model · custom).</figcaption></figure>
+  <figure><img src="figma-sweep-shots/05-speech-settings-sheet.png" alt="Agent Speech Settings sheet"><figcaption><b>05 · Agent Speech Settings.</b> Speech-only sheet; the active preset explains itself (description + Response Speed / Naturalness), and Done closes it.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/06-deployment-cards.png" alt="Deployment radio cards"><figcaption><b>06 · Deployment.</b> Bordered cards, Figma order Batch Calls → Inbound → Code/SDK, each with the frame’s one-line description and a real selected state.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/07-inbound-numbers.png" alt="Inbound phone number lines"><figcaption><b>07 · Inbound lines.</b> Numbered Phone-number selects with per-line helper; the dropdown itself carries the empty state and “Add New Phone Number”; more lines via “Add another inbound line”.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/08-custom-config-drawer.png" alt="Custom Config drawer"><figcaption><b>08 · Custom Config.</b> Per-section overrides with line numbers, live Valid JSON badge, Import Existing / Reset, and Apply Config. Applied sections lock their visual controls behind the orange banner.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/09-test-section.png" alt="Test section inline suite"><figcaption><b>09 · Test section.</b> The suite lives inline now — Description column, mono passing bar, Autogenerate Simulations, and the deploy-blocking question answered where it’s asked.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/10-golive-inbound.png" alt="Go Live inbound settings"><figcaption><b>10 · Go Live — inbound.</b> One End-call toggle on the hot path with Advanced Settings behind a sheet; Hosting Region moved here from Deployment, exclusions behind “+ Add Exclusions”.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/11-deployment-summary.png" alt="Deployment summary card"><figcaption><b>11 · Deployment Summary.</b> The frame’s exact row set — Deployed to · Models · Voice · Cost · Latency — mono-labeled, Deploy inside the card.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/12-prompt-knowledge.png" alt="Prompt and knowledge section"><figcaption><b>12 · Prompt &amp; knowledge.</b> Template picker in-section above the prompt it writes; Rewrite Prompt opens the instruction modal; Greeting/Failure Message labels per frame.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/13-kb-sheet.png" alt="Add Knowledge Base sheet"><figcaption><b>13 · Add Knowledge Base.</b> Search, the frame’s roster with sizes and Active/Processing states, per-row toggles, Create New at the bottom, Save to commit.</figcaption></figure>
+
+  <div class="footer">
+    <p>Shot tool: <code>scripts/annotate-shots.mjs</code> at 1600×1200 against the production build. Every marker carries a
+    name and a rationale; a marker that fails to match fails the run.</p>
+    <p>Wireframe — no backend. Latency, cost, TTFT, and simulation verdicts are mock estimates and disclosed as such in the UI.</p>
+  </div>
+</div>
+</body>
+</html>
