@@ -181,9 +181,10 @@ export function AgentWizard({
     setRailOpen(true)
   }, [setRailOpen])
   React.useEffect(() => {
-    // The ceremony's "Say hello" lands on the rail's Test Agent tab — the talk
-    // surface lives there (Figma 2861-52655).
-    if (autoTalk) window.setTimeout(() => openTest("agent"), 150)
+    // The ceremony's "Say hello" lands on the rail's Test Agent tab AND starts
+    // the call — a button that says Talk must deliver a talking agent, not a
+    // second Talk button (user-test 2026-08-10 S3).
+    if (autoTalk) window.setTimeout(() => { openTest("agent"); if (!testing) toggleTest() }, 150)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoTalk])
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).

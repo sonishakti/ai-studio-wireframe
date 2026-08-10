@@ -214,7 +214,7 @@ function BatchCallerIdBlock({ draft, update }: StepProps) {
     <SectionRow
       id="wz-2-batch"
       label="Choose how callers reach your agent"
-      hint="The caller ID your contacts see — runs can override it per run in Go Live."
+      hint="The caller ID your contacts see — new runs start from it and can pick their own."
     >
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Phone number</Label>
@@ -225,6 +225,12 @@ function BatchCallerIdBlock({ draft, update }: StepProps) {
         />
         <p className="text-xs text-muted-foreground">
           The agent will use this number to dial outbound calls.
+        </p>
+        {/* The card promised "a contact list you upload" — say where it lives
+            (user-test 2026-08-10 S3). */}
+        <p className="text-xs text-muted-foreground">
+          Contact lists, schedules, and runs live in{" "}
+          <a href="#wz-4-outputs" className="underline underline-offset-2 hover:text-foreground">Go Live · Batch</a>.
         </p>
       </div>
     </SectionRow>

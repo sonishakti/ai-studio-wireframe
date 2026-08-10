@@ -385,7 +385,9 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
         <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} />
         <StatRow label="Avg. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
       </dl>
-      <p className="pt-2 text-xs text-muted-foreground/70">Wireframe estimates.</p>
+      <p className="pt-2 text-xs text-muted-foreground/70">
+        TTFT — time to first token: how fast the model starts responding. All figures are wireframe estimates.
+      </p>
     </section>
   )
 }

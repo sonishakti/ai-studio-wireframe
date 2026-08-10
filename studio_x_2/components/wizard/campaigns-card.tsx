@@ -87,7 +87,9 @@ export function CampaignsCard({ draft, update }: StepProps) {
   // is hiding — clear the filter so the new row is always the one you land on.
   const startNew = () => {
     setFilter("all")
-    setNewDraft(makeCampaign(`Run ${campaigns.length + 1}`))
+    // New runs INHERIT the agent-level caller ID (user-test 2026-08-10 S2:
+    // setting the number in Deployment and again per run read as a trap).
+    setNewDraft({ ...makeCampaign(`Run ${campaigns.length + 1}`), numberId: draft.config.batch?.callerId })
     setEditing("new")
   }
   const duplicate = (c: CampaignDraft) => {
@@ -475,6 +477,11 @@ function CampaignEditor({
               </SelectItem>
             </SelectContent>
           </Select>
+          {campaign.numberId && campaign.numberId === draft.config.batch?.callerId && (
+            <p className="text-xs text-muted-foreground">
+              Default from agent — override for this run.
+            </p>
+          )}
           <AddPhoneNumberSheet open={addOpen} onOpenChange={setAddOpen} onAdded={addedNumber} />
         </div>
       </div>

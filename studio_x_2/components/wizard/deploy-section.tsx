@@ -25,14 +25,12 @@ import { type StepProps } from "@/components/wizard/types"
  *  now, resolved at render, so a mock agent's history always postdates its
  *  existence; a never-deployed draft shows NO rows — fixed "by you" dates had
  *  fresh drafts showing edits that predate the agent (user-test 2026-07-30). */
+// One truthful genesis row, nothing else (user-test 2026-08-10 S3: five
+// fabricated "by you" edits invented an audit trail the user never produced —
+// worst on an agent imported twenty minutes ago). Real edits appear as real
+// deploys happen; a wireframe must not seed history.
 const VERSION_SEED: { property: string; hoursAgo: number; old: string; next: string; by: string }[] = [
-  { property: "Model tier", hoursAgo: 26, old: "Agora Balanced", next: "Agora Cheapest", by: "you" },
-  { property: "System prompt", hoursAgo: 78, old: "…escalate to a human.", next: "…escalate to a human if asked.", by: "you" },
-  // "you" everywhere — a fresh single-user account must never imply a stranger
-  // edited its agent (user-test 2026-07-29; was a seeded teammate email).
-  { property: "Max call duration", hoursAgo: 140, old: "240 s", next: "300 s", by: "you" },
-  { property: "Voicemail detection", hoursAgo: 141, old: "Off", next: "On", by: "you" },
-  { property: "Voice", hoursAgo: 305, old: "Aria (ElevenLabs)", next: "Jenny (Azure)", by: "you" },
+  { property: "Agent created", hoursAgo: 0, old: "—", next: "version 1", by: "you" },
 ]
 
 /** "2026-07-30 14:02" — the table's existing date idiom, local time. */
