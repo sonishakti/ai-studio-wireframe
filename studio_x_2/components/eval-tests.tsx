@@ -89,7 +89,6 @@ export function TestsSection({
   // "Run all" runs the SUITE (round-6: opening one case's sheet read as the
   // other two vanishing) — brief running state, then a summary line.
   const [runningAll, setRunningAll] = React.useState(false)
-  const [lastRunNote, setLastRunNote] = React.useState<string | null>(null)
   // Design set 22–23 Jul (AgentBuilder/DEFAULT): sample scenarios ship
   // UN-RUN — status "–" until the user runs them. No fake failures on first
   // paint (2026-07-24 P0). Verdicts exist only for cases the user ran.
@@ -116,10 +115,6 @@ export function TestsSection({
       const results = allResults.filter((r) => cases.some((c) => c.id === r.caseId))
       setRanIds(new Set(results.map((r) => r.caseId)))
       const passed = results.filter((r) => r.verdict === "pass").length
-      const notRun = cases.length - results.length
-      setLastRunNote(
-        `Last run just now — ${passed} passed · ${results.length - passed} failed${notRun > 0 ? ` · ${notRun} not run (new case)` : ""}`,
-      )
       onRunSummary?.({ passed, failed: results.length - passed, total: results.length })
       toast(`${results.length} scenario${results.length === 1 ? "" : "s"} ran`, {
         description: `${passed} passed · ${results.length - passed} failed. Open a row for the transcript.`,
@@ -163,22 +158,16 @@ export function TestsSection({
       {/* Suite TABLE (Figma 2861-52041): rail = Test Name · Status · run;
           section adds Description + the mono "02/03 PASSING · 01 FAILED" bar. */}
       <div className="overflow-hidden rounded-lg border border-border">
-        {variant === "section" ? (
+        {/* Section variant only (Figma 2867-110660) — the rail table has no
+            bar: the badges + the results footer already carry run state, and a
+            prose bar above a narrow table breaks the F-pattern scan
+            (owner 2026-08-10: no added text). */}
+        {variant === "section" && stats.total > 0 && (
           <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 font-mono text-xs uppercase tracking-wider">
-            <span className={cn(stats.total > 0 ? "text-foreground" : "text-muted-foreground")}>
-              {stats.total > 0 ? `${pad2(stats.passed)}/${pad2(cases.length)} passing` : "Not run yet"}
-            </span>
-            {stats.total > 0 && stats.total - stats.passed > 0 && (
+            <span>{pad2(stats.passed)}/{pad2(cases.length)} passing</span>
+            {stats.total - stats.passed > 0 && (
               <span className="text-destructive">{pad2(stats.total - stats.passed)} failed</span>
             )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2 text-xs">
-            <span className="font-medium">
-              {stats.total > 0 ? `${stats.passed}/${stats.total} passing` : "Not run yet"}
-              {lastRunNote ? <span className="font-normal text-muted-foreground"> · {lastRunNote}</span> : null}
-            </span>
-            {stats.total > 0 && <StatusPill passed={stats.passed} total={stats.total} />}
           </div>
         )}
         <Table>
@@ -256,16 +245,6 @@ export function TestsSection({
 
 const pad2 = (n: number) => String(n).padStart(2, "0")
 
-function StatusPill({ passed, total }: { passed: number; total: number }) {
-  const allPass = passed === total
-  const failing = total - passed
-  return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5", allPass ? "text-success" : "text-destructive")}>
-      {allPass ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-      {allPass ? "All tests pass" : `${failing} test${failing === 1 ? "" : "s"} failing`}
-    </span>
-  )
-}
 
 // ─── Run: simulated caller, live transcript, verdict ──────────────────────────
 

@@ -621,7 +621,6 @@ export function ManualStackConfig({ stack, onChange, className }: StackPieceProp
           <span className="font-medium">Custom Stack</span>{" "}
           <span className="font-mono text-xs text-muted-foreground">
             {stack.asr.vendor} + {stack.llm.model} + {stack.tts.vendor}
-            {diverged ? "" : " (preset defaults)"}
           </span>
         </p>
         <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-muted-foreground" onClick={reset}>

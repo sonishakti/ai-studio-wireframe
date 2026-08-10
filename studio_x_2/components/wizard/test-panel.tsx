@@ -382,12 +382,12 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
       </dl>
       <dl className="mt-2.5 space-y-1 border-t border-border pt-2.5">
         <StatRow label="Avg. e2e latency" value={`${est.latencyMs} ms`} />
-        <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} />
+        {/* Gloss lives in the tooltip, not another line (copy discipline
+            2026-08-10). */}
+        <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} title="Time to first token — how fast the model starts responding" />
         <StatRow label="Avg. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
       </dl>
-      <p className="pt-2 text-xs text-muted-foreground/70">
-        TTFT — time to first token: how fast the model starts responding. All figures are wireframe estimates.
-      </p>
+      <p className="pt-2 text-xs text-muted-foreground/70">Wireframe estimates.</p>
     </section>
   )
 }
@@ -414,10 +414,10 @@ function SimulationResults({ passed, failed }: { passed: number; failed: number 
   )
 }
 
-function StatRow({ label, value }: { label: string; value: string }) {
+function StatRow({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div className="flex items-baseline gap-2">
-      <dt className="min-w-0 flex-1 truncate font-mono text-xs uppercase tracking-wide text-muted-foreground">
+    <div className="flex items-baseline gap-2" title={title}>
+      <dt className={cn("min-w-0 flex-1 truncate font-mono text-xs uppercase tracking-wide text-muted-foreground", title && "cursor-help underline decoration-dotted underline-offset-2")}>
         {label}
       </dt>
       <dd className="shrink-0 font-mono text-xs tabular-nums">{value}</dd>

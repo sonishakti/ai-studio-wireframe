@@ -478,9 +478,7 @@ function CampaignEditor({
             </SelectContent>
           </Select>
           {campaign.numberId && campaign.numberId === draft.config.batch?.callerId && (
-            <p className="text-xs text-muted-foreground">
-              Default from agent — override for this run.
-            </p>
+            <p className="text-xs text-muted-foreground">Default from agent.</p>
           )}
           <AddPhoneNumberSheet open={addOpen} onOpenChange={setAddOpen} onAdded={addedNumber} />
         </div>

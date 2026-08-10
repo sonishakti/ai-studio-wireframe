@@ -190,6 +190,12 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 
 ## Working rules
 
+- **⛔ COPY DISCIPLINE (standing, user-directed 2026-08-10): never ADD UI text without asking.**
+  No new helper lines, captions, glosses, banners, or explanatory prose beyond what the
+  reference design shows — propose the words in chat first and wait for a yes. Explanations
+  go behind progressive disclosure (InfoHint, tooltip, `title`), never inline. Design for
+  F-pattern scanning: max ONE short line under a control, never repeat a caption per row,
+  and prefer deleting words over qualifying them. Figma copy is the ceiling, not the floor.
 - Cite `docs.agora.io/en/` URLs for any Agora-primitive design call.
 - Commits are the truth — docs cite them. If a doc is stale, fix the doc; don't second-guess the wireframe.
 - Keep a decision log entry (LEARNINGS.md §20 pattern) for any non-trivial choice.

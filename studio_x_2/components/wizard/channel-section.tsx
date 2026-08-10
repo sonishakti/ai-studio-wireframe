@@ -214,7 +214,17 @@ function BatchCallerIdBlock({ draft, update }: StepProps) {
     <SectionRow
       id="wz-2-batch"
       label="Choose how callers reach your agent"
-      hint="The caller ID your contacts see — new runs start from it and can pick their own."
+      hint={
+        <>
+          {/* Inheritance + where-runs-live both live in the LHS hint column —
+              the control column keeps ONE line (copy discipline 2026-08-10). */}
+          <p>New runs start from this caller ID.</p>
+          <p>
+            Contact lists and runs live in{" "}
+            <a href="#wz-4-outputs" className="underline underline-offset-2 hover:text-foreground">Go Live · Batch</a>.
+          </p>
+        </>
+      }
     >
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">Phone number</Label>
@@ -225,12 +235,6 @@ function BatchCallerIdBlock({ draft, update }: StepProps) {
         />
         <p className="text-xs text-muted-foreground">
           The agent will use this number to dial outbound calls.
-        </p>
-        {/* The card promised "a contact list you upload" — say where it lives
-            (user-test 2026-08-10 S3). */}
-        <p className="text-xs text-muted-foreground">
-          Contact lists, schedules, and runs live in{" "}
-          <a href="#wz-4-outputs" className="underline underline-offset-2 hover:text-foreground">Go Live · Batch</a>.
         </p>
       </div>
     </SectionRow>
@@ -352,9 +356,13 @@ function InboundNumbersBlock({
               ariaLabel={slotLabel(i)}
               onChange={(next) => setNumberIds(numberIds.map((x) => (x === id ? next : x)))}
             />
-            <p className="text-xs text-muted-foreground">
-              The agent will use this number to receive inbound calls.
-            </p>
+            {/* Helper once, on the first line only — a caption repeated per
+                row is scan noise (copy discipline 2026-08-10). */}
+            {i === 0 && (
+              <p className="text-xs text-muted-foreground">
+                The agent will use this number to receive inbound calls.
+              </p>
+            )}
           </div>
         ))}
 
@@ -373,9 +381,11 @@ function InboundNumbersBlock({
                 })
               }}
             />
-            <p className="text-xs text-muted-foreground">
-              The agent will use this number to receive inbound calls.
-            </p>
+            {numberIds.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                The agent will use this number to receive inbound calls.
+              </p>
+            )}
           </div>
         )}
 
@@ -385,15 +395,13 @@ function InboundNumbersBlock({
           </Button>
         )}
       </div>
+      {/* One line, one destination — the call-rules pointer lives in Go Live
+          itself (copy discipline 2026-08-10). */}
       <p className="text-xs text-muted-foreground">
-        Agora routes your own carrier number via SIP — manage numbers in{" "}
+        Numbers route via SIP — manage them in{" "}
         <a href="/integrations?tab=channels" className="underline underline-offset-2">
           Resources › Deployment Channels
         </a>
-        . How answered calls end is configured in{" "}
-        <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => onGoToStep(5)}>
-          Go Live › Advanced Settings
-        </button>
         .
       </p>
     </SectionRow>
