@@ -101,6 +101,25 @@
   <figure><img src="figma-sweep-shots/12-prompt-knowledge.png" alt="Prompt and knowledge section"><figcaption><b>12 · Prompt &amp; knowledge.</b> Template picker in-section above the prompt it writes; Rewrite Prompt opens the instruction modal; Greeting/Failure Message labels per frame.</figcaption></figure>
   <figure><img src="figma-sweep-shots/13-kb-sheet.png" alt="Add Knowledge Base sheet"><figcaption><b>13 · Add Knowledge Base.</b> Search, the frame’s roster with sizes and Active/Processing states, per-row toggles, Create New at the bottom, Save to commit.</figcaption></figure>
 
+  <h2>Owner round — same day</h2>
+  <p class="lead">Direct feedback after the sweep: too much added text, invisible control borders (again), duplicate navs.
+  Shipped in <code>e9ff0e7</code> + <code>36817b2</code>:</p>
+  <div class="card"><ul>
+    <li><b>⛔ Copy discipline is now a standing CLAUDE.md rule</b> — no new UI text without asking; explanations behind disclosure; one line max per control. The prose this session added beyond the frames was stripped.</li>
+    <li><b>⛔ WCAG strokes (P0)</b> — new <code>--stroke</code> token (≥3:1 in both themes, WCAG 1.4.11) on every input, select, textarea, checkbox, radio, switch, and outline button. <code>--border</code> stays a decorative hairline. Also locked into CLAUDE.md.</li>
+    <li><b>Test strip deleted</b> (matches Figma; reverses the 07-30 lock per owner) — testing is the collapsible RHS panel; the header waveform button reopens it; the landing Talk starts the call in it.</li>
+    <li><b>Builder breadcrumb row removed</b>; <b>agent orb beside the name</b>; <b>system prompt un-mono'd</b> — all per the frames.</li>
+    <li><b>Scroll crumb</b> — the stuck section header appends the current row: “Voice &amp; Models › Sets up Agora Conversational AI Engine”.</li>
+    <li><b>App sidebar auto-collapses</b> in the builder (one left nav), restores on exit.</li>
+    <li><b>Hosting Region slimmed to the frame</b> — select · + Add Exclusions · one pinned-consequence line; everything else in a single “What pinning changes” disclosure.</li>
+  </ul></div>
+
+  <figure><img src="figma-sweep-shots/14-header-orb-no-strip.png" alt="Header with orb, no strip"><figcaption><b>14 · Header.</b> Orb + name; no breadcrumb row, no test strip; waveform reopens the panel.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/15-strokes-dark.png" alt="Dark theme strokes"><figcaption><b>15 · Strokes, dark.</b> Every control boundary ≥3:1 on the dark well.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/16-strokes-light.png" alt="Light theme strokes"><figcaption><b>16 · Strokes, light.</b> #949494 on white = 3.0:1 — fixed at the token, not per component.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/17-scroll-crumb.png" alt="Scroll crumb in stuck header"><figcaption><b>17 · Scroll crumb.</b> The sticky header names the row you're in — no new bar.</figcaption></figure>
+  <figure><img src="figma-sweep-shots/18-hosting-slim.png" alt="Hosting region slimmed"><figcaption><b>18 · Hosting Region.</b> Figma-minimal; detail behind one disclosure.</figcaption></figure>
+
   <div class="footer">
     <p>Shot tool: <code>scripts/annotate-shots.mjs</code> at 1600×1200 against the production build. Every marker carries a
     name and a rationale; a marker that fails to match fails the run.</p>
