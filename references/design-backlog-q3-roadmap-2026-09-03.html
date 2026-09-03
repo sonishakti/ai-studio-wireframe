@@ -1,0 +1,529 @@
+<title>Q3 Roadmap Design Backlog</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f6f9fb; --surface:#ffffff; --ink:#132129; --ink-2:#4b5d67; --ink-3:#7d8d96;
+  --rule:#d8e2e8; --rule-2:#e9eff3; --brand:#00658d; --brand-2:#00c2ff; --brand-soft:#e3f4fb;
+  --p0:#b3261e; --p0-soft:#fbe9e7; --p1:#8a5a00; --p1-soft:#fff3d6; --p2:#4b5d67; --p2-soft:#e8eef1;
+  --fix:#00658d; --new:#7a3fbf; --spec:#5b6b74; --done:#1b7f4d; --done-soft:#e1f4ea;
+  --code:#eef3f6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e161b; --surface:#152028; --ink:#e6eef2; --ink-2:#a9b8c0; --ink-3:#74858e;
+    --rule:#26343d; --rule-2:#1d2932; --brand:#3fb7e8; --brand-2:#00c2ff; --brand-soft:#0f2a38;
+    --p0:#ff7b70; --p0-soft:#3a1a18; --p1:#f2b84a; --p1-soft:#33270d; --p2:#a9b8c0; --p2-soft:#22303a;
+    --fix:#3fb7e8; --new:#b48cf0; --spec:#8fa0a9; --done:#4ec98a; --done-soft:#12301f;
+    --code:#1b262e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e161b; --surface:#152028; --ink:#e6eef2; --ink-2:#a9b8c0; --ink-3:#74858e;
+  --rule:#26343d; --rule-2:#1d2932; --brand:#3fb7e8; --brand-2:#00c2ff; --brand-soft:#0f2a38;
+  --p0:#ff7b70; --p0-soft:#3a1a18; --p1:#f2b84a; --p1-soft:#33270d; --p2:#a9b8c0; --p2-soft:#22303a;
+  --fix:#3fb7e8; --new:#b48cf0; --spec:#8fa0a9; --done:#4ec98a; --done-soft:#12301f;
+  --code:#1b262e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82em}
+.page{max-width:1120px;margin:0 auto;padding:40px 28px 96px}
+header.masthead{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;border-bottom:2px solid var(--brand);padding-bottom:20px;margin-bottom:28px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);font-weight:600;margin:0 0 6px}
+h1{font-size:34px;line-height:1.1;margin:0 0 10px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:68ch;margin:0}
+.meta{font-size:13px;color:var(--ink-3);text-align:right;line-height:1.7}
+.meta a{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--rule)}
+h2{font-size:22px;margin:48px 0 12px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:16px;margin:28px 0 8px}
+p{max-width:72ch}
+a{color:var(--brand)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin:0 0 8px;padding:0;list-style:none}
+.toc a{text-decoration:none;color:var(--ink-2);border-bottom:1px dotted var(--rule)}
+/* summary strip */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin:20px 0 8px}
+.strip>div{background:var(--surface);padding:14px 16px}
+.strip .n{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.strip .l{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+.strip .s{font-size:13px;color:var(--ink-2);margin-top:4px}
+/* charts */
+.charts{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin:16px 0}
+.chart{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:16px 18px}
+.chart h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:"Instrument Sans",system-ui,sans-serif;fill:var(--ink-2);font-size:11px}
+.chart .val{fill:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+/* callouts */
+.note{border-left:3px solid var(--brand-2);background:var(--brand-soft);padding:10px 14px;border-radius:0 4px 4px 0;margin:14px 0;max-width:none}
+.warn{border-left-color:var(--p1);background:var(--p1-soft)}
+.note p{margin:0;max-width:none}
+/* surface sections */
+.surface{margin-top:36px;border-top:1px solid var(--rule);padding-top:18px}
+.surface-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.surface-head h3{margin:0;font-size:18px}
+.surface-head .where{font-size:13px;color:var(--ink-3)}
+.counts{display:flex;gap:8px;font-size:12px}
+.counts span{padding:2px 8px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+td.name{min-width:300px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-2)}
+.pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11.5px;font-weight:600;line-height:1.5;white-space:nowrap}
+.P0{background:var(--p0-soft);color:var(--p0)} .P1{background:var(--p1-soft);color:var(--p1)} .P2{background:var(--p2-soft);color:var(--p2)} .Pn{background:var(--p2-soft);color:var(--ink-3);font-weight:500}
+.kind{font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.kind.fix{color:var(--fix)} .kind.new{color:var(--new)} .kind.spec{color:var(--spec)} .kind.done{color:var(--done)}
+.tag{display:inline-block;font-size:11px;color:var(--ink-3);border:1px solid var(--rule);border-radius:3px;padding:0 5px;margin-left:6px;vertical-align:1px}
+.ref{color:var(--ink-3);font-size:12.5px}
+.flag{color:var(--p1);font-weight:600}
+/* diff */
+.diff{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.diff ul{margin:6px 0 0;padding-left:18px}
+.diff li{margin:4px 0}
+/* research plan */
+.plan{border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin-top:12px}
+.plan .row{display:grid;grid-template-columns:44px 1.1fr 1.4fr 1fr;gap:14px;padding:14px 16px;border-top:1px solid var(--rule-2);background:var(--surface)}
+.plan .row:first-child{border-top:0}
+.plan .row.head{background:var(--bg);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:8px 16px}
+.plan .idx{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--brand);font-weight:500}
+.plan .q{font-weight:600}
+.plan .q small{display:block;font-weight:400;color:var(--ink-3);font-size:12.5px;margin-top:3px}
+.plan .m{font-size:13.5px;color:var(--ink-2)}
+.plan .m code,.plan .u code{font-family:"JetBrains Mono",monospace;font-size:12px;background:var(--code);padding:1px 5px;border-radius:3px}
+.plan .u{font-size:13px;color:var(--ink-2)}
+.sprint{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px}
+.sprint>div{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:14px 16px}
+.sprint h4{margin:0 0 4px;font-size:14px}
+.sprint .dates{font-size:12.5px;color:var(--ink-3);margin-bottom:8px}
+.sprint ul{margin:0;padding-left:18px;font-size:13.5px}
+.sprint li{margin:4px 0}
+details{margin-top:14px}
+summary{cursor:pointer;color:var(--brand);font-weight:600;font-size:14px}
+.excluded{columns:2;column-gap:28px;font-size:13px;color:var(--ink-2);margin-top:8px}
+.excluded li{break-inside:avoid;margin:2px 0}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-3)}
+@media (max-width:820px){.strip{grid-template-columns:repeat(2,1fr)}.charts,.diff,.sprint{grid-template-columns:1fr}.plan .row{grid-template-columns:36px 1fr}.plan .row.head{display:none}header.masthead{grid-template-columns:1fr}.meta{text-align:left}.excluded{columns:1}}
+:focus-visible{outline:2px solid var(--brand-2);outline-offset:2px}
+</style>
+
+<div class="page">
+<header class="masthead">
+  <div>
+    <p class="eyebrow">Convo AI · Q3 Roadmap · Design intake</p>
+    <h1>Q3 Roadmap Design Backlog</h1>
+    <p class="lede">Every ClickUp task from <em>Q3 Roadmap – Month × Module</em> that lands on a Studio or Console screen, split into fixes on surfaces that already exist in Studio_X and features that still need a first design, with a research plan to start on.</p>
+  </div>
+  <div class="meta">
+    Read 2026-09-03 via Claude in Chrome<br>
+    <a href="https://agora.clickup.com/8556478/v/l/6-901114080734-1">ClickUp list</a> · 5 modules · 27 objectives · 278 rows<br>
+    Raw export: <span class="mono">references/clickup-q3-roadmap-export-2026-09-03.tsv</span>
+  </div>
+</header>
+
+<ul class="toc">
+  <li><a href="#summary">Summary</a></li><li><a href="#backlog">Backlog by surface</a></li><li><a href="#conflicts">Conflicts with locks</a></li><li><a href="#diff">What changed since 07-29</a></li><li><a href="#research">Research plan</a></li><li><a href="#sprints">Next two sprints</a></li><li><a href="#excluded">Excluded items</a></li>
+</ul>
+
+<section id="summary">
+  <div class="strip" id="strip"></div>
+  <div class="charts">
+    <div class="chart"><h4>Design items by surface</h4><div id="chart-surface"></div>
+      <div class="legend"><span><i style="background:var(--fix)"></i>Fix on an existing Studio_X surface</span><span><i style="background:var(--new)"></i>New surface or flow</span><span><i style="background:var(--spec)"></i>Contract / definition work</span></div>
+    </div>
+    <div class="chart"><h4>Design items by priority and due month</h4><div id="chart-due"></div>
+      <div class="legend"><span><i style="background:var(--p0)"></i>P0</span><span><i style="background:var(--p1)"></i>P1</span><span><i style="background:var(--p2)"></i>P2 / unset</span></div>
+    </div>
+  </div>
+  <div class="note"><p><strong>How to read it.</strong> The list was restructured after 2026-07-29: Engine now carries five numbered objectives (O1–O5) with key results and tasks, and Studio's eight objectives are fully expanded. Items with no priority or no due month are unplanned in ClickUp, not low priority. "Fix" means Studio_X already has the screen and the ask is to change it; "New" means nobody has drawn it yet.</p></div>
+</section>
+
+<section id="backlog">
+  <h2>Backlog by surface</h2>
+  <p>Grouped by where the work lands in Studio_X, not by ClickUp module. Engine tasks that expose a control or a metric to developers are included; pure infra is listed at the end.</p>
+  <div id="surfaces"></div>
+</section>
+
+<section id="conflicts">
+  <h2>Roadmap items that collide with a standing lock</h2>
+  <div class="note warn"><p>These are decisions the roadmap has now made for us. Each one needs an owner call before design starts, not a quiet reversal.</p></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Roadmap item</th><th>Lock it collides with</th><th>Owner call needed</th></tr></thead>
+    <tbody>
+      <tr><td class="name">Run production A/B tests across agent versions <span class="pill P0">P0</span></td><td>Builder lock: no A/B in the builder (Test Strip v8, 2026-07-30).</td><td>Where does A/B live? Proposal: a Monitor-side experiment surface tied to versioning, keeping the builder single-track.</td></tr>
+      <tr><td class="name">Let operators take over or end active calls <span class="pill P2">P2</span> · Show live sentiment and monitor active calls <span class="pill P1">P1</span></td><td>Pause-button incident (2026-07-21): live-call controls were built from a test recommendation and pulled.</td><td>Confirm the roadmap now authorises live-call operator controls; scope which verbs (listen, whisper, take over, end).</td></tr>
+      <tr><td class="name">Phone Number Resell · purchase and assign numbers in Studio <span class="pill P0">P0</span> · XXL</td><td>Activation lock: telephony = BYO SIP, the free-minutes card lands on the 150-min nudge, not a number.</td><td>Already flagged 07-29. Re-decide the first-run home once numbers are purchasable in-product.</td></tr>
+      <tr><td class="name">Productize WhatsApp voice <span class="pill P0">P0</span> · Add SMS as an agent channel <span class="pill P0">P0</span> · Support text-only agents <span class="pill P0">P0</span></td><td>"One agent ↔ one channel" (2026-06-11) and the channel-hero Deploy step.</td><td>Does one-agent-one-channel survive three new channels, or does Deploy grow a channel matrix?</td></tr>
+      <tr><td class="name">Ship reusable agent recipes and production-ready templates <span class="pill P1">P1</span></td><td>Template gallery deliberately not built (Wave 1).</td><td>Was "not yet" or "not ever"? If P1 stands, this becomes the first-run alternative to talking to Aria.</td></tr>
+      <tr><td class="name">Unify login across Console and Studio <span class="pill P0">P0</span> · 2026-09</td><td>Not a collision, a confirmation: LEARNINGS says the seam is wayfinding, not auth.</td><td>Find out what "unify" means to the PM. If it is one session across both apps, that is exactly the Studio_X premise and should be claimed.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="diff">
+  <h2>What changed since the 2026-07-29 read</h2>
+  <div class="diff">
+    <div>
+      <h3>Delivered since</h3>
+      <ul>
+        <li>Reduce Studio project creation time</li>
+        <li>Remove the first-agent Convo AI provisioning delay</li>
+        <li>Inbound Call Event Webhook (GP)</li>
+        <li>Expose component latency metrics (console render still open on our side)</li>
+        <li>SIP direct connection metering · SIP Direct Connect audio quality</li>
+      </ul>
+      <h3>Promoted</h3>
+      <ul>
+        <li>Import agents from Vapi and Retell — unprioritised → <b>P0</b></li>
+        <li>Add voice cloning to Studio — P1 → <b>P0</b></li>
+        <li>Compare and recommend voices — P2 → <b>P0</b> · Sep</li>
+        <li>Native and MCP connector marketplace — P2 → <b>P0</b></li>
+        <li>Support text-only agents — P2 → <b>P0</b></li>
+        <li>Agent personality and tone controls — P2 → P1</li>
+        <li>Surface SIP error codes and CPS-limit failures — Aug → Sep, sized S-M</li>
+      </ul>
+      <h3>Demoted or undated</h3>
+      <ul>
+        <li>Conversational AI Composer — P1 → P2 (Studio_X already has <span class="mono">/composer</span>)</li>
+        <li>Agent-to-agent simulations at scale — lost its Aug date</li>
+        <li>Release stable Studio APIs — P1 · Sep → parent with 11 P0 subtasks, no date</li>
+      </ul>
+    </div>
+    <div>
+      <h3>New since 07-29 (not in <span class="mono">TODO-Q3-ROADMAP.md</span>)</h3>
+      <ul>
+        <li><b>Unify login across Console and Studio</b> — P0 · Sep</li>
+        <li><b>Audit and improve Studio and Console responsiveness</b> — P0 · Sep</li>
+        <li><b>Integrate Studio controls with Archer</b> — P0 · Sep · L</li>
+        <li><b>Show model-level usage, credits, and pricing breakdowns</b> — P0</li>
+        <li><b>Enforce data-retention policies across call artifacts</b> — P0 · Aug · S-M</li>
+        <li><b>Agents created through REST API should show up on Studio UI</b> — P0 · Aug</li>
+        <li><b>Ship a browser SDK and embeddable agent widget</b> — P0</li>
+        <li><b>Add SMS as an agent channel</b> — P0</li>
+        <li><b>Run production A/B tests across agent versions</b> — P0</li>
+        <li><b>Agent versioning, release environments, rollback</b> — P0</li>
+        <li>Five P0 builder-control tasks (turn-taking, recognition/denoising, provider-aware fallback, idle/silence/screening, transcriber failover) — were hidden under "+14"</li>
+        <li>Deterministic conversational evals in Studio and CI — P0</li>
+        <li>Build the Studio AI triage experience for inbound calls — P0 (was "inbound call-center MVP", P2)</li>
+        <li>Warm and agentic human transfers — P0</li>
+        <li>Ability to select SIP gateway location per number — P0 · Sep</li>
+        <li>SIP Direct Connect integration with Studio — P0 · Sep</li>
+        <li>Engine O1–O5 objective tree with per-task due months (Sep–Dec)</li>
+      </ul>
+      <h3>Renamed</h3>
+      <ul>
+        <li>Visual graph editor for multi-agent workflows → "Expand the handoff graph into an end-to-end workflow canvas"</li>
+        <li>Package and sell capacity-based SKUs → "Sell and allocate concurrency self-serve with capacity-aware safeguards"</li>
+        <li>Let user speak first → "[O2.4-T3.a] Document user-first opening behavior"</li>
+        <li>Tool-based filler words → "[O1.2-T1.c] Add filler words during tool execution"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <h2>Research plan</h2>
+  <p>Eight questions, ordered by how many P0 items each unblocks and how soon they are due. Methods reuse what is already in <span class="mono">references/prompt-library.md</span> and the user-test workflow; nothing here needs a new tool.</p>
+  <div class="plan">
+    <div class="row head"><div>#</div><div>Question</div><div>Method</div><div>Unblocks</div></div>
+    <div class="row"><div class="idx">R1</div><div class="q">Which agent-behaviour controls do developers actually reach for, and in what order?<small>Twelve new P0/P1 builder controls are queued. The builder is already at five collapsible sections; adding twelve rows without a hierarchy breaks the Test Strip layout.</small></div><div class="m">Card sort of the 22 control tasks with 6–8 developers (<code>/organize</code>), then a competitor teardown of Vapi, Retell and ElevenLabs builder panels (<code>competitor-teardown</code> prompt). Output: control taxonomy + "advanced" fold rule.</div><div class="u">Agent builder (28 items) · shared behaviour-control contract</div></div>
+    <div class="row"><div class="idx">R2</div><div class="q">What does a developer need to see to trust a phone number they bought from Agora?<small>Phone Number Resell is XXL and due September. It reverses the BYO-SIP lock and touches billing, compliance and the first-run home.</small></div><div class="m">Journey map of buy → verify → assign → first inbound call (<code>/journey</code>), with a Twilio / Telnyx / Vapi purchase-flow teardown. Pair with the Bandwidth PoC owner for the compliance steps that cannot be skipped.</div><div class="u">Telephony (15 items) · Deploy first-run · billing APIs</div></div>
+    <div class="row"><div class="idx">R3</div><div class="q">When a live call goes wrong, what does the operator need in the first ten seconds?<small>Live monitoring, sentiment, nudges and take-over are all P1/P2 and all previously locked out. One decision unblocks five items.</small></div><div class="m">Think-aloud with three operator personas on a mocked live-call panel (<code>user-test.js</code>, focus = intervention), preceded by a stakeholder interview on what verbs are permitted (<code>/investigate</code>).</div><div class="u">Monitor live view (5 items) · live-call overseer</div></div>
+    <div class="row"><div class="idx">R4</div><div class="q">How do developers evaluate an agent before and after a change?<small>Evals, scorecards, production A/B and simulations are seven separate tasks describing one loop.</small></div><div class="m">Diary-style interviews with 4 developers who ship agents weekly, mapping their current eval ritual (<code>/investigate</code>); then a blueprint of the build → test → ship → score loop (<code>/blueprint</code>).</div><div class="u">Test & evals (13 items) · versioning · A/B placement</div></div>
+    <div class="row"><div class="idx">R5</div><div class="q">What does "usage" mean to a developer paying per minute across managed and BYO vendors?<small>Model-level breakdowns, credits, concurrency self-serve and Archer all land on the Usage page in September.</small></div><div class="m">Heuristic evaluation of the current Usage and Billing pages (<code>/evaluate</code>) against the Q3 asks, then a pricing-comprehension test with 5 developers using real numbers from the verified pricing notes.</div><div class="u">Usage · Billing · Managed (8 items)</div></div>
+    <div class="row"><div class="idx">R6</div><div class="q">What should a Console-and-Studio login actually unify?<small>P0, September, and it is the seam this whole project exists for.</small></div><div class="m">Stakeholder interview with the PM who filed it, then a 5-step cognitive walkthrough of signup → first agent across both apps (<code>/evaluate</code>). Cheap, and it decides whether Studio_X's premise is the roadmap's premise.</div><div class="u">Platform & governance (9 items) · funnel north star</div></div>
+    <div class="row"><div class="idx">R7</div><div class="q">Where does a developer expect a handoff to be configured: on the agent, the deployment, or a canvas?<small>AI triage, warm transfers and the workflow canvas are P0/P1 and depend on the agent-vs-deployment split.</small></div><div class="m">Tree test of the current IA with the handoff tasks inserted (<code>/organize</code>), plus a Retell / Bland / Vapi routing teardown.</div><div class="u">Workflows & routing (7 items)</div></div>
+    <div class="row"><div class="idx">R8</div><div class="q">Do developers want to choose a voice, or be told which one?<small>"Compare and recommend voices" is P0 for September; voice cloning is P0.</small></div><div class="m">Preference test with 8 developers: gallery vs recommendation vs use-case wizard, using real voice samples from the vendor catalog. Fold cloning consent and governance into the same session.</div><div class="u">Voices & vendors (10 items)</div></div>
+  </div>
+</section>
+
+<section id="sprints">
+  <h2>Next two sprints (research)</h2>
+  <p>Assumes one designer plus Claude, two-week sprints, planned to about 70 percent. Team, PTO and the real sprint dates are yours to fill in; the sequence is what matters.</p>
+  <div class="sprint">
+    <div>
+      <h4>Sprint A — September due dates</h4>
+      <div class="dates">Goal: every P0 due in September has a research read-out before it is drawn.</div>
+      <ul>
+        <li><b>R6</b> unify login — stakeholder interview + walkthrough (2 days)</li>
+        <li><b>R2</b> phone number purchase journey (4 days)</li>
+        <li><b>R5</b> usage and pricing comprehension (3 days)</li>
+        <li>Owner calls on the six lock conflicts (half day, one meeting)</li>
+        <li>Stretch: <b>R8</b> voice preference test</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Sprint B — the builder and the loop</h4>
+      <div class="dates">Goal: a control taxonomy and an eval loop the builder can grow into without breaking the Test Strip.</div>
+      <ul>
+        <li><b>R1</b> control card sort + teardown (4 days)</li>
+        <li><b>R4</b> eval loop interviews + blueprint (4 days)</li>
+        <li><b>R3</b> live-call intervention test (2 days, only if the owner call permits operator controls)</li>
+        <li>Stretch: <b>R7</b> handoff tree test</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Risks</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Recruiting 6–8 external developers per study</td><td>Card sort and preference tests slip a sprint</td><td>Run the simulated three-persona pass first; use external sessions to confirm, not discover</td></tr>
+      <tr><td>Phone number resell compliance unknowns</td><td>R2 journey has steps design cannot invent</td><td>Pair with the Bandwidth PoC owner in week one; design the known steps, placeholder the rest</td></tr>
+      <tr><td>Lock conflicts left unresolved</td><td>Five P0/P1 items designed twice</td><td>One owner meeting before Sprint A ends; decisions logged in LEARNINGS §20</td></tr>
+      <tr><td>ClickUp list keeps restructuring</td><td>This backlog goes stale like the 07-29 one</td><td>Re-run the export at each sprint boundary; diff against the TSV</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="excluded">
+  <h2>Excluded from the design backlog</h2>
+  <p>Infra, API contracts, internal tooling, docs and strategy tasks. They shape what the UI can show but have no screen of their own.</p>
+  <details><summary>Show the excluded items</summary><ul class="excluded" id="excluded-list"></ul></details>
+</section>
+
+<footer>Source: ClickUp <em>Q3 Roadmap – Month × Module</em>, read 2026-09-03 with subtasks expanded. Prior snapshot: <span class="mono">TODO-Q3-ROADMAP.md</span> (2026-07-29). Delivered rows are shown for completeness and not counted as open.</footer>
+</div>
+
+<script>
+// kind: fix = existing Studio_X surface | new = no surface yet | spec = contract/definition | done = delivered
+const SURFACES = [
+ {id:'builder', name:'Agent builder', where:'/agents/[id]/edit — Voice & Models · Deployment · Prompt & knowledge · Test · Go Live', items:[
+  ['fix','Migrate obsolete ASR and turn-detection configuration','P0','2026-08','','Tech Debt','Voice & Models section'],
+  ['fix','Improve first-run agent defaults','P0','2026-09','M-L','QoE · PLANNING','Aria default agent'],
+  ['fix','[O1.4-T1.a] Set the Semantic EOS default to 240 ms','P0','2026-09','','','Turn-detection default + copy'],
+  ['fix','[O2.1-T1.a] Make Semantic SOS publicly available','P0','2026-09','','Production - GA','Turn-detection option'],
+  ['fix','[O1.1-T1.d] Release the pipeline template across product surfaces','P0','2026-09','','','Low-latency preset in Voice & Models'],
+  ['fix','Customize built-in tool prompts by language','P0','','','QoE','Prompt & knowledge'],
+  ['fix','[O4.4-T1.a] Validate agent configuration before join','P1','2026-10','','','Needs-attention preflight already exists'],
+  ['new','Tune turn-taking and backchannel behavior per agent','P0','','','',''],
+  ['new','Add recognition, pronunciation, and denoising controls','P0','','','',''],
+  ['new','Add provider-aware voice delivery and fallback controls','P0','','','','Pairs with Engine cross-provider failover (P1)'],
+  ['new','Configure idle, silence, duration, and call-screening behavior','P0','','','',''],
+  ['new','Configure transcriber fallback and ASR failover in Studio','P0','','','',''],
+  ['new','Add agent versioning, release environments, and rollback','P0','','','','Builder has a truthful version history; envs + rollback are new'],
+  ['new','[O1.3-T1.a] Publish preemptive response controls','P0','2026-09','','',''],
+  ['new','[O1.2-T1.b] Add context and persona to generated filler words','P0','2026-09','','','Filler words GA (Entel) — shipped Aug'],
+  ['new','[O1.2-T1.d] Continue answers after filler words','P0','2026-10','','',''],
+  ['new','[O1.2-T1.c] Add filler words during tool execution','P1','2026-10','','',''],
+  ['new','[O1.1-T1.b] Add greeting and silence-recovery controls','P1','2026-09','','',''],
+  ['new','[O2.5-T2.a] Support STT dictionaries and keyword boosting','P1','2026-08','','CLARIFIED',''],
+  ['new','[O2.4-T2.a] Add active-listening backchannels','P1','2026-10','','POC',''],
+  ['new','[O2.2-T1.a] Add dynamic SIP speaker locking','P1','2026-10','','',''],
+  ['new','[O1.6-T1.a] Add configurable background ambience','P1','2026-10','','',''],
+  ['new','[O1.6-T2.b] Add TTS SSML and pronunciation controls','P1','2026-11','','',''],
+  ['new','[O1.6-T2.c] Add expressive TTS controls and model prompts','P1','2026-12','','',''],
+  ['new','Ability to add AI disclaimer in front of the greeting','P1','','','',''],
+  ['new','Add agent personality and tone controls','P1','','','QoE',''],
+  ['new','Support multilingual agents and runtime language switching','P1','','','',''],
+  ['new','Add runtime guardrails for agent input and output','P1','','','',''],
+  ['new','[O2.4-T3.a] Document user-first opening behavior','P2','2026-11','','','Was "let user speak first"'],
+  ['new','Support multiple voices and runtime voice switching within one agent','P2','','','',''],
+  ['spec','Define the shared per-agent behavior control contract','P0','','','','Decides which of the above are agent vs deployment'],
+ ]},
+ {id:'voices', name:'Voices & vendors', where:'Voice picker · Vendor Credentials · managed catalog', items:[
+  ['fix','Update studio vendors to align with engine','P0','2026-09','S','Reliable Infra','Vendor catalog parity'],
+  ['fix','[O1.1-T2.a] Align vendor support and provision keys','P0','2026-09','','Production - GA · IN VERSION','Murf.ai resell + benchmark subtasks (P1)'],
+  ['fix','[O3.3-T1.a] Publish the regional model access matrix','P0','2026-11','','','Hosting Region row already exists; needs a models × regions view'],
+  ['fix','Offer managed testing credentials across the model provider catalog','P1','','','','Managed mode (Wave 2)'],
+  ['new','Compare and recommend voices for each use case','P0','2026-09','','QoE',''],
+  ['new','Add voice cloning to Studio','P0','','','',''],
+  ['new','Add more voice-cloning providers and professional workflows','P1','','','',''],
+  ['new','Add governance and cross-workspace sharing for cloned voices','P1','','','',''],
+  ['new','Compare and recommend model stacks for each agent use case','P1','','','',''],
+  ['new','Support customer-hosted STT and TTS endpoints safely','P1','','','','Vendor Credentials'],
+ ]},
+ {id:'monitor', name:'Monitor · Sessions · Call History', where:'/monitor · /sessions/[id] · /calls · diagnostics', items:[
+  ['fix','Build complete call and session logs — audio + transcript visibility for Engine sessions','P0','2026-10','','','3 subtasks; session detail exists'],
+  ['fix','Surface SIP error codes and CPS-limit failures in Studio','P0','2026-09','S-M','','Diagnostics + SIP ladder (Wave 2)'],
+  ['fix','[O4.3-T1.c] Align recordings and transcripts','P0','2026-10','','','Timestamp-aligned view shipped Wave 1; verify against final'],
+  ['fix','[O4.3-T2.b] Expose redacted provider payloads','P0','2026-09','','','Payloads shipped Wave 1; redaction state is new'],
+  ['fix','[O4.1-T1.a] Align Web and Native latency metrics','P0','2026-09','','','Pipeline waterfall'],
+  ['fix','[O4.1-T1.c] Restore missing MLLM latency data','P1','2026-09','','Production - GA',''],
+  ['fix','Audit and improve Studio and Console responsiveness end to end','P0','2026-09','','QoE','Perf pass across both apps'],
+  ['fix','Normalize multi-speaker diarization for transcripts and agent policy','P1','','','','Transcript speaker labels'],
+  ['done','[O4.1-T1.b] Expose component latency metrics','P0','2026-07','','DELIVERED','Console render still open on our side'],
+  ['new','[O4.3-T1.d] Deliver recordings to customer storage','P0','2026-09','','','Storage destination settings'],
+  ['new','Show live sentiment trends and let operators monitor active calls','P1','','','','See lock conflict'],
+  ['new','Give operators live quality nudges during active calls','P1','','','',''],
+  ['new','Extend live monitoring and sentiment to outbound campaigns','P1','','','','Batch Calls'],
+  ['new','Build self-serve analytics dashboards, monitors, and alerts','P1','','','',''],
+  ['new','[O5.1-T6.a] Prototype a live-call overseer','P1','2026-10','','',''],
+  ['new','[O4.3-T3.a] Add retention and PII redaction controls','P1','2026-10','','',''],
+  ['new','Let operators take over or end active calls','P2','','','','See lock conflict'],
+  ['new','Define inbound pilot metrics for FCR, answer speed, handle time, escalation, and sentiment','P2','','','',''],
+  ['new','Export Studio agent traces to customer observability platforms','P2','','','',''],
+ ]},
+ {id:'test', name:'Test · Simulations · Evals', where:'Test Strip · Run simulations panel · eval-tests', items:[
+  ['fix','Show live latency and pipeline timing in agent preview','P1','','','','Test Strip verdict line'],
+  ['fix','Score and compare simulated calls','P1','','','','Sims RHS panel'],
+  ['fix','Run agent-to-agent voice simulations at scale','P1','','','',''],
+  ['fix','Simulate a pending agent change from Studio configuration','P1','','','',''],
+  ['new','Run deterministic conversational evals in Studio and CI','P0','','','','eval-tests.tsx is a stub'],
+  ['new','Score production calls with rubrics and reusable scorecards','P0','','','',''],
+  ['new','Review production recordings and recommend targeted fixes','P0','','','QoE',''],
+  ['new','Run production A/B tests across agent versions','P0','','','','See lock conflict'],
+  ['new','Let humans join simulated voice calls to test edge cases and tone','P1','','','',''],
+  ['new','Add advanced human simulation controls','P1','','','',''],
+  ['new','Replay production traffic as regression scenarios','P1','','','',''],
+  ['new','Build self-improving agents','P1','','','',''],
+  ['new','Integrate self-improving agents into Concierge','P1','','','',''],
+ ]},
+ {id:'deploy', name:'Deploy · Channels', where:'/deploy — Inbound · Batch Calls · Web widget · Code', items:[
+  ['fix','Ship a browser SDK and embeddable agent widget','P0','','','','widget-studio exists; SDK story is new'],
+  ['fix','Build the complete outbound campaign lifecycle','P2','','','','Batch Calls'],
+  ['done','Inbound Call Event Webhook','P0','2026-08','','DELIVERED · GP',''],
+  ['new','Productize WhatsApp voice','P0','','XL','Moveo','/deploy/whatsapp currently redirects into the wizard'],
+  ['new','Add SMS as an agent channel','P0','','','','/deploy/sms currently redirects'],
+  ['new','Support text-only agents','P0','','','','Engine scope task is P2'],
+  ['new','Configure DTMF input and IVR navigation in Studio','P1','','','',''],
+  ['new','Support DTMF menu entry and inbound queue handling before AI triage','P1','','','',''],
+  ['new','Allow voice agents to leave a message after voicemail detection','P1','','','',''],
+ ]},
+ {id:'telephony', name:'Telephony · Phone numbers · SIP', where:'/deploy/phone-numbers · sip-quick-connect · SIP ladder', items:[
+  ['new','[Phone Number Resell] Let developers purchase and assign phone numbers in Studio','P0','2026-09','XXL','','7 subtasks; reverses BYO-SIP lock'],
+  ['new','Launch self-service phone-number purchase and assignment in the US','P0','','','','Subtask of resell'],
+  ['new','Expand phone-number resale beyond the US','P1','','','','Subtask of resell'],
+  ['new','Bandwidth PoC','P0','2026-09','L','Entel','Provider for resell'],
+  ['new','Integrate console billing APIs · Compliance/Legal requirements','P1','','','','Resell subtasks'],
+  ['new','Self-service phone number CPS','P0','2026-09','','','Calls-per-second purchase'],
+  ['new','Protect outbound caller reputation with verified and branded calling','P1','','','',''],
+  ['new','Ability to select SIP Gateway location based on number-level','P0','2026-09','','','Per-number region'],
+  ['new','SIP Direct Connect integration with Studio','P0','2026-09','','',''],
+  ['new','SIP Transfer to direct-link (SIP Refer / Conference) must not affect customer','P0','2026-09','','Entel, Concentrix',''],
+  ['fix','[Doc] Telnyx support from SIP manager','P0','2026-08','M-L','Entel','sip-quick-connect provider list'],
+  ['new','Automate SIP trunk and provider onboarding for customer ITSPs and regional telcos','P0','2026-10','','',''],
+  ['new','Support SIP Header customization in SIP Invite','P1','','','',''],
+  ['new','Whitelist approach instead of wide-open connection for media ip subnet','P1','','','',''],
+  ['new','Throttle outbound dialing by SIP trunk capacity and queue retries','P1','','','','Batch Calls setting'],
+  ['fix','Add SIP signaling visual ladder diagrams','P0','2026-09','M','','Shipped Wave 2; ClickUp still open'],
+ ]},
+ {id:'knowledge', name:'Knowledge · Tools · Integrations', where:'/integrations (Resources) — KB · MCP · CRM', items:[
+  ['new','Build a native and MCP connector marketplace','P0','','','',''],
+  ['new','Build no-code HTTP tools','P0','','','','Engine GET/POST tools GA Aug (L)'],
+  ['new','Supply agent context from CRM records','P0','','','',''],
+  ['new','Manage structured outputs as reusable resources','P0','','','',''],
+  ['new','Add CRM actions and controlled write-back','P1','','','',''],
+  ['new','Crawl authenticated knowledge sources','P1','','','',''],
+  ['new','Crawl complete sites for knowledge ingestion','P1','','','',''],
+  ['new','Manage contacts, audiences, and cross-session context','P1','','','',''],
+  ['new','Add web crawling and retrieval tuning to knowledge bases','P2','','','',''],
+  ['new','Refresh crawled knowledge on a schedule','P2','','','',''],
+  ['new','Run hosted code tools inside Studio agents','P2','','','',''],
+  ['fix','Add Couchbase as a knowledge provider','P1','','','','UI shipped Wave 1; concierge subtasks remain'],
+ ]},
+ {id:'usage', name:'Usage · Billing · Managed mode', where:'/usage · /billing · concurrency-card · usage-spend-card', items:[
+  ['fix','Show model-level usage, credits, and pricing breakdowns in Studio','P0','','','',''],
+  ['fix','Sell and allocate concurrency self-serve with capacity-aware safeguards','P0','2026-09','XL','','concurrency-card exists; capacity SKUs deliberately not built'],
+  ['fix','[O3.4-T3.a] Add self-service agent concurrency controls','P1','2026-09','','',''],
+  ['fix','[O3.4-T3.b] Meter Studio usage on Engine','P0','2026-09','','',''],
+  ['fix','Implement Studio managed mode using Engine reseller mode','P0','2026-09','S','','Shipped Wave 2; API use-case + separate key subtasks remain (P1)'],
+  ['fix','Add MLLM vendors to the managed reseller catalog · Metering and SKU for MLLM','P1','2026-10','','',''],
+  ['new','Integrate Studio controls with Archer','P0','2026-09','L','','Find out what Archer is before designing'],
+ ]},
+ {id:'workflows', name:'Workflows · Routing · Handoffs', where:'No surface yet — depends on agent vs deployment split', items:[
+  ['new','Build the Studio AI triage experience for inbound calls','P0','','','','Was "inbound call-center MVP"'],
+  ['new','Add warm and agentic human transfers','P0','','','','Engine summary-for-warm-transfer P1 Aug'],
+  ['new','Route handoffs by skill, condition, and context','P1','','','Entel, Concentrix','[SIP] warm transfer w/ LLM summary subtask'],
+  ['new','Expand the handoff graph into an end-to-end workflow canvas','P1','','','',''],
+  ['new','Route using live queue availability, capacity, priority, and SLA','P2','','','',''],
+  ['new','Add cross-channel routing','P2','','','',''],
+  ['spec','Build the agent handoff graph and runtime contract','P0','','','',''],
+ ]},
+ {id:'platform', name:'Platform · Developer · Governance', where:'/developer · /project/settings · Vendor Credentials · login', items:[
+  ['fix','Agents created through REST API should show up on Studio UI','P0','2026-08','S-M','','Agents library'],
+  ['fix','Manage Studio webhooks and delivery diagnostics','P0','','','','/developer/webhooks'],
+  ['fix','Fix legacy studio credential leak issue','P0','','','Tech Debt','Vendor Credentials'],
+  ['fix','Ship a Studio CLI and MCP server','P0','','','','CLI card exists'],
+  ['new','Unify login across Console and Studio','P0','2026-09','','','The seam'],
+  ['new','[Studio] Enforce data-retention policies across call artifacts','P0','2026-08','S-M','',''],
+  ['new','Add customer-configurable data retention, PII controls, and customer-owned artifact storage','P1','','','',''],
+  ['new','Add a HIPAA-ready Studio mode and BAA-backed safeguards','P1','','','',''],
+  ['new','Add Studio workspace access control and client-key governance','P2','','','',''],
+ ]},
+ {id:'onboarding', name:'Onboarding · Templates · Import', where:'Go Live home · import-agent-sheet · /composer', items:[
+  ['fix','Import agents from Vapi and Retell','P0','','','','import-agent-sheet exists; scope task P2'],
+  ['fix','Build a conversational AI Composer for agent configuration','P2','','','','/composer exists'],
+  ['fix','Instrument Studio onboarding conversion','P1','','','','Event taxonomy, not screens'],
+  ['new','Ship reusable agent recipes and production-ready templates','P1','','','','Template gallery deliberately not built'],
+  ['done','Reduce Studio project creation time','P0','2026-08','S','DELIVERED',''],
+  ['done','Remove the first-agent Convo AI provisioning delay','P0','2026-08','S','DELIVERED',''],
+ ]},
+ {id:'devx', name:'DevX · UI Kit · Docs', where:'Outside Studio_X — UI kit, docs site', items:[
+  ['new','UI Kit - Mobile','P1','','','',''],
+  ['new','UI Kit Polish','P2','','','',''],
+  ['new','Generative UI','P2','','','',''],
+  ['new','Benchmarking Tool','P2','','','',''],
+  ['new','Add an AI assistant to the documentation center','P0','','','','Parent "Improve Voice AI docs" is P0'],
+  ['new','Define the v1 Physical AI builder scope and integrate it into Studio planning','P2','','','','Parking lot'],
+ ]},
+];
+
+const EXCLUDED = [
+ '[O2.1-T2.a] Reduce Semantic SOS cost and latency','[O2.1-T3.a] Review multilingual Semantic SOS expansion','[O2.5-T1.a] Clarify likely ASR errors','[O2.4-T1.a] Deliver English MMEOS','[O5.3-T1.a] Validate the normalized RAG contract (Hilton)','[O5.2-T2.a/b] Normalize provider controls · map gaps','[O5.2-T1.e] Stabilize public APIs and SDK controls (+ scope REST APIs to app IDs, Agent Studio / Call Agent APIs public, QianZe SDK contract)','[O5.2-T1.a] Append mode to the Think API (xAI)','[O5.2-T1.b/c/d] String UIDs · optional RTC token · infer Join flags','Add cross-provider failover for ASR, LLM, TTS (infra half)','[O5.1-T9.a] Define competitor agent import scope','[O5.1-T7.a] Scope text-only agents','[O5.1-T8.a] Evaluate code-defined pipelines (Cresta)','[O5.1-T1.a] Publish the former GK capability boundary','[O5.1-T5.a] Add continuous video understanding','[O5.1-T10.a] Define MCP registration over RTM','[O5.1-T4.a] Evaluate Google conversation modes','Evaluate a private or customer-operated Conversational AI runtime','[O3.4-T1.a/b] Capacity, key allocation, performance baseline, demo-app latency','[O3.4-T2.a] Rehearse degraded-session recovery','[O3.1] Tier-2 / Tier-3 Supernode','[O3.2] Controlled LLM inference path','[O3.5] Optimize open-source models','[O3.3-T2.a] Deploy approved regional model paths','[O1.1-T3.a] Verify agent configuration propagation','[O1.1-T1.a/c] Compose pipeline template · return accepted runtime config','[O1.2-T1.a] Ship generated filler words (GA)','[O1.6-T2.a] Normalize text for speech synthesis','[O1.6-T3.a] Regional voice field tests','Close TTS coverage gaps across languages and dialects','[O1.3-T2.a] Select the fast ASR path','[O1.5] Disable client-side AINS · Web AI-QoS · echo cancellation','[O4.2] Replay traffic before release · validate H2 defaults','[O4.4-T1.b] Document hidden configuration concepts','[O4.3-T1.b/e] Recording state behavior · NCS lifecycle webhooks','[O4.3-T3.b] Deliver Entel recordings to NICE','Reduce structured output generation cost (Taiwan Survey)','Write an observability support-model recommendation','Expose Studio RAG APIs and segment-level retrieval controls','[Public API] Release stable Studio APIs · end call via API · make current API public · migrate GK features · integrate into Agent SDKs','Implement SIP-layer transfer, hangup and transfer-leg tracing (+ internal tracing tool, silence hangup)','ITSP stress test for Agora managed customer','Build a telco operations dashboard (ASR, NER, PDD) — internal','Define and phase the global SIP architecture migration','[POC] Separate SIP video optimization path for AMN','SIP Direct Connect metering · audio quality (delivered)','Publish the supported SIP and streaming media contract','Tier 1 / Tier 2 Supernode deployment','LLM Tool Bypassing · MLLM Tool Bypassing','Vercel / AI SDK integration','Remove deprecated fields from Voice AI docs','Define Agora Q3 voice-agent strategy · measurable last-mile quality criteria',
+];
+
+// ---------- render ----------
+const pill = p => `<span class="pill ${p||'Pn'}">${p||'—'}</span>`;
+const kindLabel = {fix:'Fix', new:'New', spec:'Spec', done:'Done'};
+let totals = {fix:0,new:0,spec:0,done:0}, byPri = {}, dueP0Sep=0, dueP0Aug=0;
+const surfWrap = document.getElementById('surfaces');
+for (const s of SURFACES){
+  const c = {fix:0,new:0,spec:0,done:0};
+  s.items.forEach(i=>{c[i[0]]++; if(i[0]!=='done'){ totals[i[0]]++; const k=(i[3]||'none'); byPri[k]=byPri[k]||{P0:0,P1:0,P2:0}; byPri[k][i[2]||'P2']++; }});
+  s.count=c;
+  const rows = s.items.map(i=>`<tr>
+    <td><span class="kind ${i[0]}">${kindLabel[i[0]]}</span></td>
+    <td class="name">${i[1]}${i[6]?`<div class="ref">${i[6]}</div>`:''}</td>
+    <td>${pill(i[2])}</td>
+    <td class="num">${i[3]||'—'}</td>
+    <td class="num">${i[4]||'—'}</td>
+    <td class="ref">${i[5]||''}</td></tr>`).join('');
+  surfWrap.insertAdjacentHTML('beforeend', `<div class="surface" id="s-${s.id}">
+    <div class="surface-head"><div><h3>${s.name}</h3><div class="where">${s.where}</div></div>
+    <div class="counts"><span>${c.fix} fix</span><span>${c.new} new</span>${c.spec?`<span>${c.spec} spec</span>`:''}${c.done?`<span>${c.done} done</span>`:''}</div></div>
+    <div class="tablewrap"><table><thead><tr><th>Kind</th><th>Item</th><th>Pri</th><th>Due</th><th>Size</th><th>Notes</th></tr></thead><tbody>${rows}</tbody></table></div></div>`);
+}
+const open = totals.fix+totals.new+totals.spec;
+let p0=0,p0dated=0; SURFACES.forEach(s=>s.items.forEach(i=>{ if(i[0]!=='done'&&i[2]==='P0'){p0++; if(i[3])p0dated++;} }));
+document.getElementById('strip').innerHTML = `
+  <div><div class="n">${open}</div><div class="l">Open design items</div><div class="s">of 278 ClickUp rows · ${totals.done} delivered</div></div>
+  <div><div class="n">${totals.fix}</div><div class="l">Fixes on existing surfaces</div><div class="s">screens Studio_X already has</div></div>
+  <div><div class="n">${totals.new}</div><div class="l">New surfaces or flows</div><div class="s">plus ${totals.spec} contract definitions</div></div>
+  <div><div class="n">${p0}</div><div class="l">P0 design items</div><div class="s">${p0dated} carry a due month, ${p0-p0dated} do not</div></div>`;
+
+// chart 1: horizontal stacked bars by surface
+(function(){
+  const W=560, rowH=26, left=200, top=6, max=Math.max(...SURFACES.map(s=>s.count.fix+s.count.new+s.count.spec));
+  const scale = (W-left-40)/max;
+  let svg=`<svg viewBox="0 0 ${W} ${top+SURFACES.length*rowH+4}" role="img" aria-label="Design items per surface, stacked by kind">`;
+  SURFACES.forEach((s,i)=>{
+    const y=top+i*rowH; let x=left;
+    svg+=`<text x="${left-8}" y="${y+16}" text-anchor="end">${s.name}</text>`;
+    [['fix','var(--fix)'],['new','var(--new)'],['spec','var(--spec)']].forEach(([k,col])=>{
+      const w=s.count[k]*scale; if(w>0){ svg+=`<rect x="${x}" y="${y+5}" width="${w}" height="15" fill="${col}"></rect>`; x+=w; }
+    });
+    svg+=`<text class="val" x="${x+6}" y="${y+16}">${s.count.fix+s.count.new+s.count.spec}</text>`;
+  });
+  svg+='</svg>'; document.getElementById('chart-surface').innerHTML=svg;
+})();
+// chart 2: due month columns, stacked by priority
+(function(){
+  const months=['2026-08','2026-09','2026-10','2026-11','2026-12','none'];
+  const label={'2026-08':'Aug','2026-09':'Sep','2026-10':'Oct','2026-11':'Nov','2026-12':'Dec','none':'No date'};
+  const W=360,H=190,left=30,bottom=28,top=10,colW=(W-left-10)/months.length;
+  const max=Math.max(...months.map(m=>{const b=byPri[m]||{P0:0,P1:0,P2:0};return b.P0+b.P1+b.P2;}));
+  const sc=(H-bottom-top)/max;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Design items per due month, stacked by priority">`;
+  [0,Math.round(max/2),max].forEach(v=>{const y=H-bottom-v*sc; svg+=`<line x1="${left}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--rule)" stroke-width="1"></line><text x="${left-4}" y="${y+4}" text-anchor="end">${v}</text>`;});
+  months.forEach((m,i)=>{
+    const b=byPri[m]||{P0:0,P1:0,P2:0}; const x=left+i*colW+colW*0.18, w=colW*0.64; let y=H-bottom;
+    [['P0','var(--p0)'],['P1','var(--p1)'],['P2','var(--p2)']].forEach(([p,col])=>{const h=b[p]*sc; if(h>0){y-=h; svg+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}"></rect>`;}});
+    const t=b.P0+b.P1+b.P2; if(t) svg+=`<text class="val" x="${x+w/2}" y="${y-4}" text-anchor="middle">${t}</text>`;
+    svg+=`<text x="${x+w/2}" y="${H-bottom+16}" text-anchor="middle">${label[m]}</text>`;
+  });
+  svg+='</svg>'; document.getElementById('chart-due').innerHTML=svg;
+})();
+document.getElementById('excluded-list').innerHTML = EXCLUDED.map(e=>`<li>${e}</li>`).join('');
+</script>

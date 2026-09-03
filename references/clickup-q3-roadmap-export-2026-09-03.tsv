@@ -1,0 +1,279 @@
+module	level	name	priority	due	customers	type	delivery	size	status
+Engine	0	[O2] Make turn-taking natural and robust	–	–	–	–	–	–
+Engine	1	[O2.1] Launch and scale Semantic SOS	–	–	–	–	–	–
+Engine	2	[O2.1-T1.a] Make Semantic SOS publicly available	P0	2026-09	–	Feature Request	Production - GA	–
+Engine	2	[O2.1-T2.a] Reduce Semantic SOS cost and latency	P0	2026-11	–	Reliable Infra	–	–
+Engine	2	[O2.1-T3.a] Review multilingual Semantic SOS expansion	P1	–	–	Feature Request	–	–
+Engine	1	[O2.5] Recover from recognition errors	–	–	–	–	–	–
+Engine	2	[O2.5-T2.a] Support STT dictionaries and keyword boosting	P1	2026-08	–	Feature Request	–	–	CLARIFIED
+Engine	2	[O2.5-T1.a] Clarify likely ASR errors	P1	2026-11	–	Feature Request	–	–
+Engine	1	[O2.2] Recover SIP speaker identity	–	–	–	–	–	–
+Engine	2	[O2.2-T1.a] Add dynamic SIP speaker locking	P1	2026-10	–	Feature Request	–	–
+Engine	1	[O2.4] Deliver MMEOS and natural listening	–	–	–	–	–	–
+Engine	2	[O2.4-T2.a] Add active-listening backchannels	P1	2026-10	–	Feature Request	POC	–
+Engine	2	[O2.4-T3.a] Document user-first opening behavior	P2	2026-11	–	Feature Request	–	–
+Engine	2	[O2.4-T1.a] Deliver English MMEOS	P1	2026-12	–	Feature Request	–	–
+Engine	1	Normalize multi-speaker diarization for transcripts and agent policy	P1	–	–	Feature Request	–	–
+Engine	0	[O5] Meet customer demand and close competitive gaps	–	–	–	–	–	–
+Engine	1	[O5.3] Normalize RAG provider integration	–	–	–	–	–	–
+Engine	2	[O5.3-T1.a] Validate the normalized RAG contract	P1	2026-09	Hilton	Dev Experience	–	–
+Engine	1	[O5.2] Stabilize public APIs and provider controls	–	–	–	–	–	–
+Engine	2	[O5.2-T2.b] Map provider controls and gaps	P1	2026-11	–	Dev Experience	–	–
+Engine	2	[O5.2-T2.a] Normalize provider controls	P1	2026-11	–	Dev Experience	–	–
+Engine	2	[O5.2-T1.e] Stabilize public APIs and SDK controls	P0	2026-09	–	Dev Experience	–	–
+Engine	3	Scope all REST APIs to project app IDs	–	–	–	Dev Experience	–	–
+Engine	3	Agora Agent - make Agent Studio and Call Agent APIs public	P0	2026-10	–	Dev Experience	–	M-L
+Engine	4	Collaboration with QianZe fill the gaps of SDK contract	P0	–	–	–	–	–
+Engine	2	[O5.2-T1.a] Add append mode to the Think API	P0	2026-09	xAI	Dev Experience	–	–	CLARIFIED
+Engine	2	[O5.2-T1.c] Make RTC token and UID optional in Join	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O5.2-T1.b] Support string UIDs in Join	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O5.2-T1.d] Infer Join feature flags from configuration	P0	2026-09	–	Dev Experience	–	–
+Engine	2	Offer managed testing credentials across the model provider catalog	P1	–	–	Feature Request	–	–
+Engine	2	Add cross-provider failover for ASR, LLM, TTS, and multimodal models	P1	–	–	Reliable Infra	–	–
+Engine	1	[O5.1] Deliver customer and competitive features	–	–	–	–	–	–
+Engine	2	[O5.1-T6.a] Prototype a live-call overseer	P1	2026-10	–	Feature Request	–	–
+Engine	2	[O5.1-T3.a] Support GET and POST agent tools	P1	2026-08	Platform (Studio)	Dev Experience	Production - GA	L
+Engine	2	[O5.1-T9.a] Define competitor agent import scope	P2	–	–	Dev Experience	–	–
+Engine	2	[O5.1-T7.a] Scope text-only agents	P2	–	–	Feature Request	–	–
+Engine	2	[O5.1-T8.a] Evaluate code-defined pipelines	P2	–	Cresta	Dev Experience	–	–
+Engine	2	[O5.1-T2.a] Summarize calls for warm transfer	P1	2026-08	–	Feature Request	–	–
+Engine	2	[O5.1-T1.a] Publish the former GK capability boundary	P0	2026-08	–	Feature Request	Supernode - Experimental	–
+Engine	2	[O5.1-T5.a] Add continuous video understanding	P1	2026-09	–	Feature Request	–	–
+Engine	2	[O5.1-T10.a] Define MCP registration over RTM	P2	–	–	Dev Experience	–	–
+Engine	2	[O5.1-T4.a] Evaluate Google conversation modes	P2	2026-08	–	Feature Request	–	–
+Engine	2	Evaluate a private or customer-operated Conversational AI runtime	P2	–	–	Reliable Infra	–	–
+Engine	0	[O3] Deliver consistent performance and regional scale	–	–	–	–	–	–
+Engine	1	[O3.4] Make capacity and recovery predictable	–	–	–	–	–	–
+Engine	2	[O3.4-T1.b] Establish the service performance baseline	P0	2026-09	–	Reliable Infra	–	–
+Engine	3	[Demo app & Call] Reduce end-to-end latency across Engine, audio, SIP, and Supernode placement	P0	2026-09	–	Reliable Infra	–	–	CLARIFIED
+Engine	2	[O3.4-T1.a] Operate capacity and key allocation	P0	2026-10	–	Reliable Infra	Production - GA	XL
+Engine	2	[O3.4-T2.a] Rehearse degraded-session recovery	P1	–	–	Reliable Infra	Production - GA	L
+Engine	2	[O3.4-T3.a] Add self-service agent concurrency controls	P1	2026-09	–	Reliable Infra	–	–
+Engine	2	[O3.4-T3.b] Meter Studio usage on Engine	P0	2026-09	–	Reliable Infra	–	–
+Engine	1	[O3.1] Launch Tier-2 and Tier-3 Supernode	–	–	–	–	–	–
+Engine	2	[O3.1-T1.b] Launch the Tier-3 Supernode path	P0	2026-09	–	Reliable Infra	Supernode - Prod	XL
+Engine	2	[O3.1-T1.a] Launch the Tier-2 North America preview	P0	2026-09	–	Reliable Infra	–	–
+Engine	1	[O3.2] Select controlled LLM inference	–	–	–	–	–	–
+Engine	2	[O3.2-T1.a] Select the controlled LLM inference path	P0	2026-09	–	Reliable Infra	–	–
+Engine	1	[O3.5] Optimize selected open-source models	–	–	–	–	–	–
+Engine	2	[O3.5-T1.a] Optimize selected open-source models	P1	2026-11	–	Reliable Infra	–	–
+Engine	1	[O3.3] Publish regional access and fallback	–	–	–	–	–	–
+Engine	2	[O3.3-T1.a] Publish the regional model access matrix	P0	2026-11	–	Reliable Infra	–	–
+Engine	2	[O3.3-T2.a] Deploy approved regional model paths	P1	2026-12	–	Reliable Infra	–	–
+Engine	0	[O1] Productize the low-latency experience	–	–	–	–	–	–
+Engine	1	[O1.1] Release a unified pipeline template	–	–	–	–	–	–
+Engine	2	[O1.1-T2.a] Align vendor support and provision keys	P0	2026-09	–	Dev Experience	Production - GA	–	IN VERSION
+Engine	3	Murf.ai in benchmark	P1	–	–	–	–	–
+Engine	3	Murf.ai in Studio / Engine as resell	P1	–	–	–	–	–
+Engine	2	[O1.1-T3.a] Verify agent configuration propagation	P0	2026-08	–	Reliable Infra	Production - GA	–	IN VERSION
+Engine	2	[O1.1-T1.c] Return accepted runtime configuration and fallback	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O1.1-T1.d] Release the pipeline template across product surfaces	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O1.1-T1.a] Compose the low-latency pipeline template	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O1.1-T1.b] Add greeting and silence-recovery controls	P1	2026-09	–	Dev Experience	–	–
+Engine	1	[O1.2] Deliver natural filler words	–	–	–	–	–	–
+Engine	2	[O1.2-T1.a] Ship generated filler words	P0	2026-08	Entel	Feature Request	Production - GA	M-L
+Engine	2	[O1.2-T1.c] Add filler words during tool execution	P1	2026-10	–	Feature Request	–	–
+Engine	2	[O1.2-T1.b] Add context and persona to generated filler words	P0	2026-09	–	Feature Request	–	–
+Engine	2	[O1.2-T1.d] Continue answers after filler words	P0	2026-10	–	Feature Request	–	–
+Engine	1	[O1.6] Standardize TTS behavior and controls	–	–	–	–	–	–
+Engine	2	[O1.6-T1.a] Add configurable background ambience	P1	2026-10	–	Feature Request	–	–
+Engine	2	[O1.6-T2.b] Add TTS SSML and pronunciation controls	P1	2026-11	–	Feature Request	–	–
+Engine	2	[O1.6-T2.a] Normalize text for speech synthesis	P0	2026-10	–	Feature Request	–	–
+Engine	2	[O1.6-T3.a] Complete regional voice field tests	P1	2026-12	–	Feature Request	–	–
+Engine	2	[O1.6-T2.c] Add expressive TTS controls and model prompts	P1	2026-12	–	Feature Request	–	–
+Engine	2	Close TTS coverage gaps across languages, regional accents, and dialects	P0	–	–	QoE	–	–
+Engine	1	[O1.4] Reduce Semantic EOS default latency	–	–	–	–	–	–
+Engine	2	[O1.4-T1.a] Set the Semantic EOS default to 240 ms	P0	2026-09	–	Feature Request	–	–
+Engine	1	[O1.3] Make preemptive response public	–	–	–	–	–	–
+Engine	2	[O1.3-T2.a] Select the fast ASR path	P0	2026-08	–	Feature Request	–	–
+Engine	2	[O1.3-T1.a] Publish preemptive response controls	P0	2026-09	–	Dev Experience	–	–
+Engine	1	[O1.5] Reduce Web and Native latency	–	–	–	–	–	–
+Engine	2	[O1.5-T1.b] Disable client-side AINS on Web	P0	2026-08	–	Reliable Infra	–	–
+Engine	2	[O1.5-T1.a] Enable Web AI-QoS	P0	2026-08	–	Reliable Infra	–	–
+Engine	2	Enable and validate echo cancellation for browser speakerphone agents	P1	–	–	QoE	–	–
+Engine	0	[O4] Measure quality and diagnose failures	–	–	–	–	–	–
+Engine	1	[O4.2] Replay traffic before release	–	–	–	–	–	–
+Engine	2	[O4.2-T1.a] Replay production-like traffic before release	P0	2026-10	–	Reliable Infra	POC	–
+Engine	2	[O4.2-T2.a] Validate H2 defaults and rollback	P0	2026-12	–	Reliable Infra	–	–
+Engine	1	[O4.4] Validate configurations before join	–	–	–	–	–	–
+Engine	2	[O4.4-T1.b] Document and validate hidden configuration concepts	P1	2026-10	–	Tech Debt	–	–
+Engine	2	[O4.4-T1.a] Validate agent configuration before join	P1	2026-10	–	Dev Experience	–	–
+Engine	1	[O4.3] Correlate live and post-call evidence	–	–	–	–	–	–
+Engine	2	[O4.3-T1.b] Define Engine recording state behavior	P0	2026-09	–	Reliable Infra	Production - GA	XL
+Engine	2	[O4.3-T1.e] Emit NCS recording lifecycle webhooks	P0	2026-09	–	Reliable Infra	–	–
+Engine	2	[O4.3-T1.a] Deliver end-to-end call observability	P0	2026-10	–	Reliable Infra	–	–
+Engine	3	Surface SIP error codes and CPS-limit failures in Studio	P0	2026-09	–	Feature Request	–	S-M
+Engine	3	Add SIP signaling visual ladder diagrams	P0	2026-09	–	Feature Request	–	M
+Engine	2	[O4.3-T3.a] Add retention and PII redaction controls	P1	2026-10	–	Reliable Infra	–	–
+Engine	2	[O4.3-T2.a] Show non-telephony session details	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O4.3-T1.c] Align recordings and transcripts	P0	2026-10	–	Reliable Infra	–	–
+Engine	2	[O4.3-T1.d] Deliver recordings to customer storage	P0	2026-09	–	Reliable Infra	–	–
+Engine	2	[O4.3-T2.b] Expose redacted provider payloads	P0	2026-09	–	Dev Experience	–	–
+Engine	2	[O4.3-T3.b] Deliver Entel recordings to NICE	P1	2026-10	Entel	Feature Request	–	–
+Engine	1	[O4.1] Align QoE and latency data	–	–	–	–	–	–
+Engine	2	[O4.1-T1.b] Expose component latency metrics	P0	2026-07	–	Dev Experience	Production - GA	–	DELIVERED
+Engine	2	[O4.1-T1.c] Restore missing MLLM latency data	P1	2026-09	–	Dev Experience	Production - GA	–
+Engine	2	[O4.1-T1.a] Align Web and Native latency metrics	P0	2026-09	–	Dev Experience	–	–
+Studio	0	Build and manage production-ready agents	–	–	–	–	–	–
+Studio	1	Reduce Studio project creation time	P0	2026-08	–	Dev Experience	–	S	DELIVERED
+Studio	1	Remove the first-agent Convo AI provisioning delay	P0	2026-08	–	Dev Experience	–	S	DELIVERED
+Studio	1	Update studio vendors to align with engine	P0	2026-09	–	Reliable Infra	–	S
+Studio	1	Improve first-run agent defaults	P0	2026-09	–	QoE	–	M-L	PLANNING
+Studio	1	Compare and recommend voices for each use case	P0	2026-09	–	QoE	–	–
+Studio	1	Migrate obsolete ASR and turn-detection configuration	P0	2026-08	–	Tech Debt	–	–
+Studio	1	Add voice cloning to Studio	P0	–	–	Feature Request	–	–
+Studio	1	Instrument Studio onboarding conversion	P1	–	–	Dev Experience	–	–
+Studio	1	Build a conversational AI Composer for agent configuration	P2	–	–	Dev Experience	–	–
+Studio	1	Ability to add AI disclaimer in front of the greeting	P1	–	–	Feature Request	–	–
+Studio	1	Reduce structured output generation cost	P1	–	Taiwan Survey	Feature Request	–	–
+Studio	1	Add agent personality and tone controls	P1	–	–	QoE	–	–
+Studio	1	Customize built-in tool prompts by language	P0	–	–	QoE	–	–
+Studio	1	Import agents from Vapi and Retell	P0	–	–	Dev Experience	–	–
+Studio	1	Add more voice-cloning providers and professional workflows	P1	–	–	Feature Request	–	–
+Studio	1	Integrate self-improving agents into Concierge	P1	–	–	Dev Experience	–	–
+Studio	1	Add agent versioning, release environments, and rollback	P0	–	–	Feature Request	–	–
+Studio	1	Support multilingual agents and runtime language switching	P1	–	–	Feature Request	–	–
+Studio	1	Add runtime guardrails for agent input and output	P1	–	–	Feature Request	–	–
+Studio	1	Define the shared per-agent behavior control contract	P0	–	–	Feature Request	–	–
+Studio	1	Support customer-hosted STT and TTS endpoints safely	P1	–	–	Feature Request	–	–
+Studio	1	Compare and recommend model stacks for each agent use case	P1	–	–	Feature Request	–	–
+Studio	1	Ship reusable agent recipes and production-ready templates	P1	–	–	Feature Request	–	–
+Studio	1	Support multiple voices and runtime voice switching within one agent	P2	–	–	Feature Request	–	–
+Studio	1	Tune turn-taking and backchannel behavior per agent	P0	–	–	Feature Request	–	–
+Studio	1	Add recognition, pronunciation, and denoising controls	P0	–	–	Feature Request	–	–
+Studio	1	Add provider-aware voice delivery and fallback controls	P0	–	–	Feature Request	–	–
+Studio	1	Configure idle, silence, duration, and call-screening behavior	P0	–	–	Feature Request	–	–
+Studio	1	Configure transcriber fallback and ASR failover in Studio	P0	–	–	Feature Request	–	–
+Studio	0	Observe sessions and operate agents in production	–	–	–	–	–	–
+Studio	1	Write an observability support-model recommendation for self-serve, white-glove, or tiered support	P0	2026-09	–	–	–	–	PLANNING
+Studio	1	Build complete call and session logs	P0	2026-10	–	Dev Experience	–	–
+Studio	2	Studio will have the visibility over Audio for Engine Session	P0	–	–	–	–	–
+Studio	2	Studio will have the visibility over Transcript for Engine Sessions	P0	–	–	–	–	–
+Studio	2	Engine provide recording / transcript storage from the session	P0	–	–	–	–	–
+Studio	1	Audit and improve Studio and Console responsiveness end to end	P0	2026-09	–	QoE	–	–
+Studio	1	Give operators live quality nudges during active calls	P1	–	–	Feature Request	–	–
+Studio	1	Extend live monitoring and sentiment to outbound campaigns	P1	–	–	Feature Request	–	–
+Studio	1	Build self-serve analytics dashboards, monitors, and alerts	P1	–	–	Feature Request	–	–
+Studio	1	Show live sentiment trends and let operators monitor active calls	P1	–	–	Feature Request	–	–
+Studio	1	Let operators take over or end active calls	P2	–	–	Feature Request	–	–
+Studio	1	Define inbound pilot metrics for FCR, answer speed, handle time, escalation, and sentiment	P2	–	–	Feature Request	–	–
+Studio	1	Show live latency and pipeline timing in agent preview	P1	–	–	Feature Request	–	–
+Studio	1	Export Studio agent traces to customer observability platforms	P2	–	–	Feature Request	–	–
+Studio	0	Test, evaluate, and continuously improve agents	–	–	–	–	–	–
+Studio	1	Review production recordings and recommend targeted fixes	P0	–	–	QoE	–	–
+Studio	1	Score production calls with rubrics and reusable scorecards	P0	–	–	Reliable Infra	–	–
+Studio	1	Run production A/B tests across agent versions	P0	–	–	Feature Request	–	–
+Studio	1	Let humans join simulated voice calls to test edge cases and tone	P1	–	–	Feature Request	–	–
+Studio	1	Score and compare simulated calls	P1	–	–	Feature Request	–	–
+Studio	1	Build self-improving agents	P1	–	–	Feature Request	–	–
+Studio	1	Run agent-to-agent voice simulations at scale	P1	–	–	Feature Request	–	–
+Studio	1	Simulate a pending agent change from Studio configuration	P1	–	–	Dev Experience	–	–
+Studio	1	Replay production traffic as regression scenarios	P1	–	–	Feature Request	–	–
+Studio	1	Add advanced human simulation controls	P1	–	–	Feature Request	–	–
+Studio	1	Run deterministic conversational evals in Studio and CI	P0	–	–	Feature Request	–	–
+Studio	0	Deliver conversations across channels and campaigns	–	–	–	–	–	–
+Studio	1	Productize WhatsApp voice	P0	–	Moveo	Feature Request	–	XL
+Studio	2	Wideband support on SIP manager	P1	–	–	–	–	–
+Studio	1	Inbound Call Event Webhook	P0	2026-08	GP	Feature Request	–	–	DELIVERED
+Studio	1	Support text-only agents	P0	–	–	Feature Request	–	–
+Studio	1	Build the complete outbound campaign lifecycle	P2	–	–	Feature Request	–	–
+Studio	1	Ship a browser SDK and embeddable agent widget	P0	–	–	Dev Experience	–	–
+Studio	1	Configure DTMF input and IVR navigation in Studio	P1	–	–	Feature Request	–	–
+Studio	1	Add SMS as an agent channel	P0	–	–	Feature Request	–	–
+Studio	1	Support DTMF menu entry and inbound queue handling before AI triage	P1	–	–	Feature Request	–	–
+Studio	1	Allow voice agents to leave a message after voicemail detection	P1	–	–	Feature Request	–	–
+Studio	0	Connect agents to knowledge, tools, and customer data	–	–	–	–	–	–
+Studio	1	Build a native and MCP connector marketplace	P0	–	–	Dev Experience	–	–
+Studio	1	Add web crawling and retrieval tuning to knowledge bases	P2	–	–	Feature Request	–	–
+Studio	1	Add Couchbase as a knowledge provider	P1	–	–	Feature Request	–	–
+Studio	2	Couchbase powered experience with "concierge" text & voice	P1	–	–	–	–	–
+Studio	2	Enable Couchbase for Couchbase customers POC customers will use engine & integrate	P1	–	–	–	–	–
+Studio	1	Crawl authenticated knowledge sources	P1	–	–	Feature Request	–	–
+Studio	1	Build no-code HTTP tools	P0	–	–	Feature Request	–	–
+Studio	1	Supply agent context from CRM records	P0	–	–	Feature Request	–	–
+Studio	1	Refresh crawled knowledge on a schedule	P2	–	–	Feature Request	–	–
+Studio	1	Crawl complete sites for knowledge ingestion	P1	–	–	Feature Request	–	–
+Studio	1	Expose Studio RAG APIs and segment-level retrieval controls	P0	–	–	Dev Experience	–	–
+Studio	1	Manage contacts, audiences, and cross-session context	P1	–	–	Feature Request	–	–
+Studio	1	Run hosted code tools inside Studio agents	P2	–	–	Feature Request	–	–
+Studio	1	Add CRM actions and controlled write-back	P1	–	–	Feature Request	–	–
+Studio	0	Package and operate managed services	–	–	–	–	–	–
+Studio	1	Sell and allocate concurrency self-serve with capacity-aware safeguards	P0	2026-09	–	Dev Experience	–	XL
+Studio	2	Self-service phone number CPS	P0	2026-09	–	Reliable Infra	–	–
+Studio	1	Implement Studio managed mode using Engine reseller mode	P0	2026-09	–	Reliable Infra	–	S
+Studio	2	Manage mode support Studio API use cases	P1	–	–	–	–	–
+Studio	2	Separate key/resource for usage tracking under Studio projects	P1	–	–	–	–	–
+Studio	1	Add MLLM vendors to the managed reseller catalog	P1	–	–	Reliable Infra	–	–
+Studio	2	Metering and SKU for MLLM	P1	2026-10	–	Feature Request	–	–
+Studio	1	Integrate Studio controls with Archer	P0	2026-09	–	Feature Request	–	L
+Studio	1	Show model-level usage, credits, and pricing breakdowns in Studio	P0	–	–	Feature Request	–	–
+Studio	0	Orchestrate workflows, routing, and handoffs	–	–	–	–	–	–
+Studio	1	Route handoffs by skill, condition, and context	P1	–	Entel, Concentrix	Feature Request	–	–
+Studio	2	[SIP] Warm Transfer w/ LLM-based in-call summary	P1	2026-08	–	Feature Request	–	–
+Studio	1	Build the agent handoff graph and runtime contract	P0	–	–	–	–	–
+Studio	1	Expand the handoff graph into an end-to-end workflow canvas	P1	–	–	Feature Request	–	–
+Studio	1	Add warm and agentic human transfers	P0	–	–	Feature Request	–	–
+Studio	1	Route using live queue availability, capacity, priority, and SLA	P2	–	–	Feature Request	–	–
+Studio	1	Build the Studio AI triage experience for inbound calls	P0	–	–	Feature Request	–	–
+Studio	1	Add cross-channel routing	P2	–	–	Feature Request	–	–
+Studio	0	Expose and govern the Studio platform	–	–	–	–	–	–
+Studio	1	[Public API] Release a stable Studio APIs aligned with Engine	–	–	–	Reliable Infra	–	–
+Studio	2	Agents created through REST API should show up on Studio UI	P0	2026-08	–	Dev Experience	–	S-M
+Studio	2	Fix legacy studio credential leak issue	P0	–	–	Tech Debt	–	–
+Studio	2	[Call API] End an active call through the public API	P0	–	–	Feature Request	–	–
+Studio	2	Manage structured outputs as reusable resources	P0	–	–	Dev Experience	–	–
+Studio	2	Make the current API public	P0	–	–	–	–	–
+Studio	2	Migrate the features that available from CN customers (GK) to global API	P0	–	–	–	–	–
+Studio	2	Integrate Studio APIs into the existing Agent SDKs	P0	–	–	Dev Experience	–	–
+Studio	2	Release stable Studio REST APIs	P0	–	–	Dev Experience	–	–
+Studio	2	Add Studio workspace access control and client-key governance	P2	–	–	Feature Request	–	–
+Studio	2	Manage Studio webhooks and delivery diagnostics	P0	–	–	Dev Experience	–	–
+Studio	2	Ship a Studio CLI and MCP server	P0	–	–	Dev Experience	–	–
+Studio	1	[Studio] Enforce data-retention policies across call artifacts	P0	2026-08	–	Feature Request	–	S-M
+Studio	1	Add governance and cross-workspace sharing for cloned voices	P1	–	–	Feature Request	–	–
+Studio	1	Add customer-configurable data retention, PII controls, and customer-owned artifact storage	P1	–	–	Feature Request	–	–
+Studio	1	Unify login across Console and Studio	P0	2026-09	–	Feature Request	–	–
+Studio	1	Add a HIPAA-ready Studio mode and BAA-backed safeguards	P1	–	–	Feature Request	–	–
+SIP	0	Connect telephony, numbers, and SIP providers	P1	–	–	–	–	–
+SIP	1	Implement SIP-layer transfer, hangup, and transfer-leg tracing for voice-agent calls	–	–	–	–	–	–
+SIP	2	Internal tool to support SIP tracing details in logs	P1	–	–	Reliable Infra	–	–
+SIP	2	Silence hangup support in MLLM	P1	–	–	Feature Request	–	–
+SIP	1	[Phone Number Resell] Let developers purchase and assign phone numbers in Studio	P0	2026-09	–	Dev Experience	–	XXL
+SIP	2	Phone Number Resell	P0	2026-09	–	Reliable Infra	–	XXL
+SIP	2	Bandwidth PoC	P0	2026-09	Entel	Feature Request	–	L
+SIP	2	Integrate console billing APIs	P1	–	–	–	–	–
+SIP	2	Compliance/Legal requirements	P1	–	–	–	–	–
+SIP	2	Launch self-service phone-number purchase and assignment in the US	P0	–	–	Feature Request	–	–
+SIP	2	Expand phone-number resale beyond the US	P1	–	–	Feature Request	–	–
+SIP	2	Protect outbound caller reputation with verified and branded calling	P1	–	–	Feature Request	–	–
+SIP	1	Automate SIP trunk and provider onboarding for customer ITSPs and regional telcos	P0	2026-10	–	Reliable Infra	–	–
+SIP	2	[Doc] Telnyx support from SIP manager	P0	2026-08	Entel	Feature Request	–	M-L
+SIP	2	ITSP stress test for Agora managed customer	P0	2026-09	–	Reliable Infra	–	–
+SIP	1	Build a telco operations dashboard for provider quality and key metrics such as Answer-Seizure Ratio (ASR), Network Efficiency Ratio (NER), Post Dial Delay (PDD); support for dynamic routing decisions	P1	–	–	Reliable Infra	–	–
+SIP	1	Throttle outbound dialing by SIP trunk capacity and queue retries instead of dropping calls	P1	–	–	–	–	–
+SIP	1	Define and phase the global SIP architecture migration	P1	–	–	–	–	–
+SIP	1	[POC] Define a separate SIP video optimization path for AMN	P1	–	AMN	–	–	–
+SIP	1	SIP Direct Connect	P1	–	–	Reliable Infra	–	–
+SIP	2	SIP direct connection metering	P0	2026-08	Taiwan Survey	Reliable Infra	Supernode - Prod	M	DELIVERED
+SIP	2	SIP Direct Connect - Audio Quality Optimization	P0	2026-08	–	Reliable Infra	–	M	DELIVERED
+SIP	2	SIP Direct Connect integration with Studio	P0	2026-09	–	Reliable Infra	–	–
+SIP	1	Support SIP Header customization in SIP Invite	P1	–	–	Feature Request	–	–
+SIP	1	Whitelist approach instead of wide-open connection for media ip subnet	P1	–	–	Feature Request	–	–
+SIP	1	Publish the supported SIP and streaming media contract	P1	–	–	Dev Experience	–	–
+SIP	0	SIP Transfer ability should not affected customer if transfer to direct-link (SIP Refer / Conference)	P0	2026-09	Entel, Concentrix	Feature Request	–	–
+SIP	0	Ability to select SIP Gateway location based on number-level	P0	2026-09	–	Reliable Infra	–	–
+SIP	0	Tier 1 Supernode deployment	P0	–	–	Reliable Infra	Supernode - Prod	–
+SIP	0	Tier 2 Supernode deployment	P1	–	–	–	–	–
+DevX	0	UI Kit - Mobile	P1	–	–	Feature Request	–	–
+DevX	0	LLM Tool Bypassing	P1	–	–	Feature Request	–	–
+DevX	0	MLLM Tool Bypassing	P1	–	–	Feature Request	–	–
+DevX	0	Benchmarking Tool	P2	–	–	Dev Experience	–	–
+DevX	0	Generative UI	P2	–	–	Dev Experience	–	–
+DevX	0	Vercel / AI SDK integration	P2	–	–	Dev Experience	–	–
+DevX	0	UI Kit Polish	P2	–	–	Dev Experience	–	–
+DevX	0	Improve Voice AI docs and developer help	P0	–	–	Dev Experience	–	–
+DevX	1	Remove deprecated fields from Voice AI docs	–	–	–	Dev Experience	–	–
+DevX	1	Add an AI assistant to the documentation center	–	–	–	Dev Experience	–	–
+Empty	0	Define Agora Q3 voice-agent strategy	–	–	–	–	–	–
+Empty	1	Define measurable last-mile quality criteria for production voice agents	–	–	–	–	–	–
+Empty	1	Define the v1 Physical AI builder scope and integrate it into Studio planning	P2	–	–	Feature Request	–	–
