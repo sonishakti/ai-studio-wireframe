@@ -44,6 +44,7 @@ This is a **funnel rescue project** that happens to require product consolidatio
 ## Read order
 
 0. `references/ship-protocol.md` — **how every request ships** (commit · deploy · annotated shots · log) + `references/prompt-library.md` for the research prompts and workflow reruns
+0b. `references/design-ops-protocol.md` — **how a feature gets designed** (intake → JTBD → interviews → competitor teardown → synthesis → prototype → proposal → designer review → push). Tracker: ClickUp **Convo AI › Design Tracker** (list `901114875662`, 28 features ↔ 189 roadmap tasks). Run it with `/design-feature <nn>`. Backlog: `references/design-backlog-q3-roadmap-2026-09-03.html`.
 1. `references/prd-q3-roadmap-execution-2026-07-29.html` + `TODO-Q3-ROADMAP.md` — the **official Convo AI Q3 roadmap** (111 ClickUp tasks) mapped to 7 epics / 4 waves. **Wave 1 shipped 2026-07-29** — see `references/wave1-implementation-log-2026-07-29.html`. ⚠️ It reverses three older fact-checks: Agora **will** resell phone numbers (P0, Sep), live monitoring **is** planned, WhatsApp voice **is** P0.
 2. `HANDOFF-2026-06-18.md` — prior state, commits, deploy, the shipped Diagnostics feature + the next slice (§4); `HANDOFF-2026-06-02.md` is the one before
 3. `LEARNINGS.md` — strategic frame, funnel data, personas, hypothesis stack, decision log (paid for in research — **don't re-litigate**)
@@ -183,6 +184,7 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 | Reference screenshots | `screenshots/` (newest), `references/console_map/` |
 | Open work checklist | `TODO-Q3-ROADMAP.md` (roadmap backlog) · `HANDOFF-2026-06-02.md` §5 |
 | Ship protocol + prompts | `references/ship-protocol.md` · `references/prompt-library.md` |
+| Design ops protocol + tracker | `references/design-ops-protocol.md` · ClickUp list `901114875662` · `/design-feature` |
 | Annotated screenshot tool | `scripts/annotate-shots.mjs` |
 | Reference docs | `references/*.md` |
 | Legacy HTML wireframe | `wireframes/app.html` (superseded) |
@@ -201,6 +203,7 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
   token (≥3:1 vs its surface in BOTH themes, WCAG 1.4.11) — never `--border`
   (decorative hairline) or `--input` (well fill). New form controls must use
   `border-stroke`; check dark AND light before shipping.**
+- **⛔ CONNECTOR BEFORE BROWSER (standing, user-directed 2026-09-03):** ClickUp, Figma, Slack, Linear etc. have MCP/plugin tools — use them. Claude in Chrome only for things with no API (competitor UI screenshots). A ClickUp browser scrape cost 330× the API call.
 - Cite `docs.agora.io/en/` URLs for any Agora-primitive design call.
 - Commits are the truth — docs cite them. If a doc is stale, fix the doc; don't second-guess the wireframe.
 - Keep a decision log entry (LEARNINGS.md §20 pattern) for any non-trivial choice.
@@ -210,6 +213,7 @@ number is first-class, "campaign" = outbound). **2026-06-05: section labels re-a
 
 | Skill | When |
 |---|---|
+| `/design-feature <nn>` | **Start here for any roadmap feature** — runs the design-ops pipeline and updates the ClickUp tracker |
 | `/organize` | Anything navigational, hierarchical, "where should X live" |
 | `/journey` | New flow end-to-end — agent create → first campaign, or onboarding flow |
 | `/articulate` | Tightening copy — Help hub, Contact Sales, error messages |
