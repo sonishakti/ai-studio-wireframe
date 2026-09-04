@@ -117,8 +117,64 @@ Evidence lives in the repo, not in memory: `references/research/<nn>-<slug>/` wi
 - Decision-log entry in `LEARNINGS.md` §20 for any non-trivial choice.
 - `/specify` handoff spec for engineering.
 
-## Sequencing default
+## Effort + capacity (agreed 2026-09-04)
 
-Due month, then priority, then size. Today: 26 · 16 · 22 · 27 · 09 · 07 · 11 · 17 · 02 · 04 (all P0-Sep),
-then 24 · 25 (P0-Aug, overdue), then the undated P0s (03 · 05 · 08 · 14 · 18 · 19 · 21 · 23), then P1/P2.
-Owner calls first: 08 · 12 · 16 · 18.
+**Team:** one designer + Claude. **Window:** Sep 2026 → Feb 2027 (6 months).
+26 weeks × 5 days × 70 % ≈ 90 designer-days; Claude roughly doubles prototype throughput →
+**~180 effective days**. Total scope below is **≈356 days** — about half fits. The rest is
+explicitly deferred, not silently squeezed. ClickUp carries the estimate on every task
+(native *Time Estimate*, days × 8 h) and start/due only on the 14 scheduled features.
+
+Sizing: S ≈ one control group on an existing surface · M ≈ a new section or flow ·
+L ≈ a new surface · XL ≈ a new surface with a purchase / compliance / canvas dimension.
+Days are designer-days by stage: research (JTBD + interviews + competitor teardown + synthesis),
+proto (build + copy / a11y / edge passes), review (designer iterations).
+
+| # | Feature | Size | Research | Proto | Review | Total | Why |
+|---|---|---|---|---|---|---|---|
+| 01 | Voice picker & recommendations | M | 5 | 5 | 2 | 12 | Preference test + cloning consent flow |
+| 02 | Turn-taking & listening | M | 5 | 4 | 2 | 11 | Card sort (R1) shared with 03–05 |
+| 03 | Recognition & failover | M | 3 | 4 | 2 | 9 | Rides R1; failover UI is new |
+| 04 | Greeting, filler & disclaimer | S | 2 | 3 | 1 | 6 | Extends the greeting field |
+| 05 | Call behavior rules | M | 3 | 4 | 2 | 9 | Rides R1; DTMF/IVR is a new pattern |
+| 06 | TTS expression & personality | S | 2 | 3 | 1 | 6 | Controls only |
+| 07 | Vendors & provider fallback | M | 2 | 5 | 2 | 9 | Research done; fallback UI is new |
+| 08 | Versioning & release ⚠ | L | 6 | 8 | 3 | 17 | Envs + rollback + A/B placement |
+| 09 | First run, templates & import | L | 3 | 8 | 3 | 14 | Research done; gallery + import flow |
+| 10 | Session & call logs | M | 3 | 5 | 2 | 10 | Wave 1 base; audio/transcript alignment |
+| 11 | SIP & latency diagnostics | S | 1 | 2 | 1 | 4 | Shipped Wave 2; verify vs final payloads |
+| 12 | Live monitoring & operator controls ⚠ | L | 6 | 8 | 3 | 17 | New real-time surface |
+| 13 | Dashboards & alerts | L | 6 | 8 | 3 | 17 | Dashboard builder + alert rules |
+| 14 | Evals & scorecards | XL | 8 | 10 | 4 | 22 | Whole eval loop (R4) |
+| 15 | Simulations | M | 3 | 5 | 2 | 10 | Rides R4; panel exists |
+| 16 | Phone number purchase ⚠ | XL | 8 | 12 | 4 | 24 | Buy → verify → assign + billing + compliance |
+| 17 | SIP trunk setup | L | 5 | 8 | 3 | 16 | 8 telephony sub-features |
+| 18 | Channels ⚠ | XL | 8 | 12 | 4 | 24 | 3 new channels + SDK/widget |
+| 19 | Tools & connectors | L | 5 | 8 | 3 | 16 | Marketplace + tool builder |
+| 20 | Knowledge sources | M | 3 | 5 | 2 | 10 | Crawl config on existing KB |
+| 21 | CRM & contacts | L | 5 | 8 | 3 | 16 | Context + write-back + audiences |
+| 22 | Usage, credits & concurrency | M | 3 | 6 | 2 | 11 | Research done; purchase path new |
+| 23 | Handoffs & routing | XL | 8 | 14 | 4 | 26 | Workflow canvas — biggest single surface |
+| 24 | Retention, PII & compliance | M | 4 | 5 | 2 | 11 | Settings-heavy, policy-driven |
+| 25 | Developer platform | S | 2 | 3 | 1 | 6 | Surfaces exist |
+| 26 | Unified login | S | 3 | 2 | 1 | 6 | Mostly stakeholder interview |
+| 27 | Responsiveness audit | M | 1 | 8 | 2 | 11 | ~90 routes to sweep |
+| 28 | DevX & docs | S | 2 | 3 | 1 | 6 | Outside Studio_X — parked |
+| | **Total** | | **125** | **178** | **65** | **≈356** | |
+
+## Waves (the sequencing — locked 2026-09-04)
+
+| Month | Start → Due | Features | Days | Logic |
+|---|---|---|---|---|
+| Sep 2026 | 09-07 → 09-30 | Owner calls on 08·12·16·18 · **26 · 11 · 07 · 22** | 30 | Research already done → quick wins; unblock the locks |
+| Oct 2026 | 10-01 → 10-30 | **02 · 03 · 04 · 05** | 35 | One card sort (R1) covers all four builder-control features |
+| Nov 2026 | 11-02 → 11-30 | **16 · 10** | 34 | Numbers are the biggest activation bet; logs are half-built |
+| Dec 2026 | 12-01 → 12-23 | **14 · 15** | 32 | One eval-loop study (R4) covers both |
+| Jan 2027 | 01-04 → 01-29 | **18 · 08** | 41 | Channels + versioning — both depend on Sep owner calls |
+| Feb 2027 | 02-01 → 02-26 | **23 · 09** | 40 | Canvas last (biggest, least constrained); first-run closes the loop |
+
+**Deferred (≈144 days, estimate only, no dates):** 01 · 06 · 12 · 13 · 17 · 19 · 20 · 21 · 24 · 25 · 27 · 28.
+Cheap swaps if priorities move: 01 + 06 (18 days) can replace 09 in Feb. 17 · 19 · 21 are the painful cuts.
+
+Note: the `P0-Sep` / `P0-Aug` / `P0-Oct` suffixes in each task's **Tags** line are the *engineering*
+due months from the roadmap, kept as context. Design dates are the wave dates above, never those.
