@@ -95,7 +95,13 @@ Evidence lives in the repo, not in memory: `references/research/<nn>-<slug>/` wi
 
 ### 5 · Prototype
 - Diverge → converge: 2–3 directions sketched as low-fi (ASCII or quick HTML), pick one with a stated reason.
-- Build in `studio_x_2/`, mock data only, additive only (Studio UI is frozen).
+- **Where to build (2026-09-08):** if the surface exists in the live Console, build on
+  `AgoraIO/ng-console` branch **`design/sandbox`** (sibling folder `../ng-console`, its own Claude project) —
+  real data models, automatic Vercel Preview per push. If the surface doesn't exist there yet, build in
+  `studio_x_2/` with mock data. Either way additive only.
+- Branch convention on ng-console: `design/sandbox` = the one scratch branch, never merges, rebased on
+  `staging`; `design/<nn>-<slug>` = a shippable slice cut from `origin/staging` → PR → `staging`.
+  ⛔ Never push to `main`, `preprod`, `staging`. See `ng-console/docs/design/SANDBOX.md`.
 - Passes before review: `/fortify` (empty · error · loading · edge), `/include` (a11y — `--stroke`
   on every control, both themes), `/articulate` (copy — no new UI text beyond the reference without asking).
 - Output: working prototype on the live build + `05-prototype-log.html` (ship-protocol log with annotated shots).
