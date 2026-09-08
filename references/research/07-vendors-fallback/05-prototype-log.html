@@ -1,0 +1,143 @@
+<title>Backup Providers Prototype Log</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+  --ok:#1b7f4d; --warn:#9a6700; --bad:#b3261e; --card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1100px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 10px;letter-spacing:-.01em}
+h3{font-size:16px;margin:22px 0 6px}
+p{max-width:78ch;margin:6px 0}
+code,pre{font-family:"JetBrains Mono",monospace;font-size:12.5px}
+code{background:#e9eff3;padding:1px 5px;border-radius:3px}
+pre{background:#0b0f13;color:#e8edf1;padding:14px 16px;border-radius:6px;overflow:auto;line-height:1.6}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:var(--card);padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;font-size:13.5px;margin:12px 0}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--doc-rule);font-weight:600}
+td{padding:9px 12px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:600;border:1px solid}
+.tag.ok{color:var(--ok);border-color:currentColor}.tag.warn{color:var(--warn);border-color:currentColor}.tag.bad{color:var(--bad);border-color:currentColor}
+.note{background:var(--card);border-left:3px solid var(--doc-brand);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:13.5px}
+.note.warn{border-left-color:var(--warn)}
+ul{margin:6px 0;padding-left:20px}li{margin:4px 0}
+a{color:var(--doc-brand)}
+.ascii{background:var(--card);border:1px solid var(--doc-rule);border-radius:6px;padding:14px 16px;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.55;white-space:pre;overflow:auto;color:var(--doc-ink)}
+@media (max-width:900px){.facts{grid-template-columns:1fr 1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 07 · Vendors &amp; provider fallback · step 5 prototype · 2026-09-08</p>
+<h1>Backup Providers Prototype Log</h1>
+<p>The converged direction from <a href="05-directions.html">05-directions.html</a> built additively on the <strong>live Console code</strong> (<code>AgoraIO/ng-console</code>, branch <code>design/sandbox</code>), against the real vendor model (Agent Provider Capability Catalog) and the real credential model (Studio resources with reseller aliases). Nothing mocked.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Agents › Agent Detail › <strong>Models</strong> tab, inside the ASR-LLM-TTS card, under the three model rows. Hidden in Realtime (MLLM) mode.</div>
+  <div><b>Commit</b><code>e21a1a83</code> on <code>design/sandbox</code> (never merges; a shippable slice is cut as <code>design/07-provider-fallback</code> from <code>staging</code>).</div>
+  <div><b>Preview</b><span class="tag bad">blocked</span> Vercel reports <em>Deployment was blocked</em> for <code>e21a1a83</code> and for the branch's previous commit <code>3490bfbb</code> alike (GitHub deployments <code>6323981246</code> · <code>6323533575</code>). Not a build failure: <code>bun run build</code> passes locally. Branch: <a href="https://github.com/AgoraIO/ng-console/tree/design/sandbox">design/sandbox</a>.</div>
+  <div><b>Checks</b>112 tests pass (Agent Detail 95 · planner 11 · row 6) · Biome clean · <code>tsc</code> clean. The repo's i18n copy guard already fails on the branch tip for unrelated Home files; none of this slice's files are in it.</div>
+</div>
+
+<h2>What was built</h2>
+<div class="ascii">┌ ASR-LLM-TTS card ─────────────────────────────────────────────────────────┐
+│ ASR  [ Deepgram                     ] ⚙    LLM  [ OpenAI - gpt-4o-mini ] ⚙ │
+│ TTS  [ ElevenLabs  BYOK ]  Voice [ Luna ] ⚙                                │
+│ ──────────────────────────────────────────────────────────────────────────  │
+│ Backup providers                       (●)  [TTS: no backup]  [▶ Test failover] │
+│ Requires Engine failover · Nov                                              │
+│   ASR  Deepgram · managed      →  Ares                                      │
+│   LLM  OpenAI · managed        →  Claude Anthropic                          │
+│   TTS  ElevenLabs · your key   →  none · Create credential                  │
+│   Change backups ⌄                                                          │
+│   ┌──────┬──────────────────────┬────────────────────┬───────────────────┐  │
+│   │      │ Primary              │ Backup             │ Eligible          │  │
+│   │ ASR  │ Deepgram · managed   │ [ Ares          ⌄] │ [managed] [en-us] │  │
+│   │ LLM  │ OpenAI · managed     │ [ Claude Anthr… ⌄] │ [managed]         │  │
+│   │ TTS  │ ElevenLabs · your key│ [ none          ⌄] │                   │  │
+│   └──────┴──────────────────────┴────────────────────┴───────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────┘</div>
+
+<table>
+  <thead><tr><th>Piece</th><th>From direction</th><th>What it does on the live model</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Row + switch</strong></td><td>A</td><td>One row under the model rows, on by default. The switch is live (draft state); the caption <code>Requires Engine failover · Nov</code> states the dependency under the label, as in the converged mock.</td></tr>
+    <tr><td><strong>Status chips</strong></td><td>A</td><td><code>Ready</code> when every configured section has an eligible backup; otherwise one <code>ASR/LLM/TTS: no backup</code> chip per gap. Skeleton while credentials load.</td></tr>
+    <tr><td><strong>Recap</strong></td><td>A</td><td>One mono line per section: primary vendor · <code>managed</code> / <code>your key</code> → backup vendor, or <code>none · Create credential</code>. "Create credential" opens the existing Studio resource dialog locked to that section, vendor preselected to the first catalog vendor that is not the primary; on create, the new vendor becomes the backup.</td></tr>
+    <tr><td><strong>Change backups fold</strong></td><td>B</td><td>Primary · Backup · Eligible table. Backup select lists only compatible candidates; ineligible ones are shown but disabled (never silently hidden). Gap rows get a warning border on the select.</td></tr>
+    <tr><td><strong>Test failover</strong></td><td>C</td><td>Present in the row, <strong>disabled</strong> with the caption as its title. There is no policy to run until the Engine contract lands.</td></tr>
+  </tbody>
+</table>
+
+<h2>How the row reads the real models</h2>
+<table>
+  <thead><tr><th>Fact</th><th>Source in ng-console</th><th>Rule applied</th></tr></thead>
+  <tbody>
+    <tr><td>Which sections exist</td><td><code>createOrchestrationDraftFromProperties(properties).models</code></td><td>Only sections with a vendor are planned. MLLM agents render no row.</td></tr>
+    <tr><td>Primary is <em>managed</em></td><td>Bound resource with <code>source === "reseller"</code>, or unbound with an implicit managed vendor (<code>ares</code>) or a reseller alias for that vendor</td><td>Agora owns the backup pool. Candidates = catalog vendors (model order) that have a reseller credential or an implicit managed resource, minus the primary.</td></tr>
+    <tr><td>Primary is <em>your key</em></td><td>Bound resource with <code>source !== "reseller"</code></td><td>Backup needs the user's own second key: candidates = distinct <em>other</em> vendors among the project's user credentials for that section. A second key of the same vendor is not a provider fallback.</td></tr>
+    <tr><td>Primary has no key yet</td><td>Required binding, nothing bound, no managed key</td><td>Treated like BYO (source <code>none</code>, no suffix in the recap).</td></tr>
+    <tr><td>Eligibility · ASR language</td><td><code>getAsrLanguageOptions(vendor)</code> vs <code>asr.params.language</code></td><td>Exact or base-language match (<code>en</code> ↔ <code>en-US</code>). Tamil on Sarvam → Deepgram is shown but dead.</td></tr>
+    <tr><td>Eligibility · voice mapping, tools, JSON, region</td><td>—</td><td><strong>Not derivable today.</strong> Omitted rather than faked; they arrive with the Engine contract. The Eligible column shows the backup's source chip plus the language chip for ASR.</td></tr>
+    <tr><td>Selection + switch state</td><td><code>sessionStorage</code>, key per agent</td><td>Never written to agent properties. The public agent join contract has no <code>fallback</code> field (docs.agora.io, checked 2026-09-08 in <a href="00-brief.md">00-brief.md</a>).</td></tr>
+  </tbody>
+</table>
+
+<h2>Deviations from the mock, and why</h2>
+<ul>
+  <li><strong>No region in the gap chip.</strong> <code>TTS: no backup in EU</code> became <code>TTS: no backup</code>. ng-console carries no hosting-region / geofence on the agent, so the region clause would be invented. Shortening the reference copy is allowed; adding is not.</li>
+  <li><strong>No "Unpin region" link.</strong> Same reason. The owner call (agent property vs deployment property) is still open in <a href="00-brief.md">00-brief.md</a>.</li>
+  <li><strong>Vendor label, not vendor + model.</strong> The recap says <code>Deepgram · managed</code> rather than <code>Deepgram Nova</code>; the model already sits in the row directly above, and the fallback is a vendor decision.</li>
+  <li><strong>Managed primaries only offer Agora's pool; BYO primaries only offer the user's other keys.</strong> Decided in the brief (managed includes vendor usage; BYO fallback needs a second key). Not re-litigated.</li>
+  <li><strong>No info hint.</strong> The mock shows an ⓘ next to the label; the reference gives it no text, so it was left out instead of inventing a tooltip.</li>
+  <li><strong>Switch live, Test failover dead.</strong> The directions suggested shipping the row with the switch disabled until the Engine contract. For designer review the switch and the fold are interactive (draft state only); the only control with nothing behind it is the button, and it says why.</li>
+  <li><strong>Row grammar is ng-console's.</strong> Label above control, mono 11px recap, <code>Badge</code> / <code>Switch</code> / <code>Select</code> / <code>Table</code> primitives from <code>src/components/ui</code>. Studio_X patterns were ported (recap in the fold, chips, dead-not-hidden options), not components.</li>
+</ul>
+
+<h2>Passes</h2>
+<table>
+  <thead><tr><th>Pass</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>Fortify · empty</td><td><span class="tag ok">ok</span> No cascade sections → row not rendered. No candidates → <code>none · Create credential</code>.</td></tr>
+    <tr><td>Fortify · loading</td><td><span class="tag ok">ok</span> Skeleton in the chip slot while the credentials query is pending (only when a project is selected).</td></tr>
+    <tr><td>Fortify · error</td><td><span class="tag warn">note</span> If the credentials query fails, resources are empty and every section reads as a gap. The page has no error surface for that query today; a follow-up.</td></tr>
+    <tr><td>Fortify · edge</td><td><span class="tag ok">ok</span> Unknown vendor keys are title-cased; unknown ASR vendors fall back to the common language list; sessionStorage unavailable → in-memory defaults; agent switch resets the draft.</td></tr>
+    <tr><td>Include · names</td><td><span class="tag ok">ok</span> Switch labelled by the row label; each backup select has an accessible name (<code>ASR backup</code>…); fold button carries <code>aria-expanded</code> / <code>aria-controls</code>; the table uses real column headers.</td></tr>
+    <tr><td>Include · strokes</td><td><span class="tag warn">finding</span> ng-console's control border token <code>--input</code> = <code>--border-strong</code> is <code>#0000003d</code> in light theme (about 1.7:1 on white), below the 3:1 WCAG 1.4.11 target the design office enforces with <code>--stroke</code>. The row uses the Console's own primitives on purpose (frozen surface, additive only); the token is a design-system finding for the tracker, not something this slice should fix.</td></tr>
+    <tr><td>Articulate · copy</td><td><span class="tag ok">ok</span> Only the proposed set from 05-directions: <code>Backup providers</code> · <code>Requires Engine failover · Nov</code> · <code>Ready</code> · <code>{{section}}: no backup</code> · <code>Change backups</code> · <code>Test failover</code> · <code>Primary</code> · <code>Backup</code> · <code>Eligible</code> · <code>managed</code> · <code>your key</code> · <code>none</code>. <code>Create credential</code> is the Console's existing string. All via i18n. <strong>Still needs your yes.</strong></td></tr>
+    <tr><td>Measure</td><td><span class="tag warn">open</span> <code>fallback_tested</code> (from 01-jtbd) is not wired: the button that would fire it is disabled by design until the Engine contract.</td></tr>
+  </tbody>
+</table>
+
+<h2>Evidence</h2>
+<div class="note warn"><strong>Annotated screenshots pending — two blockers, neither in the code.</strong>
+<ul>
+  <li><strong>Vercel blocks previews from this git identity.</strong> Previews for czhen's commits on 2026-09-07 completed; both <code>design/sandbox</code> commits by <code>Shakti Soni &lt;agoraio.design1@gmail.com&gt;</code> came back <em>Deployment was blocked</em>. That is Vercel's team-membership rule for Git-triggered previews: the commit author's GitHub account must belong to the <code>agoraio</code> Vercel team. Fix on the Vercel side (add the account to the team, or have a team member trigger the deploy for <code>e21a1a83</code>).</li>
+  <li><strong>The Console needs an Okta login</strong>, and I never enter credentials. Once a preview exists and you are signed in in Chrome (or a local <code>bun run dev</code> against staging), I take the red-marked shots and add them here.</li>
+</ul>
+Until then the evidence is the tests and the code itself; the row is the first thing under the TTS row on any agent's Models tab.</div>
+
+<h2>Files</h2>
+<pre>src/lib/agents/agent-provider-fallback.ts            planner: primary source · pool · eligibility · gaps
+src/lib/agents/agent-provider-fallback.test.ts       11 cases (managed pool · BYO gap · second key · language · selection · off)
+src/components/console/agent-provider-fallback-row.tsx      row · chips · recap · fold · create-credential hook
+src/components/console/agent-provider-fallback-row.test.tsx  6 cases (recap · ready · off+persist · fold+pick · dead option · no cascade)
+src/components/console/agent-models-page.tsx          + one mounted row inside the cascade card
+src/lib/i18n/resources/en/common.ts                  pages.agentModels.fallback.*
+src/components/console/agent-detail-page.test.tsx    2 queries scoped to the TTS model button</pre>
+
+<h2>Next</h2>
+<ul>
+  <li>Designer review on the preview → feedback in <code>07-review.md</code>.</li>
+  <li>Copy yes/no on the proposed set above.</li>
+  <li>Owner call: backup pool as agent property (built) or deployment property (row would move next to a region control that ng-console does not have yet).</li>
+  <li>Competitor screenshots (Vapi · Retell · LiveKit) once signed in; they may move the defaults, not the shape.</li>
+  <li>Engine failover contract (868kyqzfy, P1 · Nov): persist the pool, enable Test failover, wire <code>fallback_tested</code>, add voice / tools / region eligibility.</li>
+</ul>
+</div>
