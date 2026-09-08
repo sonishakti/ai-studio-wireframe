@@ -41,7 +41,7 @@ a{color:var(--doc-brand)}
 <div class="facts">
   <div><b>Where it lands</b>Agents › Agent Detail › <strong>Models</strong> tab, inside the ASR-LLM-TTS card, under the three model rows. Hidden in Realtime (MLLM) mode.</div>
   <div><b>Commit</b><code>e21a1a83</code> on <code>design/sandbox</code> (never merges; a shippable slice is cut as <code>design/07-provider-fallback</code> from <code>staging</code>).</div>
-  <div><b>Preview</b><span class="tag bad">blocked</span> Vercel reports <em>Deployment was blocked</em> for <code>e21a1a83</code> and for the branch's previous commit <code>3490bfbb</code> alike (GitHub deployments <code>6323981246</code> · <code>6323533575</code>). Not a build failure: <code>bun run build</code> passes locally. Branch: <a href="https://github.com/AgoraIO/ng-console/tree/design/sandbox">design/sandbox</a>.</div>
+  <div><b>Preview</b><a href="https://ng-console-design-sandbox.vercel.app">ng-console-design-sandbox.vercel.app</a> — your own Vercel project (scope <code>soni28shaktigmailcoms-projects</code>), deployed from the working tree at <code>e21a1a83</code> with the staging profile. The Agora team's Git previews stay <em>Deployment was blocked</em> for this git identity; not needed any more. Branch: <a href="https://github.com/AgoraIO/ng-console/tree/design/sandbox">design/sandbox</a>.</div>
   <div><b>Checks</b>112 tests pass (Agent Detail 95 · planner 11 · row 6) · Biome clean · <code>tsc</code> clean. The repo's i18n copy guard already fails on the branch tip for unrelated Home files; none of this slice's files are in it.</div>
 </div>
 
@@ -116,11 +116,15 @@ a{color:var(--doc-brand)}
 </table>
 
 <h2>Evidence</h2>
-<div class="note warn"><strong>Annotated screenshots pending — two blockers, neither in the code.</strong>
+<div class="note warn"><strong>Annotated screenshots pending — one gate left, and it is a shared secret, not code.</strong>
 <ul>
-  <li><strong>Vercel blocks previews from this git identity.</strong> Previews for czhen's commits on 2026-09-07 completed; both <code>design/sandbox</code> commits by <code>Shakti Soni &lt;agoraio.design1@gmail.com&gt;</code> came back <em>Deployment was blocked</em>. That is Vercel's team-membership rule for Git-triggered previews: the commit author's GitHub account must belong to the <code>agoraio</code> Vercel team. Fix on the Vercel side (add the account to the team, or have a team member trigger the deploy for <code>e21a1a83</code>).</li>
-  <li><strong>The Console needs an Okta login</strong>, and I never enter credentials. Once a preview exists and you are signed in in Chrome, I take the red-marked shots and add them here.</li>
-  <li><strong>Local run is gated too.</strong> <code>bun run dev</code> with the staging profile starts fine, but sign-in on <code>localhost:3000</code> forwards to <code>console-staging.agora.io/api/auth/login</code>, which answered <em>Invalid auth transfer signature</em>: the local <code>LOCAL_AUTH_TRANSFER_CODE</code> must equal the one set on the staging server (see <code>src/server/auth/oauth.ts</code>). With the team's code in <code>.env.local</code> the local path works and needs no Vercel change.</li>
+  <li><strong>Deployed on your own Vercel</strong> at <a href="https://ng-console-design-sandbox.vercel.app">ng-console-design-sandbox.vercel.app</a> (the Agora team's Git previews block this git identity; irrelevant now). The app loads and hands sign-in to <code>console-staging.agora.io</code> as a signed https transfer target — the alias is allow-listed on the project via <code>NG_CONSOLE_PREVIEW_AUTH_ORIGINS</code>.</li>
+  <li><strong>Sign-in needs the staging transfer code.</strong> Staging verifies the transfer signature with its own <code>LOCAL_AUTH_TRANSFER_CODE</code>; the project currently holds a random one, so staging answers <em>Invalid auth transfer signature</em>. With the team's value:
+    <pre style="margin:8px 0">vercel env rm LOCAL_AUTH_TRANSFER_CODE production --yes --scope soni28shaktigmailcoms-projects
+printf '%s' '&lt;staging code&gt;' | vercel env add LOCAL_AUTH_TRANSFER_CODE production --yes --scope soni28shaktigmailcoms-projects
+vercel deploy --prod --yes --scope soni28shaktigmailcoms-projects</pre>
+    Then sign in once on the alias; no Agora-side allowlist is required (see <code>handleAuthLogin</code> in <code>src/server/auth/handlers.ts</code>). The same code in <code>.env.local</code> makes <code>bun run dev</code> work too.</li>
+  <li><strong>I never enter credentials.</strong> Once you are signed in there in Chrome, I open an agent › Models and add the red-marked shots here.</li>
 </ul>
 Until then the evidence is the tests and the code itself; the row is the first thing under the TTS row on any agent's Models tab.</div>
 
