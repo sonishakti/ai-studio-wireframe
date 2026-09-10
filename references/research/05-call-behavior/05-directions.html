@@ -1,0 +1,352 @@
+<title>Call Rules Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: a mock of the ng-console dark builder as the designer sees it. Every color painted explicitly. Scaffold = 07-vendors-fallback/05-directions.html. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:78ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px}
+.note{font-size:11.5px;color:var(--ink-3);margin:10px 0 6px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+/* AdvancedRow grammar (agent-config-drawer.tsx:1233): chevron · title + one-line description · Switch */
+.arow{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:start;padding:10px 12px;border-top:1px solid var(--line)}
+.arow:first-child{border-top:0}
+.arow .chev{color:var(--ink-3);font-size:12px;margin-top:2px}
+.arow .ttl{font-weight:500;font-size:13px}
+.arow .ttl small{display:block;font-weight:400;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.body{padding:2px 12px 12px 40px;display:grid;gap:8px}
+.sent{font-size:12.5px;line-height:2;color:var(--ink-2)}
+.in{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--stroke);border-radius:5px;padding:0 7px;line-height:22px;background:var(--panel-2);color:var(--ink);font-family:"JetBrains Mono",monospace;font-size:11.5px;vertical-align:middle}
+.in.sel::after{content:"⌄";color:var(--ink-3)}
+.in.wide{min-width:150px;font-family:"DM Sans",system-ui,sans-serif}
+.cap{font-size:11px;color:var(--ink-3);margin-top:-6px;line-height:1.5}
+.cap a{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--brand-dim)}
+.inert,.inert .in{color:var(--ink-3)}
+.inert .in{border-style:dashed}
+.sw{position:relative;width:30px;height:17px;border-radius:999px;background:var(--brand);flex:none;display:inline-block;vertical-align:middle}
+.sw::after{content:"";position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#fff}
+.sw.off{background:var(--stroke)}.sw.off::after{right:auto;left:2px;background:var(--ink-2)}
+.sw.dis{opacity:.45}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.link{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--brand-dim);font-size:12px}
+.hint{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--stroke);color:var(--ink-3);font-size:10px;text-align:center;line-height:12px;margin-left:4px;vertical-align:1px}
+table.mx{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mx th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mx tr:last-child td{border-bottom:0}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.dis{opacity:.45}
+.field{display:grid;gap:4px;font-size:12px;color:var(--ink-2)}
+.field .in{width:100%;justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pf{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.pf li{display:grid;grid-template-columns:14px 1fr auto;gap:8px;font-size:12.5px;align-items:baseline}
+.pf .x{color:var(--bad)}.pf .w{color:var(--warn)}.pf .ok{color:var(--ok)}
+.tabs{display:flex;gap:4px;margin-bottom:10px}
+.tabs span{padding:4px 10px;border-radius:6px;font-size:12px;color:var(--ink-3);border:1px solid transparent}
+.tabs span.on{color:var(--ink);background:var(--panel-2);border-color:var(--line)}
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule)}
+table.audit th,table.audit td{border-bottom:1px solid var(--doc-rule);padding:7px 9px;text-align:left;vertical-align:top}
+table.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2)}
+table.audit td.n{font-family:"JetBrains Mono",monospace;white-space:nowrap}
+.two{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.copy code,table.audit code,p code,li code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+@media (max-width:1140px){.dir{grid-template-columns:1fr}.card{max-width:660px}}
+@media (max-width:980px){.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 05 · Call behavior rules · step 5 diverge</p>
+<h1>Call Rules Directions</h1>
+<p><strong>JTBD.</strong> When the other side goes quiet, drops off, hits voicemail or presses a key, my agent does what I'd tell a new hire to do — speak up, hang up, leave the message, take the digits — so no call runs long, hangs dead, or ends in a way I can't explain.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Agent › Advanced tab (<code>agent-advanced-page.tsx:171–191</code>), a new section beside <code>AdvancedSharedSection</code>. Go-live check in the right rail Deploy tab (<code>agent-detail-right-panel.tsx:193</code>). Number-level values already live on the phone-number edit page.</div>
+  <div><b>Agora facts</b><code>idle_timeout</code> 0–259 200 s, default 30, counts after the last user <em>leaves</em>, 72 h hard cap. <code>silence_config.timeout_ms</code> (0, 60000], speak | think, not for MLLM. <code>farewell_config.graceful_timeout_seconds</code> default 30. Telephony <code>reason</code> = request | hangup | failed only.</div>
+  <div><b>Two layers today</b>Agent (Engine): Silent reminder shipped #1446 in ms; <code>idle_timeout</code> round-trips with <strong>no control</strong>; <code>farewell_config</code> absent. Number / campaign (Console backend): max call duration 30–10 800 s, silence hang-up 30–1 800 s, end-on-conversation-end, voicemail detection (hang up only).</div>
+  <div><b>Requires Engine</b>Leave a message (868kgy2n3) · DTMF send/receive (868kykbfw) · call-screening identity + reminder count + agent-level duration (868kytrua) · guardrails (868kykbft) · join-time validation (868keazr7). Preflight today = one toast on Publish (<code>console-shell.tsx:2631</code>).</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses. Each card is mocked in the Console's <code>AdvancedRow</code> grammar (chevron · title + one line · switch) or on the surface it names. Copy is <em>proposed</em>, not approved. Dashed controls are inert — they exist to make the roadmap legible, never to pretend.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · "Call rules" in sentences</h3><div class="who">For P1 and P3. One section on the agent; every rule reads as the instruction you'd give a new hire.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div class="ttl">Call rules<small>Silence, hang-up and phone behavior.</small></div></div>
+        <div class="body">
+          <div class="sent">If the caller is silent for <span class="in">4</span> s, <span class="in sel">say</span> <span class="in wide">Are you still there?</span></div>
+          <div class="sent">After everyone leaves, hang up after <span class="in">30</span> s<span class="hint">i</span></div>
+          <div class="sent"><span class="sw off"></span>&nbsp; When stopped, finish speaking first, up to <span class="in">30</span> s</div>
+          <div class="sent">End the call after <span class="in">5</span> min</div>
+          <div class="cap">Set per phone number · <a href="#">Edit +1 415 555 0134 →</a></div>
+          <div class="sent inert">If voicemail answers, <span class="in sel">Hang up</span></div>
+          <div class="cap">Leave a message · Requires Engine</div>
+          <div class="sent inert">Keypad input <span class="in sel">Off</span></div>
+          <div class="cap">Read digits to the agent · Requires Engine</div>
+        </div>
+      </div>
+      <div class="note">Realtime (MLLM) agent with no phone number bound — the section shrinks to what is true:</div>
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div class="ttl">Call rules<small>Silence, hang-up and phone behavior.</small></div></div>
+        <div class="body">
+          <div class="sent">After everyone leaves, hang up after <span class="in">30</span> s<span class="hint">i</span></div>
+          <div class="sent"><span class="sw"></span>&nbsp; When stopped, finish speaking first, up to <span class="in">30</span> s</div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Ships two real controls that have no UI today (<code>idle_timeout</code>, <code>farewell_config</code>) with zero new chrome.</li>
+        <li class="pro">Re-presents the Silent reminder in seconds, same <code>silence_config</code> state — one row, one truth.</li>
+        <li class="pro">The number-level rule is shown as what it is (value + where to edit), so nothing can drift.</li>
+        <li class="con">Sentence UI with inline inputs is an i18n and a11y cost (word order, hidden labels) — only <code>en</code> exists today, but the guard test wants keys.</li>
+        <li class="con">"Nobody on the line" must not be read as "silence": the tooltip carries the leave-the-channel meaning, and tooltips get skipped.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · "Rules" table — Trigger · Then · Status</h3><div class="who">For P2. The ladder made visible; the Status column carries which layer owns each rule.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div class="ttl">Call rules<small>Silence, hang-up and phone behavior.</small></div></div>
+        <div style="padding:2px 8px 8px 8px">
+        <table class="mx">
+          <thead><tr><th>Trigger</th><th>Then</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Caller silent <span class="in">4</span> s</td><td><span class="in sel">say</span> <span class="in wide">Are you still there?</span></td><td><span class="chip on"><span class="dot"></span>On</span></td></tr>
+            <tr><td>Everyone left <span class="in">30</span> s</td><td>Hang up</td><td><span class="chip on"><span class="dot"></span>On</span></td></tr>
+            <tr><td>Stop requested</td><td>Finish speaking, up to <span class="in">30</span> s</td><td><span class="chip"><span class="dot"></span>Off</span></td></tr>
+            <tr><td>Call reaches 5 min</td><td>Hang up</td><td><span class="chip brand" style="border-color:var(--brand-dim);color:var(--brand)">Per number</span></td></tr>
+            <tr class="inert"><td>Voicemail answers</td><td><span class="in sel">Hang up</span></td><td><span class="chip">Campaigns only</span></td></tr>
+            <tr class="inert"><td>Key pressed</td><td><span class="in sel">Ignore</span></td><td><span class="chip">Requires Engine</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Reads as the ladder competitors never show: remind at 4 s → hang up at 30 s → cap at 5 min.</li>
+        <li class="pro">Status is a first-class column — Engine, number, campaign and "not yet" all have a home; nothing hides in a caption.</li>
+        <li class="pro">Plain strings per cell; no interpolation, clean i18n and screen-reader order.</li>
+        <li class="con">A three-column table inside the flat Plain Form — the same fold-fit risk 07 flagged for its B.</li>
+        <li class="con">"Then" cells mix editable and read-only values; the user cannot tell which cell will take a click.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · Rules live on the phone number</h3><div class="who">For P3 ops. Extend the surface that already owns max duration and silence hang-up; the agent only recaps.</div></header>
+    <div class="mock">
+      <div class="tabs"><span>Details</span><span class="on">Inbound settings</span></div>
+      <div class="sec">
+        <div style="padding:12px;display:grid;gap:12px">
+          <div class="field">Inbound agent<span class="in sel">Aria</span></div>
+          <div style="font-weight:500">Hangup<div style="font-weight:400;color:var(--ink-3);font-size:11.5px">Control when the assistant ends inbound calls.</div></div>
+          <div class="grid2">
+            <div class="field">Max call duration<span class="in">300 <em style="color:var(--ink-3);font-style:normal">s</em></span></div>
+            <div class="field">Silence timeout<span class="in">120 <em style="color:var(--ink-3);font-style:normal">s</em></span></div>
+          </div>
+          <div class="grid2">
+            <div class="sent" style="line-height:1.4"><span class="sw"></span>&nbsp; End call on conversation end</div>
+            <div class="sent" style="line-height:1.4"><span class="sw"></span>&nbsp; End call on silence</div>
+          </div>
+          <div class="grid2 inert">
+            <div class="field">Voicemail<span class="in sel">Hang up</span></div>
+            <div class="field">Keypad input<span class="in sel">Off</span></div>
+          </div>
+          <div class="cap">Leave a message · Read digits · Requires Engine</div>
+          <div class="cap" style="margin-top:0">Agent reminder: says "Are you still there?" after 4 s · <a href="#">Edit on agent →</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">No Engine dependency for duration and silence hang-up — these fields ship today on <code>end_call_config</code>.</li>
+        <li class="pro">Matches the ticket's SIP boundary: termination executes on the number through the Engine-to-SIP contract.</li>
+        <li class="con">Contradicts the v4 lock ("hang-up/pacing/transfer stay AGENT-level") and the ticket's REST/SDK parity.</li>
+        <li class="con">Campaigns already duplicate the same fields; a web-only or MLLM agent has no number and therefore no rules page at all.</li>
+        <li class="con">Rules are invisible from the builder where the prompt, greeting and reminder are written.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · "Before you go live" in the Deploy tab</h3><div class="who">For everyone. Turns today's Publish toast into a list with Fix→, reusing the validators the Console already runs.</div></header>
+    <div class="mock">
+      <div class="tabs"><span>Test</span><span>Code</span><span class="on">Deploy</span></div>
+      <div class="sec">
+        <div style="padding:12px;display:grid;gap:10px">
+          <div style="font-weight:600;font-size:13px">Before you go live <span class="chip bad" style="margin-left:6px"><span class="dot"></span>2 to fix</span></div>
+          <ul class="pf">
+            <li><span class="x">✕</span><span>System prompt is required.</span><a class="link" href="#">Fix →</a></li>
+            <li><span class="x">✕</span><span>parameters.silence_config.content is required when the silent reminder is enabled</span><a class="link" href="#">Fix →</a></li>
+            <li><span class="w">!</span><span>Reminder at 4 s, but +1 415 555 0134 hangs up on silence at 3 s</span><a class="link" href="#">Fix →</a></li>
+            <li><span class="ok">✓</span><span>Hang up 30 s after everyone leaves</span><span></span></li>
+            <li><span class="ok">✓</span><span>Max call duration 5 min · +1 415 555 0134</span><span></span></li>
+          </ul>
+          <div style="display:flex;gap:8px;align-items:center"><span class="btn primary dis">Publish</span><span style="font-size:11.5px;color:var(--ink-3)">Publish enables when the ✕ items are fixed.</span></div>
+        </div>
+      </div>
+      <div class="note">Then the existing panel: Telephony deployment → Answer inbound calls · Make outbound calls.</div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Honesty floor verbatim: blockers + Fix→. The 868keazr7 note says the preflight exists — this is where it becomes visible.</li>
+        <li class="pro">Zero new validators: <code>validateAgentDetailDraft</code> + both contract checkers already produce these codes; contract errors show unedited.</li>
+        <li class="pro">The one new check is the ladder (reminder before hang-up) — the whitespace no competitor fills.</li>
+        <li class="con">Two truths risk once Engine validates at join: the Console list and a 4xx can disagree. Engine errors must pass through into the same list.</li>
+        <li class="con">Only answers "can I go live", not "what happens on the call" — it needs a surface like A to point Fix→ at.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · "Guardrails" row, inert</h3><div class="who">For P3 compliance. An Engine-gated row that shows the policy shape and links to the closest real thing.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div class="ttl">Guardrails<small>Check what callers say and what the agent says.</small></div><span class="sw off dis"></span></div>
+        <div class="body inert">
+          <div class="sent">Caller input: block <span class="in sel">PII · off-topic</span> then <span class="in sel">Refuse</span></div>
+          <div class="sent">Agent output: block <span class="in sel">PII · claims</span> then <span class="in sel">Replace with approved message</span></div>
+          <div class="cap">Requires Engine · 868kykbft</div>
+          <div class="cap" style="margin-top:0">Your prompt has a "Guardrails:" section today · <a href="#">Edit prompt →</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Honest about the roadmap and points at the only lever that exists (the prompt).</li>
+        <li class="pro">Shape matches the ticket: per-policy categories + response (replace · refuse · hand off · end).</li>
+        <li class="con">A whole inert row on a live Console is dead weight — v7 removed decoration; this is decoration with a switch.</li>
+        <li class="con">Nothing to test, nothing to save, no success event. Belongs in docs and the roadmap page until Engine ships.</li>
+        <li class="con">Input policy is a different product surface (redaction, permissions, audit) — 24 · Retention, PII &amp; compliance owns it.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<p>1–5 per lens. Protocol fit = flat form, additive, respects locks · Perception = one glance yields one truth, ladder visible · CTA/word budget · State coverage = empty · loading · error · locked/Requires Engine · MLLM (no <code>silence_config</code>) · non-telephony agent (voicemail/DTMF meaningless) · Accessibility · i18n.</p>
+<table class="audit">
+  <thead><tr><th></th><th>Protocol fit</th><th>Perception</th><th>CTA / words</th><th>State coverage</th><th>Accessibility</th><th>i18n</th><th>Σ</th></tr></thead>
+  <tbody>
+    <tr><td class="n">A</td><td>5 — rows in the existing grammar, additive mount</td><td>5 — sentence = the instruction; caption = the layer</td><td>4 — ≤10 words a row; one caption max</td><td>4 — MLLM and unbound states shrink the section; loading = skeleton rows; error = existing contract Alert; inert captioned</td><td>3 — inline inputs need visually hidden labels; tooltip carries a load-bearing meaning</td><td>3 — <code>Trans</code> with placeholders; word order fixed in <code>en</code></td><td class="n">24</td></tr>
+    <tr><td class="n">B</td><td>3 — table inside the Plain Form (07's B con)</td><td>4 — ladder readable top to bottom</td><td>4 — cells are nouns; Status is a word</td><td>5 — every layer and "not yet" has a Status word; MLLM/unbound = rows absent</td><td>4 — real table semantics; edit affordance unclear</td><td>5 — no interpolation</td><td class="n">25</td></tr>
+    <tr><td class="n">C</td><td>2 — contradicts the v4 agent-level lock and REST/SDK parity</td><td>3 — two places (number, campaign) show the same words</td><td>4 — reuses shipped labels</td><td>3 — no home for MLLM/web agents; unbound = nothing</td><td>4 — existing form controls</td><td>4 — existing keys (one hardcoded helper already)</td><td class="n">20</td></tr>
+    <tr><td class="n">D</td><td>5 — honesty floor, reuse, Deploy tab is the go-live place</td><td>4 — verdict chip + list; ✕ vs ! separates blocker from warning</td><td>5 — one verb (Fix →), one chip</td><td>4 — empty = "Ready to publish"; loading = validating; error = Engine 4xx verbatim; nothing locked</td><td>4 — list semantics, links named</td><td>5 — codes → keys; contract strings unchanged</td><td class="n">27</td></tr>
+    <tr><td class="n">E</td><td>1 — inert decoration on a frozen surface</td><td>2 — promises a control that does nothing</td><td>3 — short, but every word is a promise</td><td>2 — only one state (locked)</td><td>3 — disabled switch needs a tooltip reason</td><td>4</td><td class="n">15</td></tr>
+  </tbody>
+</table>
+
+<h2>Verdict — A as the surface, D as the gate</h2>
+<div class="two">
+  <div class="mock wide" style="border:1px solid var(--line);border-radius:8px">
+    <div class="sec">
+      <div class="arow"><span class="chev">⌄</span><div class="ttl">Call rules<small>Silence, hang-up and phone behavior.</small></div></div>
+      <div class="body">
+        <div class="sent">If the caller is silent for <span class="in">4</span> s, <span class="in sel">say</span> <span class="in wide">Are you still there?</span></div>
+        <div class="sent">After everyone leaves, hang up after <span class="in">30</span> s<span class="hint">i</span></div>
+        <div class="sent"><span class="sw off"></span>&nbsp; When stopped, finish speaking first, up to <span class="in">30</span> s</div>
+        <div class="sent">End the call after <span class="in">5</span> min</div>
+        <div class="cap">Set per phone number · <a href="#">Edit +1 415 555 0134 →</a></div>
+        <div class="sent inert">If voicemail answers, <span class="in sel">Hang up</span></div>
+        <div class="cap">Leave a message · Requires Engine</div>
+        <div class="sent inert">Keypad input <span class="in sel">Off</span></div>
+        <div class="cap">Read digits to the agent · Requires Engine</div>
+      </div>
+    </div>
+    <div class="note">Right rail · Deploy tab:</div>
+    <div class="sec">
+      <div style="padding:12px;display:grid;gap:10px">
+        <div style="font-weight:600;font-size:13px">Before you go live <span class="chip on" style="margin-left:6px"><span class="dot"></span>Ready to publish</span></div>
+        <ul class="pf">
+          <li><span class="w">!</span><span>Reminder at 4 s, but +1 415 555 0134 hangs up on silence at 3 s</span><a class="link" href="#">Fix →</a></li>
+          <li><span class="ok">✓</span><span>Hang up 30 s after everyone leaves</span><span></span></li>
+          <li><span class="ok">✓</span><span>Max call duration 5 min · +1 415 555 0134</span><span></span></li>
+        </ul>
+        <span class="btn primary" style="justify-self:start">Publish</span>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <h4>Rationale</h4>
+    <ul>
+      <li><b>Two real controls have no UI today.</b> <code>idle_timeout</code> round-trips through save with no control; <code>farewell_config</code> is absent. A ships both as sentences in the existing row grammar — real value on day one, zero new chrome.</li>
+      <li><b>The Console already holds silence and duration rules in two layers</b> with no relation stated. A's captions ("Set per phone number · Edit →") and D's ladder check make the relation visible instead of adding a third copy that can drift.</li>
+      <li><b>Honesty floor.</b> Inert options sit inside a live sentence, dashed and captioned "Requires Engine" — the roadmap is legible without a fake card (E rejected; its content becomes one line in the docs).</li>
+      <li><b>D reuses what exists.</b> <code>validateAgentDetailDraft</code> and both contract validators already produce the codes; the Publish toast becomes a list with Fix→, exactly the v7 lock and the 868keazr7 note "Needs-attention preflight already exists".</li>
+      <li><b>Competitors agree on the shape</b> (one group on the agent · voicemail = hang up | leave a message · DTMF as a tool). The one-line ladder before go-live is the whitespace nobody fills. B's Status words survive as A's captions; C stays the home of number-level values and A links to it.</li>
+    </ul>
+    <h4>Dependencies, stated on the row</h4>
+    <ul>
+      <li>Engine: agent-level max duration, reminder count, call-screening identity (868kytrua) · leave a message (868kgy2n3) · DTMF (868kykbfw). Until then those options are disabled with the caption.</li>
+      <li>Owner call: number values read-only on the agent (proposed) vs an agent-level draft the number inherits. If the draft wins, max duration moves to <code>sessionStorage</code> like the others.</li>
+      <li>Teammate: hiding #1446's Silent reminder row needs a 3-line optional prop on <code>AdvancedSharedSection</code>.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes):</strong> section <code>Call rules</code> · line <code>Silence, hang-up and phone behavior.</code> · rows <code>If the caller is silent for [n] s, [say|think] [message]</code> · <code>After everyone leaves, hang up after [n] s</code> (tooltip <code>Counts from when the last participant leaves. 0 keeps the agent until the 72-hour limit.</code>) · <code>When stopped, finish speaking first, up to [n] s</code> · <code>End the call after [n] min</code> · <code>If voicemail answers, [Hang up ▾]</code> · <code>Keypad input [Off ▾]</code> · captions <code>Set per phone number · Edit {number} →</code> · <code>Leave a message · Requires Engine</code> · <code>Read digits to the agent · Requires Engine</code> · Deploy tab <code>Before you go live</code> · <code>Ready to publish</code> / <code>{n} to fix</code> · <code>Fix →</code> · ladder warning <code>Reminder at {a} s, but {number} hangs up on silence at {b} s</code>. Blocker strings reuse existing keys (<code>systemPromptRequired</code>, <code>modelConfigurationMissing</code>) and the contract validators' messages verbatim.</div>
+  </div>
+</div>
+
+<h2>Prototype plan (ng-console, branch <code>design/sandbox</code>, additive only)</h2>
+<table class="audit">
+  <thead><tr><th>File</th><th>What</th><th>Writes to</th></tr></thead>
+  <tbody>
+    <tr><td class="n">src/lib/agents/call-rules.ts (+ .test.ts)</td><td><code>deriveCallRules(properties, binding?)</code> → sentence recap from <code>idle_timeout</code> / <code>parameters.silence_config</code> / <code>parameters.farewell_config</code> + the bound number's <code>end_call_config</code>; ms↔s conversion (<code>Math.round(ms/100)/10</code> read, integer ms write, 1–60 s); <code>ladderWarning()</code> (reminder ≥ number silence timeout); <code>readCallRulesDraft / writeCallRulesDraft</code> for inert rules.</td><td><code>sessionStorage</code> key <code>ng-console.design.05.call-rules:&lt;agentId&gt;</code> for leave-a-message text and keypad choice. Nothing else.</td></tr>
+    <tr><td class="n">src/lib/agents/orchestration-contracts.ts · orchestration-properties.ts</td><td>Add <code>parameters.farewellConfig {gracefulEnabled, gracefulTimeoutSeconds}</code> to <code>OrchestrationDraft</code>; read at <code>:68</code> region, write beside <code>:117</code>. ~10 lines.</td><td><code>parameters.farewell_config</code> (real).</td></tr>
+    <tr><td class="n">src/components/console/agent-call-rules-section.tsx (+ .test.tsx)</td><td>Rows in the <code>AdvancedRow</code> grammar (export <code>AdvancedRow</code> from <code>agent-config-drawer.tsx:1233</code>, 1 line, or copy the grammar). Silence row hidden for MLLM; voicemail · keypad · max-duration rows hidden when no number or campaign is bound. Inline inputs carry visually hidden labels; sentences via <code>Trans</code>.</td><td><code>idle_timeout</code> via <code>patchBuilderOrchestrationDraft({ idleTimeout })</code> (real, new) · <code>parameters.silence_config</code> via the existing <code>parameters.silenceConfig</code> draft path (real, same state as #1446) · <code>farewell_config</code> (real, new).</td></tr>
+    <tr><td class="n">src/components/console/agent-advanced-page.tsx</td><td>Mount <code>&lt;AgentCallRulesSection&gt;</code> above <code>AdvancedSharedSection</code> (line ~178); pass <code>hideSilentReminder</code> to <code>AdvancedSharedSection</code> (new optional prop, default false, ~3 lines in <code>agent-config-drawer.tsx</code>). ≤8 lines.</td><td>—</td></tr>
+    <tr><td class="n">src/components/console/agent-preflight-list.tsx (+ .test.tsx)</td><td>List for the Deploy tab: <code>detailAuthoring.view.validation.issues</code> (codes → existing keys), both contract validators' strings verbatim, <code>ladderWarning()</code>, ✓ lines from <code>deriveCallRules</code>. Fix → sets the detail tab search param (<code>prompt | models | advanced</code>). Mount in <code>AgentDeployPanel</code> (<code>agent-detail-right-panel.tsx:193</code>) above the telephony buttons; <code>handleDetailPublish</code> keeps its toast as the fallback.</td><td>Reads only. Analytics <code>preflight_passed</code> / <code>preflight_blocked</code>.</td></tr>
+    <tr><td class="n">src/lib/i18n/resources/en/common.ts</td><td><code>pages.agentAdvanced.callRules.*</code> and <code>pages.agentDetail.preflight.*</code> — the copy set above, nothing more.</td><td>—</td></tr>
+    <tr><td class="n">Stays disabled · "Requires Engine"</td><td>Leave a message (option + text) · Read digits to the agent · agent-level max duration (recap only) · call-screening identity and guardrails (no row; one line in the docs).</td><td>—</td></tr>
+  </tbody>
+</table>
+<p>Tests: <code>bunx vitest run src/lib/agents/call-rules.test.ts src/components/console/agent-call-rules-section.test.tsx src/components/console/agent-preflight-list.test.tsx</code> · <code>bunx biome check --write</code> · <code>bun run typecheck</code>. Passes before review: fortify (MLLM · unbound · contract error · Engine 4xx) · include (hidden labels on inline inputs, tooltip reachable by keyboard, <code>--input</code> stroke finding logged) · articulate (no string outside the set).</p>
+
+<h2>Next</h2>
+<p>Owner answers the six questions in <code>00-brief.md</code> (agent vs number · voicemail/keypad home · where the preflight lives · hiding #1446's row · reminder count · call screening). Then build A + D additively on <code>design/sandbox</code>, run the three passes, deploy, annotate, and put it in front of the designer. Competitor screenshots (Retell Call Settings, Vapi assistant timeouts) get added to <code>03-competitors/</code> once you're signed in — they may move defaults, not the shape.</p>
+</div>

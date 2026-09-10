@@ -1,0 +1,332 @@
+<title>First Run & Import Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: mocks of the ng-console dark builder as the designer sees it. Every color painted explicitly. Scaffold = 07-vendors-fallback. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:78ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sec-h .chev{margin-left:auto;color:var(--ink-3)}
+.rowx{display:grid;grid-template-columns:140px 1fr;gap:14px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.rowx:last-child{border-bottom:0}
+.lbl{color:var(--ink-2);font-size:12.5px;line-height:1.35}
+.lbl small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px}
+.field .cv{margin-left:auto;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.recap{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-2);margin-top:8px;line-height:1.7}
+.recap b{color:var(--ink);font-weight:500}
+.arrow{color:var(--ink-3);padding:0 4px}
+.link{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--brand-dim);font-size:12px}
+.hint{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--stroke);color:var(--ink-3);font-size:10px;text-align:center;line-height:12px;margin-left:4px;vertical-align:1px}
+table.mx{width:100%;border-collapse:collapse;font-size:12px}
+table.mx th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.mx tr:last-child td{border-bottom:0}
+table.mx td.g{color:var(--ink-3);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding-top:9px}
+table.mx .r{color:var(--ink-3)}
+.mono{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.opt{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);font-size:12.5px;margin-top:6px}
+.opt.sel{border-color:var(--brand)}
+.opt small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:1px}
+.box{width:13px;height:13px;border:1px solid var(--stroke);border-radius:50%;flex:none;display:inline-grid;place-items:center;font-size:9px;color:var(--brand);margin-top:2px}
+.box.x{border-color:var(--brand)}
+.ta{background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:8px 10px;color:var(--ink-3);font-size:12px;min-height:54px;margin-top:8px}
+.foot{display:flex;gap:8px;justify-content:flex-end;padding:10px 14px;border-top:1px solid var(--line)}
+.alert{border:1px solid var(--bad);background:var(--bad-soft);border-radius:6px;padding:9px 11px;font-size:12.5px}
+.alert b{display:block;color:var(--bad);margin-bottom:2px}
+.strip{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:10px;font-size:12.5px}
+.strip .verdict{margin-left:auto;color:var(--ink-2)}
+.bubble{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:12.5px;max-width:88%}
+.bubble.me{margin-left:auto;border-color:var(--brand-dim)}
+.home{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.home .act{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:9px 11px;font-size:12.5px}
+.home .act small{margin-left:auto;color:var(--ink-3);font-size:11.5px}
+.funnel{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-2)}
+.funnel span{border:1px solid var(--line);border-radius:4px;padding:2px 6px;background:var(--panel-2)}
+.funnel span.on{border-color:var(--ok);color:var(--ok)}
+.cap{font-size:11.5px;color:var(--ink-3);margin:10px 0 6px}
+.two{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.copy code,table.au code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+table.au{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+table.au th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule);background:#f9fbfc}
+table.au td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.au td:first-child{font-weight:600;white-space:nowrap}
+table.au .s{font-weight:600;color:var(--doc-brand)}
+@media (max-width:1140px){.dir{grid-template-columns:1fr}.card{max-width:680px}}
+@media (max-width:980px){.two,.facts,.home{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 09 · First run, templates &amp; import · step 5 diverge</p>
+<h1>First Run &amp; Import Directions</h1>
+<p><strong>JTBD.</strong> When I sign up — or land here with an agent I already trust on Vapi or Retell — I want a working agent I can talk to in minutes, carried over rather than rebuilt, so I can put it on real traffic today.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Create modal (<code>agents-page.tsx:343</code>) · builder Advanced tab alert (<code>agent-config-drawer.tsx:658</code>) · Home onboarding (<code>home-onboarding.tsx</code>) · <code>src/lib/observability</code>. Additive on frozen surfaces.</div>
+  <div><b>Agora facts</b>Target = join <code>properties.*</code>. Retired: <code>turn_detection.{type, interrupt_mode, …}</code>, <code>enable_aivad</code>, <code>llm.silence_message</code>, <code>silence_timeout</code>, <code>preset</code> (v2.4 · 2.5 · 2.7 · 2.9). <code>pipeline_id</code> = published agent as base config.</div>
+  <div><b>Locks</b>No build-an-agent-first wall. No template gallery (owner call). DROP_REASONS: every dropped field carries a reason in our vocabulary. Keys are never imported. Concierge = the Composer.</div>
+  <div><b>Gaps today</b>No import · <code>/onboard</code> unreachable · three turn-detection defaults · retired config is reported, not fixable · nothing between <code>code_first_started</code> and <code>agent_create</code> is measured.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses. Each column is a self-contained answer mocked inside the real surface it would extend. Copy is <em>proposed</em>, not approved.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Import as the third way to start</h3><div class="who">For P1. Blank · Template · <b>Import from Vapi or Retell</b> in the create modal → report → builder.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Create Agent</div>
+        <div class="rowx"><div class="lbl">Agent name</div><div><div class="field">Support Bot</div></div></div>
+        <div class="rowx"><div class="lbl">Choose a template</div><div>
+          <div class="opt"><span class="box"></span><span>Blank Template</span></div>
+          <div class="opt"><span class="box"></span><span>Customer service for e-commerce</span></div>
+          <div class="opt sel"><span class="box x">●</span><span>Import from Vapi or Retell<small>Paste the agent JSON. Keys are never imported.</small></span></div>
+          <div class="ta">Paste JSON</div>
+          <div style="margin-top:6px"><span class="btn">Upload file</span></div>
+        </div></div>
+        <div class="foot"><span class="btn primary">Review import</span></div>
+      </div>
+      <div class="cap">Step 2 — the report, before anything is created:</div>
+      <div class="sec">
+        <div class="sec-h">Imported 14 of 17 settings <span class="chip brand" style="margin-left:8px">Vapi</span><span class="chev">×</span></div>
+        <table class="mx">
+          <thead><tr><th>Theirs</th><th>Ours</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td class="g" colspan="3">Mapped · 12</td></tr>
+            <tr><td class="mono">model.messages[0]</td><td>System prompt · Prompt</td><td class="r">"You are Ava, the support…"</td></tr>
+            <tr><td class="mono">firstMessage</td><td>Greeting · Prompt</td><td class="r">"Hi, this is Ava…"</td></tr>
+            <tr><td class="mono">voice.voiceId</td><td>Voice · Models <span class="chip warn">Needs a credential</span></td><td class="r">ElevenLabs · Rachel</td></tr>
+            <tr><td class="g" colspan="3">Changed · 2</td></tr>
+            <tr><td class="mono">startSpeakingPlan.waitSeconds</td><td>End of Speech · Advanced</td><td class="r">0.4 s → Balanced (640 ms)</td></tr>
+            <tr><td class="g" colspan="3">Not imported · 3</td></tr>
+            <tr><td class="mono">maxDurationSeconds</td><td colspan="2" class="r">Max call duration isn't in the Engine contract yet.</td></tr>
+            <tr><td class="mono">backgroundSound</td><td colspan="2" class="r">Background ambience isn't in the Engine contract yet.</td></tr>
+            <tr><td class="mono">server.url</td><td colspan="2" class="r">Webhooks are project-level — add it in Settings › Webhooks.</td></tr>
+          </tbody>
+        </table>
+        <div class="foot"><span class="btn">Back</span><span class="btn primary">Create agent</span></div>
+      </div>
+      <div class="strip">Prompt · Models · Advanced · Actions <span class="verdict"><span class="chip on"><span class="dot"></span>Imported from Vapi · 14 of 17</span> &nbsp;<a class="link" href="#">View report</a></span></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Lives where the user already starts; the modal's row grammar (radio + one line) absorbs it with no new chrome.</li>
+      <li class="pro">Meets 868kyj9w3 literally: mapped · changed · not imported shown <em>before</em> the create call; every drop carries a reason.</li>
+      <li class="pro">Credential gaps surface as a chip on the row that needs them, and open the existing credential picker in the builder.</li>
+      <li class="con">Retell needs two pastes (agent + LLM); the textarea must say so without a paragraph.</li>
+      <li class="con">The report table is the densest thing in the modal; three groups is the ceiling.</li>
+    </ul></div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Import as a Concierge proposal</h3><div class="who">For P1 who starts in chat. The mapper's report becomes the proposal card's details.</div></header>
+    <div class="mock">
+      <div style="display:grid;gap:8px">
+        <div class="bubble me">Here's my Vapi assistant — can you set it up here? <span class="mono" style="color:var(--ink-3)">{ "name": "Support Bot", "model": {…}, "voice": {…} }</span></div>
+        <div class="bubble">I found a Vapi assistant. 14 of 17 settings carry over; the voice needs your ElevenLabs key.</div>
+        <div class="sec">
+          <div class="sec-h">Create Support Bot from Vapi</div>
+          <table class="mx">
+            <tbody>
+              <tr><td class="lbl">Prompt</td><td class="r">"You are Ava, the support…" · from model.messages</td></tr>
+              <tr><td class="lbl">Greeting</td><td class="r">"Hi, this is Ava…"</td></tr>
+              <tr><td class="lbl">Voice</td><td class="r">ElevenLabs · Rachel <span class="chip warn">Needs a credential</span></td></tr>
+              <tr><td class="lbl">Model</td><td class="r">GPT-4o mini · managed</td></tr>
+              <tr><td class="lbl">Changed</td><td class="r">Turn detection → Balanced</td></tr>
+              <tr><td class="lbl">Not imported</td><td class="r">Max call duration · Background sound · Webhook — <a class="link" href="#">why</a></td></tr>
+            </tbody>
+          </table>
+          <div class="foot"><span class="btn">Modify</span><span class="btn primary">Confirm</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Zero new surface: <code>agents_create</code> and the task-proposal card exist; the mapper is the only new code.</li>
+      <li class="pro">Conversational Composer (868kbyqfy, P2) gets its first real write flow for free.</li>
+      <li class="con">The card caps at 8 detail rows — the honesty list collapses to a count and a "why" link; DROP_REASONS half-hidden.</li>
+      <li class="con">Nobody pastes 6 KB of JSON into a chat box; the drawer has no file upload today (only CSV/KB pickers).</li>
+      <li class="con">Proposals are one-shot; there is no place to fix the voice before confirming.</li>
+    </ul></div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · "Needs update" → one-click migration</h3><div class="who">For P2 (868kxc3wr). The existing contract alert grows one button; the diff reuses the import report table.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Advanced</div>
+        <div style="padding:10px 14px">
+          <div class="alert"><b>Configuration needs updating before saving or previewing</b>turn_detection.interrupt_mode is retired; turn_detection.silence_duration_ms is retired; llm.silence_message is retired
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><span class="btn danger">Update to current contract</span><span class="mono" style="color:var(--ink-3)">3 retired fields</span></div></div>
+        </div>
+        <div class="rowx"><div class="lbl">Turn Detection<small>Quick presets</small></div><div><div class="field">Custom <span class="cv">⌄</span></div></div></div>
+      </div>
+      <div class="cap">The sheet, before Apply:</div>
+      <div class="sec">
+        <div class="sec-h">Update configuration <span class="chev">×</span></div>
+        <table class="mx">
+          <thead><tr><th>Before</th><th>After</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">interrupt_mode: "interrupt"</td><td class="mono">interruption.enable: true<br>interruption.mode: "start_of_speech"</td><td class="r">v2.4</td></tr>
+            <tr><td class="mono">silence_duration_ms: 500</td><td class="mono">end_of_speech.vad_config.silence_duration_ms: 500</td><td class="r">v2.4</td></tr>
+            <tr><td class="mono">llm.silence_message + silence_timeout: 8</td><td class="mono">parameters.silence_config: { timeout_ms: 8000, action: "speak", content }</td><td class="r">v2.5</td></tr>
+          </tbody>
+        </table>
+        <div class="foot"><span class="btn">Cancel</span><span class="btn primary">Apply</span></div>
+      </div>
+      <div class="strip">Draft saved <span class="verdict"><span class="chip warn"><span class="dot"></span>Updated · republish to take effect</span></span></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Smallest change on a frozen surface: the destructive Alert already renders the retired paths; it gains one button.</li>
+      <li class="pro">Before/after in the field's own key names — the user learns the new contract by reading the diff, not the docs.</li>
+      <li class="pro">Closes the ticket's last line ("notify customers when they must republish") with a chip in the strip.</li>
+      <li class="con">1431 plan says backend owns migration; if backend migrates on read, Apply becomes a no-op and the sheet shrinks to a notice.</li>
+      <li class="con">Some rewrites are lossy (keyword mode → interruption keywords); the sheet must show them as Changed, not silently.</li>
+    </ul></div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · One honest default agent</h3><div class="who">For P1's first minute. "Open Agent Studio" creates a named agent instead of landing on an empty list. Owner call — not a gallery.</div></header>
+    <div class="mock">
+      <div class="home">
+        <div class="act">Start from code <small>›</small></div>
+        <div class="act" style="border-color:var(--brand)">Open Agent Studio <small>creates My first agent</small></div>
+      </div>
+      <div class="cap">Agents list after the click:</div>
+      <div class="sec">
+        <div class="rowx" style="grid-template-columns:1fr auto"><div><b>My first agent</b><div class="recap" style="margin-top:2px">Deepgram nova-3 <span class="arrow">·</span> GPT-4o mini <span class="arrow">·</span> MiniMax speech-2.8-turbo <span class="arrow">·</span> Balanced</div></div><div><span class="chip"><span class="dot" style="color:var(--ink-3)"></span>Draft</span></div></div>
+      </div>
+      <div class="strip">▶ Talk to My first agent <span class="verdict">No test runs yet</span></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Answers 868kbyun1's acceptance directly: a first call with no mandatory configuration, defaults "explicit and editable" in the strip.</li>
+      <li class="pro">Kills the three-defaults bug as a side effect — one <code>createDefaultStudioTurnDetectionProperties()</code> for draft, template and create.</li>
+      <li class="pro">Respects the Aria lock (no build-first wall) without building a gallery.</li>
+      <li class="con">Creates a real resource without asking — needs the owner's yes and a once-per-project guard.</li>
+      <li class="con">Managed presets only cover Deepgram · OpenAI · MiniMax; the default must stay inside them or the first call fails on a missing key.</li>
+    </ul></div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · Instrument first, no new screens</h3><div class="who">For the team (868kbyqdq). The four stages wired into observability; Home gets one line of truth.</div></header>
+    <div class="mock">
+      <div class="home">
+        <div class="act">Start from code <small>›</small></div>
+        <div class="act">Open Agent Studio <small>1 agent · not tested yet</small></div>
+      </div>
+      <div class="funnel"><span class="on">signup_completed</span>→<span class="on">project_created</span>→<span class="on">first_agent_usable</span>→<span>first_call_completed</span></div>
+      <div class="recap">onboarding_stage_reached { stage, elapsedMsFromSignup, elapsedMsFromPrevious, entryPoint, failureReason? }<br>agent_import_reviewed { vendor, mappedCount, changedCount, droppedCount, mappedRatio, needsCredential[], droppedPaths[] }<br>legacy_config_detected { retiredKeys[] } · operations <b>agent_import</b> · <b>agent_config_migrate</b></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Required by the ticket regardless of which direction ships; costs no surface.</li>
+      <li class="pro">Gives 868kbyun1 its "competitive benchmark": signup → first_call_completed elapsed time, comparable release over release.</li>
+      <li class="pro">The Home line is the only user-visible piece and fits the one-line-under-a-control budget.</li>
+      <li class="con">Alone it moves no user; it only tells us where they leave.</li>
+      <li class="con">"First agent usable" needs a definition the validator can compute (no issues + preview allowed) — otherwise the stage lies.</li>
+    </ul></div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<table class="au">
+  <thead><tr><th></th><th>Protocol fit<br><small>additive · template lock</small></th><th>Perception laws</th><th>CTA / word budget</th><th>State coverage<br><small>invalid JSON · unsupported vendor · dropped · keys · loading · error</small></th><th>Accessibility</th><th>i18n</th><th>Σ</th></tr></thead>
+  <tbody>
+    <tr><td>A</td><td><span class="s">5</span> one row in an existing list; no gallery</td><td><span class="s">4</span> report groups by outcome (proximity); "Needs a credential" chip on the row it blocks</td><td><span class="s">4</span> 1 primary per step; 12 new strings</td><td><span class="s">5</span> all six named; error inline under the textarea</td><td><span class="s">4</span> radio row + table; needs <code>aria-describedby</code> on the paste field</td><td><span class="s">4</span> <code>pages.agents.import.*</code>; counts via ICU plurals</td><td><b>26</b></td></tr>
+    <tr><td>B</td><td><span class="s">4</span> zero surface, but adds a Studio MCP tool</td><td><span class="s">2</span> the honesty list collapses to a count; drop reasons behind "why"</td><td><span class="s">4</span> card copy is model-generated — hard to hold a string set</td><td><span class="s">2</span> no file upload; invalid JSON becomes a chat reply</td><td><span class="s">3</span> proposal card is already accessible; JSON in a bubble is not</td><td><span class="s">2</span> model prose isn't in <code>common.ts</code></td><td><b>17</b></td></tr>
+    <tr><td>C</td><td><span class="s">5</span> one button on the existing Alert</td><td><span class="s">4</span> before/after columns, same key names (similarity)</td><td><span class="s">5</span> 5 new strings; existing title reused</td><td><span class="s">4</span> lossy rewrite = Changed row; backend-migrated-on-read = empty state to design</td><td><span class="s">4</span> destructive Alert + <code>role="dialog"</code> sheet; table needs headers</td><td><span class="s">5</span> keys are code, labels are i18n</td><td><b>27</b></td></tr>
+    <tr><td>D</td><td><span class="s">3</span> additive but creates a resource unasked — owner-gated</td><td><span class="s">5</span> one row, one strip, one button</td><td><span class="s">5</span> 2 new strings (name · caption)</td><td><span class="s">3</span> create failure on Home is a new error path; loading state on the button</td><td><span class="s">4</span> nothing new beyond the list row</td><td><span class="s">4</span> agent name must be translatable</td><td><b>24</b></td></tr>
+    <tr><td>E</td><td><span class="s">5</span> no surface; extends schema 2.1.0</td><td><span class="s">4</span> one caption under an existing button</td><td><span class="s">5</span> 3 captions</td><td><span class="s">3</span> stage definitions must not fire twice; offline queue exists</td><td><span class="s">5</span> text only</td><td><span class="s">5</span> captions via i18n; event names untranslated</td><td><b>27</b></td></tr>
+  </tbody>
+</table>
+
+<h2>Verdict — converge A + C + E</h2>
+<div class="two">
+  <div class="notes">
+    <h4>Why this shape</h4>
+    <ul>
+      <li><b>A is the surface.</b> Import is a third row in the create modal; the report is step 2 of the same sheet. Meets 868kyj9w3's "show which settings were mapped, changed, or could not be imported" before the create call — where the user already starts.</li>
+      <li><b>One mapper, three consumers.</b> <code>agent-import-mappers.ts</code> produces the LANDS / CHANGED / DROPPED rows; the same row shape renders the import report (A), the migration diff (C) and, later, the Concierge proposal details (B). DROP_REASONS is enforced in one table, so nothing can be dropped silently anywhere.</li>
+      <li><b>C is one button on an alert that already exists.</b> Today the user is told "Configuration needs updating" and left to edit JSON; the diff sheet turns the release notes into a confirmable rewrite and ends on "republish to take effect".</li>
+      <li><b>E is required anyway and costs no screens.</b> The four stages are the benchmark 868kbyun1 needs; the Home caption is the only visible piece.</li>
+      <li><b>D and the gallery are owner calls, and the verdict doesn't depend on them.</b> A works on an empty list or next to a pre-provisioned default; B follows once the mapper exists (a Studio MCP <code>agents_import</code> wrapping it).</li>
+    </ul>
+    <h4>Stays out</h4>
+    <ul>
+      <li>Template gallery / recipes (868kyr03v, locked). Bland · ElevenLabs sources. Batch import UI (P2 gets the mapper via API/CLI later).</li>
+      <li>Any field the Engine has no contract for is dropped with "Requires Engine" — never emulated.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes):</strong>
+      create row <code>Import from Vapi or Retell</code> · line <code>Paste the agent JSON. Keys are never imported.</code> · placeholder <code>Paste JSON</code> · button <code>Upload file</code> · primary <code>Review import</code> ·
+      report title <code>Imported {n} of {total} settings</code> · columns <code>Theirs</code> <code>Ours</code> <code>Value</code> · groups <code>Mapped</code> <code>Changed</code> <code>Not imported</code> · chip <code>Needs a credential</code> · <code>Back</code> / <code>Create agent</code> ·
+      errors <code>Not valid JSON</code> · <code>Not a Vapi or Retell agent</code> · <code>Also paste the Retell LLM JSON</code> ·
+      builder chip <code>Imported from {vendor} · {n} of {total}</code> · link <code>View report</code> ·
+      migration button <code>Update to current contract</code> · sheet <code>Update configuration</code> · columns <code>Before</code> <code>After</code> · <code>Cancel</code> / <code>Apply</code> · chip <code>Updated · republish to take effect</code> ·
+      Home captions <code>1 agent · not tested yet</code> · <code>Tested · publish when ready</code> · <code>Live</code>.
+      Everything else reuses existing strings (<code>Create Agent</code>, <code>Choose a template</code>, <code>Configuration needs updating before saving or previewing</code>). Reasons in DROP_REASONS are copy too — 32 of them, in the brief's mapping table.</div>
+  </div>
+  <div class="notes">
+    <h4>Prototype plan (design/sandbox, additive)</h4>
+    <ul>
+      <li><code>src/lib/agents/agent-import-mappers.ts</code> + <code>.test.ts</code> — <code>detectVendor</code>, <code>mapVapiAssistant</code>, <code>mapRetellAgent</code> (agent + LLM JSON, or merged) → <code>{ name, properties, report: { mapped, changed, dropped }, needsCredential }</code>; <code>LANDS</code> in ng-console tab vocabulary; <code>DROP_REASONS</code>; test: every dropped path has a reason, no retired key is ever emitted, no key-like field is read.</li>
+      <li><code>src/lib/agents/legacy-config-migration.ts</code> + <code>.test.ts</code> — <code>detectRetiredShapes</code> (reuses <code>studio-turn-contract.ts</code> key lists) → <code>proposeCanonical</code> → <code>{ next, rows }</code>; round-trips against <code>getStudioTurnContractErrors</code> = [].</li>
+      <li><code>src/components/console/agent-import-dialog.tsx</code> + test — paste / upload → report (shared <code>agent-import-report.tsx</code> table, also used by the migration sheet); mounted as a third <code>CreateAgentTemplateRow</code> in <code>agents-page.tsx:462–510</code>; <code>console-shell.tsx:2227</code> passes mapper <code>properties</code> instead of <code>{}</code>; recap chip in the builder header reads <code>sessionStorage</code> <code>ng-console.design.09.import-report:&lt;agentId&gt;</code>.</li>
+      <li><code>src/components/console/agent-contract-update-sheet.tsx</code> + test — opened from a button added inside the Alert at <code>agent-config-drawer.tsx:658–664</code>; Apply calls <code>onChange</code> with canonical properties (real save through the authoring session).</li>
+      <li>Defaults: <code>agent-editor-workspace.tsx:183</code> and <code>:227</code> take <code>createDefaultStudioTurnDetectionProperties()</code>; the create modal sends the blank preset's properties.</li>
+      <li>i18n <code>pages.agents.import.*</code> · <code>pages.agents.builder.contractUpdate.*</code> · <code>pages.home.firstSuccess.progress.*</code> in <code>src/lib/i18n/resources/en/common.ts</code>.</li>
+      <li><code>src/lib/observability/types.ts</code>: passive <code>onboarding_stage_reached</code>, <code>agent_import_started</code>, <code>agent_import_reviewed</code>, <code>legacy_config_detected</code>; <code>ProductOperation</code> + <code>agent_import</code>, <code>agent_config_migrate</code>; trackers in <code>src/lib/first-success/analytics.ts</code>; Home caption in <code>home-onboarding.tsx</code> (one line under "Open Agent Studio").</li>
+    </ul>
+    <h4>What writes where</h4>
+    <ul>
+      <li><b>Real properties:</b> imported agent = a real <code>agents_create</code> with mapped properties; migration = a real properties rewrite after Apply (then publish).</li>
+      <li><b>sessionStorage:</b> the import report (no API field); nothing else.</li>
+      <li><b>Never:</b> vendor keys; retired keys; template gallery.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Next</h2>
+<p>Owner answers the five questions in the brief (gallery · default agent · where import lives · migration write ownership · sources). Then: mapper + tests first (pure functions, no UI risk), dialog second, migration sheet third, events alongside; fortify · include · articulate; deploy on <code>design/sandbox</code>; annotated shots to the designer.</p>
+</div>

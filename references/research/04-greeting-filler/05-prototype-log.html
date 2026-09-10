@@ -1,0 +1,178 @@
+<title>Opening Prototype Log</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+  --ok:#1b7f4d; --warn:#9a6700; --bad:#b3261e; --card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1100px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 10px;letter-spacing:-.01em}
+h3{font-size:16px;margin:22px 0 6px}
+p{max-width:78ch;margin:6px 0}
+code,pre{font-family:"JetBrains Mono",monospace;font-size:12.5px}
+code{background:#e9eff3;padding:1px 5px;border-radius:3px}
+pre{background:#0b0f13;color:#e8edf1;padding:14px 16px;border-radius:6px;overflow:auto;line-height:1.6}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:var(--card);padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;font-size:13.5px;margin:12px 0}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--doc-rule);font-weight:600}
+td{padding:9px 12px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:600;border:1px solid}
+.tag.ok{color:var(--ok);border-color:currentColor}.tag.warn{color:var(--warn);border-color:currentColor}.tag.bad{color:var(--bad);border-color:currentColor}
+.note{background:var(--card);border-left:3px solid var(--doc-brand);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;font-size:13.5px}
+.note.warn{border-left-color:var(--warn)}
+ul{margin:6px 0;padding-left:20px}li{margin:4px 0}
+a{color:var(--doc-brand)}
+figure{margin:18px 0 22px}
+figure img{width:100%;border:1px solid var(--doc-rule);border-radius:6px;display:block}
+figcaption{font-size:13px;color:var(--doc-ink-2);margin-top:6px}
+.ascii{background:var(--card);border:1px solid var(--doc-rule);border-radius:6px;padding:14px 16px;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.55;white-space:pre;overflow:auto;color:var(--doc-ink)}
+@media (max-width:900px){.facts{grid-template-columns:1fr 1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 04 · Greeting, filler &amp; disclaimer · step 5 prototype · 2026-09-10</p>
+<h1>Opening Prototype Log</h1>
+<p>The converged direction from <a href="05-directions.html">05-directions.html</a> built additively on the <strong>live Console code</strong> (<code>AgoraIO/ng-console</code>, branch <code>design/sandbox</code>), against the real agent properties. Nothing mocked: every value in the screenshots is read from, and written back to, the same <code>llm</code> / <code>filler_words</code> / <code>parameters.silence_config</code> objects the Console publishes.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Agents › Agent Detail › <strong>Prompt</strong> tab — the <code>Opening</code> section replaces the lone Greeting field. The Advanced half relabels the Filler Words row and adds three inert rows under it.</div>
+  <div><b>Commit</b><code>c4bba4e5</code> on <code>design/sandbox</code> (rebased on <code>origin/staging</code> the same day, so it sits on top of #1443 and #1446).</div>
+  <div><b>Checks</b><code>tsc</code> clean · 306 tests pass across 10 files (composition 8 · drafts 4 · greeting_configs 3 · section 11 · engine rows 2 · plus the existing drawer / detail / workspace suites) · Biome clean on every touched file.</div>
+  <div><b>Evidence</b>9 annotated shots below, captured from the running dev server at 1600×900 @2×.</div>
+</div>
+
+<h2>What was built</h2>
+<div class="ascii">┌ Prompt tab ───────────────────────────────────────────────────────────────┐
+│ System prompt                                                             │
+│ ┌───────────────────────────────────────────────────────────────────────┐ │
+│ │ You are a warm and concise voice agent for Acme.                      │ │
+│ └───────────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+│ Opening                                                                   │
+│   Who speaks first                                    [ Agent │ Caller ]  │
+│   Greeting                                                                │
+│   [ Thanks for calling. I can help with that.                          ]  │
+│   Callers can interrupt the greeting                              (●)     │
+│   Tell the caller it's an AI  ⓘ                                   (●)     │
+│     You're talking to an AI assistant.   English   Edit   Reset           │
+│   Callers hear · You're talking to an AI assistant. Thanks for calling.…  │
+│   After 4 s of silence, says "Are you still there?"   Change              │
+│   [▶ Hear the opening]                                                    │
+│                                                                           │
+│ Failure message                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌ Advanced tab ─────────────────────────────────────────────────────────────┐
+│ ▾ While thinking                                                  (●)     │
+│   Short phrases while the answer is being generated.                      │
+│     Phrases  [ Let me look into that, One moment, Sure, give me a second ]│
+│     After (ms) ──────●──────────────────────────────────────  [ 1500 ]    │
+│     Order    [ Shuffle ⌄ ]                                                │
+│   ⓘ Match the persona            · Requires Engine                ( )     │
+│   ⓘ Keep going after the filler  · Requires Engine                ( )     │
+│   ⓘ During tool calls            · Requires Engine                ( )     │
+└───────────────────────────────────────────────────────────────────────────┘</div>
+
+<table>
+  <thead><tr><th>Piece</th><th>From direction</th><th>What it does on the live model</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Opening section</strong></td><td>A</td><td>Replaces the Greeting <code>&lt;section&gt;</code> in <code>AgentPromptForm</code>, behind an optional <code>opening</code> prop. Agent Detail passes it; the create flow keeps the plain field untouched.</td></tr>
+    <tr><td><strong>Who speaks first</strong></td><td>A</td><td>Agent = the greeting field. Caller = <code>greeting_message: ""</code>, the greeting and both switches disappear, and the last agent-first greeting is restored on the way back.</td></tr>
+    <tr><td><strong>Callers can interrupt the greeting</strong></td><td>A</td><td>Writes <code>llm.greeting_configs.interruptable</code> — a documented field (release notes v2.7) that had no control anywhere. Other <code>greeting_configs</code> keys are preserved on write.</td></tr>
+    <tr><td><strong>Tell the caller it's an AI</strong></td><td>A + B</td><td>Composes <code>&lt;sentence&gt; &lt;greeting&gt;</code> into the real greeting. The locale default is editable per agent with Edit / Reset; the tooltip cites Article 50 and says the sentence is saved as the greeting's first sentence.</td></tr>
+    <tr><td><strong>Callers hear</strong></td><td>A</td><td>Read-only <code>aria-live</code> line showing the exact composed value, or “No greeting. The agent waits for the caller.”</td></tr>
+    <tr><td><strong>Silence recap</strong></td><td>D</td><td>One read-only sentence derived from the real <code>parameters.silence_config</code> (ms → s), with <strong>Change</strong> switching to the Advanced tab. #1446 keeps the only editable home.</td></tr>
+    <tr><td><strong>Hear the opening</strong></td><td>E</td><td>Starts the existing live preview, stops after the first agent turn, and prints <code>Opening · {n} s</code>. Disabled for caller-first and while a preview is already running.</td></tr>
+    <tr><td><strong>While thinking</strong></td><td>C</td><td>i18n values only on the existing Filler Words row: <code>Phrases</code> · <code>After (ms)</code> · <code>Order</code> (Shuffle / In order). Same fields, same writes. The minimum on the wait threshold went 0 → 100 to match the contract.</td></tr>
+    <tr><td><strong>Three inert rows</strong></td><td>C</td><td>Match the persona · Keep going after the filler · During tool calls. Disabled switches, caption <code>Requires Engine</code>, tooltip naming the ticket; the choice is kept in <code>sessionStorage</code> only.</td></tr>
+  </tbody>
+</table>
+
+<h2>Evidence</h2>
+
+<figure><img src="05-shots/01-who-speaks-first.png" alt="Who speaks first toggle, annotated"><figcaption>1 · Who speaks first — Agent or Caller.</figcaption></figure>
+<figure><img src="05-shots/02-interruptible-greeting.png" alt="Callers can interrupt the greeting switch, annotated"><figcaption>2 · <code>greeting_configs.interruptable</code>, reachable without raw JSON.</figcaption></figure>
+<figure><img src="05-shots/03-disclosure-sentence.png" alt="Disclosure sentence with Edit, annotated"><figcaption>3 · The disclosure sentence, editable per agent. Legal copy — needs owner sign-off.</figcaption></figure>
+<figure><img src="05-shots/04-composed-opening.png" alt="Callers hear line, annotated"><figcaption>4 · The composed opening, shown not implied.</figcaption></figure>
+<figure><img src="05-shots/05-silence-recap.png" alt="Silence recap line, annotated"><figcaption>5 · Silence recovery, recapped read-only, with Change linking to Advanced.</figcaption></figure>
+<figure><img src="05-shots/06-caller-first.png" alt="Caller-first state, annotated"><figcaption>6 · Caller-first says so in words; the greeting field and both switches are gone.</figcaption></figure>
+<figure><img src="05-shots/07-hear-disabled.png" alt="Hear the opening disabled, annotated"><figcaption>7 · Disabled, because there is nothing to hear.</figcaption></figure>
+<figure><img src="05-shots/08-while-thinking.png" alt="While thinking row, annotated"><figcaption>8 · Filler Words in user words — labels only, same writes.</figcaption></figure>
+<figure><img src="05-shots/09-requires-engine-rows.png" alt="Three Requires Engine rows, annotated"><figcaption>9 · Three Engine follow-ups, named and inert.</figcaption></figure>
+
+<h2>How it reads and writes the real model</h2>
+<table>
+  <thead><tr><th>Fact</th><th>Source in ng-console</th><th>Rule applied</th></tr></thead>
+  <tbody>
+    <tr><td>Greeting</td><td><code>llm.greeting_message</code>, or <code>mllm.greeting_message</code> when <code>mllm.enable</code></td><td>Both paths already existed in <code>handlePromptDraftChange</code>; the section only changes what string is written.</td></tr>
+    <tr><td>Disclosure on/off</td><td>derived, not stored</td><td><code>splitOpening()</code> tries the agent's stored sentence, then the locale default. A greeting that no longer starts with a known sentence reads as disclosure off; a sentence that continues into another word (<code>…assistant.com</code>) never matches.</td></tr>
+    <tr><td>Caller-first</td><td><code>greeting_message === ""</code></td><td>Derived, with a local override so clearing the field by hand does not flip the toggle mid-typing.</td></tr>
+    <tr><td>Interruptible greeting</td><td><code>llm.greeting_configs.interruptable</code></td><td>New <code>greetingConfigs</code> member on <code>OrchestrationDraft</code>; written through the SDK's index signature (untyped in agora-agents 2.4.0), unknown sibling keys preserved.</td></tr>
+    <tr><td>Silence recap</td><td><code>parameters.silence_config.{timeout_ms, content}</code></td><td>Read-only. ms → s for display; the editable home stays the Advanced row from #1446, so there is one source of truth.</td></tr>
+    <tr><td>Filler phrases / wait / order</td><td><code>filler_words.*</code></td><td>Untouched structurally; only the labels changed and the wait minimum now matches the documented 100 ms floor.</td></tr>
+    <tr><td>Edited sentence · Engine intent</td><td><code>sessionStorage</code>, key per agent</td><td><code>ng-console.design.04.opening:&lt;agentId&gt;</code> and <code>…filler-engine:&lt;agentId&gt;</code>. Never written to <code>properties</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>Deviations from the mock, and why</h2>
+<ul>
+  <li><strong>Disclosure is OFF by default for every agent</strong>, including new ones. The directions recommend ON for new agents; that is owner question 1 and it needs the legal sign-off on the sentence first. Turning it on never rewrites a saved greeting silently — the builder sees the composed line change as they flip the switch.</li>
+  <li><strong>No preview-gate change.</strong> The mock implies caller-first should be previewable; the gate at <code>agent-editor-workspace.tsx</code> still blocks an empty greeting. Left alone in this slice — it is a shared code path with the create flow. Logged as next.</li>
+  <li><strong>The hardcoded “Thanks for calling…” fallback stays.</strong> <code>agent-detail-page.tsx</code> substitutes it when an agent has no greeting, which fights caller-first. Not touched: it is pre-existing behaviour outside this direction. Logged as a finding.</li>
+  <li><strong>Static preview turn order not fixed.</strong> The mock preview shows the caller before the agent; unrelated component, logged.</li>
+  <li><strong>Verdict line is a duration, not a transcript.</strong> “Hear the opening” prints <code>Opening · {n} s</code> from the live preview's own agent-state transitions. The directions' richer transcript line would need preview internals changed.</li>
+</ul>
+
+<h2>Passes</h2>
+<table>
+  <thead><tr><th>Pass</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>Fortify · empty</td><td><span class="tag ok">ok</span> Empty greeting = caller-first, stated in words. Empty silence config = “Stays quiet if the caller goes silent”. No agent id = drafts fall back to in-memory defaults.</td></tr>
+    <tr><td>Fortify · loading</td><td><span class="tag ok">ok</span> The section reads the builder's properties, which are already resolved when the Prompt tab renders; no new query.</td></tr>
+    <tr><td>Fortify · error</td><td><span class="tag ok">ok</span> Preview errors and the “already running” state disable the button; a failed preview clears the pending state instead of hanging.</td></tr>
+    <tr><td>Fortify · edge</td><td><span class="tag ok">ok</span> Round-trip proven for edited sentences, unknown prefixes, disclosure-only greetings, trailing whitespace while typing, and agent switches. sessionStorage unavailable → in-memory defaults.</td></tr>
+    <tr><td>Fortify · MLLM</td><td><span class="tag ok">ok</span> Realtime agents hide the interrupt switch and the silence recap (<code>greeting_configs</code> is llm-only, <code>silence_config</code> does not apply) and say so in one line.</td></tr>
+    <tr><td>Include · names</td><td><span class="tag ok">ok</span> Toggle group, switches and the sentence field all carry accessible names; the composed line is <code>aria-live="polite"</code>; the tooltip trigger has its text as its label.</td></tr>
+    <tr><td>Include · strokes</td><td><span class="tag warn">finding</span> Unchanged from 07: the Console's control border token <code>--input</code> = <code>--border-strong</code> is about 1.7:1 on white, below the 3:1 the design office enforces with <code>--stroke</code>. The section uses the Console's own primitives on purpose; the token is a design-system finding, not this slice's fix.</td></tr>
+    <tr><td>Articulate · copy</td><td><span class="tag warn">needs a yes</span> Only the proposed set from 05-directions. The default sentence <em>“You're talking to an AI assistant.”</em> is legal copy and needs owner sign-off before it ships.</td></tr>
+    <tr><td>Measure</td><td><span class="tag ok">wired</span> <code>ai_disclosure_enabled</code> · <code>caller_first_selected</code> · <code>greeting_previewed</code> added to the observability taxonomy and fired from the section.</td></tr>
+  </tbody>
+</table>
+
+<h2>Files</h2>
+<pre>src/lib/agents/greeting-composition.ts            compose / split / caller-first, with the prefix rules
+src/lib/agents/greeting-composition.test.ts        8 cases (round-trip · toggle off · edited sentence · unknown prefix · …)
+src/lib/agents/opening-draft.ts                    sessionStorage per agent: sentence + Engine-row intent
+src/lib/agents/opening-draft.test.ts               4 cases (per agent · blank · corrupt · booleans)
+src/components/console/agent-opening-section.tsx   the section
+src/components/console/agent-opening-section.test.tsx   11 cases
+src/components/console/agent-filler-engine-rows.tsx     three inert rows
+src/components/console/agent-filler-engine-rows.test.tsx 2 cases
+src/lib/agents/orchestration-contracts.ts          + OrchestrationGreetingConfigsDraft
+src/lib/agents/orchestration-properties.ts         read/write llm.greeting_configs.interruptable
+src/lib/agents/orchestration-greeting-configs.test.ts   3 cases (read · preserve siblings · round-trip)
+src/components/console/agent-editor-workspace.tsx  optional `opening` prop on AgentPromptForm
+src/components/console/agent-detail-page.tsx       passes opening + greetingConfigs patch
+src/components/console/agent-config-drawer.tsx     agentId prop · Order labels · engine rows mount · min 100
+src/components/console/agent-advanced-page.tsx     passes agentId
+src/lib/i18n/resources/en/common.ts                pages.agents.opening.* + filler relabels
+src/lib/observability/types.ts                     3 new passive events</pre>
+
+<div class="note warn"><strong>Screenshots were taken through a throwaway harness route, not a signed-in Console.</strong> The design-preview guest cannot open an agent — every backend call answers 401 — so a temporary route mounted the real <code>AgentPromptForm</code> (with the <code>opening</code> prop) and the real <code>AdvancedSharedSection</code> against fixture properties. The harness was deleted before the commit; it is not on the branch. Every component, every write path and every string in the shots is the shipped code.</div>
+
+<h2>Next</h2>
+<ul>
+  <li>Owner answers the six questions in <a href="00-brief.md">00-brief.md</a> — above all: <strong>default ON for new agents?</strong> and <strong>who authors the disclosure sentence?</strong> (the proposed en sentence is legal copy).</li>
+  <li>Copy yes/no on the proposed set.</li>
+  <li>Deploy a Vercel preview and put it in front of the designer; feedback lands in <code>07-review.md</code>.</li>
+  <li>Deferred, logged as findings: the preview gate on an empty greeting; the hardcoded greeting fallback in <code>agent-detail-page.tsx</code>; the reversed turn order in the static preview mock; the Greeting field's <code>aria-label</code> mismatch (fixed here, but only on the Detail path).</li>
+  <li>When the Engine ships <code>llm.disclosure_message</code> (868ker6zx), the prefix composition retires and the sessionStorage sentence moves into properties.</li>
+</ul>
+</div>
