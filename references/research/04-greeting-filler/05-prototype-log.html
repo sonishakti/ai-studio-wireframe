@@ -33,6 +33,9 @@ tr:last-child td{border-bottom:0}
 ul{margin:6px 0;padding-left:20px}li{margin:4px 0}
 a{color:var(--doc-brand)}
 figure{margin:18px 0 22px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pair figure{margin:8px 0 14px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
 figure img{width:100%;border:1px solid var(--doc-rule);border-radius:6px;display:block}
 figcaption{font-size:13px;color:var(--doc-ink-2);margin-top:6px}
 .ascii{background:var(--card);border:1px solid var(--doc-rule);border-radius:6px;padding:14px 16px;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.55;white-space:pre;overflow:auto;color:var(--doc-ink)}
@@ -48,7 +51,7 @@ figcaption{font-size:13px;color:var(--doc-ink-2);margin-top:6px}
   <div><b>Where it lands</b>Agents › Agent Detail › <strong>Prompt</strong> tab — the <code>Opening</code> section replaces the lone Greeting field. The Advanced half relabels the Filler Words row and adds three inert rows under it.</div>
   <div><b>Commit</b><code>c4bba4e5</code> on <code>design/sandbox</code> (rebased on <code>origin/staging</code> the same day, so it sits on top of #1443 and #1446).</div>
   <div><b>Checks</b><code>tsc</code> clean · 306 tests pass across 10 files (composition 8 · drafts 4 · greeting_configs 3 · section 11 · engine rows 2 · plus the existing drawer / detail / workspace suites) · Biome clean on every touched file.</div>
-  <div><b>Evidence</b>9 annotated shots below, captured from the running dev server at 1600×900 @2×.</div>
+  <div><b>Preview</b><a href="https://ng-console-inisu4mzl-agoraio.vercel.app">ng-console-inisu4mzl-agoraio.vercel.app</a> — git-free export of <code>c4bba4e5</code>, guest mode. As with 07, a guest cannot open an agent and the SSO handoff to console-staging still answers 400, so the section is only reachable there once the Console team aligns the transfer code. Evidence below is captured from the running app.</div>
 </div>
 
 <h2>What was built</h2>
@@ -98,7 +101,22 @@ figcaption{font-size:13px;color:var(--doc-ink-2);margin-top:6px}
   </tbody>
 </table>
 
-<h2>Evidence</h2>
+<h2>Before and after</h2>
+<p>Same fixture agent, same components, two commits: <code>6ffb3118</code> (design/sandbox before this slice) and <code>c4bba4e5</code> (after). No annotations, so nothing is covered.</p>
+<div class="pair">
+  <figure><img src="05-shots/before-prompt-tab.png" alt="Prompt tab before: a lone Greeting field"><figcaption>Before · Prompt tab. One Greeting field with a helper line; who speaks first, interruptibility and disclosure have no home.</figcaption></figure>
+  <figure><img src="05-shots/after-prompt-tab.png" alt="Prompt tab after: the Opening section"><figcaption>After · Prompt tab. The Opening section: who speaks first, greeting, interruptible greeting, disclosure, what callers hear, silence recap, Hear the opening.</figcaption></figure>
+</div>
+<div class="pair">
+  <figure><img src="05-shots/after-prompt-tab-disclosure-on.png" alt="After, disclosure on"><figcaption>After · disclosure on. The sentence appears with English · Edit, and "Callers hear" shows the composed greeting.</figcaption></figure>
+  <figure><img src="05-shots/after-prompt-tab-caller-first.png" alt="After, caller speaks first"><figcaption>After · Caller speaks first. Greeting and both switches leave; the state is stated in words; Hear the opening is disabled.</figcaption></figure>
+</div>
+<div class="pair">
+  <figure><img src="05-shots/before-advanced-filler.png" alt="Advanced before: Filler Words row"><figcaption>Before · Advanced. "Filler Words · Filler content · Response Wait Threshold (ms) · Selection Rule: shuffle".</figcaption></figure>
+  <figure><img src="05-shots/after-advanced-filler.png" alt="Advanced after: While thinking row and three inert rows"><figcaption>After · Advanced. "While thinking · Phrases · After (ms) · Order: Shuffle", then Match the persona · Keep going after the filler · During tool calls, each Requires Engine.</figcaption></figure>
+</div>
+
+<h2>Annotated evidence</h2>
 
 <figure><img src="05-shots/01-who-speaks-first.png" alt="Who speaks first toggle, annotated"><figcaption>1 · Who speaks first — Agent or Caller.</figcaption></figure>
 <figure><img src="05-shots/02-interruptible-greeting.png" alt="Callers can interrupt the greeting switch, annotated"><figcaption>2 · <code>greeting_configs.interruptable</code>, reachable without raw JSON.</figcaption></figure>
