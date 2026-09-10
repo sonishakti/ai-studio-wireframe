@@ -1,0 +1,365 @@
+<title>Session Replay Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: mocks of the live Console call/session sheet in dark, as the designer sees it. Scaffold = research/07. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a; --caller:#7dd3fc;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:78ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+/* ---- the sheet mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:12.5px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sh{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600}
+.sh .r{margin-left:auto;display:flex;gap:6px;font-weight:400}
+.srow{display:flex;justify-content:space-between;gap:10px;padding:5px 12px;border-bottom:1px solid var(--line);font-size:12px}
+.srow .k{color:var(--ink-2)}
+.tabs{display:flex;gap:14px;padding:8px 12px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+.tabs span{padding-bottom:7px}
+.tabs .on{color:var(--ink);border-bottom:2px solid var(--brand)}
+.player{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-size:11px;color:var(--ink-2);font-family:"JetBrains Mono",monospace}
+.pb{width:22px;height:22px;border:1px solid var(--stroke);border-radius:6px;display:grid;place-items:center;color:var(--ink);font-size:10px;flex:none;background:var(--panel-2)}
+.range{flex:1;height:4px;border-radius:2px;background:linear-gradient(to right,var(--brand) 0 38%,var(--stroke) 38% 100%)}
+.wave{position:relative;flex:1;height:46px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);overflow:hidden}
+.wave i{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--ink-3);opacity:.5}
+.wave b{position:absolute;width:3px;border-radius:1px}
+.wave b.c{background:var(--caller);bottom:50%;opacity:.8}
+.wave b.a{background:var(--ink-2);top:50%;opacity:.75}
+.wave em{position:absolute;top:2px;bottom:2px;width:1px;background:var(--warn);opacity:.8;font-style:normal}
+.wave em::after{content:attr(data-l);position:absolute;top:-1px;left:3px;font-size:9px;color:var(--warn)}
+.wave .head{position:absolute;top:0;bottom:0;width:2px;background:var(--brand)}
+.note{padding:6px 12px;font-size:11.5px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.tl{display:grid;grid-template-columns:34px 62px 1fr;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line);font-size:12px;align-items:start}
+.tl:last-child{border-bottom:0}
+.tl .ts{font-family:"JetBrains Mono",monospace;color:var(--brand);font-size:11px}
+.tl.dead .ts{color:var(--ink-3)}
+.tl .who{color:var(--ink-2)}
+.tl.on{background:var(--brand-soft);box-shadow:inset 2px 0 0 var(--brand)}
+.tl.sel{background:var(--row);box-shadow:inset 2px 0 0 var(--ok)}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--stroke);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--ink-2);background:var(--panel-2);vertical-align:1px}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.turn{padding:7px 12px;border-bottom:1px solid var(--line);font-size:12px}
+.turn .th{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.turn .th .n{font-family:"JetBrains Mono",monospace;color:var(--ink-3);font-size:11px}
+.lat{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--ink-3);margin-left:auto}
+.turn .l{display:grid;grid-template-columns:62px 1fr;gap:8px;padding:2px 0}
+.turn .l .who{color:var(--ink-2)}
+.tree{font-family:"JetBrains Mono",monospace;font-size:11px;line-height:1.65;color:var(--ink-2);padding:6px 12px;border-bottom:1px solid var(--line)}
+.tree .k{color:var(--ink)}
+.tree .red{color:var(--warn);border:1px solid var(--warn);border-radius:3px;padding:0 4px;font-size:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:4px 9px;font-size:11.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.menu{position:relative}
+.menu div{position:absolute;right:0;top:28px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:4px 0;min-width:170px;z-index:2;font-weight:400}
+.menu div span{display:block;padding:5px 10px;font-size:11.5px}
+.crumb{font-size:11.5px;color:var(--ink-3);margin-bottom:8px}
+.crumb b{color:var(--ink);font-weight:500}
+.blk{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.blk>div{background:var(--panel);padding:8px 12px;font-size:11.5px}
+.blk b{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px;font-weight:600}
+.bar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--panel-2);border-top:1px solid var(--line);font-size:11.5px}
+.bar .r{margin-left:auto}
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule)}
+table.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule)}
+table.audit td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td b{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--doc-brand);display:block}
+.two{display:grid;grid-template-columns:1.25fr .75fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:12px 16px;font-size:13.5px}
+.plan ol{margin:6px 0;padding-left:20px}.plan li{margin:5px 0}
+@media (max-width:980px){.dir,.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 10 · Session &amp; call logs · step 5 diverge</p>
+<h1>Session Replay Directions</h1>
+<p><strong>JTBD.</strong> When a call went wrong and I'm looking at it after the fact, I want to hear and read exactly what happened, turn by turn, so I can name the cause and change the agent instead of guessing.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Monitor › Call History › <code>CallDetailSheet</code> (frozen surface → additive) and Session History › <code>SessionDetailSheet</code>. Lists untouched.</div>
+  <div><b>Agora facts</b><code>history.contents[].speech_start_ms/end_ms</code> (v2.8; only when <code>llm.vendor='custom'</code>; post-call via webhook 103) · <code>turns[].end.type</code> ok · interrupted · ignored · error (v2.5, 7 days) · <code>sal_mode=recognition</code> · <code>opt_out</code>.</div>
+  <div><b>Console today</b><code>recordFileUrl</code> + <code>transcript[{role, content}]</code> + <code>perTurn</code> latency are real. No timestamps, no turns, no payloads (Events <code>rawDetail</code> = 4 metadata fields), no download caller, no URL for a sheet.</div>
+  <div><b>Locks</b>Label is Monitor; don't re-split. Wave 1: transcript + trace in one view, payloads inline per turn, "separate Raw tab skipped". Never fake a clock — say when alignment data is missing.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses, mocked in the sheet grammar the Console has (summary rows · audio row · tabs · panel). Copy is <em>proposed</em>. Sky bars = caller, grey = agent — a turn map from timestamps, not audio amplitude.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Aligned replay</h3><div class="who">Player and transcript share one clock. Works with today's data; degrades honestly without timestamps.</div></header>
+    <div class="mock">
+      <div class="sheet">
+        <div class="sh">Call detail <span class="r"><span class="chip ok">Completed</span></span></div>
+        <div class="srow"><span class="k">From → To</span><span>+1 415 555 0142 → +1 628 555 0199</span></div>
+        <div class="srow"><span class="k">Duration</span><span>2:41</span></div>
+        <div class="player"><span class="pb">▶</span><span>0:07 / 2:41</span>
+          <div class="wave"><i></i>
+            <b class="a" style="left:3%;height:14px"></b><b class="c" style="left:9%;height:16px"></b><b class="a" style="left:15%;height:13px"></b><b class="c" style="left:27%;height:14px"></b><b class="a" style="left:31%;height:16px"></b><b class="c" style="left:47%;height:17px"></b><b class="a" style="left:57%;height:14px"></b><b class="c" style="left:70%;height:11px"></b><b class="a" style="left:76%;height:15px"></b><b class="a" style="left:90%;height:12px"></b>
+            <em data-l="T3" style="left:46%"></em><em data-l="T5" style="left:70%"></em><span class="head" style="left:14%"></span>
+          </div></div>
+        <div class="tabs"><span class="on">Transcript</span><span>Latency</span><span>Events</span><span>Structured output</span></div>
+        <div class="tl"><span class="ts">0:00</span><span class="who">Agent</span><span>Hi, thanks for calling Acme. How can I help?</span></div>
+        <div class="tl"><span class="ts">0:04</span><span class="who">Customer</span><span>I want to change my delivery address.</span></div>
+        <div class="tl on"><span class="ts">0:07</span><span class="who">Agent</span><span>Sure. What's the new address?</span></div>
+        <div class="tl"><span class="ts">0:12</span><span class="who">Customer</span><span>Hello? Are you there?</span></div>
+        <div class="tl"><span class="ts">0:14</span><span class="who">Agent</span><span>Sorry — say the street name again?</span></div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">Same sheet, call without timestamps (every managed-vendor call today):</div>
+      <div class="sheet">
+        <div class="player"><span class="pb">▶</span><span>1:01 / 2:41</span><div class="range"></div><span class="pb">↗</span></div>
+        <div class="note">No timestamps for this call</div>
+        <div class="tl dead"><span class="ts">—</span><span class="who">Customer</span><span>I want to change my delivery address.</span></div>
+        <div class="tl dead"><span class="ts">—</span><span class="who">Agent</span><span>Sure. What's the new address?</span></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Ships on real data now (<code>recordFileUrl</code>, <code>transcript</code>); timestamps light it up the day the backend forwards webhook 103.</li>
+        <li class="pro">One clock is the pattern all four competitors expose; 868kbyqfx asks for it verbatim.</li>
+        <li class="pro">Reuses <code>BipolarWaveform</code> (caller · agent · ambient tones, markers) — a turn map, labelled as one, never a fake waveform.</li>
+        <li class="pro">The untimed state is one line and a dead timestamp column — the honesty floor without a banner.</li>
+        <li class="con">Timestamps are gated on <code>llm.vendor='custom'</code>; most calls stay in the degraded state until Engine lifts it.</li>
+        <li class="con">Doesn't explain <em>why</em> 0:12 happened — needs B.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Turns ladder</h3><div class="who">The transcript as turns: per-turn latency and why each turn ended, straight from the <code>turns</code> endpoint.</div></header>
+    <div class="mock">
+      <div class="sheet">
+        <div class="tabs"><span class="on">Transcript</span><span>Latency</span><span>Events</span><span>Structured output</span></div>
+        <div class="turn"><div class="th"><span class="n">T1</span><span class="chip">Greeting</span><span class="lat">—</span></div>
+          <div class="l"><span class="who">Agent</span><span>Hi, thanks for calling Acme. How can I help?</span></div></div>
+        <div class="turn"><div class="th"><span class="n">T2</span><span class="lat">ASR 210 · LLM 320 · TTS 110 · 640 ms</span></div>
+          <div class="l"><span class="who">Customer</span><span>I want to change my delivery address.</span></div>
+          <div class="l"><span class="who">Agent</span><span>Sure. What's the new address?</span></div></div>
+        <div class="turn" style="background:var(--row)"><div class="th"><span class="n">T3</span><span class="chip warn" title="Customer started speaking">Interrupted</span><span class="lat">ASR 190 · LLM 1 812 · TTS —</span></div>
+          <div class="l"><span class="who">Agent</span><span>Let me look that u—</span></div>
+          <div class="l"><span class="who">Customer</span><span>Hello? Are you there?</span></div></div>
+        <div class="turn"><div class="th"><span class="n">T4</span><span class="chip" title="Semantic end-of-speech: no reply needed">Ignored</span><span class="lat">ASR 230</span></div>
+          <div class="l"><span class="who">Customer</span><span>Um…</span></div></div>
+        <div class="turn"><div class="th"><span class="n">T5</span><span class="chip bad" title="LLM_REQUEST_ERR">Error</span><span class="lat">ASR 205 · LLM —</span></div>
+          <div class="l"><span class="who">Customer</span><span>Elm Street, number twelve.</span></div>
+          <div class="l"><span class="who">Agent</span><span>Please hold on a second.</span></div></div>
+        <div class="note">Requires backend · turns</div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Answers P1's question in the transcript: T3 was slow (LLM 1 812 ms) <em>and</em> interrupted — the cause sits next to the words.</li>
+        <li class="pro">Enum is the Engine's own: <code>end.type</code> ok · interrupted · ignored · error; <code>caused_by</code> behind the title. No invented taxonomy.</li>
+        <li class="pro">Per-turn latency already exists (<code>perTurn</code> 3 segments) — the ladder is real today; only the badges wait.</li>
+        <li class="con">Turns don't map 1:1 onto transcript lines (greeting, silence prompts, ignored turns have no agent line) — the pairing needs a rule and a test.</li>
+        <li class="con">Four badges + tooltips is the copy ceiling; a colour-only badge fails a11y, so each needs a word.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · Provider payloads</h3><div class="who">Per-turn request/response JSON with <code>[redacted]</code> badges and copy. Replaces the raw-text Events dump.</div></header>
+    <div class="mock">
+      <div class="sheet">
+        <div class="tabs"><span>Transcript</span><span>Latency</span><span>Events</span><span class="on">Payloads</span></div>
+        <div class="srow"><span class="k">Turn</span><span>T2 · 0:04 <span class="chip">⌄</span></span></div>
+        <div class="tree">▾ <span class="k">ASR</span> deepgram · 210 ms<br>&nbsp; request&nbsp; { model: "nova-3", language: "en-US", Authorization: <span class="red">[redacted]</span> }<br>&nbsp; response { transcript: "I want to change my delivery address", confidence: 0.94 }</div>
+        <div class="tree">▾ <span class="k">LLM</span> openai gpt-4o-mini · 320 ms<br>&nbsp; request&nbsp; { messages: [3], tools: [2], api_key: <span class="red">[redacted]</span> }<br>&nbsp; response { content: "Sure. What's the new address?", tool_calls: [] }</div>
+        <div class="tree">▸ <span class="k">TTS</span> minimax · 110 ms</div>
+        <div class="bar"><span class="btn">Copy JSON</span></div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">What the tab shows on every call today:</div>
+      <div class="sheet">
+        <div class="tabs"><span>Transcript</span><span>Latency</span><span>Events</span><span class="on">Payloads</span></div>
+        <div class="note">No payloads for this call · Requires Engine</div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Maps onto 868kbyqga's outcome: "diagnose STT, LLM, and TTS behavior for one session without exposing secrets".</li>
+        <li class="pro">Redaction as a badge on the key, not a hole — the server's literal <code>[redacted]</code> becomes visible policy.</li>
+        <li class="con">Nothing to show: the Engine contract has no payloads and <code>rawDetail</code> is four metadata fields. The whole tab is an empty state.</li>
+        <li class="con">A separate tab is what Wave 1 research rejected ("wouldn't cross-reference a separate tab back to turn 14"); Retell and ElevenLabs weave tool calls into the transcript.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · Session page</h3><div class="who">A routed, shareable <code>/agent-analytics/sessions/$sessionId</code> that calls and Studio-preview sessions both open. Participants block, inert until SAL.</div></header>
+    <div class="mock">
+      <div class="crumb">Monitor › Sessions › <b>a3f9…c21e</b></div>
+      <div class="sheet">
+        <div class="sh">Session <span class="r"><span class="btn">Copy link</span><span class="chip ok">Completed</span></span></div>
+        <div class="blk">
+          <div><b>Participants</b>Agent · Aria<br>Customer · +1 415 555 0142<br><span style="color:var(--ink-3)">Speaker 3 · unidentified</span></div>
+          <div><b>Correlation</b>Channel · acme-inbound-7f2<br>Agent UID · 90021<br>Region · NORTH_AMERICA</div>
+        </div>
+        <div class="note">Speaker identity requires Engine · SAL recognition</div>
+        <div class="player"><span class="pb">▶</span><span>0:07 / 2:41</span><div class="range"></div><span class="pb">↗</span></div>
+        <div class="tabs"><span class="on">Transcript</span><span>Latency</span><span>Events</span><span>Structured output</span></div>
+        <div class="tl on"><span class="ts">0:07</span><span class="who">Agent</span><span>Sure. What's the new address?</span></div>
+        <div class="tl"><span class="ts">0:12</span><span class="who">Customer</span><span>Hello? Are you there?</span></div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">Same page, a Studio preview session:</div>
+      <div class="sheet">
+        <div class="sh">Session <span class="r"><span class="btn">Copy link</span><span class="chip">Studio preview</span></span></div>
+        <div class="srow"><span class="k">Audio</span><span>No recording</span></div>
+        <div class="tabs"><span class="on">Transcript</span><span>Latency</span><span>Events</span></div>
+        <div class="note">No transcript for this session · Requires backend</div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Closes gap 7 (no URL) and gap 5 (non-telephony detail) in one move; the ticket's "one complete detail record".</li>
+        <li class="pro">A page doesn't clip: waveform, transcript and ladder get width a sheet can't give.</li>
+        <li class="pro">Participants block is the seat for diarization (868kyqzt1) — present, labelled inert, never a guessed identity.</li>
+        <li class="con">A new route reopens open tension #2 (Call History vs Session History) — an owner call, not a design call.</li>
+        <li class="con">Largest change on a frozen surface; two sheets plus a page = three detail views until the merge lands.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · Save as test + export</h3><div class="who">Pick a transcript range → pre-filled simulation case (F-Eval whitespace). Download recording and transcript via the orphan endpoint.</div></header>
+    <div class="mock">
+      <div class="sheet">
+        <div class="sh">Call detail <span class="r"><span class="menu"><span class="btn">Download ⌄</span><div><span>Recording</span><span>Transcript (.txt)</span><span>Transcript (.json)</span></div></span></span></div>
+        <div class="player"><span class="pb">▶</span><span>0:12 / 2:41</span><div class="range"></div></div>
+        <div class="tabs"><span class="on">Transcript</span><span>Latency</span><span>Events</span><span>Structured output</span></div>
+        <div class="tl"><span class="ts">0:04</span><span class="who">Customer</span><span>I want to change my delivery address.</span></div>
+        <div class="tl sel"><span class="ts">0:07</span><span class="who">Agent</span><span>Sure. What's the new address?</span></div>
+        <div class="tl sel"><span class="ts">0:12</span><span class="who">Customer</span><span>Hello? Are you there?</span></div>
+        <div class="tl sel"><span class="ts">0:14</span><span class="who">Agent</span><span>Sorry — say the street name again?</span></div>
+        <div class="bar">3 lines <span class="r"><span class="btn primary">Save as test</span></span></div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">Pre-filled case (Run simulations panel, feature 15):</div>
+      <div class="sheet">
+        <div class="srow"><span class="k">Persona</span><span>Caller changing a delivery address</span></div>
+        <div class="srow"><span class="k">Transcript</span><span>0:07 – 0:14 · 3 lines</span></div>
+        <div class="srow"><span class="k">PASS if…</span><span style="color:var(--ink-3)">agent confirms the street within one turn</span></div>
+        <div class="note">Requires simulations · 15 · Dec</div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Export is real today: <code>/api/telephony/download-audio</code> exists with an allowlist and no caller; transcript files are client-side.</li>
+        <li class="pro">Save-as-test is the F-Eval whitespace nobody ships; the persona and transcript are pre-filled, only the assertion is asked.</li>
+        <li class="con">Range selection adds a mode to a read-only list; keyboard selection is costly to get right.</li>
+        <li class="con">The case form belongs to feature 15 (Dec) — the button would sit disabled for three months.</li>
+        <li class="con">Menu + bar + form = the heaviest copy load of the five.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<p>1–5 per lens. States = no recording · no timestamps · running · error · redacted · opt-out. A11y = native media controls, keyboard seek, transcript as a list with roles.</p>
+<table class="audit">
+  <thead><tr><th>Direction</th><th>Protocol fit</th><th>Perception</th><th>CTA / words</th><th>States</th><th>A11y</th><th>i18n</th><th>Σ</th></tr></thead>
+  <tbody>
+    <tr><td><b>A</b> Aligned replay</td><td>5 — additive in the existing sheet</td><td>5 — playhead + active line move together</td><td>4 — one new line</td><td>4 — all but opt-out (backend)</td><td>4 — native audio stays; list needs roles + <code>aria-current</code></td><td>5 — time format only</td><td><b>27</b></td></tr>
+    <tr><td><b>B</b> Turns ladder</td><td>4 — restructures the panel, inside the tab</td><td>4 — chunked by turn; colour needs a word</td><td>3 — four badges + titles</td><td>3 — badges wait on backend; error is real</td><td>4 — text badges; focusable titles</td><td>4 — enum-keyed titles</td><td><b>22</b></td></tr>
+    <tr><td><b>C</b> Provider payloads</td><td>2 — new tab vs Wave 1; nothing to render</td><td>3 — fifth tab dilutes</td><td>3 — tab + copy + selector</td><td>2 — one empty state until Engine</td><td>3 — JSON tree = treegrid</td><td>4</td><td><b>17</b></td></tr>
+    <tr><td><b>D</b> Session page</td><td>3 — new route; tension #2 (owner)</td><td>4 — no clipping, ordered blocks</td><td>4 — Copy link + two blocks</td><td>3 — participants + web transcript inert</td><td>4 — page heading, landmarks</td><td>4 — <code>formatSessionType</code> must move to i18n</td><td><b>22</b></td></tr>
+    <tr><td><b>E</b> Save as test + export</td><td>3 — export real; save-as-test waits on 15</td><td>3 — selection competes with seek</td><td>2 — menu + bar + form</td><td>3 — form has no states yet</td><td>3 — keyboard range selection</td><td>4</td><td><b>15</b></td></tr>
+  </tbody>
+</table>
+
+<h2>Verdict — A, converged</h2>
+<div class="two">
+  <div class="mock" style="border:1px solid var(--line);border-radius:8px">
+    <div class="sheet">
+      <div class="sh">Call detail <span class="r"><span class="btn">Copy link</span><span class="menu"><span class="btn">Download ⌄</span></span><span class="chip ok">Completed</span></span></div>
+      <div class="srow"><span class="k">From → To</span><span>+1 415 555 0142 → +1 628 555 0199</span></div>
+      <div class="srow"><span class="k">Duration</span><span>2:41</span></div>
+      <div class="player"><span class="pb">▶</span><span>0:12 / 2:41</span>
+        <div class="wave"><i></i>
+          <b class="a" style="left:3%;height:14px"></b><b class="c" style="left:9%;height:16px"></b><b class="a" style="left:15%;height:13px"></b><b class="c" style="left:27%;height:14px"></b><b class="a" style="left:31%;height:16px"></b><b class="c" style="left:47%;height:17px"></b><b class="a" style="left:57%;height:14px"></b><b class="c" style="left:70%;height:11px"></b><b class="a" style="left:76%;height:15px"></b><b class="a" style="left:90%;height:12px"></b>
+          <em data-l="T3" style="left:46%"></em><em data-l="T5" style="left:70%"></em><span class="head" style="left:26%"></span>
+        </div></div>
+      <div class="tabs"><span class="on">Transcript</span><span>Latency</span><span>Events</span><span>Structured output</span></div>
+      <div class="tl"><span class="ts">0:00</span><span class="who">Agent</span><span>Hi, thanks for calling Acme. How can I help? <span class="chip">Greeting</span></span></div>
+      <div class="tl"><span class="ts">0:04</span><span class="who">Customer</span><span>I want to change my delivery address.</span></div>
+      <div class="tl"><span class="ts">0:07</span><span class="who">Agent</span><span>Sure. What's the new address?</span></div>
+      <div class="tl on"><span class="ts">0:12</span><span class="who">Agent</span><span>Let me look that u— <span class="chip warn" title="Customer started speaking · LLM 1 812 ms">Interrupted</span></span></div>
+      <div class="tl"><span class="ts">0:12</span><span class="who">Customer</span><span>Hello? Are you there?</span></div>
+      <div class="tl"><span class="ts">0:19</span><span class="who">Agent</span><span>Please hold on a second. <span class="chip bad" title="LLM_REQUEST_ERR">Error</span></span></div>
+    </div>
+    <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">Degraded states, same sheet:</div>
+    <div class="sheet">
+      <div class="note">No timestamps for this call</div>
+      <div class="srow"><span class="k">Audio</span><span>No recording</span></div>
+      <div class="srow"><span class="k">Audio</span><span>Not retained</span></div>
+      <div class="note">Available when the session ends</div>
+    </div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><b>A is the spine.</b> One clock in the existing sheet: player state lifted up, lines carry the time, click seeks, turn map on the scrubber via <code>BipolarWaveform</code>. Untimed calls get one line and a dead time column.</li>
+      <li><b>B becomes badges on the line.</b> <code>end.type</code> words (Interrupted · Ignored · Error, plus Greeting) on the agent line; <code>caused_by</code> and per-turn ms in the title. The Latency tab already is the ladder.</li>
+      <li><b>E keeps its Download menu.</b> Recording via the orphan endpoint, transcript as .txt/.json. Save-as-test moves to feature 15 on the same line model.</li>
+      <li><b>D shrinks to Copy link.</b> A search-param deep link (<code>?tab=call-history&amp;call=…</code>) gives P2 the pasteable URL now; the routed page waits for the owner's call on tension #2.</li>
+      <li><b>C folds away.</b> Payloads, when the Engine ships them, go inline per turn as a collapsed disclosure (Wave 1, Retell, ElevenLabs) — not a tab. Nothing renders until then.</li>
+    </ul>
+    <h4>Why this shape</h4>
+    <ul>
+      <li>Only A works on today's fields and stays honest when the alignment fields are absent — which is every managed-vendor call until Engine lifts the <code>llm.vendor='custom'</code> gate.</li>
+      <li>The sheet is the frozen surface; everything here is additive inside the Transcript tab and the header. No lock touched, no re-split.</li>
+      <li>One clock is what 868kbyqfx asks for verbatim and what every competitor keys the transcript on.</li>
+      <li>Badges and export attach to the same line model with no new chrome; a second tab or page repeats the Wave 1 "five tabs" mistake.</li>
+      <li>A new route reopens tension #2; Copy link does the job without deciding the IA for the owner.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes):</strong> header buttons <code>Copy link</code> · <code>Download</code> (menu <code>Recording</code> · <code>Transcript (.txt)</code> · <code>Transcript (.json)</code>) · toast <code>Link copied</code> · player line <code>No timestamps for this call</code> · audio value <code>No recording</code> / <code>Not retained</code> · running line <code>Available when the session ends</code> · line badges <code>Greeting</code> · <code>Interrupted</code> · <code>Ignored</code> · <code>Error</code> (titles: <code>Customer started speaking</code> · <code>Semantic end-of-speech: no reply needed</code> · <code>Keyword not detected</code> · <code>Interruption off</code> · the raw <code>reason</code>) · captions <code>Requires Engine</code> · <code>Requires backend</code> · turn-map aria-label <code>Turn map</code>. Everything else is existing copy (<code>Transcript</code>, <code>No transcript.</code>, <code>Audio recording</code>, <code>Agent</code> / <code>Customer</code>, <code>T1…</code>).</div>
+  </div>
+</div>
+
+<h2>Prototype plan (ng-console, <code>design/sandbox</code>, additive)</h2>
+<div class="plan">
+  <ol>
+    <li><code>src/lib/telephony/transcript-alignment.ts</code> + <code>.test.ts</code> — <code>deriveReplayTimeline({transcript, timestamps?, turns?, durationSeconds})</code> → <code>{lines[{index, role, content, turn?, startMs?, endMs?, badge?}], markers[], samples[], alignment: "timed" | "untimed"}</code>. Accepts epoch or session-relative ms, subtracts <code>speech_algorithmic_delay</code> on user lines, clamps to duration, pairs turns to lines by order (greeting / silence / ignored turns tolerated), returns <code>untimed</code> when any line lacks a time — never interpolates.</li>
+    <li><code>src/features/telephony/shared/aligned-transcript.tsx</code> + test — <code>&lt;ol&gt;</code> of lines with role, time button (disabled when untimed), <code>aria-current</code> on the active line, Enter/Space seeks, badges as text chips with <code>title</code>. Auto-scroll follows playback only while the user hasn't scrolled.</li>
+    <li><code>call-detail-sheet.tsx</code> — lift <code>currentTime</code> / <code>seekTo</code> out of <code>CallRecordingPlayer</code> (:1373–1375) into the sheet; mount <code>AlignedTranscript</code> in the Transcript tab (:569); pass markers + samples to <code>bipolar-waveform.tsx</code> inside the player row (:331); header gains <code>Copy link</code> and <code>Download</code>. Recording download calls <code>/api/telephony/download-audio?url=</code> (allowlist <code>handlers.ts:1289</code>); transcript files are built client-side.</li>
+    <li><code>src/routes/-telephony-route-search.ts</code> — add <code>call</code> (call-history) and <code>session</code> (session-history) params; <code>call-history-route-module.tsx</code> (:203, :429) opens the sheet from the URL and writes it back on open.</li>
+    <li><code>session-detail-sheet.tsx</code> — add the Transcript tab with the same panel so non-telephony sessions share the grammar; renders <code>No transcript.</code> + <code>Requires backend</code> until history is stored.</li>
+    <li>i18n <code>pages.telephony.callDetail.replay.*</code> in <code>src/lib/i18n/resources/en/common.ts</code>; move <code>formatSessionType</code> and the :743 role labels to keys while there (the hardcoded-English test will catch them).</li>
+    <li>Events: <code>call_replayed</code>, <code>transcript_seeked</code>, <code>session_link_copied</code> in <code>src/lib/observability/types.ts</code>.</li>
+  </ol>
+  <p><strong>Real data:</strong> <code>recordFileUrl</code>, <code>transcript[{role, content}]</code>, <code>latency.perTurn</code> (ASR · LLM · TTS ms → the badge title), status. <strong>Fixture / sessionStorage</strong> (<code>design:10:timeline:&lt;callId&gt;</code>, guest preview only, never written to any API): <code>speech_start_ms/end_ms</code>, <code>turns[].start/end</code>. <strong>Disabled with a caption:</strong> payloads (Requires Engine), speakers beyond Agent/Customer (Requires Engine · SAL), <code>Not retained</code> (Requires backend), web/RTC recording (Requires Cloud Recording). Real timestamps need the backend to store webhook 103 — and <code>llm.vendor='custom'</code> until Engine lifts the gate.</p>
+</div>
+
+<h2>Next</h2>
+<p>Owner answers the five questions in <code>00-brief.md</code> → build the converged direction on <code>design/sandbox</code>, run fortify · include · articulate, push for a Vercel preview, log to <code>05-prototype-log.html</code>, review with czhen and the designer.</p>
+</div>
