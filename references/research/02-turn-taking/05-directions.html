@@ -1,0 +1,332 @@
+<title>Turn-taking Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: a mock of the ng-console dark Advanced tab. Every color is painted explicitly. Scaffold reused from 07. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:78ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:repeat(auto-fit,minmax(370px,1fr));gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+/* ---- the app mock: AdvancedRow grammar = chevron · title + one-line description · right switch · folded body ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px}
+.state{font-size:11.5px;color:var(--ink-3);margin:10px 0 4px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.arow{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:10px;padding:10px 12px;border-top:1px solid var(--line);align-items:start}
+.arow:first-child{border-top:0}
+.arow .chev{color:var(--ink-3);font-size:12px;line-height:20px}
+.arow .ttl{font-weight:500;line-height:20px}
+.arow .dsc{color:var(--ink-3);font-size:12px;line-height:18px}
+.arow .cap{color:var(--warn);font-size:11.5px;line-height:18px}
+.arow.dim .ttl,.arow.dim .dsc{color:var(--ink-3)}
+.fold{padding:4px 12px 12px 40px;display:grid;gap:8px}
+.lbl{color:var(--ink-2);font-size:12px}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:6px 10px;font-size:12.5px;max-width:420px}
+.field .cv{margin-left:auto;color:var(--ink-3)}
+.seg{display:inline-flex;border:1px solid var(--stroke);border-radius:6px;overflow:hidden}
+.seg span{padding:5px 12px;font-size:12.5px;color:var(--ink-2);border-left:1px solid var(--stroke)}
+.seg span:first-child{border-left:0}
+.seg span.on{background:var(--brand);color:#04131a;font-weight:600}
+.recap{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-2);line-height:1.7}
+.recap b{color:var(--ink);font-weight:500}
+.sw{position:relative;width:30px;height:17px;border-radius:999px;background:var(--brand);flex:none;margin-top:2px}
+.sw::after{content:"";position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#fff}
+.sw.off{background:var(--stroke)}.sw.off::after{right:auto;left:2px;background:var(--ink-2)}
+.sw.dis{opacity:.45}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.hint{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--stroke);color:var(--ink-3);font-size:10px;text-align:center;line-height:12px;margin-left:4px;vertical-align:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.sl{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;max-width:420px;font-size:12px;color:var(--ink-2)}
+.track{position:relative;height:4px;background:var(--stroke);border-radius:2px}
+.track i{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:1px solid var(--stroke);margin-left:-5px}
+.track b{position:absolute;top:-6px;width:16px;height:16px;border-radius:50%;background:var(--brand);margin-left:-8px}
+.tabs{display:inline-grid;grid-template-columns:repeat(3,1fr);background:var(--panel-2);border-radius:6px;padding:3px;gap:3px;font-size:12px}
+.tabs span{padding:4px 14px;border-radius:4px;color:var(--ink-2);text-align:center}
+.tabs span.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px #0006}
+.verdict{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.verdict b{color:var(--ink);font-weight:500}
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule)}
+table.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:bottom}
+table.audit td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td b{display:block;font-size:15px}
+table.audit tr:last-child td{border-bottom:0}
+table.audit td.tot{font-weight:600}
+.two{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.copy code,table.plan code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+table.plan{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);margin-top:10px}
+table.plan th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule)}
+table.plan td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+@media (max-width:980px){.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 02 · Turn-taking &amp; listening · step 5 diverge</p>
+<h1>Turn-taking Directions</h1>
+<p><strong>JTBD.</strong> When a caller talks over my agent, pauses mid-thought, or waits for it to go first, I want the agent to stop, wait and listen the way a person would — so callers aren't talked over or left hanging.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Agent › Advanced tab, above <code>AdvancedSharedSection</code> (frozen list, additive row). Hearing it: right-rail Test tab. Evidence: <code>GET …/turns</code>.</div>
+  <div><b>Agora facts</b><code>turn_detection.config.{speech_threshold, start_of_speech, end_of_speech}</code> · <code>interruption.{enable, mode, keywords_config, disabled_config}</code> · <code>sal.sal_mode</code> + <code>enable_sal</code>. Presets: Responsive 120/400 · Balanced 160/640 · Patient 240/semantic 480 · 4 s.</div>
+  <div><b>Already shipped (#1443 · #1446)</b>Raw rows exist: Turn Detection · Start of Speech · Interruption · End of Speech · SAL · Filler Words · Silent reminder. They own the state; nothing here may duplicate it.</div>
+  <div><b>Requires Engine</b>Semantic SoS (868ktferv) · preemptive replies (868kuj2zw) · backchannels (868kamm6y) · 240 ms default (868kuj31z) · dynamic SIP lock (868kuj3f6). User-first opening = empty greeting, no switch allowed (868ker6tm).</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses. Each mock uses the real <code>AdvancedRow</code> grammar (chevron · title · one-line description · switch · folded body). Copy is <em>proposed</em>, not approved. Numbers are the Balanced preset unless the state says otherwise.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Turn-taking row, user words + recap</h3><div class="who">Thesis: the presets exist; what's missing is the sentence that says what they do.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div><div class="ttl">Turn-taking<span class="hint">i</span></div><div class="dsc">How the agent listens and takes its turn</div></div><span class="sw"></span></div>
+        <div class="fold">
+          <div class="seg"><span>Responsive</span><span class="on">Balanced</span><span>Patient</span><span>Custom</span></div>
+          <div class="recap">Interrupts after <b>160 ms</b> of speech · waits <b>640 ms</b> of silence · interruptions <b>on</b></div>
+        </div>
+        <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Turn Detection</div><div class="dsc">Control conversation flow and turn-taking behavior…</div></div><span class="sw"></span></div>
+        <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Start of Speech</div></div><span class="sw"></span></div>
+        <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Interruption</div></div><span class="sw"></span></div>
+      </div>
+      <div class="state">Patient, and Custom (someone edited Prefix padding):</div>
+      <div class="sec">
+        <div class="fold" style="padding-top:10px">
+          <div class="seg"><span>Responsive</span><span>Balanced</span><span class="on">Patient</span><span>Custom</span></div>
+          <div class="recap">Interrupts after <b>240 ms</b> of speech · waits for the end of the thought, up to <b>4 s</b> · pauses on <b>“hold on”</b></div>
+        </div>
+        <div class="fold" style="border-top:1px solid var(--line);padding-top:10px">
+          <div class="seg"><span>Responsive</span><span>Balanced</span><span>Patient</span><span class="on">Custom</span></div>
+          <div class="recap">Interrupts after <b>160 ms</b> of speech · waits <b>640 ms</b> of silence · interruptions <b>on</b> · <span style="color:var(--brand)">edit below ↓</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Reads and writes the same <code>turn_detection</code> the raw rows own — the preset click is the existing handler (:715). Zero duplicated state.</li>
+      <li class="pro">"Presets resolve to visible values" (868kykhaz) is literally the recap line; Custom keeps its numbers instead of going blank.</li>
+      <li class="pro">Interruption state joins the sentence without a second control — it's read from <code>interruption.enable</code>.</li>
+      <li class="con">Two rows now say "turn" — the old Quick Presets buttons should go in the slice PR (owner call).</li>
+      <li class="con">The recap is a long line at narrow widths; wraps to two.</li>
+    </ul></div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · One slider, Responsive ↔ Patient</h3><div class="who">Thesis: Retell's <code>responsiveness</code> 0–1 — a single dial beats a row of buttons.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div><div class="ttl">Turn-taking<span class="hint">i</span></div><div class="dsc">How the agent listens and takes its turn</div></div><span class="sw"></span></div>
+        <div class="fold">
+          <div class="sl"><span>Responsive</span><div class="track"><i style="left:0"></i><i style="left:50%"></i><i style="left:100%"></i><b style="left:50%"></b></div><span>Patient</span></div>
+          <div class="recap"><b>Balanced</b> · interrupts after 160 ms · waits 640 ms</div>
+        </div>
+      </div>
+      <div class="state">Custom (Prefix padding edited by hand):</div>
+      <div class="sec">
+        <div class="fold" style="padding-top:10px">
+          <div class="sl"><span>Responsive</span><div class="track"><i style="left:0"></i><i style="left:50%"></i><i style="left:100%"></i></div><span>Patient</span></div>
+          <div class="recap"><span class="chip warn"><span class="dot"></span>Custom · not on the scale</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Smallest word budget of the five: two end labels and one recap.</li>
+      <li class="pro">Matches the Voice section's latency-vs-cost slider (v6 lock) as a family.</li>
+      <li class="con">Three real points pretending to be a continuum; Retell's 0–1 maps to a runtime scale, ours maps to three JSON objects.</li>
+      <li class="con">Custom has no position — the knob vanishes (shown) or lies. The Console has no slider primitive; new a11y surface (role=slider, arrow keys).</li>
+      <li class="con">Keywords mode and interruption-off can't be expressed on the axis at all.</li>
+    </ul></div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · "Listening" group, honest homes for Engine work</h3><div class="who">Thesis: name SAL by what it does, and give the missing Engine rows a visible, inert seat.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div><div class="ttl">Lock onto one speaker<span class="hint">i</span></div><div class="dsc">Follows one voice and ignores the rest</div></div><span class="sw"></span></div>
+        <div class="fold">
+          <div class="lbl">Mode</div><div class="field">Locking <span class="cv">⌄</span></div>
+          <div class="lbl">Voiceprint URL</div><div class="field" style="color:var(--ink-3)">https://… <span class="cv">PCM 16 kHz · 10–15 s</span></div>
+        </div>
+        <div class="arow"><span class="chev">›</span><div><div class="ttl">Backchannels</div><div class="dsc">Says “mm-hm” while the caller talks</div><div class="cap">Requires Engine · planned</div></div><span class="sw off dis"></span></div>
+        <div class="arow"><span class="chev">›</span><div><div class="ttl">Preemptive replies</div><div class="dsc">Starts thinking before the caller finishes</div><div class="cap">Requires Engine · Sep</div></div><span class="sw off dis"></span></div>
+      </div>
+      <div class="state">Backchannels, folded open (draft only, sessionStorage):</div>
+      <div class="sec">
+        <div class="fold" style="padding-top:10px">
+          <div class="lbl">Words</div><div class="field" style="color:var(--ink-3)">mm-hm, right, I see</div>
+          <div class="lbl">How often</div><div class="seg"><span>Rarely</span><span class="on">Sometimes</span><span>Often</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">"Selective Attention Locking" → "Lock onto one speaker": the name carries the meaning, SAL moves to the tooltip. Same three properties, same writes.</li>
+      <li class="pro">"A missing public Engine capability is an explicit Engine dependency rather than hidden Studio work" (868kykhaz) — stated on the row, disabled switch + tooltip, the honesty floor.</li>
+      <li class="pro">Backchannels sit apart from Filler Words, as 868kytqwj demands (words + frequency, Retell pattern).</li>
+      <li class="con">Adds two rows to an already long list; inert rows collect "why can't I" support tickets if the month slips.</li>
+      <li class="con">Dynamic SIP locking has no visible difference from plain locking until the Engine ships it — nothing to show.</li>
+    </ul></div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · "Who speaks first", tied to the greeting</h3><div class="who">Thesis: the first turn is a turn-taking decision; today it's a side effect of an empty text box on another tab.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="arow"><span class="chev">⌄</span><div><div class="ttl">Who speaks first</div><div class="dsc">Set by the greeting on the Prompt tab</div></div></div>
+        <div class="fold">
+          <div class="seg"><span class="on">Agent greets</span><span>Caller speaks first</span></div>
+          <div class="recap">“Thanks for calling. I can help with that.” · <span style="color:var(--brand)">Edit greeting</span></div>
+        </div>
+        <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Turn-taking</div><div class="dsc">How the agent listens and takes its turn</div></div><span class="sw"></span></div>
+      </div>
+      <div class="state">Caller first (greeting emptied):</div>
+      <div class="sec">
+        <div class="fold" style="padding-top:10px">
+          <div class="seg"><span>Agent greets</span><span class="on">Caller speaks first</span></div>
+          <div class="recap">Greeting is empty · the agent waits · <span class="chip warn"><span class="dot"></span>preview needs a first message</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Answers the one question callers feel first; documents 868ker6tm's behaviour where the builder looks for it.</li>
+      <li class="pro">No new field — "Caller speaks first" writes <code>llm.greeting_message = ""</code>.</li>
+      <li class="con">868ker6tm: "without introducing a duplicate configuration switch". This is that switch, one tab away from the text it mirrors.</li>
+      <li class="con">The preview gate (<code>agent-editor-workspace.tsx</code> :1234, "Add a first message before preview.") makes caller-first unhearable today.</li>
+      <li class="con">Emptying a greeting from a segmented control is a destructive act hiding behind a toggle.</li>
+    </ul></div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · "Try interrupting" on the live test</h3><div class="who">Thesis: 160 ms means nothing until you talk over it. Testing is ambient (v8).</div></header>
+    <div class="mock">
+      <div class="tabs"><span class="on">Test</span><span>Code</span><span>Deploy</span></div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><span class="btn primary">● End Call</span><span class="chip brand">Try interrupting</span><span style="font-size:11.5px;color:var(--ink-3)">agent is speaking…</span></div>
+      <div class="verdict"><b>Interrupted after 180 ms</b> · Balanced · resumed with your words</div>
+      <div class="state">Other verdicts, same line:</div>
+      <div class="verdict" style="margin-top:0"><b>Couldn’t interrupt</b> · interruptions are off · Finishes speaking, then answers</div>
+      <div class="verdict" style="margin-top:2px"><b>Not available in manual mode</b> · your client sends the signals</div>
+      <div class="verdict" style="margin-top:2px;color:var(--ink-3)">Start a call first</div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">The Test Strip lock, ported: one chip, one verdict line, "does it work yet?" answered in place.</li>
+      <li class="pro">Evidence is real: <code>turns[].end.metadata.caused_by = start_of_speech</code> + <code>start.metadata.speech_duration_ms</code>; the verdict quotes the effective preset (868kytqwj "same effective values").</li>
+      <li class="pro">Gives the activation event <code>interruption_tested</code> a natural home.</li>
+      <li class="con">Needs turn events in the preview stream (<code>console-preview-events.tsx</code>) or a <code>turns</code> read after the call — Console plumbing before the chip is honest.</li>
+      <li class="con">Manual SoS/EoS can't be exercised by the built-in preview; keyword mode needs the tester to say the word.</li>
+    </ul></div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<p>Scores 1–5 per lens. <em>State coverage</em> = empty · loading · error · locked/Requires Engine · MLLM (where <code>turn_detection</code> doesn't apply and the row must not render).</p>
+<table class="audit">
+  <thead><tr><th></th><th>Design-ops protocol fit</th><th>Perception laws</th><th>CTA / word budget</th><th>State coverage</th><th>Accessibility</th><th>i18n</th><th>Total</th></tr></thead>
+  <tbody>
+    <tr><td><b>A</b>row + recap</td><td><b>5</b>flat row, re-presents real props, additive mount</td><td><b>4</b>recognition over recall; recap by proximity; long line at narrow widths</td><td><b>4</b>1 desc + 4 existing words + 1 recap</td><td><b>4</b>empty → Balanced seed; loading = skeleton; error = existing contract Alert; MLLM = not mounted</td><td><b>4</b>aria-pressed buttons (existing idiom); recap is text</td><td><b>4</b>unit interpolation {{ms}} / {{s}}; quotes localisable</td><td class="tot">25</td></tr>
+    <tr><td><b>B</b>slider</td><td><b>3</b>new primitive on a frozen surface</td><td><b>2</b>continuum lie; 3 detents; Custom unplaceable</td><td><b>5</b>two labels</td><td><b>2</b>Custom / keywords / off have no position; MLLM n/a</td><td><b>3</b>role=slider, arrow keys, value text — all new</td><td><b>4</b>end labels only</td><td class="tot">19</td></tr>
+    <tr><td><b>C</b>Listening group</td><td><b>4</b>rename + two inert rows; honesty floor met; list grows</td><td><b>4</b>common region: three "listening" rows together</td><td><b>3</b>3 descs + 2 captions</td><td><b>5</b>Requires Engine caption + disabled tooltip; SAL empty = no URL; error = bad URL; MLLM = not mounted</td><td><b>4</b>disabled switch needs the wrapper-span tooltip (exists in AdvancedRow)</td><td><b>4</b>captions carry a month token</td><td class="tot">24</td></tr>
+    <tr><td><b>D</b>who speaks first</td><td><b>2</b>duplicates state on another tab; 868ker6tm forbids the switch</td><td><b>4</b>answers a real first question</td><td><b>4</b>2 options + 1 recap</td><td><b>2</b>preview gate blocks caller-first; MLLM uses <code>mllm.greeting_message</code></td><td><b>4</b>segmented buttons</td><td><b>4</b>—</td><td class="tot">20</td></tr>
+    <tr><td><b>E</b>Try interrupting</td><td><b>5</b>Test Strip lock; verdict line; ambient</td><td><b>4</b>feedback loop — doing over reading</td><td><b>5</b>1 chip + 1 line</td><td><b>3</b>in-call only; off / manual / no-events verdicts; loading = "agent is speaking…"</td><td><b>3</b>verdict needs aria-live; chip appears mid-call</td><td><b>3</b>4 verdict strings with ms interpolation</td><td class="tot">23</td></tr>
+  </tbody>
+</table>
+
+<h2>Verdict — converge A + C + E</h2>
+<div class="two">
+  <div class="mock wide" style="border:1px solid var(--line);border-radius:8px">
+    <div class="sec">
+      <div class="arow"><span class="chev">⌄</span><div><div class="ttl">Turn-taking<span class="hint">i</span></div><div class="dsc">How the agent listens and takes its turn</div></div><span class="sw"></span></div>
+      <div class="fold">
+        <div class="seg"><span>Responsive</span><span class="on">Balanced</span><span>Patient</span><span>Custom</span></div>
+        <div class="recap">Interrupts after <b>160 ms</b> of speech · waits <b>640 ms</b> of silence · interruptions <b>on</b></div>
+      </div>
+      <div class="arow"><span class="chev">⌄</span><div><div class="ttl">Lock onto one speaker<span class="hint">i</span></div><div class="dsc">Follows one voice and ignores the rest</div></div><span class="sw"></span></div>
+      <div class="fold"><div class="lbl">Mode</div><div class="field">Locking <span class="cv">⌄</span></div><div class="lbl">Voiceprint URL</div><div class="field" style="color:var(--ink-3)">https://…</div></div>
+      <div class="arow"><span class="chev">›</span><div><div class="ttl">Backchannels</div><div class="dsc">Says “mm-hm” while the caller talks</div><div class="cap">Requires Engine · planned</div></div><span class="sw off dis"></span></div>
+      <div class="arow"><span class="chev">›</span><div><div class="ttl">Preemptive replies</div><div class="dsc">Starts thinking before the caller finishes</div><div class="cap">Requires Engine · Sep</div></div><span class="sw off dis"></span></div>
+      <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Turn Detection</div><div class="dsc">Control conversation flow and turn-taking behavior…</div></div><span class="sw"></span></div>
+      <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Start of Speech</div></div><span class="sw"></span></div>
+      <div class="arow dim"><span class="chev">›</span><div><div class="ttl">Interruption</div></div><span class="sw"></span></div>
+      <div class="arow dim"><span class="chev">›</span><div><div class="ttl">End of Speech</div></div><span class="sw"></span></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center"><span class="tabs"><span class="on">Test</span><span>Code</span><span>Deploy</span></span><span class="btn primary">● End Call</span><span class="chip brand">Try interrupting</span></div>
+    <div class="verdict"><b>Interrupted after 180 ms</b> · Balanced · resumed with your words</div>
+    <div class="state">Prompt tab, one line under Greeting (D reduced):</div>
+    <div class="sec"><div class="fold" style="padding-top:10px"><div class="lbl">Greeting</div><div class="field" style="color:var(--ink-3)">Thanks for calling. I can help with that.</div><div class="lbl" style="color:var(--ink-3)">Caller speaks first when this is empty</div></div></div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><b>A is the spine.</b> One Turn-taking row above the raw rows; presets in the words that already exist; the recap says what they do; Custom points down.</li>
+      <li><b>C is the naming + the honest seats.</b> SAL becomes "Lock onto one speaker" (same properties); Backchannels and Preemptive replies are visible, inert, captioned.</li>
+      <li><b>E is one chip.</b> "Try interrupting" on the Test tab with a verdict line quoting the effective preset.</li>
+      <li><b>B rejected</b> — three points are not a continuum; Custom has nowhere to stand.</li>
+      <li><b>D reduced</b> to a recap line under Greeting. No switch (868ker6tm); the preview gate is an owner question.</li>
+    </ul>
+    <h4>Why this shape</h4>
+    <ul>
+      <li>The raw rows shipped last week (#1443 · #1446) and own the state. A re-presentation that reads and writes the same <code>turn_detection</code> / <code>interruption</code> is the only move that "is not duplicated" (868kytqwj).</li>
+      <li>"Presets resolve to visible values" (868kykhaz) — the recap is that requirement, word for word, and it survives Custom.</li>
+      <li>Competitors converge on words (ElevenLabs patient · normal · eager) and name controls by what the agent does; nobody leads with prefix padding.</li>
+      <li>Engine gaps stated on the row — "an explicit Engine dependency rather than hidden Studio work" — with the switch disabled and the tooltip idiom the list already uses.</li>
+      <li>Testing is ambient (v8): one chip turns 160 ms into a felt moment and gives <code>interruption_tested</code> a trigger.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes):</strong><br>
+      Row <code>Turn-taking</code> · <code>How the agent listens and takes its turn</code> · presets <code>Responsive</code> <code>Balanced</code> <code>Patient</code> <code>Custom</code> (existing words, moved to i18n) · tooltip <code>Interrupts = speech needed while the agent talks. Waits = silence before it answers.</code><br>
+      Recap fragments <code>Interrupts after {{ms}} ms of speech</code> · <code>waits {{ms}} ms of silence</code> · <code>waits for the end of the thought, up to {{s}} s</code> · <code>pauses on “hold on”</code> · <code>interruptions on</code> · <code>interrupts on {{keywords}}</code> · <code>finishes speaking, then answers</code> · <code>finishes speaking, ignores speech</code> · <code>interruptions: backend default</code> · <code>manual · your client sends the signals</code> · <code>edit below</code><br>
+      Listening <code>Lock onto one speaker</code> · <code>Follows one voice and ignores the rest</code> · tooltip <code>Selective Attention Locking (SAL)</code> · <code>Mode</code> · <code>Voiceprint URL</code> (existing) · <code>Backchannels</code> · <code>Says “mm-hm” while the caller talks</code> · <code>Words</code> · <code>How often</code> · <code>Rarely</code> <code>Sometimes</code> <code>Often</code> · <code>Preemptive replies</code> · <code>Starts thinking before the caller finishes</code> · captions <code>Requires Engine · Sep</code> / <code>Requires Engine · planned</code><br>
+      Test <code>Try interrupting</code> · <code>Interrupted after {{ms}} ms</code> · <code>resumed with your words</code> · <code>Couldn’t interrupt · interruptions are off</code> · <code>Not available in manual mode</code> · <code>Start a call first</code> · <code>agent is speaking…</code><br>
+      Greeting line <code>Caller speaks first when this is empty</code>. MLLM: no new words — the row is not mounted; the existing MLLM "Turn Detection" section stands.
+    </div>
+  </div>
+</div>
+
+<h2>Prototype plan (design/sandbox, additive)</h2>
+<table class="plan">
+  <thead><tr><th>File</th><th>What</th><th>Writes to</th></tr></thead>
+  <tbody>
+    <tr><td><code>src/lib/agents/turn-taking-recap.ts</code> + <code>.test.ts</code></td><td><code>planTurnTaking({ turn_detection, interruption, mllm })</code> → <code>{ applies, preset, manual, fragments[] }</code>. Uses <code>readStudioTurnDetectionPreset</code> and <code>readStudioTurnDetectionSilenceMs</code> from <code>studio-turn-detection.ts</code>; reads <code>speaking_interrupt_duration_ms</code>, EoS mode, <code>max_wait_ms</code> (−1 = no cap), <code>pause_state_enabled</code>, <code>interruption.{enable, mode, keywords_config, disabled_config}</code>. Tests: 3 presets · Custom · keywords · off-append · off-ignore · backend default · manual · MLLM → <code>applies:false</code>.</td><td>nothing (pure)</td></tr>
+    <tr><td><code>src/components/console/agent-turn-taking-row.tsx</code> + <code>.test.tsx</code></td><td>AdvancedRow grammar (local copy of the primitive, or export <code>AdvancedRow</code> from the drawer — one line). Preset buttons call <code>onChange({ turnDetection: createStudioTurnDetectionPresetProperties(preset) })</code> exactly like drawer :715; Custom scrolls to the Turn Detection row. Emits <code>turn_taking_preset_applied</code>.</td><td><code>turn_detection</code> (real, same as today). Never <code>interruption</code> — read only.</td></tr>
+    <tr><td><code>src/components/console/agent-listening-rows.tsx</code> + <code>.test.tsx</code></td><td>"Lock onto one speaker" re-presents SAL (switch → <code>advancedFeatures.enable_sal</code>; Mode → <code>sal.sal_mode</code>; URL → <code>sal.sample_urls.speaker_1</code>). Backchannels + Preemptive replies: disabled switch + tooltip caption; folded drafts in <code>sessionStorage</code> <code>ng-console.design.02.listening:&lt;agentId&gt;</code>.</td><td>SAL: real properties. Engine rows: sessionStorage only.</td></tr>
+    <tr><td><code>src/components/console/agent-advanced-page.tsx</code> :178</td><td>1–8-line mount inside the cascade branch: <code>&lt;AgentTurnTakingRow draft={draft} onChange={updateDraft} /&gt;</code> + <code>&lt;AgentListeningRows … /&gt;</code> above <code>&lt;AdvancedSharedSection&gt;</code>. MLLM branch untouched.</td><td>—</td></tr>
+    <tr><td><code>src/components/console/agent-try-interrupt-chip.tsx</code> + <code>.test.tsx</code></td><td>Mounted beside <code>AgentPreviewWorkspace</code> in <code>agent-detail-right-panel.tsx</code> :78–88. Reads <code>interruption.enable</code> + <code>start_of_speech.mode</code> for the off / manual verdicts; live verdict from preview turn events (<code>console-preview-events.tsx</code>) or a <code>turns</code> read on call end; <code>aria-live="polite"</code>. Emits <code>interruption_tested</code>.</td><td>nothing</td></tr>
+    <tr><td><code>src/lib/i18n/resources/en/common.ts</code> (after <code>agentAdvanced</code> :413)</td><td><code>pages.agentAdvanced.turnTaking.*</code> · <code>pages.agentAdvanced.listening.*</code> · <code>pages.agentAdvanced.tryInterrupting.*</code> — the copy set above, nothing else.</td><td>—</td></tr>
+    <tr><td><code>src/components/console/agent-editor-workspace.tsx</code> :896 (optional, teammate file)</td><td>One <code>FieldDescription</code> line under Greeting: <code>pages.agents.builder.greetingCallerFirst</code>. Skip in the sandbox if the owner says no to D-reduced.</td><td>—</td></tr>
+  </tbody>
+</table>
+<p style="margin-top:12px"><strong>MLLM case.</strong> <code>isMllm</code> (agent-advanced-page.tsx :77) already routes to <code>MllmTurnDetectionSection</code>; the new rows are inside the cascade branch only, <code>planTurnTaking</code> returns <code>applies:false</code>, and the row test asserts nothing renders. <strong>240 ms.</strong> The semantic seed <code>320</code> (drawer :570) becomes a named constant in <code>studio-turn-detection.ts</code> so 868kuj31z is a one-line change; the recap prints whatever is effective. <strong>Runs:</strong> <code>bunx vitest run src/lib/agents/turn-taking-recap.test.ts src/components/console/agent-turn-taking-row.test.tsx src/components/console/agent-listening-rows.test.tsx</code> · <code>bunx biome check --write</code> · <code>bun run typecheck</code>. Then fortify · include · articulate, push to <code>design/sandbox</code>, <code>05-prototype-log.html</code>.</p>
+
+<h2>Next</h2>
+<p>Owner picks: the converged direction (or A alone), the copy set, replace-vs-add for the old Quick Presets, the month tokens on the inert rows, and whether D-reduced (one line under Greeting) is allowed. Then I build on <code>design/sandbox</code>, additive only.</p>
+</div>

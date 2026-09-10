@@ -1,0 +1,296 @@
+<title>Opening Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: a mock of the live Console's dark builder. Every color painted explicitly. Scaffold = 07-vendors-fallback/05-directions.html. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:74ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px}
+.note{font-size:11.5px;color:var(--ink-3);margin:10px 0 6px}
+/* Prompt-tab form grammar: heading + one line + control, stacked (2026-07-08 lock) */
+.pf{display:flex;flex-direction:column;gap:14px}
+.pf section{display:flex;flex-direction:column;gap:6px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.pf section:last-child{border-bottom:0;padding-bottom:0}
+.pfh{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.pfh .sw,.pfh .hint{margin-left:0}
+.pfd{font-size:12px;color:var(--ink-3)}
+.inp{background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px;color:var(--ink);min-height:32px}
+.inp.dis{color:var(--ink-3);border-style:dashed}
+.seg{display:inline-flex;border:1px solid var(--stroke);border-radius:6px;overflow:hidden;font-size:12.5px}
+.seg span{padding:6px 12px;color:var(--ink-2)}
+.seg span.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.hear{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-2);line-height:1.6;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.hear b{color:var(--ink);font-weight:500}
+.line{font-size:12px;color:var(--ink-2)}
+/* AdvancedRow grammar: chevron · title + one line · switch right · body pl-9 */
+.adv{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.adv-r{display:grid;grid-template-columns:18px 1fr auto;gap:10px;padding:10px 12px;border-top:1px solid var(--line);align-items:start}
+.adv-r:first-child{border-top:0}
+.chev{color:var(--ink-3);font-size:11px;margin-top:2px}
+.adv-t{font-size:13px;font-weight:500}
+.adv-d{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.adv-b{grid-column:2/4;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.sw{position:relative;width:30px;height:17px;border-radius:999px;background:var(--brand);flex:none}
+.sw::after{content:"";position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#fff}
+.sw.off{background:var(--stroke)}.sw.off::after{right:auto;left:2px;background:var(--ink-2)}
+.sw.dis{opacity:.45}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.link{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--brand-dim);font-size:12px}
+.hint{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--stroke);color:var(--ink-3);font-size:10px;text-align:center;line-height:12px;margin-left:4px;vertical-align:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:5px 9px;font-size:12px}
+.field .cv{margin-left:auto;color:var(--ink-3)}
+.strip{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:12px;font-size:12.5px}
+.strip .verdict{margin-left:auto;color:var(--ink-2)}
+.turn{display:grid;grid-template-columns:52px 1fr;gap:8px;font-size:12px;padding:4px 0}
+.turn .sp{color:var(--ink-3);font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding-top:2px}
+table.au{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+table.au th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px;border-bottom:1px solid var(--doc-rule)}
+table.au td{padding:8px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.au td b{display:block;font-size:14px}
+table.au td small{color:var(--doc-ink-2)}
+.two{display:grid;grid-template-columns:1.25fr .75fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.copy code,.plan code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:12px 16px;font-size:13.5px;margin-top:14px}
+.plan table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.plan th{text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);padding:6px 8px;border-bottom:1px solid var(--doc-rule)}
+.plan td{padding:6px 8px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+@media (max-width:980px){.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 04 · Greeting, filler &amp; disclaimer · step 5 diverge</p>
+<h1>Opening Directions</h1>
+<p><strong>JTBD.</strong> When my agent picks up, the first seconds and every pause sound like a person who is honest about being an AI — callers stay on the line and I'm covered under Article 50 without reading the spec.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Prompt tab <code>AgentPromptForm</code> (system prompt → greeting → failure message, stacked). Filler + silent reminder live on Advanced as <code>AdvancedRow</code>s. Test rail = Talk.</div>
+  <div><b>Agora facts</b><code>llm.greeting_message</code> (MLLM: <code>mllm.greeting_message</code>) · <code>greeting_configs.interruptable</code> (v2.7) · <code>filler_words</code> static phrases, wait 100–10000 ms · <code>silence_config</code> timeout/action/content, not MLLM. No greeting = caller speaks first.</div>
+  <div><b>Article 50</b>In force since 2 Aug 2026: people must be told they are talking to an AI unless obvious. No Engine field for it (868ker6zx) — the only real write is a prefix on the greeting.</div>
+  <div><b>Requires Engine</b>Persona/context filler 868kuj31y (in version) · continue after filler 868kuj327 · tool-call filler timing 868kewaqq. Console today: greeting label ≠ aria-label, preview blocks on empty greeting, preview shows caller before agent.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses. A–B put the opening on the Prompt tab in the stacked form grammar; C stays on Advanced in the row grammar; D re-presents #1446's silence reminder beside the greeting; E makes the opening audible. Copy is <em>proposed</em>, not approved. The disclosure switch is always the <strong>builder's</strong> choice — never a pre-checked consent for the caller.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · First seconds</h3><div class="who">One group on the Prompt tab: who speaks first · greeting · disclosure. The composed result is shown, not implied.</div></header>
+    <div class="mock"><div class="pf">
+      <section><div class="pfh">Who speaks first</div><div class="seg"><span class="on">Agent</span><span>Caller</span></div></section>
+      <section><div class="pfh">Greeting</div><div class="inp">Thanks for calling. I can help with that.</div></section>
+      <section><div class="pfh"><span class="sw"></span>Tell the caller it's an AI<span class="hint">i</span></div>
+        <div class="hear"><b>Callers hear</b> · You're talking to an AI assistant. Thanks for calling. I can help with that.</div></section>
+    </div>
+    <div class="note">Caller state of the same group:</div>
+    <div class="pf"><section><div class="pfh">Who speaks first</div><div class="seg"><span>Agent</span><span class="on">Caller</span></div><div class="line">No greeting. The agent waits for the caller.</div></section></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Three sequential fields, stacked — exactly the 2026-07-08 lock. One greeting, one home.</li>
+      <li class="pro">"Callers hear" line = honesty floor: the prefix write is visible, nothing composes silently.</li>
+      <li class="pro">Caller-first becomes a choice, not "leave it blank" — fixes the preview gate and the hardcoded default.</li>
+      <li class="con">Disclosure sentence is fixed here; P2 can't edit it or see its locale.</li>
+      <li class="con">Nothing about interruptibility or silence — the ticket's "controlled opening" is half covered.</li>
+    </ul></div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Disclosure first</h3><div class="who">A permanent line above the greeting: the locale default, editable. Reads like the legal text it is.</div></header>
+    <div class="mock"><div class="pf">
+      <section><div class="pfh">AI disclosure<span class="hint">i</span></div>
+        <div class="field">You're talking to an AI assistant.<span class="cv">English · <span class="link">Edit</span></span></div></section>
+      <section><div class="pfh">Greeting</div><div class="inp">Thanks for calling. I can help with that.</div></section>
+    </div>
+    <div class="note">Editing:</div>
+    <div class="pf"><section><div class="pfh">AI disclosure</div><div class="inp" style="border-color:var(--brand)">Hola, hablas con un asistente de IA de Entel.</div><div class="line"><span class="link">Reset</span> · Spanish (es-CL) default</div></section></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Locale-aware default is the thesis — P2 sees the exact sentence and its language at a glance.</li>
+      <li class="pro">Edit/Reset is the only chrome; the greeting field is untouched.</li>
+      <li class="con">Always-visible line with no switch: turning disclosure <em>off</em> means deleting text — an unclear off-state.</li>
+      <li class="con">Two rows for one utterance; the composed order (disclosure then greeting) is implied by position, not shown.</li>
+      <li class="con">Reads as a notice band → brushes the "no banded chrome" lock.</li>
+    </ul></div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · While thinking</h3><div class="who">The Filler Words row in user words, plus the three Engine follow-ups as honest inert rows.</div></header>
+    <div class="mock"><div class="adv">
+      <div class="adv-r"><span class="chev">▾</span><div><div class="adv-t">While thinking</div><div class="adv-d">Short phrases while the answer is being generated.</div>
+        <div class="adv-b"><span class="line">Phrases</span><span class="chip">Let me look into that ×</span><span class="chip">One moment ×</span><span class="chip">Sure, give me a second ×</span><span class="chip brand">+</span></div>
+        <div class="adv-b"><span class="line">After</span><span class="field">1.5 s</span><span class="line">Order</span><span class="field">Shuffle<span class="cv">⌄</span></span></div>
+      </div><span class="sw"></span></div>
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">Match the persona</div><div class="adv-d">Requires Engine</div></div><span class="sw off dis"></span></div>
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">Keep going after the filler</div><div class="adv-d">Requires Engine</div></div><span class="sw off dis"></span></div>
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">During tool calls</div><div class="adv-d">Requires Engine</div></div><span class="sw off dis"></span></div>
+    </div></div>
+    <div class="why"><ul>
+      <li class="pro">Zero new chrome — the existing <code>AdvancedRow</code> with its disabled-switch tooltip carries "Requires Engine".</li>
+      <li class="pro">"Response Wait Threshold (ms)" → "After 1.5 s"; "Selection Rule" → "Order". Same fields, user words.</li>
+      <li class="pro">Phrases as chips make the ≤100 × ≤50-word limits visible per phrase, not per comma list.</li>
+      <li class="con">Three inert rows add three lines of UI for nothing the caller can hear today.</li>
+      <li class="con">Lives on Advanced — P1 never meets it; the greeting story and the pause story stay on different tabs.</li>
+    </ul></div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · If the caller goes quiet</h3><div class="who">#1446's silent reminder as one sentence, right under the greeting, editable in place.</div></header>
+    <div class="mock"><div class="pf">
+      <section><div class="pfh">Greeting</div><div class="inp">Thanks for calling. I can help with that.</div></section>
+      <section><div class="pfh"><span class="sw"></span>If the caller goes quiet</div>
+        <div class="adv-b"><span class="line">After</span><span class="field">4 s</span><span class="line">say</span><span class="field" style="flex:1">Are you still there?</span></div></section>
+    </div>
+    <div class="note">Realtime (MLLM) agent:</div>
+    <div class="pf"><section><div class="pfh" style="color:var(--ink-3)"><span class="sw off dis"></span>If the caller goes quiet</div><div class="line">Not available for realtime agents.</div></section></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">The ticket's outcome in one breath: "controlled opening without trapping the session in silence" — greeting and recovery side by side.</li>
+      <li class="pro">Sentence form beats "Reminder timeout (ms) · Reminder action · Reminder message" for P1.</li>
+      <li class="con">Second home for <code>silence_config</code> while the Advanced row exists — violates "one home", collides with a teammate's fresh PR.</li>
+      <li class="con">Hides <code>action: think</code>; the sentence template ("After {n} s, say …") is hard to localise.</li>
+    </ul></div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · Hear the opening</h3><div class="who">One button that plays disclosure + greeting in the agent's voice from the Test rail, then stops.</div></header>
+    <div class="mock">
+      <div class="strip"><span class="btn primary">▶ Hear the opening</span><span class="btn">Talk to Aria</span><span class="verdict">Opening · 4.2 s</span></div>
+      <div class="adv" style="margin-top:10px;padding:8px 12px">
+        <div class="turn"><span class="sp">Agent</span><span>You're talking to an AI assistant. Thanks for calling. I can help with that.</span></div>
+        <div class="turn"><span class="sp"></span><span class="line">Can be interrupted · reminder after 4 s of silence</span></div>
+      </div>
+      <div class="note">Connecting / failed:</div>
+      <div class="strip"><span class="btn">▶ Hear the opening</span><span class="verdict"><span class="chip warn"><span class="dot"></span>Preview error (existing string)</span></span></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Rides the live preview that already plays the real greeting — no new audio primitive, same mic permission as Talk.</li>
+      <li class="pro">The transcript line is the same text as "Callers hear" → the honesty floor is proven with audio, not asserted.</li>
+      <li class="pro">Test Strip stays the one test entry; this is a second button in it, not a new panel.</li>
+      <li class="con">Needs "stop after the first agent turn" from <code>events</code> — a timing heuristic until <code>turns</code> is exposed in preview.</li>
+      <li class="con">Alone it changes nothing about how the opening is authored.</li>
+    </ul></div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<table class="au">
+  <thead><tr><th></th><th>Protocol fit</th><th>Perception laws</th><th>CTA / word budget</th><th>State coverage</th><th>Accessibility</th><th>i18n</th><th>Σ</th></tr></thead>
+  <tbody>
+    <tr><td><b>A</b>First seconds</td><td><b>5</b><small>Stacked sequence, one home, prefix = only real write</small></td><td><b>4</b><small>Proximity: choice → text → result; closure via "Callers hear"</small></td><td><b>3</b><small>3 controls + 1 result line; caller state 1 line</small></td><td><b>4</b><small>Caller-first ✓ · MLLM ✓ · loading = skeleton · no Engine rows</small></td><td><b>4</b><small>Switch labelled by its sentence; result line <code>aria-live</code></small></td><td><b>2</b><small>Fixed sentence; join rule "prefix + space" fails CJK</small></td><td><b>22</b></td></tr>
+    <tr><td><b>B</b>Disclosure first</td><td><b>3</b><small>Two rows for one utterance; band-like line</small></td><td><b>3</b><small>Order implied by position only</small></td><td><b>4</b><small>One line + Edit/Reset</small></td><td><b>2</b><small>No off-state; empty = off is a trap</small></td><td><b>4</b><small>Editable field, plain input</small></td><td><b>5</b><small>Locale default + language shown</small></td><td><b>21</b></td></tr>
+    <tr><td><b>C</b>While thinking</td><td><b>4</b><small>Row grammar reused; Advanced stays the home</small></td><td><b>4</b><small>Chips = countable phrases</small></td><td><b>3</b><small>Three inert rows = three extra lines</small></td><td><b>5</b><small>Requires Engine explicit via disabled switch + tooltip; empty phrases → defaults</small></td><td><b>3</b><small>Disabled switches need focusable tooltip; chip removal needs keyboard</small></td><td><b>4</b><small>User-authored phrases; "1.5 s" unit format</small></td><td><b>23</b></td></tr>
+    <tr><td><b>D</b>Caller goes quiet</td><td><b>2</b><small>Second home for silence_config vs #1446</small></td><td><b>5</b><small>One sentence, one meaning</small></td><td><b>5</b><small>1 line</small></td><td><b>4</b><small>MLLM hidden ✓ · off ✓ · think hidden ✗</small></td><td><b>4</b><small>Inline fields inside a sentence — label order</small></td><td><b>2</b><small>Sentence templating with quoted message</small></td><td><b>22</b></td></tr>
+    <tr><td><b>E</b>Hear the opening</td><td><b>4</b><small>Test Strip is the entry; no new panel</small></td><td><b>4</b><small>Feedback: hear + read the same line</small></td><td><b>4</b><small>1 button + 1 verdict</small></td><td><b>3</b><small>Connecting · error · no mic · no credentials all reuse Talk states; stop heuristic</small></td><td><b>3</b><small>Audio needs the transcript line as the accessible equivalent</small></td><td><b>4</b><small>Verdict "Opening · {n} s" only</small></td><td><b>22</b></td></tr>
+  </tbody>
+</table>
+<p style="font-size:13px;color:var(--doc-ink-2)">Scores 1–5. No single direction covers the JTBD: A owns the authoring, C the pauses, E the proof; B contributes the locale default, D the sentence form. Converge below.</p>
+
+<h2>Verdict — converged: A as the spine, B's editable default, D as a recap line, E as the one button; C ships on Advanced</h2>
+<div class="two">
+  <div class="mock wide" style="border:1px solid var(--line);border-radius:8px">
+    <div class="pf">
+      <section><div class="pfh">Opening</div><div class="pfd">System prompt above · Failure message below (unchanged)</div></section>
+      <section><div class="pfh">Who speaks first</div><div class="seg"><span class="on">Agent</span><span>Caller</span></div></section>
+      <section><div class="pfh">Greeting</div><div class="inp">Thanks for calling. I can help with that.</div>
+        <div class="pfh" style="font-weight:500;margin-top:6px"><span class="sw"></span>Callers can interrupt the greeting</div></section>
+      <section><div class="pfh"><span class="sw"></span>Tell the caller it's an AI<span class="hint">i</span></div>
+        <div class="field">You're talking to an AI assistant.<span class="cv">English · <span class="link">Edit</span></span></div>
+        <div class="hear"><b>Callers hear</b> · You're talking to an AI assistant. Thanks for calling. I can help with that.</div>
+        <div class="adv-b"><span class="btn primary">▶ Hear the opening</span><span class="line">After 4 s of silence, says "Are you still there?" · <span class="link">Change</span></span></div></section>
+    </div>
+    <div class="note">Advanced tab, same slice (C adopted as-is, inert rows carry the ticket in the tooltip):</div>
+    <div class="adv">
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">While thinking</div><div class="adv-d">Let me look into that · One moment · Sure, give me a second · after 1.5 s · shuffle</div></div><span class="sw"></span></div>
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">Match the persona</div><div class="adv-d">Requires Engine</div></div><span class="sw off dis"></span></div>
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">Keep going after the filler</div><div class="adv-d">Requires Engine</div></div><span class="sw off dis"></span></div>
+      <div class="adv-r"><span class="chev">▸</span><div><div class="adv-t">During tool calls</div><div class="adv-d">Requires Engine</div></div><span class="sw off dis"></span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><b>A is the surface.</b> "Opening" replaces the lone Greeting section: who speaks first → greeting → disclosure → what callers hear. Same stacked grammar, same tab.</li>
+      <li><b>B is the sentence.</b> The disclosure is a locale default with Edit/Reset; the switch (not deletion) is the off-state.</li>
+      <li><b>D is one read-only line.</b> The silence reminder is recapped under the opening with "Change" → Advanced. #1446 keeps the only editable home.</li>
+      <li><b>E is one button.</b> "Hear the opening" starts the live preview, stops after the first agent turn, and prints the same "Callers hear" text as a transcript line.</li>
+      <li><b>C ships as the Advanced half.</b> Relabel the Filler Words row; add three inert rows whose disabled switch tooltips name the Engine ticket.</li>
+    </ul>
+    <h4>Why this shape</h4>
+    <ul>
+      <li>Article 50 has applied since 2 Aug 2026 — disclosure is the default where the greeting is authored, not an Advanced afterthought. Recommended ON for new agents; existing greetings are never rewritten.</li>
+      <li>The prefix on <code>greeting_message</code> is the only real write. Showing the composed line is what keeps a hack honest (honesty floor).</li>
+      <li>"Who speaks first" mirrors Vapi/Retell/Bland and removes the Console's own trap: the preview gate on an empty greeting and the hardcoded "Thanks for calling…" default.</li>
+      <li>Interruptible greeting + silence recap deliver 868kuj32p's outcome ("controlled opening without trapping the session in silence") on the surface where it's read, without moving a teammate's row.</li>
+      <li>Engine work is named, not simulated: inert rows say "Requires Engine" and keep the builder's intent in this browser only.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes).</strong> Section <code>Opening</code> · <code>Who speaks first</code> → <code>Agent</code> / <code>Caller</code> · <code>Greeting</code> (aria-label unified to "Greeting") · <code>Callers can interrupt the greeting</code> · <code>Tell the caller it's an AI</code> · tooltip <code>Plays before the greeting. EU AI Act Article 50 requires people to be told they are talking to an AI unless it is obvious. Saved as the first sentence of the greeting.</code> · <strong>default sentence (en) — legal copy, owner sign-off required:</strong> <code>You're talking to an AI assistant.</code> · <code>Edit</code> · <code>Reset</code> · <code>Callers hear</code> · caller state <code>No greeting. The agent waits for the caller.</code> · recap <code>After {n} s of silence, says "{message}"</code> / off <code>Stays quiet if the caller goes silent</code> · <code>Change</code> · button <code>Hear the opening</code> · verdict <code>Opening · {n} s</code> (errors reuse <code>pages.agents.quickTry.error</code> and the Talk states) · MLLM line <code>Not available for realtime agents.</code><br>Advanced: row <code>While thinking</code> · <code>Short phrases while the answer is being generated.</code> · <code>Phrases</code> · <code>After</code> · <code>Order</code> → <code>Shuffle</code> / <code>In order</code> · inert rows <code>Match the persona</code> · <code>Keep going after the filler</code> · <code>During tool calls</code> · caption <code>Requires Engine</code> · tooltip <code>Engine work in progress ({ticket}). Your choice stays in this browser until it ships.</code></div>
+  </div>
+</div>
+
+<div class="plan">
+<strong>Prototype plan</strong> — ng-console, branch <code>design/sandbox</code>, additive only, pattern from 07 (commit e21a1a83).
+<table>
+  <thead><tr><th>File</th><th>What</th></tr></thead>
+  <tbody>
+    <tr><td><code>src/lib/agents/greeting-composition.ts</code> + <code>.test.ts</code></td><td><code>composeOpening({disclosure, greeting, locale})</code> and <code>splitOpening(greetingMessage, candidates)</code>: prefix match against the stored sentence, then the locale defaults; join rule per locale (en: one space). Tests: round-trip <code>split(compose(d,g)) = {d,g}</code>, toggle-off removes exactly the prefix, unknown prefix ⇒ disclosure off, disclosure-only greeting, whitespace/quotes.</td></tr>
+    <tr><td><code>src/lib/agents/opening-draft.ts</code></td><td><code>sessionStorage</code> key <code>ng-console.design.04.opening:&lt;agentId&gt;</code> = {disclosureSentence?} only. On/off and who-speaks-first derive from <code>greeting_message</code>; nothing else is stored.</td></tr>
+    <tr><td><code>src/components/console/agent-opening-section.tsx</code> + <code>.test.tsx</code></td><td><code>ToggleGroup</code> (Agent/Caller) · <code>Input</code> greeting · <code>Switch</code> interrupt · <code>Switch</code> + <code>Tooltip</code> disclosure · sentence field with Edit/Reset · <code>aria-live</code> "Callers hear" line · silence recap + link to <code>?tab=advanced</code> · "Hear the opening" (props: <code>livePreview?: ControlledLivePreview</code>). MLLM: hides interrupt switch + recap.</td></tr>
+    <tr><td>Mount · <code>agent-editor-workspace.tsx</code> :888–905</td><td>Replace the Greeting <code>&lt;section&gt;</code> in <code>AgentPromptForm</code> with <code>&lt;AgentOpeningSection/&gt;</code> behind an <code>opening</code> prop (≤8 lines); the create-flow host at :717 stays on the plain field until the owner says. <code>agent-detail-page.tsx</code> :640 passes <code>opening={{ mllmEnabled, greetingConfigs, silence, livePreview, locale }}</code>; <code>handlePromptDraftChange</code> :473 accepts a <code>greetingConfigs</code> patch.</td></tr>
+    <tr><td><code>src/lib/agents/orchestration-contracts.ts</code> · <code>orchestration-properties.ts</code> :443, :63</td><td>Add <code>OrchestrationDraft.greetingConfigs</code>; read <code>llm.greeting_configs</code>, write <code>llm.greeting_configs.interruptable</code> (index-signature field in SDK 2.4.0). Preview gate :1234 accepts an empty greeting when caller-first; preview mock :1165 shows the agent turn first.</td></tr>
+    <tr><td><code>src/components/console/agent-filler-engine-rows.tsx</code> + <code>.test.tsx</code></td><td>Three inert <code>AdvancedRow</code>s (export <code>AdvancedRow</code> from <code>agent-config-drawer.tsx</code> :1233, one line) mounted after the Filler Words row :1098; draft in <code>sessionStorage</code> <code>ng-console.design.04.filler-engine:&lt;agentId&gt;</code>. Filler relabel = i18n values only; chips input reuses <code>splitListInput</code>; <code>NumberField</code> min 0 → 100.</td></tr>
+    <tr><td><code>src/lib/i18n/resources/en/common.ts</code></td><td><code>pages.agents.opening.*</code> (all strings above, default sentence keyed <code>disclosure.default.en</code>) + relabelled <code>pages.agents.builder.filler*</code> values.</td></tr>
+    <tr><td>Events</td><td><code>ai_disclosure_enabled</code> · <code>greeting_previewed</code> · <code>caller_first_selected</code> · <code>filler_enabled</code> per <code>01-jtbd.md</code>, wherever ng-console keeps its taxonomy (to confirm — none found yet).</td></tr>
+  </tbody>
+</table>
+<table>
+  <thead><tr><th>Writes real properties</th><th>sessionStorage only</th><th>Disabled · "Requires Engine"</th></tr></thead>
+  <tbody><tr>
+    <td><code>llm.greeting_message</code> / <code>mllm.greeting_message</code> = composed opening (or <code>""</code> for caller-first) · <code>llm.greeting_configs.interruptable</code> · <code>filler_words.{enable, content.static_config.phrases, content.static_config.selection_rule, trigger.fixed_time_config.response_wait_ms}</code> · <code>parameters.silence_config</code> (via the existing Advanced row only)</td>
+    <td>Edited disclosure sentence (until Engine has <code>llm.disclosure_message</code> or <code>custom_settings</code> is confirmed) · intent for the three Engine rows</td>
+    <td><code>Match the persona</code> (868kuj31y) · <code>Keep going after the filler</code> (868kuj327) · <code>During tool calls</code> (868kewaqq) · generated filler (<code>content.mode</code> has no generated value)</td>
+  </tr></tbody>
+</table>
+</div>
+
+<h2>Next</h2>
+<p>Owner picks the converged direction (or one letter) and answers the six questions in <code>00-brief.md</code> — above all the default-ON call and who authors the disclosure sentence. Then: build on <code>design/sandbox</code>, run fortify · include · articulate, push for the Vercel preview, annotate, and put it in front of the designer. Competitor screenshots (Vapi · Retell · ElevenLabs) get added to the teardown once you're signed in — they may move the default sentence, not the shape.</p>
+</div>

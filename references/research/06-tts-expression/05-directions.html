@@ -1,0 +1,283 @@
+<title>TTS Expression Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: mocks of the live Console's dark TTS drawer (label above control, h-9 fields). Every color painted explicitly. Scaffold = 07-vendors-fallback/05-directions.html. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:78ch;margin:6px 0}
+code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:0;padding-left:16px}.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+/* ---- drawer mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.drw{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.drw-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.drw-h .cv{margin-left:auto;color:var(--ink-3);font-weight:400;font-size:12px}
+.drw-b{padding:12px 14px}
+.fld{margin:0 0 11px}.fld:last-child{margin-bottom:0}
+.fl{display:block;font-size:12px;font-weight:500;margin-bottom:5px}
+.sub{font-size:11.5px;color:var(--ink-3);margin-top:4px;line-height:1.35}
+.sub.warn{color:var(--warn)}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px;min-height:34px}
+.field .cv{margin-left:auto;color:var(--ink-3);white-space:nowrap}
+.sl{display:flex;align-items:center;gap:10px;min-height:34px}
+.sl .tr{flex:1;height:4px;border-radius:2px;background:var(--stroke);position:relative}
+.sl .tr i{position:absolute;left:0;top:0;height:100%;border-radius:2px;background:var(--brand)}
+.sl .tr b{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--brand);transform:translate(-50%,-50%)}
+.sl .v{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-2);min-width:46px;text-align:right}
+.dead{opacity:.5}
+.dead .sl .tr i{background:var(--stroke)}.dead .sl .tr b{border-color:var(--stroke);background:var(--panel-2)}
+.ta{background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px;min-height:46px;color:var(--ink)}
+.ta.ph{color:var(--ink-3)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.seg{display:inline-flex;border:1px solid var(--stroke);border-radius:6px;overflow:hidden}
+.seg span{padding:6px 12px;font-size:12px;color:var(--ink-2);border-right:1px solid var(--stroke)}
+.seg span:last-child{border-right:0}.seg span.on{background:var(--brand-soft);color:var(--brand)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.hint{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--stroke);color:var(--ink-3);font-size:10px;text-align:center;line-height:12px;margin-left:4px;vertical-align:1px}
+table.mx{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mx th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:6px 8px;border-bottom:1px solid var(--line)}
+table.mx tr:last-child td{border-bottom:0}
+table.mx .field{padding:4px 8px;font-size:12px;min-height:28px}
+.mono{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink-2)}
+.state{font-size:11.5px;color:var(--ink-3);margin:10px 0 6px}
+/* ---- audit ---- */
+.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule)}
+.audit th,.audit td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);text-align:left;vertical-align:top}
+.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2)}
+.audit td b{font-family:"JetBrains Mono",monospace;font-weight:500;color:var(--doc-brand)}
+.audit td.t{font-weight:600;white-space:nowrap}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:12px 16px;font-size:13.5px}
+.plan ul{margin:4px 0 10px;padding-left:18px}.plan li{margin:3px 0}
+.wrap{overflow-x:auto}
+@media (max-width:980px){.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 06 · TTS expression &amp; personality · step 5 diverge</p>
+<h1>TTS Expression Directions</h1>
+<p><strong>JTBD.</strong> When my agent's words are right but it sounds wrong — too fast, flat, mangling our product names — I want to change how it sounds without learning each vendor's knobs, so the first call a customer hears sounds like our brand.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Live Console · TTS config drawer (<code>TtsSection</code>, agent-config-drawer.tsx :1816), under Voice. v4 lock: speech tuning lives in the Advanced slide-out, not as a third voice handle.</div>
+  <div><b>Agora facts</b>Expression is per-vendor <code>tts.params</code>: pace on 11 of 17 vendors, pitch 4, volume 5, emotion enum 3 (minimax · bytedance · tencent), stability/style ElevenLabs only, prompt field OpenAI <code>instructions</code> + Generic <code>instruction</code> only. Extra keys pass through unvalidated.</div>
+  <div><b>Engine gaps</b>No SSML flag (ElevenLabs forwards SSML in text, v2.3) · no ambience (868kammep) · no portable expression (868kuj3f8) · no personality field (868ka69cb) · no synth preview endpoint (library <code>sampleUrl</code> only).</div>
+  <div><b>Console today</b>Raw NumberFields per vendor, no guidance, no preview. MiniMax-only Pronunciation table. ElevenLabs ranges wider than the vendor allows and key <code>speaker_boost</code> ≠ SDK <code>use_speaker_boost</code>. Tencent seeded <code>emotion_category:"happy"</code> with no UI.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses. Each is mocked inside the real TTS drawer grammar (label above control, one caption line max, explanations behind <span class="hint">i</span>). Copy is <em>proposed</em>, not approved. Dead controls are shown, never hidden.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Delivery — three normalised handles</h3><div class="who">For P1. Pace · Expressiveness · Stability as 0–100 sliders over vendor params, vendor fields folded underneath. "Hear it" beside them.</div></header>
+    <div class="mock">
+      <div class="drw"><div class="drw-h">TTS <span class="cv">ElevenLabs · Flash v2.5 · Rachel</span></div><div class="drw-b">
+        <div class="fld"><span class="fl">Pace<span class="hint">i</span></span><div class="sl"><div class="tr"><i style="width:50%"></i><b style="left:50%"></b></div><span class="v">1.0×</span></div></div>
+        <div class="fld"><span class="fl">Expressiveness<span class="hint">i</span></span><div class="sl"><div class="tr"><i style="width:30%"></i><b style="left:30%"></b></div><span class="v">0.3</span></div></div>
+        <div class="fld"><span class="fl">Stability<span class="hint">i</span></span><div class="sl"><div class="tr"><i style="width:65%"></i><b style="left:65%"></b></div><span class="v">0.65</span></div></div>
+        <div class="fld"><span class="btn">▶ Hear it</span><div class="sub">Sample voice · tuning not applied</div></div>
+        <div class="fld"><span class="mono">▸ Vendor fields · similarity_boost 0.75 · use_speaker_boost on · sample_rate 24000</span></div>
+      </div></div>
+      <div class="state">Same row, vendor = MiniMax:</div>
+      <div class="drw"><div class="drw-b">
+        <div class="fld"><span class="fl">Pace</span><div class="sl"><div class="tr"><i style="width:40%"></i><b style="left:40%"></b></div><span class="v">0.9×</span></div></div>
+        <div class="fld dead"><span class="fl">Expressiveness</span><div class="sl"><div class="tr"><b style="left:50%"></b></div><span class="v">—</span></div><div class="sub">Not adjustable for MiniMax</div></div>
+        <div class="fld dead"><span class="fl">Stability</span><div class="sl"><div class="tr"><b style="left:50%"></b></div><span class="v">—</span></div><div class="sub">Not adjustable for MiniMax</div></div>
+      </div></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">One mental model on every vendor; Pace maps cleanly to 11 of 17 vendors (contract in 00-brief).</li>
+      <li class="pro">Sliders with value text replace unlabeled decimals — the ElevenLabs "low = lively, high = monotone" guidance fits behind <span class="hint">i</span>.</li>
+      <li class="con">Expressiveness and Stability are ElevenLabs-only scalars: dead on 15 of 17 vendors, including the default (MiniMax). Two dead sliders on first open.</li>
+      <li class="con">Hides MiniMax pitch/volume/emotion under a fold — the vendor's real handles become expert features.</li>
+    </ul></div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Tone — a short style prompt</h3><div class="who">For P3. One line in plain words plus example chips. Writes OpenAI <code>instructions</code> / Generic <code>instruction</code>; elsewhere appends a line to the system prompt.</div></header>
+    <div class="mock">
+      <div class="drw"><div class="drw-h">TTS <span class="cv">OpenAI · gpt-4o-mini-tts · Coral</span></div><div class="drw-b">
+        <div class="fld"><span class="fl">Tone<span class="hint">i</span></span><div class="ta">Speak in a warm, unhurried tone. Sound like a helpful concierge.</div>
+          <div class="chips"><span class="chip on">Warm</span><span class="chip">Brisk</span><span class="chip">Calm</span></div>
+          <div class="sub">Writes tts.params.instructions</div></div>
+        <div class="fld"><span class="fl">Pace</span><div class="sl"><div class="tr"><i style="width:50%"></i><b style="left:50%"></b></div><span class="v">1.0×</span></div></div>
+      </div></div>
+      <div class="state">Same row, vendor = ElevenLabs:</div>
+      <div class="drw"><div class="drw-b">
+        <div class="fld"><span class="fl">Tone</span><div class="ta ph">e.g. Speak in a warm, unhurried tone.</div>
+          <div class="chips"><span class="chip">Warm</span><span class="chip">Brisk</span><span class="chip">Calm</span></div>
+          <div class="sub warn">ElevenLabs has no tone field · adds a line to the system prompt</div></div>
+      </div></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Exactly what OpenAI ships (accent · emotional range · intonation · pace · whispering) with their own example; the one place "personality" is a real field.</li>
+      <li class="pro">Chips give P3 a vocabulary without a prompt.</li>
+      <li class="con">On 15 vendors it silently edits the system prompt — the pattern 868ka69cb calls hard to "discover, review, and test"; and the LLM, not TTS, gets the instruction.</li>
+      <li class="con">Free text = new UI words in an English-only locale; chips need i18n while the prompt text must stay English for the vendor.</li>
+    </ul></div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · Pronunciation — Word → Say it as, every vendor</h3><div class="who">For P3 and P2. MiniMax writes <code>pronunciation_dict</code>; everyone else falls back to Voice Format replacements (Console-side, output text) — fallback named on the row.</div></header>
+    <div class="mock">
+      <div class="drw"><div class="drw-h">TTS <span class="cv">MiniMax · speech-2.8-turbo · Radiant Girl</span></div><div class="drw-b">
+        <div class="fld"><span class="fl">Pronunciation<span class="hint">i</span></span>
+          <table class="mx"><thead><tr><th>Word</th><th>Say it as</th><th></th></tr></thead><tbody>
+            <tr><td><div class="field">Agora</div></td><td><div class="field">uh-GOR-uh</div></td><td class="mono">✎ ✕</td></tr>
+            <tr><td><div class="field">ConvoAI</div></td><td><div class="field">convo A I</div></td><td class="mono">✎ ✕</td></tr>
+          </tbody></table>
+          <div style="margin-top:6px"><span class="btn">+ Add</span></div>
+          <div class="sub">Writes pronunciation_dict for MiniMax</div></div>
+      </div></div>
+      <div class="state">Same row, vendor = ElevenLabs:</div>
+      <div class="drw"><div class="drw-b">
+        <div class="fld"><span class="fl">Pronunciation</span>
+          <table class="mx"><tbody><tr><td><div class="field">Agora</div></td><td><div class="field">uh-GOR-uh</div></td><td class="mono">✎ ✕</td></tr></tbody></table>
+          <div class="sub">Applied as a text replacement before speech · 5 max</div></div>
+      </div></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Real on 17 of 17 vendors today, with two real write paths — no Engine dependency for v1.</li>
+      <li class="pro">Plain letters, not IPA (Bland's shape; Retell's phoneme alphabets lose P1/P3). Matches the Console's existing <code>"text/pronunciation"</code> format.</li>
+      <li class="con">Fallback is a text swap the LLM output passes through, capped at 5 by Voice Format — visible on the row, but a cap P3 will hit.</li>
+      <li class="con">Two mechanisms behind one table; switching vendor must migrate entries and say so.</li>
+    </ul></div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · Background sound — inert picker</h3><div class="who">For P1 (contact-centre feel). Off · Office · Café, present but dead with the Engine ticket, and a preview of what it would mix.</div></header>
+    <div class="mock">
+      <div class="drw"><div class="drw-h">TTS <span class="cv">Any vendor</span></div><div class="drw-b">
+        <div class="fld dead"><span class="fl">Background sound<span class="hint">i</span></span><div class="seg"><span class="on">Off</span><span>Office</span><span>Café</span></div>
+          <div class="sub">Requires Engine · 868kammep</div></div>
+        <div class="fld dead"><span class="fl">Level</span><div class="sl"><div class="tr"><b style="left:35%"></b></div><span class="v">—</span></div></div>
+        <div class="fld"><span class="mono">▸ Would mix: loop under agent speech · SIP + RTC · phone default Office, web default Off</span></div>
+      </div></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Says the true state: the field does not exist; the ticket is named; the default policy (Vapi: office for phone, off for web) is written down for the Engine to adopt.</li>
+      <li class="pro">Three scenes, not Retell's six — word budget holds.</li>
+      <li class="con">A dead row in the hot drawer for months; owner may prefer it absent until the Engine ships.</li>
+      <li class="con">"Preview of what it would mix" cannot play audio — it's a sentence, and easy to read as a promise.</li>
+    </ul></div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · Vendor-native presets only</h3><div class="who">For P2. Surface exactly the fields the vendor has — Emotion enums for MiniMax / Bytedance / Tencent, Stability for ElevenLabs — hide everything else.</div></header>
+    <div class="mock">
+      <div class="drw"><div class="drw-h">TTS <span class="cv">MiniMax · speech-2.8-turbo · Radiant Girl</span></div><div class="drw-b">
+        <div class="fld"><span class="fl">Emotion</span><div class="field">Happy <span class="cv">⌄</span></div></div>
+        <div class="fld"><span class="fl">Pitch</span><div class="sl"><div class="tr"><i style="width:50%"></i><b style="left:50%"></b></div><span class="v">0</span></div></div>
+        <div class="fld"><span class="fl">Volume</span><div class="sl"><div class="tr"><i style="width:10%"></i><b style="left:10%"></b></div><span class="v">1.0</span></div></div>
+        <div class="fld"><span class="fl">Speed</span><div class="sl"><div class="tr"><i style="width:33%"></i><b style="left:33%"></b></div><span class="v">1.0</span></div></div>
+      </div></div>
+      <div class="state">Same drawer, vendor = Cartesia:</div>
+      <div class="drw"><div class="drw-b"><div class="sub">No delivery controls for Cartesia</div></div></div>
+    </div>
+    <div class="why"><ul>
+      <li class="pro">Never fakes a capability; the emotion enums nobody exposes today (and the Tencent "happy" seed) become visible and reviewable.</li>
+      <li class="pro">Zero normalisation risk — vendor units, vendor ranges, vendor keys.</li>
+      <li class="con">Hidden ≠ dead: Cartesia users see nothing and don't learn what other vendors offer — breaks the dead-not-hidden rule.</li>
+      <li class="con">"Speed 1.0" on MiniMax and "Speed 1.25" on Tencent mean different things; no cross-vendor mental model, so switching vendor resets the sound.</li>
+    </ul></div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<div class="wrap"><table class="audit">
+  <thead><tr><th></th><th>Protocol fit</th><th>Perception laws</th><th>CTA / word budget</th><th>State coverage</th><th>Accessibility</th><th>i18n</th></tr></thead>
+  <tbody>
+    <tr><td class="t">A</td><td><b>3</b> Drawer placement fits v4; but 2 of 3 handles are ElevenLabs-only.</td><td><b>4</b> Three aligned sliders, value text, one caption.</td><td><b>4</b> 3 labels + Hear it + 1 caption.</td><td><b>2</b> Vendor-without-field: dead ×2 on the default vendor. Loading: skeleton. Error: field error. Locked: n/a. MLLM: row not mounted.</td><td><b>4</b> Native range + <code>aria-valuetext</code>; dead sliders need <code>aria-disabled</code> + reason.</td><td><b>4</b> Labels only; value text is numeric.</td></tr>
+    <tr><td class="t">B</td><td><b>2</b> Silent system-prompt write breaks the honesty floor and 868ka69cb's intent.</td><td><b>4</b> One box, three chips.</td><td><b>3</b> Placeholder + 3 chips + 2 captions = most words of the five.</td><td><b>3</b> Vendor-without-field: works via prompt (dishonest by design). Loading/error same as A. MLLM: mllm has no instructions field → dead.</td><td><b>4</b> Textarea + toggle chips; chips need pressed state.</td><td><b>3</b> Chips translate; prompt text must stay English for the vendor.</td></tr>
+    <tr><td class="t">C</td><td><b>5</b> Two real write paths, fallback named; extends the existing MiniMax section.</td><td><b>4</b> Table grammar the drawer already has.</td><td><b>4</b> 2 column heads + Add + 1 caption.</td><td><b>4</b> Vendor-without-field: fallback, cap 5 shown. Empty: one Add button. Error: existing "/" + duplicate rules. MLLM: not mounted.</td><td><b>4</b> Inputs labeled by row; edit/delete need aria-labels (exist today).</td><td><b>4</b> Words are user data; heads translate.</td></tr>
+    <tr><td class="t">D</td><td><b>3</b> Honest inert row; but a dead control in the hot drawer.</td><td><b>3</b> Segmented control reads as live until the caption.</td><td><b>5</b> 3 options + 1 caption.</td><td><b>3</b> Locked only; nothing else can happen. sessionStorage draft.</td><td><b>4</b> Disabled group with <code>title</code> reason.</td><td><b>5</b> Three nouns.</td></tr>
+    <tr><td class="t">E</td><td><b>4</b> Vendor truth; hides instead of deadening.</td><td><b>3</b> Different handles per vendor — no stable layout.</td><td><b>4</b> Existing labels + Emotion.</td><td><b>5</b> Every state is the vendor's real state; empty vendor gets one line.</td><td><b>4</b> Selects + sliders.</td><td><b>4</b> Emotion values are vendor enums (English), shown as-is.</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Verdict — converged</h2>
+<div class="two">
+  <div class="mock" style="border:1px solid var(--line);border-radius:8px">
+    <div class="drw"><div class="drw-h">TTS <span class="cv">MiniMax · speech-2.8-turbo · Radiant Girl</span></div><div class="drw-b">
+      <div class="fld"><span class="fl">Pace<span class="hint">i</span></span><div class="sl"><div class="tr"><i style="width:44%"></i><b style="left:44%"></b></div><span class="v">0.94×</span></div></div>
+      <div class="fld"><span class="fl">Pitch</span><div class="sl"><div class="tr"><i style="width:50%"></i><b style="left:50%"></b></div><span class="v">0</span></div></div>
+      <div class="fld"><span class="fl">Volume</span><div class="sl"><div class="tr"><i style="width:10%"></i><b style="left:10%"></b></div><span class="v">1.0</span></div></div>
+      <div class="fld"><span class="fl">Emotion</span><div class="field">Neutral <span class="cv">⌄</span></div></div>
+      <div class="fld dead"><span class="fl">Tone<span class="hint">i</span></span><div class="ta ph">e.g. Speak in a warm, unhurried tone.</div><div class="sub">Not adjustable for MiniMax</div></div>
+      <div class="fld"><span class="fl">Pronunciation<span class="hint">i</span></span>
+        <table class="mx"><thead><tr><th>Word</th><th>Say it as</th><th></th></tr></thead><tbody>
+          <tr><td><div class="field">Agora</div></td><td><div class="field">uh-GOR-uh</div></td><td class="mono">✎ ✕</td></tr>
+        </tbody></table>
+        <div style="margin-top:6px"><span class="btn">+ Add</span></div></div>
+      <div class="fld dead"><span class="fl">Background sound</span><div class="seg"><span class="on">Off</span><span>Office</span><span>Café</span></div><div class="sub">Requires Engine · 868kammep</div></div>
+      <div class="fld"><span class="btn">▶ Hear it</span><div class="sub">Sample voice · tuning not applied</div></div>
+    </div></div>
+    <div class="state">Vendor = ElevenLabs: Pace · Stability · Style · Similarity boost · Speaker boost live; Pitch/Volume/Emotion absent; Tone dead; Pronunciation caption "Applied as a text replacement before speech · 5 max". Vendor = Cartesia: Pace dead "Not adjustable for Cartesia"; Pronunciation + Background sound as above. MLLM/realtime: nothing mounted.</div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><b>E is the rule.</b> A control appears only when the vendor has the field — but the universal ones (Pace · Tone) stay <em>dead with the reason</em>, not hidden.</li>
+      <li><b>A gives the one normalised handle.</b> Pace, 50 = normal, mapped per vendor (contract in 00-brief). Expressiveness/Stability stay vendor-native.</li>
+      <li><b>C ships whole.</b> Pronunciation on every vendor, fallback named on the row.</li>
+      <li><b>B only where it's true.</b> Tone writes <code>instructions</code>/<code>instruction</code> on OpenAI/Generic; no system-prompt write.</li>
+      <li><b>D is one inert row</b> with the ticket, draft in sessionStorage.</li>
+    </ul>
+    <h4>Why this shape</h4>
+    <ul>
+      <li>Never fakes a capability: every live control writes a field that exists in <code>agora-agents@2.4.0</code>; every dead one says why.</li>
+      <li>One normalised handle where the mapping is clean (11 vendors), vendor units where it isn't — Retell's uniform scalars without Retell's hidden remapping.</li>
+      <li>Fixes what the audit found on the way: ElevenLabs key + ranges, the invisible Tencent "happy" seed becomes a visible Emotion select.</li>
+      <li>Stays inside the v4/v6 locks: speech tuning in the slide-out, JSON door kept, flat form, one caption per control.</li>
+      <li>"Hear it" is honest today (library sample) and becomes real the day a synth-preview endpoint exists — same button, caption removed.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes):</strong> labels <code>Pace</code> · <code>Emotion</code> · <code>Intensity</code> (Tencent) · <code>Tone</code> · <code>Background sound</code>; existing <code>Pitch</code> <code>Volume</code> <code>Stability</code> <code>Style</code> <code>Similarity boost</code> <code>Speaker boost</code> <code>Pronunciation</code> reused. Column heads <code>Word</code> · <code>Say it as</code>. Options <code>Off</code> · <code>Office</code> · <code>Café</code>. Chips <code>Warm</code> · <code>Brisk</code> · <code>Calm</code>. Placeholder <code>e.g. Speak in a warm, unhurried tone.</code> Button <code>Hear it</code>. Captions <code>Not adjustable for {{vendor}}</code> · <code>Writes pronunciation_dict for MiniMax</code> · <code>Applied as a text replacement before speech · 5 max</code> · <code>Requires Engine · 868kammep</code> · <code>Sample voice · tuning not applied</code>. Tooltips (<code>title</code>): Pace "50 is the vendor's normal speed"; Tone "Sent to the voice model, not the LLM"; Pronunciation "Plain letters, as you'd spell it out loud".</div>
+  </div>
+</div>
+
+<h2>Prototype plan (design/sandbox, additive)</h2>
+<div class="plan">
+  <ul>
+    <li><code>src/lib/agents/tts-expression.ts</code> + <code>.test.ts</code> — <code>ttsExpressionCapabilities(vendor)</code> matrix (pace · pitch · volume · emotion · stability · tone · pronunciation path); <code>normalisePace</code> / <code>denormalisePace</code> per vendor (round-trip tests, ElevenLabs clamp 0.7–1.2, Tencent/Murf 0 = normal); <code>readTtsExpression(params, vendor)</code> / <code>writeTtsExpression(params, vendor, patch)</code> writing the exact SDK keys (fixes <code>use_speaker_boost</code>); pronunciation adapter minimax ↔ <code>pronunciation_dict.tone</code>, others ↔ <code>voice_formatting.custom_replacements</code> (exact, cap 5, sets <code>enabled</code>).</li>
+    <li><code>src/components/console/agent-tts-expression-row.tsx</code> + <code>.test.tsx</code> — Pace (<code>&lt;input type="range"&gt;</code>, <code>aria-valuetext</code>; no shadcn slider exists), vendor-native handles, Emotion select, Tone textarea + chips (openai/generic only), Pronunciation table (lifts <code>minimax-pronunciation-section.tsx</code>), Background sound (disabled, <code>title</code>), Hear it (library <code>sampleUrl</code> via the voice-library query). Tests: dead-not-hidden for cartesia, MiniMax vs ElevenLabs write paths, disabled ambience reason, keyboard on the range, i18n guard.</li>
+    <li><b>Mount:</b> <code>TtsSection</code> in <code>agent-config-drawer.tsx</code> directly after the Voice field (~:2148), before the vendor blocks; the raw speed/pitch/volume/stability/style/instructions NumberFields it supersedes come out of render in the slice (same property paths — owner question 4); Skip patterns + TTS params JSON stay. No Models-tab mount (v4 lock). MLLM: not mounted.</li>
+    <li><b>i18n:</b> <code>pages.agentModels.expression.*</code> — the copy set above, nothing else.</li>
+    <li><b>Writes real properties:</b> <code>tts.params.*</code> vendor fields (allowed — fields exist), <code>tts.params.pronunciation_dict.tone</code>, <code>voice_formatting.custom_replacements</code> + <code>enabled</code>. <b>sessionStorage</b> <code>ng-console.design.06.tts-expression:&lt;agentId&gt;</code>: Background sound choice, Tone chips on vendors without a prompt field. <b>Disabled with Requires Engine:</b> Background sound (868kammep). <b>Dead with reason:</b> Pace/Tone on vendors without the field.</li>
+    <li>Passes before review: fortify (vendor switch migrates pronunciation entries with a toast; cap hit; loading skeleton) · include (range keyboard, disabled reasons, <code>--input</code> stroke finding logged not fixed) · articulate (copy set only). Log entry: LEARNINGS §20 "06 · Pace is the one normalised handle".</li>
+  </ul>
+</div>
+</div>

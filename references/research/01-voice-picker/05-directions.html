@@ -1,0 +1,372 @@
+<title>Voice Picker Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: a mock of the live Console's dark Models tab + voice-library dialog. Every color is painted explicitly. Same tokens as 07. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+p{max-width:74ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.rowy{padding:12px 14px;border-bottom:1px solid var(--line)}
+.rowy:last-child{border-bottom:0}
+.lbl{color:var(--ink-2);font-size:12.5px;line-height:1.35;margin-bottom:6px;font-weight:500}
+.lbl small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px;font-weight:400}
+.pair{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px;min-height:34px}
+.field .cv{margin-left:auto;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.field.off{color:var(--ink-3);border-style:dashed}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.play{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid var(--stroke);border-radius:50%;font-size:10px;color:var(--ink);flex:none;background:var(--panel-2)}
+.play.on{border-color:var(--brand);color:var(--brand)}
+.play.off{color:var(--ink-3);border-style:dashed}
+.link{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--brand-dim);font-size:12px}
+.link.off{color:var(--ink-3);border-color:var(--stroke)}
+.hint{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--stroke);color:var(--ink-3);font-size:10px;text-align:center;line-height:12px;margin-left:4px;vertical-align:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.sm{padding:3px 8px;font-size:11.5px}
+.btn.off{color:var(--ink-3);border-style:dashed}
+.box{width:13px;height:13px;border:1px solid var(--stroke);border-radius:3px;flex:none;display:inline-grid;place-items:center;font-size:10px;color:var(--brand)}
+.box.x{border-color:var(--brand)}
+.opt{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12.5px}
+/* dialog */
+.dlg{background:var(--panel);border:1px solid var(--stroke);border-radius:8px;overflow:hidden}
+.dlg-h{padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px;display:flex;gap:8px;align-items:center}
+.dlg-h .x{margin-left:auto;color:var(--ink-3)}
+.dlg-b{padding:10px 12px;display:grid;gap:8px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--stroke);border-radius:6px;padding:3px 9px;font-size:11.5px;color:var(--ink-2)}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab.off{color:var(--ink-3);border-style:dashed}
+.filters{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:6px}
+.filters .field{padding:5px 8px;font-size:11.5px;min-height:28px}
+table.mx{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mx th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mx tr:last-child td{border-bottom:0}
+table.mx tr.rec td{background:var(--row)}
+.tag{display:inline-block;background:var(--panel-2);border-radius:4px;padding:1px 6px;font-size:10.5px;color:var(--ink-2);margin-right:3px}
+.strip{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--row);border:1px solid var(--line);border-radius:6px;font-size:12px}
+.tray{border:1px solid var(--brand-dim);background:var(--brand-soft);border-radius:6px;padding:8px 10px;display:grid;gap:6px}
+.tray .t{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12.5px}
+.tray .t .q{color:var(--ink-2);font-family:"JetBrains Mono",monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foot{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-3)}
+.foot .r{margin-left:auto}
+.form{display:grid;gap:7px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:9px 10px}
+.form .lbl{margin-bottom:3px;font-size:11.5px}
+.cap{font-size:11.5px;color:var(--ink-3)}
+/* doc tables */
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+table.audit th,table.audit td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);text-align:left;vertical-align:top}
+table.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2)}
+table.audit td b{font-size:15px;display:block}
+table.audit td small{color:var(--doc-ink-2)}
+table.audit tr.win td{background:#eef7f2}
+.two{display:grid;grid-template-columns:1.25fr .75fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:12px 0 4px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin-top:14px}
+.copy code,.plan code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:12px 16px;font-size:13.5px}
+.plan ul{margin:4px 0 10px;padding-left:18px}.plan li{margin:3px 0}
+@media (max-width:1140px){.dir{grid-template-columns:1fr 1fr}}
+@media (max-width:980px){.dir,.two,.facts{grid-template-columns:1fr}.card{max-width:640px}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 01 · Voice picker &amp; recommendations · step 5 diverge</p>
+<h1>Voice Picker Directions</h1>
+<p><strong>JTBD.</strong> When I've written what my agent should say, I want to hear which voice fits it without auditioning the whole catalog — so I pick once, go live, and don't come back to change it.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Agent › Models tab, TTS row's <em>Voice</em> button → <code>StudioVoiceLibraryDialog</code> (vendor tabs · search · gender · accent · type · table · Use Voice). Frozen surface → additive.</div>
+  <div><b>Agora facts</b>Voice = <code>tts.params.&lt;vendor path&gt;</code> via <code>applyTtsVoiceIdForVendor</code>. Library returns accent · gender · tags · sampleUrl — no language, no use case. <code>update</code> has no <code>tts</code>.</div>
+  <div><b>Locks</b>Dropdown/browser, no quick-pick grid (v6). A pick adopts the voice's sound, not its engine; tier switch remaps same-gender + toast (v4). Unchecked consent only. Plain form.</div>
+  <div><b>Gaps</b>Cloning = vendor-side id. Consent/audit store, greeting-text preview, multi-voice + runtime switch: none in the API. Benchmark (868ka247c) is evidence only. R8 preference test not run.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five places to put the decision. Each mock is in the Models-tab row grammar (label above control) or the existing dialog grammar. Copy is <em>proposed</em>, not approved. Previews are play/stop on click — nothing autoplays.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Recommended first</h3><div class="who">For P1. The dialog opens on three voices for what this agent does, inferred from its prompt + greeting.</div></header>
+    <div class="mock">
+      <div class="dlg">
+        <div class="dlg-h">Select Voice <span class="x">✕</span></div>
+        <div class="dlg-b">
+          <div class="tabs"><span class="tab on">Minimax</span><span class="tab off">Open AI</span></div>
+          <div class="strip"><span class="chip brand"><span class="dot"></span>Recommended for support<span class="hint">i</span></span><span class="cap">from your prompt · Calm · Confident · American</span></div>
+          <table class="mx">
+            <thead><tr><th>Voice</th><th>Trait</th><th>Voice ID</th><th></th></tr></thead>
+            <tbody>
+              <tr class="rec"><td><span class="play">▶</span> Calm Woman</td><td><span class="tag">Calm</span><span class="tag">Confident</span></td><td>English_CalmWoman</td><td><span class="btn sm primary">Use Voice</span></td></tr>
+              <tr class="rec"><td><span class="play on">■</span> Trustworthy Man</td><td><span class="tag">Confident</span></td><td>English_Trustworth_Man</td><td><span class="btn sm">Use Voice</span></td></tr>
+              <tr class="rec"><td><span class="play">▶</span> Reliable Man</td><td><span class="tag">Calm</span></td><td>English_Steadymentor</td><td><span class="btn sm">Use Voice</span></td></tr>
+              <tr><td colspan="4" class="cap" style="padding:4px 8px">All voices · 62</td></tr>
+              <tr><td><span class="play">▶</span> Aussie Bloke</td><td><span class="tag">Enthusiastic</span></td><td>English_Aussie_Bloke</td><td><span class="btn sm">Use Voice</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Kills the JTBD's pain directly: three to hear, not sixty-two. The table is untouched below.</li>
+        <li class="pro">Uses signals the agent already has (prompt, greeting, ASR language → accent). No new field, no network.</li>
+        <li class="pro">Honest label lives in the tooltip: "Based on voice tags, not benchmarks" — swaps to 868ka247c evidence later.</li>
+        <li class="con">Tag heuristics can be wrong; a wrong "Recommended" costs trust faster than no recommendation.</li>
+        <li class="con">Nothing to <em>compare</em> — you still play one at a time from memory.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Compare tray</h3><div class="who">For both. Shortlist up to three; hear them on the same line, side by side, pick one.</div></header>
+    <div class="mock">
+      <div class="dlg">
+        <div class="dlg-h">Select Voice <span class="x">✕</span></div>
+        <div class="dlg-b">
+          <div class="filters"><div class="field">Search</div><div class="field">All Gender <span class="cv">⌄</span></div><div class="field">All Accent <span class="cv">⌄</span></div><div class="field">Types <span class="cv">⌄</span></div></div>
+          <table class="mx">
+            <thead><tr><th></th><th>Voice</th><th>Trait</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><span class="box x">✓</span></td><td>Calm Woman</td><td><span class="tag">Calm</span></td><td><span class="btn sm">Use Voice</span></td></tr>
+              <tr><td><span class="box x">✓</span></td><td>Graceful Lady</td><td><span class="tag">Wise</span></td><td><span class="btn sm">Use Voice</span></td></tr>
+              <tr><td><span class="box"></span></td><td>Upbeat Woman</td><td><span class="tag">Enthusiastic</span></td><td><span class="btn sm">Use Voice</span></td></tr>
+            </tbody>
+          </table>
+          <div class="tray">
+            <div class="t"><span class="play on">■</span><span>Calm Woman <span class="q">"Thanks for calling. I can help with that."</span></span><span class="btn sm primary">Use Voice</span></div>
+            <div class="t"><span class="play">▶</span><span>Graceful Lady <span class="q">"Thanks for calling. I can help with that."</span></span><span class="btn sm">Use Voice</span></div>
+            <div class="foot"><span class="box"></span> Read my greeting <span class="cap">· Requires Studio preview</span><span class="r">2 of 3</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Answers 868ka247c's "same script, same conditions" for the builder, not just the benchmark.</li>
+        <li class="pro">Hearing <em>your</em> greeting is whitespace — no competitor previews with the builder's own text.</li>
+        <li class="pro">Play/stop per voice, one audio element, ■ visible while playing — the a11y story is simple.</li>
+        <li class="con">Greeting-text synthesis has no endpoint; v1 plays vendor samples and says so.</li>
+        <li class="con">A second control column plus a tray grows a dialog that already has four filters.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · Voice in the row</h3><div class="who">For P1 who never opens the dialog. Hear the current voice on the Models tab; the browser stays one click away.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="rowy">
+          <div class="pair">
+            <div><div class="lbl">TTS</div><div class="field">◎ Minimax · speech-2.8-turbo</div></div>
+            <div><div class="lbl">Voice</div><div class="field"><span class="play">▶</span> Calm Woman <span class="cv">Female · American ⌄</span></div></div>
+            <div><div class="lbl">&nbsp;</div><span class="btn">⚙</span></div>
+          </div>
+          <div class="cap" style="margin-top:6px">Recommended for support</div>
+        </div>
+        <div class="rowy"><div class="lbl">Backup providers <small>Requires Engine failover · Nov</small></div><div class="field off">Ready <span class="cv">Change backups</span></div></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Zero-dialog path: the default agent's voice can be heard where it is set. Fitts: one target, already in the row.</li>
+        <li class="pro">Still a dropdown/browser — respects the v6 "no quick-pick grid" lock.</li>
+        <li class="pro">Same play/stop control as the dialog → one preview component.</li>
+        <li class="con">Audio inside a settings form row is unusual; needs a clear ■ state and stop-on-navigate.</li>
+        <li class="con">One caption line is the whole budget; recommendation reasons don't fit here.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · Add your own voice</h3><div class="who">For P2. Cloning is vendor-side; the Console takes the id, a name, consent, and scopes it to the project.</div></header>
+    <div class="mock">
+      <div class="dlg">
+        <div class="dlg-h">Select Voice <span class="x">✕</span></div>
+        <div class="dlg-b">
+          <div class="tabs"><span class="tab off">Minimax</span><span class="tab on">Elevenlabs</span></div>
+          <div class="form">
+            <div class="lbl">Add your own voice <span class="cap">· <a class="link" href="#">Clone a voice at ElevenLabs ↗</a></span></div>
+            <div><div class="lbl">Voice ID</div><div class="field">pNInz6obpgDQGcFmaJgB</div></div>
+            <div><div class="lbl">Name</div><div class="field">Brand voice · Maya</div></div>
+            <div class="opt"><span class="box"></span> I have the rights and consent to use this voice</div>
+            <div class="foot"><span class="cap">Usable in this project only</span><span class="r"><span class="btn sm primary">Save voice</span></span></div>
+          </div>
+          <div class="cap">Saved voices appear here and as <em>Custom</em> in the TTS drawer.</div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Honest about the Engine: a clone is an id. Writes the same <code>tts.params</code> path, so the teammate's Custom toggle shows it by construction.</li>
+        <li class="pro">Consent unchecked by default (anti-pattern list), scope stated in one line — the 868kbyqeh "record consent" step, minimal.</li>
+        <li class="pro">Gives Cartesia/ElevenLabs (Voice button disabled today) a way to get a voice at all.</li>
+        <li class="con">Self-attested consent is not verification; revocation/"where used" need the Studio store (868kyj9w5).</li>
+        <li class="con">Two entry points for one id (dialog + drawer) must never disagree.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · Voices, plural (inert)</h3><div class="who">For P2 planning ahead. Shows the multi-voice shape now, disabled until the Engine can switch.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="rowy"><div class="pair"><div><div class="lbl">TTS</div><div class="field">◎ Minimax · speech-2.8-turbo</div></div><div><div class="lbl">Voice</div><div class="field">Calm Woman <span class="cv">⌄</span></div></div><div><div class="lbl">&nbsp;</div><span class="btn">⚙</span></div></div></div>
+        <div class="rowy">
+          <div class="lbl">Voices <small>Requires Engine · voice switching</small></div>
+          <table class="mx">
+            <thead><tr><th>Label</th><th>Voice</th><th>When</th></tr></thead>
+            <tbody>
+              <tr><td>default</td><td>Calm Woman</td><td class="cap">always</td></tr>
+              <tr><td class="cap" colspan="3"><span class="btn sm off">+ Add another voice</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro">Sets the contract early: label · voice · when — the ElevenLabs shape (≤10 voices, <code>&lt;LABEL&gt;</code> markup) and what 868kyr1ej asks Studio to own.</li>
+        <li class="pro">Same "Requires Engine" caption idiom as 07's Backup providers.</li>
+        <li class="con">A disabled table on a live surface is decoration — the v7 Plain Form lock says no.</li>
+        <li class="con">Nothing to test, nothing to write: <code>update</code> can't touch <code>tts</code>, so even the preview of a switch is fake.</li>
+        <li class="con">Adds a row for every agent to serve a feature with no date.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<table class="audit">
+  <thead><tr><th></th><th>Protocol fit<br><small>additive, frozen surface</small></th><th>Perception<br><small>Hick · Fitts · disclosure</small></th><th>CTA / word budget</th><th>State coverage<br><small>empty · loading · error · locked</small></th><th>Accessibility<br><small>names · strokes · keys · audio</small></th><th>i18n</th><th>Σ</th></tr></thead>
+  <tbody>
+    <tr class="win"><td><b>A</b> Recommended first</td><td><b>5</b><small>one strip in the existing dialog</small></td><td><b>5</b><small>62 → 3 choices; table still there</small></td><td><b>4</b><small>1 label + 1 tooltip</small></td><td><b>4</b><small>needs "no match" + "no prompt yet"</small></td><td><b>4</b><small>strip is a labelled region; rows unchanged</small></td><td><b>4</b><small>use-case word is a key, not free text</small></td><td><b>26</b></td></tr>
+    <tr class="win"><td><b>B</b> Compare tray</td><td><b>4</b><small>a column + a tray</small></td><td><b>4</b><small>≤3 cap keeps Hick; tray near the rows</small></td><td><b>3</b><small>Compare · Play/Stop · Use · caption</small></td><td><b>5</b><small>0/3 · playing · sample missing · greeting locked</small></td><td><b>5</b><small>play/stop are real buttons, aria-pressed, one audio</small></td><td><b>4</b><small>"{n} of 3" plural-safe</small></td><td><b>25</b></td></tr>
+    <tr><td><b>C</b> Voice in the row</td><td><b>4</b><small>touches CascadeModelRow's second button</small></td><td><b>4</b><small>Fitts win; disclosure lost</small></td><td><b>5</b><small>one caption, no new label</small></td><td><b>3</b><small>no sample → hide; no error slot</small></td><td><b>3</b><small>audio in a form row needs stop-on-navigate</small></td><td><b>5</b><small>nothing new</small></td><td><b>24</b></td></tr>
+    <tr class="win"><td><b>D</b> Add your own voice</td><td><b>4</b><small>form in the dialog; same param path</small></td><td><b>4</b><small>progressive: link → form</small></td><td><b>3</b><small>4 labels + consent line + scope</small></td><td><b>4</b><small>invalid id · vendor 401 · duplicate</small></td><td><b>4</b><small>checkbox labelled by its sentence</small></td><td><b>3</b><small>vendor name interpolated; long consent line</small></td><td><b>22</b></td></tr>
+    <tr><td><b>E</b> Voices, plural</td><td><b>2</b><small>new row on every agent, no data</small></td><td><b>2</b><small>adds a choice nobody can make</small></td><td><b>2</b><small>table headers + caption for nothing</small></td><td><b>2</b><small>only "locked"</small></td><td><b>3</b><small>disabled table still in tab order</small></td><td><b>4</b><small>—</small></td><td><b>15</b></td></tr>
+  </tbody>
+</table>
+
+<h2>Verdict — converged A + B + D</h2>
+<div class="two">
+  <div class="mock wide" style="border:1px solid var(--line);border-radius:8px">
+    <div class="dlg">
+      <div class="dlg-h">Select Voice <span class="x">✕</span></div>
+      <div class="dlg-b">
+        <div class="tabs"><span class="tab on">Minimax</span><span class="tab off">Open AI</span><span class="tab off">Elevenlabs</span></div>
+        <div class="filters"><div class="field">Search</div><div class="field">All Gender <span class="cv">⌄</span></div><div class="field">All Accent <span class="cv">⌄</span></div><div class="field">Types <span class="cv">⌄</span></div></div>
+        <div class="strip"><span class="chip brand"><span class="dot"></span>Recommended for support<span class="hint">i</span></span><span class="cap">Calm · Confident · American</span><span class="r" style="margin-left:auto"><a class="link" href="#">Add your own voice</a></span></div>
+        <table class="mx">
+          <thead><tr><th></th><th>Voice</th><th>Trait</th><th>Voice ID</th><th></th></tr></thead>
+          <tbody>
+            <tr class="rec"><td><span class="box x">✓</span></td><td><span class="play">▶</span> Calm Woman</td><td><span class="tag">Calm</span><span class="tag">Confident</span></td><td>English_CalmWoman</td><td><span class="btn sm">Use Voice</span></td></tr>
+            <tr class="rec"><td><span class="box x">✓</span></td><td><span class="play">▶</span> Trustworthy Man</td><td><span class="tag">Confident</span></td><td>English_Trustworth_Man</td><td><span class="btn sm">Use Voice</span></td></tr>
+            <tr class="rec"><td><span class="box"></span></td><td><span class="play">▶</span> Reliable Man</td><td><span class="tag">Calm</span></td><td>English_Steadymentor</td><td><span class="btn sm">Use Voice</span></td></tr>
+            <tr><td><span class="box"></span></td><td><span class="play off">▶</span> Whispering Girl</td><td><span class="tag">Young</span></td><td>English_Whispering_girl</td><td><span class="btn sm">Use Voice</span></td></tr>
+          </tbody>
+        </table>
+        <div class="tray">
+          <div class="t"><span class="play on">■</span><span>Calm Woman <span class="q">vendor sample</span></span><span class="btn sm primary">Use Voice</span></div>
+          <div class="t"><span class="play">▶</span><span>Trustworthy Man <span class="q">vendor sample</span></span><span class="btn sm">Use Voice</span></div>
+          <div class="foot"><span class="box"></span> Read my greeting <span class="cap">· Requires Studio preview</span><span class="r">2 of 3</span></div>
+        </div>
+        <div class="foot"><span>Page 1 of 7</span><span class="r"><span class="btn sm">Previous</span> <span class="btn sm">Next</span></span></div>
+      </div>
+    </div>
+    <div class="cap" style="margin-top:10px">Models row, unchanged grammar — only the ▶ is new:</div>
+    <div class="sec" style="margin-top:6px"><div class="rowy"><div class="pair"><div><div class="lbl">TTS</div><div class="field">◎ Minimax · speech-2.8-turbo</div></div><div><div class="lbl">Voice</div><div class="field"><span class="play">▶</span> Calm Woman <span class="cv">⌄</span></div></div><div><div class="lbl">&nbsp;</div><span class="btn">⚙</span></div></div></div></div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><b>A is the opening.</b> The Recommended strip + three highlighted rows at the top of the table. The full table, filters and paging stay exactly as they are.</li>
+      <li><b>B is the mechanic.</b> A Compare column (≤3) and a tray with play/stop + Use Voice per shortlisted voice. Vendor samples in v1; "Read my greeting" disabled with its caption until the Studio preview endpoint exists.</li>
+      <li><b>D is the door.</b> "Add your own voice" in the strip opens the id · name · consent · scope form for the active vendor. Same param path as the drawer's Custom toggle.</li>
+      <li><b>C contributes one control:</b> ▶/■ on the Models-row Voice button for the current voice. No caption there.</li>
+      <li><b>E is not built.</b> A disabled table is decoration on a live surface. The multi-voice contract goes in 06-proposal as the Engine ask; one ghost "Add another voice" only if the owner says yes (Q4).</li>
+    </ul>
+    <h4>Why this shape</h4>
+    <ul>
+      <li>The catalog has no use-case field; the agent's prompt is the use case. Reading it costs nothing and needs no API.</li>
+      <li>Three recommended + three to compare is the Hick's-law budget: decide among ≤3 twice, never among 62.</li>
+      <li>Same-script compare is the builder-facing half of 868ka247c; the benchmark can replace the tag scorer without changing the surface.</li>
+      <li>Cloning stays honest: an id, a name, an unchecked consent, a scope line. No fake verification, no "processing" theatre.</li>
+      <li>Every audio control is a real button with a visible stop state and one shared element — nothing autoplays, closing the dialog silences it.</li>
+    </ul>
+    <h4>Dependencies, stated on the surface</h4>
+    <ul>
+      <li>Greeting preview → "Requires Studio preview" caption on the disabled toggle. Multi-voice → not shown (868kyr1ej: <code>update</code> has no <code>tts</code>).</li>
+      <li>Teammate branch <code>codex/add-voice-clone</code> lands first; our form must read as Custom in the drawer's <code>inferred</code> mode.</li>
+    </ul>
+    <div class="copy"><strong>Proposed copy (needs a yes)</strong> — i18n <code>pages.agentModels.voicePicker.*</code>:
+      strip <code>Recommended for {{useCase}}</code> (useCase ∈ support · sales · booking · tutoring · storytelling; unknown → <code>Recommended</code>) · tooltip <code>Based on voice tags, not benchmarks</code> ·
+      column/aria <code>Compare</code> / <code>Compare {{voice}}</code> · tray counter <code>{{count}} of 3</code> · audio aria <code>Play {{voice}}</code> / <code>Stop {{voice}}</code> (replaces the hardcoded literal) · toggle <code>Read my greeting</code> · caption <code>Requires Studio preview</code> ·
+      link <code>Add your own voice</code> · form <code>Name</code> (Voice ID reuses <code>voiceLibrary.voiceId</code>) · consent <code>I have the rights and consent to use this voice</code> · scope <code>Usable in this project only</code> · button <code>Save voice</code> · link <code>Clone a voice at {{vendor}} ↗</code> ·
+      empty state <code>No voices match</code> + <code>Clear filters</code> · optional (Q4) <code>Add another voice</code> + <code>Requires Engine · voice switching</code>.
+      Existing strings reused: Select Voice · Use Voice · Voice · Trait · Voice ID · All Gender · All Accent · Types · Loading voices… · Unable to load voices. · Page/Previous/Next · Custom.</div>
+  </div>
+</div>
+
+<h2>Prototype plan (design/sandbox, additive)</h2>
+<div class="plan">
+  <strong>Files to add</strong>
+  <ul>
+    <li><code>src/lib/agents/voice-recommendations.ts</code> + <code>.test.ts</code> — <code>inferVoiceUseCase({systemMessages, greeting})</code> → use-case key or null (keyword table, deterministic); <code>rankVoicesForUseCase(voices, useCase, {language})</code> → top 3 by tag score + accent match (<code>asr.params.language</code>); <code>readVoiceShortlist / writeVoiceShortlist</code> and <code>readOwnVoice / writeOwnVoice</code> on sessionStorage (<code>ng-console.design.01.voice-shortlist:&lt;agentId&gt;</code>, <code>ng-console.design.01.own-voice:&lt;agentId&gt;</code>).</li>
+    <li><code>src/components/console/agent-voice-compare-tray.tsx</code> + <code>.test.tsx</code> — shortlist ≤3, one <code>HTMLAudioElement</code>, play/stop buttons with <code>aria-pressed</code>, stop on unmount, <code>Use Voice</code> → <code>onSelect(voice)</code>; "Read my greeting" checkbox <code>disabled</code> + caption.</li>
+    <li><code>src/components/console/agent-own-voice-form.tsx</code> + <code>.test.tsx</code> — Voice ID · Name · consent checkbox (unchecked) · scope caption · Save voice (disabled until id + consent); vendor clone link from a small map (elevenlabs · cartesia · minimax · fishaudio).</li>
+    <li><code>src/components/console/agent-voice-sample-button.tsx</code> — the ▶/■ icon button shared by the dialog rows, the tray and the Models row (test rides on the tray test).</li>
+  </ul>
+  <strong>Files to touch</strong>
+  <ul>
+    <li><code>src/components/console/studio-voice-library-dialog.tsx</code> — new optional props <code>recommendation?: {useCase, voiceIds}</code>, <code>shortlist</code>/<code>onShortlistChange</code>, <code>ownVoice</code> slot; Recommended strip above the table; Compare column; <code>No voices match · Clear filters</code> empty state; Play/Stop aria via i18n. Existing tests keep passing with props omitted.</li>
+    <li><code>src/components/console/agent-models-page.tsx</code> — mount point: compute <code>useCase</code> from <code>properties.llm</code>, pass the ranked ids into the dialog (≈8 lines next to :715–730); wire <code>agent_voice_changed {via}</code> in the existing <code>onSelect</code>; add the sample button inside the Voice control (:772–785) reading <code>sampleUrl</code> from the last picked voice.</li>
+    <li><code>src/lib/i18n/resources/en/common.ts</code> — <code>pages.agentModels.voicePicker.*</code> block (strings above).</li>
+  </ul>
+  <strong>What is written where</strong>
+  <ul>
+    <li><b>Real property:</b> only the voice id, via <code>applyTtsVoiceIdForVendor(tts, voiceId)</code> → <code>replaceProperties</code> — from Use Voice in the table, the tray, or Save voice in the own-voice form. Nothing else touches <code>properties</code>.</li>
+    <li><b>sessionStorage draft:</b> shortlist, the own-voice record (name · consentAt · scope), last recommendation shown. Cleared with the tab; never sent.</li>
+    <li><b>Disabled with a caption:</b> "Read my greeting" → <code>Requires Studio preview</code>. Multi-voice: not mounted; if Q4 = yes, one ghost <code>Add another voice</code> under the tray with <code>Requires Engine · voice switching</code>.</li>
+  </ul>
+  <strong>Passes before review</strong> — <code>/fortify</code> (empty · loading · error · no prompt yet · sample missing · vendor without library) · <code>/include</code> (names, <code>aria-pressed</code>, keyboard stop, focus return on close) · <code>/articulate</code> (nothing beyond the set above) · <code>bunx vitest run</code> the four tests · <code>bunx biome check --write</code> · <code>bun run typecheck</code>. Then a Vercel preview on <code>design/sandbox</code> and the R8 preference test with the prototype as stimulus (Q7).
+</div>
+</div>
