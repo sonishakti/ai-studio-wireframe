@@ -244,7 +244,7 @@ export default function BillingUsagePage() {
             { id: "agent", label: "Agents" },
             { id: "rte",   label: "RTE" },
           ] as const).map((p) => (
-            <ToggleGroupItem key={p.id} value={p.id} size="sm" className="text-xs data-[state=on]:bg-accent">
+            <ToggleGroupItem key={p.id} value={p.id} size="sm" className="text-xs">
               {p.label}
             </ToggleGroupItem>
           ))}

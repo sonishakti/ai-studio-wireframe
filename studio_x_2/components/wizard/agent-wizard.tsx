@@ -923,7 +923,7 @@ export function AgentWizard({
     }
     if (n === 4)
       return simSummary
-        ? `${simSummary.passed}/${simSummary.total} sims passed · simulated`
+        ? `${simSummary.passed}/${simSummary.total} scenarios passed · simulated`
         : "Not tested yet"
     return isLive
       ? anyEdited ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live` : "Live"
@@ -975,7 +975,7 @@ export function AgentWizard({
           {(onCreateNew || !isEdit || landing) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5" aria-label="More actions">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground" aria-label="More actions">
                   <EllipsisVertical className="size-4" aria-hidden /> More
                 </Button>
               </DropdownMenuTrigger>

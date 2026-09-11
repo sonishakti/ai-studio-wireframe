@@ -59,7 +59,7 @@ export function TurnTakingRow({
             <ToggleGroupItem
               key={p}
               value={p}
-              className="border-stroke data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+              className="border-stroke"
             >
               {TURN_PRESET_LABELS[p]}
             </ToggleGroupItem>

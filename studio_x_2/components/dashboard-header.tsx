@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { openComposerPanel } from "@/components/composer-panel"
+import { unreadCount } from "@/lib/notifications-data"
 
 // ─── segment → human label map ───────────────────────────────────────────────
 
@@ -142,46 +143,68 @@ export function DashboardHeader() {
         <HeaderBreadcrumb />
       </React.Suspense>
 
-      {/* Bordered, labelled actions (owner 2026-09-11): every icon carries a
-          border and a word, no ghost icon-only buttons in the top bar. The
-          Future-scope demo switch is gone — the roadmap features are now the
-          product (Phase 0 audit N4). */}
-      <div className="ml-auto flex shrink-0 items-center gap-2">
-        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" asChild>
-          <Link href="/help">
-            <CircleHelp className="h-3.5 w-3.5" aria-hidden />
-            Help
-          </Link>
-        </Button>
-        <Button variant="outline" size="sm" className="relative h-8 gap-1.5 text-xs" asChild>
-          <Link href="/notifications" aria-label="Notifications, unread">
-            <Bell className="h-3.5 w-3.5" aria-hidden />
-            Notifications
-            <span
-              aria-hidden="true"
-              className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary"
-            />
-          </Link>
-        </Button>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              onClick={openComposerPanel}
-            >
-              <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
-              Composer
-              <kbd className="ml-0.5 hidden font-mono text-xs tracking-wider text-muted-foreground sm:inline">
-                ⌘J
-              </kbd>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Open Composer (⌘J)</TooltipContent>
-        </Tooltip>
+      {/* Header controls match the NG console shell (owner 2026-09-11, second
+          pass — console-shell.tsx footer Bell + user-menu): 28 px ghost icon
+          controls with a faint border and tint, the count on the bell, the
+          word in the tooltip and in the accessible name. */}
+      <div className="ml-auto flex shrink-0 items-center gap-1.5">
+        <HeaderControl label="Help" href="/help">
+          <CircleHelp aria-hidden />
+        </HeaderControl>
+        <HeaderControl label="Notifications" href="/notifications" count={unreadCount()}>
+          <Bell aria-hidden />
+        </HeaderControl>
+        <HeaderControl label="Composer" hint="⌘J" onClick={openComposerPanel}>
+          <Sparkles aria-hidden />
+        </HeaderControl>
       </div>
     </header>
+  )
+}
+
+/** The NG shell control: a 28 px ghost icon with a faint border (`border-stroke`,
+ *  ≥ 3:1) and a tint; the label lives in the tooltip and the accessible name;
+ *  an unread count sits on the corner the way the NG bell wears it. */
+function HeaderControl({
+  label, hint, href, onClick, count, children,
+}: {
+  label: string
+  hint?: string
+  href?: string
+  onClick?: () => void
+  count?: number
+  children: React.ReactNode
+}) {
+  const cls = "relative size-7 shrink-0 rounded-md border border-stroke bg-muted/40 px-0 text-muted-foreground hover:bg-muted hover:text-foreground [&_svg]:size-3.5"
+  const name = count ? `${label}, ${count} unread` : hint ? `${label} (${hint})` : label
+  const badge = count ? (
+    <span
+      aria-hidden="true"
+      className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full border border-background bg-primary px-0.5 font-mono text-[8.5px] font-semibold leading-none text-primary-foreground"
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  ) : null
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {href ? (
+          <Button variant="ghost" size="icon" className={cls} asChild>
+            <Link href={href} aria-label={name}>{children}{badge}</Link>
+          </Button>
+        ) : (
+          <Button variant="ghost" size="icon" className={cls} aria-label={name} onClick={onClick}>
+            {children}
+            {badge}
+          </Button>
+        )}
+      </TooltipTrigger>
+      <TooltipContent>
+        {label}
+        {hint && <kbd className="ml-1.5 font-mono text-xs tracking-wider opacity-70">{hint}</kbd>}
+        {count ? ` · ${count} unread` : null}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 

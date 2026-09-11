@@ -710,27 +710,8 @@ export default function AgentsPage() {
       <React.Suspense fallback={null}>
         <ParamsSync onParams={onParams} />
       </React.Suspense>
-      {/* Persistent mode switch — you can always SEE which of the THREE
-          /agents surfaces you're on, and get back (#8; the two-segment
-          version left the default landing unrepresented — user-test
-          2026-07-24 S3). */}
-      <div className="flex items-center justify-between border-b border-border px-6 py-2">
-        <ToggleGroup
-          type="single"
-          value={view}
-          onValueChange={(v) => {
-            if (!v) return
-            router.push(v === "list" ? "/agents?view=list" : v === "builder" ? "/agents?view=builder" : "/agents")
-          }}
-          variant="outline"
-          size="sm"
-          aria-label="Agents view"
-        >
-          <ToggleGroupItem value="start" className="text-xs">Start</ToggleGroupItem>
-          <ToggleGroupItem value="builder" className="text-xs">Builder</ToggleGroupItem>
-          <ToggleGroupItem value="list" className="text-xs">All agents</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+      {/* The Start · Builder · All agents strip is gone (owner 2026-09-11, second
+          pass): the breadcrumb carries location, the list is one link away. */}
       <PageHeader
         // The builder is a self-contained widget (own heading + view-all/create
         // chrome), so suppress the PageHeader in builder view — it only carries

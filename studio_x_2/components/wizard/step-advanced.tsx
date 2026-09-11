@@ -389,7 +389,7 @@ function ModeRow({ value, onChange, options }: { value: string; onChange: (v: st
         <ToggleGroupItem
           key={o.id}
           value={o.id}
-          className="h-auto justify-start gap-2 rounded-lg border border-border p-2.5 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          className="h-auto justify-start gap-2 rounded-lg border border-border p-2.5 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary/5 data-[state=on]:text-foreground"
         >
           <o.icon className="h-4 w-4 text-muted-foreground" aria-hidden /> {o.label}
         </ToggleGroupItem>

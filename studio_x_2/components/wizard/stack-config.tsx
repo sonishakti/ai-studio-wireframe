@@ -86,13 +86,13 @@ function SlotMode({
       >
         <ToggleGroupItem
           value="managed"
-          className="h-7 rounded-md border border-border px-2 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          className="h-7 rounded-md border border-border px-2 text-xs"
         >
           Agora managed
         </ToggleGroupItem>
         <ToggleGroupItem
           value="byo"
-          className="h-7 rounded-md border border-border px-2 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+          className="h-7 rounded-md border border-border px-2 text-xs"
         >
           Your own key
         </ToggleGroupItem>

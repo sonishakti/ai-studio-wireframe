@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Sparkles, Mic, PhoneOff } from "lucide-react"
+import { X, Sparkles, Mic, PhoneOff, ListChecks, Globe } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -169,10 +169,24 @@ export function TestPanel({
         className="flex min-h-0 flex-1 flex-col gap-0"
       >
         <div className="shrink-0 border-b border-border px-4 py-2.5">
-          <TabsList id="wz-rail-tabs" className="h-8">
-            <TabsTrigger value="simulations" className="text-xs">Simulations</TabsTrigger>
-            <TabsTrigger value="agent" className="text-xs">Test Agent</TabsTrigger>
-            {showWidgetTab && <TabsTrigger value="widget" className="text-xs">Widget</TabsTrigger>}
+          {/* Two ways to test, named by what you do (owner 2026-09-11, second
+              pass): Scenarios = the generated suite with its count; Voice call
+              = the orb, the same door the header's Voice call button opens. */}
+          <TabsList id="wz-rail-tabs" className="grid h-8 w-full auto-cols-fr grid-flow-col">
+            <TabsTrigger value="simulations" className="gap-1.5 text-xs">
+              <ListChecks className="size-3.5" aria-hidden /> Scenarios
+              {generated.length > 0 && (
+                <span className="rounded-full bg-foreground/10 px-1.5 font-mono text-[10px] tabular-nums">{generated.length}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="agent" className="gap-1.5 text-xs">
+              <Mic className="size-3.5" aria-hidden /> Voice call
+            </TabsTrigger>
+            {showWidgetTab && (
+              <TabsTrigger value="widget" className="gap-1.5 text-xs">
+                <Globe className="size-3.5" aria-hidden /> Widget
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -181,10 +195,10 @@ export function TestPanel({
             <p className="min-w-0 text-sm text-muted-foreground">
               {generated.length
                 ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
-                : "Autogenerate simulation from your prompt, channel, and call behavior."}
+                : "Scenarios are generated from your prompt, channel and call behavior."}
             </p>
             <Button size="sm" variant={generated.length ? "outline" : "default"} className="gap-1.5" disabled={generating} onClick={generate}>
-              <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Autogenerate"}
+              <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Generate scenarios"}
             </Button>
           </div>
           <TestsSection
@@ -203,6 +217,7 @@ export function TestPanel({
             talking={!!talking}
             onToggleTalk={onToggleTalk}
             disabled={talkDisabled}
+            onScenarios={() => onTabChange("simulations")}
           />
         </TabsContent>
 
@@ -293,7 +308,7 @@ export function TestPanel({
 // ─── Test agent — the orb + Talk (Figma's right-rail default state) ───────────
 
 function TalkTab({
-  agentName, greeting, advanced, talking, onToggleTalk, disabled,
+  agentName, greeting, advanced, talking, onToggleTalk, disabled, onScenarios,
 }: {
   agentName: string
   greeting?: string
@@ -302,6 +317,8 @@ function TalkTab({
   talking: boolean
   onToggleTalk?: () => void
   disabled?: boolean
+  /** Switches the rail to the Scenarios tab. */
+  onScenarios?: () => void
 }) {
   const [state, setState] = React.useState<SimState>("listening")
   const turns = React.useMemo<EvalTurn[]>(
@@ -341,8 +358,15 @@ function TalkTab({
         </div>
       ) : (
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
-          A one-off call in full persona. For coverage across awkward callers — interruptions,
-          jailbreaks, silence — run <span className="font-medium text-foreground">Simulations</span> instead.
+          A one-off call in full persona. For awkward callers — interruptions, jailbreaks,
+          silence —{" "}
+          <button
+            type="button"
+            onClick={onScenarios}
+            className="rounded font-medium text-foreground underline underline-offset-2 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            run the scenarios
+          </button>.
         </p>
       )}
     </div>
@@ -418,9 +442,9 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
 function SimulationResults({ passed, failed }: { passed: number; failed: number }) {
   const pad2 = (n: number) => String(n).padStart(2, "0")
   return (
-    <section className="shrink-0 border-t border-border px-4 py-3" aria-label="Simulation results">
+    <section className="shrink-0 border-t border-border px-4 py-3" aria-label="Scenario results">
       <h4 className="pb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-        Simulation results
+        Scenario results
       </h4>
       <dl className="space-y-1">
         <div className="flex items-baseline gap-2">

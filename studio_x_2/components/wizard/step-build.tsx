@@ -471,7 +471,7 @@ function IngestPicker({
           <ToggleGroupItem
             key={k}
             value={k}
-            className="justify-start rounded-lg border border-border px-3 py-2.5 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+            className="justify-start rounded-lg border border-border px-3 py-2.5 text-sm data-[state=on]:border-primary data-[state=on]:bg-primary/5 data-[state=on]:text-foreground"
           >
             {KB_INGEST_LABEL[k]}
             {k === "external" && (

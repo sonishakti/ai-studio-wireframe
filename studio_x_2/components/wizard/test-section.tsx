@@ -234,8 +234,8 @@ export function TestSection({
     <SectionRows>
       <SectionRow
         id="wz-4-sims"
-        label="Simulations"
-        hint="Run contextual simulations built from your agent's own context and workflows."
+        label="Scenarios"
+        hint="Generated from your agent's own prompt, channel and call behavior. Run them to score."
       >
         <TestsSection
           key={generation}
@@ -252,7 +252,7 @@ export function TestSection({
               onClick={generate}
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
-              {generating ? "Generating…" : generated.length ? "Regenerate Simulations" : "Autogenerate Simulations"}
+              {generating ? "Generating…" : generated.length ? "Regenerate scenarios" : "Generate scenarios"}
             </Button>
           }
         />

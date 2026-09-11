@@ -13,7 +13,7 @@ import { DEFAULT_ADVANCED, type AdvancedConfig } from "@/lib/wizard-draft"
 
 type ListeningIntent = { backchannels?: boolean; preemptive?: boolean }
 
-const TOGGLE_ITEM = "border-stroke data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+const TOGGLE_ITEM = "border-stroke"
 
 /**
  * Listening group (Design Tracker 02, verdict C): three flat rows named by

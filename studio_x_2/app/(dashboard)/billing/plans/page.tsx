@@ -90,7 +90,7 @@ export default function PlansPage() {
         className="justify-start flex-wrap"
       >
         {PRODUCTS.map((p) => (
-          <ToggleGroupItem key={p.id} value={p.id} className="gap-1.5 data-[state=on]:bg-accent">
+          <ToggleGroupItem key={p.id} value={p.id} className="gap-1.5">
             <p.icon className="h-3.5 w-3.5" />
             <span className="text-xs">{p.label}</span>
           </ToggleGroupItem>
