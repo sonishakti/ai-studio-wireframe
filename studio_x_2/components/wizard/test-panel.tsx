@@ -14,10 +14,11 @@ import { AgentSphere } from "@/components/agent-test-panel"
 import { SimTranscript, SimulatedBanner, AgentStateChips, type SimState } from "@/components/sim-transcript"
 import { WidgetPreviewCard } from "@/components/widget-studio"
 import { generateContextualCases } from "@/components/wizard/test-section"
-import { hasWebWidget, type AgentDraft } from "@/lib/wizard-draft"
+import { DEFAULT_ADVANCED, hasWebWidget, type AdvancedConfig, type AgentDraft } from "@/lib/wizard-draft"
 import {
   stackEstimateFor, stackLatencyDetail, type EvalCase, type EvalCaseResult, type EvalTurn,
 } from "@/lib/campaign-data"
+import { interruptVerdict } from "@/lib/turn-taking"
 
 /** Below lg (1024) the docked column doesn't exist — the panel falls back to
  *  a Sheet. Must match the grid's `lg:` breakpoint, NOT useIsMobile's 768. */
@@ -198,6 +199,7 @@ export function TestPanel({
           <TalkTab
             agentName={agentName}
             greeting={draft.greeting.trim() || undefined}
+            advanced={draft.advanced ?? DEFAULT_ADVANCED}
             talking={!!talking}
             onToggleTalk={onToggleTalk}
             disabled={talkDisabled}
@@ -291,10 +293,12 @@ export function TestPanel({
 // ─── Test agent — the orb + Talk (Figma's right-rail default state) ───────────
 
 function TalkTab({
-  agentName, greeting, talking, onToggleTalk, disabled,
+  agentName, greeting, advanced, talking, onToggleTalk, disabled,
 }: {
   agentName: string
   greeting?: string
+  /** The speech settings the "Try interrupting" verdict quotes. */
+  advanced: AdvancedConfig
   talking: boolean
   onToggleTalk?: () => void
   disabled?: boolean
@@ -332,6 +336,7 @@ function TalkTab({
         <div className="space-y-2.5">
           <SimulatedBanner />
           <AgentStateChips state={state} />
+          <TryInterrupting advanced={advanced} />
           <SimTranscript turns={turns} stream onState={setState} compact />
         </div>
       ) : (
@@ -340,6 +345,23 @@ function TalkTab({
           jailbreaks, silence — run <span className="font-medium text-foreground">Simulations</span> instead.
         </p>
       )}
+    </div>
+  )
+}
+
+/** Design Tracker 02 (verdict E): one chip turns "160 ms" into a felt moment.
+ *  Mounted only while a call is up, so the verdict resets with the call; the
+ *  line quotes the effective preset — nothing measured, nothing fabricated. */
+function TryInterrupting({ advanced }: { advanced: AdvancedConfig }) {
+  const [verdict, setVerdict] = React.useState<string | null>(null)
+  return (
+    <div className="space-y-1.5">
+      <Button type="button" size="xs" variant="outline" onClick={() => setVerdict(interruptVerdict(advanced))}>
+        Try interrupting
+      </Button>
+      <p aria-live="polite" className="min-h-4 font-mono text-xs text-muted-foreground">
+        {verdict}
+      </p>
     </div>
   )
 }

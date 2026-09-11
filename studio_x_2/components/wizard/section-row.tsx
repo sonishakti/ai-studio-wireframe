@@ -23,6 +23,7 @@ export function SectionRows({ children, className }: { children: React.ReactNode
 
 export function SectionRow({
   id,
+  focusId,
   label,
   hint,
   children,
@@ -30,6 +31,8 @@ export function SectionRow({
 }: {
   /** TOC scroll anchor (e.g. "wz-1-pick"). */
   id?: string
+  /** `data-design-focus` id — prototype links (`?focus=<id>`) open at this row. */
+  focusId?: string
   label: React.ReactNode
   /** Quiet explainer under the label — owns the row's helper copy so the RHS
    *  stays pure controls. */
@@ -40,6 +43,7 @@ export function SectionRow({
   return (
     <div
       id={id}
+      data-design-focus={focusId}
       className={cn(
         // Figma OPT2 rhythm (2698-102829): sections breathe pt-6/pb-9.
         "grid scroll-mt-28 grid-cols-1 gap-4 pt-6 pb-9 first:pt-0 last:pb-0 @3xl:grid-cols-[240px_minmax(0,1fr)] @3xl:gap-10",

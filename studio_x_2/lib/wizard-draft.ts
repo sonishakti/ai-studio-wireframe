@@ -132,9 +132,12 @@ export function overriddenSections(d: Pick<AgentDraft, "customConfig">): string[
 }
 
 export const DEFAULT_ADVANCED: AdvancedConfig = {
+  // The default preset is Balanced, so the default numbers are Balanced's
+  // (lib/turn-taking.ts TURN_PRESET_VALUES) — the recap under the preset
+  // must agree with it from first paint.
   turnDetection: { enabled: true, preset: "balanced", threshold: 50 },
-  startOfSpeech: { enabled: true, mode: "vad", keywords: [], interruptMs: 300, prefixPaddingMs: 120 },
-  endOfSpeech: { enabled: true, mode: "vad", silenceMs: 500, maxWaitMs: 8000 },
+  startOfSpeech: { enabled: true, mode: "vad", keywords: [], interruptMs: 160, prefixPaddingMs: 120 },
+  endOfSpeech: { enabled: true, mode: "vad", silenceMs: 640, maxWaitMs: 8000 },
   attentionLocking: { enabled: false, mode: "speaker" },
   filterWords: { enabled: false, patterns: "", responseWaitMs: 400, selectionRule: "shuffle" },
   history: { maxMessages: 20 },
