@@ -197,7 +197,7 @@ export function TestPanel({
                 ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
                 : "Scenarios are generated from your prompt, channel and call behavior."}
             </p>
-            <Button size="sm" variant={generated.length ? "outline" : "default"} className="gap-1.5" disabled={generating} onClick={generate}>
+            <Button size="sm" variant="outline" className="gap-1.5" disabled={generating} onClick={generate}>
               <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Generate scenarios"}
             </Button>
           </div>
@@ -287,7 +287,7 @@ export function TestPanel({
       </div>
 
       <div className="flex h-full max-h-[calc(100vh-3rem)] flex-col pl-1.5">
-        <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+        <header id="wz-test-head" className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
           <p className="min-w-0 truncate text-sm font-semibold">Test {agentName}</p>
           <Button
             variant="ghost"

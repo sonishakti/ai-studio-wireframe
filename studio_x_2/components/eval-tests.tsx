@@ -148,7 +148,7 @@ export function TestsSection({
             <Play className="h-3.5 w-3.5" />{" "}
             {runningAll ? "Running…" : hasRun ? `Re-Run (${cases.length})` : `Run all (${cases.length})`}
           </Button>
-          <Button size="sm" className="gap-1.5" onClick={() => setAddOpen(true)}>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setAddOpen(true)}>
             <Plus className="h-3.5 w-3.5" /> Add case
           </Button>
         </div>

@@ -1049,7 +1049,27 @@ export function AgentWizard({
         )}
       >
         {/* Rail — pure nav; scrolls internally on short viewports. */}
-        <aside className="min-w-0 space-y-5 border-b border-border p-5 lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
+        <aside className="min-w-0 border-b border-border lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
+          {/* One header line across all three columns (owner 2026-09-11): this
+              row, the first section header and the test rail's header share
+              h-14 and a bottom hairline, so the rule reads as one line. */}
+          <div id="wz-rail-head" className="flex h-14 items-center justify-between gap-2 border-b border-border px-5">
+            <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground" aria-live="polite">
+              {SECTION_GROUPS.flatMap((g) => g.steps).filter((n) => isDone(n)).length} of {SECTION_GROUPS.flatMap((g) => g.steps).length} done
+            </p>
+            {/* Fold control — "Expand all" whenever anything is folded. A real
+                ghost button, not a footnote link: it's load-bearing now that
+                fold state persists per agent (user-test 2026-07-30). */}
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-muted-foreground"
+              onClick={() => setAllCollapsed(collapsedSet.size === 0)}
+            >
+              {collapsedSet.size > 0 ? "Expand all" : "Collapse all"}
+            </Button>
+          </div>
+          <div className="space-y-5 p-5">
           {/* Grouped rail (owner mock 2026-07-30): CUSTOMIZE · SHIP headers +
               per-row icons over the same rows. */}
           <nav aria-label="Build sections" className="space-y-3">
@@ -1091,18 +1111,6 @@ export function AgentWizard({
             ))}
           </nav>
 
-          {/* Fold control — "Expand all" whenever anything is folded. A real
-              ghost button, not a footnote link: it's load-bearing now that
-              fold state persists per agent (user-test 2026-07-30). */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            onClick={() => setAllCollapsed(collapsedSet.size === 0)}
-          >
-            {collapsedSet.size > 0 ? "Expand all" : "Collapse all"}
-          </Button>
-
           {/* Autosave feedback — "DRAFT saved", not "Saved" (user-test #11). */}
           {saveState !== "idle" && (
             <p className="px-2.5 text-xs text-muted-foreground" role="status" aria-live="polite">
@@ -1131,6 +1139,7 @@ export function AgentWizard({
               )}
             </div>
           )}
+          </div>
         </aside>
 
         {/* Center column: borderless sections divided by hairlines. No
@@ -1149,14 +1158,14 @@ export function AgentWizard({
                     toggle too (Test Strip winner): the whole row is the
                     button, a bare chevron is the only added chrome, and a
                     folded section recaps its values inline. */}
-                <header className="z-20 flex items-center gap-1 border-b border-border bg-background lg:sticky lg:top-12">
+                <header className="z-20 flex h-14 items-center gap-1 border-b border-border bg-background lg:sticky lg:top-12">
                   <h3 id={`wizard-step-${n}-title`} className="min-w-0 flex-1">
                     <button
                       type="button"
                       onClick={() => toggleSection(n)}
                       aria-expanded={!folded}
                       aria-controls={`wizard-step-${n}-body`}
-                      className="flex w-full min-w-0 items-center gap-2 px-5 py-3 text-left transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      className="flex h-14 w-full min-w-0 items-center gap-2 px-5 text-left transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                     >
                       <ChevronRight
                         className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", !folded && "rotate-90")}

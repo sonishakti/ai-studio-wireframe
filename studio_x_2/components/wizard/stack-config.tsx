@@ -263,7 +263,7 @@ export function StackModelsDetail({
         onValueChange={(v) => v && setPipeline(v as Pipeline)}
         aria-label="Pipeline"
         // Two cards, two tracks — a 4-col track squeezed them (2026-07-21).
-        className="gap-4 @xl:grid-cols-2"
+        className="gap-3 sm:grid-cols-2"
       >
         {/* Proposal 2639-102124 card copy. */}
         <RadioCard
