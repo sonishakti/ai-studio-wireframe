@@ -1,0 +1,4502 @@
+[
+ {
+  "path": "/agents",
+  "area": "Agent",
+  "slug": "agents",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 22,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Aria is live — talk to it, then make it yours",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/agents/agents",
+  "area": "Agent",
+  "slug": "agents-agents",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 22,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Aria is live — talk to it, then make it yours",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/agents/new/edit?blank=1",
+  "area": "Agent",
+  "slug": "agents-new-edit-blank",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 64,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 101,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/agents/agt_default/edit",
+  "area": "Agent",
+  "slug": "agents-agt_default-edit",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".shadow-sm"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 74,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 107,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/agents/agt_default/test",
+  "area": "Agent",
+  "slug": "agents-agt_default-test",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 2,
+    "sample": "button[aria-controls=\"radix-_R_16l9bn5ritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".group\\/badge"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 22,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Test Playground",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/extensions",
+  "area": "Agent",
+  "slug": "extensions",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 5,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 22,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Extensions Marketplace",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/extensions/face-ar",
+  "area": "Agent",
+  "slug": "extensions-face-ar",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": ".py-2\\.5.justify-between.items-center:nth-child(1) > .group\\/switch.after\\:-inset-x-3[data-state=\"checked\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 26,
+   "unlabeled": 4,
+   "samples": [
+    "button.peer.group/switch",
+    "button.peer.group/switch",
+    "button.peer.group/switch",
+    "button.peer.group/switch"
+   ]
+  },
+  "error": null,
+  "h1": "Face AR Effects",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/integrations",
+  "area": "Agent",
+  "slug": "integrations",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 15,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 30,
+   "unlabeled": 1,
+   "samples": [
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/projects",
+  "area": "Environment",
+  "slug": "projects",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 5,
+    "sample": ".py-2"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 10,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 30,
+   "unlabeled": 5,
+   "samples": [
+    "input.h-9.w-full",
+    "button.group/button.inline-flex",
+    "button.group/button.inline-flex",
+    "button.group/button.inline-flex",
+    "button.group/button.inline-flex"
+   ]
+  },
+  "error": null,
+  "h1": "Projects",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/project/settings",
+  "area": "Environment",
+  "slug": "project-settings",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 7,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 4,
+    "sample": ".bg-card\\/50.p-4.border-border:nth-child(1) > .relative > .text-base[type=\"password\"][value=\"••••••••••••••••\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".flex-1.flex-col.flex > main"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 31,
+   "unlabeled": 4,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": "Project Settings",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/project/vendor-credentials",
+  "area": "Environment",
+  "slug": "project-vendor-credentials",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 11,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 30,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/project/notifications",
+  "area": "Environment",
+  "slug": "project-notifications",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 6,
+    "sample": ".group\\/badge"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 46,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Project Notifications",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/realtime-services",
+  "area": "Environment",
+  "slug": "realtime-services",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 2,
+    "sample": ".py-2\\.5.justify-between:nth-child(1) > .group\\/switch.after\\:-inset-x-3.after\\:-inset-y-2"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 32,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".grid"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 2,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 42,
+   "unlabeled": 2,
+   "samples": [
+    "button.peer.group/switch",
+    "button.peer.group/switch"
+   ]
+  },
+  "error": null,
+  "h1": "Realtime Services",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer",
+  "area": "Environment",
+  "slug": "developer",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 12,
+    "sample": "a[href=\"/\"] > .leading-tight.flex-1.grid > .truncate.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.flex-1.grid"
+   }
+  ],
+  "missingLabels": {
+   "controls": 27,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer/aa-credentials",
+  "area": "Environment",
+  "slug": "developer-aa-credentials",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 14,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 26,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer/audit-logs",
+  "area": "Environment",
+  "slug": "developer-audit-logs",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 14,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1 > .truncate.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 23,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer/licensing",
+  "area": "Environment",
+  "slug": "developer-licensing",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 22,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer/restful-api",
+  "area": "Environment",
+  "slug": "developer-restful-api",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 19,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-muted-foreground.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 23,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer/toolkit",
+  "area": "Environment",
+  "slug": "developer-toolkit",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 29,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/developer/webhooks",
+  "area": "Environment",
+  "slug": "developer-webhooks",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-muted-foreground.text-xs"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 24,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Developer Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/preferences",
+  "area": "Environment",
+  "slug": "preferences",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 2,
+    "sample": "button[aria-controls=\"radix-_R_2cqatpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 6,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 18,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Preferences",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy",
+  "area": "Channels and Deployment",
+  "slug": "deploy",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/api",
+  "area": "Channels and Deployment",
+  "slug": "deploy-api",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 75,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "help": "Scrollable region must have keyboard access",
+    "nodes": 1,
+    "sample": ".bg-muted\\/40.rounded-lg.overflow-hidden:nth-child(4) > .relative > pre"
+   }
+  ],
+  "missingLabels": {
+   "controls": 105,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/batch-calls",
+  "area": "Channels and Deployment",
+  "slug": "deploy-batch-calls",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 1,
+    "sample": ".overflow-x-hidden"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_R_16qatpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 15,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/batch-calls/dp_ob_01",
+  "area": "Channels and Deployment",
+  "slug": "deploy-batch-calls-dp_ob_01",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 1,
+    "sample": ".overflow-x-hidden"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_r_6_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 15,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/batch-calls/new",
+  "area": "Channels and Deployment",
+  "slug": "deploy-batch-calls-new",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 70,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 105,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/code",
+  "area": "Channels and Deployment",
+  "slug": "deploy-code",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 75,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "help": "Scrollable region must have keyboard access",
+    "nodes": 1,
+    "sample": ".bg-muted\\/40.rounded-lg.overflow-hidden:nth-child(4) > .relative > pre"
+   }
+  ],
+  "missingLabels": {
+   "controls": 105,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/embed",
+  "area": "Channels and Deployment",
+  "slug": "deploy-embed",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 75,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "help": "Scrollable region must have keyboard access",
+    "nodes": 1,
+    "sample": ".bg-muted\\/40.rounded-lg.overflow-hidden:nth-child(4) > .relative > pre"
+   }
+  ],
+  "missingLabels": {
+   "controls": 105,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/embed/api",
+  "area": "Channels and Deployment",
+  "slug": "deploy-embed-api",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 75,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "help": "Scrollable region must have keyboard access",
+    "nodes": 1,
+    "sample": ".bg-muted\\/40.rounded-lg.overflow-hidden:nth-child(4) > .relative > pre"
+   }
+  ],
+  "missingLabels": {
+   "controls": 105,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/embed/widget",
+  "area": "Channels and Deployment",
+  "slug": "deploy-embed-widget",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-valid-attr-value",
+    "impact": "critical",
+    "help": "ARIA attributes must conform to valid values",
+    "nodes": 1,
+    "sample": "#radix-_R_16klritpetabmqlb_-trigger-collapsed"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_R_9clritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 23,
+    "sample": ".group\\/badge"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 4,
+    "sample": "input[value=\"Try our Voice AI Agent\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": "main[data-fluid=\"true\"]"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "page-has-heading-one",
+    "impact": "moderate",
+    "help": "Page should contain a level-one heading",
+    "nodes": 1,
+    "sample": "html"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 52,
+   "unlabeled": 4,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/inbound",
+  "area": "Channels and Deployment",
+  "slug": "deploy-inbound",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 1,
+    "sample": ".overflow-x-hidden"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_R_16qatpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 15,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/inbound/dp_ib_01",
+  "area": "Channels and Deployment",
+  "slug": "deploy-inbound-dp_ib_01",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 1,
+    "sample": ".overflow-x-hidden"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_R_16qatpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 15,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/inbound/new",
+  "area": "Channels and Deployment",
+  "slug": "deploy-inbound-new",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".shadow-sm"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 74,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 107,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/phone-numbers",
+  "area": "Channels and Deployment",
+  "slug": "deploy-phone-numbers",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Phone numbers",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/phone-numbers/pn_01",
+  "area": "Channels and Deployment",
+  "slug": "deploy-phone-numbers-pn_01",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 8,
+    "sample": "button[aria-controls=\"radix-_R_4jn9bn5ritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 7,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 6,
+    "sample": "input[value=\"+1 (415) 555-0101\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 43,
+   "unlabeled": 16,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": "+1 (415) 555-0101",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/slack",
+  "area": "Channels and Deployment",
+  "slug": "deploy-slack",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/sms",
+  "area": "Channels and Deployment",
+  "slug": "deploy-sms",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/telephony",
+  "area": "Channels and Deployment",
+  "slug": "deploy-telephony",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/web-widget",
+  "area": "Channels and Deployment",
+  "slug": "deploy-web-widget",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-valid-attr-value",
+    "impact": "critical",
+    "help": "ARIA attributes must conform to valid values",
+    "nodes": 1,
+    "sample": "#radix-_R_16klritpetabmqlb_-trigger-collapsed"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_R_9clritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 23,
+    "sample": ".group\\/badge"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 4,
+    "sample": "input[value=\"Try our Voice AI Agent\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": "main[data-fluid=\"true\"]"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "page-has-heading-one",
+    "impact": "moderate",
+    "help": "Page should contain a level-one heading",
+    "nodes": 1,
+    "sample": "html"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 52,
+   "unlabeled": 4,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/whatsapp",
+  "area": "Channels and Deployment",
+  "slug": "deploy-whatsapp",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/deploy/widget",
+  "area": "Channels and Deployment",
+  "slug": "deploy-widget",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".shadow-sm"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 3,
+    "sample": "button[aria-controls=\"radix-_r_18_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 73,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 4,
+    "sample": "input[value=\"Try our Voice AI Agent\"]"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "help": "Scrollable region must have keyboard access",
+    "nodes": 1,
+    "sample": "pre"
+   }
+  ],
+  "missingLabels": {
+   "controls": 134,
+   "unlabeled": 4,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/phone-numbers",
+  "area": "Channels and Deployment",
+  "slug": "phone-numbers",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Phone numbers",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/phone-numbers/pn_01",
+  "area": "Channels and Deployment",
+  "slug": "phone-numbers-pn_01",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 8,
+    "sample": "button[aria-controls=\"radix-_R_4jn9bn5ritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 7,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 6,
+    "sample": "input[value=\"+1 (415) 555-0101\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 43,
+   "unlabeled": 16,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": "+1 (415) 555-0101",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/telephony/campaigns",
+  "area": "Channels and Deployment",
+  "slug": "telephony-campaigns",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/telephony/campaigns/create",
+  "area": "Channels and Deployment",
+  "slug": "telephony-campaigns-create",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".border-primary"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 70,
+    "sample": ".max-w-\\[160px\\]"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 105,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/telephony/phone-numbers",
+  "area": "Channels and Deployment",
+  "slug": "telephony-phone-numbers",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Phone numbers",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/campaigns",
+  "area": "Channels and Deployment",
+  "slug": "campaigns",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Resources",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/campaigns/calls",
+  "area": "Channels and Deployment",
+  "slug": "campaigns-calls",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 25,
+    "sample": ".py-0"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "nested-interactive",
+    "impact": "serious",
+    "help": "Interactive controls must not be nested",
+    "nodes": 25,
+    "sample": "tr[aria-label=\"Open call CALLRT\"]"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 93,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/campaigns/phone-numbers",
+  "area": "Channels and Deployment",
+  "slug": "campaigns-phone-numbers",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 45,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Phone numbers",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/campaigns/phone-numbers/pn_01",
+  "area": "Channels and Deployment",
+  "slug": "campaigns-phone-numbers-pn_01",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 8,
+    "sample": "button[aria-controls=\"radix-_R_4jn9bn5ritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 7,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 6,
+    "sample": "input[value=\"+1 (415) 555-0101\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 43,
+   "unlabeled": 16,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": "+1 (415) 555-0101",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/sessions",
+  "area": "Session",
+  "slug": "sessions",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 3,
+    "sample": ".w-44"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 29,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 57,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/sessions/HU7K-O1ER-V8LY-2FS5I",
+  "area": "Session",
+  "slug": "sessions-detail",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 109,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 65,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/session-history",
+  "area": "Session",
+  "slug": "session-history",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 3,
+    "sample": ".w-44"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 29,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 57,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/calls",
+  "area": "Session",
+  "slug": "calls",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 25,
+    "sample": ".py-0"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "nested-interactive",
+    "impact": "serious",
+    "help": "Interactive controls must not be nested",
+    "nodes": 25,
+    "sample": "tr[aria-label=\"Open call CALLRT\"]"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 93,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/monitor",
+  "area": "Session",
+  "slug": "monitor",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 1,
+    "sample": ".overflow-x-hidden"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 4,
+    "sample": "button[aria-controls=\"radix-_R_16qatpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 15,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/monitor/diagnostics",
+  "area": "Session",
+  "slug": "monitor-diagnostics",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 135,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 79,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/agents/playground",
+  "area": "Playground",
+  "slug": "agents-playground",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 5,
+    "sample": "button[aria-controls=\"radix-_R_2dklritpetabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 14,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": ".space-y-3 > h4"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 40,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Voice playground",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/composer",
+  "area": "Agent Studio",
+  "slug": "composer",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": ".group\\/badge"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 29,
+   "unlabeled": 1,
+   "samples": [
+    "textarea.flex.field-sizing-content"
+   ]
+  },
+  "error": null,
+  "h1": "Composer",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing",
+  "area": "None",
+  "slug": "billing",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 1,
+    "sample": ".overflow-x-hidden"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 11,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 27,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/invoices",
+  "area": "None",
+  "slug": "billing-invoices",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 30,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/payment-methods",
+  "area": "None",
+  "slug": "billing-payment-methods",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 14,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "label",
+    "impact": "critical",
+    "help": "Form elements must have labels",
+    "nodes": 6,
+    "sample": "input[value=\"Shakti Soni\"]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 32,
+   "unlabeled": 6,
+   "samples": [
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full",
+    "input.h-9.w-full"
+   ]
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/plans",
+  "area": "None",
+  "slug": "billing-plans",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 12,
+    "sample": "a[href=\"/\"] > .leading-tight.flex-1.text-left > .truncate.text-muted-foreground.text-xs"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "section:nth-child(1) > .mb-3.items-center.gap-2 > h3"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.flex-1.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 35,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/subscriptions",
+  "area": "None",
+  "slug": "billing-subscriptions",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 12,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs"
+   },
+   {
+    "id": "empty-table-header",
+    "impact": "minor",
+    "help": "Table header text should not be empty",
+    "nodes": 1,
+    "sample": ".w-\\[48px\\]"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 26,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/transactions",
+  "area": "None",
+  "slug": "billing-transactions",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 2,
+    "sample": "button[aria-controls=\"radix-_R_2qatpet9etabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 17,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 24,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/upgrade",
+  "area": "None",
+  "slug": "billing-upgrade",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 16,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-muted-foreground.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 26,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/billing/usage",
+  "area": "None",
+  "slug": "billing-usage",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 7,
+    "sample": ".bg-card.group\\/card.rounded-xl:nth-child(1) > .p-4.group-data-\\[size\\=sm\\]\\/card\\:px-4[data-slot=\"card-content\"] > .overflow-x-hidden.mt-3[aria-valuemax=\"100\"]"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".space-y-5"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 35,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/usage",
+  "area": "None",
+  "slug": "usage",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-progressbar-name",
+    "impact": "serious",
+    "help": "ARIA progressbar nodes must have an accessible name",
+    "nodes": 7,
+    "sample": ".bg-card.group\\/card.rounded-xl:nth-child(1) > .p-4.group-data-\\[size\\=sm\\]\\/card\\:px-4[data-slot=\"card-content\"] > .overflow-x-hidden.mt-3[aria-valuemax=\"100\"]"
+   },
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".space-y-5"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 35,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Billing",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/help",
+  "area": "None",
+  "slug": "help",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 9,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 28,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Help Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/help/contact",
+  "area": "None",
+  "slug": "help-contact",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".w-fit"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 27,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Help Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/help/contact-sales",
+  "area": "None",
+  "slug": "help-contact-sales",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 2,
+    "sample": "button[aria-controls=\"radix-_R_4l6atpet9etabmqlb_\"]"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 33,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Help Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/help/tickets",
+  "area": "None",
+  "slug": "help-tickets",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 12,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1 > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 21,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Help Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/help/whats-new",
+  "area": "None",
+  "slug": "help-whats-new",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 18,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1 > .truncate.text-muted-foreground.text-xs"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .leading-tight.grid.flex-1"
+   }
+  ],
+  "missingLabels": {
+   "controls": 19,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Help Hub",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/notifications",
+  "area": "None",
+  "slug": "notifications",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 11,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.text-left > .truncate.text-xs.text-muted-foreground"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 10,
+    "sample": "a[href=\"/\"] > .grid.leading-tight.text-left"
+   }
+  ],
+  "missingLabels": {
+   "controls": 16,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Notifications",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/defect",
+  "area": "None",
+  "slug": "defect",
+  "title": "Defect to Agora — paste your agent, hear it ring",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 8,
+    "sample": ".gap-1\\.5.items-center.flex:nth-child(3) > span:nth-child(2)"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 1,
+    "sample": ".flex-col"
+   }
+  ],
+  "missingLabels": {
+   "controls": 8,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Switching from Vapi or Retell? Paste your agent.",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/",
+  "area": "None",
+  "slug": "home",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 22,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 38,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Aria is live — talk to it, then make it yours",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ }
+]

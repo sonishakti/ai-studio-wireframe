@@ -1,0 +1,309 @@
+[
+ {
+  "path": "/agents",
+  "area": "Agent"
+ },
+ {
+  "path": "/agents/agents",
+  "area": "Agent"
+ },
+ {
+  "path": "/agents/new/edit?blank=1",
+  "area": "Agent",
+  "slug": "agents-new-edit-blank"
+ },
+ {
+  "path": "/agents/agt_default/edit",
+  "area": "Agent"
+ },
+ {
+  "path": "/agents/agt_default/test",
+  "area": "Agent"
+ },
+ {
+  "path": "/extensions",
+  "area": "Agent"
+ },
+ {
+  "path": "/extensions/face-ar",
+  "area": "Agent"
+ },
+ {
+  "path": "/integrations",
+  "area": "Agent"
+ },
+ {
+  "path": "/projects",
+  "area": "Environment"
+ },
+ {
+  "path": "/project/settings",
+  "area": "Environment"
+ },
+ {
+  "path": "/project/vendor-credentials",
+  "area": "Environment"
+ },
+ {
+  "path": "/project/notifications",
+  "area": "Environment"
+ },
+ {
+  "path": "/realtime-services",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer/aa-credentials",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer/audit-logs",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer/licensing",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer/restful-api",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer/toolkit",
+  "area": "Environment"
+ },
+ {
+  "path": "/developer/webhooks",
+  "area": "Environment"
+ },
+ {
+  "path": "/preferences",
+  "area": "Environment"
+ },
+ {
+  "path": "/deploy",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/api",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/batch-calls",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/batch-calls/dp_ob_01",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/batch-calls/new",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/code",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/embed",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/embed/api",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/embed/widget",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/inbound",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/inbound/dp_ib_01",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/inbound/new",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/phone-numbers",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/phone-numbers/pn_01",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/slack",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/sms",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/telephony",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/web-widget",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/whatsapp",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/deploy/widget",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/phone-numbers",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/phone-numbers/pn_01",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/telephony/campaigns",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/telephony/campaigns/create",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/telephony/phone-numbers",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/campaigns",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/campaigns/calls",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/campaigns/phone-numbers",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/campaigns/phone-numbers/pn_01",
+  "area": "Channels and Deployment"
+ },
+ {
+  "path": "/sessions",
+  "area": "Session"
+ },
+ {
+  "path": "/sessions/first",
+  "area": "Session",
+  "slug": "sessions-detail",
+  "resolve": {
+   "from": "/sessions",
+   "selector": "a[href^='/sessions/']"
+  }
+ },
+ {
+  "path": "/session-history",
+  "area": "Session"
+ },
+ {
+  "path": "/calls",
+  "area": "Session"
+ },
+ {
+  "path": "/monitor",
+  "area": "Session"
+ },
+ {
+  "path": "/monitor/diagnostics",
+  "area": "Session"
+ },
+ {
+  "path": "/agents/playground",
+  "area": "Playground"
+ },
+ {
+  "path": "/composer",
+  "area": "Agent Studio"
+ },
+ {
+  "path": "/billing",
+  "area": "None"
+ },
+ {
+  "path": "/billing/invoices",
+  "area": "None"
+ },
+ {
+  "path": "/billing/payment-methods",
+  "area": "None"
+ },
+ {
+  "path": "/billing/plans",
+  "area": "None"
+ },
+ {
+  "path": "/billing/subscriptions",
+  "area": "None"
+ },
+ {
+  "path": "/billing/transactions",
+  "area": "None"
+ },
+ {
+  "path": "/billing/upgrade",
+  "area": "None"
+ },
+ {
+  "path": "/billing/usage",
+  "area": "None"
+ },
+ {
+  "path": "/usage",
+  "area": "None"
+ },
+ {
+  "path": "/help",
+  "area": "None"
+ },
+ {
+  "path": "/help/contact",
+  "area": "None"
+ },
+ {
+  "path": "/help/contact-sales",
+  "area": "None"
+ },
+ {
+  "path": "/help/tickets",
+  "area": "None"
+ },
+ {
+  "path": "/help/whats-new",
+  "area": "None"
+ },
+ {
+  "path": "/notifications",
+  "area": "None"
+ },
+ {
+  "path": "/defect",
+  "area": "None"
+ },
+ {
+  "path": "/",
+  "area": "None",
+  "slug": "home"
+ }
+]
