@@ -9,13 +9,16 @@
 //             features: [{ n, name, jtbd, verdict, before: {img, caption}, after: [{img, caption, marks:[{name, why}]}],
 //                          rationale: [..], copy: [..], next: [..], links: [{label, href}] }],
 //             audit: [{id, before, after}], gates: [{name, result}] }
-import { readFileSync, writeFileSync } from "node:fs"
-import { resolve, extname } from "node:path"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { basename, dirname, extname, resolve } from "node:path"
+import { execFileSync } from "node:child_process"
 const [manifestPath, outPath] = process.argv.slice(2)
 if (!manifestPath || !outPath) { console.error("usage: build-impl-log.mjs <manifest.json> <out.html>"); process.exit(2) }
 const m = JSON.parse(readFileSync(manifestPath, "utf8"))
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
-const img = (p) => { if (!p) return ""; try { const b = readFileSync(resolve(p)); const mime = extname(p) === ".jpg" ? "image/jpeg" : "image/png"; return `data:${mime};base64,${b.toString("base64")}` } catch { return "" } }
+// Embed a 1600 px JPEG (q80) instead of the 3200 px PNG — the log must stay under the 16 MB artifact cap.
+const LOG_JPG = (p) => resolve(dirname(p), ".log", basename(p).replace(/\.png$/i, ".jpg"))
+const img = (p) => { if (!p) return ""; try { const src = resolve(p); const jpg = LOG_JPG(p); if (!existsSync(jpg)) { mkdirSync(dirname(jpg), { recursive: true }); execFileSync("sips", ["-Z", "1600", "-s", "format", "jpeg", "-s", "formatOptions", "80", src, "--out", jpg], { stdio: "ignore" }) } return `data:image/jpeg;base64,${readFileSync(jpg).toString("base64")}` } catch { try { return `data:image/png;base64,${readFileSync(resolve(p)).toString("base64")}` } catch { return "" } } }
 const list = (arr, cls = "") => arr?.length ? `<ul class="${cls}">${arr.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""
 const shot = (s) => s ? `<figure><img src="${img(s.img)}" alt="${esc(s.caption)}" loading="lazy"><figcaption>${esc(s.caption)}${s.marks?.length ? `<ol class="marks">${s.marks.map((k, i) => `<li><b>${i + 1}. ${esc(k.name)}</b> — ${esc(k.why)}</li>`).join("")}</ol>` : ""}</figcaption></figure>` : ""
 const html = `<!doctype html><meta charset="utf-8"><title>${esc(m.title)}</title>
@@ -38,6 +41,7 @@ a{color:var(--accent)}
 <h1>${esc(m.title)}</h1><p class="sub">${esc(m.date)}</p>
 <div class="meta">${m.deploy ? `<span>Live: <a href="${esc(m.deploy)}">${esc(m.deploy)}</a></span>` : ""}${(m.commits ?? []).map((c) => `<span><code>${esc(c.sha)}</code> ${esc(c.msg)}</span>`).join("")}</div>
 ${list(m.intro)}
+${m.where?.length ? `<h2>Where each feature lives</h2><table><tr><th>#</th><th>Feature</th><th>Area</th><th>Path in Studio X</th><th>Open</th></tr>${m.where.map((w) => `<tr><td><code>${esc(w.n)}</code></td><td>${esc(w.name)}</td><td>${esc(w.area)}</td><td>${esc(w.path)}</td><td><a href="${esc(w.href)}">preview</a></td></tr>`).join("")}</table>` : ""}
 ${(m.features ?? []).map((f) => `<h2>${esc(f.n)} · ${esc(f.name)}</h2>
 <div class="jtbd"><b>Job to be done</b>${esc(f.jtbd)}</div>
 ${f.verdict ? `<p><span class="pill">Verdict</span>${esc(f.verdict)}</p>` : ""}
