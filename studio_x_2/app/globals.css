@@ -79,7 +79,10 @@
     --secondary: oklch(0.9675 0.006 43.335);     /* #f8f3f1 */
     --secondary-foreground: oklch(0.2046 0 0);   /* #171717 */
     --muted: oklch(0.9675 0.006 43.335);         /* #f8f3f1 */
-    --muted-foreground: oklch(0.5624 0 0);       /* #757575 */
+    /* #757575 was 4.49:1 on the page ground — the single token behind 1 806 of
+       the 2 026 Phase-0 axe nodes. #6b6b6b clears AA (≥ 5.0:1 on #fdfcfc and on
+       the #f8f3f1 muted well). (2026-09-11) */
+    --muted-foreground: oklch(0.525 0 0);        /* #6b6b6b */
     --accent: oklch(0.9674 0.0013 286.375);      /* #f4f4f5 (bg-accent-50 base) */
     --accent-foreground: oklch(0.2046 0 0);      /* #171717 */
     --brand: oklch(0.478 0.1007 234.521);        /* #00658d (Figma `accent`) */
