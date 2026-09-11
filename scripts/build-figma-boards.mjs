@@ -7,6 +7,14 @@
 //
 //   node scripts/build-figma-boards.mjs            # all rows with research
 //   node scripts/build-figma-boards.mjs 04 07      # selected rows
+//   node scripts/build-figma-boards.mjs --images 04 07   # print the ordered image list (JSON) instead
+//
+// The SVG embeds 720px thumbnails to stay under Figma's 10 MB upload limit. After
+// importing (upload_assets → POST the SVG → use_figma moves the frame into its
+// section), replace the fills with the full-resolution PNGs: `--images` prints the
+// files in SVG document order, which is the order use_figma's findAll returns the
+// image-fill rectangles; pass those node ids to upload_assets({nodeIds}) and POST
+// each PNG to its slot. See references/design-ops-protocol.md → Review loop.
 //
 // Layout per board (reads top to bottom, the review loop):
 //   header (NN · name · status · ClickUp)  →  JTBD  →  Competitors (Vapi · Retell ·
@@ -23,7 +31,9 @@ const data = JSON.parse(readFileSync(resolve(root, "references/tracker-board/tra
 const outDir = resolve(root, "references/tracker-board/figma")
 mkdirSync(outDir, { recursive: true })
 
-const only = process.argv.slice(2)
+const argv = process.argv.slice(2)
+const imagesOnly = argv.includes("--images")
+const only = argv.filter((a) => a !== "--images")
 const VENDORS = ["Vapi", "Retell", "ElevenLabs", "LiveKit"]
 const W = 2400, PAD = 64, GAP = 32
 const COL = (W - PAD * 2 - GAP * 3) / 4 // competitor column width
@@ -114,6 +124,21 @@ function board(r) {
   const nl = wrap(r.next, 18, W - PAD * 2); parts.push(textBlock(PAD, y, nl, 18, INK, 400, 1.4)); y += heightOf(nl, 18, 1.4) + PAD
   const H = Math.ceil(y)
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><title>${esc(r.name)}</title><rect width="${W}" height="${H}" fill="${CARD}"/>${parts.join("")}</svg>`
+}
+
+if (imagesOnly) {
+  const list = []
+  for (const r of data.rows) {
+    if (only.length && !only.includes(r.n)) continue
+    let i = 0
+    for (const v of VENDORS) {
+      const items = (r.secondary ?? []).filter((s) => s.vendor === v).sort((a, b) => (a.kind === "product" ? -1 : 1) - (b.kind === "product" ? -1 : 1))
+      for (const it of items) list.push({ n: r.n, i: i++, file: it.shot, label: `${v} ${it.kind}` })
+    }
+    if (r.shot) list.push({ n: r.n, i: i++, file: r.shot.file, label: "proposal" })
+  }
+  console.log(JSON.stringify(list, null, 1))
+  process.exit(0)
 }
 
 let count = 0

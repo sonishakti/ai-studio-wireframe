@@ -35,7 +35,7 @@ const esc = (v) =>
 // Thumbnails keep the board small: each image is inlined as an 800px-wide
 // copy (<file>.thumb.png, generated with macOS sips and cached next to the
 // original). The full-size capture stays in the repo for close reading.
-const THUMB_WIDTH = 720
+const THUMB_WIDTH = 1080
 // Each unique image is inlined ONCE in a registry at the end of the page; every
 // <img> carries data-img="<key>" and a tiny script copies the src in on load,
 // so a shot used on three rows costs one base64 payload, not three.
