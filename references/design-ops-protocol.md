@@ -123,6 +123,24 @@ Evidence lives in the repo, not in memory: `references/research/<nn>-<slug>/` wi
 - Decision-log entry in `LEARNINGS.md` §20 for any non-trivial choice.
 - `/specify` handoff spec for engineering.
 
+## Review loop — one path from ClickUp to the live prototype (standing, user-directed 2026-09-11)
+
+Every feature is reviewable the same way, by anyone, from any account or agent. The reviewer goes:
+**Figma page → feature → JTBD → competitors → our proposal → prototype link.** Nothing is delivered until all
+five stops exist.
+
+| Stop | Where | Source of truth |
+|---|---|---|
+| 1 · Delivery board | Artifact **Design Delivery Board** https://claude.ai/code/artifact/a1d57eb9-2121-484c-b2f6-2d728cbd1466 — one row per ClickUp task, ClickUp order, never reshuffled; status tags exactly `Not Done` · `WIP` · `Pending review` · `Done` | `references/tracker-board/tracker-board.json` → `node scripts/build-tracker-board.mjs` → republish the same URL |
+| 2 · Figma sandbox | File **Agora Studio X** `xaAgeioGlZosBsRquDXLvI`, node `2861-52038` — one section per feature named `NN · <ClickUp name>`, containing in order: **JTBD** (the sentence from `01-jtbd.md`) · **Competitors** (Vapi · Retell · ElevenLabs · LiveKit screenshots, docs + product, source URL under each) · **Our proposal** (red-marked screenshots of the prototype, one marker per shot, name + why) · **Prototype** (the design-mode preview URL and the review Artifact) · **Status + decisions** (the board's tag and the owner questions). Building it needs Figma's write tool (`use_figma`, from the Figma desktop MCP server with writing enabled); without it, the board is the canonical view and the Figma section is queued. | the same JSON row + the PNGs under `references/research/<nn>-*/05-shots/` and `references/competitors/` |
+| 3 · Secondary research | Screenshots, not fetched text: for each feature the four vendors' docs page **and** logged-in product screen. Captured with `CHROME_PROFILE=$HOME/.agora-design/chrome-competitors node scripts/annotate-shots.mjs <config> <outDir>` after the user signs in once in a headed Chrome on that profile | `references/competitors/public-docs/`, `references/competitors/product/<vendor>/`; cited in `00-brief.md` |
+| 4 · Our proposal | Red-marked shots of the real page in design mode (`bunx vite dev --config design-kit/vite.config.ts` in ng-console) | `references/research/<nn>-*/05-shots/`, `05-prototype-log.html` |
+| 5 · Prototype link | The design-mode Vercel build of `design/sandbox` (git-free export, `vercel.json` `buildCommand` = the prototype config) deep-linked to the feature's page | `ng-console/docs/design/SANDBOX.md` |
+
+Delivery order in chat: **the link first**, then the board row. Then a desktop notification (`PushNotification`)
+— the user is not always at the terminal. Screenshot, browse and parse work runs on Sonnet/Haiku subagents;
+design verdicts and builds stay on the strongest model.
+
 ## Effort + capacity (agreed 2026-09-04)
 
 **Team:** one designer + Claude. **Window:** Sep 2026 → Feb 2027 (6 months).
