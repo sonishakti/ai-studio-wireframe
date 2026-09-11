@@ -1,18 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, Code2, Gauge, Play, SlidersHorizontal, Wrench } from "lucide-react"
+import { ChevronDown, Code2, Gauge, SlidersHorizontal, Wrench } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
+import { VoiceSampleButton, useSimulatedPlayer } from "@/components/wizard/voice-sample-button"
 import { VoiceAdvancedSheet } from "@/components/wizard/voice-advanced-sheet"
 import { StackTradeoffSlider, ManualStackConfig } from "@/components/wizard/stack-config"
 import { HistoryField } from "@/components/wizard/step-advanced"
@@ -54,6 +54,8 @@ export function VoiceSection({
   const [browserOpen, setBrowserOpen] = React.useState(false)
   const [advancedOpen, setAdvancedOpen] = React.useState(false)
   const [manualOpen, setManualOpen] = React.useState(false)
+  // The Models-row ▶/■ shares the one simulated player with the browser dialog.
+  const player = useSimulatedPlayer()
 
   const mllm = draft.stack.pipeline === "mllm"
   const provider = tierProvider(draft.stack.preset)
@@ -193,25 +195,15 @@ export function VoiceSection({
                 )}
                 <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               </button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={!selected}
-                    // Same simulated-disclosure pattern as the Talk panel — a bare
-                    // "Playing a sample" with no audio read as broken (user-test #9).
-                    onClick={() => selected && toast("Simulated preview", {
-                      description: `No live audio in this wireframe — ${selected.name}'s sample would play here.`,
-                    })}
-                    className="size-9"
-                    aria-label="Preview voice"
-                  >
-                    <Play className="h-4 w-4" aria-hidden />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Preview voice</TooltipContent>
-              </Tooltip>
+              {/* ▶/■ for the current voice — a real button with a stop state;
+                  the simulated-preview toast says no audio plays here. */}
+              <VoiceSampleButton
+                voice={selected ?? { id: "none", name: "voice" }}
+                player={player}
+                variant="outline"
+                size="icon"
+                disabled={!selected}
+              />
             </div>
           </div>
           <div className="min-w-0 basis-44 space-y-1.5">
@@ -247,7 +239,13 @@ export function VoiceSection({
         onOpenChange={setBrowserOpen}
         voices={voices}
         selectedId={draft.voice?.id}
+        useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
+        language={draft.stack.language}
+        agentId={draft.agentId}
         onSelect={(v) => {
+          // "Add your own voice" just saved a custom — re-read the catalog so
+          // the trigger can name it.
+          if (v.kind === "custom") setVoices(allVoices())
           // A cross-provider pick from the full catalog flips the TTS vendor —
           // said out loud, never blocked.
           const p = v.provider ?? "ElevenLabs"
