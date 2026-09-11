@@ -530,6 +530,10 @@ export function AgentWizard({
       if (!el) { if (tries++ < 40) window.setTimeout(attempt, 200); return }
       muteSpy(2000)
       el.scrollIntoView({ block: "center", behavior: "smooth" })
+      // Controls that live in a dialog or sheet: open their door so the link
+      // lands INSIDE the journey, not on the button that starts it.
+      if (focus.startsWith("voice-")) document.querySelector<HTMLButtonElement>('button[aria-label="Browse voices"]')?.click()
+      if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Advanced Speech Settings"))?.click()
       const prev = el.style.outline
       el.style.outline = "3px solid #e11d48"; el.style.outlineOffset = "8px"; el.style.transition = "outline-color 600ms ease"
       window.setTimeout(() => { el.style.outline = prev; el.style.outlineOffset = "" }, 2600)
