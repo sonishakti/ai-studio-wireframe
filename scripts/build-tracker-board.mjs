@@ -35,7 +35,15 @@ const esc = (v) =>
 // Thumbnails keep the board small: each image is inlined as an 800px-wide
 // copy (<file>.thumb.png, generated with macOS sips and cached next to the
 // original). The full-size capture stays in the repo for close reading.
-const THUMB_WIDTH = 800
+const THUMB_WIDTH = 720
+// Each unique image is inlined ONCE in a registry at the end of the page; every
+// <img> carries data-img="<key>" and a tiny script copies the src in on load,
+// so a shot used on three rows costs one base64 payload, not three.
+const registry = new Map()
+const imageKey = (file) => {
+  if (!registry.has(file)) registry.set(file, `i${registry.size + 1}`)
+  return registry.get(file)
+}
 const inlineImage = (file) => {
   const src = resolve(root, file)
   const thumb = `${src}.thumb.png`
@@ -74,7 +82,7 @@ const secondary = (items = []) => {
       const shots = its
         .map((it) => {
           const img = it.shot
-            ? `<button class="thumb sm" type="button" aria-label="Open screenshot: ${esc(it.label)}"><img alt="${esc(it.label)}" loading="lazy" src="${inlineImage(it.shot)}"></button>`
+            ? `<button class="thumb sm" type="button" aria-label="Open screenshot: ${esc(it.label)}"><img alt="${esc(it.label)}" loading="lazy" data-img="${imageKey(it.shot)}"></button>`
             : ""
           const link = it.href
             ? `<a href="${esc(it.href)}" target="_blank" rel="noopener">${esc(it.label)}</a>`
@@ -91,7 +99,7 @@ const row = (r) => {
   const cls = STATUS[r.status]
   if (!cls) throw new Error(`row ${r.n}: unknown status "${r.status}"`)
   const shot = r.shot
-    ? `<button class="thumb" type="button" aria-label="Open screenshot: ${esc(r.shot.alt)}"><img alt="${esc(r.shot.alt)}" loading="lazy" src="${inlineImage(r.shot.file)}"></button>`
+    ? `<button class="thumb" type="button" aria-label="Open screenshot: ${esc(r.shot.alt)}"><img alt="${esc(r.shot.alt)}" loading="lazy" data-img="${imageKey(r.shot.file)}"></button>`
     : `<span class="none">—</span>`
   return `<tr id="f${r.n}">
   <td class="n">${esc(r.n)}</td>
@@ -176,6 +184,10 @@ ${data.rows.map(row).join("\n")}
   <p class="legend"><b>Status:</b> Not Done = nothing started · WIP = research or build in progress · Pending review = built or blocked, needs your review or a decision · Done = reviewed and accepted. <b>Secondary research:</b> one screenshot per competitor (Vapi · Retell · ElevenLabs · LiveKit) of the equivalent screen — <span class="kind">docs</span> = public documentation, <span class="kind">product</span> = the logged-in builder UI; "pending" marks a capture still to do. Rows are never reordered. Source: <code>references/tracker-board/tracker-board.json</code> → <code>node scripts/build-tracker-board.mjs</code>.</p>
 </div>
 <div class="lb" id="lb" role="dialog" aria-label="Screenshot"><img alt="" id="lbimg"></div>
+<script type="application/json" id="imgs">${JSON.stringify(Object.fromEntries([...registry].map(([file, key]) => [key, inlineImage(file)])))}</script>
+<script>
+(function(){var m=JSON.parse(document.getElementById('imgs').textContent);document.querySelectorAll('img[data-img]').forEach(function(im){var src=m[im.getAttribute('data-img')];if(src)im.src=src})})();
+</script>
 <script>
 (function(){var lb=document.getElementById('lb'),img=document.getElementById('lbimg');
 document.querySelectorAll('.thumb').forEach(function(b){b.addEventListener('click',function(){img.src=b.querySelector('img').src;img.alt=b.querySelector('img').alt;lb.classList.add('open')})});
