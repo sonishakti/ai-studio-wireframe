@@ -6,6 +6,34 @@
 > Q3 roadmap tasks it covers (list `901114080734`). Backlog source:
 > `references/design-backlog-q3-roadmap-2026-09-03.html`.
 
+## The design process — seven stops (standing, user-directed 2026-09-11)
+
+This is what anyone — designer, PM, or agent — sees when a feature is asked to be designed or built. The
+detailed how-to for each stop is in **Steps 0–8** below; the seven stops are the contract and the shape of
+every artefact. Nothing is "done" until all seven exist for the feature.
+
+| # | Stop | What must exist | Where it lives |
+|---|---|---|---|
+| 1 | **JTBD — all types** | One headline JTBD, then the **happy scenario first**, then every **rainy / unexpected** scenario (empty states, vendor down, caller silent, wrong language, limits hit, permissions off…). Each scenario is one sentence in the user's words. | `research/<nn>-*/01-jtbd.md` · `tracker-board.json` → `scenarios.{happy,rainy}` · Figma section **1 · JTBD** |
+| 2 | **Research, happy + rainy, ≥ 4 competitors** | Screenshots (docs **and** logged-in product) from Vapi · Retell · ElevenLabs · LiveKit at least, for the happy path **and** the rainy paths. An empty state is not research: **act in the environment** to reach the populated state — enable the setting, run a short test call, open the panel — using `scripts/drive.mjs` on the signed-in profile. Every shot carries red outline marks + tags on what to look at. | `references/competitors/{public-docs,product/<vendor>}/` · `secondary[]` with `scenario: happy|rainy`, `marks[]` · Figma **2 · Research** (one row per scenario, four vendor columns) |
+| 3 | **Learnings** | 3–5 sentences: what the competitor environments taught us that changes our design (patterns to adopt, to avoid, the whitespace). Each names its evidence shot. | `00-brief.md` §Competitors · `learnings[]` · Figma **3 · Learnings** |
+| 4 | **Diverge 3–5, audit one** | Three to five directions, each a paragraph + low-fi, audited against the JTBD and the learnings; one verdict with the reason. | `05-directions.html` · `directions[]`, `verdict` · Figma **4 · Directions** |
+| 5 | **Prototype for the viewer** | The chosen direction built on the live Console (`design/sandbox`, design mode = no login), deep-linked; red-marked screenshots of what changed. | `05-prototype-log.html` · `open[]` (Preview, Review page) + `shot` · Figma **5 · Prototype** |
+| 6 | **Hero screens for the designer** | A few native, editable Figma frames of the happy scenario (real text layers, auto-layout where it matters) placed next to the research, so copy and quick UI changes can be made in Figma without touching code. Rationale listed underneath each hero. | Figma **6 · Hero screens** (node ids recorded in `hero[]`) |
+| 7 | **Tracker** | The one sheet that links ClickUp task ↔ Figma section ↔ prototype ↔ status tag, in ClickUp order, never reshuffled. | `tracker-board.json` → Design Delivery Board (Artifact) + ClickUp task links |
+
+**Figma layout (page *Sandbox New*, parent section *Design Tracker · research & proposals*):** one section per
+feature `NN · <ClickUp name>`, containing seven child sections in this order — `1 · JTBD`, `2 · Research`,
+`3 · Learnings`, `4 · Directions`, `5 · Prototype`, `6 · Hero screens`, `7 · Tracker`. A reviewer scrolls to the
+feature, then walks the stops top to bottom. Everything is generated from `tracker-board.json` by
+`scripts/build-figma-sections.mjs` + `use_figma` (see *Review loop*); hero screens are hand-built once per chosen
+prototype and then owned by the designer.
+
+**Rainy-day rule:** "observability disabled", "no calls yet", "no logs" are rainy scenarios, not research
+results. Reach the real state first (enable, run a 30-second test call, wait for ingestion), capture it, and
+only then keep the empty state as its own rainy shot. Never buy, upgrade a plan, or change billing to get there;
+if a state needs money or the user's credentials, stop and ask.
+
 ## Rules that sit above every step
 
 1. **Connector before browser.** ClickUp, Figma, Slack, Linear all have MCP/plugin tools. Use them.

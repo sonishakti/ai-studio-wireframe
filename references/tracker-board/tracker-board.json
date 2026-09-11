@@ -54,7 +54,8 @@
               "tag": "Voice fallback overview",
               "why": "Explains that fallback voices activate automatically when the primary voice fails, framing how voice recommendations should handle failover."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -83,7 +84,8 @@
               "tag": "Handpicked collections",
               "why": "Use-case based voice collections show how ElevenLabs surfaces voice recommendations by scenario."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -122,7 +124,8 @@
               "tag": "Use-case picks",
               "why": "Handpicked voice collections grouped by use case such as Customer Support, Sales, Coach."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -151,7 +154,8 @@
               "tag": "Voice-clone upsell",
               "why": "Empty state upsells creating a custom voice rather than surfacing default voice recommendations directly."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Vapi",
@@ -180,7 +184,8 @@
               "tag": "Voice library",
               "why": "Voice library toggle plus the selected voice (Marsh) is where recommendations/picks surface."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -209,7 +214,8 @@
               "tag": "Voices table",
               "why": "Sortable table listing each default voice with language, gender, and provider."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -238,7 +244,8 @@
               "tag": "Language selector",
               "why": "Language picker sits beside the voice, with no accent or dialect variants shown."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -267,7 +274,8 @@
               "tag": "Custom & suggested voices",
               "why": "Sidebar promises a curated Suggested voices list plus custom voice support per model — compare against the picker's own options."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -286,9 +294,45 @@
               "tag": "Voice attributes",
               "why": "Each returned voice lists id, provider, gender, accent, age and a preview URL — the facets a voice picker should surface."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Pick once, go live",
+            "jtbd": "When I've written the greeting, I hear the recommended voice say it and ship without auditioning the catalog."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "No voice in my language",
+            "jtbd": "The recommended voice doesn't exist for my locale; I need the next best and a way to preview it."
+          },
+          {
+            "title": "Preview fails",
+            "jtbd": "The voice vendor errors or is slow when I press play; I still need to choose without guessing."
+          },
+          {
+            "title": "Cloned voice not ready",
+            "jtbd": "My cloned voice is pending consent or rejected; callers must not hear a placeholder unannounced."
+          },
+          {
+            "title": "Voice changed after go-live",
+            "jtbd": "A vendor model update changed how my agent sounds; I need to notice and pin or revert."
+          }
+        ]
+      },
+      "directions": [
+        "A · Recommended first",
+        "B · Compare tray",
+        "C · Voice in the row",
+        "D · Add your own voice",
+        "E · Voices, plural (inert)"
+      ],
+      "verdict": "Verdict — converged A + B + D",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/01-voice-picker/05-directions.html"
     },
     {
       "n": "02",
@@ -348,7 +392,8 @@
               "tag": "Start Speaking Plan",
               "why": "Wait-time parameter controlling how long the assistant pauses before it starts speaking."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -377,7 +422,8 @@
               "tag": "Voice pacing fields",
               "why": "Example response shows voice_speed and enable_dynamic_voice_speed, adjacent to where turn-taking settings live in the full schema."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -406,7 +452,8 @@
               "tag": "Turn eagerness",
               "why": "Controls how quickly the assistant jumps in to respond to the caller."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -435,7 +482,8 @@
               "tag": "Turn detector comparison",
               "why": "Waveform demo comparing Turn Detector 1.0 vs 0.4.1 on the same audio to show accuracy gains."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -474,7 +522,8 @@
               "tag": "Turn V3 model",
               "why": "Turn V3 is ElevenLabs' contextual turn-detection upgrade, the key listening/turn-taking control."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -493,7 +542,8 @@
               "tag": "Turn & interruption metrics",
               "why": "Avg Turns and Interrupted columns quantify turn-taking behavior per agent."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -522,9 +572,45 @@
               "tag": "Turn detection nav",
               "why": "Sidebar link to the dedicated Turn detection & interruptions section covering listening behavior."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Caller interrupts, agent listens",
+            "jtbd": "A caller talks over the agent mid-sentence; it stops, waits and answers what was said."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Noisy line, false stops",
+            "jtbd": "Background noise keeps cutting the agent off; I need to make it less trigger-happy without a ms table."
+          },
+          {
+            "title": "Pause mid-thought",
+            "jtbd": "The caller pauses to think and the agent jumps in; I want it to wait a beat longer."
+          },
+          {
+            "title": "Caller-first and silence",
+            "jtbd": "Caller speaks first is on but nobody says anything; the call must not hang dead."
+          },
+          {
+            "title": "Kiosk keyword misfires",
+            "jtbd": "A wake/interrupt keyword fires on unrelated speech in a kiosk deployment."
+          }
+        ]
+      },
+      "directions": [
+        "A · Turn-taking row, user words + recap",
+        "B · One slider, Responsive ↔ Patient",
+        "C · \"Listening\" group, honest homes for Engine work",
+        "D · \"Who speaks first\", tied to the greeting",
+        "E · \"Try interrupting\" on the live test"
+      ],
+      "verdict": "Verdict — converge A + C + E",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/02-turn-taking/05-directions.html"
     },
     {
       "n": "03",
@@ -594,7 +680,8 @@
               "tag": "Webhook server",
               "why": "Endpoint notified of call events, useful for recovering session state after a failover."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -623,7 +710,8 @@
               "tag": "Security & fallback",
               "why": "Where failover behavior for recognition or call issues is configured."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -652,9 +740,45 @@
               "tag": "Custom STT link",
               "why": "A dedicated Custom STT page suggests bring-your-own-recognizer support worth checking against failover behavior."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Brand names heard first time",
+            "jtbd": "I list five product names, say one in the test call, and it comes back spelled right."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Transcriber fails mid-call",
+            "jtbd": "My STT vendor errors or times out; the backup must take over without the caller noticing."
+          },
+          {
+            "title": "Wrong language detected",
+            "jtbd": "A bilingual caller switches language and the agent transcribes gibberish."
+          },
+          {
+            "title": "Vocabulary rejected",
+            "jtbd": "The word list is too long or contains unsupported characters for this vendor."
+          },
+          {
+            "title": "Same word misheard repeatedly",
+            "jtbd": "An accent makes one product code fail every time; I need to see it and add a hint."
+          }
+        ]
+      },
+      "directions": [
+        "A · Vocabulary row in the ASR drawer",
+        "B · Languages row: primary + \"Also understands\"",
+        "C · \"Test a hard word\" in the Test rail",
+        "D · Fold recognition into the Models-tab ASR row",
+        "E · \"Noise & pronunciation\" group in Advanced"
+      ],
+      "verdict": "Verdict — converge A + D + C on 07's row",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/03-recognition-failover/05-directions.html"
     },
     {
       "n": "04",
@@ -729,7 +853,8 @@
               "tag": "Choose idle messages",
               "why": "Step 3 shows selecting preset idle/filler messages, the content side of this greeting-adjacent feature."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -758,7 +883,8 @@
               "tag": "Speaks-first framing",
               "why": "Reiterates that language model, voice, and who-speaks-first are decided upfront, the same territory as our greeting/disclaimer defaults."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -787,7 +913,8 @@
               "tag": "Soft timeout filler",
               "why": "Plays natural filler audio while the agent is thinking, akin to a filler phrase."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Vapi",
@@ -816,7 +943,8 @@
               "tag": "Speaks first setting",
               "why": "Dropdown that decides whether the assistant or the caller speaks first."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -845,7 +973,8 @@
               "tag": "Pause before speaking",
               "why": "Configurable delay before the greeting plays."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -884,7 +1013,8 @@
               "tag": "Turn V3 model",
               "why": "Turn-detection quality shapes how filler and silence right after the greeting are handled."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -913,7 +1043,8 @@
               "tag": "Pause before speaking",
               "why": "Configurable delay before the greeting plays, affecting perceived latency."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -942,9 +1073,49 @@
               "tag": "Preemptive speech",
               "why": "Preemptive speech generation is LiveKit's mechanism for filler audio while a response is prepared."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Natural, disclosed opening",
+            "jtbd": "The agent picks up, says it's an AI and greets naturally; the caller stays on the line."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Caller talks over the greeting",
+            "jtbd": "The caller interrupts the greeting; it should stop (or finish the disclosure) as configured."
+          },
+          {
+            "title": "Silence after the greeting",
+            "jtbd": "Nobody answers after the opening; the agent must prompt or wait, not hang dead."
+          },
+          {
+            "title": "Template variable missing",
+            "jtbd": "{{customer_name}} is empty for this call; the greeting must not read a blank."
+          },
+          {
+            "title": "Disclosure required but off",
+            "jtbd": "The locale requires an AI disclosure and the switch is off; I need to know before go-live."
+          },
+          {
+            "title": "Filler but no answer",
+            "jtbd": "A filler phrase plays and the real answer never arrives; the caller hears dead air."
+          }
+        ]
+      },
+      "directions": [
+        "A · First seconds",
+        "B · Disclosure first",
+        "C · While thinking",
+        "D · If the caller goes quiet",
+        "E · Hear the opening"
+      ],
+      "verdict": "Verdict — converged: A as the spine, B's editable default, D as a recap line, E as the one button; C ships on Advanced",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/05-directions.html"
     },
     {
       "n": "05",
@@ -1004,7 +1175,8 @@
               "tag": "Call settings",
               "why": "Houses call-level behavior rules such as timeouts and end conditions."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Vapi",
@@ -1033,9 +1205,45 @@
               "tag": "In-call control settings",
               "why": "Voicemail detection sits alongside other call-behavior rules in this nav group."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Voicemail handled cleanly",
+            "jtbd": "The call hits voicemail; the agent leaves the message and ends the call properly."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Caller goes quiet",
+            "jtbd": "The other side stops talking; the agent should speak up, then hang up on a schedule I set."
+          },
+          {
+            "title": "Keypad during speech",
+            "jtbd": "The caller presses digits while the agent is talking; the digits must be captured."
+          },
+          {
+            "title": "Max duration mid-sentence",
+            "jtbd": "The call hits its time limit; it should wrap up, not cut off."
+          },
+          {
+            "title": "Transfer target busy",
+            "jtbd": "The human transfer fails; the agent needs a fallback line."
+          }
+        ]
+      },
+      "directions": [
+        "A · \"Call rules\" in sentences",
+        "B · \"Rules\" table — Trigger · Then · Status",
+        "C · Rules live on the phone number",
+        "D · \"Before you go live\" in the Deploy tab",
+        "E · \"Guardrails\" row, inert"
+      ],
+      "verdict": "Verdict — A as the surface, D as the gate",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/05-call-behavior/05-directions.html"
     },
     {
       "n": "06",
@@ -1095,7 +1303,8 @@
               "tag": "Background sound",
               "why": "Off/Office/Default/Custom ambience presets add personality/character to the call."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1124,9 +1333,45 @@
               "tag": "Voice model",
               "why": "Cartesia Sonic 3 is the model listed; expressiveness support may vary by model family."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Sounds on-brand in one pass",
+            "jtbd": "I slow the voice down, warm the tone, fix one product name, and the first call sounds like us."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Vendor lacks the knob",
+            "jtbd": "The chosen voice vendor doesn't support speed or style; the control must say so, not silently ignore."
+          },
+          {
+            "title": "Name still mispronounced",
+            "jtbd": "A pronunciation rule doesn't take for this vendor; I need to hear and fix it."
+          },
+          {
+            "title": "Background sound masks speech",
+            "jtbd": "Ambient sound is louder than the voice on a phone line."
+          },
+          {
+            "title": "Vendor update changes delivery",
+            "jtbd": "A model refresh changes pacing; I need to notice and re-tune."
+          }
+        ]
+      },
+      "directions": [
+        "A · Delivery — three normalised handles",
+        "B · Tone — a short style prompt",
+        "C · Pronunciation — Word → Say it as, every vendor",
+        "D · Background sound — inert picker",
+        "E · Vendor-native presets only"
+      ],
+      "verdict": "Verdict — converged",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/06-tts-expression/05-directions.html"
     },
     {
       "n": "07",
@@ -1187,7 +1432,8 @@
               "tag": "Fallback sequence",
               "why": "Numbered steps show Vapi cascading through fallback voices in order until one succeeds, the core provider-failover pattern to mirror."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Vapi",
@@ -1226,7 +1472,8 @@
               "tag": "Voice vendor",
               "why": "Rime AI is the TTS vendor selected for output voice, each card independently swappable."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Vapi",
@@ -1265,7 +1512,8 @@
               "tag": "Webhook server",
               "why": "Vendor-agnostic webhook config sits beside the fallback settings, tying provider events to the assistant."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -1294,7 +1542,8 @@
               "tag": "Voice vendor",
               "why": "Single voice provider selector, with no fallback voice vendor shown."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1323,7 +1572,8 @@
               "tag": "Multi-provider TTS",
               "why": "Copy notes custom voices work across multiple TTS providers via LiveKit Inference, relevant to provider-fallback abstraction."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Vapi",
@@ -1352,7 +1602,8 @@
               "tag": "Voice provider card",
               "why": "Summary card names the current vendor (Rime AI) with cost and latency, useful for fallback/vendor comparison."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1381,7 +1632,8 @@
               "tag": "Provider filter",
               "why": "Filters voices by provider but doesn't expose any fallback ordering."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -1410,7 +1662,8 @@
               "tag": "Voice vendor",
               "why": "Single voice provider selector, with no fallback voice vendor shown."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "ElevenLabs",
@@ -1439,7 +1692,8 @@
               "tag": "Backup LLM config",
               "why": "Dedicated docs page for configuring a backup LLM — the explicit fallback settings surface to benchmark."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1468,7 +1722,8 @@
               "tag": "Plugins (other STT vendors)",
               "why": "Plugins section lists alternate STT providers that can be swapped in — the closest fallback/vendor picker."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1497,7 +1752,8 @@
               "tag": "Plugins (other vendors)",
               "why": "The Plugins link lets teams swap in a different TTS provider outside LiveKit Inference — the closest fallback mechanism shown."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -1516,9 +1772,43 @@
               "tag": "Provider field",
               "why": "Provider is a flat string per voice (e.g. elevenlabs) with no separate backup/fallback vendor field shown."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Backup takes over, nobody paged",
+            "jtbd": "The primary LLM slows; the backup answers and the caller notices nothing."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Backup also failing",
+            "jtbd": "Both vendors are degraded; the agent must degrade gracefully and I must be told."
+          },
+          {
+            "title": "Backup credentials invalid",
+            "jtbd": "The backup key expired or its quota is exhausted; fallback fails at the worst moment."
+          },
+          {
+            "title": "Region-blocked vendor",
+            "jtbd": "A vendor is blocked in the caller's region; routing must avoid it."
+          },
+          {
+            "title": "Fallback changes the persona",
+            "jtbd": "The backup voice or model sounds different; callers hear a switch mid-call."
+          }
+        ]
+      },
+      "directions": [
+        "A · One row, zero-config",
+        "B · Backup column in manual config",
+        "C · Policy + prove it"
+      ],
+      "verdict": null,
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/05-directions.html"
     },
     {
       "n": "08",
@@ -1546,7 +1836,33 @@
       "shot": null,
       "rationale": "Locked: production A/B collides with the builder \"no A/B\" lock. Brief written; versioning, rollback and \"simulate a pending change\" wait on the call.",
       "next": "Owner answers where A/B lives: Monitor-side experiments, the deploy panel, or API-only.",
-      "secondary": []
+      "secondary": [],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Publish v2, roll back in one click",
+            "jtbd": "I publish a new version to production and can revert instantly if it misbehaves."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Rollback under traffic",
+            "jtbd": "Live calls are on v2 when I revert; in-flight calls must finish safely."
+          },
+          {
+            "title": "Broken A/B variant",
+            "jtbd": "One variant fails; the split must stop sending traffic to it."
+          },
+          {
+            "title": "Two people editing a draft",
+            "jtbd": "Edits collide; nobody's work should be silently lost."
+          },
+          {
+            "title": "Old version references a removed vendor",
+            "jtbd": "A rollback target uses a model that no longer exists."
+          }
+        ]
+      }
     },
     {
       "n": "09",
@@ -1606,9 +1922,45 @@
               "tag": "Workflow preview panel",
               "why": "Live workflow canvas that previews the selected template's conversation flow before import."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Talk to a working agent in minutes",
+            "jtbd": "I sign up, pick a template, and have a call with a working agent before configuring anything."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Import fails on unsupported fields",
+            "jtbd": "My Vapi/Retell agent uses features we don't map; I need to see exactly what didn't carry over."
+          },
+          {
+            "title": "Imported agent needs update",
+            "jtbd": "The old agent is invalid under the new contract; make it valid without me learning the contract."
+          },
+          {
+            "title": "Wrong template for my case",
+            "jtbd": "The gallery pick doesn't fit; switching must not lose what I typed."
+          },
+          {
+            "title": "No credits or number to test",
+            "jtbd": "I can't make the first call because something is missing; tell me what, in one place."
+          }
+        ]
+      },
+      "directions": [
+        "A · Import as the third way to start",
+        "B · Import as a Concierge proposal",
+        "C · \"Needs update\" → one-click migration",
+        "D · One honest default agent",
+        "E · Instrument first, no new screens"
+      ],
+      "verdict": "Verdict — converge A + C + E",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/09-first-run/05-directions.html"
     },
     {
       "n": "10",
@@ -1678,7 +2030,8 @@
               "tag": "Cost column",
               "why": "Per-call cost is a standard column in Vapi's logs table."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -1717,7 +2070,8 @@
               "tag": "User sentiment",
               "why": "Auto-scored sentiment per session, an evaluative signal attached directly to the call log."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1736,7 +2090,8 @@
               "tag": "Agents table row",
               "why": "Each row logs session count and status per agent — the closest thing to a call/session log at this level."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "LiveKit",
@@ -1755,7 +2110,9 @@
               "tag": "Sessions table columns",
               "why": "Defines Duration, Participants, Features and Status per session, currently showing an empty 'No results' state."
             }
-          ]
+          ],
+          "scenario": "rainy",
+          "redo": "empty state — capture the populated state first"
         },
         {
           "vendor": "ElevenLabs",
@@ -1784,9 +2141,45 @@
               "tag": "Log search & filter",
               "why": "Lets reviewers search across session history."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Replay and name the cause",
+            "jtbd": "A call went wrong; I replay it turn by turn with audio and transcript aligned and see where it broke."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Audio and transcript drift",
+            "jtbd": "The transcript doesn't line up with the audio; I can't tell who spoke when."
+          },
+          {
+            "title": "Missing or truncated turns",
+            "jtbd": "Turns are absent; I need to know it's an ingestion gap, not the agent."
+          },
+          {
+            "title": "Provider payload redacted",
+            "jtbd": "The vendor request/response is hidden by policy; I still need the error shape."
+          },
+          {
+            "title": "Session never appears",
+            "jtbd": "The call ended but the log isn't there yet; show the delay, not an empty list."
+          }
+        ]
+      },
+      "directions": [
+        "A · Aligned replay",
+        "B · Turns ladder",
+        "C · Provider payloads",
+        "D · Session page",
+        "E · Save as test + export"
+      ],
+      "verdict": "Verdict — A, converged",
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/10-session-logs/05-directions.html"
     },
     {
       "n": "11",
@@ -1842,7 +2235,9 @@
               "tag": "Observability disabled",
               "why": "Deeper latency/diagnostic observability sits behind an opt-in toggle rather than being built in."
             }
-          ]
+          ],
+          "scenario": "rainy",
+          "redo": "empty state — capture the populated state first"
         },
         {
           "vendor": "LiveKit",
@@ -1871,9 +2266,40 @@
               "tag": "Calls with issues",
               "why": "Surfaces the count of problematic calls, the entry point for latency/SIP diagnostics."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Fault verdict in one look",
+            "jtbd": "A call failed or felt slow; I open it and see whose fault it was — carrier, us, or the model — with the latency per leg."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Carrier rejects with SIP 4xx/5xx",
+            "jtbd": "Calls fail with 403/404/503 from the trunk; I need the code, the leg and the fix."
+          },
+          {
+            "title": "CPS limit hit",
+            "jtbd": "Bursts of calls fail because calls-per-second was exceeded; I need to see the limit and the rejected calls."
+          },
+          {
+            "title": "One-way audio / early media",
+            "jtbd": "The call connects but one side hears nothing; the ladder must show where audio stopped."
+          },
+          {
+            "title": "p95 spikes in one region",
+            "jtbd": "Latency is fine globally but bad for one region or model; I need the breakdown."
+          },
+          {
+            "title": "Observability off or no calls yet",
+            "jtbd": "Diagnostics aren't enabled or nothing has been placed; the empty state must say what to enable and how to test."
+          }
+        ]
+      }
     },
     {
       "n": "12",
@@ -1925,7 +2351,8 @@
               "tag": "Calls table",
               "why": "Row-level call list where an operator would drill into a specific call, currently empty."
             }
-          ]
+          ],
+          "scenario": "happy"
         },
         {
           "vendor": "Retell",
@@ -1954,9 +2381,37 @@
               "tag": "Empty state",
               "why": "Retell's empty state for Live Monitoring shows no operator controls appear until a call is actually live."
             }
-          ]
+          ],
+          "scenario": "rainy",
+          "redo": "empty state — capture the populated state first"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Watch live calls, step in",
+            "jtbd": "I see active calls with their state and can listen or take over when one goes wrong."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Spike beyond concurrency",
+            "jtbd": "Calls exceed my concurrency; new callers must get a clear outcome and I must be alerted."
+          },
+          {
+            "title": "Operator takes over, agent keeps talking",
+            "jtbd": "Barge-in must silence the agent immediately."
+          },
+          {
+            "title": "Monitoring lags reality",
+            "jtbd": "The live view is seconds behind; I need to know how stale it is."
+          },
+          {
+            "title": "No active calls",
+            "jtbd": "Nothing is live; the page must still be useful (recent, health, test)."
+          }
+        ]
+      }
     },
     {
       "n": "13",
@@ -2038,9 +2493,36 @@
               "tag": "Transfer stats",
               "why": "Transfer success rate and wait time break down handoff performance as part of the same scorecard."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Score last week's calls",
+            "jtbd": "I run a rubric over recent calls and see the three things to fix."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Rubric disagrees with humans",
+            "jtbd": "Scores don't match reviewer judgement; I need to calibrate."
+          },
+          {
+            "title": "Run fails on missing transcripts",
+            "jtbd": "Some calls have no transcript; the run must skip and say so."
+          },
+          {
+            "title": "Scores drift after a prompt change",
+            "jtbd": "A new version scores worse; I need the comparison."
+          },
+          {
+            "title": "Nothing to evaluate",
+            "jtbd": "No calls in range; guide me to simulate or widen the window."
+          }
+        ]
+      }
     },
     {
       "n": "15",
@@ -2132,9 +2614,36 @@
               "tag": "SIP trunks link",
               "why": "Direct entry point for configuring SIP trunk connections."
             }
-          ]
+          ],
+          "scenario": "happy"
         }
-      ]
+      ],
+      "scenarios": {
+        "happy": [
+          {
+            "title": "Trunk connected, first call lands",
+            "jtbd": "I add my carrier trunk, place a test call, and it rings through."
+          }
+        ],
+        "rainy": [
+          {
+            "title": "Trunk auth rejected",
+            "jtbd": "401/403 from the carrier; show which credential or IP allow-list is wrong."
+          },
+          {
+            "title": "Codec or SRTP mismatch",
+            "jtbd": "Calls connect then drop; the negotiation failure must be visible."
+          },
+          {
+            "title": "Number not routed",
+            "jtbd": "404: the number isn't mapped to an agent or trunk."
+          },
+          {
+            "title": "Outbound blocked",
+            "jtbd": "CPS or caller-ID policy blocks outbound; say which rule."
+          }
+        ]
+      }
     },
     {
       "n": "18",
