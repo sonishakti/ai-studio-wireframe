@@ -46,6 +46,55 @@
           "kind": "docs",
           "href": "https://elevenlabs.io/docs/product-guides/voices/voice-library",
           "shot": "references/competitors/public-docs/elevenlabs-docs-voice-library.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Voice library — Trending · language/style filters · use-case picks",
+          "kind": "product",
+          "href": "https://elevenlabs.io/app/agents/voice-library",
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-voice-library.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Voices — Custom vs Default voices · voice-clone upsell",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-voices.png"
+        },
+        {
+          "vendor": "Vapi",
+          "label": "Voice settings panel — Voice model · Speed · Background Sound (Off / Office / Default / Custom)",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Default voices table — provider / language / gender filters",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-voices-default.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Kate voice · English (US) · Welcome Message · AI speaks first · Pause Before Speaking",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "TTS models — custom voices · expressive mode · Cartesia Sonic 3",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/models/tts/",
+          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "List Voices API — voice_id · provider · gender · accent · age · preview",
+          "kind": "docs",
+          "href": "https://docs.retellai.com/api-references/list-voices",
+          "shot": "references/competitors/public-docs/retell-docs-voices.png"
         }
       ]
     },
@@ -103,6 +152,27 @@
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/build/turns/turn-detector/",
           "shot": "references/competitors/public-docs/livekit-docs-turn-detector.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Agent tab — First message · Interruptible · Turn V3",
+          "kind": "product",
+          "href": "https://elevenlabs.io/app/agents",
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-agent-agent.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-agents.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Speech & audio — session.say · generate_reply · interruptions · background audio",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/build/audio/",
+          "shot": "references/competitors/public-docs/livekit-docs-speech-greeting.png"
         }
       ]
     },
@@ -132,7 +202,29 @@
       "shot": null,
       "rationale": "One Vocabulary list in the ASR drawer mapped to each vendor's field (Deepgram and Microsoft write for real; ARES shape unconfirmed), a recap on the Models row, and the ASR backup reusing 07's row.",
       "next": "Build. Owner: ARES keywords shape; label \"Vocabulary\" vs Agora's \"Keywords\".",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Advanced tab — Fallback Voices · Fallback Transcriber · Webhook Server",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-advanced.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "STT models — provider/model table (Deepgram Flux) · custom STT",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/models/stt/",
+          "shot": "references/competitors/public-docs/livekit-docs-stt.png"
+        }
+      ]
     },
     {
       "n": "04",
@@ -196,6 +288,41 @@
           "kind": "docs",
           "href": "https://elevenlabs.io/docs/agents-platform/customization/conversation-flow",
           "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png"
+        },
+        {
+          "vendor": "Vapi",
+          "label": "Assistant tab — First Message · Assistant speaks first · Transcriber/Model/Voice cards",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-model.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Agent tab — First message · Interruptible · Turn V3",
+          "kind": "product",
+          "href": "https://elevenlabs.io/app/agents",
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-agent-agent.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Kate voice · English (US) · Welcome Message · AI speaks first · Pause Before Speaking",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Speech & audio — session.say · generate_reply · interruptions · background audio",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/build/audio/",
+          "shot": "references/competitors/public-docs/livekit-docs-speech-greeting.png"
         }
       ]
     },
@@ -225,7 +352,22 @@
       "shot": null,
       "rationale": "\"Call rules\" in sentence form on Advanced (silence, hang up after everyone leaves, finish speaking first; max duration read from the bound number) plus a \"Before you go live\" list in the Deploy tab. Voicemail message, keypad and guardrails are Requires Engine.",
       "next": "Build. Owner: agent vs number level for duration; where the preflight lives.",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+        },
+        {
+          "vendor": "Vapi",
+          "label": "Voicemail Detection — detection options table",
+          "kind": "docs",
+          "href": "https://docs.vapi.ai/calls/voicemail-detection",
+          "shot": "references/competitors/public-docs/vapi-docs-voicemail.png"
+        }
+      ]
     },
     {
       "n": "06",
@@ -253,7 +395,22 @@
       "shot": null,
       "rationale": "Controls appear only when the vendor has the field: one normalised Pace, native Pitch / Volume / Emotion, a Tone prompt for OpenAI and Generic, a Pronunciation table on every vendor; Background sound inert.",
       "next": "Build. Owner: drawer vs Models placement; the ElevenLabs key and range mismatches, fix or file.",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Voice settings panel — Voice model · Speed · Background Sound (Off / Office / Default / Custom)",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "TTS models — custom voices · expressive mode · Cartesia Sonic 3",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/models/tts/",
+          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png"
+        }
+      ]
     },
     {
       "n": "07",
@@ -299,6 +456,83 @@
           "kind": "docs",
           "href": "https://docs.vapi.ai/voice-fallback-plan",
           "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png"
+        },
+        {
+          "vendor": "Vapi",
+          "label": "Assistant tab — First Message · Assistant speaks first · Transcriber/Model/Voice cards",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-model.png"
+        },
+        {
+          "vendor": "Vapi",
+          "label": "Advanced tab — Fallback Voices · Fallback Transcriber · Webhook Server",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-advanced.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Voices — Custom vs Default voices · voice-clone upsell",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-voices.png"
+        },
+        {
+          "vendor": "Vapi",
+          "label": "Voice settings panel — Voice model · Speed · Background Sound (Off / Office / Default / Custom)",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Default voices table — provider / language / gender filters",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-voices-default.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Agent editor — Kate voice · English (US) · Welcome Message · AI speaks first · Pause Before Speaking",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/agents",
+          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Models — provider cascade if one fails · backup LLM configuration",
+          "kind": "docs",
+          "href": "https://elevenlabs.io/docs/eleven-agents/customization/llm",
+          "shot": "references/competitors/public-docs/elevenlabs-docs-llm-fallback.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "STT models — provider/model table (Deepgram Flux) · custom STT",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/models/stt/",
+          "shot": "references/competitors/public-docs/livekit-docs-stt.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "TTS models — custom voices · expressive mode · Cartesia Sonic 3",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/models/tts/",
+          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "List Voices API — voice_id · provider · gender · accent · age · preview",
+          "kind": "docs",
+          "href": "https://docs.retellai.com/api-references/list-voices",
+          "shot": "references/competitors/public-docs/retell-docs-voices.png"
         }
       ]
     },
@@ -352,7 +586,15 @@
       "shot": null,
       "rationale": "\"Import from Vapi or Retell\" as a third row in the create modal with a mapped / changed / not-imported report and a real create; a one-click \"Update to current contract\" off the existing alert; onboarding funnel events. Gallery locked.",
       "next": "Build import, then contract update. Owner: the template gallery; a pre-provisioned default agent.",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "ElevenLabs",
+          "label": "Browse templates gallery with Workflow/Preview panel",
+          "kind": "product",
+          "href": "https://elevenlabs.io/app/agents/templates",
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-templates.png"
+        }
+      ]
     },
     {
       "n": "10",
@@ -380,7 +622,43 @@
       "shot": null,
       "rationale": "Aligned replay in the existing sheet: recording and transcript on one clock, click a line to seek, turn markers on the scrubber; end-of-turn badges (Interrupted · Ignored · Error) on the agent line; Download and Copy link. Degrades honestly when timestamps are missing.",
       "next": "Build. Backend must surface history timestamps and turns per session.",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Logs — Calls table (Ended Reason · Duration · Cost)",
+          "kind": "product",
+          "href": "https://dashboard.vapi.ai/logs",
+          "shot": "references/competitors/product/vapi/vapi-logs.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Call History — Duration · Cost · End Reason · Session Status · User Sentiment",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/call-history",
+          "shot": "references/competitors/product/retell/retell-call-history.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-agents.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Sessions — Duration · Participants · Features · Status (empty)",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-sessions.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Conversations — history table (Agent · Title · Date)",
+          "kind": "product",
+          "href": "https://elevenlabs.io/app/agents/history",
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-conversations.png"
+        }
+      ]
     },
     {
       "n": "11",
@@ -404,7 +682,22 @@
       "shot": null,
       "rationale": "SIP diagnostics prototype by SW4Y4M on its own branch: fault verdict, signalling ladder, SIP message detail with visible redaction, full-page call detail.",
       "next": "Verify against final Engine payloads; port onto design/sandbox.",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "LiveKit",
+          "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-agents.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-telephony.png"
+        }
+      ]
     },
     {
       "n": "12",
@@ -424,7 +717,22 @@
       "shot": null,
       "rationale": "",
       "next": "Owner call first: which operator verbs are permitted (listen · whisper · take over · end).",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "LiveKit",
+          "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-telephony.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Live Monitoring — live call table (Time · Duration · Type · From · To)",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/live-monitoring",
+          "shot": "references/competitors/product/retell/retell-live-monitoring.png"
+        }
+      ]
     },
     {
       "n": "13",
@@ -464,7 +772,15 @@
       "shot": null,
       "rationale": "",
       "next": "Research (protocol steps 0–4).",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "Retell",
+          "label": "AI Quality Assurance — Average Score · Resolution Rate · Transfer stats",
+          "kind": "product",
+          "href": "https://dashboard.retellai.com/quality-assurance",
+          "shot": "references/competitors/product/retell/retell-quality-assurance.png"
+        }
+      ]
     },
     {
       "n": "15",
@@ -524,7 +840,15 @@
       "shot": null,
       "rationale": "",
       "next": "Research on the Console (wireframe-era sip-quick-connect notes exist).",
-      "secondary": []
+      "secondary": [
+        {
+          "vendor": "LiveKit",
+          "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
+          "kind": "product",
+          "href": "https://cloud.livekit.io",
+          "shot": "references/competitors/product/livekit/livekit-telephony.png"
+        }
+      ]
     },
     {
       "n": "18",
