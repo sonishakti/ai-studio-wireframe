@@ -1,3 +1,6 @@
 .vercel
 screenshots/.DS_Store
 .claude/launch.json
+
+# board thumbnails are build output (scripts/build-tracker-board.mjs)
+*.thumb.png

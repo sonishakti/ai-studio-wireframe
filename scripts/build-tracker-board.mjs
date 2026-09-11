@@ -7,7 +7,8 @@
 // Rows come from the ClickUp Design Tracker (list 901114875662) in ClickUp
 // order and are never reordered here. Edit the JSON, rebuild, republish the
 // same Artifact. Status tags are exactly: Not Done · WIP · Pending review · Done.
-import { readFileSync, writeFileSync } from "node:fs"
+import { execFileSync } from "node:child_process"
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -31,9 +32,21 @@ const esc = (v) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
 
+// Thumbnails keep the board small: each image is inlined as an 800px-wide
+// copy (<file>.thumb.png, generated with macOS sips and cached next to the
+// original). The full-size capture stays in the repo for close reading.
+const THUMB_WIDTH = 800
 const inlineImage = (file) => {
-  const buf = readFileSync(resolve(root, file))
-  return `data:image/png;base64,${buf.toString("base64")}`
+  const src = resolve(root, file)
+  const thumb = `${src}.thumb.png`
+  const stale =
+    !existsSync(thumb) || statSync(thumb).mtimeMs < statSync(src).mtimeMs
+  if (stale) {
+    execFileSync("sips", ["-Z", String(THUMB_WIDTH), src, "--out", thumb], {
+      stdio: "ignore",
+    })
+  }
+  return `data:image/png;base64,${readFileSync(thumb).toString("base64")}`
 }
 
 const links = (items) =>
