@@ -63,6 +63,9 @@ export interface SessionTurn {
   }
   /** Set when this turn is the slowest in the session. */
   slowest?: boolean
+  /** How the turn ended — the Engine's `turns[].end.type` enum (v2.5), plus
+   *  `greeting` for the opening agent turn. Rendered as a chip with a word. */
+  endType?: "greeting" | "interrupted" | "ignored" | "error"
 }
 
 export interface SessionTrace {
@@ -283,6 +286,20 @@ export function buildSessionTrace(input: {
   const slow = agentTurns.find((t) => t.e2eMs === maxMs)
   if (slow) slow.slowest = true
 
+  // End types: the first agent turn is the greeting; at most one interrupted,
+  // one ignored, and — failed sessions only — one error, on distinct turns.
+  if (agentTurns.length > 0) agentTurns[0].endType = "greeting"
+  const free = agentTurns.slice(1)
+  const take = (): SessionTurn | undefined =>
+    free.length > 0 ? free.splice(Math.floor(rnd() * free.length), 1)[0] : undefined
+  if (rnd() < 0.4) { const t = take(); if (t) t.endType = "interrupted" }
+  if (rnd() < 0.3) { const t = take(); if (t) t.endType = "ignored" }
+  if (status === "Failed") {
+    // A failed session dropped on its one turn — the error lands there.
+    const t = free.length > 0 ? free[free.length - 1] : agentTurns[agentTurns.length - 1]
+    if (t) t.endType = "error"
+  }
+
   const sorted = agentTurns.map((t) => t.e2eMs).sort((a, b) => a - b)
   const totalAvg = sorted.reduce((a, b) => a + b, 0) / (sorted.length || 1)
 
@@ -464,6 +481,13 @@ export const SPAN_FIX: Partial<Record<TraceSpan["key"], { label: string; href: s
 /** The whole session as one downloadable object — "I'll grep it" (D3). */
 export function traceToJson(trace: SessionTrace): string {
   return JSON.stringify(trace, null, 2)
+}
+
+/** Whether a voice session's recording is still inside the retention window.
+ *  ~15% of sessions have aged out — a stated "Not retained", never an empty
+ *  player. Seeded off the id so the answer never changes between visits. */
+export function audioRetained(id: string): boolean {
+  return seeded(id + "ret")() >= 0.15
 }
 
 /** The latency budget a developer is judged against — under this is good.

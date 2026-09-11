@@ -1,35 +1,36 @@
 "use client"
 
 import * as React from "react"
-import { Copy, ChevronRight, TriangleAlert, ArrowRight, Check } from "lucide-react"
-import Link from "next/link"
+import { Copy, ChevronRight, Check } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import { SipVerdict } from "@/components/sip-verdict"
 import {
-  SIP_PARTY_LABEL, BLAME_LABEL,
+  SIP_PARTY_LABEL,
   type SipTrace, type SipMessage,
 } from "@/lib/sip-trace"
 
 /**
  * SipLadder — the signaling ladder diagram for one call (Q3 roadmap P0,
- * 2026-08). Participants are columns; time runs down; each message is an arrow
- * between two columns, labelled with the method or response code.
+ * 2026-08; Design Tracker 11 verdict A + B). Participants are columns; time
+ * runs down; each message is an arrow between two columns, labelled with the
+ * method or response code.
  *
- * Two things carry the design beyond "draw the arrows":
+ * Three things carry the design beyond "draw the arrows":
  *
- *  • **The failure is explained before it is diagrammed.** A bare "503" is
- *    unactionable to anyone who isn't a telecom engineer, and most people
- *    reading this screen aren't. The block above the ladder says what happened
- *    in plain language, whose side the fault is on, and what to do — the
- *    diagram is the evidence underneath that answer, not the answer itself.
+ *  • **The failure is explained before it is diagrammed** (`SipVerdict`).
+ *    The diagram is the evidence underneath that answer, not the answer.
  *
- *  • **Raw headers stay raw.** They're collapsed per message, and when opened
- *    they're verbatim monospace. The audience for headers is the one that will
- *    paste them into a carrier support ticket, and reformatting them into
- *    pretty cards destroys exactly that use.
+ *  • **The ladder has time.** A strip above it says where the time went per
+ *    leg; every row keeps its time gutter; the message that decided the
+ *    verdict is marked in every state; identical retry cycles collapse into
+ *    one with a count so the ladder fits a screen.
+ *
+ *  • **Raw headers stay raw.** Collapsed per message, verbatim monospace when
+ *    opened — the audience is the one pasting them into a carrier ticket.
  */
 
 const KIND_STYLE: Record<SipMessage["kind"], { line: string; text: string; dot: string }> = {
@@ -41,43 +42,45 @@ const KIND_STYLE: Record<SipMessage["kind"], { line: string; text: string; dot: 
 
 const fmtMs = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(2)} s`)
 
+/** A run of identical consecutive cycles: `count` repeats of `period`
+ *  messages starting at `start`. The first cycle stays; the rest collapse. */
+interface Repeat { start: number; period: number; count: number }
+
+function findRepeat(labels: string[]): Repeat | null {
+  const n = labels.length
+  for (let s = 0; s < n; s++) {
+    for (let p = 2; s + 2 * p <= n; p++) {
+      let k = 1
+      while (
+        s + (k + 1) * p <= n &&
+        labels.slice(s + k * p, s + (k + 1) * p).every((l, i) => l === labels[s + i])
+      ) k++
+      if (k >= 2) return { start: s, period: p, count: k }
+    }
+  }
+  return null
+}
+
 export function SipLadder({ trace }: { trace: SipTrace }) {
   const [openAll, setOpenAll] = React.useState(false)
+  const [showAll, setShowAll] = React.useState(false)
   const cols = trace.parties
+
+  const repeat = React.useMemo(
+    () => findRepeat(trace.messages.map((m) => m.label)),
+    [trace.messages],
+  )
+  const hiddenFrom = repeat ? repeat.start + repeat.period : -1
+  const hiddenTo = repeat ? repeat.start + repeat.period * repeat.count : -1
+
+  // No trace: the verdict block carries every next step; there is no ladder
+  // to draw and drawing an empty one would be a lie.
+  if (!trace.retained) return <SipVerdict trace={trace} />
 
   return (
     <div className="space-y-4">
       {/* ── The answer, before the evidence ── */}
-      {trace.failure ? (
-        <div className="space-y-2.5 rounded-lg border border-destructive/40 bg-destructive/5 p-3.5">
-          <div className="flex items-start gap-2.5">
-            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-            <div className="min-w-0 flex-1 space-y-1">
-              <p className="text-sm font-medium">
-                SIP {trace.failure.code} {trace.failure.reason}
-                <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
-                  {BLAME_LABEL[trace.failure.blame]}
-                </Badge>
-              </p>
-              <p className="text-sm text-muted-foreground">{trace.failure.explain}</p>
-              <p className="text-sm">{trace.failure.fix}</p>
-            </div>
-          </div>
-          {trace.failure.fixHref && (
-            <Button variant="outline" size="sm" asChild className="gap-1.5">
-              <Link href={trace.failure.fixHref}>
-                Go fix this <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="rounded-lg border border-border bg-muted/30 px-3.5 py-2.5">
-          <p className="text-sm">
-            Signaling completed normally — the call was answered and ended with a BYE.
-          </p>
-        </div>
-      )}
+      <SipVerdict trace={trace} />
 
       {/* ── Dialog facts. The SIP Call-ID is the first thing a carrier asks
              for, so it gets a copy button rather than being buried in headers. ── */}
@@ -85,6 +88,26 @@ export function SipLadder({ trace }: { trace: SipTrace }) {
         <Fact label="SIP Call-ID" value={trace.sipCallId} copyable />
         <Fact label="Post-dial delay" value={fmtMs(trace.pddMs)} hint="INVITE → first ring or answer" />
       </div>
+
+      {/* ── Where the time went — one cell per leg, the slowest named ── */}
+      {trace.legs.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-lg border border-border px-3 py-2">
+          <span className="text-xs text-muted-foreground">Where the time went</span>
+          {trace.legs.map((leg) => (
+            <span
+              key={leg.label}
+              className={cn(
+                "inline-flex items-baseline gap-1.5 font-mono text-xs tabular-nums",
+                leg.slowest && "font-semibold",
+              )}
+            >
+              <span className={leg.slowest ? "text-foreground" : "text-muted-foreground"}>{leg.label}</span>
+              <span>{fmtMs(leg.ms)}</span>
+              {leg.slowest && <span className="text-[10px] font-normal text-warning">slowest</span>}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium">Signaling</p>
@@ -94,7 +117,7 @@ export function SipLadder({ trace }: { trace: SipTrace }) {
       </div>
 
       {/* ── The ladder ── */}
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border" data-design-focus="sip-ladder">
         <div className="min-w-[560px] p-4">
           {/* Participant columns */}
           <div
@@ -125,15 +148,25 @@ export function SipLadder({ trace }: { trace: SipTrace }) {
             </div>
 
             <ol className="relative space-y-1.5">
-              {trace.messages.map((m, i) => (
-                <MessageRow
-                  key={i}
-                  msg={m}
-                  cols={cols}
-                  openAll={openAll}
-                  prevMs={i > 0 ? trace.messages[i - 1].atMs : 0}
-                />
-              ))}
+              {trace.messages.map((m, i) => {
+                if (!showAll && i >= hiddenFrom && i < hiddenTo) return null
+                const isRepeatHead = repeat != null && i === repeat.start
+                return (
+                  <MessageRow
+                    key={i}
+                    msg={m}
+                    cols={cols}
+                    openAll={openAll}
+                    prevMs={i > 0 ? trace.messages[i - 1].atMs : 0}
+                    deciding={i === trace.decidingIndex}
+                    repeat={isRepeatHead ? {
+                      count: repeat.count,
+                      expanded: showAll,
+                      onToggle: () => setShowAll((v) => !v),
+                    } : undefined}
+                  />
+                )
+              })}
             </ol>
           </div>
         </div>
@@ -143,15 +176,25 @@ export function SipLadder({ trace }: { trace: SipTrace }) {
 }
 
 function MessageRow({
-  msg, cols, openAll, prevMs,
+  msg, cols, openAll, prevMs, deciding, repeat,
 }: {
   msg: SipMessage
   cols: SipTrace["parties"]
   openAll: boolean
   prevMs: number
+  /** This message decided the verdict. */
+  deciding: boolean
+  /** This row heads a run of identical cycles. */
+  repeat?: { count: number; expanded: boolean; onToggle: () => void }
 }) {
+  // "Show all headers" resets every row; a row can still be toggled on its
+  // own afterwards. Derived during render, not in an effect.
   const [open, setOpen] = React.useState(false)
-  React.useEffect(() => { setOpen(openAll) }, [openAll])
+  const [seenOpenAll, setSeenOpenAll] = React.useState(openAll)
+  if (seenOpenAll !== openAll) {
+    setSeenOpenAll(openAll)
+    setOpen(openAll)
+  }
 
   const fromIdx = cols.indexOf(msg.from)
   const toIdx = cols.indexOf(msg.to)
@@ -162,7 +205,7 @@ function MessageRow({
   const gap = msg.atMs - prevMs
 
   return (
-    <li>
+    <li className={cn("-ml-2 pl-2 border-l-2", deciding ? "border-destructive" : "border-transparent")}>
       <div
         className="grid items-center gap-2"
         style={{ gridTemplateColumns: `4.5rem repeat(${cols.length}, minmax(0,1fr))` }}
@@ -206,14 +249,29 @@ function MessageRow({
       </div>
 
       <div className="pl-[4.5rem]">
-        <Collapsible open={open} onOpenChange={setOpen}>
+        <Collapsible open={open} onOpenChange={setOpen} className="flex flex-wrap items-center gap-x-2">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="-ml-2 h-6 gap-1 px-2 text-xs text-muted-foreground">
               <ChevronRight className={cn("h-3 w-3 transition-transform", open && "rotate-90")} />
               Headers
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent>
+          {deciding && (
+            <Badge variant="outline" className="h-5 border-destructive/50 px-1.5 text-[10px] font-normal text-destructive">
+              decided here
+            </Badge>
+          )}
+          {repeat && (
+            <>
+              <Badge variant="outline" className="h-5 px-1.5 font-mono text-[10px] font-normal tabular-nums" title={`This cycle repeats ${repeat.count} times`}>
+                ×{repeat.count}
+              </Badge>
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground" onClick={repeat.onToggle}>
+                {repeat.expanded ? "Hide repeats" : `Show all ${repeat.count}`}
+              </Button>
+            </>
+          )}
+          <CollapsibleContent className="basis-full">
             <div className="relative mt-1 rounded border border-border bg-muted/40">
               <Button
                 variant="ghost" size="sm"
