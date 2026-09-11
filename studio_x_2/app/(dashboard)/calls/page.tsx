@@ -23,6 +23,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DEPLOYMENTS, formatDuration, getDeployment, deploymentHref } from "@/lib/campaign-data"
 import { CallDetailSheet, type CallDetail } from "@/components/call-detail-sheet"
+import { buildSipTrace, BLAME_LABEL, BLAME_SHORT, type SipTrace, type SipFailure } from "@/lib/sip-trace"
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 
@@ -119,6 +120,36 @@ function structuredValue(c: CallRow, key: OptColKey): string {
   return c.from.startsWith("+44") || c.to.startsWith("+44") ? "English (UK)" : "English (US)"
 }
 
+// ─── issues first (Design Tracker 11, verdict C) ─────────────────────────────
+// "With issues" = the call failed or never connected. Each such row carries
+// the same attribution the call sheet's verdict states, from the same seeded
+// trace builder, so the list and the sheet can never disagree.
+
+type BlameKey = SipFailure["blame"] | "unknown"
+const BLAME_ORDER: BlameKey[] = ["carrier", "callee", "your-config", "agora-capacity", "unknown"]
+const BLAME_CHIP: Record<BlameKey, string> = { ...BLAME_LABEL, unknown: "Unknown" }
+const BLAME_CELL: Record<BlameKey, string> = { ...BLAME_SHORT, unknown: "Unknown" }
+
+const hasIssue = (c: CallRow) => c.outcome === "Failed" || c.status === "Not Connected"
+
+const TRACE_CACHE = new Map<string, SipTrace>()
+function traceFor(c: CallRow): SipTrace {
+  let t = TRACE_CACHE.get(c.id)
+  if (!t) {
+    t = buildSipTrace({
+      callId: c.id, direction: c.direction === "in" ? "Inbound" : "Outbound",
+      failed: c.outcome === "Failed", from: c.from, to: c.to,
+    })
+    TRACE_CACHE.set(c.id, t)
+  }
+  return t
+}
+
+function blameOf(c: CallRow): BlameKey | undefined {
+  if (!hasIssue(c)) return undefined
+  return traceFor(c).failure?.blame ?? "unknown"
+}
+
 export default function CallHistoryPage() {
   const [query, setQuery] = React.useState("")
   const [direction, setDirection] = React.useState<"all" | "in" | "out">("all")
@@ -128,24 +159,46 @@ export default function CallHistoryPage() {
   const [selected, setSelected] = React.useState<CallDetail | null>(null)
   const [sheetOpen, setSheetOpen] = React.useState(false)
   const [cols, setCols] = React.useState<Set<OptColKey>>(new Set())
+  const [view, setView] = React.useState<"all" | "issues">("all")
+  const [blames, setBlames] = React.useState<Set<BlameKey>>(new Set())
+  const issuesView = view === "issues"
 
   React.useEffect(() => {
     track(Events.calls_viewed)
   }, [])
 
-  const rows = React.useMemo(() => {
+  // Everything but the attribution filter — the chip counts are read off
+  // this set so they stay put while a chip is toggled.
+  const baseRows = React.useMemo(() => {
     const q = query.trim().toLowerCase()
     return CALLS.filter((c) => {
       if (direction !== "all" && c.direction !== direction) return false
+      if (issuesView && !hasIssue(c)) return false
       if (outcomes.size > 0 && !outcomes.has(c.outcome)) return false
       if (statuses.size > 0 && !statuses.has(c.status)) return false
       if (q && !c.campaignName.toLowerCase().includes(q) && !c.from.toLowerCase().includes(q) && !c.to.toLowerCase().includes(q) && !c.agent.toLowerCase().includes(q)) return false
       return true
     })
-  }, [query, direction, outcomes, statuses])
+  }, [query, direction, issuesView, outcomes, statuses])
+
+  const blameCounts = React.useMemo(() => {
+    const counts = new Map<BlameKey, number>()
+    if (!issuesView) return counts
+    for (const c of baseRows) {
+      const b = blameOf(c)
+      if (b) counts.set(b, (counts.get(b) ?? 0) + 1)
+    }
+    return counts
+  }, [baseRows, issuesView])
+
+  const rows = React.useMemo(
+    () => (issuesView && blames.size > 0 ? baseRows.filter((c) => { const b = blameOf(c); return b != null && blames.has(b) }) : baseRows),
+    [baseRows, issuesView, blames],
+  )
 
   const visible = rows.slice(0, pageSize)
-  const hasFilters = direction !== "all" || outcomes.size > 0 || statuses.size > 0
+  const hasFilters = direction !== "all" || outcomes.size > 0 || statuses.size > 0 || (issuesView && blames.size > 0)
+  const colCount = BASE_COLUMNS.length + cols.size + (issuesView ? 1 : 0)
 
   const toggle = <T,>(set: Set<T>, setter: (s: Set<T>) => void, v: T) => {
     const next = new Set(set)
@@ -222,6 +275,20 @@ export default function CallHistoryPage() {
             ))}
           </ToggleGroup>
 
+          {/* Issues first — failed or never-connected calls, grouped by who
+              the verdict attributes them to. */}
+          <ToggleGroup
+            type="single"
+            value={view}
+            onValueChange={(v) => { if (v) { setView(v as "all" | "issues"); setBlames(new Set()) } }}
+            aria-label="Filter calls by issues"
+            variant="outline"
+            size="sm"
+          >
+            <ToggleGroupItem value="all" aria-label="All calls">All</ToggleGroupItem>
+            <ToggleGroupItem value="issues" aria-label="Calls with issues">With issues</ToggleGroupItem>
+          </ToggleGroup>
+
           {/* Filter dropdown — dimensions from the reference */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -267,9 +334,37 @@ export default function CallHistoryPage() {
             {direction !== "all" && <FilterChip onClear={() => setDirection("all")}>{direction === "in" ? "Inbound" : "Outbound"}</FilterChip>}
             {[...outcomes].map((o) => <FilterChip key={o} onClear={() => toggle(outcomes, setOutcomes, o)}>Outcome: {o}</FilterChip>)}
             {[...statuses].map((s) => <FilterChip key={s} onClear={() => toggle(statuses, setStatuses, s)}>Status: {s}</FilterChip>)}
-            <button onClick={() => { setDirection("all"); setOutcomes(new Set()); setStatuses(new Set()) }} className="text-xs text-muted-foreground hover:text-foreground underline">
+            {issuesView && [...blames].map((b) => <FilterChip key={b} onClear={() => toggle(blames, setBlames, b)}>Attributed to: {BLAME_CHIP[b]}</FilterChip>)}
+            <button onClick={() => { setDirection("all"); setOutcomes(new Set()); setStatuses(new Set()); setBlames(new Set()) }} className="text-xs text-muted-foreground hover:text-foreground underline">
               Reset
             </button>
+          </div>
+        )}
+
+        {/* Attribution summary — the verdicts of every visible issue, counted.
+            Each chip is a filter on that attribution. */}
+        {issuesView && (
+          <div
+            className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-border bg-muted/30 px-3 py-2"
+            data-design-focus="calls-issues"
+          >
+            <span className="text-xs text-muted-foreground">Attributed to</span>
+            <ToggleGroup
+              type="multiple"
+              value={[...blames]}
+              onValueChange={(v) => setBlames(new Set(v as BlameKey[]))}
+              aria-label="Filter issues by attribution"
+              variant="outline"
+              size="sm"
+              className="flex-wrap"
+            >
+              {BLAME_ORDER.map((b) => (
+                <ToggleGroupItem key={b} value={b} aria-label={`${BLAME_CHIP[b]}: ${blameCounts.get(b) ?? 0}`} className="h-7 gap-1.5 text-xs">
+                  {BLAME_CHIP[b]}
+                  <span className="tabular-nums text-muted-foreground">{blameCounts.get(b) ?? 0}</span>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           </div>
         )}
 
@@ -287,6 +382,7 @@ export default function CallHistoryPage() {
                   <TableHead className="text-right">Duration</TableHead>
                   <TableHead>Call Status</TableHead>
                   <TableHead>Call Outcome</TableHead>
+                  {issuesView && <TableHead>Attributed to</TableHead>}
                   {OPTIONAL_COLUMNS.filter((col) => cols.has(col.key)).map((col) => (
                     <TableHead key={col.key}>{col.label}</TableHead>
                   ))}
@@ -341,13 +437,25 @@ export default function CallHistoryPage() {
                         )}
                       </div>
                     </TableCell>
+                    {issuesView && (
+                      <TableCell>
+                        {(() => {
+                          const b = blameOf(c)
+                          return b ? (
+                            <Badge variant="outline" className="font-normal" title={BLAME_CHIP[b]}>{BLAME_CELL[b]}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )
+                        })()}
+                      </TableCell>
+                    )}
                     {OPTIONAL_COLUMNS.filter((col) => cols.has(col.key)).map((col) => (
                       <TableCell key={col.key} className="text-sm text-muted-foreground">{structuredValue(c, col.key)}</TableCell>
                     ))}
                   </TableRow>
                 ))}
                 {visible.length === 0 && (
-                  <TableRow><TableCell colSpan={BASE_COLUMNS.length + cols.size} className="text-center text-sm text-muted-foreground py-8">No calls match your filters.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={colCount} className="text-center text-sm text-muted-foreground py-8">No calls match your filters.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>

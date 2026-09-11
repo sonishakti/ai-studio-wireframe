@@ -21,7 +21,8 @@ import { getAgent, getDeployment } from "@/lib/campaign-data"
 import { buildSignals, diagnoseCall, healthOf, fixHref, type Issue } from "@/lib/diagnostics"
 import { SeverityBadge } from "@/components/severity-badge"
 import { SipLadder } from "@/components/sip-ladder"
-import { buildSipTrace } from "@/lib/sip-trace"
+import { SipVerdict } from "@/components/sip-verdict"
+import { buildSipTrace, BLAME_LABEL } from "@/lib/sip-trace"
 import { HealthDot } from "@/components/health-dot"
 import { AlignedTranscript } from "@/components/aligned-transcript"
 import { CopyLinkButton, DownloadMenu, downloadText } from "@/components/replay-actions"
@@ -203,6 +204,11 @@ function CallDetailBody({ call }: { call: CallDetail }) {
     [call, agent, deployment],
   )
   const health = healthOf(issues)
+  // The verdict counts as a critical on the Diagnosis tab — the summary must
+  // agree with the SIP tab, not sit next to it saying something else.
+  const failed = call.outcome === "Failed"
+  const diagnosisCount = issues.length + (failed && sipTrace.failure ? 1 : 0)
+  const [tab, setTab] = React.useState("diagnosis")
   React.useEffect(() => {
     track(Events.call_diagnosis_viewed, { call_id: call.id, criticals: health.criticals, warnings: health.warnings })
     const drift = issues.find((i) => i.ruleId === "config_drift")
@@ -297,6 +303,19 @@ function CallDetailBody({ call }: { call: CallDetail }) {
         <Field label="Timestamp" value={call.timestamp} />
         <Field label="Call Duration" value={`${call.durationSec} seconds`} />
         <Field label="Call Outcome" custom={<Badge variant={OUTCOME_BADGE[call.outcome]}>{call.outcome}</Badge>} />
+        {/* The summary states the same attribution the SIP verdict does. */}
+        {failed && (
+          <Field
+            label="Attributed to"
+            custom={
+              sipTrace.failure ? (
+                <Badge variant="outline" className="font-normal">{BLAME_LABEL[sipTrace.failure.blame]}</Badge>
+              ) : (
+                <span className="text-sm text-muted-foreground">Unknown — no trace</span>
+              )
+            }
+          />
+        )}
       </div>
 
       {/* Audio — a stated state in every case: playable, never connected, or
@@ -356,16 +375,16 @@ function CallDetailBody({ call }: { call: CallDetail }) {
       <Separator />
 
       {/* Tabs */}
-      <Tabs defaultValue="diagnosis" className="w-full">
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="diagnosis" className="gap-1.5">
             Diagnosis
-            {issues.length > 0 && (
+            {diagnosisCount > 0 && (
               <Badge
-                variant={health.criticals > 0 ? "destructive" : "warning"}
+                variant={health.criticals > 0 || (failed && sipTrace.failure) ? "destructive" : "warning"}
                 className="h-5 px-1.5 text-xs tabular-nums"
               >
-                {issues.length}
+                {diagnosisCount}
               </Badge>
             )}
           </TabsTrigger>
@@ -388,14 +407,20 @@ function CallDetailBody({ call }: { call: CallDetail }) {
           </TabsTrigger>
         </TabsList>
 
-        {/* Diagnosis — rule-based issues + suggested fixes (the remediation atom) */}
+        {/* Diagnosis — the SIP verdict first on a failed telephony call (it is
+            the certain cause), then the rule-based issues + suggested fixes. */}
         <TabsContent value="diagnosis" className="mt-3 space-y-2.5">
+          {failed && (
+            <SipVerdict trace={sipTrace} variant="card" onSeeEvents={() => setTab("events")} />
+          )}
           {issues.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-12 text-center">
-              <ShieldCheck className="h-7 w-7 text-primary" />
-              <p className="text-sm font-medium">No issues detected</p>
-              <p className="text-xs text-muted-foreground">This call ran cleanly — no critical or warning signals.</p>
-            </div>
+            !failed && (
+              <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-12 text-center">
+                <ShieldCheck className="h-7 w-7 text-primary" />
+                <p className="text-sm font-medium">No issues detected</p>
+                <p className="text-xs text-muted-foreground">This call ran cleanly — no critical or warning signals.</p>
+              </div>
+            )
           ) : (
             <>
               <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">

@@ -37,6 +37,14 @@ export interface SipMessage {
   headers: string[]
 }
 
+/** One hop's share of the time before the verdict — the "where the time went"
+ *  strip above the ladder. Computed from message timings, never guessed. */
+export interface SipLeg {
+  label: string
+  ms: number
+  slowest?: boolean
+}
+
 export interface SipTrace {
   callId: string
   /** The SIP Call-ID header — what a carrier support ticket asks for. */
@@ -49,6 +57,14 @@ export interface SipTrace {
   failure?: SipFailure
   /** Post-Dial Delay — INVITE to the first ringing/answer signal. */
   pddMs: number
+  /** False when the signalling trace aged out of retention: no messages, no
+   *  explanation possible — only the Call-ID survives for a support ticket. */
+  retained: boolean
+  /** Latency per leg, in message order. Empty when not retained. */
+  legs: SipLeg[]
+  /** Index of the message that decided the verdict — the failure response,
+   *  or the BYE on an answered call. Every state marks it, not only CPS. */
+  decidingIndex?: number
 }
 
 export interface SipFailure {
@@ -62,6 +78,8 @@ export interface SipFailure {
   fix: string
   /** Where the fix lives, when there is a surface for it. */
   fixHref?: string
+  /** A second place the fix can live (e.g. pacing vs. the limit itself). */
+  fixSecondary?: { label: string; href: string }
 }
 
 /**
@@ -164,6 +182,41 @@ const hex = (rnd: () => number, n: number) =>
  *  uniform sample of the RFC. */
 const FAILURE_POOL = [486, 480, 603, 408, 503, 403, 404]
 
+/** The 503 that is a RATE problem, not a capacity one: the campaign placed
+ *  more new calls in a second than the trunk allows. Adding lines won't fix
+ *  it — pacing or the CPS limit will. Same code, different verdict. */
+const CPS_FAILURE: SipFailure = {
+  code: 503,
+  reason: "Call rate limit exceeded",
+  blame: "your-config",
+  explain: "14 calls were placed in one second against a limit of 10/s. The carrier refused the extra ones.",
+  fix: "Slow the campaign pacing or raise the CPS limit; the carrier asked for a 12 s Retry-After.",
+  fixHref: "/deploy/batch-calls",
+  fixSecondary: { label: "Raise the CPS limit", href: "/deploy/telephony" },
+}
+const CPS_RETRY_AFTER_S = 12
+
+/** Latency per leg, read off the message timings. Labels follow the outbound
+ *  path (agent → SBC → carrier → ring); the same three gaps exist inbound. */
+function computeLegs(messages: SipMessage[]): SipLeg[] {
+  const invite = messages.find((m) => m.label === "INVITE")
+  const trying = messages.find((m) => m.code === 100)
+  const ringing = messages.find((m) => m.code != null && m.code >= 180 && m.code < 200)
+  const final = messages.find((m) => m.code != null && m.code >= 200)
+  const t0 = invite?.atMs ?? 0
+  const tTrying = trying?.atMs ?? t0
+  const tFirst = (ringing ?? final)?.atMs ?? tTrying
+  const legs: SipLeg[] = [
+    { label: "Agent → SBC", ms: Math.max(0, tTrying - t0) },
+    { label: "SBC → Carrier", ms: Math.max(0, tFirst - tTrying) },
+    { label: "Ring", ms: ringing && final ? Math.max(0, final.atMs - ringing.atMs) : 0 },
+  ]
+  const max = Math.max(...legs.map((l) => l.ms))
+  const slow = legs.find((l) => l.ms === max)
+  if (slow && max > 0) slow.slowest = true
+  return legs
+}
+
 export function buildSipTrace(input: {
   callId: string
   direction: "Inbound" | "Outbound"
@@ -210,7 +263,48 @@ export function buildSipTrace(input: {
 
   if (failed) {
     const code = FAILURE_POOL[Math.floor(rnd() * FAILURE_POOL.length)]
+    // ~12% of failed calls are past the signalling retention window: nothing
+    // to draw and nothing to explain — only the Call-ID for a support ticket.
+    if (rnd() < 0.12) {
+      return { callId, sipCallId, parties, messages: [], pddMs: 0, outcome: "failed", retained: false, legs: [] }
+    }
     const meta = SIP_FAILURES[code]
+
+    // CPS variant: half the 503s are the rate limit, not capacity. The trunk
+    // refuses each retry the same way — three identical cycles, ~250 ms apart.
+    if (code === 503 && rnd() < 0.5) {
+      const refuse = () => {
+        push({
+          from: terminator, to: originator, label: "503 Service Unavailable", kind: "failure", code: 503,
+          headers: [`SIP/2.0 503 Service Unavailable`, `Call-ID: ${sipCallId}`, `CSeq: 1 INVITE`, `Retry-After: ${CPS_RETRY_AFTER_S}`],
+        })
+        t += 8 + Math.round(rnd() * 14)
+        push({
+          from: originator, to: terminator, label: "ACK", kind: "request",
+          headers: [`ACK sip:… SIP/2.0`, `Call-ID: ${sipCallId}`, `CSeq: 1 ACK`],
+        })
+      }
+      t += 40 + Math.round(rnd() * 60)
+      const pddMs = t
+      const decidingIndex = messages.length
+      refuse()
+      for (let cycle = 0; cycle < 2; cycle++) {
+        t += 230 + Math.round(rnd() * 40)
+        push({ from: originator, to: terminator, label: "INVITE", kind: "request", headers: commonHeaders("INVITE") })
+        t += 12 + Math.round(rnd() * 20)
+        push({
+          from: terminator, to: originator, label: "100 Trying", kind: "provisional", code: 100,
+          headers: [`SIP/2.0 100 Trying`, `Call-ID: ${sipCallId}`, `CSeq: 1 INVITE`],
+        })
+        t += 40 + Math.round(rnd() * 60)
+        refuse()
+      }
+      return {
+        callId, sipCallId, parties, messages, pddMs, outcome: "failed",
+        failure: CPS_FAILURE, retained: true, legs: computeLegs(messages), decidingIndex,
+      }
+    }
+
     // 486/480/603 come after ringing; the rest fail before it.
     const rangAlready = code === 486 || code === 480 || code === 603
     let pddMs = 0
@@ -226,6 +320,7 @@ export function buildSipTrace(input: {
       t += 60 + Math.round(rnd() * 240)
       pddMs = t
     }
+    const decidingIndex = messages.length
     push({
       from: terminator, to: originator, label: `${code} ${meta.reason}`, kind: "failure", code,
       headers: [
@@ -246,6 +341,9 @@ export function buildSipTrace(input: {
       callId, sipCallId, parties, messages, pddMs,
       outcome: code === 486 ? "busy" : code === 480 || code === 408 ? "no-answer" : code === 487 ? "cancelled" : "failed",
       failure: { code, ...meta },
+      retained: true,
+      legs: computeLegs(messages),
+      decidingIndex,
     }
   }
 
@@ -281,6 +379,7 @@ export function buildSipTrace(input: {
 
   t += 20000 + Math.round(rnd() * 90000)
   const byeFrom: SipParty = rnd() > 0.5 ? originator : terminator
+  const decidingIndex = messages.length
   push({
     from: byeFrom, to: byeFrom === originator ? terminator : originator,
     label: "BYE", kind: "request",
@@ -293,7 +392,10 @@ export function buildSipTrace(input: {
     headers: [`SIP/2.0 200 OK`, `Call-ID: ${sipCallId}`, `CSeq: 2 BYE`],
   })
 
-  return { callId, sipCallId, parties, messages, outcome: "answered", pddMs }
+  return {
+    callId, sipCallId, parties, messages, outcome: "answered", pddMs,
+    retained: true, legs: computeLegs(messages), decidingIndex,
+  }
 }
 
 /** Who to point at, in words. The code alone never answers "is this mine?". */
@@ -301,5 +403,13 @@ export const BLAME_LABEL: Record<SipFailure["blame"], string> = {
   "your-config": "Your configuration",
   carrier: "Your carrier",
   callee: "The person you called",
+  "agora-capacity": "Capacity",
+}
+
+/** The same attribution as a chip word — for table cells and filter chips. */
+export const BLAME_SHORT: Record<SipFailure["blame"], string> = {
+  "your-config": "Config",
+  carrier: "Carrier",
+  callee: "Callee",
   "agora-capacity": "Capacity",
 }
