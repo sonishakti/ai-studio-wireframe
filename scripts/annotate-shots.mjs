@@ -62,7 +62,11 @@ if (!configPath) {
 const SHOTS = JSON.parse(readFileSync(configPath, "utf8"))
 
 mkdirSync(OUTDIR, { recursive: true })
-const profile = `/tmp/annotate-shots-${Date.now()}`
+// CHROME_PROFILE: reuse a persistent Chrome profile (sign in to competitor
+// dashboards once in a headed Chrome started with the same --user-data-dir,
+// then headless captures reuse the cookies). Unset → a throwaway profile.
+const PERSISTENT_PROFILE = process.env.CHROME_PROFILE || null
+const profile = PERSISTENT_PROFILE || `/tmp/annotate-shots-${Date.now()}`
 
 const chrome = spawn(CHROME, [
   "--headless=new", "--disable-gpu", "--hide-scrollbars",
@@ -229,7 +233,7 @@ for (const shot of SHOTS) {
 
 ws.close()
 chrome.kill()
-try { rmSync(profile, { recursive: true, force: true, maxRetries: 3 }) } catch {}
+try { if (!PERSISTENT_PROFILE) rmSync(profile, { recursive: true, force: true, maxRetries: 3 }) } catch {}
 
 if (missed) {
   console.error(`\n${missed} marker(s) failed to match — fix the selectors, don't ship an unmarked shot.`)

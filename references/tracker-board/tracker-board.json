@@ -31,7 +31,23 @@
       ],
       "shot": null,
       "rationale": "Recommended-first strip and a compare tray inside the existing voice library, plus \"Add your own voice\" with a consent line. Only the voice id is a real write; multi-voice is Requires Engine.",
-      "next": "Build in proto-01 per the verdict. Owner: may we say \"Recommended\" from tags before the benchmark?"
+      "next": "Build in proto-01 per the verdict. Owner: may we say \"Recommended\" from tags before the benchmark?",
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Voice fallback plan",
+          "kind": "docs",
+          "href": "https://docs.vapi.ai/voice-fallback-plan",
+          "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Voice library",
+          "kind": "docs",
+          "href": "https://elevenlabs.io/docs/product-guides/voices/voice-library",
+          "shot": "references/competitors/public-docs/elevenlabs-docs-voice-library.png"
+        }
+      ]
     },
     {
       "n": "02",
@@ -58,7 +74,37 @@
       ],
       "shot": null,
       "rationale": "A Turn-taking preset row in user words with a recap read from the real config; speaker lock relabelled \"Lock onto one speaker\"; Backchannels and Preemptive replies visible but Requires Engine; \"Try interrupting\" in the Test rail.",
-      "next": "Build. Owner: agent-level or deployment-level; where the 240 ms default lands."
+      "next": "Build. Owner: agent-level or deployment-level; where the 240 ms default lands.",
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Speech configuration (start/stop speaking plans)",
+          "kind": "docs",
+          "href": "https://docs.vapi.ai/customization/speech-configuration",
+          "shot": "references/competitors/public-docs/vapi-docs-speech-configuration.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Create agent — responsiveness, interruption sensitivity, backchannel",
+          "kind": "docs",
+          "href": "https://docs.retellai.com/api-references/create-agent",
+          "shot": "references/competitors/public-docs/retell-docs-create-agent.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Conversation flow — turn timeout, eagerness",
+          "kind": "docs",
+          "href": "https://elevenlabs.io/docs/agents-platform/customization/conversation-flow",
+          "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Turn detector model",
+          "kind": "docs",
+          "href": "https://docs.livekit.io/agents/build/turns/turn-detector/",
+          "shot": "references/competitors/public-docs/livekit-docs-turn-detector.png"
+        }
+      ]
     },
     {
       "n": "03",
@@ -85,7 +131,8 @@
       ],
       "shot": null,
       "rationale": "One Vocabulary list in the ASR drawer mapped to each vendor's field (Deepgram and Microsoft write for real; ARES shape unconfirmed), a recap on the Models row, and the ASR backup reusing 07's row.",
-      "next": "Build. Owner: ARES keywords shape; label \"Vocabulary\" vs Agora's \"Keywords\"."
+      "next": "Build. Owner: ARES keywords shape; label \"Vocabulary\" vs Agora's \"Keywords\".",
+      "secondary": []
     },
     {
       "n": "04",
@@ -127,7 +174,30 @@
         "alt": "Agent Detail › Prompt tab with the Opening section marked in red"
       },
       "rationale": "An Opening section on the Prompt tab: who speaks first, greeting, interruptible greeting, and the AI disclosure composed into the greeting because the Engine has no field for it; \"Callers hear\" shows the exact result. Filler row relabelled in user words with three Requires Engine rows.",
-      "next": "Your review on the preview. Decide: disclosure on by default for new agents? Sign off the sentence and the copy set."
+      "next": "Your review on the preview. Decide: disclosure on by default for new agents? Sign off the sentence and the copy set.",
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Idle messages — Idle Messages · Max Idle Messages · Idle Timeout",
+          "kind": "docs",
+          "href": "https://docs.vapi.ai/assistants/idle-messages",
+          "shot": "references/competitors/public-docs/vapi-docs-idle-messages.png"
+        },
+        {
+          "vendor": "Retell",
+          "label": "Basic settings — begin message, user speaks first, reminder",
+          "kind": "docs",
+          "href": "https://docs.retellai.com/build/single-multi-prompt/configure-basic-settings",
+          "shot": "references/competitors/public-docs/retell-docs-basic-settings.png"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "label": "Conversation flow — first message, turn timeout",
+          "kind": "docs",
+          "href": "https://elevenlabs.io/docs/agents-platform/customization/conversation-flow",
+          "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png"
+        }
+      ]
     },
     {
       "n": "05",
@@ -154,7 +224,8 @@
       ],
       "shot": null,
       "rationale": "\"Call rules\" in sentence form on Advanced (silence, hang up after everyone leaves, finish speaking first; max duration read from the bound number) plus a \"Before you go live\" list in the Deploy tab. Voicemail message, keypad and guardrails are Requires Engine.",
-      "next": "Build. Owner: agent vs number level for duration; where the preflight lives."
+      "next": "Build. Owner: agent vs number level for duration; where the preflight lives.",
+      "secondary": []
     },
     {
       "n": "06",
@@ -181,7 +252,8 @@
       ],
       "shot": null,
       "rationale": "Controls appear only when the vendor has the field: one normalised Pace, native Pitch / Volume / Emotion, a Tone prompt for OpenAI and Generic, a Pronunciation table on every vendor; Background sound inert.",
-      "next": "Build. Owner: drawer vs Models placement; the ElevenLabs key and range mismatches, fix or file."
+      "next": "Build. Owner: drawer vs Models placement; the ElevenLabs key and range mismatches, fix or file.",
+      "secondary": []
     },
     {
       "n": "07",
@@ -219,7 +291,16 @@
         "alt": "Agent Detail › Models tab with the Backup providers row marked in red"
       },
       "rationale": "One \"Backup providers\" row on Models, on by default: Agora's pool covers managed primaries, your own second key covers BYO, and each gap is named per component. \"Test failover\" waits for the Engine contract (Nov).",
-      "next": "Your review. Owner: backup pool as agent or deployment property; copy yes or no."
+      "next": "Your review. Owner: backup pool as agent or deployment property; copy yes or no.",
+      "secondary": [
+        {
+          "vendor": "Vapi",
+          "label": "Voice fallback plan",
+          "kind": "docs",
+          "href": "https://docs.vapi.ai/voice-fallback-plan",
+          "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png"
+        }
+      ]
     },
     {
       "n": "08",
@@ -242,7 +323,8 @@
       ],
       "shot": null,
       "rationale": "Locked: production A/B collides with the builder \"no A/B\" lock. Brief written; versioning, rollback and \"simulate a pending change\" wait on the call.",
-      "next": "Owner answers where A/B lives: Monitor-side experiments, the deploy panel, or API-only."
+      "next": "Owner answers where A/B lives: Monitor-side experiments, the deploy panel, or API-only.",
+      "secondary": []
     },
     {
       "n": "09",
@@ -269,7 +351,8 @@
       ],
       "shot": null,
       "rationale": "\"Import from Vapi or Retell\" as a third row in the create modal with a mapped / changed / not-imported report and a real create; a one-click \"Update to current contract\" off the existing alert; onboarding funnel events. Gallery locked.",
-      "next": "Build import, then contract update. Owner: the template gallery; a pre-provisioned default agent."
+      "next": "Build import, then contract update. Owner: the template gallery; a pre-provisioned default agent.",
+      "secondary": []
     },
     {
       "n": "10",
@@ -296,7 +379,8 @@
       ],
       "shot": null,
       "rationale": "Aligned replay in the existing sheet: recording and transcript on one clock, click a line to seek, turn markers on the scrubber; end-of-turn badges (Interrupted · Ignored · Error) on the agent line; Download and Copy link. Degrades honestly when timestamps are missing.",
-      "next": "Build. Backend must surface history timestamps and turns per session."
+      "next": "Build. Backend must surface history timestamps and turns per session.",
+      "secondary": []
     },
     {
       "n": "11",
@@ -319,7 +403,8 @@
       ],
       "shot": null,
       "rationale": "SIP diagnostics prototype by SW4Y4M on its own branch: fault verdict, signalling ladder, SIP message detail with visible redaction, full-page call detail.",
-      "next": "Verify against final Engine payloads; port onto design/sandbox."
+      "next": "Verify against final Engine payloads; port onto design/sandbox.",
+      "secondary": []
     },
     {
       "n": "12",
@@ -338,7 +423,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Owner call first: which operator verbs are permitted (listen · whisper · take over · end)."
+      "next": "Owner call first: which operator verbs are permitted (listen · whisper · take over · end).",
+      "secondary": []
     },
     {
       "n": "13",
@@ -357,7 +443,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research (protocol steps 0–4). Label stays \"Monitor\"."
+      "next": "Research (protocol steps 0–4). Label stays \"Monitor\".",
+      "secondary": []
     },
     {
       "n": "14",
@@ -376,7 +463,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research (protocol steps 0–4)."
+      "next": "Research (protocol steps 0–4).",
+      "secondary": []
     },
     {
       "n": "15",
@@ -395,7 +483,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research. Sims stay in the right-hand panel, not Talk (builder lock)."
+      "next": "Research. Sims stay in the right-hand panel, not Talk (builder lock).",
+      "secondary": []
     },
     {
       "n": "16",
@@ -414,7 +503,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Owner call first: the first-run home once numbers are purchasable."
+      "next": "Owner call first: the first-run home once numbers are purchasable.",
+      "secondary": []
     },
     {
       "n": "17",
@@ -433,7 +523,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research on the Console (wireframe-era sip-quick-connect notes exist)."
+      "next": "Research on the Console (wireframe-era sip-quick-connect notes exist).",
+      "secondary": []
     },
     {
       "n": "18",
@@ -452,7 +543,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Owner call first: does \"one agent ↔ one channel\" survive three new channels?"
+      "next": "Owner call first: does \"one agent ↔ one channel\" survive three new channels?",
+      "secondary": []
     },
     {
       "n": "19",
@@ -471,7 +563,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research (protocol steps 0–4)."
+      "next": "Research (protocol steps 0–4).",
+      "secondary": []
     },
     {
       "n": "20",
@@ -490,7 +583,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research on the Console (Couchbase Wave 1 notes exist)."
+      "next": "Research on the Console (Couchbase Wave 1 notes exist).",
+      "secondary": []
     },
     {
       "n": "21",
@@ -509,7 +603,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research (protocol steps 0–4)."
+      "next": "Research (protocol steps 0–4).",
+      "secondary": []
     },
     {
       "n": "22",
@@ -528,7 +623,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research on the Console. Confirm the capacity-SKU lock; find out what Archer is."
+      "next": "Research on the Console. Confirm the capacity-SKU lock; find out what Archer is.",
+      "secondary": []
     },
     {
       "n": "23",
@@ -547,7 +643,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research. Depends on the Agent / Deployment split: where is a handoff configured?"
+      "next": "Research. Depends on the Agent / Deployment split: where is a handoff configured?",
+      "secondary": []
     },
     {
       "n": "24",
@@ -566,7 +663,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research (protocol steps 0–4)."
+      "next": "Research (protocol steps 0–4).",
+      "secondary": []
     },
     {
       "n": "25",
@@ -585,7 +683,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research. Temp tokens stay CLI-only."
+      "next": "Research. Temp tokens stay CLI-only.",
+      "secondary": []
     },
     {
       "n": "26",
@@ -604,7 +703,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Ask the PM what \"unify\" means; one Okta cookie already exists, the seam is wayfinding."
+      "next": "Ask the PM what \"unify\" means; one Okta cookie already exists, the seam is wayfinding.",
+      "secondary": []
     },
     {
       "n": "27",
@@ -623,7 +723,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Audit end to end on the Console."
+      "next": "Audit end to end on the Console.",
+      "secondary": []
     },
     {
       "n": "28",
@@ -642,7 +743,8 @@
       ],
       "shot": null,
       "rationale": "",
-      "next": "Research (protocol steps 0–4)."
+      "next": "Research (protocol steps 0–4).",
+      "secondary": []
     }
   ]
 }

@@ -44,6 +44,36 @@ const links = (items) =>
     )
     .join('<span class="sep">·</span>')
 
+// Secondary research: one entry per competitor screen — a red-marked or plain
+// screenshot plus the URL it came from. Vendors without a capture show as
+// "pending" so the gap is visible on every row.
+const VENDORS = ["Vapi", "Retell", "ElevenLabs", "LiveKit"]
+const secondary = (items = []) => {
+  const byVendor = new Map(VENDORS.map((v) => [v, []]))
+  for (const it of items) {
+    if (!byVendor.has(it.vendor)) byVendor.set(it.vendor, [])
+    byVendor.get(it.vendor).push(it)
+  }
+  return [...byVendor.entries()]
+    .map(([vendor, its]) => {
+      if (its.length === 0)
+        return `<div class="sr"><b>${esc(vendor)}</b><span class="none">pending</span></div>`
+      const shots = its
+        .map((it) => {
+          const img = it.shot
+            ? `<button class="thumb sm" type="button" aria-label="Open screenshot: ${esc(it.label)}"><img alt="${esc(it.label)}" loading="lazy" src="${inlineImage(it.shot)}"></button>`
+            : ""
+          const link = it.href
+            ? `<a href="${esc(it.href)}" target="_blank" rel="noopener">${esc(it.label)}</a>`
+            : esc(it.label)
+          return `<div class="sr-item">${img}<div class="sr-cap">${link}${it.kind ? ` <span class="kind">${esc(it.kind)}</span>` : ""}</div></div>`
+        })
+        .join("")
+      return `<div class="sr"><b>${esc(vendor)}</b>${shots}</div>`
+    })
+    .join("")
+}
+
 const row = (r) => {
   const cls = STATUS[r.status]
   if (!cls) throw new Error(`row ${r.n}: unknown status "${r.status}"`)
@@ -57,6 +87,7 @@ const row = (r) => {
   <td class="jtbd">${esc(r.jtbd)}</td>
   <td class="open">${links(r.open)}</td>
   <td class="shot">${shot}</td>
+  <td class="sec">${secondary(r.secondary)}</td>
   <td class="why">${esc(r.rationale) || '<span class="none">—</span>'}</td>
   <td class="next">${esc(r.next)}</td>
 </tr>`
@@ -89,7 +120,7 @@ h1{font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
 .s-notdone{color:var(--notdone);background:var(--notdone-bg)}.s-wip{color:var(--wip);background:var(--wip-bg)}
 .s-review{color:var(--review);background:var(--review-bg)}.s-done{color:var(--done);background:var(--done-bg)}
 .tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--card)}
-table{width:100%;min-width:1380px;border-collapse:collapse}
+table{width:100%;min-width:1700px;border-collapse:collapse}
 th{position:sticky;top:0;background:var(--card);z-index:1;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:600}
 td{padding:11px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
 tr:last-child td{border-bottom:0}
@@ -103,6 +134,14 @@ td.open{min-width:170px;max-width:220px;line-height:1.7}
 td.shot{width:280px}
 .thumb{display:block;width:264px;padding:0;border:1px solid var(--rule);border-radius:6px;background:var(--shot);overflow:hidden;cursor:zoom-in}
 .thumb img{display:block;width:100%;height:auto}
+td.sec{min-width:250px;max-width:300px}
+.sr{display:grid;gap:4px;padding:4px 0;border-bottom:1px dashed var(--rule)}
+.sr:last-child{border-bottom:0}
+.sr>b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.sr-item{display:grid;gap:3px}
+.thumb.sm{width:230px}
+.sr-cap{font-size:12px;line-height:1.35}
+.kind{color:var(--ink-3);font-size:11px}
 td.why{min-width:240px;max-width:320px;color:var(--ink-2)}
 td.next{min-width:200px;max-width:260px}
 .none{color:var(--ink-3)}
@@ -116,12 +155,12 @@ td.next{min-width:200px;max-width:260px}
   <h1>Design Delivery Board</h1>
   <p class="meta">${counts}<span class="sep">·</span>updated ${esc(data.updated)}<span class="sep">·</span>rows from <a href="${esc(data.source.url)}" target="_blank" rel="noopener">${esc(data.source.label)}</a>, in ClickUp order</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>#</th><th>Feature</th><th>Status</th><th>JTBD</th><th>Open</th><th>What we built</th><th>Rationale</th><th>Next</th></tr></thead>
+    <thead><tr><th>#</th><th>Feature</th><th>Status</th><th>JTBD</th><th>Open</th><th>What we built</th><th>Secondary research</th><th>Rationale</th><th>Next</th></tr></thead>
     <tbody>
 ${data.rows.map(row).join("\n")}
     </tbody>
   </table></div>
-  <p class="legend"><b>Status:</b> Not Done = nothing started · WIP = research or build in progress · Pending review = built or blocked, needs your review or a decision · Done = reviewed and accepted. Rows are never reordered. Source: <code>references/tracker-board/tracker-board.json</code> → <code>node scripts/build-tracker-board.mjs</code>.</p>
+  <p class="legend"><b>Status:</b> Not Done = nothing started · WIP = research or build in progress · Pending review = built or blocked, needs your review or a decision · Done = reviewed and accepted. <b>Secondary research:</b> one screenshot per competitor (Vapi · Retell · ElevenLabs · LiveKit) of the equivalent screen — <span class="kind">docs</span> = public documentation, <span class="kind">product</span> = the logged-in builder UI; "pending" marks a capture still to do. Rows are never reordered. Source: <code>references/tracker-board/tracker-board.json</code> → <code>node scripts/build-tracker-board.mjs</code>.</p>
 </div>
 <div class="lb" id="lb" role="dialog" aria-label="Screenshot"><img alt="" id="lbimg"></div>
 <script>
