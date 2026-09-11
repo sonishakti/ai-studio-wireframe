@@ -14,6 +14,7 @@ import {
 import { extractVars } from "@/lib/campaign-data"
 import { SectionRow } from "@/components/wizard/section-row"
 import { hasChannel, greetingSpeaksName } from "@/lib/wizard-draft"
+import { SectionOpening } from "@/components/wizard/section-opening"
 import type { StepProps } from "@/components/wizard/types"
 
 /**
@@ -29,6 +30,8 @@ export function SectionPrompt({
   templateFlash = 0,
   onUnlock,
   templateSlot,
+  onHearOpening,
+  onChangeSilence,
 }: StepProps & {
   /** Bumped by the template menu when a template overwrites the prompt —
    *  flashes the editor so the swap visibly lands. */
@@ -37,6 +40,10 @@ export function SectionPrompt({
   onUnlock?: (field: string) => void
   /** The template picker (Figma 2867-53592: "Choose an Agent Template"). */
   templateSlot?: React.ReactNode
+  /** Opening › "Hear the opening" — opens the test rail and starts the call. */
+  onHearOpening?: () => void
+  /** Opening › silence recap "Change" — jumps to the call rules. */
+  onChangeSilence?: () => void
 }) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
   const batch = hasChannel(draft, "batch")
@@ -129,33 +136,25 @@ export function SectionPrompt({
         )}
       </div>
 
-      {/* Greeting */}
-      <div id="wz-3-greeting" className="scroll-mt-28 space-y-1.5">
-        <Label htmlFor="wz-greeting" className="flex items-center gap-1.5 text-sm font-medium">
-          Greeting Message
-          {overridden("greeting") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
-        </Label>
-        {overridden("greeting") && <OverrideFlag field="greeting" />}
-        <Textarea
-          id="wz-greeting"
-          value={draft.greeting}
-          onChange={(e) => update({ greeting: e.target.value })}
-          disabled={overridden("greeting")}
-          className={cn("min-h-[64px] text-sm", overridden("greeting") && "border-warning/50 opacity-80")}
-          placeholder={batch
-            ? "Hey {{name}}, I'm calling from Acme about your account…"
-            : "Hi, thanks for calling. How can I help you today?"}
-        />
-        {/* Rename nudge (user-test 2026-07-28): a functional agent name
-            spoken aloud — "this is Payment Reminder" — sounds wrong to the
-            caller, and nothing pointed that out. */}
-        {greetingSpeaksName(draft) && (
-          <p className="text-xs text-muted-foreground">
-            Your agent introduces itself as &ldquo;{draft.name.trim()}&rdquo; — give it a
-            caller-facing name? Rename it in the header, then update the greeting to match.
-          </p>
-        )}
-      </div>
+      {/* Opening (design 04): who speaks first · greeting · interruptible ·
+          AI disclosure · "Callers hear" · silence recap · Hear the opening. */}
+      <SectionOpening
+        draft={draft}
+        update={update}
+        overridden={overridden("greeting")}
+        overrideFlag={<OverrideFlag field="greeting" />}
+        onHearOpening={onHearOpening}
+        onChangeSilence={onChangeSilence}
+      />
+      {/* Rename nudge (user-test 2026-07-28): a functional agent name
+          spoken aloud — "this is Payment Reminder" — sounds wrong to the
+          caller, and nothing pointed that out. */}
+      {greetingSpeaksName(draft) && (
+        <p className="text-xs text-muted-foreground">
+          Your agent introduces itself as &ldquo;{draft.name.trim()}&rdquo; — give it a
+          caller-facing name? Rename it in the header, then update the greeting to match.
+        </p>
+      )}
 
       {/* Failure message (proposal — new field). */}
       <div className="space-y-1.5">

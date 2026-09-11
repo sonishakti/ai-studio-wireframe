@@ -18,6 +18,7 @@ import { extractVars, stackFor, PHONE_NUMBERS, type Agent, type AgentStack } fro
 import { PRESET_VOICES } from "@/lib/voice-artifacts"
 import { clearWidgetState } from "@/lib/widget-config"
 import { DEFAULT_HOSTING, normalizeHosting, type HostingConfig } from "@/lib/hosting-regions"
+import type { BackupConfig } from "@/lib/backup-providers"
 
 /** Legacy single-channel type — still the vocabulary of the published
  *  `Agent.channel` mock and `publishDeployment`'s mode. */
@@ -334,6 +335,38 @@ export function campaignRollup(d: AgentDraft): CampaignRollup {
   }
 }
 
+/** Section 3 › Opening (design 04, ported from the ng-console prototype
+ *  2026-09-11): who speaks first, whether callers may interrupt the greeting,
+ *  and the AI disclosure composed INTO the greeting (the Engine has no
+ *  separate field — what the caller hears is disclosure + greeting, shown as
+ *  "Callers hear"). */
+export interface OpeningConfig {
+  speaksFirst: "agent" | "caller"
+  interruptible: boolean
+  disclose: boolean
+  /** The disclosure sentence; editable, reset to the default. */
+  disclosure: string
+}
+export const DEFAULT_DISCLOSURE = "You're talking to an AI assistant."
+export const DEFAULT_OPENING: OpeningConfig = {
+  speaksFirst: "agent",
+  interruptible: true,
+  disclose: false,
+  disclosure: DEFAULT_DISCLOSURE,
+}
+export function openingOf(d: Pick<AgentDraft, "opening">): OpeningConfig {
+  return { ...DEFAULT_OPENING, ...(d.opening ?? {}) }
+}
+/** The exact line the caller hears first: disclosure (if on) + greeting. */
+export function composeOpening(d: Pick<AgentDraft, "opening" | "greeting">): string {
+  const o = openingOf(d)
+  if (o.speaksFirst === "caller") return ""
+  const g = d.greeting.trim()
+  if (!o.disclose) return g
+  const s = o.disclosure.trim()
+  return [s, g].filter(Boolean).join(" ")
+}
+
 export interface AgentDraft {
   /** Set when editing an existing agent; absent for a brand-new draft. */
   agentId?: string
@@ -353,6 +386,10 @@ export interface AgentDraft {
   /** Section 3 (Context). */
   systemPrompt: string
   greeting: string
+  /** Section 3 › Opening — absent until touched (defaults apply). */
+  opening?: OpeningConfig
+  /** Section 1 › Backup providers (design 07) — absent until touched. */
+  backup?: BackupConfig
   /** What the agent says when it can't answer (proposal 2026-07-22). */
   failureMessage: string
   /** The starter template applied — shown as the header chip next to the name. */
@@ -426,6 +463,9 @@ export const EMPTY_DRAFT: AgentDraft = {
   stack: { ...stackFor("balanced"), ...STACK_DEFAULTS },
   systemPrompt: "",
   greeting: "",
+  // New agents open with the AI disclosure ON (EU AI Act Article 50 has
+  // applied since 2 Aug 2026); existing agents are never rewritten.
+  opening: { ...DEFAULT_OPENING, disclose: true },
   failureMessage: "",
   knowledge: [],
   mcp: [],

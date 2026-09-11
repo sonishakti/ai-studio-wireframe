@@ -511,6 +511,32 @@ export function AgentWizard({
     else url.searchParams.set("step", String(n))
     window.history.replaceState({}, "", url)
   }
+  // ?focus=<id> — a review link opens at the START of the journey: expand the
+  // section that owns the control, scroll it to the centre and pulse a ring
+  // (design-ops rule 2026-09-11; mirrors ng-console's design-kit focus).
+  React.useEffect(() => {
+    const focus = new URLSearchParams(window.location.search).get("focus")
+    if (!focus) return
+    const owner: Record<string, number> = {
+      opening: 3, greeting: 3, prompt: 3,
+      voice: 1, "voice-recommended": 1, "voice-compare": 1, "backup-providers": 1, "turn-taking": 1, listening: 1,
+      deployment: 2, test: 4, golive: 5,
+    }
+    const n = owner[focus] ?? 3
+    let tries = 0
+    const attempt = () => {
+      if (tries === 0) expandSection(n)
+      const el = document.querySelector<HTMLElement>(`[data-design-focus="${focus}"]`) ?? document.getElementById(`wz-${n}-${focus}`)
+      if (!el) { if (tries++ < 40) window.setTimeout(attempt, 200); return }
+      muteSpy(2000)
+      el.scrollIntoView({ block: "center", behavior: "smooth" })
+      const prev = el.style.outline
+      el.style.outline = "3px solid #e11d48"; el.style.outlineOffset = "8px"; el.style.transition = "outline-color 600ms ease"
+      window.setTimeout(() => { el.style.outline = prev; el.style.outlineOffset = "" }, 2600)
+    }
+    window.setTimeout(attempt, 350)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const scrollToStep = (n: number) => {
     const el = document.getElementById(`wizard-step-${n}`)
     if (!el) return
@@ -942,8 +968,8 @@ export function AgentWizard({
           {(onCreateNew || !isEdit || landing) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-9" aria-label="More actions">
-                  <EllipsisVertical className="size-4" aria-hidden />
+                <Button variant="outline" size="sm" className="gap-1.5" aria-label="More actions">
+                  <EllipsisVertical className="size-4" aria-hidden /> More
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -960,16 +986,17 @@ export function AgentWizard({
           )}
           {/* </> config view (icon-only). */}
           <CustomConfigDrawer draft={draft} onApply={applyCustomConfig} iconOnly />
-          {/* Waveform — the test rail's header door (Figma 2919-56680). */}
+          {/* Voice call — the test rail's header door (Figma 2919-56680), now a
+              bordered button that says what it opens (owner 2026-09-11). */}
           <Button
-            variant="ghost"
-            size="icon"
-            className="size-9"
-            aria-label="Test agent — voice panel"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            aria-label="Test agent — voice call"
             aria-pressed={testOpen}
             onClick={() => (testOpen ? setRailOpen(false) : openTest("agent"))}
           >
-            <AudioLines className="size-4" aria-hidden />
+            <AudioLines className="size-4" aria-hidden /> Voice call
           </Button>
           <Button variant="secondary" size="sm" className="min-w-16 gap-1.5" onClick={publish}>
             {deployCta}
@@ -1150,13 +1177,13 @@ export function AgentWizard({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="mr-3 h-7 w-7 shrink-0 text-muted-foreground"
+                          variant="outline"
+                          size="xs"
+                          className="mr-3 shrink-0 gap-1 text-muted-foreground"
                           onClick={() => resetStep(n)}
                           aria-label="Reset this step to the live version"
                         >
-                          <Undo2 className="h-3.5 w-3.5" aria-hidden />
+                          <Undo2 className="h-3.5 w-3.5" aria-hidden /> Reset to live
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Reset this step to the live version</TooltipContent>
@@ -1165,7 +1192,10 @@ export function AgentWizard({
                 </header>
                 {/* Folded ≠ unmounted: section-local state (the live talk
                     test, campaign editors) must survive a fold. */}
-                <div id={`wizard-step-${n}-body`} className={cn("p-5", folded && "hidden")}>
+                {/* Body indented to the title's x (owner 2026-09-11: 40–60 px):
+                    pl-11 = 44 px = px-5 + chevron + gap, so the controls read as
+                    nested under the section name. */}
+                <div id={`wizard-step-${n}-body`} className={cn("px-5 py-5 lg:pl-11", folded && "hidden")}>
                   {/* Sections 1–3 cap for readability; Go Live stays fluid
                       (the campaigns' 50/50 CSV grid manages its own width). */}
                   <div className={cn("min-w-0", n <= 3 && "max-w-5xl")}>
@@ -1177,6 +1207,7 @@ export function AgentWizard({
                         update={update}
                         onSelectVoice={selectVoice}
                         onStackChange={updateStack}
+                        onUnpinRegion={() => openRow(2)}
                       />
                     </SectionRows>
                   )}
@@ -1208,6 +1239,8 @@ export function AgentWizard({
                         update={update}
                         templateFlash={templateFlash}
                         onUnlock={unlockOverride}
+                        onHearOpening={() => { openTest("agent"); if (!testing) toggleTest() }}
+                        onChangeSilence={() => openRow(5)}
                         templateSlot={
                           <TemplateMenu
                             draft={draft}

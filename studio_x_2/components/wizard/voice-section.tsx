@@ -14,6 +14,7 @@ import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
 import { VoiceAdvancedSheet } from "@/components/wizard/voice-advanced-sheet"
+import { BackupProvidersRow } from "@/components/wizard/backup-providers-row"
 import { StackTradeoffSlider, ManualStackConfig } from "@/components/wizard/stack-config"
 import { HistoryField } from "@/components/wizard/step-advanced"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
@@ -40,11 +41,14 @@ export function VoiceSection({
   update,
   onSelectVoice,
   onStackChange,
+  onUnpinRegion,
 }: StepProps & {
   /** Host-owned voice seeding (keeps the tier, adopts the voice's TTS). */
   onSelectVoice: (v: VoiceArtifact) => void
   /** Host-owned stack writes (spy mute lives there). */
   onStackChange: (stack: AgentDraft["stack"]) => void
+  /** Backup providers › "Unpin region" — jumps to the hosting region row. */
+  onUnpinRegion?: () => void
 }) {
   // Customs (playground/import) live in localStorage — load after mount to
   // avoid hydration mismatch.
@@ -158,6 +162,9 @@ export function VoiceSection({
           )}
         </div>
       </SectionRow>
+
+      {/* Backup providers (design 07) — one row under the stack. */}
+      <BackupProvidersRow draft={draft} update={update} onUnpinRegion={onUnpinRegion} />
 
       {/* The VOICE handle — dropdown trigger + inline sound test. */}
       <SectionRow
