@@ -141,6 +141,37 @@ Delivery order in chat: **the link first**, then the board row. Then a desktop n
 — the user is not always at the terminal. Screenshot, browse and parse work runs on Sonnet/Haiku subagents;
 design verdicts and builds stay on the strongest model.
 
+### Figma write access — one-time setup per person and machine (verified 2026-09-11)
+
+Two Figma MCP servers exist and only one can edit the canvas:
+
+| Server | Shows up as | Tools | Can edit? |
+|---|---|---|---|
+| Figma desktop app, local Dev Mode server | `Figma` (kind desktop, 10 tools: get_metadata, get_screenshot, get_design_context, …) | read-only | **No** — Figma ships "write to canvas" on the remote server only |
+| Figma **remote** MCP server `https://mcp.figma.com/mcp` | `plugin:product-management:figma` (the `figma@claude-plugins-official` plugin) **or** the claude.ai **Figma connector** | `use_figma`, `create_new_file`, `whoami`, `search_design_system`, `upload_assets`, `generate_figma_design` + the read tools | **Yes** (beta, free for now) |
+
+The remote server needs a Figma OAuth sign-in. Claude cannot run that flow inside a session — the user does it once, then every later session on that machine and account has the write tools.
+
+**Path A — Claude Code plugin (works in the terminal and in the desktop app's Code tab)**
+1. Open Terminal in the project folder and start an interactive session: `claude`.
+2. Type `/mcp`. Pick `figma` (listed as `plugin:product-management:figma`, or `figma` if the standalone plugin is installed with `claude plugin install figma@claude-plugins-official`).
+3. Choose **Authenticate**. A browser opens on figma.com — sign in with the Figma account that has **edit** rights on *Agora Studio X* (Dev or Full seat on the Agora plan) and approve.
+4. Back in the terminal `/mcp` shows the server as connected. The token lives in the macOS Keychain (`Claude Code-credentials`) and is reused by every later session of this Claude account on this Mac, including the desktop app.
+5. Start (or restart) the Code-tab session. Any agent then verifies with `session_connectors_status` (row `plugin:product-management:figma` = `connected`) and `ToolSearch select:use_figma,whoami,create_new_file`.
+
+**Path B — claude.ai connector (works in claude.ai and the desktop app; nothing to install)**
+1. Claude desktop app → Settings → Connectors → *Browse connectors* → **Figma** → Connect → same Figma sign-in.
+2. In the Code tab composer, `+` → Connectors → switch **Figma** on (or let an agent call `set_session_connector_enabled("Figma", true)`; it takes effect next turn).
+3. Verify: `session_connectors_status` shows a row **Figma** of kind `connector` with more than 10 tools.
+
+**First call every agent makes after either path**
+1. Load the `figma:figma-use` skill.
+2. `whoami` → confirm the plan and that the seat is Dev/Full (view/collab seats are capped at 6 calls a month and cannot write).
+3. Read-only smoke test on the file: `use_figma` with fileKey `xaAgeioGlZosBsRquDXLvI` and script `return figma.root.children.map(p => ({id: p.id, name: p.name}))` — expect a page **Sandbox New** (`2861:52038`).
+4. Then write: `await figma.setCurrentPageAsync(page)` once per call, ≤ 10 operations per call, load Inter before touching text, return every created node ID, screenshot to verify.
+
+**Rules** — the sign-in is personal: each teammate signs in with their own Figma account, once per machine (Path A) or once per claude.ai account (Path B). Never paste tokens into chat, files or env. If neither path is authorized the fallback stays the import-ready SVG boards in `references/tracker-board/figma/` (drag onto the page).
+
 ## Effort + capacity (agreed 2026-09-04)
 
 **Team:** one designer + Claude. **Window:** Sep 2026 → Feb 2027 (6 months).
