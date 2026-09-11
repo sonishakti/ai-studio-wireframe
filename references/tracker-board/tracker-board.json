@@ -55,7 +55,8 @@
               "why": "Explains that fallback voices activate automatically when the primary voice fails, framing how voice recommendations should handle failover."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "59faf3f7f866c6a78972f092335c6bef8f897a4d"
         },
         {
           "vendor": "ElevenLabs",
@@ -85,7 +86,8 @@
               "why": "Use-case based voice collections show how ElevenLabs surfaces voice recommendations by scenario."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "cab267c9c98d22f90d092a93f290408a7bf8d5b8"
         },
         {
           "vendor": "ElevenLabs",
@@ -125,7 +127,8 @@
               "why": "Handpicked voice collections grouped by use case such as Customer Support, Sales, Coach."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "b20dba6eff6f5fbecee72553b191fd4c83e35ea4"
         },
         {
           "vendor": "LiveKit",
@@ -155,7 +158,8 @@
               "why": "Empty state upsells creating a custom voice rather than surfacing default voice recommendations directly."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "f6e56ed982d86d02fc675b4ae311483e87702bb6"
         },
         {
           "vendor": "Vapi",
@@ -185,7 +189,8 @@
               "why": "Voice library toggle plus the selected voice (Marsh) is where recommendations/picks surface."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "78ae20746d9cd26b987241cd0eb34a1b8b01ba69"
         },
         {
           "vendor": "LiveKit",
@@ -215,7 +220,8 @@
               "why": "Sortable table listing each default voice with language, gender, and provider."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "dfe04f1fa3079c1c340dbb6fc3730226a89fe88c"
         },
         {
           "vendor": "Retell",
@@ -245,7 +251,8 @@
               "why": "Language picker sits beside the voice, with no accent or dialect variants shown."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "50d0623679788383e3bd24fe868b6cfc07bf0e46"
         },
         {
           "vendor": "LiveKit",
@@ -275,7 +282,8 @@
               "why": "Sidebar promises a curated Suggested voices list plus custom voice support per model — compare against the picker's own options."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7371fa855d4e28c5e71d9ca9e3c763c0f49622a2"
         },
         {
           "vendor": "Retell",
@@ -295,7 +303,8 @@
               "why": "Each returned voice lists id, provider, gender, accent, age and a preview URL — the facets a voice picker should surface."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7d5a2d05a30da15700f6de3b6c2b1cf04b7b7c0d"
         }
       ],
       "scenarios": {
@@ -332,7 +341,12 @@
         "E · Voices, plural (inert)"
       ],
       "verdict": "Verdict — converged A + B + D",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/01-voice-picker/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/01-voice-picker/05-directions.html",
+      "learnings": [
+        "Vapi and Retell put the voice choice inside the assistant editor as a card with provider + model, not a separate gallery (Vapi voice panel, Retell agent editor).",
+        "ElevenLabs sells discovery: style filters, trending and use-case picks before any list (voice library).",
+        "LiveKit exposes voices only as a table per TTS vendor — no recommendation layer at all (docs: TTS voices)."
+      ]
     },
     {
       "n": "02",
@@ -393,7 +407,8 @@
               "why": "Wait-time parameter controlling how long the assistant pauses before it starts speaking."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "9aa4c1775166c9adc1aa5c2e01dee213e0f380a9"
         },
         {
           "vendor": "Retell",
@@ -423,7 +438,8 @@
               "why": "Example response shows voice_speed and enable_dynamic_voice_speed, adjacent to where turn-taking settings live in the full schema."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "170f001ae77b973a276782fb3c1c4198a2c76ea7"
         },
         {
           "vendor": "ElevenLabs",
@@ -453,7 +469,8 @@
               "why": "Controls how quickly the assistant jumps in to respond to the caller."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "334709bb6175e4e3f6d1d7216ab36167d5fc502e"
         },
         {
           "vendor": "LiveKit",
@@ -483,7 +500,8 @@
               "why": "Waveform demo comparing Turn Detector 1.0 vs 0.4.1 on the same audio to show accuracy gains."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "cd47522ec5240a89caccab1699c4ea405a10baef"
         },
         {
           "vendor": "ElevenLabs",
@@ -523,7 +541,8 @@
               "why": "Turn V3 is ElevenLabs' contextual turn-detection upgrade, the key listening/turn-taking control."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "bddd417e92ec409bcde487080c95d0be0a125da7"
         },
         {
           "vendor": "LiveKit",
@@ -543,7 +562,8 @@
               "why": "Avg Turns and Interrupted columns quantify turn-taking behavior per agent."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "9b2cc84104a94f09fab1a2b4d405af9a70a8d7cb"
         },
         {
           "vendor": "LiveKit",
@@ -573,7 +593,8 @@
               "why": "Sidebar link to the dedicated Turn detection & interruptions section covering listening behavior."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7ad99cf08f6f1f3e306f0c67db4013cabbb84e67"
         }
       ],
       "scenarios": {
@@ -610,7 +631,12 @@
         "E · \"Try interrupting\" on the live test"
       ],
       "verdict": "Verdict — converge A + C + E",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/02-turn-taking/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/02-turn-taking/05-directions.html",
+      "learnings": [
+        "Every vendor hides the ms behind words: Vapi 'Start speaking plan', ElevenLabs 'Turn timeout' + 'Eagerness', LiveKit a named turn detector (docs).",
+        "Retell keeps interruption controls on the agent, next to the welcome message — the two are one decision (agent editor).",
+        "Nobody offers a live 'try interrupting' test; the whitespace is proving the setting on the Test rail."
+      ]
     },
     {
       "n": "03",
@@ -681,7 +707,8 @@
               "why": "Endpoint notified of call events, useful for recovering session state after a failover."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "24340cac940e972ef468282ed6d61ffbd7d5f242"
         },
         {
           "vendor": "Retell",
@@ -711,7 +738,8 @@
               "why": "Where failover behavior for recognition or call issues is configured."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "df09548e74b9c68980905deac11aa281459a46aa"
         },
         {
           "vendor": "LiveKit",
@@ -741,7 +769,8 @@
               "why": "A dedicated Custom STT page suggests bring-your-own-recognizer support worth checking against failover behavior."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "13b1d3930c44c48557cedf3c9ff6821e2d3ceddc"
         }
       ],
       "scenarios": {
@@ -778,7 +807,12 @@
         "E · \"Noise & pronunciation\" group in Advanced"
       ],
       "verdict": "Verdict — converge A + D + C on 07's row",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/03-recognition-failover/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/03-recognition-failover/05-directions.html",
+      "learnings": [
+        "Vapi lists fallback transcribers as an ordered list right under the primary (assistant fallback).",
+        "Retell separates Realtime Transcription from Security & Fallback in the right rail — recognition and failover are two panels (agent editor).",
+        "LiveKit shows STT as a vendor table with a custom-STT escape hatch (docs)."
+      ]
     },
     {
       "n": "04",
@@ -792,7 +826,7 @@
       "open": [
         {
           "label": "Preview",
-          "href": "https://ng-console-9h69k4652-agoraio.vercel.app/agents/agent_000001?sourceTab=my-agents&tab=prompt"
+          "href": "https://ng-console-f2iwfxepb-agoraio.vercel.app/agents/agent_000001?sourceTab=my-agents&tab=prompt&designFocus=opening"
         },
         {
           "label": "Review page",
@@ -821,7 +855,8 @@
       ],
       "shot": {
         "file": "references/research/04-greeting-filler/05-shots/live-opening-marked.png",
-        "alt": "Agent Detail › Prompt tab with the Opening section marked in red"
+        "alt": "Agent Detail › Prompt tab with the Opening section marked in red",
+        "figmaHash": "4cfe1e550ba50477484c7c9d22bd1164deb7bc0a"
       },
       "rationale": "An Opening section on the Prompt tab: who speaks first, greeting, interruptible greeting, and the AI disclosure composed into the greeting because the Engine has no field for it; \"Callers hear\" shows the exact result. Filler row relabelled in user words with three Requires Engine rows.",
       "next": "Your review on the preview. Decide: disclosure on by default for new agents? Sign off the sentence and the copy set.",
@@ -854,7 +889,8 @@
               "why": "Step 3 shows selecting preset idle/filler messages, the content side of this greeting-adjacent feature."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "2589a9f31446eae49888e82c27357374f89337e4"
         },
         {
           "vendor": "Retell",
@@ -884,7 +920,8 @@
               "why": "Reiterates that language model, voice, and who-speaks-first are decided upfront, the same territory as our greeting/disclaimer defaults."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "9b672c80305f42acf7c62d1fcc363ffc89891447"
         },
         {
           "vendor": "ElevenLabs",
@@ -914,7 +951,8 @@
               "why": "Plays natural filler audio while the agent is thinking, akin to a filler phrase."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "334709bb6175e4e3f6d1d7216ab36167d5fc502e"
         },
         {
           "vendor": "Vapi",
@@ -944,7 +982,8 @@
               "why": "Dropdown that decides whether the assistant or the caller speaks first."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "e571d6f70d1ff4d3f430ecb406cbdebc2799d7e5"
         },
         {
           "vendor": "Retell",
@@ -974,7 +1013,8 @@
               "why": "Configurable delay before the greeting plays."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "df09548e74b9c68980905deac11aa281459a46aa"
         },
         {
           "vendor": "ElevenLabs",
@@ -1014,7 +1054,8 @@
               "why": "Turn-detection quality shapes how filler and silence right after the greeting are handled."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "bddd417e92ec409bcde487080c95d0be0a125da7"
         },
         {
           "vendor": "Retell",
@@ -1044,7 +1085,8 @@
               "why": "Configurable delay before the greeting plays, affecting perceived latency."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "50d0623679788383e3bd24fe868b6cfc07bf0e46"
         },
         {
           "vendor": "LiveKit",
@@ -1074,7 +1116,8 @@
               "why": "Preemptive speech generation is LiveKit's mechanism for filler audio while a response is prepared."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7ad99cf08f6f1f3e306f0c67db4013cabbb84e67"
         }
       ],
       "scenarios": {
@@ -1115,7 +1158,37 @@
         "E · Hear the opening"
       ],
       "verdict": "Verdict — converged: A as the spine, B's editable default, D as a recap line, E as the one button; C ships on Advanced",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/05-directions.html",
+      "learnings": [
+        "Vapi and Retell put 'who speaks first' next to the first-message field, as a toggle/select — one decision, one place (Vapi First message · Retell Welcome message).",
+        "ElevenLabs adds 'interruptible' and a turn-timeout right under the first message; the greeting's interruptibility is a first-class control (agent tab).",
+        "Vapi's idle messages and ElevenLabs' soft-timeout filler are the silence recovery — all vendors keep it near the greeting, not in advanced.",
+        "LiveKit frames it in code (session.say / generate_reply, preemptive speech) — no UI; the Console can own the composed 'callers hear' line."
+      ],
+      "before": [
+        {
+          "file": "references/research/04-greeting-filler/05-shots/before-prompt-tab.png",
+          "source": "design/sandbox before the change (Prompt tab)",
+          "alt": "Prompt tab: a bare 'First message' field under the system prompt",
+          "figmaHash": "da7cddcefba394d496e57d3ee904e35fbf0eea60",
+          "wrong": [
+            "Who speaks first is not a choice: an empty 'First message' silently means caller-first, and nothing says so (rainy: 'caller-first and silence').",
+            "No AI disclosure anywhere; Article 50 compliance is left to whoever writes the prompt (rainy: 'disclosure required but off').",
+            "Whether callers can interrupt the greeting is buried in Advanced JSON (greeting_configs.interruptable), invisible on the tab where the greeting is written.",
+            "Silence handling lives on another tab with no recap here, and the caller never gets to hear the composed opening before go-live."
+          ]
+        },
+        {
+          "file": "references/research/04-greeting-filler/05-shots/before-advanced-filler.png",
+          "source": "design/sandbox before the change (Advanced tab)",
+          "alt": "Advanced tab: the 'Filler Words' row in engineering words",
+          "figmaHash": "6385464a4aae0fb77d3d1119c40bd233c4059beb",
+          "wrong": [
+            "Engineering vocabulary ('Filler Words', 'response wait ms', 'selection rule') where the user thinks 'while thinking, say…'.",
+            "Shipped controls and Requires-Engine ideas (persona filler, continue after filler, tool-call filler) are not told apart, so reviewers ask for things the Engine cannot do yet."
+          ]
+        }
+      ]
     },
     {
       "n": "05",
@@ -1176,7 +1249,8 @@
               "why": "Houses call-level behavior rules such as timeouts and end conditions."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "df09548e74b9c68980905deac11aa281459a46aa"
         },
         {
           "vendor": "Vapi",
@@ -1206,7 +1280,8 @@
               "why": "Voicemail detection sits alongside other call-behavior rules in this nav group."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "b1c3747fc9c07177dbf02a9750ad8872277f7576"
         }
       ],
       "scenarios": {
@@ -1243,7 +1318,12 @@
         "E · \"Guardrails\" row, inert"
       ],
       "verdict": "Verdict — A as the surface, D as the gate",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/05-call-behavior/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/05-call-behavior/05-directions.html",
+      "learnings": [
+        "Vapi treats voicemail, keypad and end-call as named 'call behaviour' options with a detection table (docs).",
+        "Retell splits Speech Settings from Call Settings in the right rail — rules live with the call, not the prompt (agent editor).",
+        "Nobody previews the rule as a sentence; the whitespace is 'rules in sentences' with a gate before go-live."
+      ]
     },
     {
       "n": "06",
@@ -1304,7 +1384,8 @@
               "why": "Off/Office/Default/Custom ambience presets add personality/character to the call."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "78ae20746d9cd26b987241cd0eb34a1b8b01ba69"
         },
         {
           "vendor": "LiveKit",
@@ -1334,7 +1415,8 @@
               "why": "Cartesia Sonic 3 is the model listed; expressiveness support may vary by model family."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7371fa855d4e28c5e71d9ca9e3c763c0f49622a2"
         }
       ],
       "scenarios": {
@@ -1371,7 +1453,12 @@
         "E · Vendor-native presets only"
       ],
       "verdict": "Verdict — converged",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/06-tts-expression/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/06-tts-expression/05-directions.html",
+      "learnings": [
+        "Vapi exposes speed and background sound as plain sliders/pickers on the voice panel (voice settings).",
+        "LiveKit documents an 'expressive' mode per model — the knob depends on the vendor (docs TTS).",
+        "Pronunciation rules are vendor-native everywhere; one normalised 'say it as' is the whitespace."
+      ]
     },
     {
       "n": "07",
@@ -1385,7 +1472,7 @@
       "open": [
         {
           "label": "Preview",
-          "href": "https://ng-console-9h69k4652-agoraio.vercel.app/agents/agent_000001?sourceTab=my-agents&tab=models"
+          "href": "https://ng-console-f2iwfxepb-agoraio.vercel.app/agents/agent_000001?sourceTab=my-agents&tab=models&designFocus=backup-providers"
         },
         {
           "label": "ClickUp",
@@ -1410,7 +1497,8 @@
       ],
       "shot": {
         "file": "references/research/07-vendors-fallback/05-shots/live-models-backup-providers.png",
-        "alt": "Agent Detail › Models tab with the Backup providers row marked in red"
+        "alt": "Agent Detail › Models tab with the Backup providers row marked in red",
+        "figmaHash": "45681f7e1ab59d869bb4c0988ac8c518e02a0e35"
       },
       "rationale": "One \"Backup providers\" row on Models, on by default: Agora's pool covers managed primaries, your own second key covers BYO, and each gap is named per component. \"Test failover\" waits for the Engine contract (Nov).",
       "next": "Your review. Owner: backup pool as agent or deployment property; copy yes or no.",
@@ -1433,7 +1521,8 @@
               "why": "Numbered steps show Vapi cascading through fallback voices in order until one succeeds, the core provider-failover pattern to mirror."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "59faf3f7f866c6a78972f092335c6bef8f897a4d"
         },
         {
           "vendor": "Vapi",
@@ -1473,7 +1562,8 @@
               "why": "Rime AI is the TTS vendor selected for output voice, each card independently swappable."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "e571d6f70d1ff4d3f430ecb406cbdebc2799d7e5"
         },
         {
           "vendor": "Vapi",
@@ -1513,7 +1603,8 @@
               "why": "Vendor-agnostic webhook config sits beside the fallback settings, tying provider events to the assistant."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "24340cac940e972ef468282ed6d61ffbd7d5f242"
         },
         {
           "vendor": "Retell",
@@ -1543,7 +1634,8 @@
               "why": "Single voice provider selector, with no fallback voice vendor shown."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "df09548e74b9c68980905deac11aa281459a46aa"
         },
         {
           "vendor": "LiveKit",
@@ -1573,7 +1665,8 @@
               "why": "Copy notes custom voices work across multiple TTS providers via LiveKit Inference, relevant to provider-fallback abstraction."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "f6e56ed982d86d02fc675b4ae311483e87702bb6"
         },
         {
           "vendor": "Vapi",
@@ -1603,7 +1696,8 @@
               "why": "Summary card names the current vendor (Rime AI) with cost and latency, useful for fallback/vendor comparison."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "78ae20746d9cd26b987241cd0eb34a1b8b01ba69"
         },
         {
           "vendor": "LiveKit",
@@ -1633,7 +1727,8 @@
               "why": "Filters voices by provider but doesn't expose any fallback ordering."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "dfe04f1fa3079c1c340dbb6fc3730226a89fe88c"
         },
         {
           "vendor": "Retell",
@@ -1663,7 +1758,8 @@
               "why": "Single voice provider selector, with no fallback voice vendor shown."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "50d0623679788383e3bd24fe868b6cfc07bf0e46"
         },
         {
           "vendor": "ElevenLabs",
@@ -1693,7 +1789,8 @@
               "why": "Dedicated docs page for configuring a backup LLM — the explicit fallback settings surface to benchmark."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "71a35bdc81a69a6f18f22297ef93cc6370553f0d"
         },
         {
           "vendor": "LiveKit",
@@ -1723,7 +1820,8 @@
               "why": "Plugins section lists alternate STT providers that can be swapped in — the closest fallback/vendor picker."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "13b1d3930c44c48557cedf3c9ff6821e2d3ceddc"
         },
         {
           "vendor": "LiveKit",
@@ -1753,7 +1851,8 @@
               "why": "The Plugins link lets teams swap in a different TTS provider outside LiveKit Inference — the closest fallback mechanism shown."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7371fa855d4e28c5e71d9ca9e3c763c0f49622a2"
         },
         {
           "vendor": "Retell",
@@ -1773,7 +1872,8 @@
               "why": "Provider is a flat string per voice (e.g. elevenlabs) with no separate backup/fallback vendor field shown."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "7d5a2d05a30da15700f6de3b6c2b1cf04b7b7c0d"
         }
       ],
       "scenarios": {
@@ -1808,7 +1908,12 @@
         "C · Policy + prove it"
       ],
       "verdict": null,
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/05-directions.html",
+      "learnings": [
+        "Vapi shows provider per component (transcriber · model · voice) as cards with an ordered fallback list (assistant fallback).",
+        "Retell and ElevenLabs expose the vendor as a field per component; ElevenLabs adds a backup-LLM cascade (agent settings, docs).",
+        "LiveKit's plugins table is the vendor catalogue; fallback is code (docs)."
+      ]
     },
     {
       "n": "08",
@@ -1862,7 +1967,10 @@
             "jtbd": "A rollback target uses a model that no longer exists."
           }
         ]
-      }
+      },
+      "learnings": [
+        "Pending — research after the owner decision on where A/B lives (lock)."
+      ]
     },
     {
       "n": "09",
@@ -1923,7 +2031,8 @@
               "why": "Live workflow canvas that previews the selected template's conversation flow before import."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "33a41523c20f28163de925a9b69a918e45df9296"
         }
       ],
       "scenarios": {
@@ -1960,7 +2069,11 @@
         "E · Instrument first, no new screens"
       ],
       "verdict": "Verdict — converge A + C + E",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/09-first-run/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/09-first-run/05-directions.html",
+      "learnings": [
+        "ElevenLabs opens with a templates gallery and a workflow preview panel before any config (templates).",
+        "Vapi/Retell start from a blank assistant with a default template — no import from a competitor; import is whitespace."
+      ]
     },
     {
       "n": "10",
@@ -2031,7 +2144,8 @@
               "why": "Per-call cost is a standard column in Vapi's logs table."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "45662fd8da6aa7169d10dbd4ada6df9327fe3000"
         },
         {
           "vendor": "Retell",
@@ -2071,7 +2185,8 @@
               "why": "Auto-scored sentiment per session, an evaluative signal attached directly to the call log."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "fe47657f3fb9908b9a028ea0350eb4b1cd3fb5ca"
         },
         {
           "vendor": "LiveKit",
@@ -2091,7 +2206,8 @@
               "why": "Each row logs session count and status per agent — the closest thing to a call/session log at this level."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "9b2cc84104a94f09fab1a2b4d405af9a70a8d7cb"
         },
         {
           "vendor": "LiveKit",
@@ -2112,7 +2228,8 @@
             }
           ],
           "scenario": "rainy",
-          "redo": "empty state — capture the populated state first"
+          "redo": "empty state — capture the populated state first",
+          "figmaHash": "53e6129182b788a523f8462dee401ed3304f249f"
         },
         {
           "vendor": "ElevenLabs",
@@ -2142,7 +2259,8 @@
               "why": "Lets reviewers search across session history."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "629581f222abed84c795bdd46994a792c6b9988f"
         }
       ],
       "scenarios": {
@@ -2179,7 +2297,12 @@
         "E · Save as test + export"
       ],
       "verdict": "Verdict — A, converged",
-      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/10-session-logs/05-directions.html"
+      "directionsPage": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/10-session-logs/05-directions.html",
+      "learnings": [
+        "Vapi's logs table leads with Ended reason · Duration · Cost as columns (logs).",
+        "Retell's call history adds End reason, Session status and User sentiment per row (call history).",
+        "ElevenLabs conversation log has search + filter over the table; LiveKit shows sessions with turn columns (agents/sessions)."
+      ]
     },
     {
       "n": "11",
@@ -2237,7 +2360,8 @@
             }
           ],
           "scenario": "rainy",
-          "redo": "empty state — capture the populated state first"
+          "redo": "empty state — capture the populated state first",
+          "figmaHash": "9b2cc84104a94f09fab1a2b4d405af9a70a8d7cb"
         },
         {
           "vendor": "LiveKit",
@@ -2267,7 +2391,8 @@
               "why": "Surfaces the count of problematic calls, the entry point for latency/SIP diagnostics."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "164126bcbf812c962bf869ccc0420ec6d4ae8842"
         }
       ],
       "scenarios": {
@@ -2299,7 +2424,11 @@
             "jtbd": "Diagnostics aren't enabled or nothing has been placed; the empty state must say what to enable and how to test."
           }
         ]
-      }
+      },
+      "learnings": [
+        "LiveKit shows E2E median and region per agent and flags 'calls with issues' on the telephony page — but only once observability is enabled (agents · telephony).",
+        "Pending: populated happy and rainy captures from Vapi · Retell · ElevenLabs (SIP codes, latency per leg)."
+      ]
     },
     {
       "n": "12",
@@ -2352,7 +2481,8 @@
               "why": "Row-level call list where an operator would drill into a specific call, currently empty."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "164126bcbf812c962bf869ccc0420ec6d4ae8842"
         },
         {
           "vendor": "Retell",
@@ -2383,7 +2513,8 @@
             }
           ],
           "scenario": "rainy",
-          "redo": "empty state — capture the populated state first"
+          "redo": "empty state — capture the populated state first",
+          "figmaHash": "f3f6da828ed5bf74181277d29ba5870bfb197b45"
         }
       ],
       "scenarios": {
@@ -2411,7 +2542,11 @@
             "jtbd": "Nothing is live; the page must still be useful (recent, health, test)."
           }
         ]
-      }
+      },
+      "learnings": [
+        "Retell's live monitoring is a table of active calls with an empty state when nothing is live (live calls).",
+        "LiveKit lists active calls and a calls table on telephony (telephony)."
+      ]
     },
     {
       "n": "13",
@@ -2494,7 +2629,8 @@
               "why": "Transfer success rate and wait time break down handoff performance as part of the same scorecard."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "fce80d0a3fde3752aa563cd0a6a02e6d23a88346"
         }
       ],
       "scenarios": {
@@ -2522,7 +2658,10 @@
             "jtbd": "No calls in range; guide me to simulate or widen the window."
           }
         ]
-      }
+      },
+      "learnings": [
+        "Retell's analytics page leads with average score, call resolution rate and transfer stats (analytics)."
+      ]
     },
     {
       "n": "15",
@@ -2615,7 +2754,8 @@
               "why": "Direct entry point for configuring SIP trunk connections."
             }
           ],
-          "scenario": "happy"
+          "scenario": "happy",
+          "figmaHash": "164126bcbf812c962bf869ccc0420ec6d4ae8842"
         }
       ],
       "scenarios": {
@@ -2643,7 +2783,10 @@
             "jtbd": "CPS or caller-ID policy blocks outbound; say which rule."
           }
         ]
-      }
+      },
+      "learnings": [
+        "LiveKit keeps SIP trunks under a Telephony submenu with trunks as a first-class object (telephony)."
+      ]
     },
     {
       "n": "18",
@@ -2871,5 +3014,6 @@
     "page": "2861-52038",
     "parentSection": "3122-40583",
     "url": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40583"
-  }
+  },
+  "prototypeHost": "https://ng-console-f2iwfxepb-agoraio.vercel.app"
 }
