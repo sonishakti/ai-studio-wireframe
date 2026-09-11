@@ -71,9 +71,23 @@ const thumb = (file) => {
   const w = buf.readUInt32BE(16), h = buf.readUInt32BE(20)
   return { href: `data:image/png;base64,${buf.toString("base64")}`, w, h }
 }
-const image = (x, y, width, file, alt) => {
+const RED = "#e5173f"
+// Red review marks: thin outline + a small tag naming the control. `marks` come
+// from tracker-board.json (secondary[].marks / shot.marks): box = [x0,y0,x1,y1]
+// as fractions of the image, tag ≤ 3 words. Outline only, so nothing is hidden.
+const markSvg = (x, y, w, h, marks = []) => marks.map((m) => {
+  const [x0, y0, x1, y1] = m.box
+  const bx = x + x0 * w, by = y + y0 * h, bw = (x1 - x0) * w, bh = (y1 - y0) * h
+  const tw = m.tag.length * 6.6 + 12, th = 18
+  const above = by - th - 2 >= y
+  const tx = above ? bx : bx + 3, ty = above ? by - th - 2 : by + 3
+  return `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="4" fill="none" stroke="${RED}" stroke-width="3"/>` +
+    `<rect x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" width="${tw.toFixed(1)}" height="${th}" rx="3" fill="${RED}"/>` +
+    `<text x="${(tx + 6).toFixed(1)}" y="${(ty + 13).toFixed(1)}" font-family="${FONT}" font-size="11" font-weight="600" fill="#ffffff">${esc(m.tag)}</text>`
+}).join("")
+const image = (x, y, width, file, alt, marks) => {
   const t = thumb(file); const h = Math.round(width * t.h / t.w)
-  return { svg: `<rect x="${x}" y="${y}" width="${width}" height="${h}" rx="8" fill="#0b0f13"/><image x="${x}" y="${y}" width="${width}" height="${h}" href="${t.href}" preserveAspectRatio="xMidYMid meet"><title>${esc(alt)}</title></image>`, h }
+  return { svg: `<rect x="${x}" y="${y}" width="${width}" height="${h}" rx="8" fill="#0b0f13"/><image x="${x}" y="${y}" width="${width}" height="${h}" href="${t.href}" preserveAspectRatio="xMidYMid meet"><title>${esc(alt)}</title></image>${markSvg(x, y, width, h, marks)}`, h }
 }
 const pill = (x, y, label) => {
   const [fg, bg] = STATUS[label] ?? [INK2, RULE]; const w = label.length * 9 + 28
@@ -101,7 +115,7 @@ function board(r) {
     parts.push(`<text x="${c.x}" y="${cy + 18}" font-family="${FONT}" font-size="16" font-weight="600" fill="${INK}">${esc(c.v)}</text>`); cy += 32
     if (c.items.length === 0) { parts.push(`<rect x="${c.x}" y="${cy}" width="${COL}" height="120" rx="8" fill="${GROUND}" stroke="${RULE}" stroke-dasharray="6 6"/><text x="${c.x + 16}" y="${cy + 66}" font-family="${FONT}" font-size="15" fill="${INK3}">pending — capture owed</text>`); cy += 136 }
     for (const it of c.items) {
-      const im = image(c.x, cy, COL, it.shot, it.label); parts.push(im.svg); cy += im.h + 8
+      const im = image(c.x, cy, COL, it.shot, it.label, it.marks); parts.push(im.svg); cy += im.h + 8
       const cap = wrap(`${it.kind === "product" ? "PRODUCT" : "DOCS"} · ${it.label}`, 14, COL); parts.push(textBlock(c.x, cy, cap, 14, INK2, 400, 1.3)); cy += heightOf(cap, 14, 1.3)
       const url = wrap(it.href ?? "", 12, COL); parts.push(textBlock(c.x, cy, url, 12, ACCENT, 400, 1.3)); cy += heightOf(url, 12, 1.3) + 18
     }

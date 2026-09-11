@@ -42,63 +42,251 @@
           "label": "Voice fallback plan",
           "kind": "docs",
           "href": "https://docs.vapi.ai/voice-fallback-plan",
-          "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png"
+          "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png",
+          "marks": [
+            {
+              "box": [
+                0.22,
+                0.168,
+                0.78,
+                0.45
+              ],
+              "tag": "Voice fallback overview",
+              "why": "Explains that fallback voices activate automatically when the primary voice fails, framing how voice recommendations should handle failover."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Voice library",
           "kind": "docs",
           "href": "https://elevenlabs.io/docs/product-guides/voices/voice-library",
-          "shot": "references/competitors/public-docs/elevenlabs-docs-voice-library.png"
+          "shot": "references/competitors/public-docs/elevenlabs-docs-voice-library.png",
+          "marks": [
+            {
+              "box": [
+                0.351,
+                0.379,
+                0.75,
+                0.499
+              ],
+              "tag": "Trending voices",
+              "why": "Curated/trending voice carousel is the recommendation surface reviewers should compare against."
+            },
+            {
+              "box": [
+                0.351,
+                0.525,
+                0.75,
+                0.65
+              ],
+              "tag": "Handpicked collections",
+              "why": "Use-case based voice collections show how ElevenLabs surfaces voice recommendations by scenario."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Voice library — Trending · language/style filters · use-case picks",
           "kind": "product",
           "href": "https://elevenlabs.io/app/agents/voice-library",
-          "shot": "references/competitors/product/elevenlabs/elevenlabs-voice-library.png"
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-voice-library.png",
+          "marks": [
+            {
+              "box": [
+                0.219,
+                0.282,
+                0.715,
+                0.322
+              ],
+              "tag": "Style filters",
+              "why": "Language dropdown plus category chips (Conversational, Narration, Characters...) for filtering the voice grid."
+            },
+            {
+              "box": [
+                0.219,
+                0.352,
+                0.665,
+                0.556
+              ],
+              "tag": "Trending voices",
+              "why": "Curated trending voice cards shown first, each tagged with style and language."
+            },
+            {
+              "box": [
+                0.175,
+                0.614,
+                0.888,
+                0.824
+              ],
+              "tag": "Use-case picks",
+              "why": "Handpicked voice collections grouped by use case such as Customer Support, Sales, Coach."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Voices — Custom vs Default voices · voice-clone upsell",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-voices.png"
+          "shot": "references/competitors/product/livekit/livekit-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.171,
+                0.032,
+                0.325,
+                0.09
+              ],
+              "tag": "Voice tabs",
+              "why": "Custom vs Default voice tabs form the top-level split for the picker, comparable to curated vs custom voice sections."
+            },
+            {
+              "box": [
+                0.465,
+                0.368,
+                0.695,
+                0.6
+              ],
+              "tag": "Voice-clone upsell",
+              "why": "Empty state upsells creating a custom voice rather than surfacing default voice recommendations directly."
+            }
+          ]
         },
         {
           "vendor": "Vapi",
           "label": "Voice settings panel — Voice model · Speed · Background Sound (Off / Office / Default / Custom)",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png",
+          "marks": [
+            {
+              "box": [
+                0.749,
+                0.152,
+                0.995,
+                0.21
+              ],
+              "tag": "Voice model",
+              "why": "Dropdown for choosing the TTS voice model is the primary voice-picker control."
+            },
+            {
+              "box": [
+                0.749,
+                0.228,
+                0.995,
+                0.346
+              ],
+              "tag": "Voice library",
+              "why": "Voice library toggle plus the selected voice (Marsh) is where recommendations/picks surface."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Default voices table — provider / language / gender filters",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-voices-default.png"
+          "shot": "references/competitors/product/livekit/livekit-voices-default.png",
+          "marks": [
+            {
+              "box": [
+                0.171,
+                0.234,
+                0.983,
+                0.278
+              ],
+              "tag": "Voice filters",
+              "why": "Provider, language, and gender filters help narrow the voice list."
+            },
+            {
+              "box": [
+                0.171,
+                0.32,
+                0.983,
+                0.62
+              ],
+              "tag": "Voices table",
+              "why": "Sortable table listing each default voice with language, gender, and provider."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Agent editor — Kate voice · English (US) · Welcome Message · AI speaks first · Pause Before Speaking",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png"
+          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png",
+          "marks": [
+            {
+              "box": [
+                0.15,
+                0.1,
+                0.235,
+                0.142
+              ],
+              "tag": "Voice selector",
+              "why": "Shows the single active voice (Kate) chosen for the agent."
+            },
+            {
+              "box": [
+                0.238,
+                0.1,
+                0.33,
+                0.142
+              ],
+              "tag": "Language selector",
+              "why": "Language picker sits beside the voice, with no accent or dialect variants shown."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "TTS models — custom voices · expressive mode · Cartesia Sonic 3",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/models/tts/",
-          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png"
+          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.305,
+                0.799,
+                0.75,
+                1
+              ],
+              "tag": "TTS model table",
+              "why": "Model family, name, ID and languages are the fields a voice/model picker needs — Cartesia Sonic 3 shown here."
+            },
+            {
+              "box": [
+                0.747,
+                0.308,
+                0.9,
+                0.352
+              ],
+              "tag": "Custom & suggested voices",
+              "why": "Sidebar promises a curated Suggested voices list plus custom voice support per model — compare against the picker's own options."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "List Voices API — voice_id · provider · gender · accent · age · preview",
           "kind": "docs",
           "href": "https://docs.retellai.com/api-references/list-voices",
-          "shot": "references/competitors/public-docs/retell-docs-voices.png"
+          "shot": "references/competitors/public-docs/retell-docs-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.675,
+                0.4,
+                0.955,
+                0.684
+              ],
+              "tag": "Voice attributes",
+              "why": "Each returned voice lists id, provider, gender, accent, age and a preview URL — the facets a voice picker should surface."
+            }
+          ]
         }
       ]
     },
@@ -138,49 +326,203 @@
           "label": "Speech configuration (start/stop speaking plans)",
           "kind": "docs",
           "href": "https://docs.vapi.ai/customization/speech-configuration",
-          "shot": "references/competitors/public-docs/vapi-docs-speech-configuration.png"
+          "shot": "references/competitors/public-docs/vapi-docs-speech-configuration.png",
+          "marks": [
+            {
+              "box": [
+                0.225,
+                0.525,
+                0.771,
+                0.624
+              ],
+              "tag": "Speaking plan components",
+              "why": "Names the two levers, Speaking Plan and Stop Speaking Plan, that govern turn-taking."
+            },
+            {
+              "box": [
+                0.225,
+                0.78,
+                0.771,
+                0.972
+              ],
+              "tag": "Start Speaking Plan",
+              "why": "Wait-time parameter controlling how long the assistant pauses before it starts speaking."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Create agent — responsiveness, interruption sensitivity, backchannel",
           "kind": "docs",
           "href": "https://docs.retellai.com/api-references/create-agent",
-          "shot": "references/competitors/public-docs/retell-docs-create-agent.png"
+          "shot": "references/competitors/public-docs/retell-docs-create-agent.png",
+          "marks": [
+            {
+              "box": [
+                0.241,
+                0.509,
+                0.645,
+                0.65
+              ],
+              "tag": "Agent body params",
+              "why": "Start of the create-agent request body, where responsiveness/interruption-sensitivity/backchannel fields are defined further down this schema."
+            },
+            {
+              "box": [
+                0.684,
+                0.811,
+                0.954,
+                0.967
+              ],
+              "tag": "Voice pacing fields",
+              "why": "Example response shows voice_speed and enable_dynamic_voice_speed, adjacent to where turn-taking settings live in the full schema."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Conversation flow — turn timeout, eagerness",
           "kind": "docs",
           "href": "https://elevenlabs.io/docs/agents-platform/customization/conversation-flow",
-          "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png"
+          "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png",
+          "marks": [
+            {
+              "box": [
+                0.505,
+                0.403,
+                0.752,
+                0.548
+              ],
+              "tag": "Turn timeout",
+              "why": "Sets how long the assistant waits during silence before taking its turn."
+            },
+            {
+              "box": [
+                0.248,
+                0.741,
+                0.497,
+                0.896
+              ],
+              "tag": "Turn eagerness",
+              "why": "Controls how quickly the assistant jumps in to respond to the caller."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Turn detector model",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/build/turns/turn-detector/",
-          "shot": "references/competitors/public-docs/livekit-docs-turn-detector.png"
+          "shot": "references/competitors/public-docs/livekit-docs-turn-detector.png",
+          "marks": [
+            {
+              "box": [
+                0.306,
+                0.556,
+                0.704,
+                0.686
+              ],
+              "tag": "Audio turn detector",
+              "why": "Describes the TurnDetector model that predicts end-of-turn from audio instead of a transcript."
+            },
+            {
+              "box": [
+                0.306,
+                0.774,
+                0.704,
+                0.993
+              ],
+              "tag": "Turn detector comparison",
+              "why": "Waveform demo comparing Turn Detector 1.0 vs 0.4.1 on the same audio to show accuracy gains."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Agent tab — First message · Interruptible · Turn V3",
           "kind": "product",
           "href": "https://elevenlabs.io/app/agents",
-          "shot": "references/competitors/product/elevenlabs/elevenlabs-agent-agent.png"
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-agent-agent.png",
+          "marks": [
+            {
+              "box": [
+                0.184,
+                0.695,
+                0.696,
+                0.86
+              ],
+              "tag": "First message",
+              "why": "The scripted opening line sets up who speaks first, directly relevant to turn-taking sequencing."
+            },
+            {
+              "box": [
+                0.594,
+                0.86,
+                0.697,
+                0.892
+              ],
+              "tag": "Interruptible toggle",
+              "why": "Controls whether the user can cut off the agent mid-turn, core to turn-taking behavior."
+            },
+            {
+              "box": [
+                0.184,
+                0.93,
+                0.696,
+                1
+              ],
+              "tag": "Turn V3 model",
+              "why": "Turn V3 is ElevenLabs' contextual turn-detection upgrade, the key listening/turn-taking control."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-agents.png"
+          "shot": "references/competitors/product/livekit/livekit-agents.png",
+          "marks": [
+            {
+              "box": [
+                0.515,
+                0.126,
+                0.685,
+                0.19
+              ],
+              "tag": "Turn & interruption metrics",
+              "why": "Avg Turns and Interrupted columns quantify turn-taking behavior per agent."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Speech & audio — session.say · generate_reply · interruptions · background audio",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/build/audio/",
-          "shot": "references/competitors/public-docs/livekit-docs-speech-greeting.png"
+          "shot": "references/competitors/public-docs/livekit-docs-speech-greeting.png",
+          "marks": [
+            {
+              "box": [
+                0.747,
+                0.454,
+                0.897,
+                0.542
+              ],
+              "tag": "Interruption controls",
+              "why": "TOC lists SpeechHandle and Interruptions, the API surface for handling user interruptions mid-speech."
+            },
+            {
+              "box": [
+                0.021,
+                0.878,
+                0.16,
+                0.918
+              ],
+              "tag": "Turn detection nav",
+              "why": "Sidebar link to the dedicated Turn detection & interruptions section covering listening behavior."
+            }
+          ]
         }
       ]
     },
@@ -220,21 +562,97 @@
           "label": "Advanced tab — Fallback Voices · Fallback Transcriber · Webhook Server",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-advanced.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-advanced.png",
+          "marks": [
+            {
+              "box": [
+                0.343,
+                0.239,
+                0.982,
+                0.311
+              ],
+              "tag": "Fallback voices",
+              "why": "Backup voice that takes over automatically if the primary TTS voice fails mid-call."
+            },
+            {
+              "box": [
+                0.343,
+                0.332,
+                0.982,
+                0.404
+              ],
+              "tag": "Fallback transcriber",
+              "why": "Backup speech-to-text provider that takes over if the primary recognizer fails."
+            },
+            {
+              "box": [
+                0.343,
+                0.824,
+                0.982,
+                1
+              ],
+              "tag": "Webhook server",
+              "why": "Endpoint notified of call events, useful for recovering session state after a failover."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+          "shot": "references/competitors/product/retell/retell-agent-editor.png",
+          "marks": [
+            {
+              "box": [
+                0.538,
+                0.216,
+                0.746,
+                0.256
+              ],
+              "tag": "Realtime transcription",
+              "why": "Live transcription settings that feed speech recognition accuracy."
+            },
+            {
+              "box": [
+                0.538,
+                0.36,
+                0.746,
+                0.402
+              ],
+              "tag": "Security & fallback",
+              "why": "Where failover behavior for recognition or call issues is configured."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "STT models — provider/model table (Deepgram Flux) · custom STT",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/models/stt/",
-          "shot": "references/competitors/public-docs/livekit-docs-stt.png"
+          "shot": "references/competitors/public-docs/livekit-docs-stt.png",
+          "marks": [
+            {
+              "box": [
+                0.305,
+                0.8,
+                0.75,
+                1
+              ],
+              "tag": "STT model table",
+              "why": "Deepgram Flux and Flux-Multilingual rows show the recognition models on offer, each with distinct language coverage."
+            },
+            {
+              "box": [
+                0.747,
+                0.448,
+                0.9,
+                0.472
+              ],
+              "tag": "Custom STT link",
+              "why": "A dedicated Custom STT page suggests bring-your-own-recognizer support worth checking against failover behavior."
+            }
+          ]
         }
       ]
     },
@@ -289,56 +707,242 @@
           "label": "Idle messages — Idle Messages · Max Idle Messages · Idle Timeout",
           "kind": "docs",
           "href": "https://docs.vapi.ai/assistants/idle-messages",
-          "shot": "references/competitors/public-docs/vapi-docs-idle-messages.png"
+          "shot": "references/competitors/public-docs/vapi-docs-idle-messages.png",
+          "marks": [
+            {
+              "box": [
+                0.221,
+                0.824,
+                0.65,
+                0.896
+              ],
+              "tag": "Idle message settings",
+              "why": "Step 2 names the exact fields — Idle Messages, Max Idle Messages, Idle Timeout — that control filler prompts during silence."
+            },
+            {
+              "box": [
+                0.221,
+                0.923,
+                0.686,
+                0.987
+              ],
+              "tag": "Choose idle messages",
+              "why": "Step 3 shows selecting preset idle/filler messages, the content side of this greeting-adjacent feature."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Basic settings — begin message, user speaks first, reminder",
           "kind": "docs",
           "href": "https://docs.retellai.com/build/single-multi-prompt/configure-basic-settings",
-          "shot": "references/competitors/public-docs/retell-docs-basic-settings.png"
+          "shot": "references/competitors/public-docs/retell-docs-basic-settings.png",
+          "marks": [
+            {
+              "box": [
+                0.248,
+                0.208,
+                0.725,
+                0.249
+              ],
+              "tag": "Basic settings intro",
+              "why": "States that who speaks first is configured directly in the agent's basic settings, before any prompt is written."
+            },
+            {
+              "box": [
+                0.248,
+                0.289,
+                0.714,
+                0.333
+              ],
+              "tag": "Speaks-first framing",
+              "why": "Reiterates that language model, voice, and who-speaks-first are decided upfront, the same territory as our greeting/disclaimer defaults."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Conversation flow — first message, turn timeout",
           "kind": "docs",
           "href": "https://elevenlabs.io/docs/agents-platform/customization/conversation-flow",
-          "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png"
+          "shot": "references/competitors/public-docs/elevenlabs-docs-conversation-flow.png",
+          "marks": [
+            {
+              "box": [
+                0.505,
+                0.403,
+                0.752,
+                0.548
+              ],
+              "tag": "Turn timeout",
+              "why": "Timing setting shaping how quickly the first message follows silence."
+            },
+            {
+              "box": [
+                0.248,
+                0.575,
+                0.497,
+                0.73
+              ],
+              "tag": "Soft timeout filler",
+              "why": "Plays natural filler audio while the agent is thinking, akin to a filler phrase."
+            }
+          ]
         },
         {
           "vendor": "Vapi",
           "label": "Assistant tab — First Message · Assistant speaks first · Transcriber/Model/Voice cards",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-model.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-model.png",
+          "marks": [
+            {
+              "box": [
+                0.342,
+                0.4,
+                0.981,
+                0.5
+              ],
+              "tag": "First message text",
+              "why": "The scripted greeting the assistant reads verbatim when the call connects."
+            },
+            {
+              "box": [
+                0.843,
+                0.392,
+                0.978,
+                0.428
+              ],
+              "tag": "Speaks first setting",
+              "why": "Dropdown that decides whether the assistant or the caller speaks first."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+          "shot": "references/competitors/product/retell/retell-agent-editor.png",
+          "marks": [
+            {
+              "box": [
+                0.045,
+                0.848,
+                0.52,
+                0.923
+              ],
+              "tag": "Welcome message",
+              "why": "AI-speaks-first toggle and dynamic greeting message that opens the call."
+            },
+            {
+              "box": [
+                0.375,
+                0.812,
+                0.52,
+                0.847
+              ],
+              "tag": "Pause before speaking",
+              "why": "Configurable delay before the greeting plays."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Agent tab — First message · Interruptible · Turn V3",
           "kind": "product",
           "href": "https://elevenlabs.io/app/agents",
-          "shot": "references/competitors/product/elevenlabs/elevenlabs-agent-agent.png"
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-agent-agent.png",
+          "marks": [
+            {
+              "box": [
+                0.184,
+                0.695,
+                0.696,
+                0.86
+              ],
+              "tag": "First message",
+              "why": "Scripted greeting text is the direct equivalent of our opening disclosure/greeting copy."
+            },
+            {
+              "box": [
+                0.594,
+                0.86,
+                0.697,
+                0.892
+              ],
+              "tag": "Interruptible toggle",
+              "why": "Whether the greeting itself can be interrupted affects how the opening disclosure is delivered."
+            },
+            {
+              "box": [
+                0.184,
+                0.93,
+                0.696,
+                1
+              ],
+              "tag": "Turn V3 model",
+              "why": "Turn-detection quality shapes how filler and silence right after the greeting are handled."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Agent editor — Kate voice · English (US) · Welcome Message · AI speaks first · Pause Before Speaking",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png"
+          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png",
+          "marks": [
+            {
+              "box": [
+                0.045,
+                0.848,
+                0.52,
+                0.923
+              ],
+              "tag": "Welcome message",
+              "why": "AI-speaks-first toggle and dynamic greeting message that opens the call."
+            },
+            {
+              "box": [
+                0.375,
+                0.812,
+                0.52,
+                0.847
+              ],
+              "tag": "Pause before speaking",
+              "why": "Configurable delay before the greeting plays, affecting perceived latency."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Speech & audio — session.say · generate_reply · interruptions · background audio",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/build/audio/",
-          "shot": "references/competitors/public-docs/livekit-docs-speech-greeting.png"
+          "shot": "references/competitors/public-docs/livekit-docs-speech-greeting.png",
+          "marks": [
+            {
+              "box": [
+                0.747,
+                0.382,
+                0.897,
+                0.448
+              ],
+              "tag": "Initiating speech",
+              "why": "session.say and generate_reply are the calls used to have the agent greet or speak first."
+            },
+            {
+              "box": [
+                0.747,
+                0.33,
+                0.897,
+                0.376
+              ],
+              "tag": "Preemptive speech",
+              "why": "Preemptive speech generation is LiveKit's mechanism for filler audio while a response is prepared."
+            }
+          ]
         }
       ]
     },
@@ -378,14 +982,58 @@
           "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+          "shot": "references/competitors/product/retell/retell-agent-editor.png",
+          "marks": [
+            {
+              "box": [
+                0.538,
+                0.168,
+                0.746,
+                0.208
+              ],
+              "tag": "Speech settings",
+              "why": "Governs speech-level behavior parameters used during calls."
+            },
+            {
+              "box": [
+                0.538,
+                0.264,
+                0.746,
+                0.305
+              ],
+              "tag": "Call settings",
+              "why": "Houses call-level behavior rules such as timeouts and end conditions."
+            }
+          ]
         },
         {
           "vendor": "Vapi",
           "label": "Voicemail Detection — detection options table",
           "kind": "docs",
           "href": "https://docs.vapi.ai/calls/voicemail-detection",
-          "shot": "references/competitors/public-docs/vapi-docs-voicemail.png"
+          "shot": "references/competitors/public-docs/vapi-docs-voicemail.png",
+          "marks": [
+            {
+              "box": [
+                0.32,
+                0.76,
+                0.8,
+                0.995
+              ],
+              "tag": "Detection options table",
+              "why": "Lists each voicemail-detection method with strengths, weaknesses, and the recommended choice."
+            },
+            {
+              "box": [
+                0.02,
+                0.435,
+                0.185,
+                0.665
+              ],
+              "tag": "In-call control settings",
+              "why": "Voicemail detection sits alongside other call-behavior rules in this nav group."
+            }
+          ]
         }
       ]
     },
@@ -425,14 +1073,58 @@
           "label": "Voice settings panel — Voice model · Speed · Background Sound (Off / Office / Default / Custom)",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png",
+          "marks": [
+            {
+              "box": [
+                0.749,
+                0.488,
+                0.995,
+                0.582
+              ],
+              "tag": "Speed control",
+              "why": "Speed slider shapes how expressive/rushed the TTS delivery sounds."
+            },
+            {
+              "box": [
+                0.749,
+                0.592,
+                0.995,
+                0.694
+              ],
+              "tag": "Background sound",
+              "why": "Off/Office/Default/Custom ambience presets add personality/character to the call."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "TTS models — custom voices · expressive mode · Cartesia Sonic 3",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/models/tts/",
-          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png"
+          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.747,
+                0.308,
+                0.9,
+                0.352
+              ],
+              "tag": "Expressive mode",
+              "why": "A dedicated Expressive mode section is outlined for this model family — the personality/expression control to benchmark."
+            },
+            {
+              "box": [
+                0.305,
+                0.799,
+                0.75,
+                1
+              ],
+              "tag": "Voice model",
+              "why": "Cartesia Sonic 3 is the model listed; expressiveness support may vary by model family."
+            }
+          ]
         }
       ]
     },
@@ -483,84 +1175,348 @@
           "label": "Voice fallback plan",
           "kind": "docs",
           "href": "https://docs.vapi.ai/voice-fallback-plan",
-          "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png"
+          "shot": "references/competitors/public-docs/vapi-docs-voice-fallback-plan.png",
+          "marks": [
+            {
+              "box": [
+                0.22,
+                0.505,
+                0.775,
+                0.75
+              ],
+              "tag": "Fallback sequence",
+              "why": "Numbered steps show Vapi cascading through fallback voices in order until one succeeds, the core provider-failover pattern to mirror."
+            }
+          ]
         },
         {
           "vendor": "Vapi",
           "label": "Assistant tab — First Message · Assistant speaks first · Transcriber/Model/Voice cards",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-model.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-model.png",
+          "marks": [
+            {
+              "box": [
+                0.342,
+                0.236,
+                0.555,
+                0.352
+              ],
+              "tag": "Transcriber vendor",
+              "why": "Deepgram is the chosen speech-to-text vendor, swappable via this card."
+            },
+            {
+              "box": [
+                0.564,
+                0.236,
+                0.769,
+                0.352
+              ],
+              "tag": "Model vendor",
+              "why": "Groq/Llama is the LLM vendor powering responses, shown with cost and latency."
+            },
+            {
+              "box": [
+                0.777,
+                0.236,
+                0.981,
+                0.352
+              ],
+              "tag": "Voice vendor",
+              "why": "Rime AI is the TTS vendor selected for output voice, each card independently swappable."
+            }
+          ]
         },
         {
           "vendor": "Vapi",
           "label": "Advanced tab — Fallback Voices · Fallback Transcriber · Webhook Server",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-advanced.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-advanced.png",
+          "marks": [
+            {
+              "box": [
+                0.343,
+                0.239,
+                0.982,
+                0.311
+              ],
+              "tag": "Fallback voices",
+              "why": "Shows the per-provider fallback pattern: a named backup voice vendor slotted in if the primary fails."
+            },
+            {
+              "box": [
+                0.343,
+                0.332,
+                0.982,
+                0.404
+              ],
+              "tag": "Fallback transcriber",
+              "why": "Same fallback pattern applied to the transcription vendor, confirming a consistent cross-provider model."
+            },
+            {
+              "box": [
+                0.343,
+                0.824,
+                0.982,
+                1
+              ],
+              "tag": "Webhook server",
+              "why": "Vendor-agnostic webhook config sits beside the fallback settings, tying provider events to the assistant."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Agent editor — Welcome Message · AI speaks first · Realtime Transcription · Security & Fallback",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-editor.png"
+          "shot": "references/competitors/product/retell/retell-agent-editor.png",
+          "marks": [
+            {
+              "box": [
+                0.045,
+                0.1,
+                0.148,
+                0.142
+              ],
+              "tag": "Model vendor",
+              "why": "Single LLM vendor selector with no visible backup model option."
+            },
+            {
+              "box": [
+                0.15,
+                0.1,
+                0.235,
+                0.142
+              ],
+              "tag": "Voice vendor",
+              "why": "Single voice provider selector, with no fallback voice vendor shown."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Voices — Custom vs Default voices · voice-clone upsell",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-voices.png"
+          "shot": "references/competitors/product/livekit/livekit-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.171,
+                0.032,
+                0.325,
+                0.09
+              ],
+              "tag": "Default voices tab",
+              "why": "Default voices are LiveKit's own provider-supplied voice bank, the closest analog to a provider fallback list."
+            },
+            {
+              "box": [
+                0.465,
+                0.368,
+                0.695,
+                0.6
+              ],
+              "tag": "Multi-provider TTS",
+              "why": "Copy notes custom voices work across multiple TTS providers via LiveKit Inference, relevant to provider-fallback abstraction."
+            }
+          ]
         },
         {
           "vendor": "Vapi",
           "label": "Voice settings panel — Voice model · Speed · Background Sound (Off / Office / Default / Custom)",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/assistants",
-          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png"
+          "shot": "references/competitors/product/vapi/vapi-assistant-voice-panel.png",
+          "marks": [
+            {
+              "box": [
+                0.749,
+                0.152,
+                0.995,
+                0.21
+              ],
+              "tag": "Voice model",
+              "why": "Model dropdown is the vendor/provider selection surface for TTS."
+            },
+            {
+              "box": [
+                0.604,
+                0.24,
+                0.727,
+                0.354
+              ],
+              "tag": "Voice provider card",
+              "why": "Summary card names the current vendor (Rime AI) with cost and latency, useful for fallback/vendor comparison."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Default voices table — provider / language / gender filters",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-voices-default.png"
+          "shot": "references/competitors/product/livekit/livekit-voices-default.png",
+          "marks": [
+            {
+              "box": [
+                0.767,
+                0.32,
+                0.983,
+                0.62
+              ],
+              "tag": "Provider column",
+              "why": "Every default voice maps to a single provider (Cartesia), with no fallback shown."
+            },
+            {
+              "box": [
+                0.705,
+                0.24,
+                0.8,
+                0.276
+              ],
+              "tag": "Provider filter",
+              "why": "Filters voices by provider but doesn't expose any fallback ordering."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Agent editor — Kate voice · English (US) · Welcome Message · AI speaks first · Pause Before Speaking",
           "kind": "product",
           "href": "https://dashboard.retellai.com/agents",
-          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png"
+          "shot": "references/competitors/product/retell/retell-agent-voice-picker.png",
+          "marks": [
+            {
+              "box": [
+                0.045,
+                0.1,
+                0.148,
+                0.142
+              ],
+              "tag": "Model vendor",
+              "why": "Single LLM vendor selector with no visible backup model option."
+            },
+            {
+              "box": [
+                0.15,
+                0.1,
+                0.235,
+                0.142
+              ],
+              "tag": "Voice vendor",
+              "why": "Single voice provider selector, with no fallback voice vendor shown."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Models — provider cascade if one fails · backup LLM configuration",
           "kind": "docs",
           "href": "https://elevenlabs.io/docs/eleven-agents/customization/llm",
-          "shot": "references/competitors/public-docs/elevenlabs-docs-llm-fallback.png"
+          "shot": "references/competitors/public-docs/elevenlabs-docs-llm-fallback.png",
+          "marks": [
+            {
+              "box": [
+                0.25,
+                0.458,
+                0.65,
+                0.505
+              ],
+              "tag": "Provider cascade",
+              "why": "States it can auto-cascade from one LLM provider to another if one fails — the fallback promise to compare against."
+            },
+            {
+              "box": [
+                0.869,
+                0.325,
+                0.99,
+                0.352
+              ],
+              "tag": "Backup LLM config",
+              "why": "Dedicated docs page for configuring a backup LLM — the explicit fallback settings surface to benchmark."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "STT models — provider/model table (Deepgram Flux) · custom STT",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/models/stt/",
-          "shot": "references/competitors/public-docs/livekit-docs-stt.png"
+          "shot": "references/competitors/public-docs/livekit-docs-stt.png",
+          "marks": [
+            {
+              "box": [
+                0.305,
+                0.8,
+                0.75,
+                1
+              ],
+              "tag": "STT vendor",
+              "why": "Deepgram is the sole vendor listed for LiveKit Inference STT — check for fallback to another provider."
+            },
+            {
+              "box": [
+                0.747,
+                0.284,
+                0.85,
+                0.308
+              ],
+              "tag": "Plugins (other STT vendors)",
+              "why": "Plugins section lists alternate STT providers that can be swapped in — the closest fallback/vendor picker."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "TTS models — custom voices · expressive mode · Cartesia Sonic 3",
           "kind": "docs",
           "href": "https://docs.livekit.io/agents/models/tts/",
-          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png"
+          "shot": "references/competitors/public-docs/livekit-docs-tts-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.305,
+                0.799,
+                0.75,
+                1
+              ],
+              "tag": "Model vendor",
+              "why": "Cartesia is the vendor behind this TTS model; check whether another provider can serve as fallback."
+            },
+            {
+              "box": [
+                0.747,
+                0.376,
+                0.85,
+                0.404
+              ],
+              "tag": "Plugins (other vendors)",
+              "why": "The Plugins link lets teams swap in a different TTS provider outside LiveKit Inference — the closest fallback mechanism shown."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "List Voices API — voice_id · provider · gender · accent · age · preview",
           "kind": "docs",
           "href": "https://docs.retellai.com/api-references/list-voices",
-          "shot": "references/competitors/public-docs/retell-docs-voices.png"
+          "shot": "references/competitors/public-docs/retell-docs-voices.png",
+          "marks": [
+            {
+              "box": [
+                0.675,
+                0.4,
+                0.955,
+                0.684
+              ],
+              "tag": "Provider field",
+              "why": "Provider is a flat string per voice (e.g. elevenlabs) with no separate backup/fallback vendor field shown."
+            }
+          ]
         }
       ]
     },
@@ -628,7 +1584,29 @@
           "label": "Browse templates gallery with Workflow/Preview panel",
           "kind": "product",
           "href": "https://elevenlabs.io/app/agents/templates",
-          "shot": "references/competitors/product/elevenlabs/elevenlabs-templates.png"
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-templates.png",
+          "marks": [
+            {
+              "box": [
+                0.175,
+                0.076,
+                0.533,
+                0.328
+              ],
+              "tag": "Templates gallery",
+              "why": "Browsable first-run template cards like Customer Support and Language Practice Tutor to jumpstart setup."
+            },
+            {
+              "box": [
+                0.55,
+                0.076,
+                0.682,
+                0.872
+              ],
+              "tag": "Workflow preview panel",
+              "why": "Live workflow canvas that previews the selected template's conversation flow before import."
+            }
+          ]
         }
       ]
     },
@@ -668,35 +1646,145 @@
           "label": "Logs — Calls table (Ended Reason · Duration · Cost)",
           "kind": "product",
           "href": "https://dashboard.vapi.ai/logs",
-          "shot": "references/competitors/product/vapi/vapi-logs.png"
+          "shot": "references/competitors/product/vapi/vapi-logs.png",
+          "marks": [
+            {
+              "box": [
+                0.668,
+                0.26,
+                0.725,
+                0.32
+              ],
+              "tag": "Ended reason column",
+              "why": "Call table exposes an ended-reason code per session, the diagnostic field to compare against ours."
+            },
+            {
+              "box": [
+                0.87,
+                0.26,
+                0.915,
+                0.32
+              ],
+              "tag": "Duration column",
+              "why": "Call duration is tracked per row in the logs table."
+            },
+            {
+              "box": [
+                0.944,
+                0.26,
+                0.97,
+                0.32
+              ],
+              "tag": "Cost column",
+              "why": "Per-call cost is a standard column in Vapi's logs table."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Call History — Duration · Cost · End Reason · Session Status · User Sentiment",
           "kind": "product",
           "href": "https://dashboard.retellai.com/call-history",
-          "shot": "references/competitors/product/retell/retell-call-history.png"
+          "shot": "references/competitors/product/retell/retell-call-history.png",
+          "marks": [
+            {
+              "box": [
+                0.303,
+                0.12,
+                0.51,
+                0.4
+              ],
+              "tag": "Duration & cost",
+              "why": "Per-session duration and cost are the core usage metrics logged for each call."
+            },
+            {
+              "box": [
+                0.7,
+                0.12,
+                0.878,
+                0.4
+              ],
+              "tag": "End reason & status",
+              "why": "Shows how each session terminated and its final status, key fields for call-log review."
+            },
+            {
+              "box": [
+                0.88,
+                0.12,
+                0.955,
+                0.4
+              ],
+              "tag": "User sentiment",
+              "why": "Auto-scored sentiment per session, an evaluative signal attached directly to the call log."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-agents.png"
+          "shot": "references/competitors/product/livekit/livekit-agents.png",
+          "marks": [
+            {
+              "box": [
+                0.172,
+                0.126,
+                0.983,
+                0.192
+              ],
+              "tag": "Agents table row",
+              "why": "Each row logs session count and status per agent — the closest thing to a call/session log at this level."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Sessions — Duration · Participants · Features · Status (empty)",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-sessions.png"
+          "shot": "references/competitors/product/livekit/livekit-sessions.png",
+          "marks": [
+            {
+              "box": [
+                0.172,
+                0.36,
+                0.983,
+                0.51
+              ],
+              "tag": "Sessions table columns",
+              "why": "Defines Duration, Participants, Features and Status per session, currently showing an empty 'No results' state."
+            }
+          ]
         },
         {
           "vendor": "ElevenLabs",
           "label": "Conversations — history table (Agent · Title · Date)",
           "kind": "product",
           "href": "https://elevenlabs.io/app/agents/history",
-          "shot": "references/competitors/product/elevenlabs/elevenlabs-conversations.png"
+          "shot": "references/competitors/product/elevenlabs/elevenlabs-conversations.png",
+          "marks": [
+            {
+              "box": [
+                0.204,
+                0.253,
+                0.72,
+                0.33
+              ],
+              "tag": "Conversation log table",
+              "why": "Each row logs the agent, session title, and timestamp of a past call."
+            },
+            {
+              "box": [
+                0.204,
+                0.168,
+                0.72,
+                0.207
+              ],
+              "tag": "Log search & filter",
+              "why": "Lets reviewers search across session history."
+            }
+          ]
         }
       ]
     },
@@ -732,14 +1820,58 @@
           "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-agents.png"
+          "shot": "references/competitors/product/livekit/livekit-agents.png",
+          "marks": [
+            {
+              "box": [
+                0.725,
+                0.126,
+                0.84,
+                0.19
+              ],
+              "tag": "E2E median & region",
+              "why": "E2E Median latency and region are the only diagnostic fields shown, with no SIP-specific view."
+            },
+            {
+              "box": [
+                0.448,
+                0.644,
+                0.705,
+                0.828
+              ],
+              "tag": "Observability disabled",
+              "why": "Deeper latency/diagnostic observability sits behind an opt-in toggle rather than being built in."
+            }
+          ]
         },
         {
           "vendor": "LiveKit",
           "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-telephony.png"
+          "shot": "references/competitors/product/livekit/livekit-telephony.png",
+          "marks": [
+            {
+              "box": [
+                0.172,
+                0.076,
+                0.983,
+                0.156
+              ],
+              "tag": "Call stats row",
+              "why": "Top-line totals for calls and duration that anchor the diagnostics view."
+            },
+            {
+              "box": [
+                0.582,
+                0.19,
+                0.983,
+                0.418
+              ],
+              "tag": "Calls with issues",
+              "why": "Surfaces the count of problematic calls, the entry point for latency/SIP diagnostics."
+            }
+          ]
         }
       ]
     },
@@ -771,14 +1903,58 @@
           "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-telephony.png"
+          "shot": "references/competitors/product/livekit/livekit-telephony.png",
+          "marks": [
+            {
+              "box": [
+                0.172,
+                0.19,
+                0.573,
+                0.418
+              ],
+              "tag": "Active calls",
+              "why": "Live count of in-progress calls for real-time monitoring."
+            },
+            {
+              "box": [
+                0.172,
+                0.452,
+                0.983,
+                0.624
+              ],
+              "tag": "Calls table",
+              "why": "Row-level call list where an operator would drill into a specific call, currently empty."
+            }
+          ]
         },
         {
           "vendor": "Retell",
           "label": "Live Monitoring — live call table (Time · Duration · Type · From · To)",
           "kind": "product",
           "href": "https://dashboard.retellai.com/live-monitoring",
-          "shot": "references/competitors/product/retell/retell-live-monitoring.png"
+          "shot": "references/competitors/product/retell/retell-live-monitoring.png",
+          "marks": [
+            {
+              "box": [
+                0.173,
+                0.064,
+                0.995,
+                0.104
+              ],
+              "tag": "Live call table",
+              "why": "Header row lists Time, Call Duration, Type, From, To, Call ID — the fields to surface per active call."
+            },
+            {
+              "box": [
+                0.545,
+                0.492,
+                0.615,
+                0.592
+              ],
+              "tag": "Empty state",
+              "why": "Retell's empty state for Live Monitoring shows no operator controls appear until a call is actually live."
+            }
+          ]
         }
       ]
     },
@@ -830,7 +2006,39 @@
           "label": "AI Quality Assurance — Average Score · Resolution Rate · Transfer stats",
           "kind": "product",
           "href": "https://dashboard.retellai.com/quality-assurance",
-          "shot": "references/competitors/product/retell/retell-quality-assurance.png"
+          "shot": "references/competitors/product/retell/retell-quality-assurance.png",
+          "marks": [
+            {
+              "box": [
+                0.31,
+                0.564,
+                0.575,
+                0.824
+              ],
+              "tag": "Average score",
+              "why": "Overall QA score computed per call and trended over time, the core scorecard metric."
+            },
+            {
+              "box": [
+                0.583,
+                0.564,
+                0.85,
+                0.824
+              ],
+              "tag": "Call resolution rate",
+              "why": "Percentage of calls resolved successfully, a headline eval metric alongside the score."
+            },
+            {
+              "box": [
+                0.31,
+                0.84,
+                0.85,
+                0.96
+              ],
+              "tag": "Transfer stats",
+              "why": "Transfer success rate and wait time break down handoff performance as part of the same scorecard."
+            }
+          ]
         }
       ]
     },
@@ -902,7 +2110,29 @@
           "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
           "kind": "product",
           "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-telephony.png"
+          "shot": "references/competitors/product/livekit/livekit-telephony.png",
+          "marks": [
+            {
+              "box": [
+                0.006,
+                0.312,
+                0.153,
+                0.486
+              ],
+              "tag": "Telephony submenu",
+              "why": "Left-nav section listing Calls, Dispatch rules, Phone numbers and SIP trunks."
+            },
+            {
+              "box": [
+                0.006,
+                0.454,
+                0.153,
+                0.486
+              ],
+              "tag": "SIP trunks link",
+              "why": "Direct entry point for configuring SIP trunk connections."
+            }
+          ]
         }
       ]
     },
