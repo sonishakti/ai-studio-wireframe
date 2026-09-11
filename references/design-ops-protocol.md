@@ -30,6 +30,19 @@ feature, then walks the stops top to bottom. Everything is generated from `track
 `scripts/build-figma-sections.mjs` + `use_figma` (see *Review loop*); hero screens are hand-built once per chosen
 prototype and then owned by the designer.
 
+**Hero screens recipe (Stop 7, done for 04 on 2026-09-11):** measure the live prototype with `scripts/drive.mjs`
+(`eval` the bounding rects and computed styles of every control in the section, then `shot`), upload the screenshot
+as the hero frame's image fill, and rebuild the changed section on top as native layers — text nodes for every
+label, field value and recap line, rectangles/ellipses for fields, switches and buttons — inside a frame named
+`<section> — editable`, with a dashed red outline and an "Editable — text layers" tag. Put the rationale as a white
+card under the frame. Record the node ids in `hero[]`; the section `7 · Hero screens` is never regenerated.
+
+**Acting in competitor products (Stop 2):** `node scripts/drive.mjs serve` runs ONE headless Chrome on the
+signed-in profile; each agent works on its own `--tab <vendor>`. Four agents in parallel were too much for one
+Chrome (it hung twice); run at most two vendors at a time, and give each agent a 20-minute budget with the report
+file written early. `scripts/annotate-shots.mjs` defaults to CDP port 9333, which is the drive server's HTTP port —
+pass `CDP_PORT=9444` when both run.
+
 **Rainy-day rule:** "observability disabled", "no calls yet", "no logs" are rainy scenarios, not research
 results. Reach the real state first (enable, run a 30-second test call, wait for ingestion), capture it, and
 only then keep the empty state as its own rainy shot. Never buy, upgrade a plan, or change billing to get there;

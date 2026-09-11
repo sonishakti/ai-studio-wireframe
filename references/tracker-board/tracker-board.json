@@ -1188,6 +1188,14 @@
             "Shipped controls and Requires-Engine ideas (persona filler, continue after filler, tool-call filler) are not told apart, so reviewers ask for things the Engine cannot do yet."
           ]
         }
+      ],
+      "hero": [
+        {
+          "node": "3154:46029",
+          "name": "Hero · 04 Opening — happy: agent speaks first, AI disclosure on",
+          "url": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3154-46029",
+          "editable": "Opening section — editable (3154:46031)"
+        }
       ]
     },
     {
@@ -2735,6 +2743,748 @@
           ],
           "scenario": "rainy",
           "figmaHash": "164126bcbf812c962bf869ccc0420ec6d4ae8842"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Conversation history — table of past calls/chats with Duration and Evaluation columns",
+          "href": "https://elevenlabs.io/app/agents/history",
+          "shot": "references/competitors/product/elevenlabs/sip-conversations-list.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.899,
+                0.296,
+                0.955,
+                0.324
+              ],
+              "tag": "Evaluation badge",
+              "why": "Row-level pass/fail verdict is the entry point for whose-fault triage before opening a conversation."
+            },
+            {
+              "box": [
+                0.745,
+                0.296,
+                0.775,
+                0.324
+              ],
+              "tag": "Duration",
+              "why": "Only duration is shown in-line; no per-leg latency is visible until you open the row."
+            }
+          ],
+          "notes": "Account had one pre-existing conversation (text-only, 4s, Successful). Filters panel (Agent/Branch/Date range/Duration/Language/User) has no call-status or fault filter.",
+          "figmaHash": "72de6732f4f0adf872e5ee300cbc38adbeadb000"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Agent Spotlight — per-agent dashboard with a dedicated Latency summary card",
+          "href": "https://elevenlabs.io/app/agents/agents/agent_4901k4agf791fgt851cp2zvzhrd3?branchId=agtbrch_2801ks19daexf2evx2tg3cbr1wbk",
+          "shot": "references/competitors/product/elevenlabs/sip-agent-spotlight.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.1845,
+                0.9064,
+                0.3515,
+                0.98
+              ],
+              "tag": "Latency card",
+              "why": "Top-level Latency KPI sits next to Conversation Cost/Duration, framing latency as a first-class health metric per agent."
+            },
+            {
+              "box": [
+                0.8375,
+                0.632,
+                0.8945,
+                0.674
+              ],
+              "tag": "Test-call button",
+              "why": "Inline call/chat widget used to generate a live conversation on demand for diagnosis."
+            }
+          ],
+          "notes": "Card showed 'No data has been collected' for the default 7-day window; generated a live conversation via the widget to populate downstream views.",
+          "figmaHash": "656c7ec01407e64243cdddfa2bdf4c6095b23dc7"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Test call via widget — headless mic permission denied, conversation still recorded",
+          "href": "https://elevenlabs.io/app/agents/agents/agent_4901k4agf791fgt851cp2zvzhrd3?branchId=agtbrch_2801ks19daexf2evx2tg3cbr1wbk",
+          "shot": "references/competitors/product/elevenlabs/sip-test-call-permission-denied.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.8225,
+                0.1856,
+                0.899,
+                0.2016
+              ],
+              "tag": "Permission denied",
+              "why": "Voice test call fails immediately with no retry guidance or fallback-to-text suggestion."
+            },
+            {
+              "box": [
+                0.76,
+                0.912,
+                0.985,
+                0.932
+              ],
+              "tag": "Toast duplicate",
+              "why": "Same error repeated as a corner toast, but neither surface explains the cause (no microphone) or next step."
+            }
+          ],
+          "notes": "Clicked the widget's phone/call icon; headless Chrome has no mic so ElevenLabs's own client rejected the call. Did not retry voice; used it as the rainy 'client-side/carrier-leg failure' capture.",
+          "figmaHash": "dbf6d2bc812b98823299c17e37f0abad75e18a27"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Conversation Overview — status, sentiment, duration, cost after a real text chat",
+          "href": "https://elevenlabs.io/app/agents/agents/agent_4901k4agf791fgt851cp2zvzhrd3/history/conv_3101m27gfm84frsvthp18ndt2xsv?branchId=agtbrch_2801ks19daexf2evx2tg3cbr1wbk",
+          "shot": "references/competitors/product/elevenlabs/sip-conversation-detail-populated.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.7265,
+                0.432,
+                0.77,
+                0.454
+              ],
+              "tag": "Conversation status",
+              "why": "Successful/Failed verdict is the top-line answer to 'did the call work', shown before any latency detail."
+            },
+            {
+              "box": [
+                0.828,
+                0.26,
+                0.9765,
+                0.284
+              ],
+              "tag": "Connection duration",
+              "why": "Metadata panel gives total wall-clock duration and cost, but nothing that separates carrier vs model time."
+            },
+            {
+              "box": [
+                0.71,
+                0.724,
+                0.7975,
+                0.744
+              ],
+              "tag": "How conversation ended",
+              "why": "Free-text end reason ('Client navigated away') is the only signal for how a session terminated — no structured fault code."
+            }
+          ],
+          "notes": "Generated by typing two turns into the agent's text-chat widget (mic unavailable headlessly); this created a full, Successful, Text-only=Yes conversation record.",
+          "figmaHash": "a17be19a7371a1e48442679beb2c83d6d1175b99"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Transcript — per-turn LLM latency badge (e.g. 'LLM 723 ms · Reasoning') under each agent reply",
+          "href": "https://elevenlabs.io/app/agents/agents/agent_4901k4agf791fgt851cp2zvzhrd3/history/conv_3101m27gfm84frsvthp18ndt2xsv?branchId=agtbrch_2801ks19daexf2evx2tg3cbr1wbk",
+          "shot": "references/competitors/product/elevenlabs/sip-conversation-transcript-llm-latency.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.3665,
+                0.732,
+                0.425,
+                0.7504
+              ],
+              "tag": "LLM latency ms",
+              "why": "The only place ElevenLabs attributes latency to a specific leg (the model) — per assistant turn, in milliseconds."
+            },
+            {
+              "box": [
+                0.431,
+                0.732,
+                0.475,
+                0.7504
+              ],
+              "tag": "Reasoning tag",
+              "why": "Flags which turns used extended reasoning, a likely cause of the model-leg latency spike next to it."
+            }
+          ],
+          "notes": "This is the closest ElevenLabs gets to leg-level latency attribution; it only covers the LLM leg, nothing for ASR/TTS/network/carrier.",
+          "figmaHash": "6e8108be129960b01c28c569e721c717532fa29b"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Dashboards → Audio tab — Agent Response Time / Response Generation Latency / Turn Taking Latency (empty)",
+          "href": "https://elevenlabs.io/app/agents/agents/agent_4901k4agf791fgt851cp2zvzhrd3/analytics?branchId=agtbrch_2801ks19daexf2evx2tg3cbr1wbk&tab=audio",
+          "shot": "references/competitors/product/elevenlabs/sip-dashboard-audio-latency-empty.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.2045,
+                0.26,
+                0.955,
+                0.524
+              ],
+              "tag": "Agent Response Time",
+              "why": "Named as the aggregate, user-perceived response metric — the taxonomy ElevenLabs uses to reason about 'whose fault'."
+            },
+            {
+              "box": [
+                0.2045,
+                0.6504,
+                0.5775,
+                0.9216
+              ],
+              "tag": "Response Generation Latency",
+              "why": "Isolates model/LLM+TTS generation time from network/turn-taking — the 'is it the model' half of the JTBD."
+            },
+            {
+              "box": [
+                0.5825,
+                0.6504,
+                0.955,
+                0.9216
+              ],
+              "tag": "Turn Taking Latency",
+              "why": "Isolates conversational turn-taking delay — closer to the 'carrier/telephony leg' half of the JTBD."
+            }
+          ],
+          "notes": "All three cards read 'No data has been collected' even after generating a text conversation — these metrics appear to require voice/phone traffic, not text-chat, to populate. Kept as rainy/empty because the exact taxonomy the vendor tracks is itself a key finding.",
+          "figmaHash": "f0580d92eb7a76cbfafbd5f96a4abeb97b45c2dd"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Phone Numbers — empty state before any number/SIP trunk is imported",
+          "href": "https://elevenlabs.io/app/agents/phone-numbers",
+          "shot": "references/competitors/product/elevenlabs/sip-phone-numbers-empty.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.22,
+                0.1984,
+                0.94,
+                0.428
+              ],
+              "tag": "No phone numbers",
+              "why": "Zero-state gates all SIP/telephony diagnostics — nothing to correlate carrier-leg latency against until a number exists."
+            }
+          ],
+          "notes": "Account has no phone numbers or SIP trunks provisioned; did not purchase a number. 'Import number' offers From Twilio / From SIP Trunk / From Exotel.",
+          "figmaHash": "e55915283cd4a083cf64ec46ded7d4caa94c37fa"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Import SIP Trunk — Label/Phone number + Inbound Configuration (media encryption, allowed IPs)",
+          "href": "https://elevenlabs.io/app/agents/phone-numbers",
+          "shot": "references/competitors/product/elevenlabs/sip-trunk-form-inbound.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.6375,
+                0.608,
+                0.9625,
+                0.644
+              ],
+              "tag": "Media Encryption",
+              "why": "Inbound transport/encryption setting (Allowed/Required/Disabled) — mismatches here are a classic 'is it us or the carrier' cause of dropped/failed calls."
+            },
+            {
+              "box": [
+                0.6375,
+                0.832,
+                0.935,
+                0.868
+              ],
+              "tag": "Allowed Source IPs",
+              "why": "IP allowlist for the carrier's SIP trunk; wrong entries here manifest as connection failures attributable to the carrier leg."
+            },
+            {
+              "box": [
+                0.63,
+                0.494,
+                0.81,
+                0.534
+              ],
+              "tag": "Inbound Configuration",
+              "why": "Section framed explicitly as 'Forward calls to the ElevenLabs SIP server', i.e. the carrier→ElevenLabs handoff point."
+            }
+          ],
+          "notes": "Opened via Phone Numbers → Import number → From SIP Trunk. No existing trunk, so this is the create/setup form itself (per task instructions).",
+          "figmaHash": "b9d055b03cf387264a1fb42f22ccec64ad9983e4"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Import SIP Trunk — SIP digest Authentication and Outbound Configuration (destination address)",
+          "href": "https://elevenlabs.io/app/agents/phone-numbers",
+          "shot": "references/competitors/product/elevenlabs/sip-trunk-form-auth-outbound.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.6375,
+                0.4752,
+                0.9625,
+                0.584
+              ],
+              "tag": "SIP Trunk Username/Password",
+              "why": "Digest-auth credentials for inbound calls; an auth mismatch here is a clean 'us vs carrier config' fault line."
+            },
+            {
+              "box": [
+                0.6375,
+                0.796,
+                0.9625,
+                0.848
+              ],
+              "tag": "Outbound Address",
+              "why": "Hostname/IP ElevenLabs sends the SIP INVITE to for outbound legs — the exact boundary needed to say whether an outbound failure is carrier-side or ElevenLabs-side."
+            }
+          ],
+          "notes": "Continuation of the same Import SIP Trunk panel, scrolled to the bottom (Remote Domains, Authentication, Outbound Configuration → Address).",
+          "figmaHash": "5c5f600e4d0a86b232d53534c717dffa55d69550"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "product",
+          "label": "Import SIP Trunk — validation errors on empty submit (Label, Phone number required)",
+          "href": "https://elevenlabs.io/app/agents/phone-numbers",
+          "shot": "references/competitors/product/elevenlabs/sip-trunk-form-validation-error.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.6375,
+                0.196,
+                0.7175,
+                0.212
+              ],
+              "tag": "Please enter a label",
+              "why": "Required-field validation is inline and specific, but only covers the two top fields, not trunk-level config correctness."
+            },
+            {
+              "box": [
+                0.6375,
+                0.3056,
+                0.7575,
+                0.3216
+              ],
+              "tag": "Please enter a phone number",
+              "why": "Second required-field error; nothing validates SIP reachability/credentials before Import is allowed."
+            }
+          ],
+          "notes": "Triggered by clicking Import with every field blank (harmless — no data was submitted).",
+          "figmaHash": "e596fc5c1dcafce5a350a17e7cad02428eb39084"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "docs",
+          "label": "SIP trunking guide — overview, TLS/media-encryption capability, in-page Troubleshooting section",
+          "href": "https://elevenlabs.io/docs/eleven-agents/phone-numbers/sip-trunking",
+          "shot": "references/competitors/public-docs/elevenlabs-sip-trunking-setup.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.265,
+                0.6344,
+                0.6225,
+                0.6496
+              ],
+              "tag": "TLS + media encryption",
+              "why": "States the security capability the Media Encryption dropdown in-app controls."
+            },
+            {
+              "box": [
+                0.8685,
+                0.652,
+                0.935,
+                0.6704
+              ],
+              "tag": "Troubleshooting (in-page)",
+              "why": "Troubleshooting is a section of this same doc, not a separate page — the SIP-specific failure catalogue lives here."
+            }
+          ],
+          "notes": "The task's suggested /agents-platform/phone-numbers/sip-trunking URL redirects to /eleven-agents/phone-numbers/sip-trunking (path renamed).",
+          "figmaHash": "e80d956719a68ee2ace7deed6c66288a24af439a"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "docs",
+          "label": "SIP trunking — Troubleshooting section (Connection/Auth/TLS/Audio issues, BYE/481 case)",
+          "href": "https://elevenlabs.io/docs/eleven-agents/phone-numbers/sip-trunking#troubleshooting",
+          "shot": "references/competitors/public-docs/elevenlabs-sip-troubleshooting.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.265,
+                0.408,
+                0.4,
+                0.436
+              ],
+              "tag": "No Audio / One-Way Audio",
+              "why": "Named failure mode that is almost always a carrier/NAT/media-path issue rather than an ElevenLabs-side one."
+            },
+            {
+              "box": [
+                0.265,
+                0.52,
+                0.625,
+                0.552
+              ],
+              "tag": "BYE / 481 response",
+              "why": "A specific SIP-protocol-level fault signature — exactly the kind of carrier-vs-us evidence the JTBD is looking for."
+            },
+            {
+              "box": [
+                0.265,
+                0.848,
+                0.75,
+                0.952
+              ],
+              "tag": "Audio codec limitation",
+              "why": "Documents that ElevenLabs only speaks G711/G722, so codec mismatch on the trunk is a documented, attributable cause of quality problems."
+            }
+          ],
+          "notes": "There is no separate /docs/agents-platform/troubleshooting page for agents generally; the generic /docs/eleven-agents/troubleshooting URL 404s. This anchor is ElevenLabs's actual SIP troubleshooting content.",
+          "figmaHash": "561efa90f5062a96c248627ea7ff55a6b20e7001"
+        },
+        {
+          "vendor": "ElevenLabs",
+          "kind": "docs",
+          "label": "Understanding latency — model inference vs time-to-first-audio vs network round-trip",
+          "href": "https://elevenlabs.io/docs/eleven-api/concepts/latency",
+          "shot": "references/competitors/public-docs/elevenlabs-sip-understanding-latency.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.25,
+                0.516,
+                0.7325,
+                0.576
+              ],
+              "tag": "Model inference latency",
+              "why": "Explicitly the 'is it the model' number (~75ms internal, excludes network) — direct language for fault attribution."
+            },
+            {
+              "box": [
+                0.25,
+                0.612,
+                0.755,
+                0.68
+              ],
+              "tag": "Time-to-first-audio (TTFA)",
+              "why": "The user-perceived number; doc states the gap between TTFA and model latency is 'where most latency problems live'."
+            },
+            {
+              "box": [
+                0.25,
+                0.904,
+                0.735,
+                0.964
+              ],
+              "tag": "Network round-trip",
+              "why": "Named as 20–200ms depending on geography and 'irreducible without changing infrastructure' — the carrier/network-leg component."
+            }
+          ],
+          "notes": "No agents-platform-specific latency-optimization page exists (checked /docs/llms.txt); this eleven-api concepts page is the vendor's general latency-attribution framework and is the closest match. A companion 'Latency optimization' how-to page also exists at /docs/eleven-api/guides/how-to/best-practices/latency-optimization but was not screenshotted to stay within the 3-doc cap.",
+          "figmaHash": "de25cd514a9e61d0763f958b25f3fd395501856f"
+        },
+        {
+          "vendor": "LiveKit",
+          "kind": "docs",
+          "label": "SIP overview — trunks, dispatch rules, inbound and outbound flow",
+          "href": "https://docs.livekit.io/sip/",
+          "shot": "references/competitors/public-docs/livekit-sip-overview-top.png",
+          "scenario": "happy",
+          "marks": [],
+          "figmaHash": "51e33d0b37cac65e701728954ed1a5cb02dc82c2"
+        },
+        {
+          "vendor": "Retell",
+          "kind": "docs",
+          "label": "Get call API — call object with latency and disconnection_reason fields",
+          "href": "https://docs.retellai.com/api-references/get-call",
+          "shot": "references/competitors/public-docs/retell-sip-get-call.png",
+          "scenario": "happy",
+          "marks": [],
+          "figmaHash": "f4d6b140ecbd927f29790cda111a169101066b7a"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Logs → Calls table populated with one call, Ended Reason column visible",
+          "href": "https://dashboard.vapi.ai/logs",
+          "shot": "references/competitors/product/vapi/sip-calls-table-populated.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.785,
+                0.319,
+                0.879,
+                0.338
+              ],
+              "tag": "Ended Reason column",
+              "why": "Only field indicating call outcome in the table — no per-leg fault attribution (carrier/us/model) up front."
+            },
+            {
+              "box": [
+                0.542,
+                0.178,
+                0.598,
+                0.198
+              ],
+              "tag": "Ended Reason filter",
+              "why": "Calls can be filtered by ended reason but there is no filter or column for carrier/SIP leg vs. model leg."
+            }
+          ],
+          "notes": "Generated the log by opening the 'Next.js Buddy - Kid-Friendly Teacher' assistant and using in-dashboard Talk (web call) for a few seconds, then it ended itself since headless Chrome has no mic. This produced the only row in the table.",
+          "figmaHash": "096c48e95e410390676419db0ff631bde42932d6"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Call detail panel: Ended Reason and empty Transcript for the failed web call",
+          "href": "https://dashboard.vapi.ai/logs",
+          "shot": "references/competitors/product/vapi/sip-call-detail-ended-reason.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.3515,
+                0.0904,
+                0.5015,
+                0.1032
+              ],
+              "tag": "Ended reason",
+              "why": "States 'Assistant Did Not Receive Customer Audio' but not which leg (carrier, transport, or model) caused it."
+            },
+            {
+              "box": [
+                0.6025,
+                0.664,
+                0.6975,
+                0.68
+              ],
+              "tag": "No transcript",
+              "why": "Failed calls produce no transcript, removing a key debugging signal for whose-fault triage."
+            }
+          ],
+          "notes": "Same failed web call as the Calls table shot, opened into its detail drawer. Cost shows $0.00, Recording area is empty.",
+          "figmaHash": "32133ae09c9068d55972780ac3a998484b1311c6"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Assistant overview: Average Latency bar broken into Transcriber/Model/Voice legs",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/sip-assistant-latency-per-leg.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.645,
+                0.168,
+                0.77,
+                0.216
+              ],
+              "tag": "Average latency",
+              "why": "A single rolled-up ~1,000ms estimate, not a measurement from any real call."
+            },
+            {
+              "box": [
+                0.3525,
+                0.248,
+                0.9875,
+                0.34
+              ],
+              "tag": "Per-component latency budget",
+              "why": "Static config estimates (Deepgram 100ms / Groq 600ms / Rime AI 200ms) per leg — useful as a budget, but not live measured per-call latency."
+            }
+          ],
+          "notes": "Latency-per-leg exists only as a configuration-time estimate on the assistant's own page, not attached to a specific call.",
+          "figmaHash": "e571d6f70d1ff4d3f430ecb406cbdebc2799d7e5"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Call detail → Latency Summary tab: zero turns, 0ms transport for the failed call",
+          "href": "https://dashboard.vapi.ai/logs",
+          "shot": "references/competitors/product/vapi/sip-call-latency-summary-zero-turns.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.3105,
+                0.428,
+                0.6475,
+                0.488
+              ],
+              "tag": "Zero turns",
+              "why": "A call that fails before the first turn yields no per-turn STT/LLM/TTS latency at all."
+            },
+            {
+              "box": [
+                0.3105,
+                0.588,
+                0.5325,
+                0.74
+              ],
+              "tag": "Transport latency only",
+              "why": "Only generic 'From/To Transport' latency is tracked here — no carrier/SIP-specific leg is broken out."
+            }
+          ],
+          "notes": "This is the dedicated Latency Summary tab inside the call detail drawer — the closest thing Vapi has to per-leg latency diagnostics, but it is empty for any call that didn't complete a turn.",
+          "figmaHash": "9e82e1e4273855390d4fbfbb853310fd0a695c9a"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Call detail → Call Cost tab: cost breakdown collapses to $0.00 STT-only line",
+          "href": "https://dashboard.vapi.ai/logs",
+          "shot": "references/competitors/product/vapi/sip-call-cost-breakdown-zero.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.725,
+                0.604,
+                0.9875,
+                0.62
+              ],
+              "tag": "STT-only cost",
+              "why": "Even a failed call is attributed entirely to STT, with no carrier/SIP-leg cost segment."
+            },
+            {
+              "box": [
+                0.3185,
+                0.936,
+                0.525,
+                0.9504
+              ],
+              "tag": "No cost detail",
+              "why": "\"No additional details available\" — the cost breakdown UI exists but has nothing to show for a call that never connected."
+            }
+          ],
+          "notes": "Same call detail drawer, Call Cost tab. Total Cost $0.00, Duration 0s, Categories: 1 (STT).",
+          "figmaHash": "09be35b11a308a36a7b725fa5f6d92059038a5c2"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Metrics page: call volume/cost/duration charts, no success-rate or latency-per-leg metric",
+          "href": "https://dashboard.vapi.ai/metrics",
+          "shot": "references/competitors/product/vapi/sip-metrics-overview.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.1875,
+                0.48,
+                0.4325,
+                0.916
+              ],
+              "tag": "Reason Call Ended chart",
+              "why": "Aggregate ended-reason trend exists (one 'call.in-progress.error' bar), but there is no success-rate-by-leg or per-carrier breakdown."
+            },
+            {
+              "box": [
+                0.465,
+                0.48,
+                0.6925,
+                0.616
+              ],
+              "tag": "No duration/latency data",
+              "why": "Analytics page has Total Call Minutes, Number of Calls, Total Spent, Avg Cost/Call and duration-by-assistant — no dedicated latency-per-leg or success-rate metric."
+            }
+          ],
+          "notes": "Top-level Metrics/Analytics page. Only 1 call exists in the account so most charts read 'No data available' or show a single point.",
+          "figmaHash": "5dd925920be990f111af5c9d6217ceb9f218ae54"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Phone Numbers: Unprovisioned number, Server URL / Timeout config, empty auth headers",
+          "href": "https://dashboard.vapi.ai/phone-numbers",
+          "shot": "references/competitors/product/vapi/sip-phone-number-unprovisioned.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.44,
+                0.0544,
+                0.5125,
+                0.072
+              ],
+              "tag": "Unprovisioned status",
+              "why": "The phone-number/SIP-adjacent config sits in an unprovisioned state with no guided remediation."
+            },
+            {
+              "box": [
+                0.565,
+                0.88,
+                0.7675,
+                0.952
+              ],
+              "tag": "Empty auth config",
+              "why": "\"No Headers Configured\" empty state — no dedicated SIP trunk import flow was found in this account tier, only a generic Server URL + Timeout + HTTP Headers form."
+            }
+          ],
+          "notes": "Vapi's phone number is BYO-carrier via a 'Server URL' webhook pattern rather than a distinct 'Import SIP trunk' wizard; this auto-created 'Untitled Phone Number' (provider: Vapi) shows as Unprovisioned. No phone purchase or SIP trunk creation was attempted.",
+          "figmaHash": "661f7003bbbb5b3bf004667aab6e4c7c336b1f8e"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "product",
+          "label": "Talk (web call) panel: repeated 'room was deleted' errors during the failed call",
+          "href": "https://dashboard.vapi.ai/assistants",
+          "shot": "references/competitors/product/vapi/sip-web-call-room-deleted-error.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.7475,
+                0.76,
+                0.99,
+                0.968
+              ],
+              "tag": "Room deleted errors",
+              "why": "Repeated raw error toasts ('Exiting meeting because room was deleted') surface a transport failure with no leg attribution or retry guidance — exactly the ambiguity the JTBD asks about (carrier vs. us vs. model)."
+            }
+          ],
+          "notes": "Live Transcript and Chat side panel during the in-dashboard Talk attempt, right before the call ended with 'Assistant Did Not Receive Customer Audio' (expected — headless Chrome has no microphone).",
+          "figmaHash": "ee50f4faad633ecadbb8492c3d6863a840f8e518"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "docs",
+          "label": "Call ended reasons — the full list of endedReason values (pipeline, transport, assistant, customer)",
+          "href": "https://docs.vapi.ai/calls/call-ended-reason",
+          "shot": "references/competitors/public-docs/vapi-sip-call-ended-reason.png",
+          "scenario": "rainy",
+          "marks": [],
+          "figmaHash": "a09670fd131a44a0a96d62844270ed7d5470dcc6"
+        },
+        {
+          "vendor": "Vapi",
+          "kind": "docs",
+          "label": "SIP trunking — bring your own carrier: trunk credentials, outbound leading-plus, auth headers",
+          "href": "https://docs.vapi.ai/phone-numbers/sip-trunking",
+          "shot": "references/competitors/public-docs/vapi-sip-trunking.png",
+          "scenario": "happy",
+          "marks": [],
+          "figmaHash": "77e5747de48c01e6a742e1739c2bbb049692ad56"
         }
       ],
       "scenarios": {
@@ -2770,6 +3520,9 @@
       "learnings": [
         "LiveKit gates every latency view behind a free Observability toggle; once on, the Agents page gains Response Latency 'tails by stage' and Interrupted Rate — stage-level latency is the norm (sip-agents-observability-panels).",
         "Retell puts the Disconnection Reason next to End-to-End latency in the call's analysis block and exposes per-turn E2E latency only as log lines — nobody attributes latency per leg (carrier vs platform vs model) (sip-call-detail-*).",
+        "Vapi is the only vendor that budgets latency per leg on the assistant page (Transcriber 100 ms · Model 600 ms · Voice 200 ms) and names every failure with an endedReason value — but the call detail's Latency Summary shows 0 turns / 0 ms for a failed call instead of saying why (sip-assistant-latency-per-leg, sip-call-latency-summary-zero-turns).",
+        "ElevenLabs attributes latency at one leg only — a per-turn 'LLM 723 ms' badge in the transcript — while its Audio dashboard defines a fuller taxonomy (Agent Response Time / Response Generation / Turn Taking) that stayed empty after a real conversation (sip-conversation-transcript-llm-latency, sip-dashboard-audio-latency-empty).",
+        "ElevenLabs' SIP docs give explicit carrier-vs-us fault signatures (BYE/481, one-way audio, G711/G722 mismatch) and split latency into model inference · time-to-first-audio · network round-trip — the vocabulary our verdicts should use (elevenlabs-sip-troubleshooting, elevenlabs-sip-understanding-latency).",
         "Retell's analytics default range renders all-zero KPIs with no empty state, so 0 ms reads as 'fine'; our empty states must say 'no calls in range' (sip-analytics-empty-default-range).",
         "LiveKit's Telephony page has a 'Calls with issues' panel and SIP trunks as first-class objects; the inbound trunk form carries SRTP, headers and Krisp (sip-telephony-calls-empty, sip-trunk-inbound-form).",
         "Whitespace: no vendor draws a signalling ladder or names the responsible party. SW4Y4M's verdict + 'Attributed to' is ahead of the market — it needs time on the ladder and a fix per verdict to become the diagnostic."
