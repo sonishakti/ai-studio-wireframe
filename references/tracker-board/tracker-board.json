@@ -27,6 +27,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/01-voice-picker/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40585"
         }
       ],
       "shot": null,
@@ -119,6 +123,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/02-turn-taking/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40586"
         }
       ],
       "shot": null,
@@ -197,6 +205,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/03-recognition-failover/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40587"
         }
       ],
       "shot": null,
@@ -259,6 +271,10 @@
         {
           "label": "Log",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/05-prototype-log.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40588"
         }
       ],
       "shot": {
@@ -347,6 +363,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/05-call-behavior/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40589"
         }
       ],
       "shot": null,
@@ -390,6 +410,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/06-tts-expression/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40590"
         }
       ],
       "shot": null,
@@ -441,6 +465,10 @@
         {
           "label": "Log",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/05-prototype-log.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40591"
         }
       ],
       "shot": {
@@ -553,6 +581,10 @@
         {
           "label": "Brief",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/08-versioning-release/00-brief.md"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40592"
         }
       ],
       "shot": null,
@@ -581,6 +613,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/09-first-run/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40593"
         }
       ],
       "shot": null,
@@ -617,6 +653,10 @@
         {
           "label": "Directions",
           "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/10-session-logs/05-directions.html"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40594"
         }
       ],
       "shot": null,
@@ -677,6 +717,10 @@
         {
           "label": "Branch (SW4Y4M)",
           "href": "https://github.com/AgoraIO/ng-console/tree/design/sip-diagnostics-prototype"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40595"
         }
       ],
       "shot": null,
@@ -712,6 +756,10 @@
         {
           "label": "ClickUp",
           "href": "https://app.clickup.com/t/868m0mevm"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40596"
         }
       ],
       "shot": null,
@@ -767,6 +815,10 @@
         {
           "label": "ClickUp",
           "href": "https://app.clickup.com/t/868m0mexd"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40597"
         }
       ],
       "shot": null,
@@ -835,6 +887,10 @@
         {
           "label": "ClickUp",
           "href": "https://app.clickup.com/t/868m0mf18"
+        },
+        {
+          "label": "Figma",
+          "href": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40598"
         }
       ],
       "shot": null,
@@ -1070,5 +1126,11 @@
       "next": "Research (protocol steps 0–4).",
       "secondary": []
     }
-  ]
+  ],
+  "figma": {
+    "file": "xaAgeioGlZosBsRquDXLvI",
+    "page": "2861-52038",
+    "parentSection": "3122-40583",
+    "url": "https://www.figma.com/design/xaAgeioGlZosBsRquDXLvI/Agora-Studio-X?node-id=3122-40583"
+  }
 }
