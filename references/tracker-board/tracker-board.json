@@ -2310,7 +2310,7 @@
       "name": "11 · SIP & latency diagnostics",
       "clickup": "https://app.clickup.com/t/868m0mety",
       "tags": "monitor · telephony · P0-Sep",
-      "clickupSays": "ClickUp: research Done (Wave 2) · UI shipped in the wireframe · status planning",
+      "clickupSays": "ClickUp: research Done (Wave 2) · UI shipped in the wireframe · status planning · research redone 2026-09-11 with populated states",
       "jtbd": "User wants to know whose fault a failed or slow call was.",
       "status": "WIP",
       "open": [
@@ -2329,43 +2329,385 @@
       ],
       "shot": null,
       "rationale": "SIP diagnostics prototype by SW4Y4M on its own branch: fault verdict, signalling ladder, SIP message detail with visible redaction, full-page call detail.",
-      "next": "Verify against final Engine payloads; port onto design/sandbox.",
+      "next": "Port SW4Y4M's page onto design/sandbox with the verdict-driven summary, the timed ladder and fix links (Stop 6), then the hero screens. Owner: which fixes can deep-link (CPS limit, trunk settings)?",
       "secondary": [
         {
           "vendor": "LiveKit",
-          "label": "Agents dashboard — Avg Turns · Interrupted · E2E Median per agent",
           "kind": "product",
-          "href": "https://cloud.livekit.io",
-          "shot": "references/competitors/product/livekit/livekit-agents.png",
+          "label": "Agents page — observability-disabled banner blocks all per-agent latency data",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/agents",
+          "shot": "references/competitors/product/livekit/sip-observability-disabled.png",
+          "scenario": "rainy",
           "marks": [
             {
               "box": [
-                0.725,
-                0.126,
-                0.84,
-                0.19
+                0.44,
+                0.63,
+                0.66,
+                0.83
               ],
-              "tag": "E2E median & region",
-              "why": "E2E Median latency and region are the only diagnostic fields shown, with no SIP-specific view."
+              "tag": "Observability disabled",
+              "why": "Full-page blocker states no traces/transcripts are captured until this project-level setting is turned on."
             },
             {
               "box": [
-                0.448,
-                0.644,
-                0.705,
-                0.828
+                0.179,
+                0.155,
+                0.965,
+                0.18
               ],
-              "tag": "Observability disabled",
-              "why": "Deeper latency/diagnostic observability sits behind an opt-in toggle rather than being built in."
+              "tag": "Agent row, no E2E data",
+              "why": "The only deployed agent shows Sessions/Avg turns/Interrupted/E2E median all as em-dashes — there is no per-leg latency to inspect while observability is off."
             }
           ],
-          "scenario": "rainy",
-          "redo": "empty state — capture the populated state first",
-          "figmaHash": "9b2cc84104a94f09fab1a2b4d405af9a70a8d7cb"
+          "notes": "Landed on the Agents page for project 'read'; this banner and empty metrics row were the default state before any changes.",
+          "figmaHash": "32c6572ca8deedb84766612a3fe446145d82a48b"
         },
         {
           "vendor": "LiveKit",
-          "label": "Telephony — call stats, Calls With Issues, SIP trunks nav",
+          "kind": "product",
+          "label": "Settings > Observability — Agent observability toggle OFF, links to pricing",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/settings/observability",
+          "shot": "references/competitors/product/livekit/sip-observability-settings-off.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.257,
+                0.166,
+                0.898,
+                0.286
+              ],
+              "tag": "Agent observability: OFF",
+              "why": "Traces, transcripts and audio capture are gated behind this single project-level switch; a 'See pricing details' link sits right next to it, raising a cost question before enabling."
+            }
+          ],
+          "notes": "Reached via the 'Enable observability' link on the Agents-page banner, which routes to this Settings > Observability page rather than toggling inline.",
+          "figmaHash": "74955a7baab0df219ba2fdbe42826472c5d25ee0"
+        },
+        {
+          "vendor": "LiveKit",
+          "kind": "product",
+          "label": "Settings > Observability — Agent observability turned ON at no cost, PII redaction now configurable",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/settings/observability",
+          "shot": "references/competitors/product/livekit/sip-observability-enabled.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.257,
+                0.166,
+                0.898,
+                0.286
+              ],
+              "tag": "Agent observability: ON",
+              "why": "Toggling this switch enabled capture immediately with no billing/upgrade prompt — confirmed a free project setting, not a paid add-on."
+            }
+          ],
+          "notes": "Clicking the switch did not register through a naive re-query click (Radix UI dialog/switch quirk in the automation); had to select the button by a stable CSS selector and retry until aria-checked flipped to true. No payment screen appeared at any point.",
+          "figmaHash": "07b91d9383dd8ccc39190dc9df194ae95be6d177"
+        },
+        {
+          "vendor": "LiveKit",
+          "kind": "product",
+          "label": "Agents page — new latency/quality KPI panels appear once observability is on",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/agents",
+          "shot": "references/competitors/product/livekit/sip-agents-observability-panels.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.582,
+                0.078,
+                0.778,
+                0.174
+              ],
+              "tag": "Interrupted rate KPI",
+              "why": "A dedicated call-quality KPI (interruptions) sits alongside session/token counts — a proxy for 'whose fault' framing (model talking over caller vs. silence)."
+            },
+            {
+              "box": [
+                0.179,
+                0.352,
+                0.288,
+                0.372
+              ],
+              "tag": "Response latency: Over time / Tails by stage",
+              "why": "A chart toggle explicitly breaks latency into per-stage tails (STT/LLM/TTS legs), which is the closest LiveKit gets to per-leg latency attribution."
+            }
+          ],
+          "notes": "Same Agents page as the first shot, revisited after enabling observability — the KPI row and Response Latency / Agent Sessions Served charts only render once the setting is on (still zeroed since no session has run).",
+          "figmaHash": "4d774ffdca14cdfec8370657be52f5942a7a2676"
+        },
+        {
+          "vendor": "LiveKit",
+          "kind": "product",
+          "label": "Telephony > Calls — call stats and 'Calls with issues' panel, no calls yet",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/telephony",
+          "shot": "references/competitors/product/livekit/sip-telephony-calls-empty.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.582,
+                0.19,
+                0.983,
+                0.418
+              ],
+              "tag": "Calls with issues",
+              "why": "A first-class panel exists specifically to surface problem calls, but with zero telephony traffic on this project it is empty — the intended 'whose fault' entry point."
+            },
+            {
+              "box": [
+                0.71,
+                0.5,
+                0.983,
+                0.52
+              ],
+              "tag": "Session / Status columns",
+              "why": "The Calls table links each call row to its underlying session and a status column, which is where a per-leg carrier-vs-model breakdown would surface once populated."
+            }
+          ],
+          "notes": "Could not generate a real call — the project has no configured SIP trunk/phone number and the deployed agent was stuck in a DEPLOYING state, so no inbound/outbound call could be placed within the free/no-cost constraint.",
+          "figmaHash": "89248006a1aae80fb0f2e67fca88a4b5d77da1e8"
+        },
+        {
+          "vendor": "LiveKit",
+          "kind": "product",
+          "label": "Telephony > SIP trunks — inbound/outbound trunk lists empty, project SIP URI assigned",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/telephony/trunks",
+          "shot": "references/competitors/product/livekit/sip-trunks-list-empty.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.7175,
+                0.0776,
+                0.9825,
+                0.1576
+              ],
+              "tag": "Project SIP URI",
+              "why": "LiveKit assigns a real sip:*.sip.livekit.cloud URI per project by default, before any trunk is created — the carrier-facing address a SIP diagnostics feature would need to correlate against."
+            },
+            {
+              "box": [
+                0.172,
+                0.228,
+                0.983,
+                0.396
+              ],
+              "tag": "Inbound trunks table",
+              "why": "Trunk ID / name / numbers / created columns are ready to list carrier trunks, but none exist yet on this project."
+            }
+          ],
+          "notes": "Navigated via the Telephony section's 'SIP trunks' sub-nav link (a guessed /telephony/sip-trunks URL 404'd; the real path is /telephony/trunks).",
+          "figmaHash": "13a9ad92a2428bc789315ad6dc7935a45237b081"
+        },
+        {
+          "vendor": "LiveKit",
+          "kind": "product",
+          "label": "Create a new trunk — inbound SIP trunk form with SRTP, headers, Krisp noise cancellation",
+          "href": "https://cloud.livekit.io/projects/p_5tos5u3omqa/telephony/trunks",
+          "shot": "references/competitors/product/livekit/sip-trunk-inbound-form.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.634,
+                0.258,
+                0.978,
+                0.295
+              ],
+              "tag": "Inbound / Outbound direction",
+              "why": "One form models both call directions; direction is the first fork that determines which fault domain (carrier-in vs. carrier-out) a later diagnostics view would need to key off."
+            },
+            {
+              "box": [
+                0.634,
+                0.574,
+                0.978,
+                0.612
+              ],
+              "tag": "Media encryption (SRTP)",
+              "why": "Encryption mode is configured per trunk — a likely contributor to carrier-side connection/latency issues if mismatched, relevant to a 'whose fault' breakdown."
+            }
+          ],
+          "notes": "Opened via 'Create new trunk' on the empty SIP trunks page and expanded 'Optional settings'; closed the dialog with Escape afterward without submitting/creating a trunk.",
+          "figmaHash": "3e6d6ec0b0ddf3173c18e8254a06f39fff8046d1"
+        },
+        {
+          "vendor": "Retell",
+          "kind": "product",
+          "label": "Call detail — Conversation Analysis: Disconnection Reason + End-to-End Latency",
+          "href": "https://dashboard.retellai.com/call-history?history=call_63006bfee2deb265ebabfbfdfd7",
+          "shot": "references/competitors/product/retell/sip-call-detail-latency-disconnect.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.385,
+                0.32,
+                0.65,
+                0.368
+              ],
+              "tag": "call outcome",
+              "why": "Call Successful (Unsuccessful) + Call Status give the top-line pass/fail signal before drilling into why."
+            },
+            {
+              "box": [
+                0.385,
+                0.404,
+                0.65,
+                0.424
+              ],
+              "tag": "disconnection reason",
+              "why": "Single categorical field (User_hangup) — this is Retell's whole answer to 'whose fault', no carrier/us/model split."
+            },
+            {
+              "box": [
+                0.385,
+                0.432,
+                0.65,
+                0.452
+              ],
+              "tag": "e2e latency",
+              "why": "One aggregate End-to-End Latency number (1568ms) per call, with an info tooltip — no per-leg (ASR/LLM/TTS/network) breakdown on this screen."
+            }
+          ],
+          "notes": "Reached via Call History row click, but the shared headless Chrome is used concurrently by sibling research agents and row-clicks raced/landed on the wrong tab several times; navigating directly to the call-history?history=<call_id> URL was reliable. Longest call (1:54, Nov 12) chosen for richest content.",
+          "figmaHash": "7c4fb43193327b606bfec494a0212c47378458ae"
+        },
+        {
+          "vendor": "Retell",
+          "kind": "product",
+          "label": "Call detail — Detail Logs tab: per-turn E2E latency + node transition trace",
+          "href": "https://dashboard.retellai.com/call-history?history=call_63006bfee2deb265ebabfbfdfd7",
+          "shot": "references/competitors/product/retell/sip-call-detail-logs-e2e-latency.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.5,
+                0.248,
+                0.568,
+                0.276
+              ],
+              "tag": "Detail Logs tab",
+              "why": "Sits beside Transcription/Data — the only place per-turn timing shows up, not surfaced on the main analysis panel."
+            },
+            {
+              "box": [
+                0.386,
+                0.448,
+                0.745,
+                0.928
+              ],
+              "tag": "per-turn E2E latency",
+              "why": "Repeated 'E2E latency for this turn: NNNNms' log lines (546-2004ms range this call) plus node-transition names — closest Retell gets to a per-turn timeline, but it's a raw text log, not a labeled ASR/LLM/TTS/network split."
+            }
+          ],
+          "notes": "Radix tab switch required dispatching real pointerdown/mousedown/click events via JS on the tab button — a plain .click() call updated the DOM but did not fire Radix's handler. Inner panel has its own scroll container (not the page body); had to scroll that div directly to reveal tab content below the fold.",
+          "figmaHash": "90d5bc412b0489dc3631a88313976db2ad5025b5"
+        },
+        {
+          "vendor": "Retell",
+          "kind": "product",
+          "label": "Analytics — Call Dashboard (All time): Call Latency avg + Disconnection Reason breakdown",
+          "href": "https://dashboard.retellai.com/analytics?dashboard_id=dashboard_cb98d858f25b831580de9c",
+          "shot": "references/competitors/product/retell/sip-analytics-latency-disconnection.png",
+          "scenario": "happy",
+          "marks": [
+            {
+              "box": [
+                0.7175,
+                0.16,
+                0.9825,
+                0.392
+              ],
+              "tag": "avg call latency",
+              "why": "Fleet-level average E2E latency (1709ms across 5 calls) — an aggregate KPI tile, no distribution/percentile or per-leg split."
+            },
+            {
+              "box": [
+                0.3775,
+                0.732,
+                0.575,
+                0.98
+              ],
+              "tag": "disconnection reason chart",
+              "why": "Donut breakdown of disconnection reasons across all calls — useful for spotting a spike in one reason, but reasons are Retell's own coarse buckets (e.g. user_hangup), not carrier/SIP-code detail."
+            }
+          ],
+          "notes": "Default date range (last 4 weeks, Aug 15-Sep 11 2026) showed 0 calls because the account's 5 calls are dated Nov 2025-Jan 2026 — had to switch the date-range picker to 'All time' to populate the charts.",
+          "figmaHash": "211b42395be056be6a5565afe9cb8cc23b25cf95"
+        },
+        {
+          "vendor": "Retell",
+          "kind": "product",
+          "label": "Analytics — default date range renders all-zero KPIs (calls fall outside the 4-week window)",
+          "href": "https://dashboard.retellai.com/analytics",
+          "shot": "references/competitors/product/retell/sip-analytics-empty-default-range.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.1725,
+                0.116,
+                0.295,
+                0.146
+              ],
+              "tag": "stale default range",
+              "why": "Dashboard defaults to 'last 4 weeks' relative to today with no empty-state messaging explaining why every tile reads 0/0s/0ms."
+            },
+            {
+              "box": [
+                0.7175,
+                0.16,
+                0.9825,
+                0.392
+              ],
+              "tag": "0ms latency tile",
+              "why": "Call Latency tile silently shows 0ms instead of an explicit 'no calls in range' state — easy to misread as 'latency is zero/perfect'."
+            }
+          ],
+          "notes": "This is the dashboard's actual first-load state for this account (untouched date range) — not manufactured; simply landed on /analytics.",
+          "figmaHash": "8e3b3384f4a31a0d25bb11716f38a089614afd24"
+        },
+        {
+          "vendor": "Retell",
+          "kind": "product",
+          "label": "Live Monitoring — empty state, no per-leg health signal even when calls are active",
+          "href": "https://dashboard.retellai.com/live-monitoring",
+          "shot": "references/competitors/product/retell/sip-live-monitoring-empty.png",
+          "scenario": "rainy",
+          "marks": [
+            {
+              "box": [
+                0.525,
+                0.488,
+                0.635,
+                0.592
+              ],
+              "tag": "No Ongoing Calls",
+              "why": "Plain empty state; no indication of SIP trunk/telephony connectivity health independent of an active call."
+            },
+            {
+              "box": [
+                0.1725,
+                0.064,
+                0.995,
+                0.1
+              ],
+              "tag": "table columns",
+              "why": "Even the live-call table schema (Time/Duration/Type/From/To/Call ID) has no latency or carrier column — live monitoring is call presence only, not a health/latency view."
+            }
+          ],
+          "notes": "No ongoing calls existed at capture time (expected — this is a research account); this is a genuine empty state, not a broken one.",
+          "figmaHash": "7899079c7bf191488a1dadccaf5a94f7f1142988"
+        },
+        {
+          "vendor": "LiveKit",
+          "label": "Telephony — call stats, Calls With Issues, SIP trunks nav (no calls yet)",
           "kind": "product",
           "href": "https://cloud.livekit.io",
           "shot": "references/competitors/product/livekit/livekit-telephony.png",
@@ -2391,7 +2733,7 @@
               "why": "Surfaces the count of problematic calls, the entry point for latency/SIP diagnostics."
             }
           ],
-          "scenario": "happy",
+          "scenario": "rainy",
           "figmaHash": "164126bcbf812c962bf869ccc0420ec6d4ae8842"
         }
       ],
@@ -2426,9 +2768,54 @@
         ]
       },
       "learnings": [
-        "LiveKit shows E2E median and region per agent and flags 'calls with issues' on the telephony page — but only once observability is enabled (agents · telephony).",
-        "Pending: populated happy and rainy captures from Vapi · Retell · ElevenLabs (SIP codes, latency per leg)."
-      ]
+        "LiveKit gates every latency view behind a free Observability toggle; once on, the Agents page gains Response Latency 'tails by stage' and Interrupted Rate — stage-level latency is the norm (sip-agents-observability-panels).",
+        "Retell puts the Disconnection Reason next to End-to-End latency in the call's analysis block and exposes per-turn E2E latency only as log lines — nobody attributes latency per leg (carrier vs platform vs model) (sip-call-detail-*).",
+        "Retell's analytics default range renders all-zero KPIs with no empty state, so 0 ms reads as 'fine'; our empty states must say 'no calls in range' (sip-analytics-empty-default-range).",
+        "LiveKit's Telephony page has a 'Calls with issues' panel and SIP trunks as first-class objects; the inbound trunk form carries SRTP, headers and Krisp (sip-telephony-calls-empty, sip-trunk-inbound-form).",
+        "Whitespace: no vendor draws a signalling ladder or names the responsible party. SW4Y4M's verdict + 'Attributed to' is ahead of the market — it needs time on the ladder and a fix per verdict to become the diagnostic."
+      ],
+      "before": [
+        {
+          "file": "references/research/11-sip-latency/before/02-call-detail-success.png",
+          "source": "SW4Y4M branch design/sip-diagnostics-prototype — Call Details › SIP Trace (success)",
+          "alt": "Verdict banner, KPI row, four-lane signalling ladder",
+          "figmaHash": "f02c1bfaf9c8e5643108524a78bf760d912fc97e",
+          "wrong": [
+            "The summary contradicts the verdict: 'Agent completed the call' sits above Call outcome 'Failed' and end reason 'Call rejected'. The KPI row must be derived from the same verdict.",
+            "The ladder has no time: no per-hop timestamps and no latency per leg (agent → gateway → trunk → phone), so 'why was it slow' cannot be answered here; Latency is a separate tab.",
+            "'Certain cause' is a label, not evidence — it should point at the hop that decided the verdict."
+          ]
+        },
+        {
+          "file": "references/research/11-sip-latency/before/03-call-detail-cps.png",
+          "source": "SW4Y4M branch — SIP Trace (CPS limit)",
+          "alt": "'Call rate limit exceeded' verdict, Quota limit badge, repeated INVITE → 503 cycles",
+          "figmaHash": "32c15f1ddf0d54d7ee2dca9cfc633179694faef3",
+          "wrong": [
+            "The verdict explains what happened (14 calls against 10/s) but not the fix: no link to the CPS limit, the campaign pacing, or the Retry-After guidance.",
+            "Three identical INVITE → 503 → ACK cycles are drawn in full; repeats should collapse into one row with a count so the ladder fits one screen.",
+            "Only this state highlights the failing hop; every state should mark the deciding message."
+          ]
+        },
+        {
+          "file": "references/research/11-sip-latency/before/05-call-detail-no-trace.png",
+          "source": "SW4Y4M branch — SIP Trace (no trace retained)",
+          "alt": "'Cause could not be determined' with an empty ladder",
+          "figmaHash": "e4df574ca0a214a323891a195210d454fad8a574",
+          "wrong": [
+            "'No signalling trace was retained' gives no way forward — no retention setting, no trace id for support, no pointer to the Events tab.",
+            "Uncertain outcomes reuse the certain-cause layout; 'we don't know' needs its own weight and a next step."
+          ]
+        }
+      ],
+      "directions": [
+        "A · Verdict with the fix — verdict, attributed-to and one action (raise CPS, check the trunk allow-list, send the trace id to support)",
+        "B · Timed ladder — per-hop timestamps, latency per leg summarised above the ladder, repeated cycles collapsed with a count",
+        "C · Issues first — Call History filtered to calls with issues, grouped by attributed-to with counts (LiveKit's panel, done properly)",
+        "D · Latency tails by stage — per-agent chart linking to the calls in the tail (LiveKit pattern; needs Engine stage timings)",
+        "E · Raw SIP only — message list and headers, no verdict (rejected: pushes the diagnosis onto the user)"
+      ],
+      "verdict": "Verdict — A + B on the call page (the verdict drives the KPI row; the ladder gets time and per-leg latency; every verdict names its fix), C on the list; D once Engine payloads carry stage timings; E rejected."
     },
     {
       "n": "12",

@@ -1,0 +1,51 @@
+[
+  {
+    "file": "references/research/11-sip-latency/before/01-call-history-list.png",
+    "state": "default",
+    "url": "http://localhost:3011/agent-analytics?tab=call-history",
+    "alt": "Call History table with Attributed to column (SIP trunk, Agora platform, Quota limit, Carrier, etc.)",
+    "scenario": "happy"
+  },
+  {
+    "file": "references/research/11-sip-latency/before/02-call-detail-success.png",
+    "state": "success",
+    "url": "http://localhost:3011/projects/proj_000001/call-history/callId_999999?designState=success",
+    "alt": "Call detail SIP Trace tab, green 'Agent completed the call' verdict and full signaling ladder",
+    "scenario": "happy"
+  },
+  {
+    "file": "references/research/11-sip-latency/before/03-call-detail-cps.png",
+    "state": "cps",
+    "url": "http://localhost:3011/projects/proj_000001/call-history/callId_999999?designState=cps",
+    "alt": "SIP Trace tab, 'Call rate limit exceeded' verdict, Quota limit badge, repeated 503 rejections",
+    "scenario": "rainy"
+  },
+  {
+    "file": "references/research/11-sip-latency/before/04-call-detail-agora.png",
+    "state": "agora",
+    "url": "http://localhost:3011/projects/proj_000001/call-history/callId_999999?designState=agora",
+    "alt": "SIP Trace tab, red 'Agora platform failed the call' verdict, 500 Server Internal Error on the ladder",
+    "scenario": "rainy"
+  },
+  {
+    "file": "references/research/11-sip-latency/before/05-call-detail-no-trace.png",
+    "state": "no-trace",
+    "url": "http://localhost:3011/projects/proj_000001/call-history/callId_999999?designState=no-trace",
+    "alt": "SIP Trace tab empty state: 'Cause could not be determined' verdict, 'No signaling trace was retained for this call.'",
+    "scenario": "rainy"
+  },
+  {
+    "file": "references/research/11-sip-latency/before/06-call-detail-unknown.png",
+    "state": "unknown",
+    "url": "http://localhost:3011/projects/proj_000001/call-history/callId_999999?designState=unknown",
+    "alt": "SIP Trace tab, gray 'Cause could not be determined' verdict with a full ladder ending in 488 Not Acceptable",
+    "scenario": "rainy"
+  },
+  {
+    "file": "references/research/11-sip-latency/before/07-call-detail-empty.png",
+    "state": "empty",
+    "url": "http://localhost:3011/projects/proj_000001/call-history/callId_999999?designState=no-trace",
+    "alt": "SIP Trace tab empty state (empty fixture is byte-identical to no-trace; see notes)",
+    "scenario": "rainy"
+  }
+]

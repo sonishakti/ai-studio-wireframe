@@ -55,7 +55,11 @@ if (cmd === "serve") {
   const ws = new WebSocket(wsUrl); await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej })
   let id = 0; const pending = new Map()
   ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id) } }
-  const send = (method, params = {}, sessionId) => new Promise((res) => { const i = ++id; pending.set(i, res); ws.send(JSON.stringify({ id: i, method, params, sessionId })) })
+  // every CDP call times out (default 45 s) instead of hanging the server forever;
+  // a dead websocket exits the process so the launcher / caller notices
+  const CDP_TIMEOUT = +(process.env.DRIVE_CDP_TIMEOUT || 45000)
+  ws.onclose = () => { console.error("drive: Chrome websocket closed — exiting"); try { chrome.kill() } catch {} process.exit(2) }
+  const send = (method, params = {}, sessionId) => new Promise((res, rej) => { const i = ++id; const t = setTimeout(() => { pending.delete(i); rej(new Error(`${method} timed out after ${CDP_TIMEOUT} ms`)) }, CDP_TIMEOUT); pending.set(i, (m) => { clearTimeout(t); res(m) }); ws.send(JSON.stringify({ id: i, method, params, sessionId })) })
   const tabs = new Map()
   const tabFor = async (name = "main") => {
     if (tabs.has(name)) return tabs.get(name)
@@ -65,6 +69,8 @@ if (cmd === "serve") {
     await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 2, mobile: false }, sessionId)
     tabs.set(name, sessionId); return sessionId
   }
+  // heartbeat: if the browser stops answering for 2 minutes, exit so callers fail fast
+  setInterval(() => send("Browser.getVersion").catch(() => { console.error("drive: Chrome unresponsive — exiting"); try { chrome.kill() } catch {} process.exit(3) }), 120000).unref()
   // every handler gets its own session id — never a shared variable, so parallel
   // agents on different tabs cannot race each other between awaits
   const evalIn = async (s, expression) => { const r = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true }, s); if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description || "eval failed"); return r.result?.result?.value }
