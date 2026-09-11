@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Copy, PhoneIncoming, PhoneOutgoing, Download, Play, Pause, Wrench, ShieldCheck, RefreshCw,
+  Copy, PhoneIncoming, PhoneOutgoing, Play, Pause, Wrench, ShieldCheck, RefreshCw,
 } from "lucide-react"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -23,6 +23,9 @@ import { SeverityBadge } from "@/components/severity-badge"
 import { SipLadder } from "@/components/sip-ladder"
 import { buildSipTrace } from "@/lib/sip-trace"
 import { HealthDot } from "@/components/health-dot"
+import { AlignedTranscript } from "@/components/aligned-transcript"
+import { CopyLinkButton, DownloadMenu, downloadText } from "@/components/replay-actions"
+import { deriveReplayTimeline, timelineToTxt, timelineToJson } from "@/lib/transcript-alignment"
 import {
   track, Events, remediationKey, recordRemediation, listRemediations, clearRemediation,
 } from "@/lib/analytics"
@@ -124,6 +127,17 @@ const SERIES = [
   { key: "tts" as const, label: "TTS", bar: "bg-warning", dot: "bg-warning", text: "text-warning" },
 ]
 
+/** What the Audio row can honestly say. A call that never connected has no
+ *  recording; a connected call past the retention window had one and lost it.
+ *  Both are stated states, never an empty box or a fake scrubber. */
+type AudioState = "playable" | "none" | "not-retained"
+const RETENTION_LABEL = "Retention: 30 days"
+
+function audioStateFor(call: CallDetail): AudioState {
+  if (call.durationSec <= 0) return "none"
+  return seeded(call.id + "ret")() < 0.15 ? "not-retained" : "playable"
+}
+
 export function CallDetailSheet({
   call,
   open,
@@ -136,11 +150,15 @@ export function CallDetailSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="data-[side=right]:sm:max-w-[720px] overflow-y-auto p-0">
-        <SheetHeader className="px-5 py-4 border-b border-border">
-          <SheetTitle>Call Details</SheetTitle>
-        </SheetHeader>
-        {/* Keyed by id so scrubber / tab / hover state resets per call. */}
-        {call && <CallDetailBody key={call.id} call={call} />}
+        {/* Keyed by id so scrubber / tab / hover state resets per call. The
+            header lives inside the body so its actions see the same timeline. */}
+        {call ? (
+          <CallDetailBody key={call.id} call={call} />
+        ) : (
+          <SheetHeader className="px-5 py-4 border-b border-border">
+            <SheetTitle>Call Details</SheetTitle>
+          </SheetHeader>
+        )}
       </SheetContent>
     </Sheet>
   )
@@ -150,6 +168,18 @@ function CallDetailBody({ call }: { call: CallDetail }) {
   const latency = React.useMemo(() => buildLatency(call.id), [call])
   const structured = React.useMemo(() => buildStructured(call), [call])
   const events = React.useMemo(() => buildEvents(call), [call])
+  // One clock: the transcript is derived on the recording's timeline, so the
+  // player, the lines and the turn map on the scrubber all agree.
+  const timeline = React.useMemo(
+    () => deriveReplayTimeline({
+      transcript: call.transcript,
+      durationSec: call.durationSec,
+      callId: call.id,
+      failed: call.outcome === "Failed",
+    }),
+    [call],
+  )
+  const audio = React.useMemo(() => audioStateFor(call), [call])
   const sipTrace = React.useMemo(
     () => buildSipTrace({
       callId: call.id,
@@ -189,14 +219,64 @@ function CallDetailBody({ call }: { call: CallDetail }) {
     return { asr: Math.round(sum.asr / n), llm: Math.round(sum.llm / n), tts: Math.round(sum.tts / n), e2e: Math.round(sum.e2e / n) }
   }, [latency])
 
-  // Audio scrubber (mock playback). A call that never connected (0s) has no
-  // recording — show a note instead of a fake scrubber.
-  const hasRecording = call.durationSec > 0
+  // Audio scrubber (mock playback). The clock lives here so the transcript
+  // tab can seek it and follow it.
+  const hasRecording = audio === "playable"
   const total = call.durationSec
-  const [pos, setPos] = React.useState(Math.round(total * 0.13))
+  const [pos, setPos] = React.useState(0)
   const [playing, setPlaying] = React.useState(false)
+  const saidSimulated = React.useRef(false)
+
+  // Mock playback — advances the playhead so transcript sync is demonstrable.
+  React.useEffect(() => {
+    if (!playing || !hasRecording) return
+    const t = setInterval(() => {
+      setPos((p) => {
+        if (p >= total) { setPlaying(false); return total }
+        return p + 1
+      })
+    }, 500)
+    return () => clearInterval(t)
+  }, [playing, hasRecording, total])
+
+  const togglePlay = () => {
+    if (!playing && !saidSimulated.current) {
+      saidSimulated.current = true
+      toast("Simulated preview", { description: "No live audio in this wireframe — the clock advances so the transcript follows it." })
+    }
+    setPlaying((p) => !p)
+  }
+
+  const downloads = [
+    {
+      label: "Recording",
+      disabled: !hasRecording,
+      reason: audio === "none" ? "No recording — it never connected" : audio === "not-retained" ? `Not retained · ${RETENTION_LABEL}` : undefined,
+      onSelect: () => toast.success("Mock: recording downloaded"),
+    },
+    {
+      label: "Transcript (.txt)",
+      onSelect: () => downloadText(`call-${call.id}-transcript.txt`, timelineToTxt(timeline), "text/plain"),
+    },
+    {
+      label: "Transcript (.json)",
+      onSelect: () => downloadText(
+        `call-${call.id}-transcript.json`,
+        timelineToJson(timeline, { callId: call.id, durationSec: call.durationSec, outcome: call.outcome }),
+        "application/json",
+      ),
+    },
+  ]
 
   return (
+    <>
+    <SheetHeader className="flex-row items-center justify-between gap-3 border-b border-border px-5 py-3 pr-12">
+      <SheetTitle>Call Details</SheetTitle>
+      <div className="flex items-center gap-2" data-design-focus="call-actions">
+        <CopyLinkButton path={`/calls?call=${encodeURIComponent(call.id)}`} />
+        <DownloadMenu items={downloads} />
+      </div>
+    </SheetHeader>
     <div className="px-5 py-4 space-y-4">
       {/* Metadata */}
       <div className="space-y-2.5">
@@ -219,20 +299,22 @@ function CallDetailBody({ call }: { call: CallDetail }) {
         <Field label="Call Outcome" custom={<Badge variant={OUTCOME_BADGE[call.outcome]}>{call.outcome}</Badge>} />
       </div>
 
-      {/* Audio Recording */}
+      {/* Audio — a stated state in every case: playable, never connected, or
+          past retention. Downloads live in the header menu. */}
       <div className="space-y-1.5">
-        <p className="text-xs text-muted-foreground">Audio Recording</p>
-        {hasRecording ? (
+        <p className="text-xs text-muted-foreground">Audio</p>
+        {audio === "playable" ? (
           <div className="flex items-center gap-3">
             <Button
               variant="outline" size="icon" className="h-8 w-8 shrink-0"
-              onClick={() => setPlaying((p) => !p)}
+              onClick={togglePlay}
+              aria-pressed={playing}
               title={playing ? "Pause" : "Play"}
             >
               {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
               <span className="sr-only">{playing ? "Pause recording" : "Play recording"}</span>
             </Button>
-            <span className="text-xs tabular-nums text-muted-foreground shrink-0">{fmtTime(pos)} / {fmtTime(total)}</span>
+            <span className="text-xs tabular-nums text-muted-foreground shrink-0" aria-live="polite">{fmtTime(pos)} / {fmtTime(total)}</span>
             <button
               type="button"
               className="relative flex-1 h-1.5 rounded-full bg-muted"
@@ -244,20 +326,30 @@ function CallDetailBody({ call }: { call: CallDetail }) {
               aria-label="Seek recording position"
             >
               <span className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${(pos / total) * 100}%` }} />
+              {/* Turn map — every line's start is a tick, from timestamps, not audio. */}
+              {timeline.markers.length > 0 && (
+                <span role="img" aria-label="Turn map" className="pointer-events-none absolute inset-0">
+                  {timeline.markers.map((m, i) => (
+                    <span
+                      key={i}
+                      className="absolute top-1/2 h-2 w-0.5 -translate-y-1/2 rounded-full bg-foreground/25"
+                      style={{ left: `${(m / total) * 100}%` }}
+                      aria-hidden
+                    />
+                  ))}
+                </span>
+              )}
             </button>
-            <Button
-              variant="ghost" size="icon" className="h-8 w-8 shrink-0"
-              onClick={() => toast.success("Mock: recording downloaded")}
-              title="Download recording"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span className="sr-only">Download recording</span>
-            </Button>
           </div>
-        ) : (
+        ) : audio === "none" ? (
           <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">
-            No recording for this call — it never connected.
+            No recording — it never connected
           </p>
+        ) : (
+          <div className="rounded-lg border border-dashed border-border px-3 py-2.5">
+            <p className="text-xs text-muted-foreground">Not retained</p>
+            <p className="text-xs text-muted-foreground/70">{RETENTION_LABEL}</p>
+          </div>
         )}
       </div>
 
@@ -322,21 +414,16 @@ function CallDetailBody({ call }: { call: CallDetail }) {
           )}
         </TabsContent>
 
-        {/* Transcript */}
-        <TabsContent value="transcript" className="mt-3 space-y-2">
-          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
-            {call.transcript.map((t, i) => (
-              <div key={i} className="space-y-0.5">
-                <p className={t.speaker === "Agent" ? "text-xs font-medium text-primary" : "text-xs font-medium text-muted-foreground"}>
-                  {t.speaker}
-                </p>
-                <p className="text-sm leading-relaxed">{t.text}</p>
-              </div>
-            ))}
-          </div>
-          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => toast.success("Mock: transcript downloaded")}>
-            <Download className="h-3.5 w-3.5" /> Download transcript
-          </Button>
+        {/* Transcript — on the recording's clock. Click a time to seek; the
+            line under the playhead follows playback. */}
+        <TabsContent value="transcript" className="mt-3" data-design-focus="aligned-transcript">
+          <AlignedTranscript
+            timeline={timeline}
+            pos={pos}
+            playing={playing}
+            seekable={hasRecording}
+            onSeek={setPos}
+          />
         </TabsContent>
 
         {/* Structured Output */}
@@ -424,6 +511,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
         </TabsContent>
       </Tabs>
     </div>
+    </>
   )
 }
 

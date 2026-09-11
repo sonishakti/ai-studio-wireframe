@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  ArrowLeft, Copy, Download, Play, Pause, ChevronRight, Zap, Braces, Check,
+  ArrowLeft, Copy, Play, Pause, ChevronRight, Zap, Braces, Check,
 } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -13,12 +13,15 @@ import { Separator } from "@/components/ui/separator"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import {
-  CHANNEL_LABEL, SPAN_STYLE, SPAN_FIX, LATENCY_TARGET_MS, traceToJson,
+  CHANNEL_LABEL, SPAN_STYLE, SPAN_FIX, LATENCY_TARGET_MS, traceToJson, audioRetained,
   type SessionTrace, type SessionTurn, type TraceSpan,
 } from "@/lib/session-trace"
 import { buildSignals, diagnoseCall, healthOf } from "@/lib/diagnostics"
 import { HealthDot } from "@/components/health-dot"
 import { SeverityBadge } from "@/components/severity-badge"
+import { TurnBadge } from "@/components/aligned-transcript"
+import { CopyLinkButton, DownloadMenu, downloadText } from "@/components/replay-actions"
+import { timelineToTxt, timelineToJson, type ReplayTimeline } from "@/lib/transcript-alignment"
 import { track, Events } from "@/lib/analytics"
 
 /**
@@ -53,7 +56,10 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
   const turnRefs = React.useRef<Record<number, HTMLDivElement | null>>({})
 
   const voice = trace.channel !== "chat"
-  const hasRecording = voice && trace.durationSec > 0
+  // Audio is a stated state: playable, never connected, or past retention.
+  const audio: "playable" | "none" | "not-retained" =
+    !voice ? "none" : trace.durationSec <= 0 ? "none" : audioRetained(trace.id) ? "playable" : "not-retained"
+  const hasRecording = audio === "playable"
   const total = trace.durationSec
 
   React.useEffect(() => {
@@ -114,15 +120,38 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
 
   const exportJson = () => {
     track(Events.session_trace_exported, { session_id: trace.id })
-    const blob = new Blob([traceToJson(trace)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `session-${trace.id}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadText(`session-${trace.id}.json`, traceToJson(trace), "application/json")
     toast.success("Session trace downloaded")
   }
+
+  // The transcript files share the call sheet's line model, so a .txt from a
+  // session and one from a call read the same.
+  const transcriptTimeline = (): ReplayTimeline => ({
+    alignment: "timed",
+    lines: trace.turns.map((t, i) => ({
+      index: i, speaker: t.speaker, text: t.text, atSec: t.atSec,
+      ...(t.endType ? { badge: t.endType } : {}),
+    })),
+    markers: trace.turns.map((t) => t.atSec),
+  })
+  const downloads = [
+    {
+      label: "Recording",
+      disabled: !hasRecording,
+      reason: !voice ? "No audio on a chat session" : audio === "none" ? "No recording — it never connected" : audio === "not-retained" ? "Not retained · Retention: 30 days" : undefined,
+      onSelect: () => toast.success("Mock: recording downloaded"),
+    },
+    { label: "Transcript (.txt)", onSelect: () => downloadText(`session-${trace.id}-transcript.txt`, timelineToTxt(transcriptTimeline()), "text/plain") },
+    {
+      label: "Transcript (.json)",
+      onSelect: () => downloadText(
+        `session-${trace.id}-transcript.json`,
+        timelineToJson(transcriptTimeline(), { sessionId: trace.id, channel: trace.channel, durationSec: trace.durationSec }),
+        "application/json",
+      ),
+    },
+    { label: "Trace JSON", onSelect: exportJson },
+  ]
 
   return (
     <div className="flex-1 space-y-5 p-6 pt-4">
@@ -148,15 +177,14 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
           <p className="text-sm text-muted-foreground">
             {trace.agent} · {trace.startTime} · {fmtTime(trace.durationSec)}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" data-design-focus="session-actions">
             {slowest && (
               <Button variant="outline" size="sm" className="gap-1.5" onClick={jumpToSlowest}>
                 <Zap className="h-3.5 w-3.5" /> Jump to slowest turn
               </Button>
             )}
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={exportJson}>
-              <Download className="h-3.5 w-3.5" /> Trace JSON
-            </Button>
+            <CopyLinkButton path={`/sessions/${encodeURIComponent(trace.id)}`} />
+            <DownloadMenu items={downloads} />
           </div>
         </div>
       </div>
@@ -281,21 +309,23 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
         </Card>
       </div>
 
-      {/* ── Recording ── */}
+      {/* ── Audio — playable, never connected, or past retention. Chat
+             sessions have no audio row at all. ── */}
       {voice && (
         <div className="space-y-1.5">
-          <p className="text-xs text-muted-foreground">Recording</p>
+          <p className="text-xs text-muted-foreground">Audio</p>
           {hasRecording ? (
             <div className="flex items-center gap-3">
               <Button
                 variant="outline" size="icon" className="h-8 w-8 shrink-0"
                 onClick={() => setPlaying((p) => !p)}
+                aria-pressed={playing}
                 title={playing ? "Pause" : "Play"}
               >
                 {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                 <span className="sr-only">{playing ? "Pause recording" : "Play recording"}</span>
               </Button>
-              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground" aria-live="polite">
                 {fmtTime(pos)} / {fmtTime(total)}
               </span>
               <button
@@ -309,24 +339,23 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
                 aria-label="Seek recording position"
               >
                 <span className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${(pos / total) * 100}%` }} />
-                {/* Turn ticks — every turn is findable on the scrubber itself. */}
-                {trace.turns.map((t) => (
-                  <span
-                    key={t.index}
-                    className="absolute top-1/2 h-2 w-0.5 -translate-y-1/2 rounded-full bg-foreground/25"
-                    style={{ left: `${(t.atSec / total) * 100}%` }}
-                    aria-hidden
-                  />
-                ))}
+                {/* Turn map — every turn is findable on the scrubber itself. */}
+                <span role="img" aria-label="Turn map" className="pointer-events-none absolute inset-0">
+                  {trace.turns.map((t) => (
+                    <span
+                      key={t.index}
+                      className="absolute top-1/2 h-2 w-0.5 -translate-y-1/2 rounded-full bg-foreground/25"
+                      style={{ left: `${(t.atSec / total) * 100}%` }}
+                      aria-hidden
+                    />
+                  ))}
+                </span>
               </button>
-              <Button
-                variant="ghost" size="icon" className="h-8 w-8 shrink-0"
-                onClick={() => toast.success("Mock: recording downloaded")}
-                title="Download recording"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span className="sr-only">Download recording</span>
-              </Button>
+            </div>
+          ) : audio === "not-retained" ? (
+            <div className="rounded-lg border border-dashed border-border px-3 py-2.5">
+              <p className="text-xs text-muted-foreground">Not retained</p>
+              <p className="text-xs text-muted-foreground/70">Retention: 30 days</p>
             </div>
           ) : (
             <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">
@@ -403,8 +432,14 @@ const TurnRow = React.forwardRef<HTMLDivElement, {
   sessionId: string
 }>(function TurnRow({ turn, scaleMs, active, seekable, expandAll, onSeek, sessionId }, ref) {
   const isAgent = turn.speaker === "Agent"
+  // "Show all payloads" resets every row; a row can still be toggled on its
+  // own afterwards. Derived during render, not in an effect.
   const [open, setOpen] = React.useState(false)
-  React.useEffect(() => { setOpen(expandAll) }, [expandAll])
+  const [seenExpandAll, setSeenExpandAll] = React.useState(expandAll)
+  if (seenExpandAll !== expandAll) {
+    setSeenExpandAll(expandAll)
+    setOpen(expandAll)
+  }
 
   const hasPayloads = Boolean(turn.payloads.stt || turn.payloads.llm || turn.payloads.tts)
 
@@ -449,6 +484,7 @@ const TurnRow = React.forwardRef<HTMLDivElement, {
                 <Zap className="h-3 w-3" /> Slowest turn
               </Badge>
             )}
+            {turn.endType && <TurnBadge kind={turn.endType} />}
           </div>
           <p className="text-sm leading-relaxed">{turn.text}</p>
 
