@@ -8,29 +8,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { UsageSpendCard } from "@/components/usage-spend-card"
 import { ConcurrencyCard } from "@/components/concurrency-card"
-import { useFutureScope } from "@/lib/future-scope"
 import { freeMinutesStats } from "@/lib/campaign-data"
 
 /**
- * Gates the roadmap Billing surfaces (X1 Usage & spend + A6 Concurrent lines)
- * behind the Future-scope flag. OFF → the pre-roadmap "Current period" card so
- * /billing reads as today's product; ON → the two new cards.
+ * The roadmap Billing surfaces (X1 Usage & spend + A6 Concurrent lines). The
+ * Future-scope switch that used to hide them is gone (2026-09-11); the older
+ * "Current period" card is kept below for reference and is no longer rendered.
  */
 export function BillingFutureCards() {
-  const [future] = useFutureScope()
-  if (future) {
-    return (
-      <>
-        <UsageSpendCard />
-        <ConcurrencyCard />
-      </>
-    )
-  }
-  return <CurrentPeriodCard />
+  return (
+    <>
+      <UsageSpendCard />
+      <ConcurrencyCard />
+    </>
+  )
 }
 
-/** The baseline card shown when future scope is off (mirrors the original). */
-function CurrentPeriodCard() {
+/** The pre-roadmap card (unused since 2026-09-11, kept for reference). */
+export function CurrentPeriodCard() {
   const { plan, included, used, pctUsed, remaining } = freeMinutesStats()
   const hasUsage = used > 0
   return (

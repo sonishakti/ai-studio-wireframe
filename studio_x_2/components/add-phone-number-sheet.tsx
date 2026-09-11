@@ -18,7 +18,6 @@ import {
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 import { SipQuickConnect } from "@/components/sip-quick-connect"
-import { useFutureScope } from "@/lib/future-scope"
 
 type Phase = "form" | "success"
 type Transport = "TCP" | "UDP" | "TLS"
@@ -48,22 +47,21 @@ export function AddPhoneNumberSheet({
   onOpenChange?: (o: boolean) => void
 }) {
   const router = useRouter()
-  const [future] = useFutureScope()
   const [openState, setOpenState] = React.useState(false)
   const open = openProp ?? openState
   const setOpen = (o: boolean) => {
     setOpenState(o)
     onOpenChange?.(o)
   }
-  // A3 Quick connect is future-scope-gated; off = the manual SIP form only.
-  const [mode, setMode] = React.useState<Mode>(future ? defaultMode : "manual")
+  // A3 Quick connect is the default path (Future-scope switch removed 2026-09-11).
+  const [mode, setMode] = React.useState<Mode>(defaultMode)
   const [phase, setPhase] = React.useState<Phase>("form")
   const [showPw, setShowPw] = React.useState(false)
   const [transport, setTransport] = React.useState<Transport>("TCP")
   const [form, setForm] = React.useState({ number: "", vendor: "", displayName: "", sipDomain: "", username: "", password: "" })
 
   const reset = () => {
-    setMode(future ? defaultMode : "manual")
+    setMode(defaultMode)
     setPhase("form")
     setForm({ number: "", vendor: "", displayName: "", sipDomain: "", username: "", password: "" })
     setTransport("TCP")
@@ -100,7 +98,7 @@ export function AddPhoneNumberSheet({
           )}
         </SheetHeader>
 
-        {phase === "form" && future && (
+        {phase === "form" && (
           <div className="px-5 pt-4">
             <ToggleGroup
               type="single"

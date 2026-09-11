@@ -48,7 +48,6 @@ import { AgentWizard } from "@/components/wizard/agent-wizard"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { ProvisioningCeremony } from "@/components/provisioning-ceremony"
 import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-progress"
-import { useFutureScope, readFutureScope } from "@/lib/future-scope"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
 import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, stackLine, stackFor, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
@@ -533,9 +532,8 @@ export default function AgentsPage() {
   // mismatch). ?provision=1 replays; ?provision=stall demos the error state.
   const [phase, setPhase] = React.useState<"ceremony" | "warming" | "ready">("ready")
   const [stallDemo, setStallDemo] = React.useState(false)
-  // A1 is future-scope-gated: with the flag off, the ceremony never runs and
-  // /agents opens straight on today's landing.
-  const [future] = useFutureScope()
+  // A1 provisioning ceremony is part of the product (Future-scope switch
+  // removed 2026-09-11): it runs once per browser, then never again.
 
   // The view FOLLOWS the URL (?view=list) via real navigation — Back works and
   // the segmented control below always shows which surface you're on (#8).
@@ -582,7 +580,7 @@ export default function AgentsPage() {
     // ⌘K / deep links can open the templates sheet directly (?templates=1).
     if (p.get("templates") === "1") setTemplatesOpen(true)
     const prov = p.get("provision")
-    if ((prov === "1" || prov === "stall") && readFutureScope()) {
+    if (prov === "1" || prov === "stall") {
       resetProvisioned()
       setStallDemo(prov === "stall")
       setPhase("ceremony")
@@ -590,9 +588,8 @@ export default function AgentsPage() {
   }, [])
 
   React.useEffect(() => {
-    if (future && !isProvisioned()) setPhase("ceremony")
-    else if (!future) setPhase("ready")
-  }, [future])
+    if (!isProvisioned()) setPhase("ceremony")
+  }, [])
 
   // The warming beat: the user broke the wall early, so the landing renders
   // while the remaining stages "finish" — then the Talk button flips on.

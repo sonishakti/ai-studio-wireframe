@@ -93,13 +93,15 @@ export function CustomConfigDrawer({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
+        {/* Bordered + labelled in both placements (owner 2026-09-11: no
+            ghost icon-only buttons in the builder header). */}
         {iconOnly ? (
-          <Button variant="ghost" size="icon" className="size-8" aria-label="Custom config (JSON)">
-            <Code2 className="h-4 w-4" aria-hidden />
+          <Button variant="outline" size="sm" className="gap-1.5" aria-label="Custom config (JSON)">
+            <Code2 className="h-4 w-4" aria-hidden /> Custom config
           </Button>
         ) : (
-          <Button variant="ghost" size="sm" className="gap-1.5">
-            <Code2 className="h-4 w-4" aria-hidden /> Custom Config
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <Code2 className="h-4 w-4" aria-hidden /> Custom config
           </Button>
         )}
       </SheetTrigger>
