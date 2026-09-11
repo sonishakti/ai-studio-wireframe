@@ -241,3 +241,51 @@ Re-run: `EXEC=<chromium> BASE=http://localhost:3020 node scripts/revamp/scan.mjs
   under four URL prefixes; the deploy action has five names; error and loading states are missing on nearly every screen; mobile layouts break at the header.
 - Accessibility is one token plus a handful of component fixes away from clean on desktop; keyboard reachability of code blocks, table rows and
   icon-only switches is real work.
+
+## 12 · Re-audit — 2026-09-11 (after the chrome fixes and the six research features)
+
+Owner direction the same day: *"Remove toggle for future scope etc. We are now moving into building out the features from the
+research."* The phase gates below were not waited for; this section records what moved. Live build:
+https://ai-studio-console-redesign.vercel.app (deploy `ai-studio-console-redesign-nfviuxrko`, main @ `f3664d0`). After
+screenshots: `docs/revamp/after/agent/` and `docs/revamp/after/session/` (red-marked, 1600 px). Axe after-scan (same method as §8,
+same four screens, working tree = the deployed commit): `docs/revamp/axe-after-2026-09-11.json`.
+
+### Findings that moved
+
+| # | Before (Phase 0) | After | How |
+|---|---|---|---|
+| N4 | "Future scope" toggle in the global top bar on every screen | **Resolved.** Switch and `lib/future-scope.ts` deleted; the four features it gated (A1 ceremony, A3 quick connect, D1 batch detail, X1/A6 billing cards) are always on. | `components/dashboard-header.tsx`, four call sites |
+| A7 | Agent header stacks eight controls; waveform and `</>` are icon-only ghosts | **Resolved.** Every header action is a bordered button with a word: More · Custom config · Voice call · Live — no changes; Reset to live on dirty sections. Top bar: Help · Notifications · Composer, bordered. | `wizard/agent-wizard.tsx`, `custom-config-drawer.tsx`, `dashboard-header.tsx` |
+| A3 | Numbered section chips carry no label | **Unchanged** (mobile strip) — the desktop rail already names sections. Section bodies are now indented 44 px to the title (`lg:pl-11`), so each accordion reads as nested content. | `wizard/agent-wizard.tsx` |
+| A8 | Greeting is a bare textarea; who speaks first / interruptibility / disclosure absent | **Resolved (design 04).** Opening section: who speaks first · greeting · callers can interrupt · tell the caller it's an AI (composed into the greeting, shown as "Callers hear") · silence recap · Hear the opening. Filler row relabelled "While thinking" with three Requires-Engine rows. | `wizard/section-opening.tsx`, `section-prompt.tsx`, `step-advanced.tsx` |
+| A5 | Talk state mock has no `aria-live`, nothing to try | **Partly.** "Try interrupting" chip + `aria-live` verdict line on the Talk tab (design 02). The state chips themselves are unchanged. | `wizard/test-panel.tsx` |
+| S1 | No error/loading state on the sessions list; failed sessions bare | **Partly.** Session page and call sheet state missing artifacts explicitly (No recording · Not retained · No timestamps · Cause could not be determined). List loading/error states still missing. | `session-detail.tsx`, `call-detail-sheet.tsx`, `sip-verdict.tsx` |
+| S2 | Rows lead with raw ids; outcome after | **Partly.** Call History gains All · With issues and an "Attributed to" strip with counts (design 11); Sessions list column order unchanged. | `app/(dashboard)/calls/page.tsx` |
+| §4 states | Error state in 1 file, loading in 2 | Missing-artifact states added on the two detail surfaces; still no list-level loading/error. | — |
+| §7 contrast | `--muted-foreground` #757575 = 4.49:1 on the page ground → 1 806 of 2 026 axe nodes | **Resolved at the token.** `--muted-foreground` → #6b6b6b (5.0:1 on #fdfcfc and on the #f8f3f1 well). | `app/globals.css` |
+
+### Axe, same four screens (serious + critical nodes)
+
+| Screen | Before | After | What remains |
+|---|---|---|---|
+| `/agents/agt_default/edit` | 75 | **5** | 1 `aria-input-field-name` (pre-existing agent-name input), 4 `color-contrast` on `.opacity-50` disabled controls (WCAG exempts disabled controls; axe still counts them) |
+| `/calls` | 51 | **39** | 25 `nested-interactive` (the row is a button and contains links/buttons — pre-existing), 13 contrast on `.opacity-*` / badge text, 1 `button-name` |
+| `/sessions` | 32 | **19** | 16 contrast on secondary badge text, 3 `button-name` (pagination icons, pre-existing) |
+| `/sessions/[id]` | 109 | **6** | 6 contrast on chart legend text |
+
+Net on these four screens: 267 → 69. The remaining nodes are pre-existing patterns (`nested-interactive` rows, disabled-control
+contrast, badge text on tinted fills) — fix them in the Session grayscale pass, not per feature.
+
+### New surfaces added (design tracker) — heuristics applied while building
+
+- **01** Recommended strip + Compare tray + Add your own voice inside Select voice — recognition over recall (three ranked voices before a
+  fourteen-row table), every audio control has a stop state, consent is unchecked by default.
+- **02** Turn-taking row with a recap in milliseconds, Listening group (SAL renamed to what it does), inert Requires-Engine rows —
+  visibility of system status, match with the caller's words.
+- **07** Backup providers row — a stated state per component; "Test failover" disabled with the Engine dependency named, never a
+  dead button.
+- **10 / 11** One clock, end-type badges, Copy link, Download menu, verdict-driven SIP with per-leg time, collapsed repeats, deciding
+  message, issues-first list — error recognition and recovery in the same block, honest empty states.
+
+Copy introduced on these surfaces is listed in `references/agent-builder-features-implementation-log-2026-09-11.html` for sign-off.
+The NG token pass (Phase 1) is still ahead: these screens carry the Studio X look.

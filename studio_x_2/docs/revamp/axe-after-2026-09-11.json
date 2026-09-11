@@ -1,0 +1,215 @@
+[
+ {
+  "path": "/agents/agt_default/edit",
+  "area": "Agent",
+  "slug": "agents-agt_default-edit",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "aria-input-field-name",
+    "impact": "serious",
+    "help": "ARIA input fields must have an accessible name",
+    "nodes": 1,
+    "sample": ".shadow-sm"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 4,
+    "sample": ".opacity-50"
+   },
+   {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": 1,
+    "sample": "#wizard-step-1-title"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 117,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": null,
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/calls",
+  "area": "Session",
+  "slug": "calls",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 1,
+    "sample": ".pr-3"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 13,
+    "sample": ".py-0"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "nested-interactive",
+    "impact": "serious",
+    "help": "Interactive controls must not be nested",
+    "nodes": 25,
+    "sample": "tr[aria-label=\"Open call CALLRT\"]"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:ring-sidebar-ring.focus-visible\\:outline-none[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 94,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/sessions",
+  "area": "Session",
+  "slug": "sessions",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "help": "Buttons must have discernible text",
+    "nodes": 3,
+    "sample": ".w-44"
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 16,
+    "sample": ".px-1\\.5"
+   },
+   {
+    "id": "landmark-main-is-top-level",
+    "impact": "moderate",
+    "help": "Main landmark should not be contained in another landmark",
+    "nodes": 1,
+    "sample": ".p-6"
+   },
+   {
+    "id": "landmark-no-duplicate-main",
+    "impact": "moderate",
+    "help": "Document should not have more than one main landmark",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "landmark-unique",
+    "impact": "moderate",
+    "help": "Landmarks should have a unique role or role/label/title (i.e. accessible name) combination",
+    "nodes": 1,
+    "sample": ".md\\:peer-data-\\[variant\\=inset\\]\\:m-2"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 56,
+   "unlabeled": 1,
+   "samples": [
+    "input.w-full.min-w-0"
+   ]
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ },
+ {
+  "path": "/sessions/O1ER-V8LY-2FS5-9MZCP",
+  "area": "Session",
+  "slug": "sessions-detail",
+  "title": "Studio_X · Agora",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": 6,
+    "sample": ".bg-destructive\\/10"
+   },
+   {
+    "id": "region",
+    "impact": "moderate",
+    "help": "All page content should be contained by landmarks",
+    "nodes": 12,
+    "sample": ".focus-visible\\:outline-none.focus-visible\\:ring-sidebar-ring[href$=\"agents\"]"
+   }
+  ],
+  "missingLabels": {
+   "controls": 48,
+   "unlabeled": 0,
+   "samples": []
+  },
+  "error": null,
+  "h1": "Monitor",
+  "focusVisible": {
+   "outlineNone": 13,
+   "focusVisibleRules": 52
+  }
+ }
+]

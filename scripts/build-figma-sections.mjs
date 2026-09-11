@@ -38,7 +38,7 @@ for (const r of data.rows) {
     research: scenarios,
     learnings: r.learnings ?? [],
     directions: r.directions ?? [], verdict: r.verdict ?? null, directionsPage: r.directionsPage ?? null,
-    prototype: { open: (r.open ?? []).filter((l) => l.label !== "Figma"), shot: r.shot ? { alt: r.shot.alt, hash: r.shot.figmaHash || null, dims: dims(r.shot.file) } : null, rationale: r.rationale, next: r.next },
+    prototype: { open: (r.open ?? []).filter((l) => l.label !== "Figma"), shot: r.shot ? { alt: r.shot.alt, hash: r.shot.figmaHash || null, dims: dims(r.shot.file) } : null, moreShots: (r.afterShots ?? []).map((s) => ({ alt: s.alt, hash: s.figmaHash || null, dims: dims(s.file) })), rationale: r.rationale, next: r.next },
     before: (r.before ?? []).map((b) => ({ alt: b.alt, source: b.source, wrong: b.wrong ?? [], hash: b.figmaHash || null, dims: dims(b.file) })),
     hero: r.hero ?? [],
     tracker: { board: "https://claude.ai/code/artifact/a1d57eb9-2121-484c-b2f6-2d728cbd1466", clickup: r.clickup, figma: figmaLink(r) },
