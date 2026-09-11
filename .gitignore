@@ -4,3 +4,4 @@ screenshots/.DS_Store
 
 # board thumbnails are build output (scripts/build-tracker-board.mjs)
 *.thumb.png
+references/tracker-board/figma/plans/
