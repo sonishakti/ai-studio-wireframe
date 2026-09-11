@@ -51,7 +51,7 @@ figcaption{font-size:13px;color:var(--doc-ink-2);margin-top:6px}
   <div><b>Where it lands</b>Agents › Agent Detail › <strong>Prompt</strong> tab — the <code>Opening</code> section replaces the lone Greeting field. The Advanced half relabels the Filler Words row and adds three inert rows under it.</div>
   <div><b>Commit</b><code>c4bba4e5</code> on <code>design/sandbox</code> (rebased on <code>origin/staging</code> the same day, so it sits on top of #1443 and #1446).</div>
   <div><b>Checks</b><code>tsc</code> clean · 306 tests pass across 10 files (composition 8 · drafts 4 · greeting_configs 3 · section 11 · engine rows 2 · plus the existing drawer / detail / workspace suites) · Biome clean on every touched file.</div>
-  <div><b>Preview</b><a href="https://ng-console-inisu4mzl-agoraio.vercel.app">ng-console-inisu4mzl-agoraio.vercel.app</a> — git-free export of <code>c4bba4e5</code>, guest mode. As with 07, a guest cannot open an agent and the SSO handoff to console-staging still answers 400, so the section is only reachable there once the Console team aligns the transfer code. Evidence below is captured from the running app.</div>
+  <div><b>Preview · no sign-in</b><a href="https://ng-console-9h69k4652-agoraio.vercel.app">ng-console-9h69k4652-agoraio.vercel.app</a> — the <strong>design-mode build</strong> (design-kit, commit <code>9f289762</code>): the whole Console rendered from fixtures, so Agents › Support Voice Agent › Prompt opens with no Agora session. The earlier guest-mode preview (<code>inisu4mzl</code>) is superseded. Evidence below is captured from the running app.</div>
 </div>
 
 <h2>What was built</h2>
@@ -100,6 +100,14 @@ figcaption{font-size:13px;color:var(--doc-ink-2);margin-top:6px}
     <tr><td><strong>Three inert rows</strong></td><td>C</td><td>Match the persona · Keep going after the filler · During tool calls. Disabled switches, caption <code>Requires Engine</code>, tooltip naming the ticket; the choice is kept in <code>sessionStorage</code> only.</td></tr>
   </tbody>
 </table>
+
+<h2>On the real page (design mode)</h2>
+<p>The section inside the actual Agent Detail page, served by <code>bunx vite dev --config design-kit/vite.config.ts</code> — no login, no secret, no network. Same build as the preview link above.</p>
+<figure><img src="05-shots/live-prompt-tab.png" alt="Agent Detail, Prompt tab, with the Opening section"><figcaption>Live · Prompt tab. Sidebar, project switcher, LIVE badge, Re-Publish, the Test rail; the Opening section between System prompt and Failure message.</figcaption></figure>
+<div class="pair">
+  <figure><img src="05-shots/live-prompt-tab-disclosure-on.png" alt="Live page, disclosure on"><figcaption>Live · disclosure on.</figcaption></figure>
+  <figure><img src="05-shots/live-advanced-while-thinking.png" alt="Live Advanced tab with While thinking and the three Requires Engine rows"><figcaption>Live · Advanced. "While thinking", then the three Requires Engine rows, before Voice Format and Silent reminder.</figcaption></figure>
+</div>
 
 <h2>Before and after</h2>
 <p>Same fixture agent, same components, two commits: <code>6ffb3118</code> (design/sandbox before this slice) and <code>c4bba4e5</code> (after). No annotations, so nothing is covered.</p>
