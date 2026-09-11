@@ -13,8 +13,10 @@
 // importing (upload_assets → POST the SVG → use_figma moves the frame into its
 // section), replace the fills with the full-resolution PNGs: `--images` prints the
 // files in SVG document order, which is the order use_figma's findAll returns the
-// image-fill rectangles; pass those node ids to upload_assets({nodeIds}) and POST
-// each PNG to its slot. See references/design-ops-protocol.md → Review loop.
+// image-fill rectangles. Request upload_assets slots (no nodeIds — that path
+// reports success without changing fills), POST each PNG, then set each rect's
+// fill yourself: rect.fills = [{type:"IMAGE", scaleMode:"FILL", imageHash}] with
+// the hash from the POST response. See references/design-ops-protocol.md → Review loop.
 //
 // Layout per board (reads top to bottom, the review loop):
 //   header (NN · name · status · ClickUp)  →  JTBD  →  Competitors (Vapi · Retell ·
