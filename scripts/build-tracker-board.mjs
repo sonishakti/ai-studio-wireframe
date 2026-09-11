@@ -1,0 +1,135 @@
+#!/usr/bin/env node
+// build-tracker-board — renders references/tracker-board/tracker-board.json into
+// references/tracker-board/index.html (self-contained: thumbnails inlined).
+//
+//   node scripts/build-tracker-board.mjs
+//
+// Rows come from the ClickUp Design Tracker (list 901114875662) in ClickUp
+// order and are never reordered here. Edit the JSON, rebuild, republish the
+// same Artifact. Status tags are exactly: Not Done · WIP · Pending review · Done.
+import { readFileSync, writeFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
+
+const here = dirname(fileURLToPath(import.meta.url))
+const root = resolve(here, "..")
+const dataPath = resolve(root, "references/tracker-board/tracker-board.json")
+const outPath = resolve(root, "references/tracker-board/index.html")
+const data = JSON.parse(readFileSync(dataPath, "utf8"))
+
+const STATUS = {
+  "Not Done": "s-notdone",
+  WIP: "s-wip",
+  "Pending review": "s-review",
+  Done: "s-done",
+}
+
+const esc = (v) =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+
+const inlineImage = (file) => {
+  const buf = readFileSync(resolve(root, file))
+  return `data:image/png;base64,${buf.toString("base64")}`
+}
+
+const links = (items) =>
+  items
+    .map(
+      (l) =>
+        `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`
+    )
+    .join('<span class="sep">·</span>')
+
+const row = (r) => {
+  const cls = STATUS[r.status]
+  if (!cls) throw new Error(`row ${r.n}: unknown status "${r.status}"`)
+  const shot = r.shot
+    ? `<button class="thumb" type="button" aria-label="Open screenshot: ${esc(r.shot.alt)}"><img alt="${esc(r.shot.alt)}" loading="lazy" src="${inlineImage(r.shot.file)}"></button>`
+    : `<span class="none">—</span>`
+  return `<tr id="f${r.n}">
+  <td class="n">${esc(r.n)}</td>
+  <td class="feat"><a href="${esc(r.clickup)}" target="_blank" rel="noopener"><b>${esc(r.name)}</b></a><div class="tags">${esc(r.tags)}</div><div class="says">${esc(r.clickupSays)}</div></td>
+  <td><span class="pill ${cls}">${esc(r.status)}</span></td>
+  <td class="jtbd">${esc(r.jtbd)}</td>
+  <td class="open">${links(r.open)}</td>
+  <td class="shot">${shot}</td>
+  <td class="why">${esc(r.rationale) || '<span class="none">—</span>'}</td>
+  <td class="next">${esc(r.next)}</td>
+</tr>`
+}
+
+const counts = Object.keys(STATUS).map(
+  (s) => `<span class="pill ${STATUS[s]}">${esc(s)}</span> ${data.rows.filter((r) => r.status === s).length}`
+).join('<span class="sep">·</span>')
+
+const html = `<title>Design Delivery Board</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--ground:#f2f6f8;--card:#fff;--ink:#101e26;--ink-2:#4c5f69;--ink-3:#7d8f99;--rule:#d5dfe5;--accent:#00658d;--accent-soft:#dcedf4;
+  --notdone:#5b6b74;--notdone-bg:#e6ecef;--wip:#8a5a00;--wip-bg:#fbf1d9;--review:#00658d;--review-bg:#dcedf4;--done:#1a7a4a;--done-bg:#dff3e8;--shot:#0b0f13}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0c1317;--card:#131c22;--ink:#e7eef2;--ink-2:#9fb1bb;--ink-3:#6f8390;--rule:#22313a;--accent:#5cc8f0;--accent-soft:#10303f;
+  --notdone:#9fb1bb;--notdone-bg:#1b262d;--wip:#e2b95c;--wip-bg:#2c2410;--review:#5cc8f0;--review-bg:#10303f;--done:#5fd39a;--done-bg:#0f2b1e;--shot:#000}}
+:root[data-theme="dark"]{--ground:#0c1317;--card:#131c22;--ink:#e7eef2;--ink-2:#9fb1bb;--ink-3:#6f8390;--rule:#22313a;--accent:#5cc8f0;--accent-soft:#10303f;
+  --notdone:#9fb1bb;--notdone-bg:#1b262d;--wip:#e2b95c;--wip-bg:#2c2410;--review:#5cc8f0;--review-bg:#10303f;--done:#5fd39a;--done-bg:#0f2b1e;--shot:#000}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:13.5px;line-height:1.45}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code{font-family:"JetBrains Mono",monospace;font-size:.9em;background:var(--accent-soft);padding:1px 4px;border-radius:3px}
+.wrap{max-width:1680px;margin:0 auto;padding:28px 22px 80px}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 6px}
+h1{font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0 0 6px}
+.meta{color:var(--ink-2);font-size:13px;margin:0 0 14px;display:flex;flex-wrap:wrap;gap:6px 0;align-items:center}
+.sep{color:var(--ink-3);padding:0 7px}
+.pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.s-notdone{color:var(--notdone);background:var(--notdone-bg)}.s-wip{color:var(--wip);background:var(--wip-bg)}
+.s-review{color:var(--review);background:var(--review-bg)}.s-done{color:var(--done);background:var(--done-bg)}
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--card)}
+table{width:100%;min-width:1380px;border-collapse:collapse}
+th{position:sticky;top:0;background:var(--card);z-index:1;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:600}
+td{padding:11px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-family:"JetBrains Mono",monospace;color:var(--ink-3);font-variant-numeric:tabular-nums;width:38px}
+td.feat{min-width:200px;max-width:240px}
+td.feat b{font-weight:600}
+.tags{color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.says{color:var(--ink-3);font-size:11.5px;margin-top:4px}
+td.jtbd{min-width:210px;max-width:260px;color:var(--ink-2)}
+td.open{min-width:170px;max-width:220px;line-height:1.7}
+td.shot{width:280px}
+.thumb{display:block;width:264px;padding:0;border:1px solid var(--rule);border-radius:6px;background:var(--shot);overflow:hidden;cursor:zoom-in}
+.thumb img{display:block;width:100%;height:auto}
+td.why{min-width:240px;max-width:320px;color:var(--ink-2)}
+td.next{min-width:200px;max-width:260px}
+.none{color:var(--ink-3)}
+.legend{font-size:12.5px;color:var(--ink-2);margin:14px 0 0}
+.lb{position:fixed;inset:0;background:rgba(6,12,16,.86);display:none;place-items:center;padding:24px;z-index:9;cursor:zoom-out}
+.lb.open{display:grid}
+.lb img{max-width:100%;max-height:100%;border-radius:8px;border:1px solid var(--rule);background:var(--shot)}
+</style>
+<div class="wrap">
+  <p class="eyebrow">Convo AI · Design Tracker · delivery</p>
+  <h1>Design Delivery Board</h1>
+  <p class="meta">${counts}<span class="sep">·</span>updated ${esc(data.updated)}<span class="sep">·</span>rows from <a href="${esc(data.source.url)}" target="_blank" rel="noopener">${esc(data.source.label)}</a>, in ClickUp order</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Feature</th><th>Status</th><th>JTBD</th><th>Open</th><th>What we built</th><th>Rationale</th><th>Next</th></tr></thead>
+    <tbody>
+${data.rows.map(row).join("\n")}
+    </tbody>
+  </table></div>
+  <p class="legend"><b>Status:</b> Not Done = nothing started · WIP = research or build in progress · Pending review = built or blocked, needs your review or a decision · Done = reviewed and accepted. Rows are never reordered. Source: <code>references/tracker-board/tracker-board.json</code> → <code>node scripts/build-tracker-board.mjs</code>.</p>
+</div>
+<div class="lb" id="lb" role="dialog" aria-label="Screenshot"><img alt="" id="lbimg"></div>
+<script>
+(function(){var lb=document.getElementById('lb'),img=document.getElementById('lbimg');
+document.querySelectorAll('.thumb').forEach(function(b){b.addEventListener('click',function(){img.src=b.querySelector('img').src;img.alt=b.querySelector('img').alt;lb.classList.add('open')})});
+function close(){lb.classList.remove('open');img.src=''}
+lb.addEventListener('click',close);document.addEventListener('keydown',function(e){if(e.key==='Escape')close()})})();
+</script>
+`
+writeFileSync(outPath, html)
+console.log(`wrote ${outPath} (${Math.round(html.length / 1024)} KB, ${data.rows.length} rows)`)

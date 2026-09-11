@@ -1,0 +1,648 @@
+{
+  "updated": "2026-09-11",
+  "source": {
+    "label": "ClickUp · Convo AI › Design Tracker (901114875662)",
+    "url": "https://app.clickup.com/8556478/v/l/li/901114875662"
+  },
+  "preview": "https://ng-console-9h69k4652-agoraio.vercel.app",
+  "rows": [
+    {
+      "n": "01",
+      "id": "868m0medx",
+      "name": "01 · Voice picker & recommendations",
+      "clickup": "https://app.clickup.com/t/868m0medx",
+      "tags": "builder · voices · P0-Sep",
+      "clickupSays": "ClickUp: research Pending · UI exists (voice select) · status planning",
+      "jtbd": "User wants to pick a voice that fits the use case without auditioning the whole catalog.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0medx"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/01-voice-picker/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/01-voice-picker/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "Recommended-first strip and a compare tray inside the existing voice library, plus \"Add your own voice\" with a consent line. Only the voice id is a real write; multi-voice is Requires Engine.",
+      "next": "Build in proto-01 per the verdict. Owner: may we say \"Recommended\" from tags before the benchmark?"
+    },
+    {
+      "n": "02",
+      "id": "868m0mef4",
+      "name": "02 · Turn-taking & listening",
+      "clickup": "https://app.clickup.com/t/868m0mef4",
+      "tags": "builder · engine · P0-Sep",
+      "clickupSays": "ClickUp: research Pending · UI partial (turn-detection controls) · status added",
+      "jtbd": "User wants the agent to interrupt, wait and listen like a person.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mef4"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/02-turn-taking/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/02-turn-taking/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "A Turn-taking preset row in user words with a recap read from the real config; speaker lock relabelled \"Lock onto one speaker\"; Backchannels and Preemptive replies visible but Requires Engine; \"Try interrupting\" in the Test rail.",
+      "next": "Build. Owner: agent-level or deployment-level; where the 240 ms default lands."
+    },
+    {
+      "n": "03",
+      "id": "868m0megc",
+      "name": "03 · Recognition & failover",
+      "clickup": "https://app.clickup.com/t/868m0megc",
+      "tags": "builder · engine · P0",
+      "clickupSays": "ClickUp: research Pending · UI none · status planning",
+      "jtbd": "User wants to be understood in their language, accent and jargon — even when a vendor fails.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0megc"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/03-recognition-failover/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/03-recognition-failover/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "One Vocabulary list in the ASR drawer mapped to each vendor's field (Deepgram and Microsoft write for real; ARES shape unconfirmed), a recap on the Models row, and the ASR backup reusing 07's row.",
+      "next": "Build. Owner: ARES keywords shape; label \"Vocabulary\" vs Agora's \"Keywords\"."
+    },
+    {
+      "n": "04",
+      "id": "868m0mejc",
+      "name": "04 · Greeting, filler & disclaimer",
+      "clickup": "https://app.clickup.com/t/868m0mejc",
+      "tags": "builder · P0-Sep",
+      "clickupSays": "ClickUp: research Pending · UI partial (greeting field) · status planning",
+      "jtbd": "User wants the first seconds and the pauses to feel natural — and compliant.",
+      "status": "Pending review",
+      "open": [
+        {
+          "label": "Preview",
+          "href": "https://ng-console-9h69k4652-agoraio.vercel.app/agents/agent_000001?sourceTab=my-agents&tab=prompt"
+        },
+        {
+          "label": "Review page",
+          "href": "https://claude.ai/code/artifact/fc54ca10-7e6f-4023-9f13-ad846bceccb9"
+        },
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mejc"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/05-directions.html"
+        },
+        {
+          "label": "Log",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/04-greeting-filler/05-prototype-log.html"
+        }
+      ],
+      "shot": {
+        "file": "references/research/04-greeting-filler/05-shots/live-opening-marked.png",
+        "alt": "Agent Detail › Prompt tab with the Opening section marked in red"
+      },
+      "rationale": "An Opening section on the Prompt tab: who speaks first, greeting, interruptible greeting, and the AI disclosure composed into the greeting because the Engine has no field for it; \"Callers hear\" shows the exact result. Filler row relabelled in user words with three Requires Engine rows.",
+      "next": "Your review on the preview. Decide: disclosure on by default for new agents? Sign off the sentence and the copy set."
+    },
+    {
+      "n": "05",
+      "id": "868m0mejx",
+      "name": "05 · Call behavior rules",
+      "clickup": "https://app.clickup.com/t/868m0mejx",
+      "tags": "builder · telephony · P0",
+      "clickupSays": "ClickUp: research Pending · UI none · status added",
+      "jtbd": "User wants to control what happens on idle, silence, voicemail and keypad input.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mejx"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/05-call-behavior/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/05-call-behavior/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "\"Call rules\" in sentence form on Advanced (silence, hang up after everyone leaves, finish speaking first; max duration read from the bound number) plus a \"Before you go live\" list in the Deploy tab. Voicemail message, keypad and guardrails are Requires Engine.",
+      "next": "Build. Owner: agent vs number level for duration; where the preflight lives."
+    },
+    {
+      "n": "06",
+      "id": "868m0mekq",
+      "name": "06 · TTS expression & personality",
+      "clickup": "https://app.clickup.com/t/868m0mekq",
+      "tags": "builder · P1",
+      "clickupSays": "ClickUp: research Pending · UI none · status planning",
+      "jtbd": "User wants to shape how the agent sounds, not just what it says.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mekq"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/06-tts-expression/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/06-tts-expression/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "Controls appear only when the vendor has the field: one normalised Pace, native Pitch / Volume / Emotion, a Tone prompt for OpenAI and Generic, a Pronunciation table on every vendor; Background sound inert.",
+      "next": "Build. Owner: drawer vs Models placement; the ElevenLabs key and range mismatches, fix or file."
+    },
+    {
+      "n": "07",
+      "id": "868m0men7",
+      "name": "07 · Vendors & provider fallback",
+      "clickup": "https://app.clickup.com/t/868m0men7",
+      "tags": "builder · vendors · P0-Sep",
+      "clickupSays": "ClickUp: research Done · UI exists (Voice & Models · Vendor Credentials) · status planning",
+      "jtbd": "User wants to trust that models keep running across vendors and regions.",
+      "status": "Pending review",
+      "open": [
+        {
+          "label": "Preview",
+          "href": "https://ng-console-9h69k4652-agoraio.vercel.app/agents/agent_000001?sourceTab=my-agents&tab=models"
+        },
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0men7"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/05-directions.html"
+        },
+        {
+          "label": "Log",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/07-vendors-fallback/05-prototype-log.html"
+        }
+      ],
+      "shot": {
+        "file": "references/research/07-vendors-fallback/05-shots/live-models-backup-providers.png",
+        "alt": "Agent Detail › Models tab with the Backup providers row marked in red"
+      },
+      "rationale": "One \"Backup providers\" row on Models, on by default: Agora's pool covers managed primaries, your own second key covers BYO, and each gap is named per component. \"Test failover\" waits for the Engine contract (Nov).",
+      "next": "Your review. Owner: backup pool as agent or deployment property; copy yes or no."
+    },
+    {
+      "n": "08",
+      "id": "868m0menv",
+      "name": "08 · Versioning & release ⚠ lock",
+      "clickup": "https://app.clickup.com/t/868m0menv",
+      "tags": "builder · test · P0 · ⚠ lock",
+      "clickupSays": "ClickUp: research Pending · UI partial (version history) · status clarified",
+      "jtbd": "User wants to change a live agent safely and undo it.",
+      "status": "Pending review",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0menv"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/08-versioning-release/00-brief.md"
+        }
+      ],
+      "shot": null,
+      "rationale": "Locked: production A/B collides with the builder \"no A/B\" lock. Brief written; versioning, rollback and \"simulate a pending change\" wait on the call.",
+      "next": "Owner answers where A/B lives: Monitor-side experiments, the deploy panel, or API-only."
+    },
+    {
+      "n": "09",
+      "id": "868m0meqf",
+      "name": "09 · First run, templates & import",
+      "clickup": "https://app.clickup.com/t/868m0meqf",
+      "tags": "onboarding · P0-Sep",
+      "clickupSays": "ClickUp: research Done (activation) · UI exists · lock on the template gallery · status added",
+      "jtbd": "User wants a working agent in minutes — from scratch or from a competitor.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0meqf"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/09-first-run/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/09-first-run/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "\"Import from Vapi or Retell\" as a third row in the create modal with a mapped / changed / not-imported report and a real create; a one-click \"Update to current contract\" off the existing alert; onboarding funnel events. Gallery locked.",
+      "next": "Build import, then contract update. Owner: the template gallery; a pre-provisioned default agent."
+    },
+    {
+      "n": "10",
+      "id": "868m0meta",
+      "name": "10 · Session & call logs",
+      "clickup": "https://app.clickup.com/t/868m0meta",
+      "tags": "monitor · P0-Oct",
+      "clickupSays": "ClickUp: research WIP (Wave 1) · UI partial (session detail) · status added",
+      "jtbd": "User wants to replay exactly what happened on a call.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0meta"
+        },
+        {
+          "label": "Brief",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/10-session-logs/00-brief.md"
+        },
+        {
+          "label": "Directions",
+          "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/10-session-logs/05-directions.html"
+        }
+      ],
+      "shot": null,
+      "rationale": "Aligned replay in the existing sheet: recording and transcript on one clock, click a line to seek, turn markers on the scrubber; end-of-turn badges (Interrupted · Ignored · Error) on the agent line; Download and Copy link. Degrades honestly when timestamps are missing.",
+      "next": "Build. Backend must surface history timestamps and turns per session."
+    },
+    {
+      "n": "11",
+      "id": "868m0mety",
+      "name": "11 · SIP & latency diagnostics",
+      "clickup": "https://app.clickup.com/t/868m0mety",
+      "tags": "monitor · telephony · P0-Sep",
+      "clickupSays": "ClickUp: research Done (Wave 2) · UI shipped in the wireframe · status planning",
+      "jtbd": "User wants to know whose fault a failed or slow call was.",
+      "status": "WIP",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mety"
+        },
+        {
+          "label": "Branch (SW4Y4M)",
+          "href": "https://github.com/AgoraIO/ng-console/tree/design/sip-diagnostics-prototype"
+        }
+      ],
+      "shot": null,
+      "rationale": "SIP diagnostics prototype by SW4Y4M on its own branch: fault verdict, signalling ladder, SIP message detail with visible redaction, full-page call detail.",
+      "next": "Verify against final Engine payloads; port onto design/sandbox."
+    },
+    {
+      "n": "12",
+      "id": "868m0mevm",
+      "name": "12 · Live monitoring & operator controls ⚠ lock",
+      "clickup": "https://app.clickup.com/t/868m0mevm",
+      "tags": "monitor · P1 · ⚠ lock",
+      "clickupSays": "ClickUp: research Pending · UI none · lock: pause-button incident · status added",
+      "jtbd": "User wants to watch live calls and step in when one goes wrong.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mevm"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Owner call first: which operator verbs are permitted (listen · whisper · take over · end)."
+    },
+    {
+      "n": "13",
+      "id": "868m0mewr",
+      "name": "13 · Dashboards & alerts",
+      "clickup": "https://app.clickup.com/t/868m0mewr",
+      "tags": "monitor · P1",
+      "clickupSays": "ClickUp: research Pending · UI partial (Monitor overview) · status added",
+      "jtbd": "User wants to see agent health without asking an engineer.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mewr"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research (protocol steps 0–4). Label stays \"Monitor\"."
+    },
+    {
+      "n": "14",
+      "id": "868m0mexd",
+      "name": "14 · Evals & scorecards",
+      "clickup": "https://app.clickup.com/t/868m0mexd",
+      "tags": "test · P0",
+      "clickupSays": "ClickUp: research Pending · UI partial (eval-tests stub) · status added",
+      "jtbd": "User wants to prove an agent is good before and after shipping.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mexd"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research (protocol steps 0–4)."
+    },
+    {
+      "n": "15",
+      "id": "868m0meyb",
+      "name": "15 · Simulations",
+      "clickup": "https://app.clickup.com/t/868m0meyb",
+      "tags": "test · P1",
+      "clickupSays": "ClickUp: research Pending · UI exists (Run simulations panel) · status added",
+      "jtbd": "User wants to stress-test an agent without real callers.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0meyb"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research. Sims stay in the right-hand panel, not Talk (builder lock)."
+    },
+    {
+      "n": "16",
+      "id": "868m0mf09",
+      "name": "16 · Phone number purchase ⚠ lock",
+      "clickup": "https://app.clickup.com/t/868m0mf09",
+      "tags": "telephony · P0-Sep · XXL · ⚠ lock",
+      "clickupSays": "ClickUp: research Pending · UI none (numbers are BYO) · status added",
+      "jtbd": "User wants to buy a number and take a call without leaving Studio.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf09"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Owner call first: the first-run home once numbers are purchasable."
+    },
+    {
+      "n": "17",
+      "id": "868m0mf18",
+      "name": "17 · SIP trunk setup",
+      "clickup": "https://app.clickup.com/t/868m0mf18",
+      "tags": "telephony · P0-Sep",
+      "clickupSays": "ClickUp: research WIP (sip-quick-connect) · UI partial · status added",
+      "jtbd": "User wants to connect their own carrier once and never touch it again.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf18"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research on the Console (wireframe-era sip-quick-connect notes exist)."
+    },
+    {
+      "n": "18",
+      "id": "868m0mf2u",
+      "name": "18 · Channels ⚠ lock",
+      "clickup": "https://app.clickup.com/t/868m0mf2u",
+      "tags": "deploy · P0 · ⚠ lock",
+      "clickupSays": "ClickUp: research Pending · UI partial (widget-studio · Batch Calls) · status added",
+      "jtbd": "User wants to put one agent on WhatsApp, SMS, web and text.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf2u"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Owner call first: does \"one agent ↔ one channel\" survive three new channels?"
+    },
+    {
+      "n": "19",
+      "id": "868m0mf40",
+      "name": "19 · Tools & connectors",
+      "clickup": "https://app.clickup.com/t/868m0mf40",
+      "tags": "knowledge · P0",
+      "clickupSays": "ClickUp: research Pending · UI partial (Resources › MCP) · status added",
+      "jtbd": "User wants the agent to act on other systems without writing code.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf40"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research (protocol steps 0–4)."
+    },
+    {
+      "n": "20",
+      "id": "868m0mf4k",
+      "name": "20 · Knowledge sources",
+      "clickup": "https://app.clickup.com/t/868m0mf4k",
+      "tags": "knowledge · P1",
+      "clickupSays": "ClickUp: research WIP (Couchbase, Wave 1) · UI partial (KB upload) · status added",
+      "jtbd": "User wants the agent's knowledge kept current from real sources.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf4k"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research on the Console (Couchbase Wave 1 notes exist)."
+    },
+    {
+      "n": "21",
+      "id": "868m0mf5e",
+      "name": "21 · CRM & contacts",
+      "clickup": "https://app.clickup.com/t/868m0mf5e",
+      "tags": "knowledge · P0",
+      "clickupSays": "ClickUp: research Pending · UI none · status added",
+      "jtbd": "User wants to greet callers with context and write back what happened.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf5e"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research (protocol steps 0–4)."
+    },
+    {
+      "n": "22",
+      "id": "868m0mf7b",
+      "name": "22 · Usage, credits & concurrency",
+      "clickup": "https://app.clickup.com/t/868m0mf7b",
+      "tags": "billing · P0-Sep",
+      "clickupSays": "ClickUp: research Done (pricing + managed mode) · UI partial · lock on capacity SKUs · status added",
+      "jtbd": "User wants to understand what they're paying for and buy more capacity themselves.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf7b"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research on the Console. Confirm the capacity-SKU lock; find out what Archer is."
+    },
+    {
+      "n": "23",
+      "id": "868m0mf8y",
+      "name": "23 · Handoffs & routing",
+      "clickup": "https://app.clickup.com/t/868m0mf8y",
+      "tags": "workflows · P0",
+      "clickupSays": "ClickUp: research Pending · UI none · status added",
+      "jtbd": "User wants to hand a caller to the right human or agent, with context.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mf8y"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research. Depends on the Agent / Deployment split: where is a handoff configured?"
+    },
+    {
+      "n": "24",
+      "id": "868m0mfae",
+      "name": "24 · Retention, PII & compliance",
+      "clickup": "https://app.clickup.com/t/868m0mfae",
+      "tags": "governance · P0-Aug",
+      "clickupSays": "ClickUp: research Pending · UI none · status added",
+      "jtbd": "User wants to meet their compliance bar without filing a ticket.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mfae"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research (protocol steps 0–4)."
+    },
+    {
+      "n": "25",
+      "id": "868m0mfbx",
+      "name": "25 · Developer platform",
+      "clickup": "https://app.clickup.com/t/868m0mfbx",
+      "tags": "platform · P0-Aug",
+      "clickupSays": "ClickUp: research Pending · UI exists (/developer · webhooks · CLI card) · status added",
+      "jtbd": "User wants to build via API and still see everything in the UI.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mfbx"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research. Temp tokens stay CLI-only."
+    },
+    {
+      "n": "26",
+      "id": "868m0mfcy",
+      "name": "26 · Unified login",
+      "clickup": "https://app.clickup.com/t/868m0mfcy",
+      "tags": "platform · P0-Sep",
+      "clickupSays": "ClickUp: research Pending · UI exists (the Studio_X premise) · status added",
+      "jtbd": "User wants to sign in once for Console and Studio.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mfcy"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Ask the PM what \"unify\" means; one Okta cookie already exists, the seam is wayfinding."
+    },
+    {
+      "n": "27",
+      "id": "868m0mfdn",
+      "name": "27 · Responsiveness audit",
+      "clickup": "https://app.clickup.com/t/868m0mfdn",
+      "tags": "platform · P0-Sep",
+      "clickupSays": "ClickUp: research Pending · UI exists · status added",
+      "jtbd": "User wants to use Studio on any screen without it fighting them.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mfdn"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Audit end to end on the Console."
+    },
+    {
+      "n": "28",
+      "id": "868m0mfea",
+      "name": "28 · DevX & docs",
+      "clickup": "https://app.clickup.com/t/868m0mfea",
+      "tags": "devx · P1/P2",
+      "clickupSays": "ClickUp: research Pending · UI none (outside Studio_X) · status added",
+      "jtbd": "User wants to ship a front end fast.",
+      "status": "Not Done",
+      "open": [
+        {
+          "label": "ClickUp",
+          "href": "https://app.clickup.com/t/868m0mfea"
+        }
+      ],
+      "shot": null,
+      "rationale": "",
+      "next": "Research (protocol steps 0–4)."
+    }
+  ]
+}
