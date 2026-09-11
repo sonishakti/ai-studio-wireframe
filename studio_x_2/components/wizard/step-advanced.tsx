@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Gauge, MessagesSquare, Ear, Settings2, AudioLines, Type, Sparkle, Lock, Fingerprint, X } from "lucide-react"
+import { Gauge, MessagesSquare, Ear, Settings2, AudioLines, Type, Sparkle, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,14 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { DEFAULT_ADVANCED, type AdvancedConfig } from "@/lib/wizard-draft"
+import { reconcileTurnPreset } from "@/lib/turn-taking"
+import { useStoredState } from "@/hooks/use-stored-state"
 import { SectionRow } from "@/components/wizard/section-row"
+import { InfoHint } from "@/components/wizard/info-hint"
+import { EngineRow } from "@/components/wizard/engine-row"
+
+/** Browser-only intent for the filler rows the Engine cannot honour yet. */
+type FillerIntent = { persona?: boolean; keepGoing?: boolean; toolCalls?: boolean }
 
 /**
  * Speech tuning (was the optional "Advanced" section — dissolved into Voice &
@@ -30,6 +37,7 @@ export function StepAdvanced({
   onChange,
   realtime,
   showHistory = true,
+  agentId,
 }: {
   value: AdvancedConfig | undefined
   onChange: (next: AdvancedConfig) => void
@@ -37,9 +45,15 @@ export function StepAdvanced({
   realtime?: boolean
   /** v3 builder renders history in Knowledge & Tools instead. */
   showHistory?: boolean
+  /** Scopes the browser-only intent of the Requires-Engine rows. */
+  agentId?: string
 }) {
   const adv = value ?? DEFAULT_ADVANCED
   const patch = (p: Partial<AdvancedConfig>) => onChange({ ...adv, ...p })
+  /** A raw-row edit that diverges from the named preset flips it to Custom —
+   *  the Turn-taking row above must never claim numbers it doesn't have. */
+  const patchSpeech = (p: Partial<AdvancedConfig>) => onChange(reconcileTurnPreset({ ...adv, ...p }))
+  const [fillerIntent, setFillerIntent] = useStoredState<FillerIntent>(`sx:filler_intent:${agentId ?? "new"}`, {})
 
   return (
     // [label | content] rows (owner 2026-07-21): two labeled groups, each its
@@ -50,7 +64,13 @@ export function StepAdvanced({
       <SectionRow
         id="wz-4-turntaking"
         label="Turn-taking & interruptions"
-        hint="Fine-tune how the agent listens and takes turns. Barge-in tuning lives here (Speaking interrupt duration)."
+        hint={realtime
+          ? "Fine-tune how the agent listens and takes turns. Barge-in tuning lives here (Speaking interrupt duration)."
+          : (
+            <InfoHint label="Raw controls behind the preset above">
+              Turn detection, start and end of speech. Changing a number here switches the preset to Custom.
+            </InfoHint>
+          )}
       >
       {/* Turn detection */}
       <Sub
@@ -60,28 +80,35 @@ export function StepAdvanced({
         enabled={adv.turnDetection.enabled}
         onToggle={(enabled) => patch({ turnDetection: { ...adv.turnDetection, enabled } })}
       >
-        <Label className="text-xs text-muted-foreground">Quick Presets</Label>
-        <div className="grid grid-cols-2 gap-2 @lg:grid-cols-4">
-          {TURN_PRESETS.map((p) => {
-            const on = adv.turnDetection.preset === p.id
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => patch({ turnDetection: { ...adv.turnDetection, preset: p.id } })}
-                aria-pressed={on}
-                className={cn(
-                  "flex flex-col items-start gap-1 rounded-lg border p-2.5 text-left transition-colors",
-                  on ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:bg-accent/40",
-                )}
-              >
-                <p.icon className="h-4 w-4 text-muted-foreground" aria-hidden />
-                <span className="text-sm font-medium">{p.label}</span>
-                <span className="text-xs text-muted-foreground">{p.hint}</span>
-              </button>
-            )
-          })}
-        </div>
+        {/* Presets live in the Turn-taking row above (turn-taking-row.tsx) —
+            this grid stays only for realtime stacks, where that row is not
+            mounted. */}
+        {realtime && (
+          <>
+            <Label className="text-xs text-muted-foreground">Quick Presets</Label>
+            <div className="grid grid-cols-2 gap-2 @lg:grid-cols-4">
+              {TURN_PRESETS.map((p) => {
+                const on = adv.turnDetection.preset === p.id
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => patch({ turnDetection: { ...adv.turnDetection, preset: p.id } })}
+                    aria-pressed={on}
+                    className={cn(
+                      "flex flex-col items-start gap-1 rounded-lg border p-2.5 text-left transition-colors",
+                      on ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:bg-accent/40",
+                    )}
+                  >
+                    <p.icon className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    <span className="text-sm font-medium">{p.label}</span>
+                    <span className="text-xs text-muted-foreground">{p.hint}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )}
         {/* The chosen preset, characterized (Figma 2916-3435): a one-line
             description plus its Response Speed / Naturalness read-out. */}
         <p className="text-xs text-muted-foreground">
@@ -123,7 +150,7 @@ export function StepAdvanced({
           >
             <ModeRow
               value={adv.startOfSpeech.mode}
-              onChange={(mode) => patch({ startOfSpeech: { ...adv.startOfSpeech, mode: mode as "vad" | "keyword" } })}
+              onChange={(mode) => patchSpeech({ startOfSpeech: { ...adv.startOfSpeech, mode: mode as "vad" | "keyword" } })}
               options={[
                 { id: "vad", label: "Voice activity", icon: AudioLines },
                 { id: "keyword", label: "Keyword", icon: Type },
@@ -139,7 +166,7 @@ export function StepAdvanced({
               label="Speaking interrupt duration" unit="ms" value={adv.startOfSpeech.interruptMs} min={0} max={1500} step={20}
               helper="How long the user must speak while the agent is talking before it interrupts."
               ends={["Attentive", "Talkative"]}
-              onChange={(interruptMs) => patch({ startOfSpeech: { ...adv.startOfSpeech, interruptMs } })}
+              onChange={(interruptMs) => patchSpeech({ startOfSpeech: { ...adv.startOfSpeech, interruptMs } })}
             />
             <SliderRow
               label="Prefix padding" unit="ms" value={adv.startOfSpeech.prefixPaddingMs} min={0} max={500} step={10}
@@ -159,7 +186,7 @@ export function StepAdvanced({
           >
             <ModeRow
               value={adv.endOfSpeech.mode}
-              onChange={(mode) => patch({ endOfSpeech: { ...adv.endOfSpeech, mode: mode as "vad" | "semantic" } })}
+              onChange={(mode) => patchSpeech({ endOfSpeech: { ...adv.endOfSpeech, mode: mode as "vad" | "semantic" } })}
               options={[
                 { id: "vad", label: "Voice activity", icon: AudioLines },
                 { id: "semantic", label: "Semantic", icon: Sparkle },
@@ -169,36 +196,37 @@ export function StepAdvanced({
               label="Silence duration" unit="ms" value={adv.endOfSpeech.silenceMs} min={0} max={2000} step={20}
               helper="How long should the agent wait after you stop talking before it responds?"
               ends={["Quick", "Thoughtful"]}
-              onChange={(silenceMs) => patch({ endOfSpeech: { ...adv.endOfSpeech, silenceMs } })}
+              onChange={(silenceMs) => patchSpeech({ endOfSpeech: { ...adv.endOfSpeech, silenceMs } })}
             />
             <SliderRow
               label="Max wait duration" unit="ms" value={adv.endOfSpeech.maxWaitMs} min={1000} max={20000} step={250}
               helper="The longest the system waits for a response before timing out."
-              onChange={(maxWaitMs) => patch({ endOfSpeech: { ...adv.endOfSpeech, maxWaitMs } })}
+              onChange={(maxWaitMs) => patchSpeech({ endOfSpeech: { ...adv.endOfSpeech, maxWaitMs } })}
             />
           </Sub>
         </>
       )}
       </SectionRow>
 
-      {/* Attention & filters (anchor renumbered — section 4). */}
+      {/* Fillers (anchor kept: wz-4-attention). "Lock onto one speaker" now
+          lives in the Listening group (listening-rows.tsx) — same state, one
+          place. */}
       <SectionRow
         id="wz-4-attention"
-        label="Attention & filters"
-        hint="Who the agent listens to, and the filler patterns it holds for."
+        label="Fillers"
       >
-      {/* Filter words (proposal 2639-102124: counter · one-per-line helper ·
-          selection rule). */}
+      {/* While thinking (Design Tracker 04-C: relabel only — counter,
+          one-per-line helper and order rule unchanged). */}
       <Sub
         icon={Settings2}
-        title="Filter words"
-        desc="Filler patterns to hold while the agent thinks."
+        title="While thinking"
+        desc="Short phrases while the answer is being generated"
         enabled={adv.filterWords.enabled}
         onToggle={(enabled) => patch({ filterWords: { ...adv.filterWords, enabled } })}
       >
         <div className="space-y-1.5">
           <div className="flex items-baseline justify-between gap-3">
-            <Label className="text-xs text-muted-foreground">Filler words / phrases</Label>
+            <Label className="text-xs text-muted-foreground">Phrases</Label>
             <span className="font-mono text-xs tabular-nums text-muted-foreground">
               {adv.filterWords.patterns.split("\n").filter((l) => l.trim()).length}/100
             </span>
@@ -212,69 +240,46 @@ export function StepAdvanced({
           <p className="text-xs text-muted-foreground">One per line, separated by a comma, max 100 phrases.</p>
         </div>
         <SliderRow
-          label="Response wait threshold" unit="ms" value={adv.filterWords.responseWaitMs} min={0} max={2000} step={20}
+          label="After" unit="ms" value={adv.filterWords.responseWaitMs} min={0} max={2000} step={20}
           helper="How long should the agent wait before it starts using filler words?"
           ends={["Quick", "Thoughtful"]}
           onChange={(responseWaitMs) => patch({ filterWords: { ...adv.filterWords, responseWaitMs } })}
         />
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Selection Rule</Label>
+          <Label className="text-xs text-muted-foreground">Order</Label>
           <Select
             value={adv.filterWords.selectionRule ?? "shuffle"}
             onValueChange={(v) => patch({ filterWords: { ...adv.filterWords, selectionRule: v as "shuffle" | "in-order" } })}
           >
             <SelectTrigger className="w-full max-w-sm text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="shuffle">Shuffle (random, no repeats until exhausted)</SelectItem>
+              <SelectItem value="shuffle">Shuffle</SelectItem>
               <SelectItem value="in-order">In order</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </Sub>
-
-      {/* Selective attention locking — Speaker Lock vs Voiceprint Recognition
-          (proposal; "passthrough" is gone). */}
-      <Sub
-        icon={Lock}
-        title="Selective attention locking"
-        desc="Helps the agent focus on the right voice while filtering out background conversations and noise."
-        enabled={adv.attentionLocking.enabled}
-        onToggle={(enabled) => patch({ attentionLocking: { ...adv.attentionLocking, enabled } })}
-      >
-        <Label className="text-xs text-muted-foreground">SAL Mode</Label>
-        <ModeRow
-          value={adv.attentionLocking.mode}
-          onChange={(mode) => patch({ attentionLocking: { ...adv.attentionLocking, mode: mode as "speaker" | "voiceprint" } })}
-          options={[
-            { id: "speaker", label: "Speaker Lock", icon: Lock },
-            { id: "voiceprint", label: "Voiceprint Recognition", icon: Fingerprint },
-          ]}
-        />
-        {adv.attentionLocking.mode === "voiceprint" && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Name</Label>
-                <Input
-                  value={adv.attentionLocking.voiceprint?.name ?? ""}
-                  onChange={(e) => patch({ attentionLocking: { ...adv.attentionLocking, voiceprint: { name: e.target.value, url: adv.attentionLocking.voiceprint?.url ?? "" } } })}
-                  placeholder="Speaker 1"
-                  className="text-sm"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Voiceprint URL</Label>
-                <Input
-                  value={adv.attentionLocking.voiceprint?.url ?? ""}
-                  onChange={(e) => patch({ attentionLocking: { ...adv.attentionLocking, voiceprint: { name: adv.attentionLocking.voiceprint?.name ?? "", url: e.target.value } } })}
-                  placeholder="https://"
-                  className="font-mono text-sm"
-                />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">16kHz, 16-bit, mono PCM. Max 2MB.</p>
-          </div>
-        )}
+        {/* What the Engine will add to fillers — visible, inert, captioned;
+            intent stays in this browser (sx:filler_intent:<agentId|new>). */}
+        <div className="divide-y divide-border border-t border-border pt-3">
+          <EngineRow
+            title="Match the persona"
+            description="Filler that fits the conversation so far"
+            checked={fillerIntent.persona === true}
+            onCheckedChange={(on) => setFillerIntent({ ...fillerIntent, persona: on })}
+          />
+          <EngineRow
+            title="Keep going after the filler"
+            description="The answer continues without repeating the acknowledgement"
+            checked={fillerIntent.keepGoing === true}
+            onCheckedChange={(on) => setFillerIntent({ ...fillerIntent, keepGoing: on })}
+          />
+          <EngineRow
+            title="During tool calls"
+            description="Fills the wait while a tool runs"
+            checked={fillerIntent.toolCalls === true}
+            onCheckedChange={(on) => setFillerIntent({ ...fillerIntent, toolCalls: on })}
+          />
+        </div>
       </Sub>
       </SectionRow>
 

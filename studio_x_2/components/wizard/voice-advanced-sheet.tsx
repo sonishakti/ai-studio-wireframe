@@ -7,6 +7,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { SectionRows } from "@/components/wizard/section-row"
 import { StepAdvanced } from "@/components/wizard/step-advanced"
+import { TurnTakingRow } from "@/components/wizard/turn-taking-row"
+import { ListeningRows } from "@/components/wizard/listening-rows"
 import type { AgentDraft } from "@/lib/wizard-draft"
 import type { StepProps } from "@/components/wizard/types"
 
@@ -43,11 +45,23 @@ export function VoiceAdvancedSheet({
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           <SectionRows>
+            {/* Design Tracker 02: the preset row and the Listening group sit
+                ABOVE the raw rows, which keep the state. A realtime model owns
+                turn-taking natively — no preset row there. */}
+            {draft.stack.pipeline !== "mllm" && (
+              <TurnTakingRow value={draft.advanced} onChange={(advanced) => update({ advanced })} />
+            )}
+            <ListeningRows
+              value={draft.advanced}
+              onChange={(advanced) => update({ advanced })}
+              agentId={draft.agentId}
+            />
             <StepAdvanced
               value={draft.advanced}
               onChange={(advanced) => update({ advanced })}
               realtime={draft.stack.pipeline === "mllm"}
               showHistory={false}
+              agentId={draft.agentId}
             />
           </SectionRows>
         </div>
