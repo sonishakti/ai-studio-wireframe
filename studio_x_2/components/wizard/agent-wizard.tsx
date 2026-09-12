@@ -514,9 +514,7 @@ export function AgentWizard({
   // ?focus=<id> — a review link opens at the START of the journey: expand the
   // section that owns the control, scroll it to the centre and pulse a ring
   // (design-ops rule 2026-09-11; mirrors ng-console's design-kit focus).
-  React.useEffect(() => {
-    const focus = new URLSearchParams(window.location.search).get("focus")
-    if (!focus) return
+  const focusOn = React.useCallback((focus: string) => {
     const owner: Record<string, number> = {
       opening: 3, greeting: 3, prompt: 3,
       voice: 1, "voice-recommended": 1, "voice-compare": 1, "backup-providers": 1, "turn-taking": 1, listening: 1,
@@ -528,6 +526,12 @@ export function AgentWizard({
     const openDoor = () => {
       if (focus.startsWith("voice-")) document.querySelector<HTMLButtonElement>('button[aria-label="Browse voices"]')?.click()
       if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Advanced Speech Settings"))?.click()
+      if (focus === "backup-providers") {
+        // Backup lives inside the vendor's own Configure sheet (owner IA 2026-09-12).
+        const door = [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Configure models manually"))
+        if (door?.getAttribute("aria-expanded") === "false") door.click()
+        window.setTimeout(() => document.querySelector<HTMLButtonElement>('button[aria-label="Configure STT vendor and credential"]')?.click(), 350)
+      }
     }
     let tries = 0
     const attempt = () => {
@@ -544,6 +548,15 @@ export function AgentWizard({
     window.setTimeout(attempt, 350)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  React.useEffect(() => {
+    const focus = new URLSearchParams(window.location.search).get("focus")
+    if (focus) focusOn(focus)
+    // Dialogs deep in the tree (the voice browser's "Read my greeting") send
+    // the user to a field the same way a review link does.
+    const onFocus = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (id) focusOn(id) }
+    window.addEventListener("sx:focus", onFocus)
+    return () => window.removeEventListener("sx:focus", onFocus)
+  }, [focusOn])
   const scrollToStep = (n: number) => {
     const el = document.getElementById(`wizard-step-${n}`)
     if (!el) return
@@ -938,7 +951,10 @@ export function AgentWizard({
       {/* Breadcrumb row REMOVED (owner 2026-08-10) — the topbar already
           carries location; a second nav row was scan noise. */}
       {/* Header — identity on the left, Test + Deploy on the right. */}
-      <header className="flex items-center gap-4 border-b border-border px-5 py-4">
+      {/* Frozen at all times (owner 2026-09-12): name · status · id on the
+          left, the actions on the right, under the 48 px app bar. Every
+          sticky element below sits under it: top-28 = 3rem + 4rem. */}
+      <header id="wz-builder-head" className="sticky top-12 z-40 flex h-16 items-center gap-4 border-b border-border bg-background px-5">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {/* The agent's face (Figma 2861-52655: orb beside the name). */}
           <AgentSphere size={24} active={testing} />
@@ -1029,7 +1045,7 @@ export function AgentWizard({
 
       {/* Below lg the rail stacks above the sections; a slim sticky strip keeps
           step nav + deploy in the fold (top-12 = the app header height). */}
-      <div className="sticky top-12 z-30 flex items-center gap-3 border-b border-border bg-background/95 px-5 py-2 backdrop-blur lg:hidden">
+      <div className="sticky top-28 z-30 flex items-center gap-3 border-b border-border bg-background/95 px-5 py-2 backdrop-blur lg:hidden">
         <span className="flex shrink-0 items-center gap-1" role="group" aria-label="Jump to section">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -1062,7 +1078,7 @@ export function AgentWizard({
         )}
       >
         {/* Rail — pure nav; scrolls internally on short viewports. */}
-        <aside className="min-w-0 border-b border-border lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
+        <aside className="min-w-0 border-b border-border lg:sticky lg:top-28 lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-y-auto lg:border-b-0">
           {/* One header line across all three columns (owner 2026-09-11): this
               row, the first section header and the test rail's header share
               h-14 and a bottom hairline, so the rule reads as one line. */}
@@ -1165,13 +1181,13 @@ export function AgentWizard({
                 key={n}
                 id={`wizard-step-${n}`}
                 aria-labelledby={`wizard-step-${n}-title`}
-                className="scroll-mt-24"
+                className="scroll-mt-28"
               >
                 {/* Plain sticky heading over a hairline — now the collapse
                     toggle too (Test Strip winner): the whole row is the
                     button, a bare chevron is the only added chrome, and a
                     folded section recaps its values inline. */}
-                <header className="z-20 flex h-14 items-center gap-1 border-b border-border bg-background lg:sticky lg:top-12">
+                <header className="z-20 flex h-14 items-center gap-1 border-b border-border bg-background lg:sticky lg:top-28">
                   <h3 id={`wizard-step-${n}-title`} className="min-w-0 flex-1">
                     <button
                       type="button"

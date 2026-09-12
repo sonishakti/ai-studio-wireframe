@@ -257,7 +257,7 @@ export function TestPanel({
 
   return (
     <div
-      className="relative hidden lg:block lg:sticky lg:top-12 lg:h-[calc(100vh-3rem)] lg:self-start"
+      className="relative hidden lg:block lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] lg:self-start"
       style={{ width }}
       role="complementary"
       aria-label={`Test ${agentName}`}
@@ -280,7 +280,7 @@ export function TestPanel({
         <span className="absolute inset-y-0 left-0 w-px bg-border transition-colors group-hover:bg-primary/50" aria-hidden />
       </div>
 
-      <div className="flex h-full max-h-[calc(100vh-3rem)] flex-col pl-1.5">
+      <div className="flex h-full max-h-[calc(100vh-7rem)] flex-col pl-1.5">
         <header id="wz-test-head" className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
           <p className="min-w-0 truncate text-sm font-semibold">{activeTab === "simulations" ? "Test scenarios" : `Test ${agentName}`}</p>
           <Button

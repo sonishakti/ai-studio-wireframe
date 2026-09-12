@@ -56,7 +56,7 @@ export function SectionOpening({
     : "Stays quiet if the caller goes silent"
 
   return (
-    <div id="wz-3-opening" data-design-focus="opening" className="scroll-mt-28 space-y-4 rounded-md">
+    <div id="wz-3-opening" data-design-focus="opening" className="scroll-mt-44 space-y-4 rounded-md">
       <div className="flex items-center justify-between gap-3">
         <Label className="flex items-center gap-1.5 text-sm font-medium">
           Opening
@@ -84,7 +84,7 @@ export function SectionOpening({
 
       {/* Greeting */}
       <div className="space-y-1.5">
-        <Label htmlFor="wz-greeting" className="text-sm font-medium">Greeting</Label>
+        <Label htmlFor="wz-greeting" className="text-sm font-medium" data-design-focus="greeting">Greeting</Label>
         <Textarea
           id="wz-greeting"
           value={draft.greeting}

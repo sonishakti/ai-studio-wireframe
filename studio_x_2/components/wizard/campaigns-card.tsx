@@ -202,13 +202,17 @@ export function CampaignsCard({ draft, update }: StepProps) {
       )}
 
       {campaigns.length === 0 && editing !== "new" ? (
-        <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
-          <p className="text-sm font-medium">No runs yet</p>
-          <p className="max-w-sm text-xs text-muted-foreground">
-            A run is one batch pass: a contact list, a caller ID, and a schedule.
-            Create one to start batch calling.
-          </p>
-          <Button size="sm" variant="outline" className="mt-2 gap-1.5" onClick={startNew}>
+        /* The same empty-state row as Knowledge base and MCP server: copy on
+           the left, the door on the right, on the section grid. A centered
+           block here broke the grid (owner 2026-09-12). */
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">No runs yet</p>
+            <p className="text-xs text-muted-foreground">
+              A run is one batch pass: a contact list, a caller ID, and a schedule. Create one to start batch calling.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={startNew}>
             <Plus className="h-3.5 w-3.5" aria-hidden /> New run
           </Button>
         </div>

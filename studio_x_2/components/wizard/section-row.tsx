@@ -46,7 +46,7 @@ export function SectionRow({
       data-design-focus={focusId}
       className={cn(
         // Figma OPT2 rhythm (2698-102829): sections breathe pt-6/pb-9.
-        "grid scroll-mt-28 grid-cols-1 gap-4 pt-6 pb-9 first:pt-0 last:pb-0 @3xl:grid-cols-[240px_minmax(0,1fr)] @3xl:gap-10",
+        "grid scroll-mt-44 grid-cols-1 gap-4 pt-6 pb-9 first:pt-0 last:pb-0 @3xl:grid-cols-[240px_minmax(0,1fr)] @3xl:gap-10",
         className,
       )}
     >

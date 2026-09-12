@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { Check, ChevronLeft, ChevronRight, Search, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,10 +16,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { InfoHint } from "@/components/wizard/info-hint"
 import { OwnVoiceForm, type OwnVoiceVendor } from "@/components/wizard/own-voice-form"
 import { VoiceSampleButton, useSimulatedPlayer } from "@/components/wizard/voice-sample-button"
 import { useStoredState } from "@/hooks/use-stored-state"
@@ -33,9 +32,10 @@ const COMPARE_MAX = 3
 
 /** Voice browser (Figma "Select Voice") — a filterable, paginated catalog with
  *  per-voice traits + id + a mock sample, replacing the plain Step-1 dropdown.
- *  Design Tracker 01 (converged A + B + D): a Recommended strip above the
- *  table read from the prompt, a Compare column + tray (≤3), and "Add your
- *  own voice" — all inside this dialog; table, filters and paging unchanged. */
+ *  Design Tracker 01 (converged A + B + D): recommended voices read from the
+ *  prompt sort to the top of the SAME table and wear a badge (owner
+ *  2026-09-12: no separate list; the header is frozen), a Compare column +
+ *  tray (≤3), and "Add your own voice" — all inside this dialog. */
 export function VoiceBrowser({
   open,
   onOpenChange,
@@ -98,13 +98,15 @@ export function VoiceBrowser({
     }
     return true
   })
-  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageRows = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
-
-  // ── A · Recommended — tags vs the prompt, never benchmarks. ────────────────
+  // ── A · Recommended — tags vs the prompt, never benchmarks. They sort to
+  //   the top of the one table and wear a badge; nothing else changes. ──────
   const useCase = useCaseHint ? inferVoiceUseCase(useCaseHint) : null
   const recommended = rankVoicesForUseCase(voices, useCase, { language })
-  const recommendedIds = new Set(recommended.map((v) => v.id))
+  const recommendedRank = new Map(recommended.map((v, i) => [v.id, i]))
+  const ordered = [...filtered].sort((a, b) => (recommendedRank.get(a.id) ?? 99) - (recommendedRank.get(b.id) ?? 99))
+  const pages = Math.max(1, Math.ceil(ordered.length / PAGE_SIZE))
+  const pageRows = ordered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
+  const hasGreeting = !!useCaseHint?.greeting?.trim()
 
   // ── B · Compare — a shortlist of ≤3, persisted per agent. ──────────────────
   const [shortlist, setShortlist] = useStoredState<string[]>(`sx:voice_shortlist:${agentId ?? "new"}`, [])
@@ -153,6 +155,9 @@ export function VoiceBrowser({
             <FilterSelect label="Gender" value={gender} onChange={setGender} options={["Male", "Female", "Neutral"]} />
             <FilterSelect label="Accent" value={accent} onChange={setAccent} options={accents} />
             <FilterSelect label="Type" value={type} onChange={setType} options={types} />
+            <Button variant="link" size="sm" className="ml-auto h-auto p-0 text-xs" onClick={() => setOwnVoiceOpen(true)}>
+              Add your own voice
+            </Button>
           </div>
         </div>
 
@@ -163,42 +168,14 @@ export function VoiceBrowser({
               onSave={(v) => { setOwnVoiceOpen(false); use(v) }}
               onCancel={() => setOwnVoiceOpen(false)}
             />
-          ) : recommended.length > 0 ? (
-            <section data-design-focus="voice-recommended" className="border-b border-border pb-2" aria-label="Recommended voices">
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pb-1">
-                <span className="flex flex-wrap items-baseline gap-x-2">
-                  <h3 className="text-sm font-medium">Recommended{useCase ? ` for ${useCase}` : ""}</h3>
-                  <InfoHint label="Based on voice tags, not benchmarks">
-                    Ranked from each voice&apos;s type and trait tags against your prompt and greeting.
-                  </InfoHint>
-                </span>
-                <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => setOwnVoiceOpen(true)}>
-                  Add your own voice
-                </Button>
-              </div>
-              <ul className="divide-y divide-border">
-                {recommended.map((v) => {
-                  const on = v.id === selectedId
-                  return (
-                    <li key={v.id} className="flex items-center gap-2 py-1.5">
-                      <VoiceSampleButton voice={v} player={player} className="text-muted-foreground" />
-                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="text-sm font-medium">{v.name}</span>
-                        {(v.traits ?? []).map((t) => <Badge key={t} variant="secondary" className="font-normal">{t}</Badge>)}
-                      </span>
-                      <Button size="sm" variant={on ? "secondary" : "outline"} onClick={() => use(v)}>
-                        {on ? "Selected" : "Use voice"}
-                      </Button>
-                    </li>
-                  )
-                })}
-              </ul>
-            </section>
           ) : null}
 
-          <Table>
-            <TableHeader>
-              <TableRow>
+          {/* A bare <table>: the shadcn wrapper is an overflow box, which would
+              keep the header from sticking to the dialog's scroll area. */}
+          <table className="w-full caption-bottom text-sm">
+            {/* Frozen, non-highlightable header (owner 2026-09-12). */}
+            <TableHeader className="sticky top-0 z-10 bg-background select-none">
+              <TableRow className="hover:bg-transparent">
                 <TableHead className="w-8" />
                 <TableHead>Voice</TableHead>
                 <TableHead className="hidden md:table-cell">Traits</TableHead>
@@ -208,18 +185,35 @@ export function VoiceBrowser({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pageRows.map((v) => {
+              {pageRows.map((v, i) => {
                 const on = v.id === selectedId
                 const inShortlist = shortlist.includes(v.id)
+                const rec = recommendedRank.has(v.id)
                 return (
-                  <TableRow key={v.id} className={cn("group", (on || recommendedIds.has(v.id)) && "bg-primary/5")}>
+                  <TableRow
+                    key={v.id}
+                    data-design-focus={rec && i === 0 ? "voice-recommended" : undefined}
+                    className={cn("group", on && "bg-primary/5")}
+                  >
                     <TableCell>
                       <VoiceSampleButton voice={v} player={player} size="icon-xs" className="h-7 w-7 text-muted-foreground" />
                     </TableCell>
                     <TableCell>
-                      <span className="flex items-center gap-2 font-medium">
+                      <span className="flex flex-wrap items-center gap-2 font-medium">
                         {v.name}
                         {on && <Check className="h-3.5 w-3.5 text-primary" aria-hidden />}
+                        {rec && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="secondary" className="gap-1 font-normal" tabIndex={0}>
+                                <Star className="size-3" aria-hidden /> Recommended
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-72">
+                              {useCase ? `For ${useCase}: ` : ""}ranked from each voice&apos;s type and trait tags against your prompt and greeting. Voice tags, not benchmarks.
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </span>
                       <span className="text-xs text-muted-foreground">{v.gender} · {v.accent} · {v.voiceType}</span>
                     </TableCell>
@@ -258,7 +252,7 @@ export function VoiceBrowser({
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </table>
         </div>
 
         {/* B · The compare tray — docked above the paging footer while ≥1 is
@@ -285,18 +279,35 @@ export function VoiceBrowser({
               ))}
             </ul>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  {/* A disabled control swallows pointer events — the wrapper
-                      carries the tooltip and stays keyboard-reachable. */}
-                  <span tabIndex={0} className="inline-flex items-center gap-2 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    <Checkbox id={readGreetingId} disabled aria-label="Read my greeting" />
-                    <Label htmlFor={readGreetingId} className="text-xs font-normal text-muted-foreground">Read my greeting</Label>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-72">Requires the Studio preview to read your greeting in each voice.</TooltipContent>
-              </Tooltip>
-              <span className="text-xs text-muted-foreground">· Requires Studio preview</span>
+              {hasGreeting ? (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      {/* A disabled control swallows pointer events — the wrapper
+                          carries the tooltip and stays keyboard-reachable. */}
+                      <span tabIndex={0} className="inline-flex items-center gap-2 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <Checkbox id={readGreetingId} disabled aria-label="Read my greeting" />
+                        <Label htmlFor={readGreetingId} className="text-xs font-normal text-muted-foreground">Read my greeting</Label>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-72">Requires the Studio preview to read your greeting in each voice.</TooltipContent>
+                  </Tooltip>
+                  <span className="text-xs text-muted-foreground">· Requires Studio preview</span>
+                </>
+              ) : (
+                /* No greeting yet: the honest door is the Greeting field itself
+                   (owner 2026-09-12). Closes the dialog and lands on it. */
+                <span className="text-xs text-muted-foreground">
+                  Read my greeting needs a greeting first.{" "}
+                  <button
+                    type="button"
+                    className="text-foreground underline underline-offset-4"
+                    onClick={() => { close(); window.dispatchEvent(new CustomEvent("sx:focus", { detail: "greeting" })) }}
+                  >
+                    Write it in Prompt &amp; knowledge
+                  </button>
+                </span>
+              )}
             </div>
           </section>
         )}

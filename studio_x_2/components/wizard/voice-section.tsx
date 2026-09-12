@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, Code2, Gauge, Music2, SlidersHorizontal, Wrench } from "lucide-react"
+import { ChevronDown, Code2, Gauge, SlidersHorizontal, Wrench } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,6 @@ import { InfoHint } from "@/components/wizard/info-hint"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
 import { VoiceSampleButton, useSimulatedPlayer } from "@/components/wizard/voice-sample-button"
 import { VoiceAdvancedSheet } from "@/components/wizard/voice-advanced-sheet"
-import { BackupProvidersRow } from "@/components/wizard/backup-providers-row"
 import { StackTradeoffSlider, ManualStackConfig } from "@/components/wizard/stack-config"
 import { HistoryField } from "@/components/wizard/step-advanced"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
@@ -167,6 +166,7 @@ export function VoiceSection({
                 backup={backupOf(draft.backup)}
                 onBackupChange={(b) => update({ backup: b })}
                 hosting={draftHosting(draft)}
+                onUnpinRegion={onUnpinRegion}
                 voices={voices}
                 selectedVoiceId={draft.voice?.id}
                 onPickVoice={pickVoice}
@@ -194,9 +194,6 @@ export function VoiceSection({
           )}
         </div>
       </SectionRow>
-
-      {/* Backup providers (design 07) — one row under the stack. */}
-      <BackupProvidersRow draft={draft} update={update} onUnpinRegion={onUnpinRegion} />
 
       {/* The VOICE handle — dropdown trigger + inline sound test. */}
       <SectionRow
@@ -241,11 +238,6 @@ export function VoiceSection({
                 size="icon"
                 disabled={!selected}
               />
-              {/* The dialog's door says what it opens (owner 2026-09-12: "why do
-                  I not see voice selection here?"). The field stays a trigger too. */}
-              <Button type="button" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={() => setBrowserOpen(true)}>
-                <Music2 className="size-4" aria-hidden /> Browse voices
-              </Button>
             </div>
           </div>
           <div className="min-w-0 basis-44 space-y-1.5">
