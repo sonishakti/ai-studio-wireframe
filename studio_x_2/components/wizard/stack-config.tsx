@@ -811,7 +811,27 @@ export function ManualStackConfig({
                 >
                   <SlidersHorizontal className="h-4 w-4" aria-hidden />
                 </Button>
+                {backup && onBackupChange && !backup.picks[slot] && !backupOpen[slot] && (
+                  <InlineBackup
+                    slot={slot}
+                    plan={plan.slots.find((s) => s.slot === slot)!}
+                    backup={backup}
+                    open={false}
+                    onOpen={(o) => setBackupOpen((b) => ({ ...b, [slot]: o }))}
+                    onChange={onBackupChange}
+                  />
+                )}
               </div>
+              {backup && onBackupChange && (backup.picks[slot] || backupOpen[slot]) && (
+                <InlineBackup
+                  slot={slot}
+                  plan={plan.slots.find((s) => s.slot === slot)!}
+                  backup={backup}
+                  open={!!backupOpen[slot]}
+                  onOpen={(o) => setBackupOpen((b) => ({ ...b, [slot]: o }))}
+                  onChange={onBackupChange}
+                />
+              )}
             </div>
           ))}
         </div>
