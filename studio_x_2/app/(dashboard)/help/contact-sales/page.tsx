@@ -40,7 +40,7 @@ const SELLING_POINTS = [
   "Volume pricing for >100K agent minutes / month",
   "SSO / SAML and SCIM provisioning",
   "Dedicated CSM and 24×7 priority support",
-  "Custom MSA, BAA, DPA — including HIPAA",
+  "Custom MSA, BAA, DPA · including HIPAA",
   "On-prem and air-gapped deployment options",
   "Custom voice models and language coverage",
 ]

@@ -108,7 +108,7 @@ function NavLink({ item }: { item: NavItem }) {
           // "Agent sessions", never RTC telemetry — that's Agora Analytics, a
           // separate product (locked Monitor naming; user-test 2026-07-29 P1).
           title={`${item.badge} critical agent sessions`}
-          aria-label={`${item.badge} critical agent sessions — open the needs-attention queue`}
+          aria-label={`${item.badge} critical agent sessions. Open the needs-attention queue`}
           className="absolute right-1 top-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring group-data-[collapsible=icon]:hidden"
         >
           <Badge variant="destructive" className="text-xs px-1.5 py-0">

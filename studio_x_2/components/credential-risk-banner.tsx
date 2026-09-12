@@ -36,7 +36,7 @@ export function CredentialRiskBanner({
                   {c.vendor} key {c.status === "expired" ? "has expired" : `expires ${c.expiresOn ?? "soon"}`}.
                 </span>{" "}
                 <span className="text-muted-foreground">
-                  This deployment runs on it — calls {c.status === "expired" ? "are failing" : "will fail"} until it&apos;s rotated.
+                  This deployment runs on it · calls {c.status === "expired" ? "are failing" : "will fail"} until it&apos;s rotated.
                 </span>
               </p>
               <Button

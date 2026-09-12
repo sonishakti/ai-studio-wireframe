@@ -81,7 +81,7 @@ type AgentRow = {
 }
 
 const AGENTS: AgentRow[] = [
-  { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default — live and ready", status: "live",   channelType: "phone",    channelLabel: "+1 (628) 555-0188", stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
+  { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default · live and ready", status: "live",   channelType: "phone",    channelLabel: "+1 (628) 555-0188", stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
   { id: "agt_support_v2", name: "Support Bot v2",       description: "Handles tier-1 support queries via phone",       status: "live",   channelType: "phone",    channelLabel: "+1 (415) 555-0101", stack: "fastest",  calls: 12430, lastModified: "2 hours ago" },
   { id: "agt_appointment_setter", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "web",      channelLabel: "acme.com/booking",  stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
   { id: "agt_survey", name: "Survey Bot",           description: "Post-interaction CSAT surveys",                  status: "live",   channelType: "web",      channelLabel: "acme.com/help",     stack: "cheapest", calls: 5601,  lastModified: "1 day ago" },
@@ -379,9 +379,9 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                             2026-07-24 P0). */}
                         {agent.id === "agt_default" && (
                           <InfoHint label="sandbox line">
-                            Auto-provisioned sample agent, live on an Agora sandbox line — its call
+                            Auto-provisioned sample agent, live on an Agora sandbox line: its call
                             history is sample data, and it costs nothing until it takes real traffic.
-                            Shared sandbox number for testing — production telephony is
+                            Shared sandbox number for testing: production telephony is
                             bring-your-own SIP.
                           </InfoHint>
                         )}
@@ -416,7 +416,7 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                               only way to stop a live agent (user-test S2). */}
                           {(agent.status === "live" || agent.status === "paused") && (
                             <DropdownMenuItem onClick={() => togglePause(agent.id)}>
-                              {agent.status === "live" ? "Pause — take offline" : "Resume"}
+                              {agent.status === "live" ? "Pause · take offline" : "Resume"}
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
@@ -721,7 +721,7 @@ export default function AgentsPage() {
             ? undefined
             : view === "start"
               ? phase !== "ceremony" && ariaLive
-                ? "Aria is live — talk to it, then make it yours"
+                ? "Aria is live · talk to it, then make it yours"
                 : "Deploy your first voice agent"
               : "Agents"
         }
@@ -859,9 +859,9 @@ function StartView({
             Aria, your sample agent, is live on +1 (628) 555-0188 · 42 sample calls
           </span>
           <InfoHint label="sandbox line">
-            Auto-provisioned for you on an Agora sandbox line — its call history is sample data,
-            and it costs nothing until it takes real traffic. Shared sandbox number for testing —
-            production telephony is bring-your-own SIP.
+            Auto-provisioned for you on an Agora sandbox line: its call history is sample data,
+            and it costs nothing until it takes real traffic. Shared sandbox number for testing.
+            Production telephony is bring-your-own SIP.
           </InfoHint>
           {/* The promised live agent is ONE click, not an Edit-link detour
               behind the template-preview mic (user-test 2026-07-29 P0). */}
@@ -945,7 +945,7 @@ function StartView({
                 variant="secondary"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => toast("Simulated preview", { description: `No live audio in this wireframe — ${tpl.name} would answer here.` })}
+                onClick={() => toast("Simulated preview", { description: `No live audio in this wireframe · ${tpl.name} would answer here.` })}
               >
                 <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to agent
               </Button>

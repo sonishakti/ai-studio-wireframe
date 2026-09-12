@@ -8,7 +8,7 @@ const RELEASES = [
     date: "May 27, 2026",
     tag: "Latest",
     changes: [
-      { type: "new", text: "Studio_X Next.js app launched — full dashboard with shadcn/ui" },
+      { type: "new", text: "Studio_X Next.js app launched: full dashboard with shadcn/ui" },
       { type: "new", text: "Unified Calls view merges telephony and realtime session history" },
       { type: "improved", text: "Agent editor now shows all 4 tabs: Prompt, Models, Actions, Advanced" },
       { type: "fixed", text: "Campaign timezone calculation off-by-one on DST boundaries" },
@@ -19,8 +19,8 @@ const RELEASES = [
     date: "May 20, 2026",
     tag: null,
     changes: [
-      { type: "new", text: "Vendor Credentials page — manage LLM, TTS, STT API keys in one place" },
-      { type: "new", text: "Extensions Marketplace — browse and install Agora add-ons" },
+      { type: "new", text: "Vendor Credentials page: manage LLM, TTS, STT API keys in one place" },
+      { type: "new", text: "Extensions Marketplace · browse and install Agora add-ons" },
       { type: "improved", text: "Monitor page (formerly Analytics) refactored with tabbed overview / by-agent view" },
       { type: "fixed", text: "Phone number import modal now validates E.164 format" },
     ],

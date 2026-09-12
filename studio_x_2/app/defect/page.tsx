@@ -1,7 +1,7 @@
 import { DefectorFlow } from "@/components/defector-flow"
 
 export const metadata = {
-  title: "Defect to Agora — paste your agent, hear it ring",
+  title: "Defect to Agora · paste your agent, hear it ring",
 }
 
 // Radical activation experiment (2026-06-22) — the "Defector" prototype from the

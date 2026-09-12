@@ -133,7 +133,7 @@ export function TestsSection({
         {/* Failing ↔ Deploy relationship, nested behind a dotted hint (owner
             2026-07-21: reduce upfront text). Figma copy: a question link. */}
         <InfoHint label={variant === "section" ? "Do failing scenarios block deploy?" : "How scoring works?"}>
-          A judge model scores each run — {"{verdict, score, reason}"} per assertion. A failure
+          A judge model scores each run: {"{verdict, score, reason}"} per assertion. A failure
           caused by a real config gap names the setting to fix. Failing scenarios never block deploy.
         </InfoHint>
         <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export function TestsSection({
                   </TableCell>
                   {variant === "section" && (
                     <TableCell className="max-w-[260px] truncate text-muted-foreground">
-                      Caller wants to {c.persona.goal || "—"}
+                      Caller wants to {c.persona.goal || ", "}
                     </TableCell>
                   )}
                   <TableCell>
@@ -404,7 +404,7 @@ export function AddCaseSheet({
           <SheetTitle>{prefill ? "Save this call as a test" : "Add a test case"}</SheetTitle>
           <SheetDescription>
             {prefill
-              ? "We kept the caller and transcript — just say what should always be true."
+              ? "We kept the caller and transcript. Just say what should always be true."
               : "Cast a simulated caller, then say what must always be true."}
           </SheetDescription>
         </SheetHeader>

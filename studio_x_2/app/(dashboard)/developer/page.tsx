@@ -54,7 +54,7 @@ export default function DeveloperPage() {
     <main className="flex-1 p-6 space-y-6">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Everything you need to build on Studio_X — APIs, webhooks, SDKs, and licensing.
+          Everything you need to build on Studio_X. APIs, webhooks, SDKs, and licensing.
         </p>
         <Button variant="outline" className="gap-1.5 shrink-0" asChild>
           <a href="https://docs.agora.io" target="_blank" rel="noreferrer">

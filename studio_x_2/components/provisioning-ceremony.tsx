@@ -35,7 +35,7 @@ import { getDefaultAgent } from "@/lib/campaign-data"
 const STAGES = [
   { id: "project", label: "Creating your project", detail: "App ID, keys, and workspace" },
   { id: "aria", label: "Provisioning Aria, your default agent", detail: "Prompt, persona, and a live test line in your browser" },
-  { id: "pipeline", label: "Warming the voice pipeline", detail: "Speech recognition, model, and voice — ready to answer" },
+  { id: "pipeline", label: "Warming the voice pipeline", detail: "Speech recognition, model, and voice. Ready to answer" },
 ] as const
 
 const STAGE_MS = 1400
@@ -119,7 +119,7 @@ export function ProvisioningCeremony({
                   </h1>
                   <p className="text-sm text-muted-foreground max-w-sm">
                     “{STAGES[stageIdx].label}” stalled. Everything already finished is
-                    saved — retry only redoes this step.
+                    saved: retry only redoes this step.
                   </p>
                 </>
               ) : (
@@ -128,7 +128,7 @@ export function ProvisioningCeremony({
                     Setting up your studio
                   </h1>
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    The moment this finishes, {aria.name} can take a real call — in your
+                    The moment this finishes, {aria.name} can take a real call: in your
                     browser, mic on, no number to buy, nothing to configure.
                   </p>
                 </>
@@ -157,7 +157,7 @@ export function ProvisioningCeremony({
                       <span className="block text-sm font-medium">
                         {s.label}
                         <span className="sr-only">
-                          {st === "done" ? " — done" : st === "active" ? " — in progress" : st === "stalled" ? " — stalled" : ""}
+                          {st === "done" ? " · done" : st === "active" ? " · in progress" : st === "stalled" ? " · stalled" : ""}
                         </span>
                       </span>
                       <span className="block text-xs text-muted-foreground">{s.detail}</span>

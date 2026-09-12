@@ -109,7 +109,7 @@ export function ExternalRetrievalForm({
       setSecret("")
       setConn({
         phase: "ok",
-        summary: "Credentials verified — 3 buckets visible.",
+        summary: "Credentials verified: 3 buckets visible.",
       })
     }, 900)
   }
@@ -148,7 +148,7 @@ export function ExternalRetrievalForm({
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          We query your index — we never copy or re-index your documents.
+          We query your index. We never copy or re-index your documents.
         </p>
       </div>
 
@@ -199,7 +199,7 @@ export function ExternalRetrievalForm({
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Stored encrypted and never shown again — the same way {provider.label} treats it.
+            Stored encrypted and never shown again. The same way {provider.label} treats it.
           </p>
         </div>
 
@@ -248,7 +248,7 @@ export function ExternalRetrievalForm({
               <p className="text-xs text-muted-foreground">
                 {connected
                   ? "Pick the index to query."
-                  : "Test the connection first — we'll list these instead of asking you to type them."}
+                  : "Test the connection first. We'll list these instead of asking you to type them."}
               </p>
             </div>
             {provider.levels.map((level, i) => {
@@ -269,7 +269,7 @@ export function ExternalRetrievalForm({
                     }}
                     disabled={!connected || !prevChosen}
                   >
-                    <SelectTrigger><SelectValue placeholder={connected ? `Select a ${level.toLowerCase()}` : "—"} /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={connected ? `Select a ${level.toLowerCase()}` : ", "} /></SelectTrigger>
                     <SelectContent>
                       {(MOCK_RESOURCES[level] ?? []).map((o) => (
                         <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -356,17 +356,17 @@ export function ExternalRetrievalForm({
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Chunks to retrieve — {topK}</Label>
+            <Label className="text-sm font-medium">Chunks to retrieve · {topK}</Label>
             <Slider value={[topK]} min={1} max={10} step={1} onValueChange={([v]) => setTopK(v)} aria-label="Chunks to retrieve" />
             <p className="text-xs text-muted-foreground">More context, slower turns.</p>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Similarity threshold — {threshold.toFixed(2)}</Label>
+            <Label className="text-sm font-medium">Similarity threshold · {threshold.toFixed(2)}</Label>
             <Slider
               value={[threshold * 100]} min={0} max={100} step={5}
               onValueChange={([v]) => setThreshold(v / 100)} aria-label="Similarity threshold"
             />
-            <p className="text-xs text-muted-foreground">Higher is stricter — fewer but more relevant chunks.</p>
+            <p className="text-xs text-muted-foreground">Higher is stricter: fewer but more relevant chunks.</p>
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -380,7 +380,7 @@ export function ExternalRetrievalForm({
       </Button>
       {connected && pathComplete && !retrieval && (
         <p className={cn("text-center text-xs text-muted-foreground")}>
-          Tip: run a test retrieval first — that&apos;s what proves it works.
+          Tip: run a test retrieval first. That&apos;s what proves it works.
         </p>
       )}
     </div>

@@ -15,11 +15,11 @@ import {
 import { PageHeader } from "@/components/page-header"
 
 const TRANSACTIONS = [
-  { id: "txn_8j2n",  date: "May 26, 2026", type: "charge",       description: "Conversational AI Engine — May usage", method: "Visa •• 4242",       amount: "-$48.20",  status: "succeeded" },
+  { id: "txn_8j2n",  date: "May 26, 2026", type: "charge",       description: "Conversational AI Engine. May usage", method: "Visa •• 4242",       amount: "-$48.20",  status: "succeeded" },
   { id: "txn_6h1m",  date: "May 18, 2026", type: "recharge",     description: "Manual recharge",                       method: "Visa •• 4242",       amount: "+$500.00", status: "succeeded" },
   { id: "txn_4f9l",  date: "May 06, 2026", type: "charge",       description: "April invoice settlement",              method: "Mastercard •• 8210", amount: "-$152.66", status: "succeeded" },
-  { id: "txn_2d7k",  date: "May 02, 2026", type: "credit",       description: "Promotional credit",                    method: "—",                   amount: "+$25.00",  status: "succeeded" },
-  { id: "txn_9b3j",  date: "Apr 20, 2026", type: "refund",       description: "Partial refund — recording overage",    method: "Visa •• 4242",       amount: "+$12.10",  status: "succeeded" },
+  { id: "txn_2d7k",  date: "May 02, 2026", type: "credit",       description: "Promotional credit",                    method: ", ",                   amount: "+$25.00",  status: "succeeded" },
+  { id: "txn_9b3j",  date: "Apr 20, 2026", type: "refund",       description: "Partial refund · recording overage",    method: "Visa •• 4242",       amount: "+$12.10",  status: "succeeded" },
   { id: "txn_7a1h",  date: "Apr 06, 2026", type: "charge",       description: "March invoice settlement",              method: "Visa •• 4242",       amount: "-$248.20", status: "failed"    },
 ]
 
@@ -150,7 +150,7 @@ export default function TransactionsPage() {
               <p className="flex items-start gap-2">
                 <FileText className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>
-                  Payments apply chronologically — oldest bills are settled first. Refunds reverse the most recent payment first and may change the status of recent invoices.
+                  Payments apply chronologically: oldest bills are settled first. Refunds reverse the most recent payment first and may change the status of recent invoices.
                 </span>
               </p>
             </CardContent>

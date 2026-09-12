@@ -59,7 +59,7 @@ export function ImportAgentSheet({
         <SheetHeader>
           <SheetTitle>Import an Agent</SheetTitle>
           <SheetDescription>
-            Migrating from another platform? Paste your Vapi, Retell, ElevenLabs, or Bland export —
+            Migrating from another platform? Paste your Vapi, Retell, ElevenLabs, or Bland export,
             or any JSON. We map name, voice, model, prompt, and greeting, and show you exactly what
             didn&apos;t carry. (YAML soon.)
           </SheetDescription>
@@ -188,7 +188,7 @@ function MappingReport({ result }: { result: ImportParseResult }) {
         <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="font-medium">
-            Ready to import — {mapped.length} field{mapped.length === 1 ? "" : "s"} mapped
+            Ready to import · {mapped.length} field{mapped.length === 1 ? "" : "s"} mapped
             {dropped.length > 0 && `, ${dropped.length} didn't carry`}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -197,8 +197,8 @@ function MappingReport({ result }: { result: ImportParseResult }) {
           </p>
           {result.detected && (
             <p className="text-xs text-muted-foreground mt-1">
-              Parsed as <span className="font-medium text-foreground">{result.detected}</span> —
-              that&apos;s what the JSON&apos;s shape says it is.
+              Parsed as <span className="font-medium text-foreground">{result.detected}</span>.
+              That&apos;s what the JSON&apos;s shape says it is.
             </p>
           )}
         </div>

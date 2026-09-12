@@ -70,7 +70,7 @@ function SlotMode({
   if (!resellable) {
     return (
       <p className="text-xs text-muted-foreground">
-        {vendor} is bring-your-own-key only — Agora doesn&apos;t resell it.
+        {vendor} is bring-your-own-key only. Agora doesn&apos;t resell it.
       </p>
     )
   }
@@ -99,7 +99,7 @@ function SlotMode({
       </ToggleGroup>
       <p className="text-xs text-muted-foreground">
         {mode === "managed"
-          ? "Included — no key to add, no vendor bill."
+          ? "Included. No key to add, no vendor bill."
           : `You add a ${vendor} key and they bill you directly (~$${rate.toFixed(3)}/min on top of Agora's rate).`}
       </p>
     </div>
@@ -553,9 +553,9 @@ function ConfigureSlotSheet({
             </Select>
             <p className="text-xs text-muted-foreground">
               {!resellable
-                ? `${vendor} is bring-your-own-key only — Agora doesn't resell it.`
+                ? `${vendor} is bring-your-own-key only. Agora doesn't resell it.`
                 : mode === "managed"
-                ? "Included — no key to add, no vendor bill."
+                ? "Included. No key to add, no vendor bill."
                 : `You add a ${vendor} key and they bill you directly, on top of Agora's rate.`}
             </p>
           </div>
@@ -690,7 +690,7 @@ const SLIDER_ORDER: StackPreset[] = ["fastest", "balanced", "cheapest"]
  *  plus the vendors it bundles, from the CURRENT stack so per-slot overrides
  *  stay truthful ("Custom mix" once diverged). */
 const bundleLine = (s: AgentStack, diverged: boolean) =>
-  `${diverged ? "Custom mix" : STACK_PRESETS[s.preset].label} — ${s.asr.vendor} STT · ${s.llm.model} · ${s.tts.vendor} voice`
+  `${diverged ? "Custom mix" : STACK_PRESETS[s.preset].label}: ${s.asr.vendor} STT · ${s.llm.model} · ${s.tts.vendor} voice`
 
 export function StackTradeoffSlider({
   stack, onChange, className, lean,
@@ -780,7 +780,7 @@ export function StackTradeoffSlider({
         {cost.allManaged ? (
           <p>
             <span className="font-medium">${cost.totalPerMin.toFixed(2)}/min, all in.</span>{" "}
-            Speech, model, and voice are included in Agora&apos;s rate — no vendor keys, no second bill.
+            Speech, model, and voice are included in Agora&apos;s rate. No vendor keys, no second bill.
           </p>
         ) : (
           <div className="space-y-0.5">
@@ -806,7 +806,7 @@ export function StackTradeoffSlider({
       </p>
       {nonStreaming.length > 0 && (
         <p className="text-xs text-warning">
-          {nonStreaming.join(", ")} doesn&apos;t stream — it transcribes only after the caller
+          {nonStreaming.join(", ")} doesn&apos;t stream. It transcribes only after the caller
           stops, which is most of the delay above.
         </p>
       )}

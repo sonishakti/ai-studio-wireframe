@@ -31,15 +31,15 @@ type Turn = {
 const SCRIPT: Turn[] = [
   { speaker: "agent", text: "Hi! Thanks for calling Acme support. How can I help you today?", at: 800 },
   { speaker: "user",  text: "Hi, I'm trying to reschedule my appointment for next week.",      at: 4200 },
-  { speaker: "agent", text: "Sure — can you tell me the email address on the booking?",        at: 6100 },
+  { speaker: "agent", text: "Sure. Can you tell me the email address on the booking?",        at: 6100 },
   { speaker: "user",  text: "It's shakti@example.com",                                          at: 9300 },
   { speaker: "agent", text: "Found it. You have a 30-minute call with Dr. Lee on Tuesday at 2pm. What time would you like to move to?", at: 11700 },
 ]
 
 const ROLLING_METRICS = [
-  { label: "End-to-end latency", at: 0,    value: "—",      sub: "Not started" },
-  { label: "End-to-end latency", at: 4500, value: "612 ms", sub: "p50 — voice path" },
-  { label: "End-to-end latency", at: 9500, value: "598 ms", sub: "p50 — voice path" },
+  { label: "End-to-end latency", at: 0,    value: ", ",      sub: "Not started" },
+  { label: "End-to-end latency", at: 4500, value: "612 ms", sub: "p50 · voice path" },
+  { label: "End-to-end latency", at: 9500, value: "598 ms", sub: "p50 · voice path" },
 ]
 
 // ─── component ───────────────────────────────────────────────────────────────
@@ -299,9 +299,9 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
             <Separator />
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "LLM",  value: state === "active" ? "184 ms" : "—" },
-                { label: "STT",  value: state === "active" ? "92 ms"  : "—" },
-                { label: "TTS",  value: state === "active" ? "210 ms" : "—" },
+                { label: "LLM",  value: state === "active" ? "184 ms" : ", " },
+                { label: "STT",  value: state === "active" ? "92 ms"  : ", " },
+                { label: "TTS",  value: state === "active" ? "210 ms" : ", " },
               ].map((m) => (
                 <div key={m.label}>
                   <p className="text-xs uppercase tracking-wider text-muted-foreground">{m.label}</p>
@@ -334,7 +334,7 @@ export function AgentPlayground({ agentId }: { agentId: string }) {
               <Settings2 className="h-4 w-4 text-muted-foreground" />
               Test settings
             </CardTitle>
-            <CardDescription>These only affect the playground — not production.</CardDescription>
+            <CardDescription>These only affect the playground. Not production.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">

@@ -77,7 +77,7 @@ export function VoiceSection({
         update({ voice: { kind: "preset", id: remap.id } })
         onStackChange({ ...stack, tts: { vendor: nextProvider, voice: remap.ttsVoice } })
         toast(`Voice switched to ${remap.name}`, {
-          description: `This tier uses ${nextProvider} TTS — ${selected.name} isn't available there.`,
+          description: `This tier uses ${nextProvider} TTS · ${selected.name} isn't available there.`,
         })
         return
       }
@@ -120,7 +120,7 @@ export function VoiceSection({
           </h4>
           {mllm ? (
             <p className="text-sm text-muted-foreground">
-              Runs a realtime model — no tier slider. Switch pipelines under Configure models manually.
+              Runs a realtime model. No tier slider. Switch pipelines under Configure models manually.
             </p>
           ) : (
             <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} lean />
@@ -157,7 +157,7 @@ export function VoiceSection({
                 <Code2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">Custom Config (JSON)</span>
-                  <span className="block text-xs text-muted-foreground">Override engine sections as JSON — overridden sections lock in the UI.</span>
+                  <span className="block text-xs text-muted-foreground">Override engine sections as JSON: overridden sections lock in the UI.</span>
                 </span>
               </button>
             </div>
@@ -228,7 +228,7 @@ export function VoiceSection({
             P1) — say why it still matters to them. */}
         {hasChannel(draft, "code") && (
           <p className="text-xs text-muted-foreground">
-            Also applies to Code / SDK agents — it&apos;s the pipeline&apos;s TTS stage.
+            Also applies to Code / SDK agents. It&apos;s the pipeline&apos;s TTS stage.
           </p>
         )}
 
@@ -258,7 +258,7 @@ export function VoiceSection({
           const p = v.provider ?? "ElevenLabs"
           if (!mllm && p !== provider) {
             toast(`${v.name} uses ${p} TTS`, {
-              description: "The text-to-speech vendor follows the voice — the rest of the tier is unchanged.",
+              description: "The text-to-speech vendor follows the voice. The rest of the tier is unchanged.",
             })
           }
           onSelectVoice(v)

@@ -56,7 +56,7 @@ export function BackupProvidersRow({
         <InfoHint label="Agora keeps a backup ready">
           If a vendor is slow, down or blocked in your region, the call continues on the backup.
           Managed components are covered by Agora at no extra cost; a component on your own key needs a second key.
-          Switching is never silent — every switch shows in the session log.
+          Switching is never silent. Every switch shows in the session log.
         </InfoHint>
       }
     >

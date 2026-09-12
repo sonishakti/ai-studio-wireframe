@@ -166,13 +166,13 @@ export function ComposerChat({
 
     if (voice.active) {
       // Composer acknowledges by voice, streamed into the thread.
-      window.setTimeout(() => voice.say(`Got it — I'll use ${name} as context while we build.`), 400)
+      window.setTimeout(() => voice.say(`Got it · I'll use ${name} as context while we build.`), 400)
     } else {
       setIsThinking(true)
       window.setTimeout(() => {
         setMessages((prev) => [
           ...prev,
-          { id: `m_${Date.now()}_a`, role: "assistant", text: `Thanks — I've added ${name} as context. What should I do with it?`, via: "text", at: "just now" },
+          { id: `m_${Date.now()}_a`, role: "assistant", text: `Thanks · I've added ${name} as context. What should I do with it?`, via: "text", at: "just now" },
         ])
         setIsThinking(false)
       }, 700)
@@ -202,7 +202,7 @@ export function ComposerChat({
             {contextChip && <Badge variant="outline" className="text-xs">{contextChip}</Badge>}
           </div>
           <p className="text-xs text-muted-foreground truncate">
-            Build, configure, and debug agents — by chat or voice.
+            Build, configure, and debug agents: by chat or voice.
           </p>
         </div>
         <Button
@@ -491,7 +491,7 @@ function QuickChip({ children, onClick }: { children: React.ReactNode; onClick?:
 function assistantReplyFor(prompt: string): string {
   const lower = prompt.toLowerCase()
   if (lower.includes("latency")) {
-    return "First-token latency above 1s usually means STT streaming isn't enabled or the LLM model is too large. Check the Models tab — switch Deepgram to streaming mode, and try gpt-4o-mini for faster TTFT. I can open the agent editor at that tab if you'd like."
+    return "First-token latency above 1s usually means STT streaming isn't enabled or the LLM model is too large. Check the Models tab. Switch Deepgram to streaming mode, and try gpt-4o-mini for faster TTFT. I can open the agent editor at that tab if you'd like."
   }
   if (lower.includes("phone number") || lower.includes("telephony")) {
     return "Got it. To connect a number to an inbound campaign: 1) Go to Phone Numbers → Buy number, pick a region. 2) Create or open the campaign, add the Telephony channel. 3) Pick your agent. Want me to draft the campaign for you?"

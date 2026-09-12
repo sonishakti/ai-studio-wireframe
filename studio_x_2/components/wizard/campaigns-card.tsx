@@ -105,7 +105,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
     }
     setCampaigns([...campaigns, copy])
     setEditing(copy.id)
-    toast(`${c.name} duplicated`, { description: "A fully editable copy — change anything." })
+    toast(`${c.name} duplicated`, { description: "A fully editable copy. Change anything." })
   }
   /** RERUN (owner 2026-07-28, distinct from Duplicate): SAME agent, SAME
    *  config — only the contact list (and timing) change, so aggregated
@@ -115,7 +115,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
     const next: CampaignDraft = {
       ...c,
       id: newCampaignId(),
-      name: `${c.name} — rerun`,
+      name: `${c.name}: rerun`,
       csvName: null,
       contacts: undefined,
       status: "draft",
@@ -126,7 +126,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
     setCampaigns([...campaigns, next])
     setEditing(next.id)
     toast(`Rerunning ${c.name}`, {
-      description: "Config is locked to the original run — upload the new contact list and launch.",
+      description: "Config is locked to the original run: upload the new contact list and launch.",
     })
   }
   const remove = (c: CampaignDraft) => {
@@ -205,7 +205,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
         <div className="flex flex-col items-center gap-2 px-5 py-10 text-center">
           <p className="text-sm font-medium">No runs yet</p>
           <p className="max-w-sm text-xs text-muted-foreground">
-            A run is one batch pass — a contact list, a caller ID, and a schedule.
+            A run is one batch pass: a contact list, a caller ID, and a schedule.
             Create one to start batch calling.
           </p>
           <Button size="sm" variant="outline" className="mt-2 gap-1.5" onClick={startNew}>
@@ -228,7 +228,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
                   setNewDraft(null)
                   toast(`${newDraft.name} saved`, {
                     description: newDraft.launch?.mode === "scheduled"
-                      ? "Scheduled — it arms when you deploy."
+                      ? "Scheduled. It arms when you deploy."
                       : "Starts dialing when you deploy.",
                   })
                 }}
@@ -255,7 +255,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
                       {c.language && <span className="text-xs font-normal text-muted-foreground">{c.language}</span>}
                       {c.locked && (
                         <Badge variant="outline" className="h-5 gap-1 border-warning/50 px-1.5 text-xs font-normal text-foreground">
-                          <Lock className="h-3 w-3 text-warning" aria-hidden /> rerun — config locked
+                          <Lock className="h-3 w-3 text-warning" aria-hidden /> rerun · config locked
                         </Badge>
                       )}
                     </p>
@@ -348,7 +348,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
 
       {roll.running > 0 && (
         <p className="pt-2.5 text-xs text-muted-foreground/80">
-          Wireframe — dial progress is simulated.
+          Wireframe: dial progress is simulated.
         </p>
       )}
     </section>
@@ -414,7 +414,7 @@ function CampaignEditor({
           list and timing change, so aggregated analytics stay comparable. */}
       {locked && (
         <p className="rounded-md border border-warning/50 bg-warning/10 px-3 py-2 text-xs text-foreground">
-          Config is locked to the original run — upload the new contact list and set the timing.
+          Config is locked to the original run: upload the new contact list and set the timing.
           Caller ID, language, and dialing stay identical so analytics aggregate across runs.
           Need changes? Use <span className="font-medium">Duplicate</span> instead.
         </p>
@@ -430,7 +430,7 @@ function CampaignEditor({
             id={`cmp-name-${campaign.id}`}
             value={campaign.name}
             onChange={(e) => onChange({ name: e.target.value })}
-            placeholder="e.g. Q3 Renewals — EN West"
+            placeholder="e.g. Q3 Renewals. EN West"
             className="text-sm"
           />
         </div>
@@ -468,7 +468,7 @@ function CampaignEditor({
                 <SelectItem key={n.id} value={n.id} disabled>
                   {n.number} · {n.assignedTo.length > 0
                     ? `answering ${n.label}`
-                    : `assigned to ${n.assignedAgent?.name ?? n.label}`} — a line can&apos;t answer and dial at once
+                    : `assigned to ${n.assignedAgent?.name ?? n.label}`} · a line can&apos;t answer and dial at once
                 </SelectItem>
               ))}
               <SelectSeparator />
@@ -561,7 +561,7 @@ function CampaignContacts({
           </button>
         </div>
         <p className="text-xs text-muted-foreground">
-          One row per contact — columns become {"{{variables}}"}.{" "}
+          One row per contact · columns become {"{{variables}}"}.{" "}
           <a
             href="https://docs.agora.io/en/conversational-ai"
             target="_blank"
@@ -604,14 +604,14 @@ function CampaignContacts({
           {varsCovered && <Check className={cn("mt-0.5 h-3.5 w-3.5 shrink-0 text-success", coveredFlash > 0 && "sx-tick-pop")} />}
           {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
             ? `${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length}/${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length} {{variables}} covered.`
-            : "No {{variables}} in your prompt yet — add them in Prompt & knowledge to personalize each call."}
+            : "No {{variables}} in your prompt yet. Add them in Prompt & knowledge to personalize each call."}
         </p>
       ) : (
         <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
           <p className="text-xs leading-relaxed text-foreground">
             Missing {missing.length} prompt variable{missing.length > 1 ? "s" : ""}:{" "}
-            {missing.map((v) => `{{${v}}}`).join(", ")} — add the columns, or remove them from
+            {missing.map((v) => `{{${v}}}`).join(", ")}. Add the columns, or remove them from
             the prompt. Deploy stays blocked until they match.
           </p>
         </div>

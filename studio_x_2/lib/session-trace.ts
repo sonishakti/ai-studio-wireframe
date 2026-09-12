@@ -115,9 +115,9 @@ const pct = (sorted: number[], p: number) =>
 // ─── mock conversation content ───────────────────────────────────────────────
 
 const EXCHANGES: [string, string][] = [
-  ["Hi, thanks for calling. How can I help you today?", "Hey — I'm calling about my order, it hasn't shipped yet."],
+  ["Hi, thanks for calling. How can I help you today?", "Hey · I'm calling about my order, it hasn't shipped yet."],
   ["I can check that for you. Could I get the order number?", "It's 4-4-9-2-0-1."],
-  ["Thanks. I see order 449201 — it's packed and leaves the warehouse tonight.", "Tonight? The email said it shipped two days ago."],
+  ["Thanks. I see order 449201. It's packed and leaves the warehouse tonight.", "Tonight? The email said it shipped two days ago."],
   ["I understand the confusion. The email confirms the label was created, not that it left.", "Okay. So when does it actually arrive?"],
   ["Delivery is estimated for Thursday. Want me to send a tracking link?", "Yes please, to the same email."],
   ["Sent. Anything else I can help with?", "No, that's everything. Thanks."],

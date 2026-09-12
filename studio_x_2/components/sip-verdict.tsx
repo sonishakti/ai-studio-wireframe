@@ -88,7 +88,7 @@ export function SipVerdict({
   if (!trace.failure) {
     return (
       <div data-design-focus="sip-verdict" className={cn("rounded-lg border border-border bg-muted/30 px-3.5 py-2.5", className)}>
-        <p className="text-sm">Signaling completed normally — the call was answered and ended with a BYE.</p>
+        <p className="text-sm">Signaling completed normally. The call was answered and ended with a BYE.</p>
       </div>
     )
   }

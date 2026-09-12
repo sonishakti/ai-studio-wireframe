@@ -76,7 +76,7 @@ function buildRows(draft: AgentDraft): CheckRow[] {
         id: "campaigns", icon: Users, label: "Batch",
         value: draft.channels.length === 1
           ? "Create a campaign run to start batch calling."
-          : "No runs yet — batch stays idle until you create one.",
+          : "No runs yet: batch stays idle until you create one.",
         state: draft.channels.length === 1 ? "warn" : "ok",
         fixStep: draft.channels.length === 1 ? 5 : undefined,
         fixLabel: draft.channels.length === 1 ? "New run" : undefined,
@@ -131,7 +131,7 @@ function buildRows(draft: AgentDraft): CheckRow[] {
   rows.push({
     id: "hosting", icon: Globe, label: "Hosting",
     value: isPinned(hosting)
-      ? `${hostingSummary(hosting)} — the agent will not start outside it`
+      ? `${hostingSummary(hosting)}. The agent will not start outside it`
       : hostingSummary(hosting),
     state: "ok",
   })
@@ -208,12 +208,12 @@ export function DeployPreflight({
           <AlertDialogTitle className="flex items-center gap-2">
             <Rocket className="h-4 w-4 text-muted-foreground" aria-hidden />
             {batch && ready.length > 0
-              ? `Pre-flight check — ${ready.length} run${ready.length > 1 ? "s" : ""} · ${totalContacts.toLocaleString()} contacts`
+              ? `Pre-flight check · ${ready.length} run${ready.length > 1 ? "s" : ""} · ${totalContacts.toLocaleString()} contacts`
               : "Pre-flight check"}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {batch && ready.length > 0
-              ? `Deploying starts the runs — ${draft.name || "your agent"} dials every contact in each list. Checking the configuration first:`
+              ? `Deploying starts the runs · ${draft.name || "your agent"} dials every contact in each list. Checking the configuration first:`
               : `What ${draft.name || "your agent"} goes live with:`}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -297,7 +297,7 @@ export function DeployPreflight({
               )
             })}
             <li className="tabular-nums">
-              · Estimate: ~${Math.round(totalContacts * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min —{" "}
+              · Estimate: ~${Math.round(totalContacts * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min , {" "}
               <InfoHint label="what's in this estimate?">
                 Sums the stack&apos;s list prices per minute (speech recognition + model + voice) and
                 Agora platform minutes. Carrier/SIP charges from your own trunk are NOT included.
@@ -329,7 +329,7 @@ export function DeployPreflight({
           {/* Configuration-scoped verdict (user-test 2026-07-24: "All systems
               go" dressed a client-side config check as server verification). */}
           {allGo
-            ? "Configuration complete — ready to launch."
+            ? "Configuration complete: ready to launch."
             : `${warns.length} check${warns.length > 1 ? "s" : ""} need${warns.length > 1 ? "" : "s"} attention before launch.`}
         </p>
 

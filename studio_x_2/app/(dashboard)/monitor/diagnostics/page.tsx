@@ -110,7 +110,7 @@ export default function DiagnosticsPage() {
           <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-16 text-center">
             <ShieldCheck className="h-7 w-7 text-primary" />
             <p className="text-sm font-medium">All clear</p>
-            <p className="text-xs text-muted-foreground">No open issues match — your live deployments are healthy.</p>
+            <p className="text-xs text-muted-foreground">No open issues match. Your live deployments are healthy.</p>
           </div>
         ) : (
           <div className="space-y-3">

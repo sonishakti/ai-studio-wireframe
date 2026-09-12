@@ -101,7 +101,7 @@ export function AgentDeploymentPanel({ id, agent }: { id: string; agent?: Agent 
         <div>
           <p className="text-sm font-medium">Persona for this deployment</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Inherits {agentName}&apos;s voice — only the personality changes here, unless you edit the identity.
+            Inherits {agentName}&apos;s voice. Only the personality changes here, unless you edit the identity.
           </p>
         </div>
 

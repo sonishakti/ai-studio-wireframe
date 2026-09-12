@@ -138,7 +138,7 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
     {
       label: "Recording",
       disabled: !hasRecording,
-      reason: !voice ? "No audio on a chat session" : audio === "none" ? "No recording — it never connected" : audio === "not-retained" ? "Not retained · Retention: 30 days" : undefined,
+      reason: !voice ? "No audio on a chat session" : audio === "none" ? "No recording. It never connected" : audio === "not-retained" ? "Not retained · Retention: 30 days" : undefined,
       onSelect: () => toast.success("Mock: recording downloaded"),
     },
     { label: "Transcript (.txt)", onSelect: () => downloadText(`session-${trace.id}-transcript.txt`, timelineToTxt(transcriptTimeline()), "text/plain") },
@@ -235,7 +235,7 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
 
           {trace.stats.turnCount > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Where the time goes — average per turn</p>
+              <p className="text-xs font-medium text-muted-foreground">Where the time goes. Average per turn</p>
               <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
                 {trace.stats.byComponent.map((c) => (
                   <span
@@ -359,7 +359,7 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
             </div>
           ) : (
             <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">
-              No recording — this session never connected.
+              No recording. This session never connected.
             </p>
           )}
         </div>

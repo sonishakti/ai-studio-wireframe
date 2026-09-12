@@ -33,7 +33,7 @@ const PROJECTS: Project[] = [
   { id: "prj_789012", name: "Acme Production",  description: "Live customer support agents",  appId: "f9e8d7c6b5a43210", plan: "Pro",        env: "production", members: 8, agents: 14, status: "active",   lastActive: "12 min ago", current: false },
   { id: "prj_345678", name: "Acme Staging",     description: "Pre-prod testing",              appId: "0a1b2c3d4e5f6789", plan: "Pro",        env: "staging",    members: 6, agents: 7,  status: "active",   lastActive: "3 hours ago", current: false },
   { id: "prj_901234", name: "Q3 Pilot",         description: "Limited release pilot",         appId: "9b8a7c6d5e4f3210", plan: "Free",       env: "development",members: 3, agents: 2,  status: "active",   lastActive: "Yesterday",   current: false },
-  { id: "prj_567890", name: "Legacy Voice",     description: "RTC-only — sunsetting Aug 2026", appId: "abcdef1234567890", plan: "Enterprise", env: "production", members: 12,agents: 0,  status: "archived", lastActive: "May 12, 2026", current: false },
+  { id: "prj_567890", name: "Legacy Voice",     description: "RTC-only · sunsetting Aug 2026", appId: "abcdef1234567890", plan: "Enterprise", env: "production", members: 12,agents: 0,  status: "archived", lastActive: "May 12, 2026", current: false },
 ]
 
 // Env shown as a single colored dot + label — quieter than a bordered badge per card.

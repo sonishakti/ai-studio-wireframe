@@ -72,8 +72,8 @@ const SCENARIO_SEEDS: {
       if (cb.transfer) return null
       // Point at the control that EXISTS for this agent's channel; a web/
       // code-only agent has no transfer control, so no fake failure.
-      if (hasChannel(d, "inbound")) return "Transfer to human is OFF — the agent had no handoff path. Enable it in Go Live › Inbound call settings › Transfer to human."
-      if (hasChannel(d, "batch")) return "Transfer to human is OFF — the agent had no handoff path. Enable it in Go Live › Batch call behavior › Transfer to human."
+      if (hasChannel(d, "inbound")) return "Transfer to human is OFF. The agent had no handoff path. Enable it in Go Live › Inbound call settings › Transfer to human."
+      if (hasChannel(d, "batch")) return "Transfer to human is OFF. The agent had no handoff path. Enable it in Go Live › Batch call behavior › Transfer to human."
       return null
     },
   },
@@ -87,8 +87,8 @@ const SCENARIO_SEEDS: {
     failsBecause: (d) => {
       const cb = { ...DEFAULT_CALL_BEHAVIOR, ...d.callBehavior }
       if (cb.silenceHangup) return null
-      if (hasChannel(d, "inbound")) return "Silence hang-up is OFF — the call would hang open. Enable it in Go Live › Inbound call settings."
-      if (hasChannel(d, "batch")) return "Silence hang-up is OFF — the call would hang open. Enable it in Go Live › Batch call behavior."
+      if (hasChannel(d, "inbound")) return "Silence hang-up is OFF. The call would hang open. Enable it in Go Live › Inbound call settings."
+      if (hasChannel(d, "batch")) return "Silence hang-up is OFF. The call would hang open. Enable it in Go Live › Batch call behavior."
       return null
     },
   },
@@ -152,7 +152,7 @@ const SCENARIO_SEEDS: {
     assertion: (d) => {
       const vars = extractVars(`${d.systemPrompt} ${d.greeting}`)
       return vars.length
-        ? `PASS if every variable (${vars.map((v) => `{{${v}}}`).join(", ")}) is filled — no raw placeholders spoken aloud.`
+        ? `PASS if every variable (${vars.map((v) => `{{${v}}}`).join(", ")}) is filled. No raw placeholders spoken aloud.`
         : "PASS if the agent never speaks a raw {{placeholder}}."
     },
   },
@@ -173,7 +173,7 @@ function synthTranscript(d: AgentDraft, goal: string, fail?: string | null): Eva
     fail
       ? { role: "agent", text: "…", note: fail }
       : { role: "agent", text: `(simulated) The agent handles it the way the prompt directs, staying in persona.` },
-    { role: "caller", text: "(simulated) Okay — that works. Thanks." },
+    { role: "caller", text: "(simulated) Okay. That works. Thanks." },
   ]
 }
 

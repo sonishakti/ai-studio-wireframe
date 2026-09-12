@@ -52,7 +52,7 @@ const CHANNELS: ChannelRow[] = [
   { id: "ch_04", type: "web",      label: "Help widget",     identifier: "acme.com/help",     backs: "Support Bot v2",     status: "active",     href: "/deploy/web-widget" },
   { id: "ch_05", type: "batch",    label: "Q2 Collections",  identifier: "4,210 contacts",    backs: "Collections Outreach", status: "scheduled", href: "/deploy/batch-calls" },
   { id: "ch_06", type: "code",     label: "SDK embed",       identifier: "token auth",        backs: "Aria",               status: "active",     href: "/deploy/code" },
-  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: "—",                  status: "unassigned", href: "/deploy/phone-numbers" },
+  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: ", ",                  status: "unassigned", href: "/deploy/phone-numbers" },
 ]
 
 const FILTERS: { id: "all" | ChannelType; label: string }[] = [
@@ -74,7 +74,7 @@ export function ChannelsPanel() {
         <div>
           <h2 className="text-sm font-semibold">Deployment Channels</h2>
           <p className="text-xs text-muted-foreground">
-            Everywhere your agents answer — phone, WhatsApp, web, batch, and code. Filter by type.
+            Everywhere your agents answer: phone, WhatsApp, web, batch, and code. Filter by type.
           </p>
         </div>
         <AddPhoneNumberSheet>

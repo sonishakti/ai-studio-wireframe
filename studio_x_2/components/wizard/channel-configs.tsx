@@ -99,7 +99,7 @@ export function publishDeployment({
     // (user-test #12: the shared "is live" headline contradicted the badge,
     // and "below" pointed the wrong way from the toast).
     toast.success(`${name || "Deployment"} is deployed`, {
-      description: `${who} goes live the moment your app connects — the snippets now carry its live ID.`,
+      description: `${who} goes live the moment your app connects. The snippets now carry its live ID.`,
       action: { label: "View Monitor", onClick: () => router.push(monitorUrl) },
     })
     return

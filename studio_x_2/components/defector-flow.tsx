@@ -171,7 +171,7 @@ function PasteStep({
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Switching from Vapi or Retell? Paste your agent.</h1>
         <p className="mt-1.5 text-muted-foreground">
-          Hear your own agent ring on Agora in under a minute — no rebuild, no keys. Then claim a number.
+          Hear your own agent ring on Agora in under a minute. No rebuild, no keys. Then claim a number.
         </p>
       </div>
 
@@ -235,8 +235,8 @@ function LiveStep({
     const t = turns
     setTurns(t + 1)
     const ex = [
-      { you: "What can you do?", agent: "Everything your old setup did — I answer calls, qualify leads and book appointments, now on Agora." },
-      { you: "Nice — how do I get you live?", agent: "Hit “End & go live” — you'll be up in a moment, free." },
+      { you: "What can you do?", agent: "Everything your old setup did. I answer calls, qualify leads and book appointments, now on Agora." },
+      { you: "Nice: how do I get you live?", agent: "Hit “End & go live” · you'll be up in a moment, free." },
     ]
     const pair = ex[Math.min(t, ex.length - 1)]
     setLines((l) => [...l, { role: "you", text: pair.you }])
@@ -268,7 +268,7 @@ function LiveStep({
 
       <p className="rounded-lg border border-border bg-muted/40 px-4 py-2.5 text-xs text-muted-foreground">
         You&apos;re hearing <span className="font-medium text-foreground">your own agent</span> in this browser. Going live
-        is one more step — free.
+        is one more step: free.
       </p>
 
       {lines.length > 0 && (
@@ -310,7 +310,7 @@ function ClaimStep({
   const emailOk = /.+@.+\..+/.test(email)
 
   function go() {
-    if (!emailOk) { setErr("Enter your email — we'll create your Agora account with it."); return }
+    if (!emailOk) { setErr("Enter your email. We'll create your Agora account with it."); return }
     setErr(null); setBusy(true)
     after(1100, () => {
       track(Events.deployment_went_live, { agent_id: agentId, channel: "web" } as never)
@@ -323,7 +323,7 @@ function ClaimStep({
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Go live with {config.name}</h2>
         <p className="mt-1 text-muted-foreground">
-          Free to start — {PLAN_USAGE.freeMinutesUngated} minutes, no card. We&apos;ll nudge you for a card at
+          Free to start · {PLAN_USAGE.freeMinutesUngated} minutes, no card. We&apos;ll nudge you for a card at
           {" "}{PLAN_USAGE.freeMinutesUngated} min to unlock the rest.
         </p>
       </div>
@@ -331,14 +331,14 @@ function ClaimStep({
       <div className="space-y-1.5">
         <Label htmlFor="defect-email">Your email</Label>
         <Input id="defect-email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (err) setErr(null) }} placeholder="you@company.com" autoComplete="email" />
-        <p className="text-xs text-muted-foreground">We&apos;ll create your Agora account with this email — no separate signup.</p>
+        <p className="text-xs text-muted-foreground">We&apos;ll create your Agora account with this email. No separate signup.</p>
       </div>
 
       <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
         <p className="font-medium">Where should {config.name} answer?</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           It goes live on the web instantly. To put it on the phone, connect a number from your carrier
-          (Twilio / Telnyx / …) over SIP — Agora bridges it and you keep the number.
+          (Twilio / Telnyx / …) over SIP. Agora bridges it and you keep the number.
         </p>
         <div className="mt-2.5">
           <AddPhoneNumberSheet>
@@ -370,7 +370,7 @@ function DoneStep({ name }: { name: string }) {
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">{name} is live on Agora</h2>
         <p className="mt-1.5 text-muted-foreground">
-          You switched in one motion — no rebuild. Place a real call to see it in Monitor.
+          You switched in one motion. No rebuild. Place a real call to see it in Monitor.
         </p>
       </div>
       <Separator className="max-w-xs" />

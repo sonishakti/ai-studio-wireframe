@@ -95,7 +95,7 @@ function transcriptFor(c: CallRow): CallDetail["transcript"] {
   return [
     { speaker: "Agent", text: `Hi, this is ${c.agent} calling on behalf of ACME Corp regarding ${c.campaignName}. Am I speaking with the account holder?` },
     { speaker: "Customer", text: "Yes, this is them." },
-    { speaker: "Agent", text: "Great — I'm following up on your recent interest. Do you have a quick moment?" },
+    { speaker: "Agent", text: "Great · I'm following up on your recent interest. Do you have a quick moment?" },
     { speaker: "Customer", text: c.outcome === "Successful" ? "Sure, go ahead." : "Not right now, thanks." },
   ]
 }
@@ -444,7 +444,7 @@ export default function CallHistoryPage() {
                           return b ? (
                             <Badge variant="outline" className="font-normal" title={BLAME_CHIP[b]}>{BLAME_CELL[b]}</Badge>
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">, </span>
                           )
                         })()}
                       </TableCell>

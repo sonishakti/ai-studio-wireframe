@@ -50,7 +50,7 @@ export const HOSTING_OPTIONS: HostingOption[] = [
     label: "Automatic (nearest region)",
     desc: "Agora places the agent closest to your LLM endpoint and fails over if a region goes down.",
     outOfRegionMs: 0,
-    residency: "No residency guarantee — the agent may run in any Agora region.",
+    residency: "No residency guarantee. The agent may run in any Agora region.",
   },
   {
     value: "GLOBAL",
@@ -71,7 +71,7 @@ export const HOSTING_OPTIONS: HostingOption[] = [
     label: "Europe",
     desc: "The agent only ever runs on Agora's European servers.",
     outOfRegionMs: 110,
-    residency: "Conversation media and agent state stay on European servers — the usual GDPR ask.",
+    residency: "Conversation media and agent state stay on European servers. The usual GDPR ask.",
   },
   {
     value: "ASIA",
@@ -113,9 +113,9 @@ export function areaLabel(a: HostingSelection): string {
  *  Kept in ONE place so those three can never disagree. */
 export function hostingSummary(h: HostingConfig | undefined): string {
   const cfg = h ?? DEFAULT_HOSTING
-  if (cfg.area === HOSTING_AUTO) return "Automatic — nearest region"
+  if (cfg.area === HOSTING_AUTO) return "Automatic · nearest region"
   if (cfg.area === "GLOBAL") {
-    return cfg.excludeArea ? `Global · never ${areaLabel(cfg.excludeArea)}` : "Global — every region allowed"
+    return cfg.excludeArea ? `Global · never ${areaLabel(cfg.excludeArea)}` : "Global. Every region allowed"
   }
   return `${areaLabel(cfg.area)} only`
 }

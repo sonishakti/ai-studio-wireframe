@@ -50,7 +50,7 @@ export function TemplateMenu({
       stack: stackFor(tpl.preset, draft.stack.modality),
     })
     toast(`${tpl.name} template applied`, {
-      description: `Prompt, greeting, and the ${STACK_PRESETS[tpl.preset].label} model stack are set — edit anything in Prompt & knowledge.`,
+      description: `Prompt, greeting, and the ${STACK_PRESETS[tpl.preset].label} model stack are set: edit anything in Prompt & knowledge.`,
     })
     onApplied?.()
   }
@@ -98,7 +98,7 @@ export function TemplateMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Apply {pending?.name ?? "this template"}?</AlertDialogTitle>
             <AlertDialogDescription>
-              A template now sets more than the prompt — here&apos;s exactly what changes.
+              A template now sets more than the prompt: here&apos;s exactly what changes.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {/* The diff. A binary replace-or-cancel gave no way to judge the

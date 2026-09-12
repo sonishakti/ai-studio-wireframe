@@ -41,7 +41,7 @@ export function ChannelHero({
           Deploy <span className="text-primary">{agent.name}</span> to a channel
         </h2>
         <p className="text-sm text-muted-foreground">
-          Pick where {agent.name} goes live — each card deploys this agent to that channel.
+          Pick where {agent.name} goes live. Each card deploys this agent to that channel.
           {showNote && agent.status !== "live" && " It isn't live yet; deploying publishes it, and going live is free."}
         </p>
       </div>
@@ -72,7 +72,7 @@ export function ChannelHero({
           agentId={agent.id}
           icon={Code2}
           title="Embed in your app"
-          desc="Drop in the web widget or call the API — no number needed."
+          desc="Drop in the web widget or call the API. No number needed."
           footer={
             <Link
               href={deployHref("web")}

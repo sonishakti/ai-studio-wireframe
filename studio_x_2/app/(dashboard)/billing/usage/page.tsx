@@ -89,7 +89,7 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
       viewBox={`0 0 ${width} ${height}`}
       className="w-full h-auto"
       role="img"
-      aria-label={`Usage trend over ${MONTHS.length} months. Latest values — ${latestSummary || "no series selected"}.`}
+      aria-label={`Usage trend over ${MONTHS.length} months. Latest values: ${latestSummary || "no series selected"}.`}
     >
       <g transform={`translate(${padding.left} ${padding.top})`}>
         {gridLines.map((g) => (

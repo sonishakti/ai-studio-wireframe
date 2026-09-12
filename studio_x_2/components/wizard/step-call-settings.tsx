@@ -123,7 +123,7 @@ export function InboundCallSettings({ draft, update }: StepProps) {
 
 const TIMEZONES = [
   "US Pacific (PT)", "US Mountain (MT)", "US Central (CT)", "US Eastern (ET)",
-  "UTC", "Europe — London", "Europe — Berlin", "India (IST)", "Singapore (SGT)",
+  "UTC", "Europe · London", "Europe · Berlin", "India (IST)", "Singapore (SGT)",
 ]
 
 export function CampaignLaunchFields({
@@ -323,7 +323,7 @@ export function HangupSettings({ draft, update }: StepProps) {
           <p className="text-xs text-muted-foreground">
             Call ends after {cb.silenceTimeoutSec} seconds of no response.{" "}
             <InfoHint label="Two silence settings?">
-              Different from the turn-taking silence in Voice & Models › Advanced — that one shapes
+              Different from the turn-taking silence in Voice & Models › Advanced. That one shapes
               when the agent replies; this one ends the call.
             </InfoHint>
           </p>
@@ -467,7 +467,7 @@ function CampaignCapacityNote({ maxConcurrent }: { maxConcurrent: number }) {
             <span className="font-medium text-foreground">
               {maxConcurrent} at once is above your {stats.totalLines} concurrent lines.
             </span>{" "}
-            Calls beyond {stats.totalLines} queue until a line frees — nothing drops. +{overBy}{" "}
+            Calls beyond {stats.totalLines} queue until a line frees. Nothing drops. +{overBy}{" "}
             lines (${overBy * stats.pricePerLineMo}/mo, prorated today) removes the queue.
           </p>
           <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => setLinesOpen(true)}>

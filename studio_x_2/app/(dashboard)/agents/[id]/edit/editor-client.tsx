@@ -38,7 +38,7 @@ export function AgentEditorClient({ id }: { id: string }) {
     // Unknown id → back to the list with a notice (user-test 2026-07-29 S2):
     // an EDIT URL must never silently mount a blank new-agent wizard.
     toast.error("Agent not found", {
-      description: `No agent "${id}" in this project — it may have been deleted. Showing all agents.`,
+      description: `No agent "${id}" in this project. It may have been deleted. Showing all agents.`,
     })
     router.replace("/agents?view=list")
   }, [staticKnown, id, router])

@@ -126,12 +126,12 @@ export function AgentTestPanel({
           <>
             <StatRow
               label="Est. end-to-end latency"
-              value={spec.latencyMs !== null ? `~${spec.latencyMs} ms` : "—"}
+              value={spec.latencyMs !== null ? `~${spec.latencyMs} ms` : ", "}
               mono
             />
             <StatRow
               label="Est. LLM time to first token"
-              value={spec.ttftMs !== null ? `~${spec.ttftMs} ms` : "—"}
+              value={spec.ttftMs !== null ? `~${spec.ttftMs} ms` : ", "}
               mono
             />
           </>
@@ -143,7 +143,7 @@ export function AgentTestPanel({
 
 /** Format an optional latency figure as "~N ms", or an em-dash when unknown. */
 function ms(v: number | null | undefined): string {
-  return v != null ? `~${v} ms` : "—"
+  return v != null ? `~${v} ms` : ", "
 }
 
 function StatRow({

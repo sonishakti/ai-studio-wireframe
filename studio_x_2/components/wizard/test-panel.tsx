@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, Sparkles, Mic, PhoneOff, ListChecks, Globe } from "lucide-react"
+import { X, Sparkles, Mic, PhoneOff, Globe } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -68,11 +68,11 @@ export type TestPanelTab = "simulations" | "agent" | "widget"
 /** The scripted exchange the rail's Talk mock plays — evidence of a working
  *  agent rather than a silent orb (the top recurring break in user tests). */
 const RAIL_TALK: EvalTurn[] = [
-  { role: "agent", text: "Hi! Thanks for calling — how can I help today?" },
+  { role: "agent", text: "Hi! Thanks for calling: how can I help today?" },
   { role: "caller", text: "I wanted to check on my order." },
   { role: "agent", text: "Happy to help. What's the order number?" },
   { role: "caller", text: "It's 4471." },
-  { role: "agent", text: "Got it — order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
+  { role: "agent", text: "Got it: order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
 ]
 
 export function TestPanel({
@@ -168,33 +168,27 @@ export function TestPanel({
         onValueChange={(v) => onTabChange(v as TestPanelTab)}
         className="flex min-h-0 flex-1 flex-col gap-0"
       >
-        <div className="shrink-0 border-b border-border px-4 py-2.5">
-          {/* Two ways to test, named by what you do (owner 2026-09-11, second
-              pass): Scenarios = the generated suite with its count; Voice call
-              = the orb, the same door the header's Voice call button opens. */}
-          <TabsList id="wz-rail-tabs" className="grid h-8 w-full auto-cols-fr grid-flow-col">
-            <TabsTrigger value="simulations" className="gap-1.5 text-xs">
-              <ListChecks className="size-3.5" aria-hidden /> Scenarios
-              {generated.length > 0 && (
-                <span className="rounded-full bg-foreground/10 px-1.5 font-mono text-[10px] tabular-nums">{generated.length}</span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="agent" className="gap-1.5 text-xs">
-              <Mic className="size-3.5" aria-hidden /> Voice call
-            </TabsTrigger>
-            {showWidgetTab && (
+        {/* The strip only lists what the rail can switch between in place:
+            Voice call · Widget. Scenarios has its own door in the builder
+            header ("Run test scenarios", owner 2026-09-12) and no tab. */}
+        {activeTab !== "simulations" && showWidgetTab && (
+          <div className="shrink-0 border-b border-border px-4 py-2.5">
+            <TabsList id="wz-rail-tabs" className="grid h-8 w-full auto-cols-fr grid-flow-col">
+              <TabsTrigger value="agent" className="gap-1.5 text-xs">
+                <Mic className="size-3.5" aria-hidden /> Voice call
+              </TabsTrigger>
               <TabsTrigger value="widget" className="gap-1.5 text-xs">
                 <Globe className="size-3.5" aria-hidden /> Widget
               </TabsTrigger>
-            )}
-          </TabsList>
-        </div>
+            </TabsList>
+          </div>
+        )}
 
         <TabsContent value="simulations" className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="min-w-0 text-sm text-muted-foreground">
               {generated.length
-                ? `${generated.length} contextual scenarios — regenerate after big prompt changes.`
+                ? `${generated.length} contextual scenarios. Regenerate after big prompt changes.`
                 : "Scenarios are generated from your prompt, channel and call behavior."}
             </p>
             <Button size="sm" variant="outline" className="gap-1.5" disabled={generating} onClick={generate}>
@@ -245,7 +239,7 @@ export function TestPanel({
           className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md"
         >
           <SheetHeader className="shrink-0 border-b border-border px-4 py-3 text-left">
-            <SheetTitle className="text-base">Test {agentName}</SheetTitle>
+            <SheetTitle className="text-base">{activeTab === "simulations" ? "Test scenarios" : `Test ${agentName}`}</SheetTitle>
           </SheetHeader>
           {body}
         </SheetContent>
@@ -263,7 +257,7 @@ export function TestPanel({
 
   return (
     <div
-      className="relative hidden lg:block lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:self-start"
+      className="relative hidden lg:block lg:sticky lg:top-12 lg:h-[calc(100vh-3rem)] lg:self-start"
       style={{ width }}
       role="complementary"
       aria-label={`Test ${agentName}`}
@@ -288,7 +282,7 @@ export function TestPanel({
 
       <div className="flex h-full max-h-[calc(100vh-3rem)] flex-col pl-1.5">
         <header id="wz-test-head" className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
-          <p className="min-w-0 truncate text-sm font-semibold">Test {agentName}</p>
+          <p className="min-w-0 truncate text-sm font-semibold">{activeTab === "simulations" ? "Test scenarios" : `Test ${agentName}`}</p>
           <Button
             variant="ghost"
             size="icon"
@@ -333,7 +327,7 @@ function TalkTab({
         <Button
           id="wz-rail-talk"
           size="sm"
-          variant={talking ? "outline" : "default"}
+          variant={talking ? "destructive" : "default"}
           className="gap-1.5"
           disabled={disabled || !onToggleTalk}
           onClick={onToggleTalk}
@@ -344,7 +338,7 @@ function TalkTab({
         </Button>
         {disabled && (
           <p className="text-xs text-muted-foreground">
-            {agentName} is still warming up — this unlocks in a moment.
+            {agentName} is still warming up. This unlocks in a moment.
           </p>
         )}
       </div>
@@ -358,8 +352,8 @@ function TalkTab({
         </div>
       ) : (
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
-          A one-off call in full persona. For awkward callers — interruptions, jailbreaks,
-          silence —{" "}
+          A one-off call in full persona. For awkward callers: interruptions, jailbreaks,
+          silence , {" "}
           <button
             type="button"
             onClick={onScenarios}
@@ -430,7 +424,7 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
         <StatRow label="Avg. e2e latency" value={`${est.latencyMs} ms`} />
         {/* Gloss lives in the tooltip, not another line (copy discipline
             2026-08-10). */}
-        <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} title="Time to first token — how fast the model starts responding" />
+        <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} title="Time to first token. How fast the model starts responding" />
         <StatRow label="Avg. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
       </dl>
       <p className="pt-2 text-xs text-muted-foreground/70">Wireframe estimates.</p>

@@ -60,7 +60,7 @@ export function PhoneNumberClient({ id }: { id: string }) {
   const detachAgent = () => {
     setDetached(true)
     setAgent("none")
-    toast.info(`Detached ${assignedAgent?.name ?? "agent"} — you can now edit this number.`)
+    toast.info(`Detached ${assignedAgent?.name ?? "agent"}. You can now edit this number.`)
   }
 
   return (

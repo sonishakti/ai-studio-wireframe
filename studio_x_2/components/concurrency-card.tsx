@@ -101,12 +101,12 @@ export function ConcurrencyCard() {
           <StateBanner tone="success" icon={CheckCircle2}>
             <p className="text-sm font-medium">
               {confirm.qty > 0
-                ? `${confirm.qty} added line${confirm.qty > 1 ? "s" : ""} live now — ${stats.totalLines} total (${stats.included} included + ${stats.purchased} purchased).`
-                : `${-confirm.qty} line${confirm.qty < -1 ? "s" : ""} removed — ${stats.totalLines} total (${stats.included} included + ${stats.purchased} purchased).`}
+                ? `${confirm.qty} added line${confirm.qty > 1 ? "s" : ""} live now · ${stats.totalLines} total (${stats.included} included + ${stats.purchased} purchased).`
+                : `${-confirm.qty} line${confirm.qty < -1 ? "s" : ""} removed · ${stats.totalLines} total (${stats.included} included + ${stats.purchased} purchased).`}
             </p>
             <p className="text-xs text-muted-foreground tabular-nums">
               {confirm.qty > 0
-                ? `$${confirm.charge.toFixed(2)} today, prorated for the ${PLAN_USAGE.periodDaysTotal - PLAN_USAGE.periodDaysElapsed} days left this cycle — then $${(stats.purchased * stats.pricePerLineMo).toFixed(0)}/mo. Reduce anytime for a prorated credit.`
+                ? `$${confirm.charge.toFixed(2)} today, prorated for the ${PLAN_USAGE.periodDaysTotal - PLAN_USAGE.periodDaysElapsed} days left this cycle. Then $${(stats.purchased * stats.pricePerLineMo).toFixed(0)}/mo. Reduce anytime for a prorated credit.`
                 : `$${confirm.charge.toFixed(2)} credited on your next invoice. Add lines back anytime.`}
             </p>
           </StateBanner>
@@ -116,14 +116,14 @@ export function ConcurrencyCard() {
           // The wall is designed behavior — primary tone, zero alarm.
           <StateBanner tone="primary" icon={PhoneForwarded}>
             <p className="text-sm font-medium">
-              All {stats.totalLines} lines are in use — new batch calls queue. Nothing drops
+              All {stats.totalLines} lines are in use. New batch calls queue. Nothing drops
               or fails.
             </p>
             {stats.queued > 0 && (
               <p className="text-xs text-muted-foreground tabular-nums">
                 +5 lines ≈ your queue clears ~{minSaved(5)} min sooner{" "}
                 <Badge variant="secondary" className="text-xs align-middle">Estimate</Badge>{" "}
-                — {stats.queued} queued calls × ~{AVG_CALL_MIN} min ÷ lines.
+                · {stats.queued} queued calls × ~{AVG_CALL_MIN} min ÷ lines.
               </p>
             )}
             <div className="mt-2 flex items-center gap-2">
@@ -131,7 +131,7 @@ export function ConcurrencyCard() {
               {keptQueuing ? (
                 <span className="inline-flex items-center text-xs text-muted-foreground">
                   <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-success" />
-                  Queuing as designed — calls dial as lines free up.
+                  Queuing as designed: calls dial as lines free up.
                 </span>
               ) : (
                 <Button
@@ -188,7 +188,7 @@ export function ConcurrencyCard() {
         {/* ── Disclosures + write path (X1 idiom) ─────────────────────── */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
           <p className="text-xs text-muted-foreground">
-            At capacity, batch calls queue — nothing drops. Line fees bill separately from
+            At capacity, batch calls queue. Nothing drops. Line fees bill separately from
             usage: your spend cap governs per-minute spend only.
           </p>
           <Button
@@ -273,7 +273,7 @@ export function AddLinesSheet({
         <SheetHeader>
           <SheetTitle>Concurrent lines</SheetTitle>
           <SheetDescription>
-            {totalLines} today — {CONCURRENCY.included} included free
+            {totalLines} today · {CONCURRENCY.included} included free
             {purchased > 0 ? ` + ${purchased} purchased` : ""}. Changes apply instantly.
           </SheetDescription>
         </SheetHeader>
@@ -318,14 +318,14 @@ export function AddLinesSheet({
               {adding
                 ? `${clamped} × $${price}/mo = $${(clamped * price).toFixed(0)}/mo · $${prorated.toFixed(2)} prorated for the ${daysLeft} days left this cycle · then $${monthlyAfter.toFixed(0)}/mo total`
                 : clamped < 0
-                  ? `$${prorated.toFixed(2)} prorated credit on your next invoice — no fees, add lines back anytime`
+                  ? `$${prorated.toFixed(2)} prorated credit on your next invoice. No fees, add lines back anytime`
                   : "Pick a change"}
               {" "}· wireframe pricing
             </p>
             {saved > 0 && (
               <p className="text-xs text-muted-foreground tabular-nums">
                 Your queue clears ~{saved} min sooner{" "}
-                <Badge variant="secondary" className="text-xs align-middle">Estimate</Badge> —{" "}
+                <Badge variant="secondary" className="text-xs align-middle">Estimate</Badge> , {" "}
                 {queued} queued × ~{AVG_CALL_MIN} min ÷ lines.
               </p>
             )}
@@ -334,15 +334,15 @@ export function AddLinesSheet({
           <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground space-y-1">
             <p className="font-medium text-foreground">Lines and your spend cap:</p>
             <p>
-              · More lines never raise your cap — line fees bill separately; the cap governs
+              · More lines never raise your cap: line fees bill separately; the cap governs
               per-minute usage.
             </p>
             {capHeadroomUsd != null && capMinutes != null && adding && (
               <p className="tabular-nums">
-                · At full use, {newTotal} lines spend ${burnPerMin.toFixed(2)}/min — your $
+                · At full use, {newTotal} lines spend ${burnPerMin.toFixed(2)}/min. Your $
                 {capHeadroomUsd.toFixed(2)} headroom lasts ≈{capMinutes} min (estimate).
                 {saved > 0 && capMinutes < saved && (
-                  <> The cap would pause calls before the speed-up pays off — review it in
+                  <> The cap would pause calls before the speed-up pays off: review it in
                   Usage &amp; spend above.</>
                 )}
               </p>

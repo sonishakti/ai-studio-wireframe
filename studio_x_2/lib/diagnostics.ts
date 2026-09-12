@@ -206,7 +206,7 @@ const ruleBargeIn: Rule = (s, ctx) => {
     title: "Barge-in not honored",
     severity: "critical",
     turn: miss.turn,
-    rootCause: "The caller spoke over the agent but it kept talking — the voice couldn't be cancelled mid-sentence.",
+    rootCause: "The caller spoke over the agent but it kept talking. The voice couldn't be cancelled mid-sentence.",
     suggestedFix: "Switch to an interruptible voice, or enable provider-side stream cancellation.",
     fixTarget: agentTarget(ctx, "stack"),
   })]
@@ -219,7 +219,7 @@ const ruleToolTimeout: Rule = (s, ctx) => {
     title: "Tool call failed",
     severity: "critical",
     turn: bad.turn,
-    rootCause: `\`${bad.name}\` ${bad.status === "timeout" ? `timed out after ${(bad.ms / 1000).toFixed(1)}s` : "returned an error"} — the agent had no data to answer with.`,
+    rootCause: `\`${bad.name}\` ${bad.status === "timeout" ? `timed out after ${(bad.ms / 1000).toFixed(1)}s` : "returned an error"}. The agent had no data to answer with.`,
     suggestedFix: "Raise the tool timeout or add a fallback so the agent can recover gracefully.",
     fixTarget: deploymentTarget(ctx, "prompt"),
   })]
@@ -231,7 +231,7 @@ const ruleEscalation: Rule = (s, ctx) => {
     title: "Escalation didn't connect",
     severity: "critical",
     turn: s.escalation.turn,
-    rootCause: "The agent tried to transfer to a human, but the queue returned no one — the call dropped.",
+    rootCause: "The agent tried to transfer to a human, but the queue returned no one. The call dropped.",
     suggestedFix: "Set a transfer fallback in the failure message, or check the escalation routing.",
     fixTarget: deploymentTarget(ctx, "prompt"),
   })]
@@ -258,7 +258,7 @@ const ruleLowAsr: Rule = (s, ctx) => {
     title: "Low ASR confidence",
     severity: "warning",
     turn,
-    rootCause: `Speech recognition was unsure on ${lows} turn${lows > 1 ? "s" : ""} (confidence < 0.60) — the agent may have misheard.`,
+    rootCause: `Speech recognition was unsure on ${lows} turn${lows > 1 ? "s" : ""} (confidence < 0.60). The agent may have misheard.`,
     suggestedFix: "Try a higher-accuracy ASR model for noisy phone audio.",
     fixTarget: agentTarget(ctx, "stack"),
   })]
@@ -272,7 +272,7 @@ const ruleLlmSpike: Rule = (s, ctx) => {
     title: "LLM latency spike",
     severity: "warning",
     turn,
-    rootCause: `Time-to-first-token hit ${(max / 1000).toFixed(1)}s — well above the sub-second target, leaving the caller waiting.`,
+    rootCause: `Time-to-first-token hit ${(max / 1000).toFixed(1)}s: well above the sub-second target, leaving the caller waiting.`,
     suggestedFix: "Use a faster model, or enable streaming so tokens start sooner.",
     fixTarget: agentTarget(ctx, "stack"),
   })]
@@ -296,7 +296,7 @@ const ruleDeadAir: Rule = (s, ctx) => {
     title: "Dead air",
     severity: "warning",
     turn: gap.turn,
-    rootCause: `${(gap.ms / 1000).toFixed(1)}s of silence — the agent went quiet while waiting on a tool.`,
+    rootCause: `${(gap.ms / 1000).toFixed(1)}s of silence. The agent went quiet while waiting on a tool.`,
     suggestedFix: "Add a filler line while tools run, or shorten the endpointing window.",
     fixTarget: agentTarget(ctx, "stack"),
   })]
@@ -308,7 +308,7 @@ const ruleConfigDrift: Rule = (s, ctx) => {
   return [mk(s, "config_drift", {
     title: "Config drift",
     severity: "warning",
-    rootCause: `This call ran config v${s.configVersionAtRun}, but the agent is now v${current} — the diagnosis may reflect an older setup.`,
+    rootCause: `This call ran config v${s.configVersionAtRun}, but the agent is now v${current}. The diagnosis may reflect an older setup.`,
     suggestedFix: `Re-publish the deployment so it ships the current v${current} config.`,
     fixTarget: agentTarget(ctx, "stack"),
   })]
@@ -385,7 +385,7 @@ export function credentialIssues(): AggregatedIssue[] {
         severity: "critical",
         rootCause: `${d.name} runs on ${cred.vendor} (${cred.category}), whose key ${
           expired ? "has expired" : `expires ${cred.expiresOn ?? "soon"}`
-        } — ${expired ? "calls are failing" : "calls will start failing"} until it's rotated.`,
+        } · ${expired ? "calls are failing" : "calls will start failing"} until it's rotated.`,
         suggestedFix: `Rotate the ${cred.vendor} key in Resources › Vendor Credentials.`,
         fixTarget: { level: "credential", id: cred.id, section: "" },
       }

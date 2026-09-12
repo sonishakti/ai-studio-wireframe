@@ -13,11 +13,11 @@ import type { EvalTurn } from "@/lib/campaign-data"
 /** A short scripted exchange the in-browser "Talk to it" test plays so the
  *  surface shows evidence of a working agent (mock — no real audio). */
 const SAMPLE_TALK: EvalTurn[] = [
-  { role: "agent", text: "Hi! Thanks for calling — how can I help today?" },
+  { role: "agent", text: "Hi! Thanks for calling: how can I help today?" },
   { role: "caller", text: "I wanted to check on my order." },
   { role: "agent", text: "Happy to help. What's the order number?" },
   { role: "caller", text: "It's 4471." },
-  { role: "agent", text: "Got it — order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
+  { role: "agent", text: "Got it: order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
 ]
 import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { type StackLatencyBreakdown } from "@/lib/campaign-data"

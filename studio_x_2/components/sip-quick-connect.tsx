@@ -133,7 +133,7 @@ export function SipQuickConnect({
       if (clock.current) clearInterval(clock.current)
       setCallState("connected")
       track(Events.test_call_connected, {})
-      push("Test call answered — two-way audio confirmed", true)
+      push("Test call answered · two-way audio confirmed", true)
       setStage("done")
     }, 2600))
   }
@@ -194,7 +194,7 @@ export function SipQuickConnect({
           {provider === "twilio" && (
             <button type="button" onClick={() => { setUseToken((t) => !t); setCred({ ...cred, sid: "", secret: "" }) }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               <ChevronDown className="h-3 w-3" />
-              {useToken ? "Use a scoped API key instead (safer — least-privilege)" : "Use Account SID + Auth Token instead (less secure)"}
+              {useToken ? "Use a scoped API key instead (safer · least-privilege)" : "Use Account SID + Auth Token instead (less secure)"}
             </button>
           )}
         </div>
@@ -204,7 +204,7 @@ export function SipQuickConnect({
         </Button>
         <p className="text-xs text-muted-foreground">
           Find your key under {PROVIDERS[provider].label} {PROVIDERS[provider].keyHelp}. You bring a
-          number you already own — Agora doesn&apos;t sell or port numbers.{" "}
+          number you already own. Agora doesn&apos;t sell or port numbers.{" "}
           <button type="button" onClick={onFallback} className="underline underline-offset-2 hover:text-foreground">
             Prefer the manual SIP form?
           </button>
@@ -274,12 +274,12 @@ export function SipQuickConnect({
         <StateBanner tone={callState === "connected" ? "success" : "primary"} icon={callState === "connected" ? CheckCircle2 : Radio}>
           {callState === "connected" ? (
             <>
-              <p className="text-sm font-medium">Verified with a real call — {pickedNumber?.e164} is live.</p>
+              <p className="text-sm font-medium">Verified with a real call · {pickedNumber?.e164} is live.</p>
               <p className="text-xs text-muted-foreground">Answered in {callSec || 2}s, two-way audio. Route it to an agent below.</p>
             </>
           ) : (
             <>
-              <p className="text-sm font-medium">Trunk is provisioned — now prove it connects.</p>
+              <p className="text-sm font-medium">Trunk is provisioned. Now prove it connects.</p>
               <p className="text-xs text-muted-foreground">
                 Configuration success isn&apos;t call success. Place a real test call before you rely on it.
               </p>
@@ -311,7 +311,7 @@ export function SipQuickConnect({
             </button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Disconnect stops Agora using this credential — it doesn&apos;t revoke or rotate it at {PROVIDERS[provider].label}.
+            Disconnect stops Agora using this credential. It doesn&apos;t revoke or rotate it at {PROVIDERS[provider].label}.
           </p>
           <Button className="w-full" onClick={() => onConnected(pickedNumber!.e164)}>
             Route this number

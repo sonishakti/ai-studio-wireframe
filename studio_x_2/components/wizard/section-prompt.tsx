@@ -131,7 +131,7 @@ export function SectionPrompt({
             Retell-webhook switcher hit silence here). */}
         {vars.length > 0 && !batch && hasChannel(draft, "inbound") && (
           <p className="text-xs text-muted-foreground">
-            Inbound agents: per-call variables via API — coming soon.
+            Inbound agents: per-call variables via API: coming soon.
           </p>
         )}
       </div>
@@ -151,7 +151,7 @@ export function SectionPrompt({
           caller, and nothing pointed that out. */}
       {greetingSpeaksName(draft) && (
         <p className="text-xs text-muted-foreground">
-          Your agent introduces itself as &ldquo;{draft.name.trim()}&rdquo; — give it a
+          Your agent introduces itself as &ldquo;{draft.name.trim()}&rdquo;: give it a
           caller-facing name? Rename it in the header, then update the greeting to match.
         </p>
       )}
@@ -174,7 +174,7 @@ export function SectionPrompt({
         {/* When it plays — the field arrived with no trigger doc (journey
             test 2026-07-22 D1: "when does that play?"). */}
         <p className="text-xs text-muted-foreground">
-          Played when the agent can&apos;t respond — a model error, tool timeout, or dropped connection.
+          Played when the agent can&apos;t respond: a model error, tool timeout, or dropped connection.
         </p>
       </div>
 
@@ -189,7 +189,7 @@ export function SectionPrompt({
             systemPrompt: `${base}${base ? "\n\n" : ""}Tone & style: ${instruction.trim().replace(/\.$/, "")}.`,
           })
           toast("Prompt rewritten", {
-            description: "Simulated — a model would restructure the whole prompt here, not just append the direction.",
+            description: "Simulated: a model would restructure the whole prompt here, not just append the direction.",
           })
         }}
       />

@@ -155,7 +155,7 @@ export function UsageSpendCard() {
         {confirm === "card" && (
           <StateBanner tone="success" icon={CheckCircle2}>
             <p className="text-sm font-medium">
-              Card on file — {free.included - effective.freeMinutesUngated} more free minutes unlocked.
+              Card on file · {free.included - effective.freeMinutesUngated} more free minutes unlocked.
             </p>
             <p className="text-xs text-muted-foreground">
               After your {free.included} free minutes, usage rolls into pay-as-you-go at{" "}
@@ -168,7 +168,7 @@ export function UsageSpendCard() {
         {confirm === "cap-raised" && (
           <StateBanner tone="success" icon={CheckCircle2}>
             <p className="text-sm font-medium">
-              Cap raised to {usd(capUsd ?? 0, false)}/mo — new calls resumed.
+              Cap raised to {usd(capUsd ?? 0, false)}/mo. New calls resumed.
             </p>
             <p className="text-xs text-muted-foreground">
               {headroomUsd != null && headroomMin != null && (
@@ -183,7 +183,7 @@ export function UsageSpendCard() {
           <StateBanner tone="primary" icon={Gift}>
             <p className="text-sm font-medium">
               You&apos;ve used your first {effective.freeMinutesUngated} free minutes. A card
-              unlocks {free.included - effective.freeMinutesUngated} more — free.
+              unlocks {free.included - effective.freeMinutesUngated} more: free.
             </p>
             <p className="text-xs text-muted-foreground">
               $0 today. No charge until all {free.included} free minutes are used, and
@@ -202,7 +202,7 @@ export function UsageSpendCard() {
         {exhaustedNoCard && (
           <StateBanner tone="destructive" icon={PauseCircle}>
             <p className="text-sm font-medium">
-              All {free.included} free minutes used — new calls are paused.
+              All {free.included} free minutes used. New calls are paused.
             </p>
             <p className="text-xs text-muted-foreground">
               Calls already in progress finished normally and your agents and data are
@@ -222,12 +222,12 @@ export function UsageSpendCard() {
         {spend.state === "cap_warning" && (
           <StateBanner tone="warning" icon={BellRing}>
             <p className="text-sm font-medium">
-              {spend.pctOfCap}% of your {usd(cap ?? 0, false)}/mo cap used —{" "}
+              {spend.pctOfCap}% of your {usd(cap ?? 0, false)}/mo cap used , {" "}
               {usd(headroomUsd ?? 0)} left (≈{(headroomMin ?? 0).toLocaleString()} min).
             </p>
             <p className="text-xs text-muted-foreground">
               At the cap, new calls pause; live calls finish. Raise it for more headroom,
-              or keep it — both are fine.
+              or keep it: both are fine.
             </p>
             <div className="mt-2 flex gap-2">
               <Button size="sm" onClick={() => setSheetOpen(true)}>Raise cap</Button>
@@ -241,7 +241,7 @@ export function UsageSpendCard() {
         {spend.state === "cap_hit" && confirm !== "cap-raised" && (
           <StateBanner tone="destructive" icon={PauseCircle}>
             <p className="text-sm font-medium">
-              {usd(spend.spentUsd)} of {usd(cap ?? 0, false)} — the cap you set did exactly
+              {usd(spend.spentUsd)} of {usd(cap ?? 0, false)}. The cap you set did exactly
               its job. New calls are paused.
             </p>
             <p className="text-xs text-muted-foreground">
@@ -273,12 +273,12 @@ export function UsageSpendCard() {
               </span>
               <Badge variant="secondary" className="text-xs">Estimate</Badge>
               <span className="text-xs text-muted-foreground">
-                projected this period — updates as you use
+                projected this period · updates as you use
               </span>
             </div>
             {projectionClamped && (
               <p className="mt-1 text-xs text-muted-foreground">
-                Run rate alone would be {usd(rawProjected)} — your {usd(cap ?? 0, false)} cap
+                Run rate alone would be {usd(rawProjected)}. Your {usd(cap ?? 0, false)} cap
                 holds the invoice.
               </p>
             )}
@@ -296,7 +296,7 @@ export function UsageSpendCard() {
               </span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {usd(0)} projected — pay-as-you-go starts only after your{" "}
+              {usd(0)} projected · pay-as-you-go starts only after your{" "}
               {free.included} free minutes, and never without a card on file.
             </p>
           </div>
@@ -372,10 +372,10 @@ export function UsageSpendCard() {
               </div>
             </div>
             <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground tabular-nums">
-              <span>{effective.freeMinutesUngated} min — no card needed</span>
+              <span>{effective.freeMinutesUngated} min. No card needed</span>
               <span className="inline-flex items-center gap-1">
                 {!cardOnFile && <Gift className="h-3 w-3" />}
-                {free.included - effective.freeMinutesUngated} min —{" "}
+                {free.included - effective.freeMinutesUngated} min , {" "}
                 {cardOnFile ? "unlocked" : "free with a card"}
               </span>
             </div>
@@ -392,9 +392,9 @@ export function UsageSpendCard() {
                 {Math.round(alertPct * 100)}%
               </>
             ) : preCardCap != null ? (
-              <>Cap of {usd(preCardCap, false)}/mo saved — it arms with your first card</>
+              <>Cap of {usd(preCardCap, false)}/mo saved. It arms with your first card</>
             ) : (
-              <>No cap yet — defaults to {usd(PLAN_USAGE.defaultSpendCapUsd, false)}/mo with your first card</>
+              <>No cap yet · defaults to {usd(PLAN_USAGE.defaultSpendCapUsd, false)}/mo with your first card</>
             )}
           </p>
           <Button
@@ -408,7 +408,7 @@ export function UsageSpendCard() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Usage can take a few minutes to reflect. At your cap, new calls pause — live
+          Usage can take a few minutes to reflect. At your cap, new calls pause: live
           calls finish, and your invoice never exceeds the cap.
         </p>
       </CardContent>
@@ -512,7 +512,7 @@ function SpendControlsSheet({
         <SheetHeader>
           <SheetTitle>Spend controls</SheetTitle>
           <SheetDescription>
-            Your cap, your ceiling — pay-as-you-go can never bill past it.
+            Your cap, your ceiling: pay-as-you-go can never bill past it.
           </SheetDescription>
         </SheetHeader>
 
@@ -542,13 +542,13 @@ function SpendControlsSheet({
             </div>
             {!cardOnFile && (
               <p className="text-xs text-muted-foreground">
-                No card on file yet — this cap is saved now and arms automatically with
+                No card on file yet. This cap is saved now and arms automatically with
                 your first card.
               </p>
             )}
             {belowSpend && (
               <p role="alert" className="text-xs text-warning">
-                That&apos;s below the {usd(spentUsd)} already spent this period — new calls
+                That&apos;s below the {usd(spentUsd)} already spent this period. New calls
                 stay paused until the period resets or you raise the cap.
               </p>
             )}
@@ -581,7 +581,7 @@ function SpendControlsSheet({
             </div>
             {capValid && (
               <p className="text-xs text-muted-foreground tabular-nums">
-                We&apos;ll warn you at {usd((pctClamped / 100) * capNum)} — before anything
+                We&apos;ll warn you at {usd((pctClamped / 100) * capNum)} · before anything
                 pauses.
               </p>
             )}
@@ -590,10 +590,10 @@ function SpendControlsSheet({
           {/* Beat 3 — what happens at the cap, in plain language */}
           <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground space-y-1">
             <p className="font-medium text-foreground">At the cap:</p>
-            <p>· New calls pause — nothing is deleted or suspended.</p>
+            <p>· New calls pause. Nothing is deleted or suspended.</p>
             <p>· Calls already in progress finish normally.</p>
             <p>· Your invoice never exceeds the cap, even if usage reporting lags.</p>
-            <p>· Raise, lower, or remove the cap anytime — changes apply immediately.</p>
+            <p>· Raise, lower, or remove the cap anytime: changes apply immediately.</p>
           </div>
         </div>
 

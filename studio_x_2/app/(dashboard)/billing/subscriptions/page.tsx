@@ -18,7 +18,7 @@ const SUBS = [
   { id: "sub_01", product: "Conversational AI Engine", plan: "Pay-as-you-go",  status: "active",   started: "Feb 12, 2026", renews: "Monthly", spend: "$0.00" },
   { id: "sub_02", product: "Cloud Recording",          plan: "Pay-as-you-go",  status: "active",   started: "Mar 04, 2026", renews: "Monthly", spend: "$0.00" },
   { id: "sub_03", product: "Real-Time STT",            plan: "Free trial",     status: "trialing", started: "May 15, 2026", renews: "Jun 14, 2026", spend: "$0.00" },
-  { id: "sub_04", product: "Spatial Audio",            plan: "Add-on (Pro)",   status: "cancelled",started: "Jan 10, 2026", renews: "—",       spend: "$0.00" },
+  { id: "sub_04", product: "Spatial Audio",            plan: "Add-on (Pro)",   status: "cancelled",started: "Jan 10, 2026", renews: ", ",       spend: "$0.00" },
 ]
 
 export default function SubscriptionsPage() {

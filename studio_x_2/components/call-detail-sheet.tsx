@@ -248,7 +248,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
   const togglePlay = () => {
     if (!playing && !saidSimulated.current) {
       saidSimulated.current = true
-      toast("Simulated preview", { description: "No live audio in this wireframe — the clock advances so the transcript follows it." })
+      toast("Simulated preview", { description: "No live audio in this wireframe. The clock advances so the transcript follows it." })
     }
     setPlaying((p) => !p)
   }
@@ -257,7 +257,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
     {
       label: "Recording",
       disabled: !hasRecording,
-      reason: audio === "none" ? "No recording — it never connected" : audio === "not-retained" ? `Not retained · ${RETENTION_LABEL}` : undefined,
+      reason: audio === "none" ? "No recording. It never connected" : audio === "not-retained" ? `Not retained · ${RETENTION_LABEL}` : undefined,
       onSelect: () => toast.success("Mock: recording downloaded"),
     },
     {
@@ -311,7 +311,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
               sipTrace.failure ? (
                 <Badge variant="outline" className="font-normal">{BLAME_LABEL[sipTrace.failure.blame]}</Badge>
               ) : (
-                <span className="text-sm text-muted-foreground">Unknown — no trace</span>
+                <span className="text-sm text-muted-foreground">Unknown. No trace</span>
               )
             }
           />
@@ -362,7 +362,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
           </div>
         ) : audio === "none" ? (
           <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground">
-            No recording — it never connected
+            No recording. It never connected
           </p>
         ) : (
           <div className="rounded-lg border border-dashed border-border px-3 py-2.5">
@@ -418,7 +418,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
               <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border py-12 text-center">
                 <ShieldCheck className="h-7 w-7 text-primary" />
                 <p className="text-sm font-medium">No issues detected</p>
-                <p className="text-xs text-muted-foreground">This call ran cleanly — no critical or warning signals.</p>
+                <p className="text-xs text-muted-foreground">This call ran cleanly. No critical or warning signals.</p>
               </div>
             )
           ) : (
@@ -706,7 +706,7 @@ export function IssueCard({
       )}
       {recheck ? (
         <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary">
-          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Marked fixed — re-running checks…
+          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Marked fixed · re-running checks…
         </div>
       ) : (
         <Button asChild variant="outline" size="sm" className="gap-1.5">

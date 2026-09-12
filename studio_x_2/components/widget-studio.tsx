@@ -130,9 +130,9 @@ function EmbedTruthLine({
       )}
     >
       {state === "never"
-        ? "Not embedded yet — copy the snippet to put it on your site"
+        ? "Not embedded yet · copy the snippet to put it on your site"
         : state === "stale"
-          ? "Edits aren't in your embed yet — re-copy the snippet"
+          ? "Edits aren't in your embed yet. Re-copy the snippet"
           : "Embed up to date"}
     </span>
   )
@@ -237,7 +237,7 @@ export function WebEmbedPanel({
           <Palette className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
           <span className="min-w-0">
             <span className="block text-sm font-medium">Style this widget</span>
-            <span className="block text-xs text-muted-foreground">Colors, text, launcher, live preview — in Widget UI</span>
+            <span className="block text-xs text-muted-foreground">Colors, text, launcher, live preview. In Widget UI</span>
           </span>
         </span>
         <span className="shrink-0 text-xs text-muted-foreground">Open →</span>
@@ -459,7 +459,7 @@ function ConfigSections({ cfg, set, lean }: { cfg: WidgetConfig; set: SetCfg; le
         {/* NO greeting field here (owner 2026-07-15): the greeting is
             established ONCE in Prompt & tools — the widget reflects it. */}
         <p className="text-xs text-muted-foreground">
-          The widget opens with your agent&apos;s greeting — set once in Prompt &amp; tools.
+          The widget opens with your agent&apos;s greeting. Set once in Prompt &amp; tools.
         </p>
         <TextField label="Listening status" value={cfg.listeningStatus} onChange={(v) => set("listeningStatus", v)} />
         <TextField label="Connecting status" value={cfg.connectingStatus} onChange={(v) => set("connectingStatus", v)} />

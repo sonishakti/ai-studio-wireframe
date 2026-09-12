@@ -49,7 +49,7 @@ const FACE_AR: ExtensionDetail = {
     "Background removal and virtual background replacement",
     "Face beautification (smoothing, tone correction)",
     "Emotion detection and pose estimation",
-    "Low-latency GPU pipeline — <2 ms processing overhead",
+    "Low-latency GPU pipeline · <2 ms processing overhead",
   ],
   gallery: [
     { label: "Face Masks", tone: "bg-muted text-muted-foreground" },

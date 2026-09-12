@@ -196,7 +196,7 @@ function extractCallBehavior(p: Rec): { found: NonNullable<Found["callBehavior"]
   // themselves don't port, and the row says both halves.
   if (Array.isArray(p.endCallPhrases) && (p.endCallPhrases as unknown[]).length) {
     partial.endCall = true
-    rows.push({ theirs: "endCallPhrases", ours: LAND, value: "End-call ability on — the phrases themselves don't port" })
+    rows.push({ theirs: "endCallPhrases", ours: LAND, value: "End-call ability on. The phrases themselves don't port" })
     consumed.push("endCallPhrases")
   }
 
@@ -232,13 +232,13 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
     mapped.push({ theirs: found.name.path, ours: LANDS.name, value: trunc(found.name.value, 40) })
   } else {
     name = `${source === "Generic JSON" ? "Imported" : source} agent`
-    warnings.push(`No agent name in the export — we called it “${name}”. Rename it in the builder header.`)
+    warnings.push(`No agent name in the export. We called it “${name}”. Rename it in the builder header.`)
   }
   if (found.prompt) {
     mapped.push({
       theirs: found.prompt.path,
       ours: LANDS.prompt,
-      value: `${found.prompt.value.trim().length.toLocaleString()} chars — ${quote(found.prompt.value, 40)}`,
+      value: `${found.prompt.value.trim().length.toLocaleString()} chars: ${quote(found.prompt.value, 40)}`,
     })
   }
   if (found.greeting) mapped.push({ theirs: found.greeting.path, ours: LANDS.greeting, value: quote(found.greeting.value) })
@@ -255,7 +255,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.voice) {
     dropped.push({
       theirs: found.voice.path,
-      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack — the default voice is set; pick one in Voice & Models.`,
+      reason: `“${found.voice.provider}” voices aren't in Agora's bundled stack. The default voice is set; pick one in Voice & Models.`,
     })
   }
   const llm = catalogLlm(found.model?.value)
@@ -264,7 +264,7 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.model) {
     dropped.push({
       theirs: found.model.path,
-      reason: `“${found.model.value}” isn't in Agora's bundled catalog — the balanced default is set instead; change it in Voice & Models › Advanced.`,
+      reason: `“${found.model.value}” isn't in Agora's bundled catalog. The balanced default is set instead; change it in Voice & Models › Advanced.`,
     })
   }
   const lang = languageLabelFor(found.language?.value)
@@ -273,13 +273,13 @@ function assemble(found: Found, source: ImportSource, extraDropped: DroppedField
   } else if (found.language) {
     dropped.push({
       theirs: found.language.path,
-      reason: `“${found.language.value}” isn't in the language list yet — English is set; change it in Voice & Models.`,
+      reason: `“${found.language.value}” isn't in the language list yet. English is set; change it in Voice & Models.`,
     })
   }
   if (found.tools?.names.length) {
     dropped.push({
       theirs: `${found.tools.path} (${found.tools.names.length})`,
-      reason: `Tool definitions don't port across platforms — rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Prompt & knowledge › Additional context.`,
+      reason: `Tool definitions don't port across platforms · rebuild ${found.tools.names.slice(0, 3).join(", ")}${found.tools.names.length > 3 ? "…" : ""} in Prompt & knowledge › Additional context.`,
     })
   }
   // Call-behavior rows claim carried only because the partial below IS
@@ -322,19 +322,19 @@ const META_KEYS = new Set([
  *  the reason MUST point at it (user-test 2026-07-21 D2: one stale "isn't
  *  supported yet" against a visible toggle poisons the whole report). */
 const DROP_REASONS: Record<string, string> = {
-  channel: "The agent's channel is picked in the builder's Deployment section (Inbound · Batch calls · Code / SDK) — the vendor setting itself doesn't port.",
-  webhook_url: "Webhooks would belong to the deployment, not the agent — deployment webhooks aren't here yet.",
-  server: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
-  serverUrl: "Server URLs would belong to the deployment — deployment webhooks aren't here yet.",
+  channel: "The agent's channel is picked in the builder's Deployment section (Inbound · Batch calls · Code / SDK). The vendor setting itself doesn't port.",
+  webhook_url: "Webhooks would belong to the deployment, not the agent: deployment webhooks aren't here yet.",
+  server: "Server URLs would belong to the deployment: deployment webhooks aren't here yet.",
+  serverUrl: "Server URLs would belong to the deployment: deployment webhooks aren't here yet.",
   serverMessages: "Server event streams aren't supported yet.",
-  states: "Conversation states don't port — express the flow in your system prompt (the Prompt & knowledge section).",
-  starting_state: "Conversation states don't port — express the flow in your system prompt (the Prompt & knowledge section).",
-  pathway_id: "Bland pathways don't port — express the flow in your system prompt (the Prompt & knowledge section).",
-  voicemail_detection: "Voicemail detection re-enables as a toggle in Go Live › call behavior — the vendor setting itself doesn't port.",
-  voicemailMessage: "Leaving a voicemail message isn't supported — voicemail detection (hang up on machines) is a toggle in Go Live › call behavior.",
-  voicemailDetection: "Voicemail detection re-enables as a toggle in Go Live › call behavior — the vendor setting itself doesn't port.",
-  endCallMessage: "A scripted closing message isn't supported — end-call behavior lives in Go Live › call behavior › Hang-up.",
-  endCallPhrases: "End-call phrases don't port — end-call behavior lives in Go Live › call behavior › Hang-up.",
+  states: "Conversation states don't port: express the flow in your system prompt (the Prompt & knowledge section).",
+  starting_state: "Conversation states don't port: express the flow in your system prompt (the Prompt & knowledge section).",
+  pathway_id: "Bland pathways don't port: express the flow in your system prompt (the Prompt & knowledge section).",
+  voicemail_detection: "Voicemail detection re-enables as a toggle in Go Live › call behavior. The vendor setting itself doesn't port.",
+  voicemailMessage: "Leaving a voicemail message isn't supported: voicemail detection (hang up on machines) is a toggle in Go Live › call behavior.",
+  voicemailDetection: "Voicemail detection re-enables as a toggle in Go Live › call behavior. The vendor setting itself doesn't port.",
+  endCallMessage: "A scripted closing message isn't supported: end-call behavior lives in Go Live › call behavior › Hang-up.",
+  endCallPhrases: "End-call phrases don't port: end-call behavior lives in Go Live › call behavior › Hang-up.",
   end_call_after_silence_ms: "Silence hang-up re-configures in Go Live › call behavior › Hang-up (in seconds).",
   analysisPlan: "Post-call analysis is configured in Go Live › Structured outputs.",
   artifactPlan: "Recording settings live in Go Live › Structured outputs.",
@@ -343,8 +343,8 @@ const DROP_REASONS: Record<string, string> = {
   knowledge_base_ids: "Knowledge re-attaches in Prompt & knowledge › Additional context.",
   knowledge_base: "Knowledge re-attaches in Prompt & knowledge › Additional context.",
   platform_settings: "Platform/auth settings stay vendor-specific.",
-  transcriber: "The transcriber maps to Agora's bundled STT — tune it in Voice & Models › Advanced.",
-  asr: "ASR maps to Agora's bundled STT — tune it in Voice & Models › Advanced.",
+  transcriber: "The transcriber maps to Agora's bundled STT: tune it in Voice & Models › Advanced.",
+  asr: "ASR maps to Agora's bundled STT: tune it in Voice & Models › Advanced.",
   turn: "Turn-taking tuning lives in Voice & Models › Advanced › Speech tuning.",
   conversation: "Conversation limits stay vendor-specific.",
   ambient_sound: "Ambient audio isn't supported yet.",
@@ -365,11 +365,11 @@ const DROP_REASONS: Record<string, string> = {
   silenceTimeoutSeconds: "Silence hang-up re-configures in Go Live › call behavior › Hang-up.",
   reminder_trigger_ms: "Reminder nudges stay vendor-specific.",
   reminder_max_count: "Reminder nudges stay vendor-specific.",
-  dynamic_data: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API — coming soon.",
-  default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API — coming soon.",
+  dynamic_data: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API: coming soon.",
+  default_dynamic_variables: "Dynamic variables move to the deployment's CSV columns. Inbound agents: per-call variables via API: coming soon.",
   voice_speed: "Voice tuning stays vendor-specific.",
   voice_temperature: "Voice tuning stays vendor-specific.",
-  voice_model: "TTS runs on Agora's bundled stack — pick the engine in Voice & Models › Advanced.",
+  voice_model: "TTS runs on Agora's bundled stack. Pick the engine in Voice & Models › Advanced.",
   fallback_voice_ids: "Voice fallbacks stay vendor-specific.",
   volume: "Voice tuning stays vendor-specific.",
   firstMessageMode: "Who speaks first is part of the greeting (the Prompt & knowledge section).",
@@ -382,7 +382,7 @@ function sweepDropped(p: Rec, consumed: Set<string>): DroppedField[] {
   const out: DroppedField[] = []
   for (const k of Object.keys(p)) {
     if (consumed.has(k) || META_KEYS.has(k)) continue
-    out.push({ theirs: k, reason: DROP_REASONS[k] ?? "No direct Agora equivalent — not carried." })
+    out.push({ theirs: k, reason: DROP_REASONS[k] ?? "No direct Agora equivalent. Not carried." })
   }
   return out
 }
@@ -420,8 +420,8 @@ function parseVapi(p: Rec): VendorParse {
       : undefined,
   }
   const warnings: string[] = []
-  if (!found.prompt && messages.length) warnings.push("model.messages has no system-role message — the prompt didn't carry.")
-  else if (!found.prompt && !model) warnings.push("No `model` block found — a Vapi assistant export carries the prompt in model.messages.")
+  if (!found.prompt && messages.length) warnings.push("model.messages has no system-role message. The prompt didn't carry.")
+  else if (!found.prompt && !model) warnings.push("No `model` block found: a Vapi assistant export carries the prompt in model.messages.")
   const consumed = new Set(["name", "model", "voice", "firstMessage", "transcriber", "instructions"])
   const cb = extractCallBehavior(p)
   if (cb) {
@@ -472,8 +472,8 @@ function parseRetell(p: Rec): VendorParse {
     const llmId = str(re?.llm_id) ?? str(p.llm_id)
     warnings.push(
       llmId
-        ? `This agent references its prompt by ID (${trunc(llmId, 20)}) — in Retell the prompt lives on the Retell-LLM object. Paste that JSON too (both objects together works) and we'll read general_prompt from it.`
-        : "No general_prompt found — in Retell the prompt lives on the Retell-LLM object; paste it together with the agent JSON.",
+        ? `This agent references its prompt by ID (${trunc(llmId, 20)}): in Retell the prompt lives on the Retell-LLM object. Paste that JSON too (both objects together works) and we'll read general_prompt from it.`
+        : "No general_prompt found: in Retell the prompt lives on the Retell-LLM object; paste it together with the agent JSON.",
     )
   }
   // "channel" is NOT consumed (2026-07-29): a consumed-but-unreported key was
@@ -514,14 +514,14 @@ function parseElevenLabs(p: Rec): VendorParse {
   const warnings: string[] = []
   const extra: DroppedField[] = []
   if (!cc) {
-    warnings.push("No conversation_config block — an ElevenLabs agent export nests everything under it (GET /v1/convai/agents/:id).")
+    warnings.push("No conversation_config block: an ElevenLabs agent export nests everything under it (GET /v1/convai/agents/:id).")
   } else {
     // Name the interesting sub-blocks that don't carry — the root-level sweep
     // can't see inside the consumed conversation_config.
     for (const k of ["asr", "turn", "conversation"]) {
       if (rec(cc[k])) extra.push({ theirs: `conversation_config.${k}`, reason: DROP_REASONS[k] ?? "Voice-pipeline tuning stays vendor-specific." })
     }
-    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack — pick the engine in Voice & Models › Advanced." })
+    if (str(tts?.model_id)) extra.push({ theirs: "conversation_config.tts.model_id", reason: "TTS runs on Agora's bundled stack. Pick the engine in Voice & Models › Advanced." })
     if (Array.isArray(promptObj?.knowledge_base) && (promptObj!.knowledge_base as unknown[]).length) {
       extra.push({ theirs: "conversation_config.agent.prompt.knowledge_base", reason: "Knowledge re-attaches in Prompt & knowledge › Additional context." })
     }
@@ -545,7 +545,7 @@ function parseBland(p: Rec): VendorParse {
   }
   const extra: DroppedField[] = []
   const tier = str(p.model)
-  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM — pick a model in Voice & Models › Advanced.` })
+  if (tier) extra.push({ theirs: "model", reason: `Bland's “${tier}” is a pipeline tier, not an LLM. Pick a model in Voice & Models › Advanced.` })
   const consumed = new Set(["name", "agent_name", "prompt", "task", "first_sentence", "voice", "voice_id", "language", "tools", "model"])
   return withSweep(assemble(found, "Bland", extra, []), p, consumed)
 }
@@ -641,8 +641,8 @@ export function parseImport(raw: string, source: ImportSource): ImportParseResul
     return {
       ok: false,
       error: yamlish
-        ? "This looks like YAML — paste the JSON export for now (YAML support is coming)."
-        : "That doesn't parse as JSON — check for a stray comma or an unclosed brace, and paste the whole object.",
+        ? "This looks like YAML: paste the JSON export for now (YAML support is coming)."
+        : "That doesn't parse as JSON. Check for a stray comma or an unclosed brace, and paste the whole object.",
     }
   }
 
@@ -657,7 +657,7 @@ export function parseImport(raw: string, source: ImportSource): ImportParseResul
     delete p.agent
   }
   if (!p || !Object.keys(p).length) {
-    return { ok: false, error: "That JSON is empty — paste your agent's full config object." }
+    return { ok: false, error: "That JSON is empty. Paste your agent's full config object." }
   }
 
   // The shape wins over the chip: parsing a Vapi export "as Retell" because
@@ -841,7 +841,7 @@ export const VENDOR_EXAMPLES: Record<ImportSource, string> = {
   "conversation_config": {
     "agent": {
       "language": "en",
-      "first_message": "Hi, thanks for calling — how can I help?",
+      "first_message": "Hi, thanks for calling: how can I help?",
       "prompt": { "prompt": "You are a helpful tier-1 support agent…", "llm": "gpt-4o" }
     },
     "tts": { "voice_id": "cjVigY5qzO86Huf0OWal", "model_id": "eleven_turbo_v2" }
@@ -869,8 +869,8 @@ export const VENDOR_EXAMPLES: Record<ImportSource, string> = {
 
 export const VENDOR_FIELD_HINTS: Record<ImportSource, string> = {
   Vapi: "We read name, model.messages (system role), model.model, voice.voiceId, firstMessage, and transcriber.language.",
-  Retell: "We read agent_name, voice_id, language, and the prompt — general_prompt / begin_message inline under response_engine, or on a pasted Retell-LLM object.",
-  ElevenLabs: "We read name plus conversation_config — agent.prompt.prompt, first_message, language, and tts.voice_id.",
+  Retell: "We read agent_name, voice_id, language, and the prompt: general_prompt / begin_message inline under response_engine, or on a pasted Retell-LLM object.",
+  ElevenLabs: "We read name plus conversation_config: agent.prompt.prompt, first_message, language, and tts.voice_id.",
   Bland: "We read prompt (or task), first_sentence, voice, and language.",
   "Generic JSON": "Recognized keys: name, system_prompt, first_message, voice, llm.model, language, tools.",
 }

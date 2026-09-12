@@ -36,7 +36,7 @@ export default function GlobalError({
           <h1 className="text-2xl font-semibold tracking-tight mt-1">Something went wrong</h1>
           <p className="text-sm text-muted-foreground mt-2">
             We hit a problem rendering this page. Your live agents and deployments
-            keep running — this is a console-only hiccup, not an outage. Try again,
+            keep running. This is a console-only hiccup, not an outage. Try again,
             and if it keeps happening, contact support.
           </p>
           {error.digest && (

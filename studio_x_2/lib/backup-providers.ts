@@ -129,7 +129,7 @@ export function planBackups(input: {
     if (primary.byo) {
       return {
         slot, primary, eligible, ineligible, state: "needs-key",
-        note: "your key — a backup needs a second key",
+        note: "your key · a backup needs a second key",
       }
     }
     const picked = backup.picks[slot] ? eligible.find((c) => c.id === backup.picks[slot]) : undefined

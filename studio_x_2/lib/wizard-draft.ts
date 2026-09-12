@@ -761,7 +761,7 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
       // Code-path builders skip the voice story, so say WHY it still gates
       // (user-test 2026-07-29): the voice is half of the served pipeline.
       reason: hasChannel(d, "code")
-        ? "Choose a voice — it's the TTS half of the agent's pipeline."
+        ? "Choose a voice. It's the TTS half of the agent's pipeline."
         : "Choose a voice.",
       step: 1,
       action: "Pick a voice",

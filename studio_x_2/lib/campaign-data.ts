@@ -220,7 +220,7 @@ export const EVAL_RUN: EvalRun = {
         { role: "caller", text: "Hi, I'd love to see a demo of the product." },
         { role: "agent", text: "Happy to set that up! Would Tuesday at 2pm work?" },
         { role: "caller", text: "Tuesday's perfect." },
-        { role: "agent", text: "Great — I'll send a calendar invite. What's the best email?", note: "book_demo called" },
+        { role: "agent", text: "Great · I'll send a calendar invite. What's the best email?", note: "book_demo called" },
       ],
       assertions: [
         { id: "a1", verdict: "pass", reasoning: "Offered Tuesday 2pm and asked for the email." },
@@ -240,8 +240,8 @@ export const EVAL_RUN: EvalRun = {
     {
       caseId: "ec_offscript", verdict: "pass",
       transcript: [
-        { role: "caller", text: "Quick one — what's the capital of Mongolia?" },
-        { role: "agent", text: "Ha, I'll stay focused on getting you set up — want to pick a demo time?" },
+        { role: "caller", text: "Quick one. What's the capital of Mongolia?" },
+        { role: "agent", text: "Ha, I'll stay focused on getting you set up: want to pick a demo time?" },
       ],
       assertions: [
         { id: "a1", verdict: "pass", reasoning: "Redirected politely, did not hallucinate an answer." },
@@ -484,7 +484,7 @@ export const STACK_PRESETS: Record<
   cheapest: {
     label: "Cheapest",
     hint: "Lowest per-minute cost",
-    tradeoff: "Noticeably slower — the STT doesn't stream.",
+    tradeoff: "Noticeably slower. The STT doesn't stream.",
     llm: { vendor: "Anthropic", model: "claude-haiku" },
     asr: { vendor: "Whisper", model: "large-v3" },
     tts: { vendor: "Azure", voice: "en-US-Jenny" },
@@ -601,9 +601,9 @@ export const AGENTS: Agent[] = [
     // Multi-campaign demo (2026-07-28 IA): two parallel English runs by
     // region, a scheduled Spanish one, and a completed Q1 for the Re-run path.
     campaigns: [
-      { id: "cmp_q2_west", name: "Q2 Collections — EN West", numberId: "pn_05", csvName: "q2-collections-west.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "running" },
-      { id: "cmp_q2_east", name: "Q2 Collections — EN East", numberId: "pn_05", csvName: "q2-collections-east.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "running" },
-      { id: "cmp_q2_es", name: "Cobranza Q2 — ES", numberId: "pn_05", csvName: "cobranza-q2.csv", contacts: 248, language: "Spanish (MX)", callWindow: "extended", maxConcurrent: 5, retries: 2, status: "scheduled", startDate: "2026-08-03", startTime: "09:00", timezone: "US Central (CT)" },
+      { id: "cmp_q2_west", name: "Q2 Collections · EN West", numberId: "pn_05", csvName: "q2-collections-west.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "running" },
+      { id: "cmp_q2_east", name: "Q2 Collections · EN East", numberId: "pn_05", csvName: "q2-collections-east.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "running" },
+      { id: "cmp_q2_es", name: "Cobranza Q2 · ES", numberId: "pn_05", csvName: "cobranza-q2.csv", contacts: 248, language: "Spanish (MX)", callWindow: "extended", maxConcurrent: 5, retries: 2, status: "scheduled", startDate: "2026-08-03", startTime: "09:00", timezone: "US Central (CT)" },
       { id: "cmp_q1", name: "Q1 Collections", numberId: "pn_05", csvName: "q1-collections.csv", contacts: 248, language: "English (US)", callWindow: "business", maxConcurrent: 10, retries: 1, status: "completed" },
     ],
     persona: { personality: "Calm, firm, compliant", tone: "Professional", language: "en-US" },
@@ -674,17 +674,17 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
 The appointment is on {{appointment_date}} at {{appointment_time}} with {{provider_name}}.
 
 Your job, in order:
-1. Confirm you're speaking to {{customer_name}}. If someone else answers, ask when they'll be available and end politely — never discuss appointment details with anyone else.
+1. Confirm you're speaking to {{customer_name}}. If someone else answers, ask when they'll be available and end politely: never discuss appointment details with anyone else.
 2. State the date, time and provider clearly, then ask them to confirm, reschedule, or cancel.
 3. If they reschedule, offer the next two available slots. If neither works, take their preference and say the office will follow up.
-4. If they cancel, ask once whether they'd like to rebook — do not press a second time.
+4. If they cancel, ask once whether they'd like to rebook. Do not press a second time.
 
 Rules:
 - Never give medical, legal, or financial advice, even if asked directly. Say you'll have {{provider_name}}'s office call back.
 - If they sound confused about who you are, re-introduce yourself and offer the business's main number.
 - If you reach voicemail, leave the date, time, and callback number once. Do not leave a second message.
 - Keep the whole call under 90 seconds.`,
-    greeting: "Hi, this is a reminder call from {{business_name}} — am I speaking with {{customer_name}}?",
+    greeting: "Hi, this is a reminder call from {{business_name}}. Am I speaking with {{customer_name}}?",
     failure: "I'm sorry, I didn't catch that. Let me have someone from the office call you back.",
     extract: ["Confirmed / rescheduled / cancelled", "New preferred time", "Reached voicemail", "Callback requested"],
   },
@@ -696,7 +696,7 @@ Rules:
     prompt: `You are running a short satisfaction survey for {{business_name}} about a recent {{interaction_type}}.
 
 Your job:
-1. Ask for 30 seconds of their time. If they say no, thank them and end immediately — never ask twice.
+1. Ask for 30 seconds of their time. If they say no, thank them and end immediately: never ask twice.
 2. Ask the core question: "On a scale of zero to ten, how likely are you to recommend {{business_name}} to a friend or colleague?"
 3. Accept the number in any form ("an eight", "eight out of ten", "pretty likely" → ask them to pick a number).
 4. Ask ONE follow-up: "What's the main reason for that score?" Let them talk. Do not interrupt.
@@ -704,11 +704,11 @@ Your job:
 
 Rules:
 - Never argue with a low score or try to change their mind. Acknowledge and move on.
-- If they raise a specific complaint, say it will be passed to the team — do not promise a resolution or a refund.
+- If they raise a specific complaint, say it will be passed to the team. Do not promise a resolution or a refund.
 - Do not ask any question beyond the score and the one follow-up.
 - If they ask to be removed from the calling list, confirm you'll action it and record that.`,
-    greeting: "Hi, this is a quick survey call from {{business_name}} — do you have 30 seconds?",
-    failure: "No problem at all — thanks for your time.",
+    greeting: "Hi, this is a quick survey call from {{business_name}}. Do you have 30 seconds?",
+    failure: "No problem at all: thanks for your time.",
     extract: ["NPS score (0–10)", "Reason for score", "Complaint raised", "Do-not-call requested"],
   },
   {
@@ -719,10 +719,10 @@ Rules:
     prompt: `You are the first point of contact for {{business_name}}. Your only job is to understand what the caller needs and route them correctly. You do not resolve issues yourself.
 
 Departments and what belongs to each:
-- Sales — new orders, pricing, product questions, quotes
-- Support — something already purchased is broken, delayed, or wrong
-- Billing — invoices, payments, refunds, subscription changes
-- Everything else — route to the general queue
+- Sales. New orders, pricing, product questions, quotes
+- Support: something already purchased is broken, delayed, or wrong
+- Billing · invoices, payments, refunds, subscription changes
+- Everything else · route to the general queue
 
 Your job:
 1. Ask what they're calling about, in open language. Do not read a numbered menu.
@@ -731,7 +731,7 @@ Your job:
 4. Before transferring, tell them who they're going to and that there may be a short wait.
 
 Rules:
-- Speed matters more than completeness — do not gather details the receiving team will re-ask.
+- Speed matters more than completeness. Do not gather details the receiving team will re-ask.
 - If the caller is angry or asks for a human immediately, route to the general queue without further questions.
 - If they mention a safety issue or an emergency, route to the general queue immediately and say help is coming.
 - Never guess at pricing, order status, or account details.`,
@@ -742,24 +742,24 @@ Rules:
   {
     id: "payment-reminder",
     name: "Payment Reminder",
-    description: "Follow up on an overdue balance — compliant, calm, and never pushy",
+    description: "Follow up on an overdue balance: compliant, calm, and never pushy",
     preset: "balanced",
     prompt: `You are calling on behalf of {{business_name}} about an outstanding balance of {{amount_due}}, originally due on {{due_date}}.
 
 Your job, in order:
-1. Confirm you're speaking to {{customer_name}}. If it's anyone else, do NOT mention a balance, a payment, or a debt — say you'll call back and end.
+1. Confirm you're speaking to {{customer_name}}. If it's anyone else, do NOT mention a balance, a payment, or a debt: say you'll call back and end.
 2. State that there's an outstanding balance and the amount. Ask if they're able to settle it today.
 3. If yes, direct them to {{payment_url}} or offer to send a payment link by text. Never take card details on the call.
 4. If no, ask what timeframe works and record it. Offer a payment plan only if they raise financial difficulty.
 5. If they dispute the amount, do not argue. Record the dispute and say the billing team will review it and contact them within two business days.
 
-Rules — these are compliance requirements, not preferences:
+Rules · these are compliance requirements, not preferences:
 - Never take card numbers, bank details, or any payment information by voice.
 - Never threaten legal action, credit consequences, or added fees.
 - If they ask you to stop calling, confirm you'll action it and end the call.
 - If they say they're in financial hardship, drop the collection framing entirely and offer the hardship line.
 - Stay calm regardless of tone. Never match hostility.`,
-    greeting: "Hi, I'm calling from {{business_name}} about your account — am I speaking with {{customer_name}}?",
+    greeting: "Hi, I'm calling from {{business_name}} about your account. Am I speaking with {{customer_name}}?",
     failure: "I'm sorry about that. Let me have our billing team reach out to you directly.",
     extract: ["Payment promised", "Promised date", "Amount disputed", "Hardship raised", "Do-not-call requested"],
   },
@@ -772,7 +772,7 @@ Rules — these are compliance requirements, not preferences:
 
 Your job:
 1. Ask for the order number. Accept it in any format and read it back to confirm.
-2. Look up the order and state its real status plainly — including when the news is bad.
+2. Look up the order and state its real status plainly: including when the news is bad.
 3. Handle the four common cases:
    - Not yet shipped → give the expected ship date, offer a tracking link.
    - Late → apologise once, give the current estimate, offer to escalate if it's more than 3 days past.
@@ -781,11 +781,11 @@ Your job:
 4. Confirm what will happen next and by when, before ending.
 
 Rules:
-- A shipping label being created is NOT the same as shipped. Say which one it is — customers are routinely confused by this and being vague makes it worse.
+- A shipping label being created is NOT the same as shipped. Say which one it is: customers are routinely confused by this and being vague makes it worse.
 - Never invent a delivery date. If you don't have one, say so and offer to notify them when it updates.
 - Never offer a discount, credit, or goodwill gesture that isn't in the policy above.
 - If the customer has contacted us more than twice about the same order, escalate to a human without being asked.`,
-    greeting: "Thanks for calling {{business_name}} — do you have your order number handy?",
+    greeting: "Thanks for calling {{business_name}}. Do you have your order number handy?",
     failure: "I'm having trouble pulling that up. Let me get you to someone who can look into it properly.",
     extract: ["Order number", "Issue type", "Resolution offered", "Replacement started", "Escalated to human"],
   },
@@ -1327,7 +1327,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
 You are calling lapsed Acme customers to win them back with the Q2 offer.
 
 # CONTEXT (per row)
-Customer: {{name}} at {{company}} — last active {{last_active}}, on the {{previous_plan}} plan.
+Customer: {{name}} at {{company}} · last active {{last_active}}, on the {{previous_plan}} plan.
 
 # CONSTRAINTS
 Lead with the 20% win-back discount. If not interested, thank and end within 15 seconds.`,
@@ -1350,7 +1350,7 @@ Lead with the 20% win-back discount. If not interested, thank and end within 15 
       retry: { max: 3, retrying: 34 },
       cps: { target: 3, actual: 1.9 },
       maxQueueSec: 92,
-      reason: "All 10 lines are dialing — new calls are queuing, not dropping. Add lines to clear the queue faster.",
+      reason: "All 10 lines are dialing. New calls are queuing, not dropping. Add lines to clear the queue faster.",
     },
   },
   {
@@ -1384,7 +1384,7 @@ Customer: {{name}}, current plan {{plan}}, account owner {{owner_email}}.`,
       retry: { max: 3, retrying: 0 },
       cps: { target: 3, actual: 0 },
       maxQueueSec: 0,
-      reason: "Scheduled for Jun 1, 9:00 AM in each contact's local time — nothing dials until then.",
+      reason: "Scheduled for Jun 1, 9:00 AM in each contact's local time. Nothing dials until then.",
     },
   },
   {
@@ -1419,7 +1419,7 @@ Remind customers their Acme subscription renews soon and confirm payment details
       retry: { max: 3, retrying: 0 },
       cps: { target: 3, actual: 0 },
       maxQueueSec: 0,
-      reason: "Completed — 2,210 of 2,800 connected; 59 numbers were disconnected or wrong and were flagged, not retried.",
+      reason: "Completed: 2,210 of 2,800 connected; 59 numbers were disconnected or wrong and were flagged, not retried.",
     },
   },
   {
@@ -1434,7 +1434,7 @@ Remind customers their Acme subscription renews soon and confirm payment details
 Politely collect overdue invoices. Offer a payment link or a payment plan.
 
 # CONTEXT (per row)
-{{name}} — invoice {{invoice_id}}, {{days_overdue}} days overdue, balance {{balance}}.
+{{name}} · invoice {{invoice_id}}, {{days_overdue}} days overdue, balance {{balance}}.
 
 # COMPLIANCE
 Identify the company immediately. Never threaten. Offer the hardship line if asked.`,
@@ -1458,7 +1458,7 @@ Identify the company immediately. Never threaten. Offer the hardship line if ask
       retry: { max: 3, retrying: 0 },
       cps: { target: 3, actual: 0 },
       maxQueueSec: 610,
-      reason: "Paused automatically — carrier failures hit 22% (SIP 503, trunk saturated). Check the trunk's CPS limit before resuming.",
+      reason: "Paused automatically: carrier failures hit 22% (SIP 503, trunk saturated). Check the trunk's CPS limit before resuming.",
     },
   },
   {
@@ -1483,7 +1483,7 @@ Run a 2-question NPS survey: score 0–10, then one open follow-up.
     },
     metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 8000 },
-    startDate: "—",
+    startDate: ", ",
   },
   {
     id: "dp_ob_06",
@@ -1497,7 +1497,7 @@ Run a 2-question NPS survey: score 0–10, then one open follow-up.
 Offer the Black Friday deal ({{discount}} off annual plans) to warm leads.
 
 # CONTEXT (per row)
-{{name}} from {{company}} — interest tag: {{interest}}.`,
+{{name}} from {{company}} · interest tag: {{interest}}.`,
     greeting: "Hi {{name}}! Black Friday came early at Acme: {{discount}} off annual plans.",
     failure: "I'll text you the offer link instead.",
     contacts: {
@@ -1683,7 +1683,7 @@ export const CONNECTORS: Connector[] = [
 ]
 
 export function formatDuration(seconds: number): string {
-  if (seconds <= 0) return "—"
+  if (seconds <= 0) return ", "
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
   return `${m}m ${s.toString().padStart(2, "0")}s`
@@ -1744,7 +1744,7 @@ export const MANAGED_PROVIDERS: Record<string, number> = {
 
 export const VENDOR_CREDENTIALS: VendorCredential[] = [
   { id: "vc_01", vendor: "OpenAI",     category: "LLM",       name: "Production API Key",       keyHint: "sk-proj-••••••••••••xK3a", status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "byo" },
-  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Managed by Agora",         keyHint: "—",                        status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "managed", managedRatePerMin: 0.046 },
+  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Managed by Agora",         keyHint: ", ",                        status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "managed", managedRatePerMin: 0.046 },
   { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026", mode: "byo" },
   { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026", mode: "byo" },
   { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "Aug 14, 2026", mode: "byo" },

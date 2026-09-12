@@ -36,7 +36,7 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
           <div>
             <h2 className="text-sm font-semibold">Vendor Credentials</h2>
             <p className="text-xs text-muted-foreground">
-              Third-party API keys your agents&apos; stacks use — LLM, TTS, STT, Telephony.
+              Third-party API keys your agents&apos; stacks use. LLM, TTS, STT, Telephony.
             </p>
           </div>
           <Button size="sm" className="gap-1.5" onClick={() => toast.info("Mock: Add credential")}>
@@ -131,19 +131,19 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Actions for ${v.vendor} — ${v.name}`}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Actions for ${v.vendor}: ${v.name}`}>
                           <MoreHorizontal className="h-3.5 w-3.5" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => toast.info(`Mock: Edit ${v.vendor} — ${v.name}`)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => toast.info(`Mock: Rotate ${v.vendor} — ${v.name}`)}>Rotate</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => toast.info(`Mock: Edit ${v.vendor}: ${v.name}`)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => toast.info(`Mock: Rotate ${v.vendor}: ${v.name}`)}>Rotate</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DestructiveActionDialog
                           action="Delete"
                           resource="vendor credential"
                           resourceId={v.id}
-                          resourceName={`${v.vendor} — ${v.name}`}
+                          resourceName={`${v.vendor}: ${v.name}`}
                           description="Agents using this vendor key will fail until you add a replacement. This cannot be undone."
                         >
                           <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={(e) => e.preventDefault()}>

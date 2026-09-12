@@ -252,7 +252,7 @@ function ResourcesInner() {
                       variant="outline"
                       size="sm"
                       disabled={!editable}
-                      title={editable ? undefined : "Sample server — create your own to configure its tools"}
+                      title={editable ? undefined : "Sample server · create your own to configure its tools"}
                       onClick={() => setConfigMcpId(s.id)}
                     >
                       Configure tools

@@ -92,7 +92,7 @@ export default function ProjectNotificationsPage() {
                         <Switch
                           checked={p[c.key]}
                           onCheckedChange={(v) => update(p.id, c.key, v)}
-                          aria-label={`${p.label} — ${c.label}`}
+                          aria-label={`${p.label}: ${c.label}`}
                         />
                       </TableCell>
                     ))}

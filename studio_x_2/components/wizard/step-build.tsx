@@ -280,7 +280,7 @@ function ResourceField({
               key={i.id}
               variant={i.disabled ? "outline" : "secondary"}
               className={cn("gap-1 pr-1 font-normal", i.disabled && "border-destructive/40 text-destructive")}
-              title={i.disabled ? "No longer connected — reconnect in Resources or remove it" : undefined}
+              title={i.disabled ? "No longer connected · reconnect in Resources or remove it" : undefined}
             >
               {i.disabled && <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />}
               {i.name}

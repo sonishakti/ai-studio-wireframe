@@ -69,7 +69,7 @@ interface UseVoiceSessionArgs {
 // ─── Scripted demo dialog (wireframe — no real ASR/LLM/TTS) ──────────────────
 
 const GREETING =
-  "Hey — I'm Composer. Tell me what kind of agent you want to build, and I'll set it up while we talk. You can attach a doc any time too."
+  "Hey · I'm Composer. Tell me what kind of agent you want to build, and I'll set it up while we talk. You can attach a doc any time too."
 
 const USER_LINES = [
   "I want a support agent for my online store that can handle order questions.",
@@ -79,10 +79,10 @@ const USER_LINES = [
 ]
 
 const COMPOSER_LINES = [
-  "Got it — a customer-support voice agent for e-commerce. I'll start it on gpt-4o with Deepgram for speech and an ElevenLabs voice. What should it sound like?",
-  "Warm and concise — done. I capped responses around 50 words so it stays snappy on a call.",
+  "Got it: a customer-support voice agent for e-commerce. I'll start it on gpt-4o with Deepgram for speech and an ElevenLabs voice. What should it sound like?",
+  "Warm and concise: done. I capped responses around 50 words so it stays snappy on a call.",
   "Added two tools: order lookup by phone, and start-a-return. They're showing in the draft on the right.",
-  "Nice — I added a transfer-to-human fallback when sentiment turns negative. Want me to open it in the editor?",
+  "Nice. I added a transfer-to-human fallback when sentiment turns negative. Want me to open it in the editor?",
 ]
 
 const DRAFT_NOTES = [
@@ -92,7 +92,7 @@ const DRAFT_NOTES = [
   "Added guardrail: transfer to human on negative sentiment",
 ]
 
-const FALLBACK_COMPOSER = "Mm-hmm — anything else you'd like it to handle?"
+const FALLBACK_COMPOSER = "Mm-hmm · anything else you'd like it to handle?"
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
 

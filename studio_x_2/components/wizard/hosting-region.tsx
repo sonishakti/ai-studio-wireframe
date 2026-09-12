@@ -71,9 +71,9 @@ export function HostingRegionRow({ draft, update }: StepProps) {
         <InfoHint label="What pinning changes">
           Pin a region when a contract or regulation says conversation data must stay inside it
           (GDPR, DPDP, APPI). Automatic runs the agent nearest your model endpoint with failover;
-          pinning turns failover off. This pins Agora&apos;s engine only — LLM/TTS/ASR vendors
-          process data at their own endpoints (set regional URLs in{" "}
-          <a href="/project/vendor-credentials" className="underline underline-offset-2">Vendor Credentials</a>).{" "}
+          pinning turns failover off. This pins Agora&apos;s engine only. LLM, TTS and ASR vendors
+          process data at their own endpoints; set regional URLs in{" "}
+          <a href="/project/vendor-credentials" className="underline underline-offset-2">Vendor Credentials</a>.{" "}
           <a href={HOSTING_DOCS_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
             Agora region docs
           </a>
@@ -88,12 +88,7 @@ export function HostingRegionRow({ draft, update }: StepProps) {
           </SelectTrigger>
           <SelectContent>
             {HOSTING_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                <span className="flex min-w-0 flex-col gap-0.5 py-0.5">
-                  <span>{o.label}</span>
-                  <span className="text-xs text-muted-foreground">{o.desc}</span>
-                </span>
-              </SelectItem>
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -125,7 +120,7 @@ export function HostingRegionRow({ draft, update }: StepProps) {
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            One region only — Agora&apos;s geofence takes a single exclusion, and only under Global.
+            One region only. Agora&apos;s geofence takes a single exclusion, and only under Global.
           </p>
         </div>
       )}
@@ -133,7 +128,7 @@ export function HostingRegionRow({ draft, update }: StepProps) {
       {/* One line, only when the choice has a consequence worth stating. */}
       {pinned && (
         <p className="text-xs text-muted-foreground">
-          Failover off — the agent runs only in {areaLabel(hosting.area)} (~{base} ms in region).
+          Failover off. The agent runs only in {areaLabel(hosting.area)} (~{base} ms in region).
         </p>
       )}
     </SectionRow>

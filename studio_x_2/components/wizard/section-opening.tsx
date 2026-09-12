@@ -91,7 +91,7 @@ export function SectionOpening({
           onChange={(e) => update({ greeting: e.target.value })}
           disabled={overridden || callerFirst}
           className={cn("min-h-[64px] text-sm", overridden && "border-warning/50 opacity-80")}
-          placeholder={callerFirst ? "The caller speaks first — the agent answers what it hears." : "Hi, thanks for calling. How can I help you today?"}
+          placeholder={callerFirst ? "The caller speaks first. The agent answers what it hears." : "Hi, thanks for calling. How can I help you today?"}
         />
       </div>
 
@@ -116,7 +116,7 @@ export function SectionOpening({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-64 text-xs">
-                  Says the sentence before the greeting. Required in several regions (EU AI Act, Article 50) — on by default is the compliant choice.
+                  Says the sentence before the greeting. Required in several regions (EU AI Act, Article 50): on by default is the compliant choice.
                 </TooltipContent>
               </Tooltip>
             </Label>
@@ -150,11 +150,29 @@ export function SectionOpening({
         </div>
       )}
 
-      {/* Callers hear — the exact composed result */}
-      <p className="font-mono text-xs text-foreground/85" data-testid="wz-opening-callers-hear">
-        <span className="text-muted-foreground">Callers hear · </span>
-        {callerFirst ? <span className="text-muted-foreground">nothing until the caller speaks — then the agent answers.</span> : (hears || <span className="text-muted-foreground">add a greeting</span>)}
-      </p>
+      {/* Callers hear: the composed line, read-only, in a field like Greeting;
+          Hear the opening sits on the same line (owner 2026-09-12). */}
+      <div className="space-y-1.5">
+        <Label htmlFor="wz-opening-hears" className="text-sm font-medium">Callers hear</Label>
+        <div className="flex items-start gap-2">
+          <Textarea
+            id="wz-opening-hears"
+            readOnly
+            rows={2}
+            value={callerFirst ? "" : hears}
+            placeholder={callerFirst ? "Nothing until the caller speaks. The agent answers what it hears." : "Add a greeting"}
+            aria-describedby="wz-opening-hears-hint"
+            data-testid="wz-opening-callers-hear"
+            className="min-h-[60px] flex-1 resize-none text-sm"
+          />
+          <Button type="button" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={onHearOpening} disabled={callerFirst && !hears}>
+            <Play className="h-3.5 w-3.5" aria-hidden /> Hear the opening
+          </Button>
+        </div>
+        <p id="wz-opening-hears-hint" className="text-xs text-muted-foreground">
+          Read-only. The AI sentence and the greeting, in the order callers hear them.
+        </p>
+      </div>
 
       {/* Silence recap → call rules */}
       <p className="text-xs text-muted-foreground">
@@ -164,10 +182,6 @@ export function SectionOpening({
         )}
       </p>
 
-      {/* Hear the opening */}
-      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={onHearOpening} disabled={callerFirst && !hears}>
-        <Play className="h-3.5 w-3.5" aria-hidden /> Hear the opening
-      </Button>
     </div>
   )
 }

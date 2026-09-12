@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, AudioLines } from "lucide-react"
+import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, AudioLines, ListChecks } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -65,7 +65,7 @@ import { toast } from "sonner"
  * NOTHING IS LOCKED — every field is editable at any time.
  * Publish is a HINT, not a gate. Deep-links: `?step=N` (legacy 1–7 mapped),
  * `?dc=` seeds a channel, `?artifact=` selects a custom voice. Draft
- * autosaves; live agents get per-section "Reset to live".
+ * autosaves; live agents get per-section "Undo to live".
  */
 /** An explicit close of the right rail is remembered; reopening forgets it. */
 const RAIL_CLOSED_KEY = "sx:wizard_rail_closed"
@@ -427,7 +427,7 @@ export function AgentWizard({
           id: "import-landing",
           description: notice.inferred
             ? `${notice.inferred}. Review, then deploy.`
-            : "Template applied — pick its channels, then deploy.",
+            : "Template applied. Pick its channels, then deploy.",
         })
       } else if (notice) {
         const prev = notice.prev
@@ -435,7 +435,7 @@ export function AgentWizard({
           id: "import-landing",
           description: notice.hadPrompt
             ? "Voice, engine, prompt, and greeting came in. Point it at a channel and deploy."
-            : "Voice and engine came in — the export had no prompt, so we started one for you.",
+            : "Voice and engine came in. The export had no prompt, so we started one for you.",
           action: prev
             ? {
                 label: "Undo import",
@@ -661,7 +661,7 @@ export function AgentWizard({
     toast.success("Config applied", {
       description: sections.length
         ? `${sections.length} section${sections.length > 1 ? "s" : ""} now overridden by your custom config: ${sections.join(", ")}.`
-        : "No sections carry properties — the visual editor stays in control.",
+        : "No sections carry properties. The visual editor stays in control.",
       action: { label: "Undo", onClick: () => { dirty.current = true; setDraft(before) } },
     })
   }
@@ -729,7 +729,7 @@ export function AgentWizard({
     const promptChanged = importedPrompt ? opts.replacePrompt || !hadOwnPrompt : !hadOwnPrompt
     toast.success(
       importedPrompt && !promptChanged
-        ? `${config.name} applied — kept your prompt`
+        ? `${config.name} applied: kept your prompt`
         : `${config.name} applied`,
       {
         description:
@@ -740,8 +740,8 @@ export function AgentWizard({
               : importedPrompt
                 ? "Voice and engine updated; your prompt and greeting stayed."
                 : hadOwnPrompt
-                  ? "Voice and engine updated — the export had no prompt, so yours stayed."
-                  : "Voice and engine updated — the export had no prompt, so we started one for you.",
+                  ? "Voice and engine updated. The export had no prompt, so yours stayed."
+                  : "Voice and engine updated. The export had no prompt, so we started one for you.",
         action: {
           label: "Undo",
           onClick: () => {
@@ -811,7 +811,7 @@ export function AgentWizard({
       if (!isEdit) upsertSessionAgent(draftToSessionAgent(d, agentId))
       publishDeployment({
         router, agentId, agentName: draft.name || "Your agent",
-        channel: d.channels.map(channelLabel).join(" · ") || "—",
+        channel: d.channels.map(channelLabel).join(" · ") || ", ",
         name: draft.name || "Deployment",
         mode: primary === "batch" ? "outbound" : primary === "code" ? "code" : "inbound",
         stay,
@@ -867,9 +867,9 @@ export function AgentWizard({
     ? anyEdited
       ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live`
       : // Clean state must not imply pending changes (user-test 2026-07-29).
-        "Live — edits stay draft until you redeploy."
+        "Live: edits stay draft until you redeploy."
     : codeDeployed
-    ? "Deployed — goes live when your app connects."
+    ? "Deployed: goes live when your app connects."
     : blockReason ?? "Review Go Live and deploy."
   const baselineBatch = !!baseline.current?.channels.includes("batch")
   const channelsChanged = isLive && !!baseline.current &&
@@ -877,14 +877,14 @@ export function AgentWizard({
   const deployCta = !isLive
     ? codeDeployed ? "Redeploy" : "Deploy"
     : channelsChanged && hasChannel(draft, "batch") && !baselineBatch ? "Launch batch calls"
-    : anyEdited || channelsChanged ? "Redeploy" : "Live — no changes"
+    : anyEdited || channelsChanged ? "Redeploy" : "Live. No changes"
   const active = activeCampaigns(draft)
   const preflightCta =
     hasChannel(draft, "batch") && active.length > 0
       ? active.every((c) => c.launch?.mode === "scheduled")
         ? `Schedule run${active.length > 1 ? "s" : ""}`
         : `Start run${active.length > 1 ? "s" : ""}`
-      : deployCta === "Live — no changes" ? "Deploy" : deployCta
+      : deployCta === "Live. No changes" ? "Deploy" : deployCta
 
   const previewStatus =
     warming ? "Warming up"
@@ -995,13 +995,26 @@ export function AgentWizard({
           <CustomConfigDrawer draft={draft} onApply={applyCustomConfig} iconOnly />
           {/* Voice call — the test rail's header door (Figma 2919-56680), now a
               bordered button that says what it opens (owner 2026-09-11). */}
+          {/* Two rail doors (owner 2026-09-12): the scenario suite and the live
+              call each open the rail in their own mode; pressing the open one
+              closes the rail. */}
           <Button
             variant="outline"
             size="sm"
             className="gap-1.5"
-            aria-label="Test agent — voice call"
-            aria-pressed={testOpen}
-            onClick={() => (testOpen ? setRailOpen(false) : openTest("agent"))}
+            aria-label="Run test scenarios"
+            aria-pressed={testOpen && testTab === "simulations"}
+            onClick={() => (testOpen && testTab === "simulations" ? setRailOpen(false) : openTest("simulations"))}
+          >
+            <ListChecks className="size-4" aria-hidden /> Run test scenarios
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            aria-label="Test agent, voice call"
+            aria-pressed={testOpen && testTab !== "simulations"}
+            onClick={() => (testOpen && testTab !== "simulations" ? setRailOpen(false) : openTest("agent"))}
           >
             <AudioLines className="size-4" aria-hidden /> Voice call
           </Button>
@@ -1125,7 +1138,7 @@ export function AgentWizard({
                 <p className="px-0.5 text-xs text-warning">{dirtyCount} section{dirtyCount > 1 ? "s" : ""} edited · not live</p>
               )}
               {codeDeployed && (
-                <p className="px-0.5 text-xs text-muted-foreground">Deployed — goes live when your app connects.</p>
+                <p className="px-0.5 text-xs text-muted-foreground">Deployed: goes live when your app connects.</p>
               )}
               {isLive && anyEdited && (
                 <>
@@ -1199,7 +1212,7 @@ export function AgentWizard({
                           onClick={() => resetStep(n)}
                           aria-label="Reset this step to the live version"
                         >
-                          <Undo2 className="h-3.5 w-3.5" aria-hidden /> Reset to live
+                          <Undo2 className="h-3.5 w-3.5" aria-hidden /> Undo to live
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Reset this step to the live version</TooltipContent>
@@ -1234,7 +1247,7 @@ export function AgentWizard({
                           2026-07-30): the TYPE is chosen here; the launch
                           lives in Go Live. Owner-locked labels untouched. */}
                       <p className="pb-5 text-sm text-muted-foreground">
-                        Where your agent takes calls — launch it in Go Live.
+                        Where your agent takes calls: launch it in Go Live.
                       </p>
                       <SectionRows>
                         <ChannelSection
@@ -1361,7 +1374,7 @@ export function AgentWizard({
                 <AlertDialogDescription>
                   You&apos;re editing {existing?.name ?? "an agent"}{isLive ? ", which is live" : ""}. Import{" "}
                   {importPending.config.name} as its own agent, or apply its voice, engine, and prompt to{" "}
-                  {existing?.name ?? "this agent"}{isLive ? " — applied changes only go live when you redeploy" : ""}.
+                  {existing?.name ?? "this agent"}{isLive ? " · applied changes only go live when you redeploy" : ""}.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -1492,8 +1505,8 @@ function announceDcSwap(before: AgentDraft, after: AgentDraft) {
     (dropped === "inbound" && added === "batch") || (dropped === "batch" && added === "inbound")
   toast(`Switched to ${channelLabel(added)}`, {
     description: directionPair
-      ? "One agent can't handle both inbound and outbound. The previous setup is kept — switch back in Deployment to restore it."
-      : `One deployment per agent — your ${channelLabel(dropped)} setup is kept. Switch back in Deployment to restore it.`,
+      ? "One agent can't handle both inbound and outbound. The previous setup is kept. Switch back in Deployment to restore it."
+      : `One deployment per agent. Your ${channelLabel(dropped)} setup is kept. Switch back in Deployment to restore it.`,
   })
 }
 

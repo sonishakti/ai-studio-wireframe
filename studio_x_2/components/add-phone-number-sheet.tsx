@@ -92,7 +92,7 @@ export function AddPhoneNumberSheet({
           <SheetTitle>Add a phone number</SheetTitle>
           {phase === "form" && (
             <SheetDescription>
-              Bring a number you already own — Agora routes it, and doesn&apos;t sell or port
+              Bring a number you already own. Agora routes it, and doesn&apos;t sell or port
               numbers.
             </SheetDescription>
           )}
@@ -255,7 +255,7 @@ export function AddPhoneNumberSheet({
                   >
                     Link to this agent
                   </Button>
-                  <Button variant="outline" className="w-full" onClick={() => { setOpen(false); reset() }}>Done — don&apos;t link yet</Button>
+                  <Button variant="outline" className="w-full" onClick={() => { setOpen(false); reset() }}>Done · don&apos;t link yet</Button>
                 </>
               ) : (
                 <>

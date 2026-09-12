@@ -97,7 +97,7 @@ export const SIP_FAILURES: Record<number, Omit<SipFailure, "code">> = {
   },
   404: {
     reason: "Not Found",
-    explain: "The number you dialled isn't routable — either it doesn't exist or the carrier has no route to it.",
+    explain: "The number you dialled isn't routable · either it doesn't exist or the carrier has no route to it.",
     blame: "your-config",
     fix: "Verify the number is in E.164 format and that your trunk covers that destination.",
     fixHref: "/deploy/phone-numbers",
@@ -110,7 +110,7 @@ export const SIP_FAILURES: Record<number, Omit<SipFailure, "code">> = {
   },
   480: {
     reason: "Temporarily Unavailable",
-    explain: "The line exists but isn't accepting calls right now — phone off, out of coverage, or forwarded to nothing.",
+    explain: "The line exists but isn't accepting calls right now: phone off, out of coverage, or forwarded to nothing.",
     blame: "callee",
     fix: "Nothing to fix on your side. Retry later, or let the batch queue handle the retry.",
   },
@@ -122,14 +122,14 @@ export const SIP_FAILURES: Record<number, Omit<SipFailure, "code">> = {
   },
   487: {
     reason: "Request Terminated",
-    explain: "The call was cancelled before it was answered — normally because our side gave up first, or the caller hung up during ringing.",
+    explain: "The call was cancelled before it was answered: normally because our side gave up first, or the caller hung up during ringing.",
     blame: "callee",
     fix: "If this is frequent on outbound, your ring timeout may be too short.",
     fixHref: "/deploy/batch-calls",
   },
   503: {
     reason: "Service Unavailable",
-    explain: "Capacity was refused. This is the one code that means two very different things — see whether it came from your carrier's trunk or from our own concurrency ceiling.",
+    explain: "Capacity was refused. This is the one code that means two very different things. See whether it came from your carrier's trunk or from our own concurrency ceiling.",
     blame: "agora-capacity",
     fix: "If it's our ceiling, add concurrent lines. If it's the trunk, raise the channel limit with your carrier.",
     fixHref: "/billing/usage",

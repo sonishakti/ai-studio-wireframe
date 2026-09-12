@@ -73,13 +73,13 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
   // Verdict headline — one sentence, the whole point of the view.
   const headline =
     pacing === "paced"
-      ? `Working — dialing at capacity. ${rt!.queued.toLocaleString()} queued, none dropped.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
+      ? `Working: dialing at capacity. ${rt!.queued.toLocaleString()} queued, none dropped.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
       : pacing === "dialing"
-        ? `Working — ${rt?.linesInUse ?? 0} of ${rt?.linesTotal ?? 0} lines dialing.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
+        ? `Working · ${rt?.linesInUse ?? 0} of ${rt?.linesTotal ?? 0} lines dialing.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
         : pacing === "scheduled"
-          ? "Scheduled — nothing dials yet."
+          ? "Scheduled. Nothing dials yet."
           : pacing === "degraded"
-            ? "Auto-paused — this batch needs attention."
+            ? "Auto-paused. This batch needs attention."
             : pacing === "done"
               ? "Completed."
               : "Paused."

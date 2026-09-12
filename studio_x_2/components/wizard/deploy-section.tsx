@@ -30,7 +30,7 @@ import { type StepProps } from "@/components/wizard/types"
 // worst on an agent imported twenty minutes ago). Real edits appear as real
 // deploys happen; a wireframe must not seed history.
 const VERSION_SEED: { property: string; hoursAgo: number; old: string; next: string; by: string }[] = [
-  { property: "Agent created", hoursAgo: 0, old: "—", next: "version 1", by: "you" },
+  { property: "Agent created", hoursAgo: 0, old: ", ", next: "version 1", by: "you" },
 ]
 
 /** "2026-07-30 14:02" — the table's existing date idiom, local time. */
@@ -158,7 +158,7 @@ export function DeploySection({
           <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
             <SheetTitle className="text-base">Version history</SheetTitle>
             <p className="text-sm text-muted-foreground">
-              Every deployed change to {draft.name || "this agent"} — your unsaved edits ship as the next version.
+              Every deployed change to {draft.name || "this agent"}. Your unsaved edits ship as the next version.
             </p>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
@@ -191,11 +191,11 @@ export function DeploySection({
             ) : (
               // Fresh draft: nothing has deployed, so nothing predates it.
               <p className="text-sm text-muted-foreground">
-                No versions yet — your first deploy records version 1.
+                No versions yet. Your first deploy records version 1.
               </p>
             )}
             <p className="pt-3 text-xs text-muted-foreground">
-              Wireframe data — versions are recorded on every deploy, one row per changed property.
+              Wireframe data: versions are recorded on every deploy, one row per changed property.
             </p>
           </div>
         </SheetContent>
@@ -211,7 +211,7 @@ export function DeploySection({
           <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
             <SheetTitle className="text-base">Advanced Settings</SheetTitle>
             <p className="text-sm text-muted-foreground">
-              Agent-level rules every campaign follows — per-campaign window, concurrency,
+              Agent-level rules every campaign follows: per-campaign window, concurrency,
               and retries live on each campaign.
             </p>
           </SheetHeader>

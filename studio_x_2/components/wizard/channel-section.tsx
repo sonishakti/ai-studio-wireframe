@@ -48,7 +48,7 @@ const CHANNEL_CARDS: { id: DeployChannel; title: string; desc: string }[] = [
 ]
 
 const SURFACE_CARDS: { id: InboundSurface; title: string; desc: string }[] = [
-  { id: "phone", title: "Phone number", desc: "Answer calls 24/7 — link one or several numbers." },
+  { id: "phone", title: "Phone number", desc: "Answer calls 24/7: link one or several numbers." },
   { id: "web", title: "Web widget", desc: "A floating voice widget for your website." },
 ]
 
@@ -82,7 +82,7 @@ export function ChannelSection({
       const wasLive = liveChannels?.includes(current)
       toast(`Switched to ${channelLabel(c)}`, {
         description: wasLive
-          ? `${channelLabel(current)} goes offline on your next redeploy — its setup is kept and undoable.`
+          ? `${channelLabel(current)} goes offline on your next redeploy: its setup is kept and undoable.`
           : `Your ${channelLabel(current)} setup is kept, not deleted. Switch back any time.`,
         action: { label: "Undo", onClick: () => update({ channels: [current] }) },
       })
@@ -104,11 +104,11 @@ export function ChannelSection({
       <SectionRow
         id="wz-2-pick"
         label="How will this agent handle calls?"
-        hint="One deployment type per agent — duplicate the agent for the other direction."
+        hint="One deployment type per agent: duplicate the agent for the other direction."
       >
         {liveChannels && liveChannels.length > 0 && (
           <p className="rounded-md border border-warning/40 bg-warning/5 px-3 py-2 text-xs text-foreground">
-            {draft.name || "This agent"} is live on {liveChannels.map(channelLabel).join(" · ")} — switching
+            {draft.name || "This agent"} is live on {liveChannels.map(channelLabel).join(" · ")} · switching
             deployment types takes it offline there on your next redeploy. The setup is kept, and every switch has an Undo.
           </p>
         )}
@@ -143,7 +143,7 @@ export function ChannelSection({
         </RadioCardGroup>
 
         <InfoHint label="Phone channels are bring-your-own number">
-          Agora doesn&apos;t sell numbers — connect your carrier&apos;s via SIP with{" "}
+          Agora doesn&apos;t sell numbers: connect your carrier&apos;s via SIP with{" "}
           <span className="font-medium text-foreground">Add phone number</span> below, or manage them in{" "}
           <a href="/integrations?tab=channels" className="underline underline-offset-2">
             Resources › Deployment Channels
@@ -157,7 +157,7 @@ export function ChannelSection({
         <SectionRow
           id="wz-2-surfaces"
           label="Inbound channels"
-          hint="Pick every way callers reach this agent — it can serve several at once."
+          hint="Pick every way callers reach this agent. It can serve several at once."
         >
           <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2" role="group" aria-label="Inbound channels">
             {SURFACE_CARDS.map((sf) => (
@@ -170,7 +170,7 @@ export function ChannelSection({
               />
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">WhatsApp · Telegram — soon</p>
+          <p className="text-xs text-muted-foreground">WhatsApp · Telegram · soon</p>
         </SectionRow>
       )}
 
@@ -179,7 +179,7 @@ export function ChannelSection({
       )}
 
       {current === "inbound" && surfaces.includes("web") && (
-        <SectionRow id="wz-2-web" label="Widget Settings" hint="How visitors talk to your agent — behaviour, branding, text, and the embed snippet.">
+        <SectionRow id="wz-2-web" label="Widget Settings" hint="How visitors talk to your agent: behaviour, branding, text, and the embed snippet.">
           <WidgetStyleConfig agentId={agentId} />
         </SectionRow>
       )}
@@ -194,7 +194,7 @@ export function ChannelSection({
         <SectionRow
           id="wz-2-code"
           label="Connect your app"
-          hint="No phone number and no campaign — your app joins a channel and the agent joins it too."
+          hint="No phone number and no campaign. Your app joins a channel and the agent joins it too."
         >
           <CodeConfigure agentId={agentId} />
         </SectionRow>
@@ -332,7 +332,7 @@ function InboundNumbersBlock({
     <SectionRow
       id="wz-2-inbound"
       label="Choose how callers reach your agent"
-      hint="Link one or several numbers — the agent answers them all."
+      hint="Link one or several numbers. The agent answers them all."
     >
       <div className="space-y-4">
         {numberIds.map((id, i) => (
@@ -398,7 +398,7 @@ function InboundNumbersBlock({
       {/* One line, one destination — the call-rules pointer lives in Go Live
           itself (copy discipline 2026-08-10). */}
       <p className="text-xs text-muted-foreground">
-        Numbers route via SIP — manage them in{" "}
+        Numbers route via SIP. Manage them in{" "}
         <a href="/integrations?tab=channels" className="underline underline-offset-2">
           Resources › Deployment Channels
         </a>
@@ -417,7 +417,7 @@ export function CodeConfigure({ agentId }: { agentId: string }) {
   const connect = `import { AgentClient } from "@agora/agent-sdk"
 
 const client = new AgentClient({
-  agentId: "${agentId}",${unpublished ? " // placeholder — deploy to mint the real ID" : ""}
+  agentId: "${agentId}",${unpublished ? " // placeholder: deploy to mint the real ID" : ""}
   appId: process.env.AGORA_APP_ID, // Project Settings › App ID
 })
 
@@ -425,7 +425,7 @@ const client = new AgentClient({
 // token minted from your App Certificate on join — clients keep their own
 await client.joinChannel({ channel: "support-room" })`
 
-  const stop = `// Stop the agent — releases the channel and stops billing
+  const stop = `// Stop the agent: releases the channel and stops billing
 await client.leaveChannel()
 await client.stop()`
 
@@ -438,7 +438,7 @@ await client.stop()`
           <div className="min-w-0 text-sm">
             <p className="font-medium">Please Note</p>
             <p className="text-muted-foreground">
-              This agent&apos;s ID is minted when you deploy — these snippets carry the
+              This agent&apos;s ID is minted when you deploy: these snippets carry the
               placeholder &quot;new&quot; until then.
             </p>
           </div>
@@ -455,7 +455,7 @@ await client.stop()`
       <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
       <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
       <InfoHint label="Secured-mode channels & tokens">
-        The platform mints the agent&apos;s token from your App Certificate on join — your
+        The platform mints the agent&apos;s token from your App Certificate on join. Your
         clients keep bringing their own tokens, and the agent needs nothing extra from you.
       </InfoHint>
 

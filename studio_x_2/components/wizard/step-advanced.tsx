@@ -133,7 +133,7 @@ export function StepAdvanced({
           where they went instead of leaving a hole. */}
       {realtime && (
         <p className="text-xs text-muted-foreground">
-          Realtime multimodal models manage turn-taking natively — the Start/End of speech
+          Realtime multimodal models manage turn-taking natively. The Start/End of speech
           controls apply to cascading stacks.
         </p>
       )}
@@ -354,7 +354,7 @@ const PRESET_DESC: Record<AdvancedConfig["turnDetection"]["preset"], { text: str
   responsive: { text: "Answers the moment the caller pauses. Best for quick, transactional calls.", speed: "Fast", naturalness: "Direct" },
   balanced: { text: "Good mix of responsiveness and naturalness. Ideal for most use-cases.", speed: "Moderate", naturalness: "Natural" },
   patient: { text: "Waits out longer pauses before replying. Best for thoughtful or elderly callers.", speed: "Slow", naturalness: "Very natural" },
-  custom: { text: "Your own threshold — tune how loud the caller must be to take the turn.", speed: "Custom", naturalness: "Custom" },
+  custom: { text: "Your own threshold: tune how loud the caller must be to take the turn.", speed: "Custom", naturalness: "Custom" },
 }
 
 function Sub({

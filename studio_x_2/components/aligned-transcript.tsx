@@ -118,7 +118,7 @@ export function AlignedTranscript({
                   !timed && "select-none",
                 )}
               >
-                {line.atSec != null ? fmtClock(line.atSec) : "—"}
+                {line.atSec != null ? fmtClock(line.atSec) : ", "}
               </button>
               <div className="min-w-0 flex-1 space-y-0.5">
                 <div className="flex flex-wrap items-center gap-2">

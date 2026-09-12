@@ -126,7 +126,7 @@ export default function ExtensionsPage() {
       <PageHeader
         crumbs={[{ label: "Extensions Marketplace" }]}
         title="Extensions Marketplace"
-        description="Add capabilities to your project — recording, AI, safety, and more."
+        description="Add capabilities to your project: recording, AI, safety, and more."
       />
 
       <main className="flex-1 p-6 space-y-4">

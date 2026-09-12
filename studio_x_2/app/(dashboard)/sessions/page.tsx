@@ -149,7 +149,7 @@ export default function SessionsPage() {
                           {s.p95Ms.toLocaleString()} ms
                         </span>
                       ) : (
-                        <span className="text-sm text-muted-foreground">—</span>
+                        <span className="text-sm text-muted-foreground">, </span>
                       )}
                     </TableCell>
                     <TableCell>
