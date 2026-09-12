@@ -1,0 +1,777 @@
+{
+ "title": "Agent builder — Future scope removed, NG-style chrome, six research features (01 · 02 · 04 · 07 · 10 · 11)",
+ "date": "2026-09-12 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main bfb4406 · production ai-studio-console-redesign-mp4vnlddw",
+ "deploy": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+ "commits": [
+  {
+   "sha": "15c6a5b",
+   "msg": "chrome: Future-scope switch removed; top-bar actions bordered + labelled"
+  },
+  {
+   "sha": "3ccac1a",
+   "msg": "agent(04,07): Opening section · Backup providers row · header buttons · section indent · ?focus links"
+  },
+  {
+   "sha": "bc0187b",
+   "msg": "tokens: muted-foreground #757575 → #6b6b6b"
+  },
+  {
+   "sha": "167c65f",
+   "msg": "session(10): aligned replay, badges, copy link, download menu, stated audio states"
+  },
+  {
+   "sha": "8d73173",
+   "msg": "session(11): verdict-driven SIP diagnostics, timed ladder, issues-first list"
+  },
+  {
+   "sha": "b1a734a",
+   "msg": "agent(01): recommended strip, compare tray, add your own voice"
+  },
+  {
+   "sha": "8a9822e",
+   "msg": "agent(02): turn-taking row + recap, listening group, try interrupting; 04-C while-thinking"
+  },
+  {
+   "sha": "424b659",
+   "msg": "chrome: NG-style header controls, ghost More, Scenarios · Voice call rail, agents strip removed"
+  },
+  {
+   "sha": "69388fc",
+   "msg": "chrome: selected state is a chip not a CTA, one primary per fold, one header line, architecture cards side by side"
+  },
+  {
+   "sha": "0ac8422",
+   "msg": "builder: Run test scenarios header door, full-height rail, Undo to live, Callers hear as a field, clean hosting region, red End test; no em dashes in copy"
+  },
+  {
+   "sha": "b95ac93",
+   "msg": "models(01,07): voice field with Browse voices in the TTS sheet, + Add backup beside each vendor, credentials as a switch (Agora Managed Key by default)"
+  },
+  {
+   "sha": "bfb4406",
+   "msg": "models(07): render the inline + Add backup beside each vendor row (the component existed but was never mounted)"
+  }
+ ],
+ "intro": [
+  "Owner direction (2026-09-11): remove the Future-scope toggle, give every top icon a border and a word, indent the accordion bodies, re-audit, and build the research features 01 02 04 07 10 11.",
+  "The Future-scope switch is gone and the four features it gated are simply the product now. Every top-bar and builder-header icon is a bordered button with a label. Section bodies are indented 44 px to the title.",
+  "Each feature below follows its design-office verdict (references/research/NN-*/05-directions.html). Prototype links open at the start of the journey (?focus=<id>). Copy is proposed, not approved — the sign-off list is under each feature.",
+  "The NG token pass (Phase 1 of the revamp) is still ahead: these screens carry the Studio X look. One token was fixed on the way: --muted-foreground now clears AA, which removed most of the Phase-0 axe nodes.",
+  "Second pass, same evening: seven owner notes on the first delivery — strip removed, ghost More, NG-style header controls, a better test rail, Figma overlaps fixed, contrast, and a where-it-lives table (below) — plus three follow-ups from screenshots: one header line, side-by-side architecture cards, one primary CTA per fold.",
+  "Third and fourth pass (2026-09-12): ten owner notes on the chrome (Run test scenarios as a header door, full-height rail, Undo to live, Callers hear as a field, hosting region as label + value, red End test, no em dashes anywhere in copy) and three on the models fold (voice selection in the TTS config, + Add backup beside every vendor, credentials as a switch modelled on the NG console). Then a presence check of all six features on production: every marker matched."
+ ],
+ "features": [
+  {
+   "n": "Chrome",
+   "name": "Top bar · builder header · accordion",
+   "jtbd": "A first-time user can tell what every control at the top does, and nothing in the product bar is a demo device.",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-chrome-builder.png",
+    "caption": "Before — Future scope switch in the top bar, ghost icon-only buttons, section bodies flush with the title"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-chrome-builder.png",
+     "caption": "After — live build",
+     "marks": [
+      {
+       "name": "Bordered, labelled top-bar actions",
+       "why": "Help · Notifications · Composer read as buttons; the Future-scope demo switch is gone — the roadmap features are the product now."
+      },
+      {
+       "name": "Voice call, Custom config, More",
+       "why": "Every builder-header icon carries a border and a word; a first-time user can tell what each opens."
+      },
+      {
+       "name": "Section body indented 44 px",
+       "why": "Controls align with the section title after the chevron, so each accordion reads as nested content."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after2-chrome-header.png",
+     "caption": "After (second pass) — Help · Notifications · Composer as NG shell controls; More is a ghost button",
+     "marks": [
+      {
+       "name": "Header controls match the NG shell",
+       "why": "Help · Notifications · Composer are the NG console's 28 px icon controls: faint border, tint, the word in the tooltip and the accessible name; the bell wears the real unread count."
+      },
+      {
+       "name": "More is a ghost button",
+       "why": "The overflow menu no longer competes with Voice call and Custom config, which keep their borders because they act."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after2-test-rail.png",
+     "caption": "After (second pass) — the test rail: Scenarios (with count) · Voice call",
+     "marks": [
+      {
+       "name": "Scenarios · Voice call",
+       "why": "The rail's two tests are named by what you do — the generated suite with its count, or a live call. The active tab is a card with a 3:1 ring and semibold text, not a lighter shade of grey and not a CTA."
+      },
+      {
+       "name": "One verb per tab",
+       "why": "Scenarios are generated, then run; the Voice call tab links back with “run the scenarios”, so neither tab is a dead end."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after2-opening-contrast.png",
+     "caption": "After (second pass) — Who speaks first: the selected segment is unmistakable",
+     "marks": [
+      {
+       "name": "Selected segment is unmistakable",
+       "why": "Who speaks first — Agent / Caller: the chosen option is an ink-tinted chip with an ink border and semibold text; the other is outlined on border-stroke (≥ 3:1). The same rule now applies to every toggle group and tab in Studio X."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after2-call-sheet-tabs.png",
+     "caption": "After (second pass) — the same selected state on the call sheet's tabs",
+     "marks": [
+      {
+       "name": "Same selected state, app-wide",
+       "why": "The call sheet's tabs use the same card-with-ring selected state; the count badges stay readable and nothing reads as a primary button."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after3-headers-one-line.png",
+     "caption": "After (third pass) — one header line across the rail, the section and the test rail",
+     "marks": [
+      {
+       "name": "One header line, three columns",
+       "why": "The rail header (n of 5 done · Collapse all), the section header and the test rail header are all 56 px with the same hairline, so the rule reads as one continuous line."
+      },
+      {
+       "name": "Test rail header, same height",
+       "why": "Its bottom border now meets the section header's — the step that looked odd is gone."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after3-architecture-side-by-side.png",
+     "caption": "After (third pass) — Model Architecture cards side by side",
+     "marks": [
+      {
+       "name": "Cascading · Multimodal, left to right",
+       "why": "The two architecture cards sit side by side — one glance compares them; the stacked version read as a list."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after3-dark-one-primary.png",
+     "caption": "After (third pass, dark) — one primary CTA per fold; selected states are chips, not buttons",
+     "marks": [
+      {
+       "name": "Selected is a chip, not a CTA",
+       "why": "The active tab is a card with a 3:1 ring and semibold text — it no longer borrows the primary fill, so it stops competing with Deploy."
+      },
+      {
+       "name": "One primary per fold",
+       "why": "Generate scenarios and Add case are outline buttons; Deploy in the header is the only filled CTA on screen."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after4-scenarios-door.png",
+     "caption": "After (third pass): Run test scenarios is a header door; the rail runs the full viewport height",
+     "marks": [
+      {
+       "name": "Run test scenarios is a header door",
+       "why": "The scenario suite left the rail's tab strip; it opens the rail in its own mode next to Voice call and Custom config, and the open door reads as pressed."
+      },
+      {
+       "name": "Rail runs the full viewport height",
+       "why": "The panel is the viewport height, so its left border reaches the bottom instead of stopping where the content ends."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after4-callers-hear-field.png",
+     "caption": "After (third pass): Callers hear is a read-only field with Hear the opening on the same line; no em dashes in copy",
+     "marks": [
+      {
+       "name": "Callers hear is a field, Hear the opening on the same line",
+       "why": "A read-only field like Greeting shows the exact composed line; the play button sits beside it. No new behaviour, the disclosure and greeting still compose it."
+      },
+      {
+       "name": "No em dashes in copy",
+       "why": "Every em dash in user-facing text was rewritten: label pairs use a middot, sentences a period or colon. The failure, judge and hosting hints now read as sentences."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after4-hosting-region.png",
+     "caption": "After (third pass): Hosting region is label + value; what pinning changes lives in the info disclosure",
+     "marks": [
+      {
+       "name": "Region is label + value",
+       "why": "The options carry their name only; what pinning changes lives in the info disclosure, and a one-line consequence appears only when a region is pinned."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after4-end-test-red.png",
+     "caption": "After (third pass): End test uses the destructive variant",
+     "marks": [
+      {
+       "name": "End test is semantic red",
+       "why": "Ending a call, deleting, removing: the destructive variant (a tint of red) marks every action that stops or takes something away."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "A switch that reveals unbuilt features in the product bar confuses reviewers (Phase 0 finding N4); now that the roadmap features are being built, they are shown.",
+    "Icon-only ghosts fail recognition over recall on a header with eight controls (A7); border + word costs 60 px and removes the guesswork.",
+    "44 px = padding + chevron + gap, so the body aligns with the title text — nested by geometry, not by a box.",
+    "Second pass (owner feedback, 2026-09-11 evening): the Start · Builder · All agents strip is gone (the breadcrumb carries location); More is a ghost button; Help · Notifications · Composer follow the NG console shell — 28 px ghost icon controls with a faint border and tint, the word in the tooltip and the accessible name, the real unread count on the bell.",
+    "Selected states: every toggle group and tab shares one rule — the chosen option is an ink-tinted chip with an ink border and semibold text (toggles) or a card with a 3:1 ring (tabs); the unchosen one is outlined on border-stroke. A first version used the primary fill and read as a CTA in dark mode, so it was replaced.",
+    "One primary per fold: Deploy owns the filled button; Generate scenarios and Add case in the test rail are outline.",
+    "The test rail's two tests are named by what you do — Scenarios (with its count) and Voice call — with a cross-link from the call to the scenarios; section 4 and the preflight say scenarios too.",
+    "The three builder columns share one 56 px header line (rail: n of 5 done · Collapse all; section header; test rail header). Model Architecture cards sit side by side.",
+    "Third pass (owner notes, 2026-09-12): the scenario suite left the rail's tab strip and became a header door, Run test scenarios, beside Custom config and Voice call; the open door reads as pressed. The rail is the viewport height so its border reaches the bottom. Reset to live is now Undo to live. Callers hear is a read-only field like Greeting, with Hear the opening on the same line and no new behaviour. Hosting region options carry their name only. End test, Delete and Remove use the destructive variant (a tint of red).",
+    "Copy rule, standing: no em dash in user-facing text. Every one was rewritten: label pairs use a middot, sentence elaborations a period or colon. The failure, judge and hosting hints now read as sentences."
+   ],
+   "copy": [
+    "Help",
+    "Notifications",
+    "Composer",
+    "More",
+    "Custom config",
+    "Voice call",
+    "Reset to live"
+   ],
+   "next": [
+    "Phase 1 token pass (NG look) on top of these fixes.",
+    "Confirm the NG-shell control recipe (icon-only + tooltip) is the direction for every top bar in Studio X, or whether a word should return on Composer.",
+    "Tabs: the ring-on-card selected state is app-wide now — say if any surface should keep the older line-underline variant."
+   ]
+  },
+  {
+   "n": "01",
+   "name": "Voice picker & recommendations",
+   "jtbd": "Pick a voice that fits the use case without auditioning the whole catalog.",
+   "verdict": "Converged A + B + D — Recommended first, Compare tray, Add your own voice; E (voices, plural) not built.",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-01-voice-browser.png",
+    "caption": "Before — a flat 14-row catalog; Use voice is the only action"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-01-voice-browser.png",
+     "caption": "After — Select voice dialog, live build",
+     "marks": [
+      {
+       "name": "Recommended first",
+       "why": "Three voices ranked from the prompt's use case (tags, not benchmarks) sit above the full catalog; decide among three, never among fourteen."
+      },
+      {
+       "name": "Compare column",
+       "why": "Shortlist up to three and hear them on the same script in the tray below; Use voice stays one click."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after5-tts-sheet-voice.png",
+     "caption": "After (fourth pass): Configure TTS sheet with credentials as a switch and a Voice field that opens the Select voice dialog",
+     "marks": [
+      {
+       "name": "Credentials are a switch",
+       "why": "Off means Agora Managed Key, shown with the shield, included. On reveals a select of saved credentials with No credential selected and Create credential, the way the live NG console's drawer does it."
+      },
+      {
+       "name": "Voice selection lives in the TTS config too",
+       "why": "The Voice field names the picked voice and opens the Select voice dialog (design 01), like the NG TTS drawer's voice library."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after5-browse-voices.png",
+     "caption": "After (fourth pass): Browse voices is a labelled button beside the voice field",
+     "marks": [
+      {
+       "name": "Browse voices is a labelled button",
+       "why": "The Select voice dialog had only the field and an icon as doors; the button says what it opens."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/presence-01-voice.png",
+     "caption": "Live check (2026-09-12, deploy mp4vnlddw): 01 on production",
+     "marks": [
+      {
+       "name": "01 · Voice picker",
+       "why": "Agent builder › Voice & Models › Select voice dialog: Recommended strip, Compare, Add your own voice."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "The catalog has no use-case field; the agent's prompt is the use case — reading it costs nothing and needs no API.",
+    "Three recommended + three to compare is the Hick's-law budget.",
+    "Cloning stays honest: an id, a name, an unchecked consent, a scope line. No fake verification.",
+    "Fourth pass (owner, 2026-09-12): the Configure TTS sheet carries a Voice field that names the picked voice and opens the Select voice dialog, the way the NG console's TTS drawer opens its voice library (src/components/console/agent-config-drawer.tsx). Browse voices is a labelled button beside the field, not an icon; the pick updates vendor and voice together."
+   ],
+   "copy": [
+    "Recommended for {useCase} / Recommended",
+    "Based on voice tags, not benchmarks",
+    "Compare · Compare {voice} · {count} of 3 · Clear",
+    "Read my greeting · Requires Studio preview",
+    "Add your own voice · Voice ID · Name · I have the rights and consent to use this voice · Usable in this project only · Save voice · Clone a voice at {vendor} ↗",
+    "No voices match · Clear filters",
+    "Play {voice} / Stop {voice}",
+    "Voice · Browse voices · {voice} · {vendor} {description}"
+   ],
+   "next": [
+    "Owner: may we say 'Recommended' from tags before the benchmark?",
+    "Sign off the consent line."
+   ],
+   "links": [
+    {
+     "label": "Preview",
+     "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=voice-recommended"
+    },
+    {
+     "label": "ClickUp",
+     "href": "https://app.clickup.com/t/868m0medx"
+    }
+   ]
+  },
+  {
+   "n": "02",
+   "name": "Turn-taking & listening",
+   "jtbd": "Set how the agent listens and takes its turn, in the caller's words, and feel it on the test call.",
+   "verdict": "Converge A + C + E — Turn-taking row with recap, Listening group with honest Engine seats, Try interrupting.",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-02-speech-settings.png",
+    "caption": "Before — Quick Presets cards without a recap; SAL named after the algorithm"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-02-turn-taking.png",
+     "caption": "After — Agent Speech Settings, live build",
+     "marks": [
+      {
+       "name": "Turn-taking in the caller's words",
+       "why": "Responsive · Balanced · Patient · Custom with a recap that resolves the preset to visible milliseconds; Custom folds to the raw rows that already exist."
+      },
+      {
+       "name": "Listening group",
+       "why": "SAL is named by what it does — Lock onto one speaker; Backchannels and Preemptive replies are honest, inert Requires-Engine rows."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/presence-02-turn-taking.png",
+     "caption": "Live check (2026-09-12, deploy mp4vnlddw): 02 on production",
+     "marks": [
+      {
+       "name": "02 · Turn-taking & listening",
+       "why": "Agent builder › Advanced Speech Settings sheet: Responsive · Balanced · Patient · Custom with the recap; Listening below."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "'Presets resolve to visible values' is the ticket's bar (868kykhaz) — the recap is that requirement word for word and survives Custom.",
+    "Competitors converge on words (ElevenLabs patient · normal · eager) and name controls by what the agent does.",
+    "Engine gaps are stated on the row, with the intent kept in this browser only."
+   ],
+   "copy": [
+    "Turn-taking · How the agent listens and takes its turn",
+    "Interrupts after {ms} ms of speech · waits {ms} ms of silence · interruptions on",
+    "Listening · Lock onto one speaker · Follows one voice and ignores the rest",
+    "Backchannels · Says “mm-hm” while the caller talks · Requires Engine · planned",
+    "Preemptive replies · Starts thinking before the caller finishes · Requires Engine · Sep",
+    "Try interrupting · Interrupted after {ms} ms · {Preset} · resumed with your words · Couldn't interrupt · interruptions are off",
+    "While thinking · Phrases · After · Order · Match the persona · Keep going after the filler · During tool calls"
+   ],
+   "next": [
+    "Owner: replace the raw preset cards or keep them under Custom?",
+    "Which month to print on the inert rows."
+   ],
+   "links": [
+    {
+     "label": "Preview",
+     "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=turn-taking"
+    },
+    {
+     "label": "ClickUp",
+     "href": "https://app.clickup.com/t/868m0mef1"
+    }
+   ]
+  },
+  {
+   "n": "04",
+   "name": "Greeting, filler & disclaimer",
+   "jtbd": "The first seconds and the pauses feel natural — and compliant.",
+   "verdict": "A as the spine, B's editable default, D as a recap line, E as the one button; C ships on Advanced.",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-04-prompt-greeting.png",
+    "caption": "Before — a bare Greeting Message textarea"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-04-opening.png",
+     "caption": "After — Opening section on Prompt & knowledge, live build",
+     "marks": [
+      {
+       "name": "Opening",
+       "why": "Who speaks first · greeting · can callers interrupt it · tell the caller it's an AI · the exact line callers hear · silence recap · Hear the opening — one place for the first five seconds."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/presence-04-opening.png",
+     "caption": "Live check (2026-09-12, deploy mp4vnlddw): 04 on production",
+     "marks": [
+      {
+       "name": "04 · Opening",
+       "why": "Agent builder › Prompt & knowledge: who speaks first, greeting, interrupt, AI disclosure, Callers hear, silence recap."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "Article 50 has applied since 2 Aug 2026 — disclosure is the default where the greeting is authored, not an Advanced afterthought. New agents open with it on; existing greetings are never rewritten.",
+    "The prefix on the greeting is the only real write; showing the composed line keeps the hack honest.",
+    "Ported from the ng-console prototype (design/sandbox c4bba4e5) so both consoles carry the same grammar."
+   ],
+   "copy": [
+    "Opening · Who speaks first → Agent / Caller · Greeting · Callers can interrupt the greeting · Tell the caller it's an AI · You're talking to an AI assistant. · Edit · Reset · Callers hear · Hangs up after {n}s of silence / Stays quiet if the caller goes silent · Change · Hear the opening"
+   ],
+   "next": [
+    "Sign off the disclosure sentence and default-on for new agents."
+   ],
+   "links": [
+    {
+     "label": "Preview",
+     "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=opening"
+    },
+    {
+     "label": "ClickUp",
+     "href": "https://app.clickup.com/t/868m0mejc"
+    }
+   ]
+  },
+  {
+   "n": "07",
+   "name": "Vendors & provider fallback",
+   "jtbd": "When a vendor is slow, down or blocked in my region, my live agents keep talking without me being paged.",
+   "verdict": "A is the surface (one row, on by default), B is the fold (ordered pool with eligibility), C is one button (Test failover).",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-07-model-stack.png",
+    "caption": "Before — model stack with no fallback concept"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-07-backup-providers.png",
+     "caption": "After — Backup providers row, live build",
+     "marks": [
+      {
+       "name": "Backup providers",
+       "why": "On by default; primary → backup per component in one recap; Change backups opens the ordered pool with eligibility; Test failover names the Engine dependency instead of pretending."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after5-add-backup.png",
+     "caption": "After (fourth pass): + Add backup beside each vendor field; the ASR one opened into a Backup vendor select",
+     "marks": [
+      {
+       "name": "+ Add backup beside each vendor",
+       "why": "A Backup vendor select appears under the field; the primary vendor is listed but disabled, ineligible vendors say why. The pick is the same one the Backup providers row recaps."
+      },
+      {
+       "name": "One door per vendor",
+       "why": "LLM and TTS get the same ghost button; nothing is set until you pick."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/presence-07-backup.png",
+     "caption": "Live check (2026-09-12, deploy mp4vnlddw): 07 on production",
+     "marks": [
+      {
+       "name": "07 · Backup providers",
+       "why": "Agent builder › Voice & Models, under the model stack: primary → backup per component, status chip, Change backups."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "Managed is cheaper than BYO and includes vendor usage, so Agora can own the backup pool for managed components; a BYO component asks for a second key.",
+    "Pinning a hosting region costs failover — 'no eligible backup in Europe' is a real state with two real fixes (unpin, add a key).",
+    "The public agent API has no fallback field (Engine P1 · Nov): the pool is a draft field, the button says so.",
+    "Fourth pass (owner, 2026-09-12): + Add backup sits beside each vendor field in Configure models manually. It opens a Backup vendor select with the primary vendor listed but disabled and ineligible vendors saying why; the pick writes the same draft the Backup providers row recaps, so there is one truth.",
+    "Credentials are a switch modelled on the NG console's credential select (src/components/console/studio-resource-select.tsx): off is Agora Managed Key with the shield and Included, no key to add; on is a select of saved credentials with No credential selected and Create credential. A BYO-only vendor keeps the switch on and disabled. The earlier saved-credential placeholder name was wrong and is gone.",
+    "Same-day fix (bfb4406): the inline component existed but was never mounted in the slot rows, so the first production check found no + Add backup. The shots above are from the fixed deploy."
+   ],
+   "copy": [
+    "Backup providers · Agora keeps a backup ready",
+    "{n} of 3 covered · TTS has no backup · no backup · Add a key · Unpin region · your key — a backup needs a second key · no eligible backup in {area}",
+    "Change backups · Primary · Backup · managed · your key · Needs a second key",
+    "Test failover · Requires Engine failover · Nov",
+    "+ Add backup · Backup {ASR|LLM|TTS} vendor · Select a backup vendor · {vendor} · primary · Remove backup · Your key on the primary: a backup needs a second key. Add a key",
+    "Use my own credentials · Agora Managed Key · Included, no key to add · No credential selected · Create credential · {vendor} is bring-your-own-key only"
+   ],
+   "next": [
+    "Owner: agent property or deployment property?",
+    "Confirm the backup pool vendors.",
+    "Owner: is the credential switch the right door, or should Studio X reuse the NG select as-is (Agora Managed Key as the first option)?"
+   ],
+   "links": [
+    {
+     "label": "Preview",
+     "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=backup-providers"
+    },
+    {
+     "label": "ClickUp",
+     "href": "https://app.clickup.com/t/868m0men7"
+    }
+   ]
+  },
+  {
+   "n": "10",
+   "name": "Session & call logs",
+   "jtbd": "Replay the call and name the cause — from one timeline.",
+   "verdict": "A · Aligned replay, converged — one clock; B as badges on the line; E keeps the Download menu; D shrinks to Copy link; C folds away.",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-10-call-sheet-transcript.png",
+    "caption": "Before — transcript with no clock; player and transcript are strangers"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-10-call-sheet.png",
+     "caption": "After — call sheet › Transcript, live build",
+     "marks": [
+      {
+       "name": "Copy link · Download",
+       "why": "A pasteable URL and one download menu (recording, transcript .txt/.json) replace scattered ghost buttons."
+      },
+      {
+       "name": "One clock",
+       "why": "Every line carries its time and seeks the recording; Greeting · Interrupted · Ignored · Error say how the turn ended; untimed calls say so instead of faking a clock."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after-10-session-detail.png",
+     "caption": "After — session page, live build",
+     "marks": [
+      {
+       "name": "Copy link · Download menu",
+       "why": "The session page gets the same actions as the call sheet: one link for a ticket, one menu for every artifact."
+      },
+      {
+       "name": "End reasons on the line",
+       "why": "Greeting · Interrupted · Ignored · Error chips on agent turns; the transcript follows playback."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/presence-10-call.png",
+     "caption": "Live check (2026-09-12, deploy mp4vnlddw): 10 on production",
+     "marks": [
+      {
+       "name": "10 · Call and session replay",
+       "why": "Monitor › Call History › call sheet: one clock, end-type badges, Copy link and one Download menu."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "One clock is what 868kbyqfx asks for verbatim and what every competitor keys the transcript on.",
+    "Badges and export attach to the same line model with no new chrome; a second tab or page repeats the Wave 1 'five tabs' mistake.",
+    "Missing artifacts are stated states: No recording · Not retained · No timestamps."
+   ],
+   "copy": [
+    "Copy link · Link copied · Download · Recording · Transcript (.txt) · Transcript (.json) · Trace JSON",
+    "Audio · No recording — it never connected · Not retained · Retention: 30 days · No timestamps for this call",
+    "Greeting · Interrupted · Ignored · Error (titles: Customer started speaking · Semantic end-of-speech: no reply needed · LLM_REQUEST_ERR)",
+    "Turn map · Jump to mm:ss"
+   ],
+   "next": [
+    "Owner: Call History vs Session History (tension #2).",
+    "What 'redacted' hides."
+   ],
+   "links": [
+    {
+     "label": "Preview",
+     "href": "https://ai-studio-console-redesign.vercel.app/calls?call=CALLRV"
+    },
+    {
+     "label": "ClickUp",
+     "href": "https://app.clickup.com/t/868m0meta"
+    }
+   ]
+  },
+  {
+   "n": "11",
+   "name": "SIP & latency diagnostics",
+   "jtbd": "Know whose fault a failed or slow call was — and what to do about it.",
+   "verdict": "A + B on the call page (verdict drives the summary; timed ladder; every verdict names its fix), C on the list; D once Engine payloads carry stage timings; E rejected.",
+   "before": {
+    "img": "references/research/_before-2026-09-11/before-11-sip-tab.png",
+    "caption": "Before — verdict without a timed ladder; repeats drawn in full; nothing marks the deciding message"
+   },
+   "after": [
+    {
+     "img": "references/research/_after-2026-09-11/after-11-sip.png",
+     "caption": "After — call sheet › SIP, live build",
+     "marks": [
+      {
+       "name": "Verdict with the fix",
+       "why": "Whose fault, in words, with the action that fixes it — the summary above now agrees with this verdict."
+      },
+      {
+       "name": "Timed ladder",
+       "why": "Where the time went per leg, repeated cycles collapsed with a count, and the message that decided the verdict marked."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after-11-calls-issues.png",
+     "caption": "After — Call History › With issues, live build",
+     "marks": [
+      {
+       "name": "Issues first, attributed",
+       "why": "Failed calls grouped by whose fault, with counts, before anyone opens a sheet."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/presence-11-sip.png",
+     "caption": "Live check (2026-09-12, deploy mp4vnlddw): 11 on production",
+     "marks": [
+      {
+       "name": "11 · SIP diagnostics",
+       "why": "Monitor › Call History › call sheet › SIP: the verdict with its fix, per-leg time, the timed ladder; the list has All · With issues."
+      }
+     ]
+    }
+   ],
+   "rationale": [
+    "No vendor draws a signalling ladder or names the responsible party; SW4Y4M's verdict was ahead of the market and needed time on the ladder and a fix per verdict.",
+    "A call with no retained trace gets its own honest state: the Call-ID for support, the retention setting, the Events tab.",
+    "Attribution on the list is LiveKit's 'calls with issues' done properly — grouped by whose fault."
+   ],
+   "copy": [
+    "Attributed to · Unknown — no trace · Your carrier · The person you called · Your configuration · Capacity",
+    "Cause could not be determined · No signalling trace was retained for this call. · Retention: 7 days · Change · Send the Call-ID to support · See the Events tab",
+    "Where the time went · Agent → SBC · SBC → Carrier · Ring · slowest · decided here · ×{n} · Show all {n} / Hide repeats",
+    "Call rate limit exceeded · Slow the campaign pacing or raise the CPS limit; the carrier asked for a 12 s Retry-After. · Raise the CPS limit",
+    "All · With issues"
+   ],
+   "next": [
+    "Owner: which fixes can deep-link (CPS limit, trunk settings)?",
+    "Port onto ng-console design/sandbox from SW4Y4M's branch."
+   ],
+   "links": [
+    {
+     "label": "Preview",
+     "href": "https://ai-studio-console-redesign.vercel.app/calls?call=CALLS4"
+    },
+    {
+     "label": "ClickUp",
+     "href": "https://app.clickup.com/t/868m0mety"
+    }
+   ]
+  }
+ ],
+ "audit": [
+  {
+   "id": "N4 Future scope",
+   "before": "Demo switch in the global bar",
+   "after": "Removed; gated features always on"
+  },
+  {
+   "id": "A7 header",
+   "before": "Eight controls, icon-only ghosts",
+   "after": "Bordered + labelled: More · Custom config · Voice call"
+  },
+  {
+   "id": "A8 greeting",
+   "before": "Bare textarea",
+   "after": "Opening section (design 04)"
+  },
+  {
+   "id": "§7 contrast token",
+   "before": "--muted-foreground 4.49:1 → 1 806 axe nodes",
+   "after": "5.0:1 — builder 75 → 5, session detail 109 → 6, calls 51 → 39, sessions 32 → 19 serious/critical"
+  }
+ ],
+ "gates": [
+  {
+   "name": "pnpm tsc --noEmit",
+   "result": "clean"
+  },
+  {
+   "name": "pnpm next build",
+   "result": "exit 0"
+  },
+  {
+   "name": "eslint on touched files",
+   "result": "zero new errors (pre-existing react-compiler rules untouched)"
+  },
+  {
+   "name": "axe (4 changed screens)",
+   "result": "267 → 69 serious/critical nodes; remaining are pre-existing patterns"
+  },
+  {
+   "name": "annotate-shots, third + fourth pass",
+   "result": "after4-* and after5-* all markers matched on production (after5-add-backup after the bfb4406 fix)"
+  },
+  {
+   "name": "Live check (2026-09-12)",
+   "result": "deploy mp4vnlddw: presence markers for 01 02 04 07 10 11 all matched on production; /agents/agt_default/edit and /calls answer 200"
+  }
+ ],
+ "where": [
+  {
+   "n": "01",
+   "name": "Voice picker & recommendations",
+   "area": "Agent builder",
+   "path": "Voice & Models › Agent Voice › Select voice (dialog); also Configure models manually › Configure TTS › Voice › Browse voices",
+   "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=voice-recommended"
+  },
+  {
+   "n": "02",
+   "name": "Turn-taking & listening",
+   "area": "Agent builder",
+   "path": "Voice & Models › Advanced Speech Settings (sheet) › Turn-taking · Listening; Test rail › Voice call › Try interrupting",
+   "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=turn-taking"
+  },
+  {
+   "n": "04",
+   "name": "Greeting, filler & disclaimer",
+   "area": "Agent builder",
+   "path": "Prompt & knowledge › Opening; Advanced Speech Settings › While thinking",
+   "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=opening"
+  },
+  {
+   "n": "07",
+   "name": "Vendors & provider fallback",
+   "area": "Agent builder",
+   "path": "Voice & Models › Backup providers (row under the model stack); + Add backup beside each vendor in Configure models manually; credentials switch in every Configure sheet",
+   "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=backup-providers"
+  },
+  {
+   "n": "10",
+   "name": "Session & call logs",
+   "area": "Monitor",
+   "path": "Monitor › Call History › call sheet › Transcript; Monitor › Sessions › session detail",
+   "href": "https://ai-studio-console-redesign.vercel.app/calls?call=CALLRV"
+  },
+  {
+   "n": "11",
+   "name": "SIP & latency diagnostics",
+   "area": "Monitor",
+   "path": "Monitor › Call History › call sheet › Diagnosis · SIP; Call History list › All · With issues",
+   "href": "https://ai-studio-console-redesign.vercel.app/calls?call=CALLS4"
+  }
+ ]
+}

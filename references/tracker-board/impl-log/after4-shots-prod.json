@@ -1,0 +1,44 @@
+[
+ {
+  "name": "after4-scenarios-door",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';})()",
+  "preWait": 600,
+  "marks": [
+   { "sel": "button[aria-label='Run test scenarios']", "name": "Run test scenarios is a header door", "why": "The scenario suite left the rail's tab strip; it opens the rail in its own mode next to Voice call and Custom config, and the open door reads as pressed." },
+   { "sel": "[role='complementary']", "name": "Rail runs the full viewport height", "why": "The panel is the viewport height, so its left border reaches the bottom instead of stopping where the content ends." }
+  ]
+ },
+ {
+  "name": "after4-callers-hear-field",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=opening",
+  "wait": 6500,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';})()",
+  "preWait": 600,
+  "marks": [
+   { "sel": "#wz-opening-hears", "up": 2, "maxH": 140, "name": "Callers hear is a field, Hear the opening on the same line", "why": "A read-only field like Greeting shows the exact composed line; the play button sits beside it. No new behaviour, the disclosure and greeting still compose it." },
+   { "text": "Played when the agent can", "tags": "p", "name": "No em dashes in copy", "why": "Every em dash in user-facing text was rewritten: label pairs use a middot, sentences a period or colon. The failure, judge and hosting hints now read as sentences." }
+  ]
+ },
+ {
+  "name": "after4-hosting-region",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=deployment",
+  "wait": 6500,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const t=document.querySelector('#wz-hosting-area');t&&t.scrollIntoView({block:'center'});})()",
+  "preWait": 700,
+  "marks": [
+   { "sel": "#wz-hosting-area", "up": 1, "maxH": 120, "name": "Region is label + value", "why": "The options carry their name only; what pinning changes lives in the info disclosure, and a one-line consequence appears only when a region is pinned." }
+  ]
+ },
+ {
+  "name": "after4-end-test-red",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';document.querySelector(\"button[aria-label='Test agent, voice call']\")?.click();await new Promise(r=>setTimeout(r,700));document.querySelector('#wz-rail-talk')?.click();})()",
+  "preWait": 1500,
+  "marks": [
+   { "sel": "#wz-rail-talk", "name": "End test is semantic red", "why": "Ending a call, deleting, removing: the destructive variant (a tint of red) marks every action that stops or takes something away." }
+  ]
+ }
+]

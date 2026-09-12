@@ -1,0 +1,34 @@
+[
+ {
+  "name": "after5-tts-sheet-voice",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Configure models manually'));b&&b.click();await new Promise(r=>setTimeout(r,700));document.querySelector(\"button[aria-label='Configure TTS vendor and credential']\")?.click();})()",
+  "preWait": 1400,
+  "marks": [
+   { "text": "Use my own credentials", "up": 1, "maxH": 60, "name": "Credentials are a switch", "why": "Off means Agora Managed Key, shown with the shield, included. On reveals a select of saved credentials with No credential selected and Create credential, the way the live NG console's drawer does it." },
+   { "text": "Browse voices", "tags": "button", "name": "Voice selection lives in the TTS config too", "why": "The Voice field names the picked voice and opens the Select voice dialog (design 01), like the NG TTS drawer's voice library." }
+  ]
+ },
+ {
+  "name": "after5-add-backup",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Configure models manually'));b&&b.click();await new Promise(r=>setTimeout(r,700));const adds=[...document.querySelectorAll('button')].filter(x=>x.textContent.trim()==='Add backup');adds[0]&&adds[0].click();await new Promise(r=>setTimeout(r,400));const sel=document.querySelector('#wz-backup-asr');sel&&sel.scrollIntoView({block:'center'});})()",
+  "preWait": 900,
+  "marks": [
+   { "sel": "#wz-backup-asr", "up": 1, "maxH": 120, "name": "+ Add backup beside each vendor", "why": "A Backup vendor select appears under the field; the primary vendor is listed but disabled, ineligible vendors say why. The pick is the same one the Backup providers row recaps." },
+   { "text": "Add backup", "tags": "button", "name": "One door per vendor", "why": "LLM and TTS get the same ghost button; nothing is set until you pick." }
+  ]
+ },
+ {
+  "name": "after5-browse-voices",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=voice",
+  "wait": 6500,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';})()",
+  "preWait": 800,
+  "marks": [
+   { "text": "Browse voices", "tags": "button", "name": "Browse voices is a labelled button", "why": "The Select voice dialog had only the field and an icon as doors; the button says what it opens." }
+  ]
+ }
+]
