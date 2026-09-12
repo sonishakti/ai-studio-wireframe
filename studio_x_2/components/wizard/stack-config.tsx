@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, RotateCcw, SlidersHorizontal } from "lucide-react"
+import Link from "next/link"
+import { ChevronDown, RotateCcw, SlidersHorizontal, Plus, X, ShieldCheck, Music2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -14,12 +15,18 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
+import { VoiceBrowser } from "@/components/wizard/voice-browser"
+import type { VoiceArtifact } from "@/lib/voice-artifacts"
+import type { HostingConfig } from "@/lib/hosting-regions"
+import { BACKUP_CANDIDATES, SLOT_LABEL as BACKUP_SLOT, backupOf, planBackups, type BackupConfig, type BackupSlotPlan } from "@/lib/backup-providers"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
   STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackNonStreaming,
   stackCost, slotMode, MANAGED_PROVIDERS, AGORA_RATE_PER_MIN,
   type StackPreset, type AgentStack, type CredentialMode,
+  VENDOR_CREDENTIALS,
 } from "@/lib/campaign-data"
 
 /**
@@ -455,15 +462,25 @@ const SLOT_LABEL = { asr: "STT", llm: "LLM", tts: "TTS" } as const
 /** "Configure LLM" — the per-slot sheet behind each model row's ⚙ button:
  *  Vendor, Credential (managed vs your own key — Agora's `credential_mode`,
  *  per slot), Model (or a Custom id), Save changes. */
+/** What the TTS sheet needs to open the Select voice dialog (design 01) from
+ *  its Voice field, the way the live NG console's TTS drawer does. */
+export interface VoicePickProps {
+  voices?: VoiceArtifact[]
+  selectedVoiceId?: string
+  onPickVoice?: (v: VoiceArtifact) => void
+  useCaseHint?: React.ComponentProps<typeof VoiceBrowser>["useCaseHint"]
+  language?: string
+}
+
 function ConfigureSlotSheet({
-  slot, stack, onChange, open, onOpenChange,
+  slot, stack, onChange, open, onOpenChange, voices, selectedVoiceId, onPickVoice, useCaseHint, language,
 }: {
   slot: "asr" | "llm" | "tts"
   stack: AgentStack
   onChange: (next: AgentStack) => void
   open: boolean
   onOpenChange: (o: boolean) => void
-}) {
+} & VoicePickProps) {
   const current = stack[slot]
   const vendors = React.useMemo(() => {
     const list = slot === "tts" ? STACK_CATALOG.tts : slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm
@@ -474,12 +491,15 @@ function ConfigureSlotSheet({
   const [model, setModel] = React.useState(slot === "tts" ? stack.tts.voice : (current as { model: string }).model)
   const [mode, setMode] = React.useState<CredentialMode>(slotMode(stack, slot))
   const [custom, setCustom] = React.useState(false)
+  const [credentialId, setCredentialId] = React.useState<string | undefined>(stack.credentials?.[slot])
+  const [voiceOpen, setVoiceOpen] = React.useState(false)
   React.useEffect(() => {
     if (open) {
       setVendor(current.vendor)
       setModel(slot === "tts" ? stack.tts.voice : (current as { model: string }).model)
       setMode(slotMode(stack, slot))
       setCustom(false)
+      setCredentialId(stack.credentials?.[slot])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
@@ -491,11 +511,18 @@ function ConfigureSlotSheet({
   }, [slot, vendor])
 
   const resellable = vendor in MANAGED_PROVIDERS
+  const byo = !resellable || mode === "byo"
+  // Saved credentials for this vendor (wireframe: the Vendor Credentials list).
+  const saved = VENDOR_CREDENTIALS.filter((c) => c.vendor.toLowerCase() === vendor.toLowerCase() && c.mode === "byo")
+  const pickedVoice = slot === "tts" ? voices?.find((v) => v.ttsVoice === model && (v.provider ?? "ElevenLabs") === vendor) : undefined
 
   const save = () => {
     const modes = { asr: slotMode(stack, "asr"), llm: slotMode(stack, "llm"), tts: slotMode(stack, "tts") }
+    const credentials = { ...(stack.credentials ?? {}) }
+    if (byo && credentialId) credentials[slot] = credentialId; else delete credentials[slot]
     const next: AgentStack = {
       ...stack,
+      credentials,
       credentialMode: { ...modes, [slot]: resellable ? mode : "byo" },
       ...(slot === "tts"
         ? { tts: { vendor, voice: model } }
@@ -530,39 +557,81 @@ function ConfigureSlotSheet({
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Credential</Label>
-              <a
-                href="/integrations?tab=credentials"
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-2 hover:underline"
-              >
-                Manage <span aria-hidden>↗</span>
-              </a>
+          {/* Credential, the way the live NG console does it (owner 2026-09-12):
+              Agora Managed Key by default; a switch brings your own key, then a
+              select of saved credentials with Create credential at the end. */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor={`wz-cred-${slot}`} className="text-sm font-medium">Use my own credentials</Label>
+              <Switch
+                id={`wz-cred-${slot}`}
+                checked={byo}
+                disabled={!resellable}
+                onCheckedChange={(v) => setMode(v ? "byo" : "managed")}
+              />
             </div>
-            <Select
-              value={resellable ? mode : "byo"}
-              onValueChange={(v) => setMode(v as CredentialMode)}
-              disabled={!resellable}
-            >
-              <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {resellable && <SelectItem value="managed">Agora managed (included)</SelectItem>}
-                <SelectItem value="byo">my-{vendor.toLowerCase().replace(/\s+/g, "-")}-{slot}-credential</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {!resellable
-                ? `${vendor} is bring-your-own-key only. Agora doesn't resell it.`
-                : mode === "managed"
-                ? "Included. No key to add, no vendor bill."
-                : `You add a ${vendor} key and they bill you directly, on top of Agora's rate.`}
-            </p>
+            {byo ? (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground" htmlFor={`wz-cred-pick-${slot}`}>Credential</Label>
+                <Select
+                  value={credentialId ?? "__none__"}
+                  onValueChange={(v) => {
+                    if (v === "__create__") { window.location.assign("/project/vendor-credentials"); return }
+                    setCredentialId(v === "__none__" ? undefined : v)
+                  }}
+                >
+                  <SelectTrigger id={`wz-cred-pick-${slot}`} className="w-full text-sm" aria-label="Credential">
+                    <SelectValue placeholder="Select credential" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {saved.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} <span className="ml-1 font-mono text-xs text-muted-foreground">{c.keyHint}</span>
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__none__">No credential selected</SelectItem>
+                    <SelectItem value="__create__">
+                      <span className="flex items-center gap-1.5"><Plus className="size-3.5" aria-hidden /> Create credential</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {!resellable
+                    ? `${vendor} is bring-your-own-key only. Agora doesn't resell it.`
+                    : `${vendor} bills you directly, on top of Agora's rate.`}
+                </p>
+              </div>
+            ) : (
+              <div className="flex h-9 items-center gap-2 rounded-md border border-stroke bg-muted/40 px-3 text-sm" aria-label="Credential: Agora Managed Key">
+                <ShieldCheck className="size-4 text-success" aria-hidden />
+                Agora Managed Key
+                <span className="ml-auto text-xs text-muted-foreground">Included, no key to add</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">{slot === "tts" ? "Voice" : "Model"}</Label>
-            {custom ? (
+            {slot === "tts" && voices && !custom ? (
+              /* The voice is chosen in the Select voice dialog (design 01), the
+                 way the NG console's TTS drawer opens its voice library. */
+              <div className="flex gap-2">
+                <div className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md border border-stroke px-3 text-sm" aria-label="Selected voice">
+                  {pickedVoice ? (
+                    <>
+                      <span aria-hidden className="size-2 shrink-0 rounded-full bg-primary" />
+                      <span className="font-medium">{pickedVoice.name}</span>
+                      <span className="truncate text-xs text-muted-foreground">{pickedVoice.tagline}</span>
+                    </>
+                  ) : (
+                    <span className="truncate font-mono text-xs">{model}</span>
+                  )}
+                </div>
+                <Button type="button" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={() => setVoiceOpen(true)}>
+                  <Music2 className="size-4" aria-hidden /> Browse voices
+                </Button>
+              </div>
+            ) : custom ? (
               <Input
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
@@ -586,16 +655,102 @@ function ConfigureSlotSheet({
         <div className="shrink-0 border-t border-border px-5 py-3">
           <Button className="w-full" onClick={save}>Save changes</Button>
         </div>
+        {slot === "tts" && voices && (
+          <VoiceBrowser
+            open={voiceOpen}
+            onOpenChange={setVoiceOpen}
+            voices={voices}
+            selectedId={selectedVoiceId}
+            useCaseHint={useCaseHint}
+            language={language}
+            onSelect={(v) => {
+              onPickVoice?.(v)
+              setVendor(v.provider ?? "ElevenLabs")
+              setModel(v.ttsVoice)
+              setVoiceOpen(false)
+            }}
+          />
+        )}
       </SheetContent>
     </Sheet>
+  )
+}
+
+/** "+ Add backup" beside a vendor field (owner 2026-09-12): opens a Backup
+ *  vendor select for that slot. The primary vendor is listed but disabled;
+ *  ineligible vendors say why (language, pinned region). The pick is the same
+ *  `backup.picks` the Backup providers row (design 07) recaps. */
+function InlineBackup({
+  slot, plan, backup, open, onOpen, onChange,
+}: {
+  slot: "asr" | "llm" | "tts"
+  plan: BackupSlotPlan
+  backup: BackupConfig
+  open: boolean
+  onOpen: (o: boolean) => void
+  onChange: (b: BackupConfig) => void
+}) {
+  const pick = backup.picks[slot]
+  if (!pick && !open) {
+    return (
+      <Button type="button" variant="ghost" size="xs" className="gap-1 text-muted-foreground" onClick={() => onOpen(true)}>
+        <Plus className="size-3.5" aria-hidden /> Add backup
+      </Button>
+    )
+  }
+  const primary = BACKUP_CANDIDATES.filter((c) => c.slot === slot && c.vendor === plan.primary.vendor)
+  const remove = () => {
+    const picks = { ...backup.picks }; delete picks[slot]
+    onChange({ ...backup, picks }); onOpen(false)
+  }
+  return (
+    <div className="space-y-1.5 rounded-md border border-dashed border-stroke p-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs text-muted-foreground" htmlFor={`wz-backup-${slot}`}>Backup {BACKUP_SLOT[slot]} vendor</Label>
+        <Button type="button" variant="ghost" size="icon-xs" className="text-muted-foreground" aria-label="Remove backup" onClick={remove}>
+          <X className="size-3.5" aria-hidden />
+        </Button>
+      </div>
+      <Select value={pick ?? ""} onValueChange={(id) => onChange({ ...backup, enabled: true, picks: { ...backup.picks, [slot]: id } })}>
+        <SelectTrigger id={`wz-backup-${slot}`} className="h-8 w-full text-sm" aria-label={`Backup ${BACKUP_SLOT[slot]} vendor`}>
+          <SelectValue placeholder="Select a backup vendor" />
+        </SelectTrigger>
+        <SelectContent>
+          {primary.map((c) => (
+            <SelectItem key={c.id} value={c.id} disabled>{c.label} · primary</SelectItem>
+          ))}
+          {plan.eligible.map((c) => (
+            <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
+          ))}
+          {plan.ineligible.map(({ candidate, why }) => (
+            <SelectItem key={candidate.id} value={candidate.id} disabled>{candidate.label} · {why}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {plan.state === "needs-key" && (
+        <p className="text-xs text-muted-foreground">
+          Your key on the primary: a backup needs a second key.{" "}
+          <Link href="/project/vendor-credentials" className="text-foreground underline underline-offset-4">Add a key</Link>
+        </p>
+      )}
+    </div>
   )
 }
 
 /** "Or Configure models manually" (Figma 2998-93809) — the inline expander:
  *  Custom Stack recap + Reset, the architecture cards, then one row per model
  *  slot with a ⚙ door to its Configure sheet. */
-export function ManualStackConfig({ stack, onChange, className }: StackPieceProps) {
+export function ManualStackConfig({
+  stack, onChange, className, backup, onBackupChange, hosting, voices, selectedVoiceId, onPickVoice, useCaseHint, language,
+}: StackPieceProps & VoicePickProps & {
+  /** Design 07 inline: "+ Add backup" beside each vendor field writes the same picks as the Backup providers row. */
+  backup?: BackupConfig
+  onBackupChange?: (b: BackupConfig) => void
+  hosting?: HostingConfig
+}) {
   const [openSlot, setOpenSlot] = React.useState<"asr" | "llm" | "tts" | null>(null)
+  const [backupOpen, setBackupOpen] = React.useState<Partial<Record<"asr" | "llm" | "tts", boolean>>>({})
+  const plan = React.useMemo(() => planBackups({ stack, hosting, backup: backupOf(backup) }), [stack, hosting, backup])
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   const diverged = pipeline === "stt-llm-tts" && divergedFromPreset(stack)
 
@@ -671,6 +826,11 @@ export function ManualStackConfig({ stack, onChange, className }: StackPieceProp
           onChange={onChange}
           open={!!openSlot}
           onOpenChange={(o) => !o && setOpenSlot(null)}
+          voices={voices}
+          selectedVoiceId={selectedVoiceId}
+          onPickVoice={onPickVoice}
+          useCaseHint={useCaseHint}
+          language={language}
         />
       )}
     </div>

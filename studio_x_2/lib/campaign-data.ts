@@ -329,6 +329,8 @@ export interface AgentStack {
    *  one. Undefined = managed, because managed is the cheaper default and the
    *  auto-provisioned agent already runs that way. */
   credentialMode?: { asr: CredentialMode; llm: CredentialMode; tts: CredentialMode }
+  /** The saved credential picked per slot when the mode is BYO (VENDOR_CREDENTIALS id). */
+  credentials?: Partial<Record<"asr" | "llm" | "tts", string>>
 }
 
 /** Read a slot's mode with the managed default applied. */

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, Code2, Gauge, SlidersHorizontal, Wrench } from "lucide-react"
+import { ChevronDown, Code2, Gauge, Music2, SlidersHorizontal, Wrench } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,8 @@ import { StackTradeoffSlider, ManualStackConfig } from "@/components/wizard/stac
 import { HistoryField } from "@/components/wizard/step-advanced"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_PRESETS, STACK_CATALOG, type AgentStack } from "@/lib/campaign-data"
-import { hasChannel, overriddenSections, type AgentDraft } from "@/lib/wizard-draft"
+import { draftHosting, hasChannel, overriddenSections, type AgentDraft } from "@/lib/wizard-draft"
+import { backupOf } from "@/lib/backup-providers"
 import type { StepProps } from "@/components/wizard/types"
 
 /**
@@ -87,6 +88,24 @@ export function VoiceSection({
 
   const setLanguage = (language: string) => update({ stack: { ...draft.stack, language } })
 
+  /** One voice pick for the Voice row, the Select voice dialog and the TTS
+   *  sheet's Voice field (owner 2026-09-12: the vendor config must show the
+   *  voice too, as the live NG console's TTS drawer does). */
+  const pickVoice = (v: VoiceArtifact) => {
+    // "Add your own voice" just saved a custom; re-read the catalog so the
+    // trigger can name it.
+    if (v.kind === "custom") setVoices(allVoices())
+    // A cross-provider pick from the full catalog flips the TTS vendor, said
+    // out loud, never blocked.
+    const p = v.provider ?? "ElevenLabs"
+    if (!mllm && p !== provider) {
+      toast(`${v.name} uses ${p} TTS`, {
+        description: "The text-to-speech vendor follows the voice. The rest of the tier is unchanged.",
+      })
+    }
+    onSelectVoice(v)
+  }
+
   const modelsOverridden = overriddenSections(draft).some((s) => s === "asr" || s === "llm" || s === "tts")
 
   return (
@@ -142,7 +161,18 @@ export function VoiceSection({
           </button>
           {manualOpen && (
             <div className={cn("space-y-4 pt-4", modelsOverridden && "pointer-events-none opacity-50")}>
-              <ManualStackConfig stack={draft.stack} onChange={handleStackChange} />
+              <ManualStackConfig
+                stack={draft.stack}
+                onChange={handleStackChange}
+                backup={backupOf(draft.backup)}
+                onBackupChange={(b) => update({ backup: b })}
+                hosting={draftHosting(draft)}
+                voices={voices}
+                selectedVoiceId={draft.voice?.id}
+                onPickVoice={pickVoice}
+                useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
+                language={draft.stack.language}
+              />
               <HistoryField
                 id="wz-1-history"
                 value={draft.advanced}
@@ -211,6 +241,11 @@ export function VoiceSection({
                 size="icon"
                 disabled={!selected}
               />
+              {/* The dialog's door says what it opens (owner 2026-09-12: "why do
+                  I not see voice selection here?"). The field stays a trigger too. */}
+              <Button type="button" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={() => setBrowserOpen(true)}>
+                <Music2 className="size-4" aria-hidden /> Browse voices
+              </Button>
             </div>
           </div>
           <div className="min-w-0 basis-44 space-y-1.5">
@@ -249,20 +284,7 @@ export function VoiceSection({
         useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
         language={draft.stack.language}
         agentId={draft.agentId}
-        onSelect={(v) => {
-          // "Add your own voice" just saved a custom — re-read the catalog so
-          // the trigger can name it.
-          if (v.kind === "custom") setVoices(allVoices())
-          // A cross-provider pick from the full catalog flips the TTS vendor —
-          // said out loud, never blocked.
-          const p = v.provider ?? "ElevenLabs"
-          if (!mllm && p !== provider) {
-            toast(`${v.name} uses ${p} TTS`, {
-              description: "The text-to-speech vendor follows the voice. The rest of the tier is unchanged.",
-            })
-          }
-          onSelectVoice(v)
-        }}
+        onSelect={pickVoice}
       />
 
       <VoiceAdvancedSheet
