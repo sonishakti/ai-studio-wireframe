@@ -1,0 +1,132 @@
+[
+ {
+  "name": "after6-stack-default",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+  "preWait": 400,
+  "marks": [
+   {
+    "text": "Agora switches to its backup",
+    "tags": "p",
+    "up": 0,
+    "name": "A default stack needs no backup control",
+    "why": "Managed stack, Agora's keys: the backup is Agora's job. One sentence in the cost card says so; the separate Backup providers section is gone."
+   },
+   {
+    "sel": "#wz-builder-head",
+    "name": "Header frozen at all times",
+    "why": "Name, status, id and the actions stay under the app bar while the page scrolls; the rail, section headers and test rail now stick under it."
+   }
+  ]
+ },
+ {
+  "name": "after6-rows-recap",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Configure models manually'));if(b&&b.getAttribute('aria-expanded')==='false')b.click();await new Promise(r=>setTimeout(r,800));document.querySelector('button[aria-label=\"Configure STT backup\"]')?.scrollIntoView({block:'center'});})()",
+  "preWait": 1000,
+  "marks": [
+   {
+    "sel": "button[aria-label='Configure STT backup']",
+    "up": 0,
+    "name": "Backup recap under each model",
+    "why": "One line names the backup and whose key it runs on. It is read-only here; it and the gear open the same Configure sheet, where the backup is set."
+   },
+   {
+    "sel": "button[aria-label='Configure TTS backup']",
+    "up": 0,
+    "name": "Same line, every model",
+    "why": "STT, LLM and TTS carry the same recap. No inline select, no second section."
+   }
+  ]
+ },
+ {
+  "name": "after6-sheet-backup",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Configure models manually'));if(b&&b.getAttribute('aria-expanded')==='false')b.click();await new Promise(r=>setTimeout(r,700));document.querySelector('button[aria-label=\"Configure STT vendor and credential\"]')?.click();await new Promise(r=>setTimeout(r,900));document.querySelector('#wz-backup-asr')?.scrollIntoView({block:'center'});})()",
+  "preWait": 1200,
+  "marks": [
+   {
+    "sel": "#wz-backup-asr",
+    "up": 1,
+    "name": "Backup lives in the model's own sheet",
+    "why": "Vendor, credential, model, then Backup: the order things are needed in. The primary is listed but disabled, ineligible vendors say why, No backup is a choice."
+   },
+   {
+    "sel": "#wz-bcred-asr-field",
+    "up": 0,
+    "name": "The backup has its own key",
+    "why": "Same credential control as the primary. A backup in Agora's pool runs on Agora Managed Key; any other vendor asks for one of your saved credentials right here."
+   }
+  ]
+ },
+ {
+  "name": "after6-sheet-backup-byo",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 5000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Configure models manually'));if(b&&b.getAttribute('aria-expanded')==='false')b.click();await wait(700);document.querySelector('button[aria-label=\"Configure STT vendor and credential\"]')?.click();await wait(900);const t=document.querySelector('#wz-backup-asr');t.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,pointerType:'mouse',pointerId:1}));await wait(500);const opt=[...document.querySelectorAll('[role=option]')].find(o=>o.textContent.startsWith('Google STT v2'));if(opt){opt.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',pointerId:1}));opt.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,pointerType:'mouse',pointerId:1}));}await wait(600);document.querySelector('#wz-bcred-asr-pick')?.scrollIntoView({block:'center'});})()",
+  "preWait": 1200,
+  "marks": [
+   {
+    "sel": "#wz-bcred-asr-pick",
+    "up": 1,
+    "name": "No key, no backup",
+    "why": "Google STT is bring-your-own-key: the switch locks on and the select offers your saved credentials, No credential selected and Create credential. Until a key is picked the recap says needs your Google key."
+   }
+  ]
+ },
+ {
+  "name": "after6-voice-table",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=voice-recommended",
+  "wait": 6500,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const sc=document.querySelector('[role=dialog] .overflow-y-auto');if(sc){sc.scrollTop=140;}})()",
+  "preWait": 900,
+  "marks": [
+   {
+    "sel": "[role='dialog'] thead",
+    "up": 0,
+    "name": "One table, frozen header",
+    "why": "Voice, Traits, Voice ID, Compare stay put while the list scrolls, and never highlight."
+   },
+   {
+    "sel": "[role='dialog'] tbody tr:first-child",
+    "up": 0,
+    "name": "Recommended is a badge, not a second list",
+    "why": "The three recommended voices sort to the top of the same rows with a star badge; same columns, same Compare, same Use voice."
+   }
+  ]
+ },
+ {
+  "name": "after6-voice-field",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=voice",
+  "wait": 5500,
+  "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+  "preWait": 600,
+  "marks": [
+   {
+    "sel": "button[aria-label='Browse voices']",
+    "up": 0,
+    "name": "One door to the voice dialog",
+    "why": "The field opens Select voice. The extra Browse voices button did the same thing and is gone; the TTS sheet's Voice field is the same control."
+   }
+  ]
+ },
+ {
+  "name": "after6-runs-empty",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=deployment",
+  "wait": 5500,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const card=[...document.querySelectorAll('button, [role=radio]')].find(x=>x.textContent.includes('Batch Calls'));card&&card.click();await new Promise(r=>setTimeout(r,900));const p=[...document.querySelectorAll('p')].find(x=>x.textContent.trim()==='No runs yet');p&&p.scrollIntoView({block:'center'});})()",
+  "preWait": 1000,
+  "marks": [
+   {
+    "text": "No runs yet",
+    "tags": "p",
+    "up": 1,
+    "name": "Empty state on the section grid",
+    "why": "The same row as Knowledge base and MCP server: copy on the left, the door on the right. The centered block that broke the grid is gone."
+   }
+  ]
+ }
+]

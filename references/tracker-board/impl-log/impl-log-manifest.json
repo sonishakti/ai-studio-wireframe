@@ -1,6 +1,6 @@
 {
  "title": "Agent builder — Future scope removed, NG-style chrome, six research features (01 · 02 · 04 · 07 · 10 · 11)",
- "date": "2026-09-12 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main bfb4406 · production ai-studio-console-redesign-mp4vnlddw",
+ "date": "2026-09-12 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main ba26db4 · production ai-studio-console-redesign-7qcx6msas",
  "deploy": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
  "commits": [
   {
@@ -50,6 +50,10 @@
   {
    "sha": "bfb4406",
    "msg": "models(07): render the inline + Add backup beside each vendor row (the component existed but was never mounted)"
+  },
+  {
+   "sha": "ba26db4",
+   "msg": "builder(01,07): backup lives in each model's Configure sheet with its own credential, no separate section; recommended voices are badged rows in one table with a frozen header; one door to the voice dialog; runs empty state on the shared pattern; builder header frozen"
   }
  ],
  "intro": [
@@ -58,7 +62,8 @@
   "Each feature below follows its design-office verdict (references/research/NN-*/05-directions.html). Prototype links open at the start of the journey (?focus=<id>). Copy is proposed, not approved — the sign-off list is under each feature.",
   "The NG token pass (Phase 1 of the revamp) is still ahead: these screens carry the Studio X look. One token was fixed on the way: --muted-foreground now clears AA, which removed most of the Phase-0 axe nodes.",
   "Second pass, same evening: seven owner notes on the first delivery — strip removed, ghost More, NG-style header controls, a better test rail, Figma overlaps fixed, contrast, and a where-it-lives table (below) — plus three follow-ups from screenshots: one header line, side-by-side architecture cards, one primary CTA per fold.",
-  "Third and fourth pass (2026-09-12): ten owner notes on the chrome (Run test scenarios as a header door, full-height rail, Undo to live, Callers hear as a field, hosting region as label + value, red End test, no em dashes anywhere in copy) and three on the models fold (voice selection in the TTS config, + Add backup beside every vendor, credentials as a switch modelled on the NG console). Then a presence check of all six features on production: every marker matched."
+  "Third and fourth pass (2026-09-12): ten owner notes on the chrome (Run test scenarios as a header door, full-height rail, Undo to live, Callers hear as a field, hosting region as label + value, red End test, no em dashes anywhere in copy) and three on the models fold (voice selection in the TTS config, + Add backup beside every vendor, credentials as a switch modelled on the NG console). Then a presence check of all six features on production: every marker matched.",
+  "Fifth pass (2026-09-12, owner IA notes): five surfaces had drifted into new designs of things that already had a home. Backup providers were a section of their own plus an inline select with no key; recommended voices were a list above the voice table; a Browse voices button duplicated the voice field; the runs empty state was centered while every other empty state is a left-aligned row; the builder header scrolled away while everything under it stuck. Each is now a state of the surface that already renders that kind of thing. The rule is recorded: things that belong together live together and look the same, and a default Agora handles needs no control."
  ],
  "features": [
   {
@@ -221,6 +226,30 @@
        "why": "Ending a call, deleting, removing: the destructive variant (a tint of red) marks every action that stops or takes something away."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-stack-default.png",
+     "caption": "After (fifth pass): the header is frozen; a default stack needs no backup control",
+     "marks": [
+      {
+       "name": "A default stack needs no backup control",
+       "why": "Managed stack, Agora's keys: the backup is Agora's job. One sentence in the cost card says so; the separate Backup providers section is gone."
+      },
+      {
+       "name": "Header frozen at all times",
+       "why": "Name, status, id and the actions stay under the app bar while the page scrolls; the rail, section headers and test rail now stick under it."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-runs-empty.png",
+     "caption": "After (fifth pass): the runs empty state on the section grid, same row as Knowledge base and MCP server",
+     "marks": [
+      {
+       "name": "Empty state on the section grid",
+       "why": "The same row as Knowledge base and MCP server: copy on the left, the door on the right. The centered block that broke the grid is gone."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -233,7 +262,9 @@
     "The test rail's two tests are named by what you do — Scenarios (with its count) and Voice call — with a cross-link from the call to the scenarios; section 4 and the preflight say scenarios too.",
     "The three builder columns share one 56 px header line (rail: n of 5 done · Collapse all; section header; test rail header). Model Architecture cards sit side by side.",
     "Third pass (owner notes, 2026-09-12): the scenario suite left the rail's tab strip and became a header door, Run test scenarios, beside Custom config and Voice call; the open door reads as pressed. The rail is the viewport height so its border reaches the bottom. Reset to live is now Undo to live. Callers hear is a read-only field like Greeting, with Hear the opening on the same line and no new behaviour. Hosting region options carry their name only. End test, Delete and Remove use the destructive variant (a tint of red).",
-    "Copy rule, standing: no em dash in user-facing text. Every one was rewritten: label pairs use a middot, sentence elaborations a period or colon. The failure, judge and hosting hints now read as sentences."
+    "Copy rule, standing: no em dash in user-facing text. Every one was rewritten: label pairs use a middot, sentence elaborations a period or colon. The failure, judge and hosting hints now read as sentences.",
+    "Fifth pass (owner, 2026-09-12): the builder header (name, status, id, actions) is sticky under the app bar at all times; the rail, section headers and test rail stick under it, so the three columns keep one continuous line while scrolling.",
+    "The runs empty state was a centered block; every other empty state in the builder is a left-aligned bordered row with the door on the right. It now uses that row. Same thing, same look."
    ],
    "copy": [
     "Help",
@@ -307,13 +338,40 @@
        "why": "Agent builder › Voice & Models › Select voice dialog: Recommended strip, Compare, Add your own voice."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-voice-table.png",
+     "caption": "After (fifth pass): one table with a frozen header; recommended voices are badged rows at the top",
+     "marks": [
+      {
+       "name": "One table, frozen header",
+       "why": "Voice, Traits, Voice ID, Compare stay put while the list scrolls, and never highlight."
+      },
+      {
+       "name": "Recommended is a badge, not a second list",
+       "why": "The three recommended voices sort to the top of the same rows with a star badge; same columns, same Compare, same Use voice."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-voice-field.png",
+     "caption": "After (fifth pass): the voice field is the only door to the dialog",
+     "marks": [
+      {
+       "name": "One door to the voice dialog",
+       "why": "The field opens Select voice. The extra Browse voices button did the same thing and is gone; the TTS sheet's Voice field is the same control."
+      }
+     ]
     }
    ],
    "rationale": [
     "The catalog has no use-case field; the agent's prompt is the use case — reading it costs nothing and needs no API.",
     "Three recommended + three to compare is the Hick's-law budget.",
     "Cloning stays honest: an id, a name, an unchecked consent, a scope line. No fake verification.",
-    "Fourth pass (owner, 2026-09-12): the Configure TTS sheet carries a Voice field that names the picked voice and opens the Select voice dialog, the way the NG console's TTS drawer opens its voice library (src/components/console/agent-config-drawer.tsx). Browse voices is a labelled button beside the field, not an icon; the pick updates vendor and voice together."
+    "Fourth pass (owner, 2026-09-12): the Configure TTS sheet carries a Voice field that names the picked voice and opens the Select voice dialog, the way the NG console's TTS drawer opens its voice library (src/components/console/agent-config-drawer.tsx). Browse voices is a labelled button beside the field, not an icon; the pick updates vendor and voice together.",
+    "Fifth pass (owner, 2026-09-12): the Recommended strip was a second list with its own row design above the table. It is gone: the three recommended voices sort to the top of the same rows and wear a Recommended badge (tooltip: ranked from voice tags against the prompt and greeting, not benchmarks). The header (Voice, Traits, Voice ID, Compare) is frozen and never highlights. Add your own voice moved to the filter row.",
+    "Browse voices duplicated the voice field, which already opens the dialog; the button is removed in Voice & Models and in the Configure TTS sheet. One door per action.",
+    "Read my greeting with no greeting written is not a disabled checkbox any more: the tray links to the Greeting field, closes the dialog and lands on it."
    ],
    "copy": [
     "Recommended for {useCase} / Recommended",
@@ -323,7 +381,9 @@
     "Add your own voice · Voice ID · Name · I have the rights and consent to use this voice · Usable in this project only · Save voice · Clone a voice at {vendor} ↗",
     "No voices match · Clear filters",
     "Play {voice} / Stop {voice}",
-    "Voice · Browse voices · {voice} · {vendor} {description}"
+    "Voice · Browse voices · {voice} · {vendor} {description}",
+    "Recommended (badge) · For {useCase}: ranked from each voice's type and trait tags against your prompt and greeting. Voice tags, not benchmarks.",
+    "Read my greeting needs a greeting first. Write it in Prompt & knowledge"
    ],
    "next": [
     "Owner: may we say 'Recommended' from tags before the benchmark?",
@@ -500,6 +560,44 @@
        "why": "Agent builder › Voice & Models, under the model stack: primary → backup per component, status chip, Change backups."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-rows-recap.png",
+     "caption": "After (fifth pass): a read-only backup recap under each model; the sheet is the only place it is set",
+     "marks": [
+      {
+       "name": "Backup recap under each model",
+       "why": "One line names the backup and whose key it runs on. It is read-only here; it and the gear open the same Configure sheet, where the backup is set."
+      },
+      {
+       "name": "Same line, every model",
+       "why": "STT, LLM and TTS carry the same recap. No inline select, no second section."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-sheet-backup.png",
+     "caption": "After (fifth pass): Configure STT sheet, vendor, credential, model, then Backup with its own credential",
+     "marks": [
+      {
+       "name": "Backup lives in the model's own sheet",
+       "why": "Vendor, credential, model, then Backup: the order things are needed in. The primary is listed but disabled, ineligible vendors say why, No backup is a choice."
+      },
+      {
+       "name": "The backup has its own key",
+       "why": "Same credential control as the primary. A backup in Agora's pool runs on Agora Managed Key; any other vendor asks for one of your saved credentials right here."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after6-sheet-backup-byo.png",
+     "caption": "After (fifth pass): a bring-your-own-key backup asks for its credential right there",
+     "marks": [
+      {
+       "name": "No key, no backup",
+       "why": "Google STT is bring-your-own-key: the switch locks on and the select offers your saved credentials, No credential selected and Create credential. Until a key is picked the recap says needs your Google key."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -508,20 +606,22 @@
     "The public agent API has no fallback field (Engine P1 · Nov): the pool is a draft field, the button says so.",
     "Fourth pass (owner, 2026-09-12): + Add backup sits beside each vendor field in Configure models manually. It opens a Backup vendor select with the primary vendor listed but disabled and ineligible vendors saying why; the pick writes the same draft the Backup providers row recaps, so there is one truth.",
     "Credentials are a switch modelled on the NG console's credential select (src/components/console/studio-resource-select.tsx): off is Agora Managed Key with the shield and Included, no key to add; on is a select of saved credentials with No credential selected and Create credential. A BYO-only vendor keeps the switch on and disabled. The earlier saved-credential placeholder name was wrong and is gone.",
-    "Same-day fix (bfb4406): the inline component existed but was never mounted in the slot rows, so the first production check found no + Add backup. The shots above are from the fixed deploy."
+    "Same-day fix (bfb4406): the inline component existed but was never mounted in the slot rows, so the first production check found no + Add backup. The shots above are from the fixed deploy.",
+    "Fifth pass (owner IA, 2026-09-12): the separate Backup providers section and the inline + Add backup are gone. A backup belongs to the model it protects, so it is set in that model's Configure sheet after the vendor, its credential and the model: Backup vendor (primary listed but disabled, ineligible vendors say why, No backup is a choice) and the backup's own credential, the same CredentialField as the primary. Agora's pool (AssemblyAI, Cartesia) and resold vendors run on Agora Managed Key; any other backup needs one of your saved credentials, and until then the recap says needs your {vendor} key. That answers the owner's question: what about the keys for the backup?",
+    "A default, managed Agora stack shows no backup control at all. One sentence in the cost card says Agora switches to its backup and nothing needs setting up. Backup UI appears only once you configure models manually, where the right panel already owns configuration, sequence and keys.",
+    "Why it drifted: the 07 verdict said one row, on by default, and I drew that row as a new section instead of extending the sheet that already held vendor and credential. The rule now: extend the existing surface, never add a sibling one. Test failover waits for the Engine failover contract (Nov) and is no longer a dead button on screen."
    ],
    "copy": [
-    "Backup providers · Agora keeps a backup ready",
-    "{n} of 3 covered · TTS has no backup · no backup · Add a key · Unpin region · your key — a backup needs a second key · no eligible backup in {area}",
-    "Change backups · Primary · Backup · managed · your key · Needs a second key",
-    "Test failover · Requires Engine failover · Nov",
-    "+ Add backup · Backup {ASR|LLM|TTS} vendor · Select a backup vendor · {vendor} · primary · Remove backup · Your key on the primary: a backup needs a second key. Add a key",
-    "Use my own credentials · Agora Managed Key · Included, no key to add · No credential selected · Create credential · {vendor} is bring-your-own-key only"
+    "Backup · If {vendor} is slow, down or blocked in your region, the call continues on the backup. Switching is never silent: every switch shows in the session log.",
+    "Backup vendor · {vendor} · primary · {vendor} · your key · {vendor} · no {language} · {vendor} · not in {area} · No backup · Agora's pick. Change it, or choose No backup.",
+    "Use my own credentials for the backup · Agora Managed Key · Included, no key to add · No credential selected · Create credential · {vendor} is bring-your-own-key only. Agora doesn't resell it.",
+    "Backup · {backup} · Agora Managed Key / {credential name} / needs your {vendor} key / none",
+    "If a vendor is slow or down, Agora switches to its backup. Nothing to set up."
    ],
    "next": [
     "Owner: agent property or deployment property?",
-    "Confirm the backup pool vendors.",
-    "Owner: is the credential switch the right door, or should Studio X reuse the NG select as-is (Agora Managed Key as the first option)?"
+    "Confirm the backup pool vendors (AssemblyAI and Cartesia in Agora's pool).",
+    "Test failover returns when the Engine failover contract ships (Nov)."
    ],
    "links": [
     {
@@ -726,8 +826,12 @@
    "result": "after4-* and after5-* all markers matched on production (after5-add-backup after the bfb4406 fix)"
   },
   {
-   "name": "Live check (2026-09-12)",
-   "result": "deploy mp4vnlddw: presence markers for 01 02 04 07 10 11 all matched on production; /agents/agt_default/edit and /calls answer 200"
+   "name": "annotate-shots, fifth pass",
+   "result": "after6-* all 7 shots, every marker matched on production (deploy 7qcx6msas)"
+  },
+  {
+   "name": "Live check (2026-09-12, fifth pass)",
+   "result": "header sticky at 48 px, 64 px tall, rail at 112 px while scrolled; no Browse voices button; no Backup providers section; /agents/agt_default/edit answers 200"
   }
  ],
  "where": [
@@ -735,7 +839,7 @@
    "n": "01",
    "name": "Voice picker & recommendations",
    "area": "Agent builder",
-   "path": "Voice & Models › Agent Voice › Select voice (dialog); also Configure models manually › Configure TTS › Voice › Browse voices",
+   "path": "Voice & Models › Voice field › Select voice (dialog, one table); the same field in Configure models manually › Configure TTS",
    "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=voice-recommended"
   },
   {
@@ -756,7 +860,7 @@
    "n": "07",
    "name": "Vendors & provider fallback",
    "area": "Agent builder",
-   "path": "Voice & Models › Backup providers (row under the model stack); + Add backup beside each vendor in Configure models manually; credentials switch in every Configure sheet",
+   "path": "Voice & Models › Configure models manually › Configure STT / LLM / TTS (sheet) › Backup; a read-only recap under each model row",
    "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=backup-providers"
   },
   {

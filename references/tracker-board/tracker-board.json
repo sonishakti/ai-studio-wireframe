@@ -1,5 +1,5 @@
 {
- "updated": "2026-09-11",
+ "updated": "2026-09-12",
  "source": {
   "label": "ClickUp · Convo AI › Design Tracker (901114875662)",
   "url": "https://app.clickup.com/8556478/v/l/li/901114875662"
@@ -42,12 +42,11 @@
     }
    ],
    "shot": {
-    "file": "references/research/_after-2026-09-11/after-01-voice-browser.png",
-    "alt": "Select voice with the Recommended strip, the Compare column and Add your own voice — marked in red",
-    "figmaHash": "09bd34ee6fc47e239d5417d504f9a3516a0248c8"
+    "file": "references/research/_after-2026-09-11/after6-voice-table.png",
+    "alt": "Select voice: one table with a frozen header, recommended voices badged at the top, marked in red"
    },
-   "rationale": "Inside the existing Select voice dialog: a Recommended strip (three voices ranked from the prompt's use case — tags, not benchmarks), a Compare column with a tray to hear ≤3 on the same script, and Add your own voice (id · name · consent · scope). The catalog, filters and paging are untouched.",
-   "next": "Review on the preview. Decide: may we say 'Recommended' from tags before the benchmark? Sign off the strip copy and the consent line.",
+   "rationale": "Inside the existing Select voice dialog, one table: the header (Voice, Traits, Voice ID, Compare) is frozen and never highlights; the three voices ranked from the prompt's use case sort to the top of the same rows with a Recommended badge (tags, not benchmarks); a Compare column with a tray to hear up to 3 on the same script; Add your own voice in the filter row. The voice field is the only door to the dialog: the extra Browse voices button is gone, in Voice & Models and in the TTS sheet. Read my greeting sends you to the Greeting field when none is written.",
+   "next": "Review on the preview. Decide: may we say Recommended from tags before the benchmark? Sign off the badge copy and the consent line.",
    "secondary": [
     {
      "vendor": "Vapi",
@@ -1590,12 +1589,11 @@
     }
    ],
    "shot": {
-    "file": "references/research/_after-2026-09-11/after-07-backup-providers.png",
-    "alt": "Voice & Models › Backup providers row under the model stack — marked in red",
-    "figmaHash": "f05be5b7e9e834af3357894c0d066ff9d04995d0"
+    "file": "references/research/_after-2026-09-11/after6-sheet-backup.png",
+    "alt": "Configure STT sheet: vendor, credential, model, then Backup with its own credential, marked in red"
    },
-   "rationale": "One Backup providers row under the model stack, on by default: primary → backup per component in a mono recap, a status chip (3 of 3 covered / TTS has no backup), Change backups folds to the ordered pool with eligibility (language, pinned region), BYO components ask for a second key, and Test failover names the Engine dependency (Nov) instead of pretending.",
-   "next": "Owner: agent property or deployment property? Confirm the backup pool vendors and the Nov Engine date on the button.",
+   "rationale": "The backup lives with the model it protects. In each model's Configure sheet, after the vendor, its credential and the model: a Backup vendor select (primary listed but disabled, ineligible vendors say why, No backup is a choice) and the backup's own credential, the same control as the primary (Agora Managed Key for Agora's pool, your saved credential otherwise: no key, no backup). The manual rows carry a one-line read-only recap. A default Agora stack shows no backup control at all: one sentence in the cost card says Agora switches for you. The separate Backup providers section and the inline + Add backup are gone.",
+   "next": "Owner: agent property or deployment property? Confirm the backup pool vendors (AssemblyAI, Cartesia in Agora's pool). Test failover waits for the Engine failover contract (Nov).",
    "secondary": [
     {
      "vendor": "Vapi",
