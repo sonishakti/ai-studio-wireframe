@@ -1,0 +1,1013 @@
+{
+ "$comment": "Agent builder tracking plan. Companion to docs/strategy/agent-builder-kpis.md. Names are object_verb past tense; properties are snake_case; no free text, no unbounded cardinality. trigger:'auto' is excluded from every metric.",
+ "version": "1.0.0",
+ "updated": "2026-09-15",
+ "surface": "studio_x_2 agent builder",
+ "conventions": [
+  "NAMING — freeze `snake_case`, `object_verb`, PAST TENSE (`agent_test_started`, `deploy_blocked`). PostHog's own docs contradict themselves (best-practices page says present tense `category:object_action`; JS SDK page says past tense `object verb`), so this is an Agora decision, not a PostHog one. studio_x_2/lib/analytics.ts already declares this rule at the top of the file and has 88 `track()` call sites obeying it — do not churn them. Allowed verbs: opened, closed, started, ended, completed, selected, changed, configured, previewed, edited, generated, clicked, blocked, succeeded, failed, received, reviewed, promoted, rolled_back, exited, resumed, rated, imported, linked.",
+  "PROPERTY CASING — camelCase, wire-compatible with ng-console. ng-console/src/lib/observability/sanitize.ts silently DROPS any property not on a 48-key camelCase allowlist (`durationMs`, `routePattern`, `productArea`, `trigger`, `scenario`, `surface`, `operation`, `result`, `errorStage`…). studio_x_2's stub emits snake_case (`agent_id`, `time_to_live_ms`), which would arrive in PostHog as events with NO properties. Decision: studio_x_2 converts to camelCase (it has zero production data); ng-console extends the allowlist with the builder keys below. Do this in ONE PR before any new event ships, or the funnel will look instrumented and be un-sliceable.",
+  "ALLOWLIST ADDITIONS required in ng-console/src/lib/observability/sanitize.ts before wave 0: agentId, agentState, builderSessionId, section, sectionIndex, isFirstAgent, channel, preset, pipeline, vendor, slot, credentialMode, voiceId, voiceVendor, blockedReason, blockedStep, blockCount, warnCount, wallMs, activeMs, resumeCount, turnCount, e2eLatencyBucket, verdict, passCount, failCount, scenarioCount, configured, heardOwnGreeting, railOpen, viewport, versionId, canaryCalls, endReason. This one change also retroactively fixes three already-firing live events — `caller_first_selected`, `ai_disclosure_enabled`, `greeting_previewed` in ng-console/src/components/console/agent-opening-section.tsx (lines 114/129/186) currently lose `agentId` and `seconds` entirely.",
+  "BASE PROPERTIES go on `posthog.register()` at init/identify, never per-call: schemaVersion, release, environment, eventSource, productArea='agent_builder', isInternalUser, isTestUser, trafficType, cid, accountUid, isFirstAgent. Enforce the allowlist in posthog-js `before_send`, not only in the facade — sanitize.ts today proves intent, `before_send` proves behaviour. Note posthog-js may be imported ONLY from ng-console/src/lib/observability/posthog-client.ts (enforced by src/lib/observability/sdk-import-guard.ts) — so studio_x_2's `track()` must become a thin facade call, not its own PostHog client.",
+  "RENAME THE CLOCK. 'TTFA' is already an industry term meaning Time To First Audio, measured in milliseconds (Hamming's pre-launch gate is TTFA < 800 ms). Using it for a minutes-scale onboarding metric guarantees permanent confusion in every review with a voice engineer. Call the onboarding clock **TTFT — Time To First Talk**; keep TTFA for the runtime per-turn metric. Five-minute fix now, unfixable once it is a dashboard title.",
+  "TTFT DEFINITION (the headline speed metric). Start = `builder_opened` where `isFirstAgent=true`, keyed on `builderSessionId`. Stop = `agent_audio_heard` with `trigger != 'auto'` AND `configured=true` AND `turnCount >= 1`. Reported as THREE numbers on the stop event: `wallMs` (persisted Date.now delta across reloads), `activeMs` (visibility-aware accumulation — the primary design metric), `resumeCount` (separate sittings). Winsorize at 600 000 ms; sessions past the ceiling are counted as a separate failure rate, never as long successes. Report median + p75 when n>=25, geometric mean with log-transformed CI when n<25 (Sauro & Lewis). NEVER report the arithmetic mean. Population: first agents only; exclusions declared per metric-definitions.md.",
+  "TTFT REFINEMENT PATH, committed now so v2/v3 are a redefinition not a re-instrumentation: v1 = first audio heard with turnCount>=1; v2 = turnCount>=3 (they had a conversation); v3 = turnCount>=3 AND e2eLatencyBucket acceptable (they heard a GOOD agent). Log `turnCount` and `e2eLatencyBucket` on `agent_audio_heard` from day one so all three are computable retroactively (Amazon's detail-page→detail-page-view→in-stock→Fast-Track refinement pattern).",
+  "TTFD DEFINITION (time to deployed agent). Start = the SAME `builder_opened` origin as TTFT, not `agent_audio_heard` — re-anchoring both clocks on one origin is what makes them comparable and stops TTFD moving mechanically whenever the TTFT stop condition is edited. Stop = `deployment_went_live`. Emit `wallMs`, `activeMs`, `resumeCount`, plus `blockedOn` ∈ none | external_carrier | regulatory_review | payment_method | credential — a Twilio regulatory bundle takes up to 3 business days (21 in KYC countries) and must not contaminate the builder's own clock. Winsorize at 24 h. Report `activeMs` as the design metric and `wallMs` as the honest customer-experience number, side by side.",
+  "CURRENT DURATION CODE IS BROKEN AND MUST BE REPLACED FIRST. studio_x_2/lib/analytics.ts: `timeToLiveMs()` calls `localStorage.removeItem()` BEFORE returning, so a failed dispatch or a React StrictMode double-invoke destroys the measurement with no retry; `markBuildStart()` writes only `if (!localStorage.getItem(...))` so a returning user's second agent is still measured from their first-ever builder mount (a four-day 'time to live'); `agent_test_ended` sends `duration_sec: 30` as a LITERAL with no timer; `time_to_live_ms` is a measurement used as an event name; and `duration_sec` vs ng-console's `durationMs` is two units for one clock. Replace all of it with one `useDurationClock(scopeKey)` hook: stamp per `agentId + builderSessionId`, expire after 2 h idle, clear only in the capture callback, milliseconds everywhere.",
+  "CLOCK MECHANICS. `performance.now()` deltas for within-page active time (monotonic, immune to NTP/system-clock jumps); a persisted `Date.now()` stamp only for spans that cross a reload. Never mix them. Accumulate `activeMs` from `visibilitychange` + Date.now deltas, never from a `setInterval`/rAF tick counter — background tabs throttle those to >=1 s or freeze them entirely. Never write a duration to a person property with `$set` (PostHog sets person properties in INGESTION order, not timestamp order, so a late event overwrites it); use `$set_once` for first-time milestones only.",
+  "SERVER ANCHOR FOR THE STOP EVENT. `agent_audio_heard` fired purely client-side is exposed to telemetry-loss bias — the exact failure that invalidated every client-event metric in Microsoft's mobile experiment — and a live voice session is precisely where a client drops its last beacon. Anchor the canonical stop on the runtime's first turn-finished for that agent (ng-console/src/lib/latency-metrics.ts already parses Agora notification event 112) and keep the client event as secondary. Ship a data-quality insight comparing client `agent_audio_heard` count to server turn count from day one; without it the wave-0 baseline is uninterpretable.",
+  "MEASURE PER PERSON OVER A WINDOW, NOT PER SESSION. A PostHog session ends after 30 min idle or 24 h total, and TTFD's p75 target routinely crosses that boundary; 40% of interrupted tasks are never resumed in the same sitting at all. Build TWO funnels per clock, never one: 'same sitting' with a 60-minute conversion window (the number quoted against the target) and 'eventual' with a 7-day window (the number that feeds activation). The gap between them IS the multi-session finding.",
+  "FUNNEL ORDER = Sequential, pinned in the spec with a comment. ng-console runs `autocapture: true`, so Strict order (no events in between) would report near-zero conversion on every builder funnel. Mark every KPI event Verified in Data Management so funnels are never assembled from an autocapture lookalike.",
+  "THE FUNNEL'S PERCENTILES CANNOT COME FROM THE FUNNEL. PostHog's time-to-convert view exposes median and mean only — no p75/p90 (open issue #24208). Every p75 in the KPI doc must come from a numeric duration property read through a Trends percentile aggregation (75th/90th/95th/99th are the only options) or a HogQL `quantile()` insight. The funnel median is the independent cross-check, not the source of truth. Note also PostHog rewrites event timestamps for clock skew (`timestamp = now + timestamp - sent_at`) while the client `wallMs` is uncorrected, so the two will legitimately differ: declare the client number canonical and treat a >10% gap as a data-quality alarm, not a metric move.",
+  "EXPOSURE AND FLAGS. Ship every builder change behind a flag whose key equals its assumption id (`builder-a1-model-preset`), so `$feature_flag` breaks any funnel down by ledger row with no extra property. Bootstrap flags server-side (`@posthog/next` `bootstrapFlags`) — 100–500 ms of flag-evaluation latency is both a UX defect and a measurement artefact in a product whose headline metric is time-to-first-answer. When a funnel is used as an experiment metric, DROP the first step: PostHog makes the exposure event step 1 automatically, and including `builder_opened` double-counts.",
+  "VOLUME REALITY — WRITE IT INTO THE PLAN. Agora's entire international base is ~1,880 accounts with total active customers up 0.4% YoY, i.e. tens of first-agent sessions per week. PostHog's own formula (N = 16×variance/d²) puts the 24h-rollback guardrail at ~1,216 users/arm and tested-before-live at ~816/arm — unreachable. Only TTFT has any prospect of a powered flag test (~100/arm at CV 0.5, ~900 at a realistic CV 1.5 — measure the variance in wave 0 before promising anything). Everything else is staged rollout + before/after against a pre-declared baseline, plus a 20-participant moderated benchmark, which is the only instrument that can actually resolve the ~20–30% TTFT change the ledger predicts.",
+  "@posthog/next FOR studio_x_2 (Next.js App Router, currently zero PostHog wiring). Use `postHogMiddleware({ proxy: true })` (`/ingest`, survives ad blockers — ad-blocked users never emit a start event, so blocking biases TTFT DOWNWARD by dropping only the slow survivors' peers), `bootstrapFlags`, and `<PostHogPageView captureRouteTemplate />`. Its route property is `$route`, NOT ng-console's `routePattern` — map one to the other in `before_send`; do not let both exist. Pin the exact version (pre-release, API churn) and pin posthog-js `defaults` to ONE dated string with a comment — an unpinned bump silently changes pageview capture, replay duration semantics and internal-user detection mid-baseline.",
+  "THE SPEC IS COMMITTED AND CI-CHECKED. PostHog has NO ingestion-side schema enforcement (its enforcer plugin was archived 2024-07-26; malformed events are ingested with a warning, and 'Verified' is documentation not a gate). So: commit `docs/observability/tracking-plan.md` (human) plus `posthog.json` + `posthog-typed.ts` from `posthog-cli exp schema pull`, run `exp schema status` in CI and fail on drift, ban `captureRaw()` in lint, pin the CLI version (the `exp` prefix means the surface can change). Also commit `docs/observability/metric-definitions.md` with eight fields per metric — name · definition sentence · formula with numerator AND denominator named · population · window · exclusions · owner · action threshold. The exclusions line (bots, internal cids, duplicated agents, imported agents, resumed sessions, `trigger='auto'`) is the one every draft omits and the one that makes two people compute two different TTFTs in week one."
+ ],
+ "identity": [
+  "ng-console already solves identity and it is NOT anonymous: `facade.ts identify()` calls `posthog.identify(accountUid ?? userId, sanitized(identity))` then `posthog.group('cid', cid)`, and `AuthenticatedObservabilityGate` renders NOTHING until identify has resolved — so no builder event can ever fire before identity is attached. Do not invent a second identity path in studio_x_2; call the same facade.",
+  "PERSON = `accountUid ?? userId`. This is the randomisation unit for every experiment and the unit for retention/lifecycle insights (PostHog does not support group types on lifecycle or user-paths).",
+  "ORGANIZATION = the EXISTING `cid` group type. Keep it. It is the right unit for a B2B console where two engineers share one agent, and it is what makes 'how fast is our platform' answerable per company rather than per browser.",
+  "PROJECT = a SECOND group type, `project`. Call `posthog.group('project', projectId, { name, region, createdAt })` in the SAME tick as `identify()` and `group('cid')`, before any builder event — groups only attach to events sent AFTER the call, so a late call leaves the first event of every session ungrouped. A group needs at least one property to appear in the People & groups tab.",
+  "AGENT = a THIRD group type, `agent`, but GATE IT. PostHog allows 5 group types per project; retention by agent (the per-agent AR7 the KPI doc wants) requires group analytics. Ship `posthog.group('agent', agentId, …)` behind one env-gated helper and ALWAYS send `agentId` as a plain event property regardless, so the person-level version works on day one and the switch is a config change later.",
+  "BILLING WARNING TO RAISE WITH THE OWNER BEFORE ENABLING ANY NEW GROUP TYPE: the group-analytics add-on is ~$0.000071/event and bills EVERY identified event in the project, not just events carrying group properties — roughly 2.4× the $0.00005 base identified rate. Because ng-console identifies before first render, 100% of console events are identified. Budget it as a wave-3 decision tied to AR7, not a wave-0 default; until then `cid` and `projectId` ride as event properties on the launch dashboard.",
+  "ACTIVATION IS DEFINED TWICE, ON PURPOSE. (a) A person property `activationState` ∈ none | tested | deployed | proven, written with `$set` at each milestone — instant, and the ONLY form that can target a feature flag (PostHog refuses dynamic cohorts with behavioural/lifecycle criteria as flag targets). (b) A dynamic cohort for analysis. Dynamic cohorts recalculate once per 24 h, so never use one for a same-day read or the daily design-agent report.",
+  "INTERNAL TRAFFIC: keep it, never exclude it globally, and always break down by `trafficType`. ng-console auto-classifies any @agora.io email as internal, so the design team dogfooding will otherwise flatter every median. Two required fixes: (1) pass `classifyNonProductionAsTest: true` at `AuthenticatedObservabilityGate` before the redesign hits a Vercel preview — today preview/local traffic falls through to `authenticated_identity` and is counted as EXTERNAL; (2) turn OFF PostHog's project setting 'enable the internal-user filter on all new insights', because the default is not neutral and once `defaults >= 2026-01-30` is pinned, localhost is auto-flagged internal.",
+  "PRIMARY BREAKDOWN ON EVERY BUILDER INSIGHT is `isFirstAgent`. Agora's revenue is expansion-led (Q2 2026: revenue +18% YoY, DBNRR 104%, active customers +0.4%), so a metric counting only first agents from new accounts measures the thinnest part of the business. Split Weekly Proven Agents into a new-account series and an existing-account series and report both.",
+  "ANONYMOUS PRE-AUTH: if a logged-out 'hear it talk' demo ships (Bland and LiveKit both have one; Agora does not), fire `agent_test_started{authState:'anonymous'}` with `$process_person_profile:false` (anonymous events are up to 4× cheaper) and rely on PostHog's anonymous→identified join at signup. It is the only TTFT measurement that can ever reach zero minutes."
+ ],
+ "rules": [
+  "No property may carry text a user typed. deploy_blocked emits a stable `code`, never the interpolated reason string.",
+  "Durations accumulate from visibilitychange deltas, never a tick counter, and are winsorised at 900000 ms.",
+  "trigger:'auto' (the prototype's 150 ms auto-start) is excluded from TTFA, VTR and FPA.",
+  "Every new property key must be added to the ng-console sanitiser allowlist or it is dropped silently.",
+  "Cost and latency are bucketed, never sent raw, to bound cardinality."
+ ],
+ "deployBlockedCodes": [
+  "no_voice",
+  "no_channel",
+  "no_surface",
+  "no_number",
+  "no_prompt",
+  "batch_no_run",
+  "batch_no_number",
+  "batch_no_csv",
+  "batch_no_schedule",
+  "batch_uncovered_vars"
+ ],
+ "testRefusedCodes": [
+  "mic_denied",
+  "quota_exhausted",
+  "payment_required",
+  "no_voice",
+  "runtime_unavailable",
+  "user_cancelled"
+ ],
+ "events": [
+  {
+   "name": "builder_opened",
+   "when": "On mount of the agent editor route, once per builderSessionId. Generate builderSessionId here (crypto.randomUUID) and start the duration clock. Skip when the mount effect early-returns for ?view=list.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "isFirstAgent",
+    "agentState (new|draft|live)",
+    "entryPoint (create_dialog|agents_list|deep_link|direct)",
+    "trigger (user|auto)",
+    "railOpen",
+    "viewport (desktop|below_lg)",
+    "hasRestorableDraft",
+    "routePattern"
+   ],
+   "feeds": [
+    "TTFT clock START",
+    "TTFD clock START",
+    "Activation funnel step 1",
+    "Builder-entry denominator for every rate"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx → the mount useEffect that currently calls markBuildStart()"
+  },
+  {
+   "name": "builder_resumed",
+   "when": "On the same mount effect, when restoreDraft()/hasDraft() finds a stored draft and the 'Resuming unsaved edits' / 'Draft restored' toast is shown. Fires IN ADDITION to builder_opened.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "draftAgeMs",
+    "resumeStep (1-5)",
+    "resumeCount",
+    "discarded (boolean, patched on the toast's Discard action)"
+   ],
+   "feeds": [
+    "Multi-session share of TTFT/TTFD",
+    "Decides whether the clocks are reported per session or per agent",
+    "Resumability design row"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx → mount effect, restore branches (lib/wizard-draft.ts restoreDraft/hasDraft)"
+  },
+  {
+   "name": "builder_section_opened",
+   "when": "Every time a section becomes the active/expanded one — rail click, ⌘K, deep link, 'Fix this' jump. openRow(n) is the single funnel for all four, so one call site covers them.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "section (voice_models|deployment|prompt|test|golive)",
+    "sectionIndex",
+    "trigger (rail|command_palette|deep_link|preflight_fix|next_button)",
+    "blocksRemaining"
+   ],
+   "feeds": [
+    "Per-section dwell budgets (§2.3)",
+    "Section-order IA evidence (is Test reached before Deployment?)",
+    "Struggle conjunction"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx → openRow(n)"
+  },
+  {
+   "name": "builder_section_completed",
+   "when": "When a section is left (openRow moves elsewhere, section collapses, or component unmounts) AND its isDone(n) predicate is true. Use transport:'sendBeacon' for the unload case.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "section",
+    "sectionIndex",
+    "wallMs",
+    "activeMs",
+    "resumeCount",
+    "overBudget (boolean vs the section's p75 budget)",
+    "editCount"
+   ],
+   "feeds": [
+    "p75 dwell per section — the ONLY source, since funnel time-to-convert has no p75",
+    "45s/90s/60s/2m/5m/90s budget table",
+    "Where the 3-minute target is actually being spent"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx → openRow(n) exit path + a useEffect cleanup in the section owner"
+  },
+  {
+   "name": "stack_preset_changed",
+   "when": "The latency-vs-cost slider or preset cards commit a new preset. Debounce the slider to fire on release, not per tick.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "preset (fastest|balanced|cheapest)",
+    "fromPreset",
+    "estLatencyMs",
+    "estCostPerMin",
+    "changeCount (nth change this session)",
+    "isDefault (boolean — did they land back on balanced)"
+   ],
+   "feeds": [
+    "A1 preset-vs-manual arm",
+    "Change-away-from-default rate — the direct test of whether the default is right (Johnson & Goldstein: a bad default is what destroys completion, not asking)",
+    "§1 dwell"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/stack-config.tsx → StackTradeoffSlider onValueChange / StackPresetCards setPreset; commits via components/wizard/voice-section.tsx handleStackChange"
+  },
+  {
+   "name": "manual_config_opened",
+   "when": "The 'Or configure models manually' expander opens. Once per open, not per render.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "preset",
+    "trigger (expander|deep_link)"
+   ],
+   "feeds": [
+    "A1 assumption ('70% of first agents never open manual config')",
+    "Denominator for every Configure-sheet rate",
+    "§1 over-budget diagnosis"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/stack-config.tsx → ManualStackConfig expander onOpenChange"
+  },
+  {
+   "name": "model_slot_sheet_opened",
+   "when": "A per-vendor Configure sheet opens for one slot (asr/llm/tts).",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "slot (asr|llm|tts)",
+    "vendor",
+    "credentialMode (managed|byo)",
+    "reentryCount (nth open of this slot this session)"
+   ],
+   "feeds": [
+    "Sheet re-entry — one of the four struggle signals, owned as its own normalised rate",
+    "§1 manual-path dwell (2 min p75 budget)"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/stack-config.tsx → ConfigureSlotSheet onOpenChange"
+  },
+  {
+   "name": "model_slot_configured",
+   "when": "A Configure sheet is saved and applySlot() mutates the stack. Do NOT fire on sheet dismiss without save — that is sheet_abandoned.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "slot",
+    "vendor",
+    "model",
+    "credentialMode",
+    "hasBackup (boolean)",
+    "backupVendor",
+    "wallMs (sheet open → save)"
+   ],
+   "feeds": [
+    "A4 backup attach rate",
+    "Manual-config completion rate",
+    "BYO-vs-managed split"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/stack-config.tsx → applySlot() (called from ConfigureSlotSheet save)"
+  },
+  {
+   "name": "model_slot_abandoned",
+   "when": "A Configure sheet closes without a save. HEART's 'failure is easier to identify than success' signal — far more sensitive than dwell time.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "slot",
+    "vendor",
+    "fieldsTouched",
+    "lastFieldTouched",
+    "wallMs"
+   ],
+   "feeds": [
+    "Struggle conjunction (>=2 signals in one section)",
+    "Which field kills the manual path"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/stack-config.tsx → ConfigureSlotSheet onOpenChange(false) when no save fired"
+  },
+  {
+   "name": "credential_mode_changed",
+   "when": "The managed/BYO toggle in a slot changes.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "slot",
+    "credentialMode",
+    "vendor"
+   ],
+   "feeds": [
+    "Proportion of agents reaching first talk with zero keys — the zero-credential claim",
+    "A2 failure-branch diagnosis"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/stack-config.tsx → SlotMode onValueChange"
+  },
+  {
+   "name": "credential_page_exited",
+   "when": "IMMEDIATELY BEFORE window.location.assign('/project/vendor-credentials') in the credential Select's __create__ branch. This is the builder's only hard page-exit on a configuration path: it destroys React state, is three levels deep (sheet → expander → section 1), and has no return affordance. Use sendBeacon.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "slot",
+    "vendor",
+    "section",
+    "returnToProvided (boolean)"
+   ],
+   "feeds": [
+    "Highest-value leak in the funnel",
+    "Explains unreturned TTFT sessions",
+    "A-row for in-sheet credential creation"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/stack-config.tsx:529 → CredentialField Select onValueChange, the `if (v === \"__create__\")` branch"
+  },
+  {
+   "name": "voice_browser_opened",
+   "when": "The Select-voice dialog opens.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "trigger (voice_row|manual_door|preflight_fix)",
+    "hasVoice (boolean — first pick vs change)",
+    "reentryCount"
+   ],
+   "feeds": [
+    "§1 voice budget (90s p75)",
+    "A5 preview-count denominator"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/voice-browser.tsx → VoiceBrowser open; opened from components/wizard/voice-section.tsx"
+  },
+  {
+   "name": "voice_previewed",
+   "when": "A voice sample plays. Throttle to one event per voiceId per 10s so auditioning does not spam ingestion.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "voiceId",
+    "voiceVendor",
+    "previewIndex (nth preview this session)",
+    "usedOwnGreeting (boolean)",
+    "playbackLatencyMs"
+   ],
+   "feeds": [
+    "A5 (previews 6 → 3)",
+    "Doherty 400ms budget on preview start — a slow preview makes users audition fewer voices and pick worse",
+    "§1 voice dwell"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/voice-sample-button.tsx → play handler (used by voice-browser.tsx rows)"
+  },
+  {
+   "name": "voice_selected",
+   "when": "'Use' is clicked on a voice row — VoiceBrowser.use() → onSelect → seedFromVoice(). Note this one action also fills name, systemPrompt and greeting, satisfying two of the four publish blocks.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "voiceId",
+    "voiceVendor",
+    "previewsBeforeSelect",
+    "wallMs (browser open → select)",
+    "seededPrompt (boolean)",
+    "language"
+   ],
+   "feeds": [
+    "§1 completion",
+    "Blocks-remaining drop",
+    "A5 verdict"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/voice-browser.tsx:130 → use(v); commits in components/wizard/agent-wizard.tsx seedFromVoice()"
+  },
+  {
+   "name": "prompt_edited",
+   "when": "First meaningful edit to systemPrompt per section visit, then throttled to one per 30s. Derive from the single update(patch) callback by inspecting Object.keys(patch) — do not instrument the textarea directly.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "promptLength",
+    "promptBucket (short|medium|long)",
+    "fromTemplate (boolean)",
+    "editCount",
+    "seeded (boolean — was it seedFromVoice's default)"
+   ],
+   "feeds": [
+    "§3 budget (5 min p75 — the section most at risk)",
+    "Did the seeded default survive, or did they rewrite it"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/agent-wizard.tsx:236 → update(patch), keyed on patch.systemPrompt; edited in components/wizard/section-prompt.tsx"
+  },
+  {
+   "name": "opening_configured",
+   "when": "Any change inside the Opening block — who speaks first, AI disclosure, greeting text, interruptible greeting, silence recap.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "field (caller_first|disclose|greeting|interruptible|silence)",
+    "discloseEnabled (boolean)",
+    "hostingRegion",
+    "greetingLength"
+   ],
+   "feeds": [
+    "EU AI Act Art. 50 compliance rate (binding since 2 Aug 2026; €15M / 3% turnover ceiling)",
+    "§3 dwell",
+    "Preflight blocking item when region=EU and disclose=false"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/section-opening.tsx:62 → patch(p)"
+  },
+  {
+   "name": "channel_selected",
+   "when": "A deployment channel radio card is chosen (inbound | batch | code). Fires on every change, including switches.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "channel",
+    "fromChannel",
+    "sectionIndexAtSelect",
+    "beforeFirstTest (boolean)"
+   ],
+   "feeds": [
+    "TTFT/TTFD split by channel — a single blended number is dominated by channel mix",
+    "IA evidence: how many users are forced through a channel decision BEFORE hearing the agent"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/channel-section.tsx:72 → setChannel(c)"
+  },
+  {
+   "name": "phone_number_linked",
+   "when": "A number is bound to the agent from the Select, or imported via the sheet. Distinguish the two with `source`.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "source (existing_unassigned|quick_connect|manual_sip)",
+    "vendor",
+    "transport",
+    "wallMs",
+    "fieldCount (6 for manual, <=4 for quick-connect)"
+   ],
+   "feeds": [
+    "TTFD channel-connect sub-span (the category evidence says this span dominates)",
+    "Quick-connect vs manual-SIP comparison — Agora's real phone story, since Agora does not sell or port numbers"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/channel-section.tsx:365 → setNumberIds(ids); components/add-phone-number-sheet.tsx:72 → handleAdd(); components/sip-quick-connect.tsx (already instrumented end-to-end)"
+  },
+  {
+   "name": "test_panel_opened",
+   "when": "The docked test panel opens or its tab changes. Note the panel auto-opens at >=1024px on the 'simulations' tab, which HIDES the Talk button — that default costs one click of TTFT.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "tab (simulations|agent)",
+    "trigger (auto_mount|header|opening_button|section|rail)",
+    "railOpen",
+    "viewport",
+    "sectionIndexAtOpen"
+   ],
+   "feeds": [
+    "TTFT intermediate step",
+    "Evidence for changing the default tab",
+    "Desktop vs mobile funnel split (mobile has NO test door in the sticky strip)"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx:180 → openTest(tab)"
+  },
+  {
+   "name": "agent_test_started",
+   "when": "toggleTest() flips testing to true. MUST carry `trigger` — the autoTalk path starts a test 150 ms after mount with no user action on agt_default, which would make a naive TTFT read as ~0 for everyone arriving that way. `trigger` is already on ng-console's allowlist.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "trigger (auto|header|opening|section|rail)",
+    "agentState (draft|saved|live)",
+    "configured (voice != null && systemPrompt non-empty)",
+    "channel",
+    "preset",
+    "credentialMode",
+    "freeMinutesRemaining",
+    "warmingMs"
+   ],
+   "feeds": [
+    "TTFT numerator (excluding trigger='auto')",
+    "Test-attempt rate (A2)",
+    "Tested-before-live rate — with numerator AND denominator charted separately"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx:868 → toggleTest()"
+  },
+  {
+   "name": "agent_audio_heard",
+   "when": "THE TTFT STOP EVENT. Fires when the first agent utterance is actually rendered/played — today SimTranscript's first turn reveal (500 ms timer); with real runtime, the first turn-finished for that agent. Never fire it from the button click.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "wallMs",
+    "activeMs",
+    "resumeCount",
+    "trigger",
+    "configured",
+    "heardOwnGreeting (boolean — own greeting vs the canned RAIL_TALK script)",
+    "turnCount",
+    "e2eLatencyBucket",
+    "serverAnchored (boolean)",
+    "isFirstAgent"
+   ],
+   "feeds": [
+    "TTFT — the north-star input metric",
+    "v2/v3 refinement (turnCount, e2eLatencyBucket)",
+    "Client-vs-server data-quality check"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/sim-transcript.tsx → SimTranscript first-turn reveal in the stream effect; real path: ng-console/src/lib/latency-metrics.ts parseTurnFinishedMessage (Agora notification event 112)"
+  },
+  {
+   "name": "agent_test_ended",
+   "when": "From a useEffect CLEANUP in the component that owns `testing`, with a real elapsed time — not the current hard-coded duration_sec: 30. Closing the rail (setRailOpen(false)) does not touch `testing` today, so sessions are left open forever. Copy ng-console's idiom (agent-detail-page.tsx:388 unmount cleanup keyed on agent id).",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "durationMs",
+    "turnCount",
+    "reason (toggle|rail_closed|unmount|navigated|error)",
+    "heardOwnGreeting",
+    "e2eLatencyBucket",
+    "interrupted (boolean)"
+   ],
+   "feeds": [
+    "Test-session depth (turnCount>=3 = TTFT v2)",
+    "Orphan-session rate as a data-quality metric",
+    "Tested-before-live"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx → new useEffect cleanup around `testing`; replaces the literal in toggleTest():870"
+  },
+  {
+   "name": "test_scenarios_generated",
+   "when": "The generate() button produces the contextual scenario suite (~900 ms simulated).",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "scenarioCount",
+    "source (auto|template|saved_call)",
+    "guaranteedFailCount (e.g. the 'Asks for a human' case, which always fails while transfer defaults to off)",
+    "durationMs"
+   ],
+   "feeds": [
+    "§4 completion",
+    "Simulation coverage (numerator and denominator charted separately — A2 moves this denominator)",
+    "Confidence-ladder step 2"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/test-panel.tsx:149 → generate(); components/wizard/test-section.tsx:220 → generate() / generateContextualCases(d)"
+  },
+  {
+   "name": "test_run_completed",
+   "when": "A single scenario run ends with a verdict. Already partially wired — add the missing properties and a real duration.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "verdict (pass|fail)",
+    "assertionKind (rubric|tool_call|data_point|exact)",
+    "scenarioId",
+    "durationMs",
+    "fidelity (transcript|audio)",
+    "judgeOverridden (boolean)"
+   ],
+   "feeds": [
+    "Trusted Change Rate inputs",
+    "Judge-override rate — if it exceeds ~30% the rubric is broken, not the agent (LLM judges agree with humans ~70% of the time)",
+    "Suite freshness"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/eval-tests.tsx:286 → RunSheet onState('ended') (already calls track(Events.test_run_completed))"
+  },
+  {
+   "name": "suite_run_completed",
+   "when": "runAll() finishes the whole suite.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "scenarioCount",
+    "passCount",
+    "failCount",
+    "durationMs",
+    "staleVsConfig (boolean — config changed since last run)",
+    "fidelity"
+   ],
+   "feeds": [
+    "Confidence ladder",
+    "Go Live staleness gate ('last run 3 config changes ago' is a more honest gate than pass/fail)",
+    "Proportion of deploys preceded by a test"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/eval-tests.tsx:110 → runAll()"
+  },
+  {
+   "name": "test_outcome_selected",
+   "when": "The test→deploy hinge: the user picks 'tweak' or 'deploy' after a test.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "outcome (tweak|deploy)",
+    "testsRunBefore",
+    "passCount",
+    "failCount"
+   ],
+   "feeds": [
+    "Test→deploy conversion",
+    "A9 (do simulations move TCR, or are they theatre)"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/test-section.tsx / components/wizard/test-panel.tsx — the existing Events.test_outcome_selected site"
+  },
+  {
+   "name": "deploy_clicked",
+   "when": "Every press of the header/StepPublish Deploy CTA, BEFORE publishBlockReason is re-checked. Fires even when the CTA is the no-op 'Live. No changes' — distinguish with `ctaState`.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "ctaState (deploy|redeploy|launch_batch|already_live|redeploy_code)",
+    "channel",
+    "blocksRemaining",
+    "testedBefore (boolean)",
+    "suiteRun (boolean)",
+    "dirtyCount"
+   ],
+   "feeds": [
+    "TTFD intent step",
+    "Deploy-attempt count (N blockers must not cost N attempts)",
+    "Separating the no-op CTA from real intent"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx:794 → publish(); CTA computed at deployCta:890"
+  },
+  {
+   "name": "deploy_blocked",
+   "when": "publish() early-returns on publishBlockReason, OR the preflight renders warns. Emit ONE event carrying the full block set, not one per attempt — the whole point of the preflight is collapsing N attempts into 1.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "blockedReason (first block)",
+    "blockedStep",
+    "blockCount",
+    "allReasons (pipe-joined)",
+    "channel"
+   ],
+   "feeds": [
+    "Drop-off explanation between deploy_clicked and deployment_went_live — 9 distinct reasons, a small closed taxonomy",
+    "A8 preflight assumption (validate it with PostHog correlation analysis on the publish step rather than asserting it)"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx:794 → publish() early return; reasons from lib/wizard-draft.ts publishBlocks()/publishBlockReason()"
+  },
+  {
+   "name": "preflight_opened",
+   "when": "DeployPreflight mounts and buildRows() completes. Note the verdict is withheld for rows.length*140+250 ms (~1090 ms for a simple inbound agent) purely cosmetically — log it so the theatre is measurable.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "rowCount",
+    "warnCount",
+    "allGo (boolean)",
+    "simsRun (boolean)",
+    "settleMs",
+    "channel",
+    "untestedItems (count of things NOT checked)"
+   ],
+   "feeds": [
+    "The funnel's last gate — currently entirely untracked",
+    "Confidence ladder",
+    "Checklist-length evidence (Degani & Wiener: length vs compliance)"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/deploy-preflight.tsx:155 → DeployPreflight mount / buildRows(draft):57"
+  },
+  {
+   "name": "preflight_fix_clicked",
+   "when": "A Fix button, 'Talk to it first', or the sim-verdict link is clicked inside the preflight.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "rowId",
+    "action (fix|talk_first|view_sims)",
+    "targetStep"
+   ],
+   "feeds": [
+    "Which preflight row actually routes to a fix",
+    "Preflight → section round-trip cost"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/deploy-preflight.tsx → footer/row buttons (~line 312 region)"
+  },
+  {
+   "name": "preflight_abandoned",
+   "when": "The preflight closes via 'Not yet', Escape or overlay click without confirming. Distinguishes a blocked deploy from cold feet — the single most useful distinction at this gate.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "warnCount",
+    "allGo",
+    "dwellMs",
+    "rowsExpanded"
+   ],
+   "feeds": [
+    "Deploy-intent conversion",
+    "Confidence (a user who abandons an all-green preflight is telling you the evidence was not convincing)"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/deploy-preflight.tsx → onOpenChange(false) without a confirm"
+  },
+  {
+   "name": "deployment_went_live",
+   "when": "publishDeployment() succeeds. Already fires — replace time_to_live_ms (a measurement used as an event name) with durationMs properties on THIS event, in milliseconds.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "versionId",
+    "channel",
+    "wallMs",
+    "activeMs",
+    "resumeCount",
+    "blockedOn (none|external_carrier|regulatory_review|payment_method|credential)",
+    "deployAttempts",
+    "testedBefore",
+    "suitePassCount",
+    "isFirstDeploy",
+    "preflightWarnCount"
+   ],
+   "feeds": [
+    "TTFD STOP — the whole time-to-deployed-agent metric",
+    "Weekly Proven Agents numerator",
+    "Proportion of deploys preceded by a test"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/channel-configs.tsx:64 → publishDeployment() (lines 87–89 today)"
+  },
+  {
+   "name": "deploy_exited_to_monitor",
+   "when": "publishDeployment()'s router.push('/monitor?…') runs — i.e. every non-code deploy force-navigates the user out of the builder. The funnel's last step is currently an EXIT, and the post-deploy confidence moment happens on another page with no agent context.",
+   "properties": [
+    "agentId",
+    "versionId",
+    "channel",
+    "stayed (boolean — true only for primaryChannel='code')"
+   ],
+   "feeds": [
+    "Post-deploy continuity",
+    "Denominator for first-24-hours review reach"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/channel-configs.tsx → publishDeployment() router.push tail"
+  },
+  {
+   "name": "agent_version_promoted",
+   "when": "A published version is created. Name the version concept that is already half-present in the front end — config_drift_detected already carries ran_version and current_version.",
+   "properties": [
+    "agentId",
+    "versionId",
+    "fromVersionId",
+    "changedSurfaces (pipe-joined: prompt|voice|models|channel|tools|kb)",
+    "canaryCalls (0 = full rollout)",
+    "rollbackRuleSet (boolean)"
+   ],
+   "feeds": [
+    "Trusted Change Rate",
+    "Joins deploys to production outcomes",
+    "Rollback attribution"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/channel-configs.tsx → publishDeployment(), alongside deployment_went_live; version ids shared with lib/analytics.ts config_drift_detected"
+  },
+  {
+   "name": "first_live_call_received",
+   "when": "The first production (non-test) call reaches a deployed version. Server-anchored — from the runtime/webhook path (Agora events 201/202 call state), not the client.",
+   "properties": [
+    "agentId",
+    "versionId",
+    "channel",
+    "msSinceDeploy",
+    "endReason",
+    "answered (boolean)",
+    "durationMs",
+    "turnCount",
+    "e2eLatencyBucket"
+   ],
+   "feeds": [
+    "Gap between deploy and first real traffic — the true 'is it working in production?' latency",
+    "Weekly Proven Agents",
+    "AR7 start event"
+   ],
+   "priority": "P0",
+   "hookPoint": "Server/webhook side (Agora notification events 201/202 + 112); surfaced in app/(dashboard)/monitor"
+  },
+  {
+   "name": "call_reviewed",
+   "when": "A production call detail/transcript is opened after a deploy.",
+   "properties": [
+    "agentId",
+    "versionId",
+    "callId",
+    "endReason",
+    "outcome (ok|failed|abandoned|transferred)",
+    "dwellMs",
+    "source (first_24h_review|calls_list|alert)"
+   ],
+   "feeds": [
+    "Confidence ladder ('human-reviewed transcripts: N')",
+    "Time-to-detect a bad publish — the metric a console can uniquely improve and no voice competitor advertises"
+   ],
+   "priority": "P1",
+   "hookPoint": "app/(dashboard)/calls + app/(dashboard)/monitor call detail"
+  },
+  {
+   "name": "call_saved_as_test",
+   "when": "A production call is converted into a regression case. Already wired as save_call_as_test — keep the name, add properties.",
+   "properties": [
+    "agentId",
+    "callId",
+    "endReason",
+    "fidelity (transcript|audio)",
+    "scenarioCount (suite size after add)"
+   ],
+   "feeds": [
+    "Suite growth from production failures per agent per week — the cleanest measure of a maturing builder",
+    "TCR"
+   ],
+   "priority": "P2",
+   "hookPoint": "components/eval-tests.tsx:389 → AddCaseSheet save (prefill branch)"
+  },
+  {
+   "name": "agent_edited_after_live",
+   "when": "First edit in a builder session where the agent is already live — derive from update(patch) when isLive is true, then throttle to once per section per session.",
+   "properties": [
+    "agentId",
+    "versionId",
+    "section",
+    "field",
+    "msSinceDeploy",
+    "hasRunSuiteSince (boolean)"
+   ],
+   "feeds": [
+    "Second-agent / expansion behaviour (where Agora's revenue actually is)",
+    "Config drift vs last test run",
+    "Denominator for redeploy TCR"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/agent-wizard.tsx:236 → update(patch), guarded by isLive"
+  },
+  {
+   "name": "deployment_rolled_back",
+   "when": "A live version is reverted or disabled. Must record what the rollback did NOT restore — Synthflow's version history silently excludes actions and knowledge bases, and a rollback that quietly fails to restore tools is a false confidence signal.",
+   "properties": [
+    "agentId",
+    "fromVersionId",
+    "toVersionId",
+    "msSinceDeploy",
+    "trigger (user|auto_rule|support)",
+    "reason",
+    "restoredSurfaces",
+    "excludedSurfaces",
+    "callsSinceDeploy"
+   ],
+   "feeds": [
+    "24h rollback rate — a DETERIORATION metric (no acceptable margin), not a guardrail",
+    "TCR",
+    "DORA change-failure-rate analogue (elite <5%)"
+   ],
+   "priority": "P0",
+   "hookPoint": "app/(dashboard)/monitor revert control + components/wizard/channel-configs.tsx publish path"
+  },
+  {
+   "name": "deploy_confidence_rated",
+   "when": "A one-question PostHog survey (API presentation type, rendered in Studio X components) triggered by deployment_went_live, shown once per person. The only attitudinal instrument available — session replay is off by policy, so 'confidence in production' is otherwise pure behavioural inference.",
+   "properties": [
+    "agentId",
+    "versionId",
+    "rating (1-5)",
+    "freeText",
+    "testedBefore",
+    "suitePassCount",
+    "isFirstDeploy"
+   ],
+   "feeds": [
+    "Confidence in production — the owner's fourth question",
+    "Effort counter-metric: interrupted people finish FASTER with more stress, so a falling TTFT can coexist with a worsening experience",
+    "Cross-cut against TCR: does stated confidence predict 24h survival"
+   ],
+   "priority": "P1",
+   "hookPoint": "PostHog survey with event trigger on deployment_went_live (event_triggers match on NAME only — properties are not filtered, so the trigger event must be its own name)"
+  },
+  {
+   "name": "builder_exited",
+   "when": "Any navigation out of the builder that is not a deploy — the 9 soft hint links plus Add Connector's router.push, which is the only way to add a connector and therefore sits on a required path.",
+   "properties": [
+    "agentId",
+    "builderSessionId",
+    "target (vendor_credentials|integrations_channels|integrations_connectors|web_widget|calls|docs|new_agent)",
+    "section",
+    "required (boolean)",
+    "activeMs"
+   ],
+   "feeds": [
+    "Leak map",
+    "Distinguishes hint copy being read as an instruction from genuine optional depth"
+   ],
+   "priority": "P1",
+   "hookPoint": "components/wizard/hosting-region.tsx:76; channel-section.tsx:148,402; step-build.tsx:127; widget-studio.tsx:367; channel-configs.tsx:378; deploy-preflight.tsx:312"
+  },
+  {
+   "name": "telemetry_heartbeat",
+   "when": "Once per builderSessionId, ~30 s after builder_opened, carrying a count of events emitted so far in this session. Purely a data-quality canary.",
+   "properties": [
+    "builderSessionId",
+    "eventsEmitted",
+    "schemaVersion",
+    "release",
+    "clockSkewMs (client now vs server-corrected)",
+    "storageAvailable (boolean)"
+   ],
+   "feeds": [
+    "Telemetry-loss-bias check (the single highest-leverage line in the plan — without it the wave-0 baseline is uninterpretable)",
+    "Alert #5 on the free tier",
+    "Twyman's-law investigation trigger"
+   ],
+   "priority": "P0",
+   "hookPoint": "components/wizard/agent-wizard.tsx → timer in the mount effect"
+  }
+ ],
+ "insights": [
+  {
+   "name": "TTFT — same sitting",
+   "type": "SQL (HogQL) insight",
+   "spec": "quantile(0.5)(properties.activeMs), quantile(0.75)(...), quantile(0.9)(...) over agent_audio_heard WHERE isFirstAgent AND trigger != 'auto' AND configured AND turnCount >= 1 AND trafficType = 'external' AND activeMs <= 600000, joined back to builder_opened on builderSessionId. Report activeMs as primary and wallMs beside it. Break down by isFirstAgent, channel, viewport, $feature_flag. MUST be SQL, not a funnel — PostHog's time-to-convert view has no p75/p90 (issue #24208) — and SQL insights are alertable while funnel time-to-convert is not.",
+   "answers": "How long until someone hears their agent talk? The headline claim, defensible against Vapi's published 'under 5 minutes' and Retell's 15."
+  },
+  {
+   "name": "TTFT — eventual (7 days)",
+   "type": "Funnel, time-to-convert (median only)",
+   "spec": "builder_opened → agent_test_started → agent_audio_heard. Sequential order, conversion window 7 days, person-level. Sits beside the same-sitting version; the gap between the two IS the multi-session population, and neither number alone is honest.",
+   "answers": "How many people who wanted an agent got one eventually, and how many sittings it took. Guards against scoring the ~40% of interrupted tasks that resume later as abandonment."
+  },
+  {
+   "name": "Time to deployed agent (TTFD)",
+   "type": "SQL (HogQL) insight",
+   "spec": "quantile(0.5/0.75/0.9)(properties.activeMs) and the same over wallMs on deployment_went_live, anchored on the same builder_opened origin as TTFT, truncated at 24 h. Break down by channel and by blockedOn so carrier/regulatory waits (Twilio bundles: up to 3 business days, 21 in KYC countries) are visible as their own band rather than contaminating the builder's clock.",
+   "answers": "How long to a live agent, and how much of that time the builder actually controls."
+  },
+  {
+   "name": "Builder activation funnel",
+   "type": "Funnel (Sequential, 7-day window)",
+   "spec": "builder_opened → voice_selected → channel_selected → agent_test_started → agent_audio_heard → deploy_clicked → deployment_went_live. No tile-level date range (a tile's own date_from silently overrides the dashboard picker and will invalidate the wave-0-vs-wave-1 comparison). Report BOTH conditional (of those who started the step) and unconditional (of all who entered the builder) rates at each step — PostHog gives conditional for free and unconditional only if you ask.",
+   "answers": "Where the cold-start path loses people across its 7 clicks."
+  },
+  {
+   "name": "Deploy blocker taxonomy",
+   "type": "Trends, count per user, broken down by blockedReason",
+   "spec": "deploy_blocked broken down by blockedReason and blockedStep, normalised per builder session, with deploy_clicked as a companion series so the ratio is readable. The taxonomy is closed and small (9 reasons from lib/wizard-draft.ts publishBlocks).",
+   "answers": "Why deploys fail, ranked — and whether the preflight really collapses N attempts into 1."
+  },
+  {
+   "name": "Section dwell vs budget",
+   "type": "Trends, 75th percentile of activeMs, broken down by section",
+   "spec": "builder_section_completed, aggregation = 75th percentile of activeMs, breakdown by section, with the §2.3 budget line (45s / 90s / 60s / 2m / 5m / 90s) annotated. One tile is the whole dwell-budget dashboard. Any section whose p75 exceeds budget for two consecutive weeks triggers an investigation, not a redesign.",
+   "answers": "Which section is eating the three-minute budget."
+  },
+  {
+   "name": "Struggle conjunction",
+   "type": "Trends, unique sessions",
+   "spec": "Count of builder sessions where >=2 of {credential_page_exited, model_slot_abandoned, model_slot_sheet_opened.reentryCount>=2, deploy_blocked} fire in the SAME section. Do NOT build the KPI doc's additive 'struggle index' — a sum of four counts that each move for unrelated reasons fails HEART's specificity test and will produce false alarms. Read it only next to an over-budget dwell row.",
+   "answers": "Where users are actually fighting the UI, with far fewer false positives than dwell time alone."
+  },
+  {
+   "name": "Zero-credential path integrity",
+   "type": "Trends, ratio of two series",
+   "spec": "agent_audio_heard WHERE credentialMode='managed' AND configured, over all agent_audio_heard. Companion series: credential_page_exited per builder session. Numerator and denominator charted as their own series (metric-SRM protection).",
+   "answers": "Is anyone being pulled into BYOK unintentionally? Credential fields are the highest-drop field type known (10.5% mean drop-off)."
+  },
+  {
+   "name": "Change-away-from-default rate",
+   "type": "Trends, per control",
+   "spec": "stack_preset_changed WHERE isDefault=false, voice_selected, opening_configured — each over builder_opened. This is the direct test of default quality: a well-made forced choice performs as well as a good default (79% vs 82% in Johnson & Goldstein); what destroys completion is a default people must undo.",
+   "answers": "Are our defaults right, per control — the A1 assumption measured rather than asserted."
+  },
+  {
+   "name": "Tested before live",
+   "type": "Trends, two series + ratio",
+   "spec": "deployment_went_live WHERE testedBefore=true, over all deployment_went_live, with suiteRun as a third series. Both numerator and denominator on the dashboard — A2 deliberately changes WHO tests, so this rate has a moving denominator and its delta can otherwise move in an arbitrary direction.",
+   "answers": "Proportion of deploys preceded by a real test — the confidence ladder's first rung."
+  },
+  {
+   "name": "Trusted Change Rate / rollback",
+   "type": "Trends + Retention",
+   "spec": "deployments surviving 24 h without deployment_rolled_back, by versionId; plus deployment_rolled_back broken down by trigger and msSinceDeploy. Declared as a DETERIORATION metric (inferiority test, no acceptable margin), not a guardrail. Powering it to detect 5%→7.5% needs ~1,216 users/arm, which is unreachable — so it is monitored with a stopping rule ('halt if it crosses 8% at any read'), never a powered test.",
+   "answers": "Did speed cost trust? The tiebreaker on every A-row."
+  },
+  {
+   "name": "First 24 hours (post-deploy)",
+   "type": "Dashboard — 6 tiles",
+   "spec": "(1) Call funnel dialled → ringing → answered → completed from Agora events 201/202 — answer rate sits ABOVE every latency number, because 86% of consumers do not answer unknown numbers; (2) abandonment against the 2–3% / 5–6% / >10% bands; (3) end-reason distribution grouped by WHO CAN FIX IT (caller behaviour / your config, deep-linked to section N / Agora infra / vendor credential — a group of reasons that simply does not exist for managed-key agents, and the console should say so); (4) measured caller-perceived p50/p95 turn latency against the 800ms and 1,200ms lines; (5) rule-of-three bound printed in words: 'No failures in 20 calls. That still allows a failure rate as high as 15%. Keep watching to 60 for 5%'; (6) barge-in signals from event 112 start.type / end.type / interrupt_duration_ms — all three are emitted today and discarded by latency-metrics.ts.",
+   "answers": "Is my agent actually working, and how sure can I be? The owner's 'confidence in production' question, answered with evidence rather than a green tick."
+  },
+  {
+   "name": "Weekly Proven Agents",
+   "type": "Trends + Retention, split by account type",
+   "spec": "first_live_call_received-backed agent count, split into new-account and existing-account series (revenue is expansion-led: +18% revenue vs +0.4% customers). Retention start event = first deployment_went_live in 'First ever occurrence' mode, return event = production session, weekly interval, paired with a Stickiness insight — retention shows only whether they returned, not how much, and 'one call in week 1' vs '400' are the same cell. Add a PERSON-level D7 return metric beside it with 7% as the initial target (Amplitude's 2025 benchmark: 7% D7 = top quartile; 69% of top D7 performers were also top 3-month performers).",
+   "answers": "The north star, and whether activation actually predicts retention rather than being assumed to."
+  },
+  {
+   "name": "Data quality",
+   "type": "Trends, 4 series + 1 alert",
+   "spec": "(a) client agent_audio_heard count vs server turn-finished count; (b) events on an unexpected schemaVersion; (c) telemetry_heartbeat eventsEmitted distribution; (d) share of events missing isFirstAgent / trafficType. Plus an SRM check on flag exposure and an isFirstAgent-share check — adopt Spotify's fourth ship clause: a quality test that significantly invalidates the experiment blocks the read, it is not a caveat.",
+   "answers": "Can we believe any of the above? Pre-register Twyman's law here: after the two-week baseline, record the week-to-week SD of median TTFT, and investigate any claimed improvement beyond 3 SD for telemetry loss or a changed stop condition before reading it as a win — A2 is the row most likely to produce a fake win."
+  },
+  {
+   "name": "Alerts — spend the free tier's five",
+   "type": "Alerts (Trends + SQL only)",
+   "spec": "Free orgs get 5 alerts total and hourly is the fastest free cadence (15-min needs Boost, real-time needs Scale/Enterprise); funnel time-to-convert and flow views are NOT alertable. Spend them on: (1) TTFT p75 via the SQL insight; (2) first-publish failure rate; (3) 24h rollback rate; (4) data quality — events on the wrong schemaVersion; (5) publish error rate. Do not write '15 minutes' into any runbook.",
+   "answers": "What wakes someone up. Each alert needs a named human owner and an action threshold that triggers investigation, not a target — a metric with no owner and no action threshold is a vanity metric by definition."
+  }
+ ],
+ "traps": [
+  "BACKGROUNDED TABS — browsers throttle setInterval/rAF to >=1 s or freeze them entirely, so any tick-counted duration silently under-reports. Accumulate activeMs from `visibilitychange` transitions plus Date.now deltas, never from a ticker. Emit both activeMs and wallMs on every completion event so the difference is itself a readable signal.",
+  "RELOADS AND CRASHES — performance.now() resets per document and cannot span a reload; Date.now() jumps on NTP correction or a manual clock change and can produce a NEGATIVE duration. Use performance.now() deltas within a page and a persisted Date.now() stamp only for cross-reload spans. Never mix the two in one number, and clamp negatives to null with a data-quality flag rather than shipping them.",
+  "READ-AND-CLEAR DESTROYS MEASUREMENTS — studio_x_2's timeToLiveMs() removes the localStorage stamp BEFORE returning, so a failed dispatch, a thrown capture, or a React StrictMode double-invoke in dev loses the number with no retry. Clear the stamp only inside the capture callback.",
+  "PER-BROWSER STAMPS MEASURE THE WRONG THING — markBuildStart() writes only if the key is absent and markSignup() writes once forever, so a returning user's second, third and fourth agents are all measured from their first-ever builder mount. Key every stamp by agentId + builderSessionId, expire after 2 h idle, and scope per attempt.",
+  "AUTO-STARTED TESTS FAKE A ZERO — the autoTalk path fires agent_test_started 150 ms after mount with no user action on agt_default. Every test event MUST carry `trigger`, and TTFT must exclude trigger='auto'. `trigger` is already on ng-console's property allowlist, so it survives sanitisation.",
+  "THE CANNED DEMO IS NOT A TEST — the Talk surface is not gated by configuration at all; an empty draft with no voice, prompt or channel plays the same hard-coded RAIL_TALK script. Without `configured` and `heardOwnGreeting` on the event, TTFT counts demo playbacks as agent tests and the headline metric is unfalsifiable.",
+  "MULTI-SESSION TASKS — 40% of interrupted tasks are never resumed in the same sitting, and only 10% of developers make their first edit within a minute of returning (~30% take over 30 minutes). Measure per person over an explicit window (60 min for 'same sitting', 7 days for 'eventual'), never per PostHog session — a session ends after 30 min idle or 24 h total, and TTFD's p75 target routinely crosses that boundary. Emit resumeCount on every duration event so 'our builder is slow' can be separated from 'this person had a meeting'.",
+  "DAYS-LATER RETURNS — PostHog funnels default to a 14-DAY conversion window, so a person who returns the following week is counted as an in-session conversion and drags the average. Pin the window explicitly on every funnel; a 3-minute target read through a 14-day window is a retention metric wearing a speed metric's name.",
+  "LONG-TAIL SKEW — task times are lognormal with a floor at zero and a handful of users taking 10–20× the rest. Winsorize TTFT at 600 s and TTFD at 24 h, count the truncated sessions as their own failure rate rather than as slow successes, report median/p75 at n>=25 and the GEOMETRIC MEAN with log-transformed CIs below n=25 (every moderated study and every early flag cell lives below 25), and never report the arithmetic mean. Note PostHog experiments winsorize mean/funnel/ratio metrics by default — declare the bounds explicitly or the slow tail the 10-minute ceiling exists to catch is clipped before you read it, and a change that fixes only slow users will look like no change.",
+  "AD BLOCKERS BIAS TTFT DOWNWARD — a blocked client never emits the start event, so only the unblocked population is measured. Route ingestion through the same-origin /ingest proxy (ng-console already has the vercel.json rewrites; @posthog/next's postHogMiddleware({proxy:true}) gives studio_x_2 the same).",
+  "CLIENT-ONLY STOP EVENTS ARE THE CLASSIC TELEMETRY-LOSS FAILURE — a live voice session is exactly where a client drops its last beacon, and biased loss invalidates every metric built on the affected event. Anchor agent_audio_heard on the runtime's first turn-finished, keep the client event secondary, and ship the client-vs-server count comparison as a first-class insight from day one.",
+  "ORPHANED TEST SESSIONS — closing the rail (setRailOpen(false)) does not touch `testing`, and there is no unmount handler or beforeunload, so a user who folds the panel or navigates leaves the session open forever. Fire agent_test_ended from a useEffect cleanup with a `reason` property, and use transport:'sendBeacon' for unload-time events.",
+  "CLOCK SKEW MAKES THE FUNNEL AND THE PROPERTY DISAGREE — PostHog rewrites timestamps as `now + timestamp - sent_at`, so a funnel-derived duration is skew-corrected while a client-computed wallMs is not. Declare the client number canonical, the funnel median the sanity check, and a persistent gap >10% a data-quality alarm rather than a metric move.",
+  "LOCALSTORAGE IS PER-BROWSER AND CAN THROW — a user who starts on a laptop and tests on a phone gets no duration at all, while PostHog's person-level funnel still converts them; private windows and blocked site data make every read throw. Wrap every access in try/catch, emit storageAvailable on the heartbeat, and treat a missing duration as null, never as zero.",
+  "PERSON PROPERTIES ARE SET IN INGESTION ORDER, NOT TIMESTAMP ORDER — a late-arriving event can overwrite a duration written with $set. Never store a duration on a person property; use $set_once only for first-time milestones (first_agent_created_at, first_test_succeeded_at).",
+  "THE RAIL STATE SILENTLY CHANGES THE CLICK PATH FOREVER — one click on the rail's close button writes a localStorage flag that permanently alters the shortest path to Talk for that browser, on every agent. Any TTFT expressed in clicks is wrong for returning users; carry railOpen and `trigger` as properties so the populations can be separated.",
+  "DESKTOP AND MOBILE ARE DIFFERENT FUNNELS — the two-click TTFT does not exist below 1024px: the builder header does not wrap or scroll, the mobile sticky strip has step chips and Deploy but NO test door, and the test panel falls back to a Sheet that never auto-opens. Never quote one TTFT across both; break down by viewport or the mobile p75 will be attributed to a design that mobile users cannot reach.",
+  "DWELL IS A DESIGN CONTRACT, NOT A SUCCESS METRIC — 'time on page' is on Amplitude's own list of vanity metrics, and in a builder more engagement is worse, not better. Declare Engagement explicitly OUT of scope in the HEART grid so nobody adds an engagement metric later, and always read a dwell number next to a completion rate.",
+  "GUARDRAILS ARE UNFALSIFIABLE AT THIS VOLUME — 'must not rise' cannot be tested when the rollback guardrail needs ~1,216 users/arm. Rewrite each as a non-inferiority statement with a declared margin and an honest MDE, split the block into two tiers (deterioration: publish failure and rollback, no acceptable margin; guardrail: support contacts and latency, bounded margin), and CUT the count — four guardrails inflate the required sample by ~75% per arm via Spotify's β* = β/(G+1) before a single extra user exists.",
+  "RATES WHOSE DENOMINATOR THE CHANGE ITSELF MOVES — A2 deliberately changes who tests, so 'tested-before-live' and 'simulation coverage' both have moving denominators and their delta can change in an arbitrary direction. Put numerator and denominator on the dashboard as their own series for every rate, and prefer the average of per-user ratios over the ratio of totals where a per-user ratio makes sense."
+ ]
+}

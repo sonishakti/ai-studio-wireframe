@@ -1,0 +1,131 @@
+{
+ "_comment": "Feeds the Strategy panel on the Design Delivery Board. Source of truth for the narrative: docs/strategy/agent-builder-kpis.md. Edit here, run node scripts/build-tracker-board.mjs, republish the artifact.",
+ "updated": "2026-09-15",
+ "bet": "We want to be the fastest platform on which someone can configure an AI agent and hear it answer, and then trust it enough to put it in front of customers.",
+ "northStar": {
+  "name": "Fast Proven Agents",
+  "short": "FPA",
+  "status": "provisional",
+  "definition": "Agents created this week that reached a verified first answer inside 15 minutes of active builder time, and then held a real conversation of two or more turns within 14 days.",
+  "targetLabel": "Fast-Proven Rate",
+  "target": "≥ 45%",
+  "current": "unmeasured",
+  "currentNote": "No test-session event exists in the live console, so this cannot be computed today. Modelled 35–45%. Do not quote it.",
+  "counter": "FPA count is reported with no target: at 45% it would need ~33 qualifying new agents a week against a modelled 30–40 company-wide. The rate is the half design owns.",
+  "gaming": "Strip the builder to one button that plays a canned demo and time-to-first-answer collapses to 20 seconds while nothing works. FPA falls. That is the test a north star has to pass."
+ },
+ "inputs": [
+  {
+   "id": "i1",
+   "name": "TTFA",
+   "full": "Time To First Answer",
+   "definition": "Active time from opening the builder to the agent speaking. Idle gaps over 120s removed, winsorised at 900s, median and p75 only, never the mean.",
+   "target": "median ≤ 3 min · p75 ≤ 6 min",
+   "baseline": "unmeasured · modelled 8–12 min",
+   "owner": "Design lead",
+   "levers": ["01 Voice picker", "03 Recognition", "07 Vendors & fallback", "Chrome: rail and test panel"]
+  },
+  {
+   "id": "i2",
+   "name": "VTR",
+   "full": "Verified Test Rate",
+   "definition": "Share of new agents that reach a verified first answer at all within 14 days, however long it took.",
+   "target": "≥ 70% in 14 days · ≥ 55% first session",
+   "baseline": "unmeasured · est. 35–45%",
+   "owner": "Design lead",
+   "levers": ["02 Turn-taking", "04 Opening", "Test panel default tab"]
+  },
+  {
+   "id": "i3",
+   "name": "SBDR",
+   "full": "Same-Block Deploy Rate",
+   "definition": "Share of agents with a verified first answer that publish and take a first production call within 24h, under 30 minutes of total active time.",
+   "target": "≥ 40%",
+   "baseline": "unmeasured",
+   "owner": "Product owner",
+   "levers": ["05 Call behavior", "08 Versioning", "Deploy preflight"]
+  },
+  {
+   "id": "i4",
+   "name": "SAR",
+   "full": "Second-Agent Rate",
+   "definition": "Share of accounts with a proven agent that create a second one within 28 days. The business is expansion-led, so a first-agent-only metric looks away from the money.",
+   "target": "≥ 25%",
+   "baseline": "unmeasured",
+   "owner": "Design lead",
+   "levers": ["09 First run & templates", "10 Session logs", "11 SIP diagnostics"]
+  }
+ ],
+ "budget": {
+  "total": "180 s",
+  "ceiling": "900 s",
+  "ceilingNote": "Past this the session is a failure, not a slow success. It is the smallest natural working block a developer has (Parnin & Rugaber, ICPC 2009), not a sum.",
+  "stages": [
+   { "n": "1", "stage": "Orient", "seconds": 15, "note": "First paint to first interaction. The first 10 s decide whether the visit continues (NN/g, 205,873 pages). 3 s of it is our own paint." },
+   { "n": "2", "stage": "Declare intent", "seconds": 20, "note": "Template, import, or one sentence. Parity with Vapi and Retell, not an advantage." },
+   { "n": "3", "stage": "Voice and stack", "seconds": 50, "note": "Zero required stack decisions. The 50 s is voice audition: ~3 previews at 8 s plus 26 s to commit." },
+   { "n": "4", "stage": "Opening and prompt", "seconds": 45, "note": "A working prompt and greeting are already seeded, so the median user edits one line. The writer's path is reported separately." },
+   { "n": "5", "stage": "Reach the test", "seconds": 10, "note": "One click from Hear the opening, two from the header. Machine time here is a Doherty problem, under 400 ms." },
+   { "n": "6", "stage": "Connect", "seconds": 25, "note": "12 s human for the mic permission, 8 s join, 5 s warm-up. The only stage that can exceed Nielsen's 10-second limit, so the only one that earns a progress state." },
+   { "n": "7", "stage": "First agent audio", "seconds": 15, "note": "First-turn setup plus playback starting. The runtime clock inside it is time-to-first-audio-byte, a different metric in different units." }
+  ]
+ },
+ "guardrails": [
+  { "name": "24h rollback / disable rate", "threshold": "≤ 5%", "onBreach": "Revert the newest flagged builder change before anything else ships", "owner": "Product owner", "tier": "stop" },
+  { "name": "First-publish failure rate", "threshold": "≤ 5% · a week over 8% blocks builder ships", "onBreach": "Read the errorStage distribution and re-derive the preflight checks from it", "owner": "Staff front-end", "tier": "stop" },
+  { "name": "Evidence-before-live rate", "threshold": "floor 85% · non-inferior within −3pp", "onBreach": "The speed change loses, even if TTFA won", "owner": "Design lead", "tier": "trade" },
+  { "name": "Minutes consumed per verified test", "threshold": "monitored, no ceiling set", "onBreach": "A speed win that multiplies test volume is a direct cost increase at $0.10/min", "owner": "Product owner", "tier": "cost" },
+  { "name": "External share of FPA", "threshold": "≥ 70%", "onBreach": "The week's read does not count. Preview traffic currently falls through to external and must be reclassified first", "owner": "Staff front-end", "tier": "quality" },
+  { "name": "Telemetry agreement, client vs server", "threshold": "≥ 95% · inert until the server emitter exists", "onBreach": "As specified today it compares a client event to another client event and would certify bad data as good", "owner": "unowned", "tier": "quality" }
+ ],
+ "guardrailNote": "Three that can stop a ship, one cost counter, two data-quality checks. Not seven: every extra guardrail inflates the sample needed per arm by roughly a third. At ~36 first agents a week most of these are monitors read as trends, not hypothesis tests, and the dashboard says so rather than pretending otherwise.",
+ "assumptions": [
+  { "id": "A1", "change": "Latency-vs-cost slider replaces three vendor dropdowns, Balanced pre-applied", "raw": "§1 dwell −60 to −105 s", "discounted": "−20 to −35 s", "metric": "p75 activeDwellMs on stack_preset_changed", "powered": "yes", "poweredNote": "~100 sessions", "status": "shipped" },
+  { "id": "A2", "change": "Agora Managed Key by default, zero credential fields on the default path", "raw": "first-answer completion ≥ 60% vs a 37.5% SaaS mean", "discounted": "directional only", "metric": "credential_mode_changed · credential_page_exited", "powered": "no", "poweredNote": "576/arm needed. Review at W8", "status": "shipped" },
+  { "id": "A3", "change": "Test panel always present, tests the unsaved draft, defaulted to Voice call", "raw": "tested-before-publish 60% → 85%; time to first Talk −20 to −40 s", "discounted": "−7 to −13 s", "metric": "agent_test_started{trigger}", "powered": "yes", "poweredNote": "~62/arm", "status": "shipped" },
+  { "id": "A4", "change": "Backup inside each model's Configure sheet, with its own credential and its own switch", "raw": "attach 15% → 30–40% among sheet-openers", "discounted": "+4 to +7 pp across all first agents", "metric": "model_slot_configured{hasBackup}, conditional and unconditional", "powered": "yes", "poweredNote": "within a segment A1 is shrinking", "status": "shipped" },
+  { "id": "A5", "change": "One voice table, recommended badged at the top, frozen header", "raw": "previews 6 → 3–4; voice dwell −30 to −40 s", "discounted": "−10 to −13 s", "metric": "voice_previewed per voice_selected", "powered": "yes", "poweredNote": "~22–35 pickers/arm", "status": "shipped" },
+  { "id": "A6", "change": "Test scenarios generated from the agent's own prompt and channel", "raw": "≥ 60% run the suite before publish, from 0%", "discounted": "≥ 40%", "metric": "suite_run_completed", "powered": "yes", "poweredNote": "~38/arm", "status": "shipped" },
+  { "id": "A7", "change": "Opening composes the disclosure and greeting and shows the spoken line", "raw": "fewer prompt reverts before first test", "discounted": "directional only", "metric": "agent_config_reverted on the greeting group", "powered": "no", "poweredNote": "no prediction claimed", "status": "shipped" },
+  { "id": "A8", "change": "Five-section accordion with an n-of-5 rail", "raw": "none claimed", "discounted": "none claimed", "metric": "builder_section_completed", "powered": "n/a", "poweredNote": "the counter has a correctness bug; fix it alone and measure nothing", "status": "shipped" },
+  { "id": "A9", "change": "Preflight names what blocks a deploy", "raw": "publish attempts per agent 1.8 → 1.1", "discounted": "directional only", "metric": "deploy_blocked{code}", "powered": "no", "poweredNote": "624/arm needed", "status": "shipped" },
+  { "id": "A10", "change": "Undo to live, and a visible Live-no-changes state", "raw": "rollback ≤ 5%", "discounted": "monitor", "metric": "24h rollback guardrail", "powered": "no", "poweredNote": "monitor, not a test", "status": "shipped" },
+  { "id": "A11", "change": "Trade-off rule: when speed and trust conflict, trust wins", "raw": "a change that takes 30 s off TTFA and drops evidence-before-live below 85% is reverted", "discounted": "policy, not a prediction", "metric": "evidence-before-live guardrail", "powered": "n/a", "poweredNote": "stated so it is not decided accidentally", "status": "policy" }
+ ],
+ "assumptionNote": "Two rules throughout. Kohavi's prior: most changes move key metrics not at all, and at Bing 10–20% do, so every prediction is shown raw and discounted by a third. Plan with the discounted figure. And: powered or directional, never both. Where the sample needed exceeds what this traffic produces, the row states a direction and a review date instead of a number.",
+ "next": [
+  { "rank": "1", "name": "W0 measurement gate", "why": "Ship the test-session operation, fix the three duration bugs, extend the sanitiser allowlist. Nothing in the ledger is readable until this lands.", "effort": "S" },
+  { "rank": "2", "name": "Move Deployment after Test, or make it skippable", "why": "The rail asks for a model stack and a deployment channel before the user has heard anything. Largest predicted effect in the pack: +8 to +15 pp first-test rate, −30 to −60 s median TTFA.", "effort": "S" },
+  { "rank": "3", "name": "Print measured latency and cost per preset on the slider", "why": "Vapi already does. An unlabelled slider pushes users into manual config to find out what it did.", "effort": "S" },
+  { "rank": "4", "name": "Immutable versions with one-click rollback", "why": "The rollback guardrail cannot exist without it, and Retell shipped versioning in May.", "effort": "L" },
+  { "rank": "5", "name": "20-participant moderated first-agent benchmark", "why": "At tens of first agents a week, telemetry will not resolve an 8 pp change for two quarters. This gives every assumption a real baseline in one week.", "effort": "M" },
+  { "rank": "6", "name": "Timed competitive cold-start study, published with its method", "why": "Every competitor time claim is an undefined marketing number. Ours should not be.", "effort": "M" }
+ ],
+ "telemetry": {
+  "events": 42,
+  "p0": 22,
+  "instrumented": 3,
+  "spec": "references/telemetry/event-spec.json",
+  "module": "studio_x_2/lib/analytics.ts",
+  "waves": [
+   { "wave": "W0", "work": "Test-session operation, duration-bug fixes, sanitiser allowlist delta", "unlocks": "TTFA computable at all", "status": "not started", "owner": "Staff front-end" },
+   { "wave": "W1", "work": "Instrument the 42 builder events, P0 first", "unlocks": "The funnel, the dwell budgets, VTR", "status": "started · TTFA clock and first-answer event wired in the prototype", "owner": "Design lead" },
+   { "wave": "W2", "work": "Backend emitter for Agora notification events 112 / 201 / 202 on a BFF webhook route", "unlocks": "The server anchor, proven conversations, the telemetry-agreement check", "status": "UNOWNED", "owner": "needs a name" },
+   { "wave": "W3", "work": "Immutable published versions with one-click rollback", "unlocks": "The rollback guardrail", "status": "not started", "owner": "Product owner" }
+  ],
+  "rules": [
+   "No property may carry text a user typed. deploy_blocked emits a stable code, never the interpolated reason string, which contains campaign names.",
+   "Durations accumulate from visibilitychange deltas, never a tick counter, and are winsorised at 900 s.",
+   "trigger 'auto' is excluded from every metric: the demo agent starts a test 150 ms after mount, and left in, the headline speed number would be generated by a setTimeout.",
+   "Every new property key must be added to the live console's 48-key sanitiser allowlist or it is dropped silently.",
+   "Session replay is off by policy, so struggle is inferred from four separate scalar signals, never summed into one index."
+  ]
+ },
+ "decisions": [
+  { "q": "Does a simulation count as a verified first answer, or only a live voice test?", "why": "Both clocks are undefined until this is settled, and it changes A3 and A6." },
+  { "q": "Who owns the backend emitter (W2)?", "why": "Without a name, everything server-anchored stays provisional and the north star cannot be computed as defined." },
+  { "q": "Fast-Proven Rate ≥ 45% — accept as the target?", "why": "It is 1.15× the cross-SaaS activation mean, chosen because zero required credentials should beat the mean. Aspirational, not derived. Revisit 8 weeks after the first clean cohort." },
+  { "q": "Is the 20-participant moderated benchmark funded this quarter?", "why": "It is the only instrument that can resolve most of the assumption ledger at this traffic." },
+  { "q": "Do we publish the competitive cold-start study?", "why": "It converts fastest platform from an adjective into an artefact, and it may not flatter us at first." }
+ ]
+}

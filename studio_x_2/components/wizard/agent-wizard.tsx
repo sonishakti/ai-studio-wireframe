@@ -27,7 +27,7 @@ import { DeployPreflight } from "@/components/wizard/deploy-preflight"
 import { STEP_TITLES, SECTION_COUNT, SECTION_GROUPS, STEP_ICONS, stepTitle, resolveStepParam } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
-import { markBuildStart, track, Events } from "@/lib/analytics"
+import { markBuildStart, track, Events, builderOpened, agentAudioHeard } from "@/lib/analytics"
 import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
@@ -865,12 +865,39 @@ export function AgentWizard({
   const cardStack = stackLine(draft.stack)
   const cardEst = stackEstimateFor(draft.stack)
   const cardLatency = draft.stack.pipeline === "mllm" ? undefined : stackLatencyDetail(draft.stack)
+  // The TTFA clock (KPI plan §3, docs/strategy/agent-builder-kpis.md). Opening
+  // the builder starts it; the agent's first turn stops it. Active time only —
+  // a tab left open over lunch is idle, not a slow builder.
+  const ttfaKey = draft.agentId ?? "new"
+  React.useEffect(() => {
+    builderOpened(ttfaKey, { isEdit, isLive })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const testStartedAt = React.useRef<number | null>(null)
   const toggleTest = () => {
     const channel = primaryChannel(draft) ?? "unknown"
-    if (testing) track(Events.agent_test_ended, { channel, agent_id: draft.agentId ?? "new", duration_sec: 30 })
-    else track(Events.agent_test_started, { channel, agent_id: draft.agentId ?? "new" })
+    if (testing) {
+      // A measured duration, not a literal. The old call site reported 30 s for
+      // every test, which made the number worse than having none.
+      const started = testStartedAt.current
+      testStartedAt.current = null
+      track(Events.agent_test_ended, {
+        channel,
+        agent_id: ttfaKey,
+        duration_sec: started ? Math.round((Date.now() - started) / 1000) : 0,
+      })
+    } else {
+      testStartedAt.current = Date.now()
+      track(Events.agent_test_started, { channel, agent_id: ttfaKey })
+    }
     setTesting((t) => !t)
   }
+
+  /** Did the builder change a default before testing? A voice pick alone does
+   *  not count — seedFromVoice fills name, prompt and greeting in one click. */
+  const configuredByUser =
+    draft.greeting.trim().length > 0 || draft.systemPrompt.trim().length > 0 || draft.channels.length > 0
 
   const blockReason = publishBlockReason(draft)
   // Honest deploy-state line: a live agent with pending edits says so.
@@ -1355,6 +1382,9 @@ export function AgentWizard({
           talking={testing}
           onToggleTalk={toggleTest}
           talkDisabled={warming}
+          onAgentSpoke={(turnCount) =>
+            agentAudioHeard(ttfaKey, { trigger: "rail", turnCount, configuredByUser })
+          }
         />
       </div>
 

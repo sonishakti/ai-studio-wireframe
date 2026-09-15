@@ -47,6 +47,59 @@ td.why{min-width:240px;max-width:320px;color:var(--ink-2)}
 td.next{min-width:200px;max-width:260px}
 .none{color:var(--ink-3)}
 .legend{font-size:12.5px;color:var(--ink-2);margin:14px 0 0}
+/* ── Strategy panel ─────────────────────────────────────────────────────── */
+.nav{display:flex;flex-wrap:wrap;gap:0 18px;font-size:12.5px;margin:0 0 20px;padding:9px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.nav a{color:var(--ink-2);text-decoration:none}.nav a:hover{color:var(--accent);text-decoration:underline}
+h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:34px 0 12px}
+.ns{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:0;border:1px solid var(--rule);border-radius:10px;background:var(--card);overflow:hidden}
+@media(max-width:900px){.ns{grid-template-columns:1fr}}
+.ns-l{padding:20px 22px}
+.ns-r{padding:20px 22px;border-left:1px solid var(--rule);background:var(--accent-soft)}
+@media(max-width:900px){.ns-r{border-left:0;border-top:1px solid var(--rule)}}
+.ns-name{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:0 0 2px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.ns-abbr{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-3);font-weight:400}
+.ns-def{color:var(--ink-2);margin:0 0 14px;max-width:62ch}
+.ns-note{font-size:12.5px;color:var(--ink-2);margin:10px 0 0;max-width:62ch}
+.ns-note b{font-weight:600;color:var(--ink)}
+.big{font-family:"JetBrains Mono",monospace;font-size:30px;font-weight:500;letter-spacing:-.02em;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.1}
+.tiny{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:0 0 3px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:12px}
+.card{border:1px solid var(--rule);border-radius:9px;background:var(--card);padding:15px 16px}
+.card h3{margin:0 0 3px;font-size:14.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+.card h3 span{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-3);font-weight:400}
+.card .full{font-size:12px;color:var(--ink-3);margin:0 0 8px}
+.card p{margin:0 0 9px;font-size:12.5px;color:var(--ink-2)}
+.kv{display:flex;gap:7px;font-size:12px;margin:0 0 3px}
+.kv b{font-weight:600;color:var(--ink-3);min-width:62px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.chip{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.bar{display:flex;height:34px;border-radius:7px;overflow:hidden;border:1px solid var(--rule);margin:0 0 10px}
+.bar div{display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:11px;color:#fff;border-right:1px solid rgba(255,255,255,.28);min-width:0;overflow:hidden}
+.bar div:last-child{border-right:0}
+.budget{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 26px}
+.budget div{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--rule);font-size:12.5px;align-items:baseline}
+.budget b{font-family:"JetBrains Mono",monospace;font-weight:500;color:var(--accent);min-width:42px;text-align:right;font-variant-numeric:tabular-nums}
+.budget i{font-style:normal;font-weight:600;min-width:118px}
+.budget span{color:var(--ink-2);min-width:0}
+table.s{min-width:0;width:100%;border:1px solid var(--rule);border-radius:9px;background:var(--card);border-collapse:separate;border-spacing:0;overflow:hidden}
+table.s th{position:static;border-bottom:1px solid var(--rule)}
+table.s td{font-size:12.5px;border-bottom:1px solid var(--rule)}
+table.s tr:last-child td{border-bottom:0}
+.t-stop{color:var(--wip);background:var(--wip-bg)}.t-trade{color:var(--review);background:var(--review-bg)}
+.t-quality{color:var(--notdone);background:var(--notdone-bg)}.t-cost{color:var(--done);background:var(--done-bg)}
+.yes{color:var(--done);font-weight:600}.no{color:var(--wip);font-weight:600}
+.mono{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.note{font-size:12.5px;color:var(--ink-2);margin:10px 0 0;max-width:96ch}
+.ranked{counter-reset:r;list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:10px}
+.ranked li{border:1px solid var(--rule);border-radius:9px;background:var(--card);padding:13px 15px}
+.ranked b{display:block;font-size:13.5px;margin-bottom:3px}
+.ranked span{font-size:12.5px;color:var(--ink-2)}
+.ranked em{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-3);float:right}
+.qs{list-style:none;padding:0;margin:0}
+.qs li{border-left:2px solid var(--accent);padding:2px 0 2px 13px;margin:0 0 13px}
+.qs b{display:block;font-size:13.5px;margin-bottom:2px}
+.qs span{font-size:12.5px;color:var(--ink-2)}
+.unowned{color:var(--wip);font-weight:600}
 .lb{position:fixed;inset:0;background:rgba(6,12,16,.86);display:none;place-items:center;padding:24px;z-index:9;cursor:zoom-out}
 .lb.open{display:grid}
 .lb img{max-width:100%;max-height:100%;border-radius:8px;border:1px solid var(--rule);background:var(--shot)}
@@ -55,6 +108,236 @@ td.next{min-width:200px;max-width:260px}
   <p class="eyebrow">Convo AI · Design Tracker · delivery</p>
   <h1>Design Delivery Board</h1>
   <p class="meta"><span class="pill s-notdone">Not Done</span> 17<span class="sep">·</span><span class="pill s-wip">WIP</span> 4<span class="sep">·</span><span class="pill s-review">Pending review</span> 7<span class="sep">·</span><span class="pill s-done">Done</span> 0<span class="sep">·</span>updated 2026-09-12<span class="sep">·</span>rows from <a href="https://app.clickup.com/8556478/v/l/li/901114875662" target="_blank" rel="noopener">ClickUp · Convo AI › Design Tracker (901114875662)</a>, in ClickUp order</p>
+  
+  <nav class="nav" aria-label="Sections">
+    <a href="#northstar">North star</a><a href="#inputs">Input metrics</a><a href="#budget">Time budget</a>
+    <a href="#guardrails">Guardrails</a><a href="#assumptions">Assumptions</a><a href="#next">Next</a>
+    <a href="#telemetry">Telemetry</a><a href="#decisions">Decisions for you</a><a href="#delivery">Delivery</a>
+  </nav>
+
+  <h2 id="northstar">The bet, and the one number that says whether it worked</h2>
+  <div class="ns">
+    <div class="ns-l">
+      <p class="ns-def" style="color:var(--ink);font-size:15px;margin-bottom:16px">We want to be the fastest platform on which someone can configure an AI agent and hear it answer, and then trust it enough to put it in front of customers.</p>
+      <p class="ns-name">Fast Proven Agents <span class="ns-abbr">FPA · provisional</span></p>
+      <p class="ns-def">Agents created this week that reached a verified first answer inside 15 minutes of active builder time, and then held a real conversation of two or more turns within 14 days.</p>
+      <p class="ns-note"><b>The gaming test.</b> Strip the builder to one button that plays a canned demo and time-to-first-answer collapses to 20 seconds while nothing works. FPA falls. That is the test a north star has to pass.</p>
+      <p class="ns-note"><b>Why no count target.</b> FPA count is reported with no target: at 45% it would need ~33 qualifying new agents a week against a modelled 30–40 company-wide. The rate is the half design owns.</p>
+    </div>
+    <div class="ns-r">
+      <p class="tiny">Fast-Proven Rate — target</p>
+      <p class="big">≥ 45%</p>
+      <p class="tiny" style="margin-top:16px">Today</p>
+      <p class="big" style="color:var(--ink-3);font-size:22px">unmeasured</p>
+      <p class="ns-note">No test-session event exists in the live console, so this cannot be computed today. Modelled 35–45%. Do not quote it.</p>
+    </div>
+  </div>
+
+  <h2 id="inputs">Input metrics — the four numbers a design change may claim</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>TTFA <span>i1</span></h3>
+      <p class="full">Time To First Answer</p>
+      <p>Active time from opening the builder to the agent speaking. Idle gaps over 120s removed, winsorised at 900s, median and p75 only, never the mean.</p>
+      <div class="kv"><b>Target</b><span class="mono">median ≤ 3 min · p75 ≤ 6 min</span></div>
+      <div class="kv"><b>Baseline</b><span class="mono">unmeasured · modelled 8–12 min</span></div>
+      <div class="kv"><b>Owner</b><span>Design lead</span></div>
+      <div class="chips"><span class="chip">01 Voice picker</span><span class="chip">03 Recognition</span><span class="chip">07 Vendors &amp; fallback</span><span class="chip">Chrome: rail and test panel</span></div>
+    </div><div class="card">
+      <h3>VTR <span>i2</span></h3>
+      <p class="full">Verified Test Rate</p>
+      <p>Share of new agents that reach a verified first answer at all within 14 days, however long it took.</p>
+      <div class="kv"><b>Target</b><span class="mono">≥ 70% in 14 days · ≥ 55% first session</span></div>
+      <div class="kv"><b>Baseline</b><span class="mono">unmeasured · est. 35–45%</span></div>
+      <div class="kv"><b>Owner</b><span>Design lead</span></div>
+      <div class="chips"><span class="chip">02 Turn-taking</span><span class="chip">04 Opening</span><span class="chip">Test panel default tab</span></div>
+    </div><div class="card">
+      <h3>SBDR <span>i3</span></h3>
+      <p class="full">Same-Block Deploy Rate</p>
+      <p>Share of agents with a verified first answer that publish and take a first production call within 24h, under 30 minutes of total active time.</p>
+      <div class="kv"><b>Target</b><span class="mono">≥ 40%</span></div>
+      <div class="kv"><b>Baseline</b><span class="mono">unmeasured</span></div>
+      <div class="kv"><b>Owner</b><span>Product owner</span></div>
+      <div class="chips"><span class="chip">05 Call behavior</span><span class="chip">08 Versioning</span><span class="chip">Deploy preflight</span></div>
+    </div><div class="card">
+      <h3>SAR <span>i4</span></h3>
+      <p class="full">Second-Agent Rate</p>
+      <p>Share of accounts with a proven agent that create a second one within 28 days. The business is expansion-led, so a first-agent-only metric looks away from the money.</p>
+      <div class="kv"><b>Target</b><span class="mono">≥ 25%</span></div>
+      <div class="kv"><b>Baseline</b><span class="mono">unmeasured</span></div>
+      <div class="kv"><b>Owner</b><span>Design lead</span></div>
+      <div class="chips"><span class="chip">09 First run &amp; templates</span><span class="chip">10 Session logs</span><span class="chip">11 SIP diagnostics</span></div>
+    </div>
+  </div>
+  <p class="note">The first two pull against each other on purpose: making testing easier pulls in slower, less confident users, which raises the test rate and raises the clock. Read them as a pair. A speed win with a test-rate loss is a selection effect, not an improvement.</p>
+
+  <h2 id="budget">Time budget — how the 180 s target is spent</h2>
+  <div class="bar">
+    <div style="flex:15;background:#00658d" title="Orient — 15s"></div><div style="flex:20;background:#0b7ba6" title="Declare intent — 20s">20s</div><div style="flex:50;background:#1b8fb8" title="Voice and stack — 50s">50s</div><div style="flex:45;background:#2fa2c6" title="Opening and prompt — 45s">45s</div><div style="flex:10;background:#4bb4d2" title="Reach the test — 10s"></div><div style="flex:25;background:#6cc4dc" title="Connect — 25s">25s</div><div style="flex:15;background:#92d3e6" title="First agent audio — 15s"></div>
+  </div>
+  <div class="budget">
+    <div><b>15s</b><i>Orient</i><span>First paint to first interaction. The first 10 s decide whether the visit continues (NN/g, 205,873 pages). 3 s of it is our own paint.</span></div><div><b>20s</b><i>Declare intent</i><span>Template, import, or one sentence. Parity with Vapi and Retell, not an advantage.</span></div><div><b>50s</b><i>Voice and stack</i><span>Zero required stack decisions. The 50 s is voice audition: ~3 previews at 8 s plus 26 s to commit.</span></div><div><b>45s</b><i>Opening and prompt</i><span>A working prompt and greeting are already seeded, so the median user edits one line. The writer's path is reported separately.</span></div><div><b>10s</b><i>Reach the test</i><span>One click from Hear the opening, two from the header. Machine time here is a Doherty problem, under 400 ms.</span></div><div><b>25s</b><i>Connect</i><span>12 s human for the mic permission, 8 s join, 5 s warm-up. The only stage that can exceed Nielsen's 10-second limit, so the only one that earns a progress state.</span></div><div><b>15s</b><i>First agent audio</i><span>First-turn setup plus playback starting. The runtime clock inside it is time-to-first-audio-byte, a different metric in different units.</span></div>
+  </div>
+  <p class="note"><b>Total 180s.</b> The 900 s ceiling is not a sum. Past this the session is a failure, not a slow success. It is the smallest natural working block a developer has (Parnin &amp; Rugaber, ICPC 2009), not a sum. A budget is a design contract: if p75 active dwell on a row exceeds it, the row is the defect, not the user.</p>
+
+  <h2 id="guardrails">Guardrails — a change that wins on speed and loses here has not won</h2>
+  <table class="s"><tr><th>Guardrail</th><th>Threshold</th><th>On breach</th><th>Owner</th></tr>
+    <tr>
+      <td><span class="pill t-stop">stop</span> 24h rollback / disable rate</td>
+      <td class="mono">≤ 5%</td>
+      <td>Revert the newest flagged builder change before anything else ships</td>
+      <td>Product owner</td>
+    </tr><tr>
+      <td><span class="pill t-stop">stop</span> First-publish failure rate</td>
+      <td class="mono">≤ 5% · a week over 8% blocks builder ships</td>
+      <td>Read the errorStage distribution and re-derive the preflight checks from it</td>
+      <td>Staff front-end</td>
+    </tr><tr>
+      <td><span class="pill t-trade">trade</span> Evidence-before-live rate</td>
+      <td class="mono">floor 85% · non-inferior within −3pp</td>
+      <td>The speed change loses, even if TTFA won</td>
+      <td>Design lead</td>
+    </tr><tr>
+      <td><span class="pill t-cost">cost</span> Minutes consumed per verified test</td>
+      <td class="mono">monitored, no ceiling set</td>
+      <td>A speed win that multiplies test volume is a direct cost increase at $0.10/min</td>
+      <td>Product owner</td>
+    </tr><tr>
+      <td><span class="pill t-quality">quality</span> External share of FPA</td>
+      <td class="mono">≥ 70%</td>
+      <td>The week's read does not count. Preview traffic currently falls through to external and must be reclassified first</td>
+      <td>Staff front-end</td>
+    </tr><tr>
+      <td><span class="pill t-quality">quality</span> Telemetry agreement, client vs server</td>
+      <td class="mono">≥ 95% · inert until the server emitter exists</td>
+      <td>As specified today it compares a client event to another client event and would certify bad data as good</td>
+      <td><span class="unowned">unowned</span></td>
+    </tr>
+  </table>
+  <p class="note">Three that can stop a ship, one cost counter, two data-quality checks. Not seven: every extra guardrail inflates the sample needed per arm by roughly a third. At ~36 first agents a week most of these are monitors read as trends, not hypothesis tests, and the dashboard says so rather than pretending otherwise.</p>
+
+  <h2 id="assumptions">Assumptions — what we are betting, and what would prove us wrong</h2>
+  <table class="s"><tr><th>#</th><th>Change</th><th>Predicted, raw</th><th>Plan with</th><th>The event that would refute it</th><th>Powered?</th></tr>
+    <tr>
+      <td class="mono">A1</td>
+      <td>Latency-vs-cost slider replaces three vendor dropdowns, Balanced pre-applied</td>
+      <td>§1 dwell −60 to −105 s</td>
+      <td class="mono"><b>−20 to −35 s</b></td>
+      <td class="mono">p75 activeDwellMs on stack_preset_changed</td>
+      <td><span class="yes">yes</span><br><span style="color:var(--ink-3);font-size:11.5px">~100 sessions</span></td>
+    </tr><tr>
+      <td class="mono">A2</td>
+      <td>Agora Managed Key by default, zero credential fields on the default path</td>
+      <td>first-answer completion ≥ 60% vs a 37.5% SaaS mean</td>
+      <td class="mono"><b>directional only</b></td>
+      <td class="mono">credential_mode_changed · credential_page_exited</td>
+      <td><span class="no">no</span><br><span style="color:var(--ink-3);font-size:11.5px">576/arm needed. Review at W8</span></td>
+    </tr><tr>
+      <td class="mono">A3</td>
+      <td>Test panel always present, tests the unsaved draft, defaulted to Voice call</td>
+      <td>tested-before-publish 60% → 85%; time to first Talk −20 to −40 s</td>
+      <td class="mono"><b>−7 to −13 s</b></td>
+      <td class="mono">agent_test_started{trigger}</td>
+      <td><span class="yes">yes</span><br><span style="color:var(--ink-3);font-size:11.5px">~62/arm</span></td>
+    </tr><tr>
+      <td class="mono">A4</td>
+      <td>Backup inside each model's Configure sheet, with its own credential and its own switch</td>
+      <td>attach 15% → 30–40% among sheet-openers</td>
+      <td class="mono"><b>+4 to +7 pp across all first agents</b></td>
+      <td class="mono">model_slot_configured{hasBackup}, conditional and unconditional</td>
+      <td><span class="yes">yes</span><br><span style="color:var(--ink-3);font-size:11.5px">within a segment A1 is shrinking</span></td>
+    </tr><tr>
+      <td class="mono">A5</td>
+      <td>One voice table, recommended badged at the top, frozen header</td>
+      <td>previews 6 → 3–4; voice dwell −30 to −40 s</td>
+      <td class="mono"><b>−10 to −13 s</b></td>
+      <td class="mono">voice_previewed per voice_selected</td>
+      <td><span class="yes">yes</span><br><span style="color:var(--ink-3);font-size:11.5px">~22–35 pickers/arm</span></td>
+    </tr><tr>
+      <td class="mono">A6</td>
+      <td>Test scenarios generated from the agent's own prompt and channel</td>
+      <td>≥ 60% run the suite before publish, from 0%</td>
+      <td class="mono"><b>≥ 40%</b></td>
+      <td class="mono">suite_run_completed</td>
+      <td><span class="yes">yes</span><br><span style="color:var(--ink-3);font-size:11.5px">~38/arm</span></td>
+    </tr><tr>
+      <td class="mono">A7</td>
+      <td>Opening composes the disclosure and greeting and shows the spoken line</td>
+      <td>fewer prompt reverts before first test</td>
+      <td class="mono"><b>directional only</b></td>
+      <td class="mono">agent_config_reverted on the greeting group</td>
+      <td><span class="no">no</span><br><span style="color:var(--ink-3);font-size:11.5px">no prediction claimed</span></td>
+    </tr><tr>
+      <td class="mono">A8</td>
+      <td>Five-section accordion with an n-of-5 rail</td>
+      <td>none claimed</td>
+      <td class="mono"><b>none claimed</b></td>
+      <td class="mono">builder_section_completed</td>
+      <td><span class="">n/a</span><br><span style="color:var(--ink-3);font-size:11.5px">the counter has a correctness bug; fix it alone and measure nothing</span></td>
+    </tr><tr>
+      <td class="mono">A9</td>
+      <td>Preflight names what blocks a deploy</td>
+      <td>publish attempts per agent 1.8 → 1.1</td>
+      <td class="mono"><b>directional only</b></td>
+      <td class="mono">deploy_blocked{code}</td>
+      <td><span class="no">no</span><br><span style="color:var(--ink-3);font-size:11.5px">624/arm needed</span></td>
+    </tr><tr>
+      <td class="mono">A10</td>
+      <td>Undo to live, and a visible Live-no-changes state</td>
+      <td>rollback ≤ 5%</td>
+      <td class="mono"><b>monitor</b></td>
+      <td class="mono">24h rollback guardrail</td>
+      <td><span class="no">no</span><br><span style="color:var(--ink-3);font-size:11.5px">monitor, not a test</span></td>
+    </tr><tr>
+      <td class="mono">A11</td>
+      <td>Trade-off rule: when speed and trust conflict, trust wins</td>
+      <td>a change that takes 30 s off TTFA and drops evidence-before-live below 85% is reverted</td>
+      <td class="mono"><b>policy, not a prediction</b></td>
+      <td class="mono">evidence-before-live guardrail</td>
+      <td><span class="">n/a</span><br><span style="color:var(--ink-3);font-size:11.5px">stated so it is not decided accidentally</span></td>
+    </tr>
+  </table>
+  <p class="note">Two rules throughout. Kohavi's prior: most changes move key metrics not at all, and at Bing 10–20% do, so every prediction is shown raw and discounted by a third. Plan with the discounted figure. And: powered or directional, never both. Where the sample needed exceeds what this traffic produces, the row states a direction and a review date instead of a number.</p>
+
+  <h2 id="next">Next, ranked by expected effect on the north star</h2>
+  <ol class="ranked">
+    <li><em>S</em><b>1. W0 measurement gate</b><span>Ship the test-session operation, fix the three duration bugs, extend the sanitiser allowlist. Nothing in the ledger is readable until this lands.</span></li><li><em>S</em><b>2. Move Deployment after Test, or make it skippable</b><span>The rail asks for a model stack and a deployment channel before the user has heard anything. Largest predicted effect in the pack: +8 to +15 pp first-test rate, −30 to −60 s median TTFA.</span></li><li><em>S</em><b>3. Print measured latency and cost per preset on the slider</b><span>Vapi already does. An unlabelled slider pushes users into manual config to find out what it did.</span></li><li><em>L</em><b>4. Immutable versions with one-click rollback</b><span>The rollback guardrail cannot exist without it, and Retell shipped versioning in May.</span></li><li><em>M</em><b>5. 20-participant moderated first-agent benchmark</b><span>At tens of first agents a week, telemetry will not resolve an 8 pp change for two quarters. This gives every assumption a real baseline in one week.</span></li><li><em>M</em><b>6. Timed competitive cold-start study, published with its method</b><span>Every competitor time claim is an undefined marketing number. Ours should not be.</span></li>
+  </ol>
+
+  <h2 id="telemetry">Telemetry — what has to exist before any of this is readable</h2>
+  <div class="cards" style="margin-bottom:14px">
+    <div class="card"><p class="tiny">Events specified</p><p class="big">42</p><p style="margin-top:6px">22 of them P0. Spec: <code>references/telemetry/event-spec.json</code></p></div>
+    <div class="card"><p class="tiny">Instrumented today</p><p class="big" style="color:var(--ink-3)">3</p><p style="margin-top:6px">And all three lose their payload to the live console's 48-key sanitiser allowlist.</p></div>
+    <div class="card"><p class="tiny">Front-end contract</p><p style="margin-top:6px"><code>studio_x_2/lib/analytics.ts</code> carries the typed event names and the active-time clock. It no-ops until a PostHog key exists, so the builder can be wired now and switched on later.</p></div>
+  </div>
+  <table class="s"><tr><th>Wave</th><th>Work</th><th>Unlocks</th><th>Status</th><th>Owner</th></tr>
+    <tr>
+      <td class="mono">W0</td><td>Test-session operation, duration-bug fixes, sanitiser allowlist delta</td><td>TTFA computable at all</td>
+      <td>not started</td>
+      <td>Staff front-end</td>
+    </tr><tr>
+      <td class="mono">W1</td><td>Instrument the 42 builder events, P0 first</td><td>The funnel, the dwell budgets, VTR</td>
+      <td>started · TTFA clock and first-answer event wired in the prototype</td>
+      <td>Design lead</td>
+    </tr><tr>
+      <td class="mono">W2</td><td>Backend emitter for Agora notification events 112 / 201 / 202 on a BFF webhook route</td><td>The server anchor, proven conversations, the telemetry-agreement check</td>
+      <td><span class="unowned">UNOWNED</span></td>
+      <td><span class="unowned">needs a name</span></td>
+    </tr><tr>
+      <td class="mono">W3</td><td>Immutable published versions with one-click rollback</td><td>The rollback guardrail</td>
+      <td>not started</td>
+      <td>Product owner</td>
+    </tr>
+  </table>
+  <p class="note"><b>Rules the spec obeys.</b></p>
+  <ul class="note" style="padding-left:18px"><li style="margin:4px 0">No property may carry text a user typed. deploy_blocked emits a stable code, never the interpolated reason string, which contains campaign names.</li><li style="margin:4px 0">Durations accumulate from visibilitychange deltas, never a tick counter, and are winsorised at 900 s.</li><li style="margin:4px 0">trigger 'auto' is excluded from every metric: the demo agent starts a test 150 ms after mount, and left in, the headline speed number would be generated by a setTimeout.</li><li style="margin:4px 0">Every new property key must be added to the live console's 48-key sanitiser allowlist or it is dropped silently.</li><li style="margin:4px 0">Session replay is off by policy, so struggle is inferred from four separate scalar signals, never summed into one index.</li></ul>
+
+  <h2 id="decisions">Decisions waiting on you</h2>
+  <ul class="qs">
+    <li><b>Does a simulation count as a verified first answer, or only a live voice test?</b><span>Both clocks are undefined until this is settled, and it changes A3 and A6.</span></li><li><b>Who owns the backend emitter (W2)?</b><span>Without a name, everything server-anchored stays provisional and the north star cannot be computed as defined.</span></li><li><b>Fast-Proven Rate ≥ 45% — accept as the target?</b><span>It is 1.15× the cross-SaaS activation mean, chosen because zero required credentials should beat the mean. Aspirational, not derived. Revisit 8 weeks after the first clean cohort.</span></li><li><b>Is the 20-participant moderated benchmark funded this quarter?</b><span>It is the only instrument that can resolve most of the assumption ledger at this traffic.</span></li><li><b>Do we publish the competitive cold-start study?</b><span>It converts fastest platform from an adjective into an artefact, and it may not flatter us at first.</span></li>
+  </ul>
+
+  <h2 id="delivery">Delivery — one row per tracker task</h2>
   <div class="tablewrap"><table>
     <thead><tr><th>#</th><th>Feature</th><th>Status</th><th>JTBD</th><th>Open</th><th>What we built</th><th>Secondary research</th><th>Rationale</th><th>Next</th></tr></thead>
     <tbody>

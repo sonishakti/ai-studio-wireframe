@@ -87,6 +87,7 @@ export function TestPanel({
   talking,
   onToggleTalk,
   talkDisabled,
+  onAgentSpoke,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
@@ -103,6 +104,8 @@ export function TestPanel({
   onToggleTalk?: () => void
   /** First run: Aria is still warming. Disabled WITH its reason, never dead. */
   talkDisabled?: boolean
+  /** The agent's first turn of a test — the TTFA stop (KPI plan §3). */
+  onAgentSpoke?: (turnCount: number) => void
 }) {
   const isMobile = useBelowLg()
   const showWidgetTab = hasWebWidget(draft)
@@ -212,6 +215,7 @@ export function TestPanel({
             onToggleTalk={onToggleTalk}
             disabled={talkDisabled}
             onScenarios={() => onTabChange("simulations")}
+            onAgentSpoke={onAgentSpoke}
           />
         </TabsContent>
 
@@ -302,7 +306,7 @@ export function TestPanel({
 // ─── Test agent — the orb + Talk (Figma's right-rail default state) ───────────
 
 function TalkTab({
-  agentName, greeting, advanced, talking, onToggleTalk, disabled, onScenarios,
+  agentName, greeting, advanced, talking, onToggleTalk, disabled, onScenarios, onAgentSpoke,
 }: {
   agentName: string
   greeting?: string
@@ -313,8 +317,13 @@ function TalkTab({
   disabled?: boolean
   /** Switches the rail to the Scenarios tab. */
   onScenarios?: () => void
+  /** The agent's first turn — the TTFA stop event (KPI plan §3). Fires once
+   *  per test, when the transcript actually reveals a turn, never on mount. */
+  onAgentSpoke?: (turnCount: number) => void
 }) {
   const [state, setState] = React.useState<SimState>("listening")
+  const spoke = React.useRef(false)
+  React.useEffect(() => { if (!talking) spoke.current = false }, [talking])
   const turns = React.useMemo<EvalTurn[]>(
     () => (greeting ? [{ role: "agent" as const, text: greeting }, ...RAIL_TALK.slice(1)] : RAIL_TALK),
     [greeting],
@@ -348,7 +357,18 @@ function TalkTab({
           <SimulatedBanner />
           <AgentStateChips state={state} />
           <TryInterrupting advanced={advanced} />
-          <SimTranscript turns={turns} stream onState={setState} compact />
+          <SimTranscript
+            turns={turns}
+            stream
+            onState={(s) => {
+              setState(s)
+              if ((s === "speaking" || s === "ended") && !spoke.current) {
+                spoke.current = true
+                onAgentSpoke?.(1)
+              }
+            }}
+            compact
+          />
         </div>
       ) : (
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
