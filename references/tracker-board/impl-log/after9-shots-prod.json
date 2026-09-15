@@ -1,0 +1,43 @@
+[
+ {
+  "name": "after9-stack-options",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+  "preWait": 800,
+  "marks": [
+   {
+    "text": "Most capable",
+    "tags": "span",
+    "up": 1,
+    "maxH": 210,
+    "name": "Three options, not a dial",
+    "why": "Agora charges the same $0.10 a minute whichever stack you pick, so there was one real axis and a slider had nothing to dial. Each option says what it is for and carries its own answer time."
+   },
+   {
+    "text": "$0.10/min included",
+    "tags": "span",
+    "up": 0,
+    "maxH": 80,
+    "name": "One price for all three",
+    "why": "It becomes a figure only when a slot leaves the Agora Managed Key, which is the one place a stack choice changes the bill."
+   }
+  ]
+ },
+ {
+  "name": "after9-template-dialog",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const key=(el,k)=>el.dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true}));await wait(1500);const chip=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Template:'));if(chip){chip.focus();key(chip,'Enter');}await wait(900);for(let i=0;i<10;i++){const it=[...document.querySelectorAll('[role=menuitem]')];const cur=it.find(x=>/Appointment/i.test(x.textContent));if(cur){cur.focus();key(cur,'Enter');break;}key(document.activeElement||document.body,'ArrowDown');await wait(200);}await wait(1600);})()",
+  "preWait": 1600,
+  "marks": [
+   {
+    "sel": "[data-slot=alert-dialog-content]",
+    "up": 0,
+    "maxH": 420,
+    "name": "Content stays inside the panel",
+    "why": "Every row was a flex with no minimum-width reset, so the greeting and the extract list pushed straight through the panel edge. They are two-column grids now, and the primitive stops any grid child from outgrowing its dialog."
+   }
+  ]
+ }
+]

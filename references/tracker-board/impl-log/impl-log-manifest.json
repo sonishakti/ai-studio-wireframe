@@ -1,6 +1,6 @@
 {
  "title": "Agent builder — Future scope removed, NG-style chrome, six research features (01 · 02 · 04 · 07 · 10 · 11)",
- "date": "2026-09-15 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main 32bb4e2 · production ai-studio-console-redesign-lier7wepq",
+ "date": "2026-09-15 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main ccac8a2 · production ai-studio-console-redesign-rjxe3sfk0",
  "deploy": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
  "commits": [
   {
@@ -74,6 +74,14 @@
   {
    "sha": "32bb4e2",
    "msg": "models: the slider trades speed against capability, not money; disclosure carries its source"
+  },
+  {
+   "sha": "bb75f3b",
+   "msg": "copy: write for someone who arrived a minute ago, and a lint that enforces it"
+  },
+  {
+   "sha": "ccac8a2",
+   "msg": "ui: fix dialogs at the primitive, and the two that showed it"
   }
  ],
  "intro": [
@@ -85,7 +93,8 @@
   "Third and fourth pass (2026-09-12): ten owner notes on the chrome (Run test scenarios as a header door, full-height rail, Undo to live, Callers hear as a field, hosting region as label + value, red End test, no em dashes anywhere in copy) and three on the models fold (voice selection in the TTS config, + Add backup beside every vendor, credentials as a switch modelled on the NG console). Then a presence check of all six features on production: every marker matched.",
   "Fifth pass (2026-09-12, owner IA notes): five surfaces had drifted into new designs of things that already had a home. Backup providers were a section of their own plus an inline select with no key; recommended voices were a list above the voice table; a Browse voices button duplicated the voice field; the runs empty state was centered while every other empty state is a left-aligned row; the builder header scrolled away while everything under it stuck. Each is now a state of the surface that already renders that kind of thing. The rule is recorded: things that belong together live together and look the same, and a default Agora handles needs no control.",
   "Sixth pass (2026-09-15): twenty owner notes on the models sheet, the Opening section, the deployment flow and the copy. A backup is now a chain, not one pick: each link carries its own vendor, model, credential and on/off switch, because the owner's question was \"what about the keys for the backup?\" and a backup without a key is not a backup. Prompt & knowledge splits into three labelled rows. Batch calling gets its contact list at the point of decision. And the builder now carries a KPI strategy: a north star, a 180-second time budget with parts, three guardrails with owners, and eleven assumptions stated with numbers so they can be refuted.",
-  "Seventh pass (2026-09-15, same day): twenty-three more owner notes, and one of them sent me to Agora's own pricing docs. The rate is a flat $0.10 per agent-minute and the docs say it is the same with your own key, so the slider's Lowest-Cost end was measuring a number that never moves. The axis is now speed against capability with two badges, one that changes and one that does not. Advanced settings became a single panel with a contents list instead of four hiding places. Credentials are made inside the builder. Go live stopped asking for things Deployment already collected."
+  "Seventh pass (2026-09-15, same day): twenty-three more owner notes, and one of them sent me to Agora's own pricing docs. The rate is a flat $0.10 per agent-minute and the docs say it is the same with your own key, so the slider's Lowest-Cost end was measuring a number that never moves. The axis is now speed against capability with two badges, one that changes and one that does not. Advanced settings became a single panel with a contents list instead of four hiding places. Credentials are made inside the builder. Go live stopped asking for things Deployment already collected.",
+  "Eighth pass: the owner caught a sentence of mine arguing with the design inside the product, and the control that made me write it. A first-time reader never saw a cost axis, so answering \"not money\" was noise. The slider is gone; three named options replace it. Then the same class of copy came out of 27 other strings, and a lint now catches it. Finally, modals were broken at the primitive: three CSS bugs in Dialog, AlertDialog and Sheet that affected every one of them."
  ],
  "features": [
   {
@@ -376,6 +385,30 @@
        "why": "The campaign-runs card, its roll-up, its status filter and its second caller-ID picker are gone. The contact list and the number were chosen in Deployment; asking again read as a trap."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after9-stack-options.png",
+     "caption": "After (eighth pass): three named options instead of a slider",
+     "marks": [
+      {
+       "name": "Three options, not a dial",
+       "why": "Agora charges the same $0.10 a minute whichever stack you pick, so there was one real axis and a slider had nothing to dial. Each option says what it is for and carries its own answer time."
+      },
+      {
+       "name": "One price for all three",
+       "why": "It becomes a figure only when a slot leaves the Agora Managed Key, which is the one place a stack choice changes the bill."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after9-template-dialog.png",
+     "caption": "After (eighth pass): dialog content stays inside its panel",
+     "marks": [
+      {
+       "name": "Content stays inside the panel",
+       "why": "Every row was a flex with no minimum-width reset, so the greeting and the extract list pushed straight through the panel edge. They are two-column grids now, and the primitive stops any grid child from outgrowing its dialog."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -398,7 +431,10 @@
     "Seventh pass (owner, 2026-09-15): four advanced-settings doors became one panel with a contents list naming what each group holds, so nothing depends on remembering which sheet hid what. Conversation history and the raw config JSON moved there from the model expander; the silence rule moved there from the Opening section, where it had been sitting as a stray recap line.",
     "The AI-disclosure sentence is a field like the greeting, and it carries what the pinned region actually requires with a link to the primary source: EU AI Act Article 50, Korea's AI Framework Act Article 31, Utah 13-77-104, MeitY's IT Rules FAQ, Japan's AI Promotion Act. It says plainly that the region is where the agent runs and the binding rule is where the caller is. Outbound adds the FCC's 2024 ruling that an AI voice is an artificial voice under the TCPA.",
     "Go live lost the campaign-runs card, its roll-up, its status filter and its second caller-ID picker. The contact list and the number were chosen in Deployment, so it asks one thing: when to start. The deploy summary lost its card and gained the size of the batch.",
-    "Every string that talked about the prototype instead of the product is gone: no wireframe estimates, no simulated previews, no parenthetical annotations in the transcript."
+    "Every string that talked about the prototype instead of the product is gone: no wireframe estimates, no simulated previews, no parenthetical annotations in the transcript.",
+    "Eighth pass (owner, 2026-09-15): \"Every stop costs the same $0.10 a minute. The slider trades how fast the agent answers against how much it can handle, not money\" was copy defending a decision. Only someone who saw the cost axis would need the words \"not money\". It is gone, and so is the slider: with price constant there was one real axis, and a dial with nothing to dial is the wrong control. Three options that say what they are for, each carrying its own answer time.",
+    "The same class of writing came out of 27 more strings that named the prototype rather than the product, and out of the disclosure block, the advanced panel's subtitle and the pre-flight description. CLAUDE.md now carries a copy gate with four tests, and scripts/copy-lint.mjs checks the mechanical half. It found those 27 on its first run.",
+    "Modals were broken at the primitive, which is why they were all broken. Dialog, AlertDialog and Sheet are CSS grids, and a grid child defaults to min-width auto, so any long value pushed through the panel edge instead of wrapping. Nothing bounded their height, so a tall dialog ran off the viewport with its own buttons out of reach. AlertDialog had no inset, so it touched the screen edges. Then the two the screenshots caught: the pre-flight's label column was narrower than the word DEPLOYMENT, and every row of the template diff was a flex with no minimum-width reset."
    ],
    "copy": [
     "Help",
@@ -1022,12 +1058,16 @@
    "result": "after4-* and after5-* all markers matched on production (after5-add-backup after the bfb4406 fix)"
   },
   {
-   "name": "annotate-shots, seventh pass",
-   "result": "after8-* all 6 shots, every marker matched on production (deploy lier7wepq)"
+   "name": "annotate-shots, eighth pass",
+   "result": "after9-* both shots, every marker matched on production (deploy rjxe3sfk0)"
   },
   {
-   "name": "Live check (2026-09-15, seventh pass)",
-   "result": "credential checkbox, in-builder key dialog, advanced panel with three groups, Go live without the runs card, and the two slider badges all confirmed on production; tsc and next build clean"
+   "name": "copy-lint",
+   "result": "clean. 27 strings fixed on its first run; it fails the build on any string that names the prototype or defends a decision"
+  },
+  {
+   "name": "Live check (2026-09-15, eighth pass)",
+   "result": "template dialog measured 512 px wide and centred in a 1440 px viewport with zero row overflow; pre-flight 571 px tall in a 950 px viewport with no clipping; tsc and next build clean"
   }
  ],
  "where": [
