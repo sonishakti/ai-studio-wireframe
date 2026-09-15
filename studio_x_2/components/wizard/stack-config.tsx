@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, RotateCcw, SlidersHorizontal, Plus, ShieldCheck } from "lucide-react"
+import { ChevronDown, RotateCcw, SlidersHorizontal, Plus, X, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -18,7 +18,10 @@ import { Switch } from "@/components/ui/switch"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
 import type { VoiceArtifact } from "@/lib/voice-artifacts"
 import type { HostingConfig } from "@/lib/hosting-regions"
-import { BACKUP_CANDIDATES, NO_BACKUP, backupManaged, backupOf, planBackups, type BackupConfig, type BackupSlotPlan } from "@/lib/backup-providers"
+import {
+  BACKUP_CANDIDATES, backupManaged, backupOf, candidateById, planBackups,
+  type BackupConfig, type BackupEntry, type BackupSlotPlan,
+} from "@/lib/backup-providers"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
@@ -560,12 +563,61 @@ function CredentialField({
 }
 
 /** What the sheet needs to own a slot's backup (design 07, owner IA 2026-09-12). */
+/** What the sheet needs to own a slot's backup chain (design 07, owner IA
+ *  2026-09-12, chain 2026-09-15). */
 interface BackupOwnerProps {
   backup?: BackupConfig
   onBackupChange?: (b: BackupConfig) => void
   hosting?: HostingConfig
   /** Jumps to the hosting region control in Deployment. */
   onUnpinRegion?: () => void
+}
+
+/** Vendor + model on one row — the pair a person names together ("Deepgram
+ *  Nova-2"), so they read as one decision (owner IA 2026-09-15). */
+function VendorModelRow({
+  idBase, label, vendors, vendor, onVendor, models, model, onModel, modelLabel = "Model", modelSlot,
+}: {
+  idBase: string
+  label?: string
+  vendors: string[]
+  vendor: string
+  onVendor: (v: string) => void
+  models: string[]
+  model: string
+  onModel: (m: string) => void
+  modelLabel?: string
+  /** TTS replaces the model select with the voice door. */
+  modelSlot?: React.ReactNode
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <div className="min-w-0 space-y-1.5">
+        <Label className="text-xs text-muted-foreground" htmlFor={`${idBase}-vendor`}>{label ? `${label} vendor` : "Vendor"}</Label>
+        <Select value={vendor} onValueChange={onVendor}>
+          <SelectTrigger id={`${idBase}-vendor`} className="w-full text-sm" aria-label={label ? `${label} vendor` : "Vendor"}>
+            <SelectValue placeholder="Select a vendor" />
+          </SelectTrigger>
+          <SelectContent>
+            {vendors.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="min-w-0 space-y-1.5">
+        <Label className="text-xs text-muted-foreground" htmlFor={`${idBase}-model`}>{modelLabel}</Label>
+        {modelSlot ?? (
+          <Select value={models.includes(model) ? model : (models[0] ?? "")} onValueChange={onModel}>
+            <SelectTrigger id={`${idBase}-model`} className="w-full text-sm capitalize" aria-label={modelLabel}>
+              <SelectValue placeholder="Select a model" />
+            </SelectTrigger>
+            <SelectContent>
+              {models.map((m) => <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+    </div>
+  )
 }
 
 function ConfigureSlotSheet({
@@ -591,21 +643,23 @@ function ConfigureSlotSheet({
   const [custom, setCustom] = React.useState(false)
   const [credentialId, setCredentialId] = React.useState<string | undefined>(stack.credentials?.[slot])
   const [voiceOpen, setVoiceOpen] = React.useState(false)
-  // The slot's backup: undefined = Agora's pick, NO_BACKUP = none, else a candidate id.
-  const [bPick, setBPick] = React.useState<string | undefined>(b.picks[slot])
-  const [bMode, setBMode] = React.useState<CredentialMode>(b.credentialMode?.[slot] ?? "managed")
-  const [bCredentialId, setBCredentialId] = React.useState<string | undefined>(b.credentials?.[slot])
+  /** The slot's backup chain, local until Save. */
+  const [chain, setChain] = React.useState<BackupEntry[]>([])
+
   React.useEffect(() => {
-    if (open) {
-      setVendor(current.vendor)
-      setModel(slot === "tts" ? stack.tts.voice : (current as { model: string }).model)
-      setMode(slotMode(stack, slot))
-      setCustom(false)
-      setCredentialId(stack.credentials?.[slot])
-      setBPick(b.picks[slot])
-      setBMode(b.credentialMode?.[slot] ?? "managed")
-      setBCredentialId(b.credentials?.[slot])
-    }
+    if (!open) return
+    setVendor(current.vendor)
+    setModel(slot === "tts" ? stack.tts.voice : (current as { model: string }).model)
+    setMode(slotMode(stack, slot))
+    setCustom(false)
+    setCredentialId(stack.credentials?.[slot])
+    // Untouched slot: seed the chain from Agora's own default so the switch
+    // shows what is actually running, rather than an empty panel.
+    const saved = b.entries[slot]
+    if (saved) { setChain(saved); return }
+    const auto = planBackups({ stack, hosting, backup: b }).slots.find((s) => s.slot === slot)
+    const first = auto?.links[0]?.candidate
+    setChain(first ? [{ id: first.id, enabled: true }] : [])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
@@ -619,24 +673,40 @@ function ConfigureSlotSheet({
   const byo = !resellable || mode === "byo"
   const pickedVoice = slot === "tts" ? voices?.find((v) => v.ttsVoice === model && (v.provider ?? "ElevenLabs") === vendor) : undefined
 
-  // The plan for THIS sheet's draft: the backup follows the vendor being
-  // edited, not the saved one, so "· primary" and eligibility never lag.
+  // The plan for THIS sheet's draft: the chain follows the vendor being
+  // edited, not the saved one, so eligibility never lags.
   const localStack = React.useMemo(
     () => applySlot(stack, slot, { vendor, model, mode: resellable ? mode : "byo", credentialId: byo ? credentialId : undefined }),
     [stack, slot, vendor, model, mode, resellable, byo, credentialId],
   )
-  const localBackup = React.useMemo<BackupConfig>(() => {
-    const picks = { ...b.picks }
-    if (bPick) picks[slot] = bPick; else delete picks[slot]
-    const credentials = { ...(b.credentials ?? {}) }
-    if (bCredentialId) credentials[slot] = bCredentialId; else delete credentials[slot]
-    return { ...b, enabled: true, picks, credentialMode: { ...(b.credentialMode ?? {}), [slot]: bMode }, credentials }
+  const localBackup = React.useMemo<BackupConfig>(
+    () => ({ ...b, enabled: true, entries: { ...b.entries, [slot]: chain } }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [backup, slot, bPick, bMode, bCredentialId])
+    [backup, slot, chain],
+  )
   const localPlan = React.useMemo(() => planBackups({ stack: localStack, hosting, backup: localBackup }), [localStack, hosting, localBackup])
   const slotPlan = localPlan.slots.find((p) => p.slot === slot) as BackupSlotPlan
-  const primaryCandidates = BACKUP_CANDIDATES.filter((c) => c.slot === slot && c.vendor === vendor)
-  const backupOn = bPick !== NO_BACKUP && !!slotPlan.backup
+
+  /** Vendors this slot can fall back to, primary excluded. */
+  const backupVendors = React.useMemo(() => {
+    const pool = BACKUP_CANDIDATES.filter((c) => c.slot === slot && c.vendor !== vendor)
+    return [...new Set(pool.map((c) => c.vendor))]
+  }, [slot, vendor])
+  const backupModels = (v: string) => BACKUP_CANDIDATES.filter((c) => c.slot === slot && c.vendor === v).map((c) => c.model)
+  const candidateFor = (v: string, m: string) =>
+    BACKUP_CANDIDATES.find((c) => c.slot === slot && c.vendor === v && c.model === m)
+    ?? BACKUP_CANDIDATES.find((c) => c.slot === slot && c.vendor === v)
+
+  const patchLink = (i: number, patch: Partial<BackupEntry>) =>
+    setChain((cs) => cs.map((c, n) => (n === i ? { ...c, ...patch } : c)))
+  const addBackup = () => {
+    const used = new Set(chain.map((c) => candidateById(c.id)?.vendor))
+    used.add(vendor)
+    const next = BACKUP_CANDIDATES.find((c) => c.slot === slot && !used.has(c.vendor))
+    if (!next) return
+    setChain((cs) => [...cs, { id: next.id, enabled: true }])
+  }
+  const removeBackup = (i: number) => setChain((cs) => cs.filter((_, n) => n !== i))
 
   const save = () => {
     onChange(localStack)
@@ -650,152 +720,183 @@ function ConfigureSlotSheet({
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
           <SheetTitle className="text-base">Configure {SLOT_LABEL[slot]}</SheetTitle>
         </SheetHeader>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Vendor</Label>
-            <Select value={vendor} onValueChange={(v) => {
-              setVendor(v)
-              const first = slot === "tts"
-                ? STACK_CATALOG.tts.find((x) => x.vendor === v)?.voices[0]
-                : (slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm).find((x) => x.vendor === v)?.model
-              if (first) setModel(first)
-            }}>
-              <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {vendors.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <CredentialField
-            id={`wz-cred-${slot}`}
-            vendor={vendor}
-            resellable={resellable}
-            mode={mode}
-            onMode={setMode}
-            credentialId={credentialId}
-            onCredential={setCredentialId}
-          />
-
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">{slot === "tts" ? "Voice" : "Model"}</Label>
-            {slot === "tts" && voices && !custom ? (
-              /* The voice is chosen in the Select voice dialog (design 01), the
-                 way the NG console's TTS drawer opens its voice library. The
-                 field is the door: one control, the same one as in Voice &
-                 Models (owner 2026-09-12). */
-              <button
-                type="button"
-                onClick={() => setVoiceOpen(true)}
-                aria-label="Select voice"
-                className="flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-stroke bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {pickedVoice ? (
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span aria-hidden className="size-2 shrink-0 rounded-full bg-primary" />
-                    <span className="font-medium">{pickedVoice.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{pickedVoice.tagline}</span>
-                  </span>
-                ) : (
-                  <span className="truncate font-mono text-xs">{model}</span>
-                )}
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-              </button>
-            ) : custom ? (
-              <Input
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder={slot === "tts" ? "custom-voice-id" : "custom-model-id"}
-                className="font-mono text-sm"
-              />
-            ) : (
-              <Select value={models.includes(model) ? model : models[0]} onValueChange={setModel}>
-                <SelectTrigger className="w-full text-sm capitalize"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {models.map((m) => <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            )}
-            <label className="flex items-center gap-2 pt-1 text-sm text-muted-foreground">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          {/* PRIMARY — vendor + model on one row, then its key. */}
+          <section className="space-y-3">
+            <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Primary</p>
+            <VendorModelRow
+              idBase={`wz-slot-${slot}`}
+              vendors={vendors}
+              vendor={vendor}
+              onVendor={(v) => {
+                setVendor(v)
+                const first = slot === "tts"
+                  ? STACK_CATALOG.tts.find((x) => x.vendor === v)?.voices[0]
+                  : (slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm).find((x) => x.vendor === v)?.model
+                if (first) setModel(first)
+              }}
+              models={models}
+              model={model}
+              onModel={setModel}
+              modelLabel={slot === "tts" ? "Voice" : "Model"}
+              modelSlot={
+                slot === "tts" && voices && !custom ? (
+                  /* The voice is chosen in the Select voice dialog (design 01):
+                     the field is the door, the same control as Voice & Models. */
+                  <button
+                    type="button"
+                    onClick={() => setVoiceOpen(true)}
+                    aria-label="Select voice"
+                    className="flex h-9 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-stroke bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {pickedVoice ? (
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span aria-hidden className="size-2 shrink-0 rounded-full bg-primary" />
+                        <span className="truncate font-medium">{pickedVoice.name}</span>
+                      </span>
+                    ) : (
+                      <span className="truncate font-mono text-xs">{model}</span>
+                    )}
+                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  </button>
+                ) : custom ? (
+                  <Input
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    placeholder={slot === "tts" ? "custom-voice-id" : "custom-model-id"}
+                    className="font-mono text-sm"
+                  />
+                ) : undefined
+              }
+            />
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <Checkbox checked={custom} onCheckedChange={(c) => setCustom(!!c)} aria-label="Custom model id" />
               Custom
             </label>
-          </div>
+            <CredentialField
+              id={`wz-cred-${slot}`}
+              vendor={vendor}
+              resellable={resellable}
+              mode={mode}
+              onMode={setMode}
+              credentialId={credentialId}
+              onCredential={setCredentialId}
+            />
+          </section>
 
-          {/* Backup (design 07, owner IA 2026-09-12): the backup lives with
-              the model it protects, after its vendor, key and model, and
-              carries a key of its own. No section elsewhere. */}
+          {/* BACKUP CHAIN — the same anatomy, once per backup, each with its
+              own switch and its own key (owner IA 2026-09-15). */}
           {onBackupChange && (
-            <div data-design-focus="backup-providers" className="space-y-3 rounded-md border border-stroke p-3">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">Backup</p>
-                <p className="text-xs text-muted-foreground">
-                  If {vendor} is slow, down or blocked in your region, the call continues on the backup.
-                  Switching is never silent: every switch shows in the session log.
-                </p>
+            <section className="mt-6 space-y-3 border-t border-border pt-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Backup</p>
+                <p className="text-xs text-muted-foreground">Tried in order if {vendor} fails.</p>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground" htmlFor={`wz-backup-${slot}`}>Backup vendor</Label>
-                <Select
-                  value={bPick === NO_BACKUP ? NO_BACKUP : (slotPlan.backup?.id ?? "")}
-                  onValueChange={(id) => {
-                    setBPick(id)
-                    const c = BACKUP_CANDIDATES.find((x) => x.id === id)
-                    setBMode(c && backupManaged(c) ? "managed" : "byo")
-                    setBCredentialId(undefined)
-                  }}
-                >
-                  <SelectTrigger id={`wz-backup-${slot}`} className="w-full text-sm" aria-label="Backup vendor">
-                    <SelectValue placeholder="No eligible backup" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {primaryCandidates.map((c) => (
-                      <SelectItem key={c.id} value={c.id} disabled>{c.label} · primary</SelectItem>
-                    ))}
-                    {slotPlan.eligible.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.label}{backupManaged(c) ? "" : " · your key"}</SelectItem>
-                    ))}
-                    {/* Ineligible backups are shown but dead — never silently hidden. */}
-                    {slotPlan.ineligible.map(({ candidate, why }) => (
-                      <SelectItem key={candidate.id} value={candidate.id} disabled>{candidate.label} · {why}</SelectItem>
-                    ))}
-                    <SelectItem value={NO_BACKUP}>No backup</SelectItem>
-                  </SelectContent>
-                </Select>
-                {!bPick && slotPlan.backup && (
-                  <p className="text-xs text-muted-foreground">Agora&apos;s pick. Change it, or choose No backup.</p>
-                )}
-                {localPlan.pinnedArea && (
-                  <p className="text-xs text-muted-foreground">
-                    Backups are limited to vendors serving {localPlan.pinnedArea} because the hosting region is pinned.{" "}
-                    {onUnpinRegion && (
-                      <button type="button" onClick={() => { onOpenChange(false); onUnpinRegion() }} className="text-foreground underline underline-offset-4">
-                        Unpin region
-                      </button>
+
+              {chain.length === 0 && (
+                <p className="rounded-md border border-dashed border-stroke px-3 py-2.5 text-xs text-muted-foreground">
+                  No backup. The call ends if {vendor} fails.
+                </p>
+              )}
+
+              {chain.map((entry, i) => {
+                const cand = candidateById(entry.id)
+                const link = slotPlan.links[i]
+                const v = cand?.vendor ?? backupVendors[0] ?? ""
+                const managed = cand ? backupManaged(cand) : false
+                return (
+                  <div key={`${entry.id}-${i}`} className={cn("space-y-3 rounded-md border border-stroke p-3", !entry.enabled && "opacity-60")}>
+                    <div className="flex items-center justify-between gap-2">
+                      <Label htmlFor={`wz-backup-${slot}${i === 0 ? "" : `-${i}`}-vendor`} className="text-sm font-medium">
+                        Backup {String(i + 1).padStart(2, "0")}
+                      </Label>
+                      <div className="flex items-center gap-1">
+                        <Switch
+                          checked={entry.enabled}
+                          onCheckedChange={(on) => patchLink(i, { enabled: on })}
+                          aria-label={`Backup ${i + 1} on`}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          className="text-muted-foreground"
+                          aria-label={`Remove backup ${i + 1}`}
+                          onClick={() => removeBackup(i)}
+                        >
+                          <X className="size-3.5" aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                    <VendorModelRow
+                      idBase={`wz-backup-${slot}${i === 0 ? "" : `-${i}`}`}
+                      label="Backup"
+                      vendors={backupVendors}
+                      vendor={v}
+                      onVendor={(nv) => {
+                        const next = candidateFor(nv, backupModels(nv)[0] ?? "")
+                        if (next) patchLink(i, { id: next.id, credentialMode: backupManaged(next) ? "managed" : "byo", credentialId: undefined })
+                      }}
+                      models={backupModels(v)}
+                      model={cand?.model ?? ""}
+                      onModel={(m) => {
+                        const next = candidateFor(v, m)
+                        if (next) patchLink(i, { id: next.id })
+                      }}
+                      modelLabel={slot === "tts" ? "Voice model" : "Model"}
+                    />
+                    {entry.enabled && cand && (
+                      <CredentialField
+                        id={`wz-bcred-${slot}${i === 0 ? "" : `-${i}`}`}
+                        vendor={cand.vendor}
+                        resellable={managed}
+                        mode={entry.credentialMode ?? (managed ? "managed" : "byo")}
+                        onMode={(m) => patchLink(i, { credentialMode: m })}
+                        credentialId={entry.credentialId}
+                        onCredential={(id) => patchLink(i, { credentialId: id })}
+                        label="Use my own credentials"
+                      />
                     )}
-                  </p>
-                )}
-              </div>
-              {backupOn && slotPlan.backup && (
-                <CredentialField
-                  id={`wz-bcred-${slot}`}
-                  vendor={slotPlan.backup.vendor}
-                  resellable={backupManaged(slotPlan.backup)}
-                  mode={bMode}
-                  onMode={setBMode}
-                  credentialId={bCredentialId}
-                  onCredential={setBCredentialId}
-                  label="Use my own credentials for the backup"
-                />
-              )}
-              {backupOn && slotPlan.backup && slot === "tts" && (
+                    {entry.enabled && link?.problem && (
+                      <p className="text-xs text-warning">
+                        {link.problem.startsWith("needs your")
+                          ? `This backup ${link.problem}. Pick one above, or it will be skipped.`
+                          : `Skipped: ${link.problem}.`}
+                      </p>
+                    )}
+                    {entry.enabled && slot === "tts" && cand && !link?.problem && (
+                      <p className="text-xs text-muted-foreground">
+                        {cand.voiceMapped
+                          ? `Backup voice: the closest match to ${pickedVoice?.name ?? model} on ${cand.vendor}.`
+                          : `No mapped voice on ${cand.vendor}: the backup speaks in its default voice.`}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={addBackup}
+                disabled={chain.length >= backupVendors.length}
+              >
+                <Plus className="size-3.5" aria-hidden /> Add backup
+              </Button>
+
+              {localPlan.pinnedArea && (
                 <p className="text-xs text-muted-foreground">
-                  {slotPlan.backup.voiceMapped
-                    ? `Backup voice: the closest match to ${pickedVoice?.name ?? model} on ${slotPlan.backup.vendor}.`
-                    : `No mapped voice on ${slotPlan.backup.vendor}: the backup speaks in its default voice.`}
+                  Backups are limited to vendors serving {localPlan.pinnedArea} because the hosting region is pinned.{" "}
+                  {onUnpinRegion && (
+                    <button type="button" onClick={() => { onOpenChange(false); onUnpinRegion() }} className="text-foreground underline underline-offset-4">
+                      Unpin region
+                    </button>
+                  )}
                 </p>
               )}
-            </div>
+            </section>
           )}
         </div>
         <div className="shrink-0 border-t border-border px-5 py-3">
@@ -821,6 +922,7 @@ function ConfigureSlotSheet({
     </Sheet>
   )
 }
+
 
 /** "Or Configure models manually" (Figma 2998-93809) — the inline expander:
  *  Custom Stack recap + Reset, the architecture cards, then one row per model
@@ -848,12 +950,17 @@ export function ManualStackConfig({
   const recap = (slot: Slot) => {
     const s = plan.slots.find((p) => p.slot === slot)
     if (!s) return null
+    const live = s.links.filter((l) => l.enabled)
+    const first = live.find((l) => !l.problem) ?? live[0]
+    const more = Math.max(0, live.length - 1)
     const gap = s.state === "needs-key" || s.state === "no-match"
-    const key = s.state === "needs-key"
-      ? s.note
-      : s.backupByo
-        ? (VENDOR_CREDENTIALS.find((c) => c.id === s.credentialId)?.name ?? "your key")
-        : "Agora Managed Key"
+    const key = first
+      ? first.problem
+        ? first.problem
+        : first.byo
+          ? (VENDOR_CREDENTIALS.find((c) => c.id === first.credentialId)?.name ?? "your key")
+          : "Agora Managed Key"
+      : null
     return (
       <button
         type="button"
@@ -864,17 +971,21 @@ export function ManualStackConfig({
           gap ? "text-warning" : "text-muted-foreground",
         )}
       >
-        <span className="font-medium">Backup</span>
+        <span className="font-medium">{live.length > 1 ? "Backups" : "Backup"}</span>
         <span aria-hidden>·</span>
-        {s.state === "off" ? (
-          <span>none</span>
-        ) : s.state === "no-match" || !s.backup ? (
-          <span>{s.note}</span>
+        {!first ? (
+          <span>{s.note ?? "none"}</span>
         ) : (
           <>
-            <span>{s.backup.label}</span>
+            <span>{first.candidate.label}</span>
             <span aria-hidden>·</span>
             <span>{key}</span>
+            {more > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{more} more</span>
+              </>
+            )}
           </>
         )}
       </button>
@@ -975,11 +1086,14 @@ const bundleLine = (s: AgentStack, diverged: boolean) =>
   `${diverged ? "Custom mix" : STACK_PRESETS[s.preset].label}: ${s.asr.vendor} STT · ${s.llm.model} · ${s.tts.vendor} voice`
 
 export function StackTradeoffSlider({
-  stack, onChange, className, lean,
+  stack, onChange, className, lean, afterRecap,
 }: StackPieceProps & {
   /** Builder hot-path mode (Plain Form winner, 2026-07-29): no card chrome,
    *  no mono label, one estimate line. The Playground default is unchanged. */
   lean?: boolean
+  /** Rendered directly under the line that names the chosen stack, so the
+   *  manual door sits beside the preset it replaces (owner 2026-09-15). */
+  afterRecap?: React.ReactNode
 }) {
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
   if (pipeline === "mllm") return null
@@ -1054,6 +1168,7 @@ export function StackTradeoffSlider({
           Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min
         </p>
       )}
+      {afterRecap}
       {/* Where the money actually goes. Agora charges its platform rate either
           way and managed absorbs the vendor bill, so managed is CHEAPER — the
           inverse of every competitor, and previously invisible. Arithmetic, not
@@ -1061,9 +1176,7 @@ export function StackTradeoffSlider({
       <div className="rounded-lg border border-border bg-muted/30 p-2.5 text-xs">
         {cost.allManaged ? (
           <p>
-            <span className="font-medium">${cost.totalPerMin.toFixed(2)}/min, all in.</span>{" "}
-            Speech, model, and voice are included in Agora&apos;s rate. No vendor keys, no second bill.
-            If a vendor is slow or down, Agora switches to its backup. Nothing to set up.
+            <span className="font-medium">${cost.totalPerMin.toFixed(2)}/min, all in.</span>
           </p>
         ) : (
           <div className="space-y-0.5">
@@ -1081,21 +1194,10 @@ export function StackTradeoffSlider({
           </div>
         )}
       </div>
-      {/* The measurement boundary, stated. A latency figure with no stated
-          boundary is unfalsifiable — every vendor quotes the flattering one. */}
-      <p className="text-xs text-muted-foreground">
-        Typical end-to-end: caller stops speaking → agent audio starts. Measured across our
-        traffic, not a guarantee for your account.
-      </p>
       {nonStreaming.length > 0 && (
         <p className="text-xs text-warning">
           {nonStreaming.join(", ")} doesn&apos;t stream. It transcribes only after the caller
-          stops, which is most of the delay above.
-        </p>
-      )}
-      {diverged && (
-        <p className="text-xs text-muted-foreground">
-          Moving the slider replaces your custom model mix.
+          stops speaking, which adds to the wait.
         </p>
       )}
     </section>

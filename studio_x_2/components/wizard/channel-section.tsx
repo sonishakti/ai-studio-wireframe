@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { X, ExternalLink, Info, Phone, Plus } from "lucide-react"
+import { X, ExternalLink, Info, Phone, Plus, ChevronDown, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -14,10 +14,12 @@ import { InfoHint } from "@/components/wizard/info-hint"
 import { CodeBlock } from "@/components/code-block"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
+import { cn } from "@/lib/utils"
+import { CampaignContacts } from "@/components/wizard/campaigns-card"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
-  channelLabel, inboundSurfaces,
-  type AgentDraft, type DeployChannel, type InboundSurface,
+  channelLabel, inboundSurfaces, makeCampaign,
+  type AgentDraft, type CampaignDraft, type DeployChannel, type InboundSurface,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
@@ -74,6 +76,11 @@ export function ChannelSection({
       patch.config = { ...draft.config, inbound: { numberIds: [], surfaces: ["phone"] } }
     }
     if (c === "code") patch.config = { ...draft.config, code: { added: true } }
+    // Batch without a contact list is an empty promise: seed the first run so
+    // the CSV drop appears the moment the type is picked (owner 2026-09-15).
+    if (c === "batch" && draft.campaigns.length === 0) {
+      patch.campaigns = [{ ...makeCampaign("Run 01"), numberId: draft.config.batch?.callerId }]
+    }
     update(patch)
     // Switching away from a configured/live channel: say the setup is KEPT.
     if (current && (liveChannels?.includes(current) ||
@@ -143,8 +150,8 @@ export function ChannelSection({
         </RadioCardGroup>
 
         <InfoHint label="Phone channels are bring-your-own number">
-          Agora doesn&apos;t sell numbers: connect your carrier&apos;s via SIP with{" "}
-          <span className="font-medium text-foreground">Add phone number</span> below, or manage them in{" "}
+          Agora doesn&apos;t sell numbers. Connect your carrier&apos;s over SIP from any phone-number
+          field below, or manage them in{" "}
           <a href="/integrations?tab=channels" className="underline underline-offset-2">
             Resources › Deployment Channels
           </a>
@@ -184,10 +191,13 @@ export function ChannelSection({
         </SectionRow>
       )}
 
-      {/* BATCH (Figma 2875-83511) — the agent-level caller ID; runs and their
-          schedules live in Go Live. */}
+      {/* BATCH (Figma 2875-83511) — the number it dials from, then the list it
+          dials. Schedules, retries and concurrency stay in Go live. */}
       {current === "batch" && (
-        <BatchCallerIdBlock draft={draft} update={update} />
+        <>
+          <BatchCallerIdBlock draft={draft} update={update} />
+          <BatchContactsBlock draft={draft} update={update} onGoToStep={onGoToStep} />
+        </>
       )}
 
       {current === "code" && (
@@ -213,29 +223,69 @@ function BatchCallerIdBlock({ draft, update }: StepProps) {
   return (
     <SectionRow
       id="wz-2-batch"
-      label="Choose how callers reach your agent"
-      hint={
-        <>
-          {/* Inheritance + where-runs-live both live in the LHS hint column —
-              the control column keeps ONE line (copy discipline 2026-08-10). */}
-          <p>New runs start from this caller ID.</p>
-          <p>
-            Contact lists and runs live in{" "}
-            <a href="#wz-4-outputs" className="underline underline-offset-2 hover:text-foreground">Go Live · Batch</a>.
-          </p>
-        </>
-      }
+      label="Caller ID"
+      hint="The number your agent dials from. Every run starts with it."
     >
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Phone number</Label>
-        <PhoneNumberSelect
-          value={callerId}
-          onChange={setCallerId}
-          placeholder="Choose a phone number"
-        />
-        <p className="text-xs text-muted-foreground">
-          The agent will use this number to dial outbound calls.
-        </p>
+      <PhoneNumberSelect
+        value={callerId}
+        onChange={setCallerId}
+        placeholder="Choose a phone number"
+        ariaLabel="Caller ID"
+      />
+    </SectionRow>
+  )
+}
+
+// ─── Batch — the contact list, at the point of decision ──────────────────────
+
+/** Picking Batch used to change nothing on screen; the CSV lived two sections
+ *  away in Go live (owner 2026-09-15). The first run's list now opens here,
+ *  collapsible, with the table visible — and the rail carries a Contact list
+ *  door while Batch is the chosen type. */
+function BatchContactsBlock({
+  draft, update, onGoToStep,
+}: StepProps & { onGoToStep: (n: number) => void }) {
+  const [open, setOpen] = React.useState(true)
+  const run: CampaignDraft | undefined = draft.campaigns[0]
+  if (!run) return null
+  const patchRun = (patch: Partial<CampaignDraft>) =>
+    update({ campaigns: draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c)) })
+
+  return (
+    <SectionRow
+      id="wz-2-contacts"
+      label="Contact list"
+      hint="One row per contact. Its columns fill the {{variables}} in your prompt."
+    >
+      <div className="rounded-lg border border-border">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-controls="wz-2-contacts-body"
+          className="flex w-full items-center justify-between gap-2 rounded-lg px-3.5 py-2.5 text-left text-sm font-medium transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        >
+          <span>{run.name}</span>
+          <span className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
+            {run.csvName ?? "No file yet"}
+            <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} aria-hidden />
+          </span>
+        </button>
+        {open && (
+          <div id="wz-2-contacts-body" className="space-y-4 border-t border-border p-3.5">
+            <CampaignContacts draft={draft} campaign={run} onChange={patchRun} defaultPreviewOpen />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        <span>Schedule, retries and concurrency: set them in Go live, or later.</span>
+        <button
+          type="button"
+          onClick={() => onGoToStep(5)}
+          className="inline-flex items-center gap-1 rounded font-medium text-foreground transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Open Go live <ArrowRight className="h-3 w-3" aria-hidden />
+        </button>
       </div>
     </SectionRow>
   )
@@ -288,7 +338,7 @@ function PhoneNumberSelect({
           <SelectSeparator />
           <SelectItem value={ADD_SENTINEL}>
             <span className="flex items-center gap-1.5">
-              <Plus className="h-3.5 w-3.5" aria-hidden /> Add New Phone Number
+              <Plus className="h-3.5 w-3.5" aria-hidden /> Add phone number
             </span>
           </SelectItem>
         </SelectContent>
@@ -331,8 +381,8 @@ function InboundNumbersBlock({
   return (
     <SectionRow
       id="wz-2-inbound"
-      label="Choose how callers reach your agent"
-      hint="Link one or several numbers. The agent answers them all."
+      label="Phone numbers"
+      hint="Link one or several. The agent answers them all."
     >
       <div className="space-y-4">
         {numberIds.map((id, i) => (
@@ -358,11 +408,6 @@ function InboundNumbersBlock({
             />
             {/* Helper once, on the first line only — a caption repeated per
                 row is scan noise (copy discipline 2026-08-10). */}
-            {i === 0 && (
-              <p className="text-xs text-muted-foreground">
-                The agent will use this number to receive inbound calls.
-              </p>
-            )}
           </div>
         ))}
 
@@ -381,11 +426,6 @@ function InboundNumbersBlock({
                 })
               }}
             />
-            {numberIds.length === 0 && (
-              <p className="text-xs text-muted-foreground">
-                The agent will use this number to receive inbound calls.
-              </p>
-            )}
           </div>
         )}
 

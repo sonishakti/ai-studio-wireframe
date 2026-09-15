@@ -53,7 +53,10 @@ export function SectionRow({
       <div className="min-w-0">
         {/* data-wz-row-label feeds the sticky header's "Section › Row" crumb
             (owner 2026-08-10) — the scroll tracker reads its textContent. */}
-        <h4 data-wz-row-label className="text-base font-medium leading-snug">{label}</h4>
+        {/* text-balance: the label column is 240px and three-word titles were
+            breaking with a single word on the last line (owner 2026-09-15: never
+            leave a widow). Balancing splits them evenly instead. */}
+        <h4 data-wz-row-label className="text-base font-medium leading-snug text-balance">{label}</h4>
         {hint ? <div className="mt-1.5 space-y-1 text-xs leading-relaxed text-muted-foreground">{hint}</div> : null}
       </div>
       {/* The RHS is its OWN @container: children's container queries must

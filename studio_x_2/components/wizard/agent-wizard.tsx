@@ -1112,8 +1112,8 @@ export function AgentWizard({
                     const isActive = n === selected
                     const Icon = STEP_ICONS[n]
                     return (
-                      <button
-                        key={n}
+                      <React.Fragment key={n}>
+                        <button
                         type="button"
                         onClick={() => openRow(n)}
                         aria-current={isActive ? "step" : undefined}
@@ -1132,7 +1132,25 @@ export function AgentWizard({
                           )}
                         </span>
                         {isDone(n) && <span className="sr-only">(done)</span>}
-                      </button>
+                        </button>
+                        {/* Batch dials a list, so the list gets its own door —
+                            and only while Batch is chosen (owner 2026-09-15). */}
+                        {n === 2 && draft.channels[0] === "batch" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              openRow(2)
+                              window.setTimeout(
+                                () => document.getElementById("wz-2-contacts")?.scrollIntoView({ block: "center", behavior: "smooth" }),
+                                300,
+                              )
+                            }}
+                            className="flex w-full items-center gap-2 rounded-md py-1.5 pl-9 pr-2.5 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
+                          >
+                            Contact list
+                          </button>
+                        )}
+                      </React.Fragment>
                     )
                   })}
                 </div>
@@ -1259,12 +1277,6 @@ export function AgentWizard({
                   {/* 2 · DEPLOYMENT — pick the type + per-type connection. */}
                   {n === 2 && (
                     <>
-                      {/* Deployment vs Go Live disambiguation (user-test
-                          2026-07-30): the TYPE is chosen here; the launch
-                          lives in Go Live. Owner-locked labels untouched. */}
-                      <p className="pb-5 text-sm text-muted-foreground">
-                        Where your agent takes calls: launch it in Go Live.
-                      </p>
                       <SectionRows>
                         <ChannelSection
                           draft={draft}

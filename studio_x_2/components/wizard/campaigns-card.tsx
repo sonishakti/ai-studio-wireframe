@@ -66,8 +66,12 @@ type RunFilter = "all" | CampaignStatus
 
 export function CampaignsCard({ draft, update }: StepProps) {
   const campaigns = draft.campaigns
-  // null = closed · "new" = creating · id = editing that row.
-  const [editing, setEditing] = React.useState<string | null>(null)
+  // null = closed · "new" = creating · id = editing that row. The first run
+  // opens with its fields already asked (owner 2026-09-15): a draft run is an
+  // unfinished form, not a row to go and find.
+  const [editing, setEditing] = React.useState<string | null>(
+    () => campaigns.find((c) => c.status === "draft")?.id ?? null,
+  )
   const [newDraft, setNewDraft] = React.useState<CampaignDraft | null>(null)
   const [filter, setFilter] = React.useState<RunFilter>("all")
 
@@ -78,6 +82,9 @@ export function CampaignsCard({ draft, update }: StepProps) {
     : campaigns
   const filterCount = (f: RunFilter) =>
     f === "all" ? roll.total : campaigns.filter((c) => c.status === f).length
+  // A second run is a real idea only once the first one has left draft; before
+  // that "New run" competes with the run you are already filling in.
+  const showNewRun = campaigns.length === 0 || campaigns.some((c) => c.status !== "draft")
 
   const setCampaigns = (next: CampaignDraft[]) => update({ campaigns: next })
   const patchCampaign = (id: string, patch: Partial<CampaignDraft>) =>
@@ -143,12 +150,14 @@ export function CampaignsCard({ draft, update }: StepProps) {
           <p className="text-sm font-semibold">Campaign runs ({campaigns.length})</p>
           <InfoHint label="Runs vs reruns">
             A run = one contact list + schedule; several can run in parallel.{" "}
-            <span className="font-medium text-foreground">Rerun</span> keeps the config, swaps the CSV.
+            <em>Rerun</em> keeps the config, swaps the CSV.
           </InfoHint>
         </div>
-        <Button size="sm" variant="outline" className="gap-1.5" onClick={startNew} disabled={editing === "new"}>
-          <Plus className="h-3.5 w-3.5" aria-hidden /> New run
-        </Button>
+        {showNewRun && (
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={startNew} disabled={editing === "new"}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> New run
+          </Button>
+        )}
       </header>
 
       {/* Roll-up — the state of every run in one line, without opening any of
@@ -201,22 +210,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
         </div>
       )}
 
-      {campaigns.length === 0 && editing !== "new" ? (
-        /* The same empty-state row as Knowledge base and MCP server: copy on
-           the left, the door on the right, on the section grid. A centered
-           block here broke the grid (owner 2026-09-12). */
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">No runs yet</p>
-            <p className="text-xs text-muted-foreground">
-              A run is one batch pass: a contact list, a caller ID, and a schedule. Create one to start batch calling.
-            </p>
-          </div>
-          <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={startNew}>
-            <Plus className="h-3.5 w-3.5" aria-hidden /> New run
-          </Button>
-        </div>
-      ) : (
+      {campaigns.length === 0 && editing !== "new" ? null : (
         <ul className="divide-y divide-border">
           {editing === "new" && newDraft && (
             <li className="p-4">
@@ -521,16 +515,19 @@ const PREVIEW_ROWS = PREVIEW_NAMES.map((name, i) => ({
   dueDate: `2026-08-${String(1 + (i % 28)).padStart(2, "0")}`,
 }))
 
-function CampaignContacts({
-  draft, campaign, onChange,
+export function CampaignContacts({
+  draft, campaign, onChange, defaultPreviewOpen = false,
 }: {
   draft: AgentDraft
   campaign: CampaignDraft
   onChange: (patch: Partial<CampaignDraft>) => void
+  /** Deployment shows the table straight away — the list IS the decision
+   *  there, not a detail behind a toggle (owner 2026-09-15). */
+  defaultPreviewOpen?: boolean
 }) {
   const hasCsv = !!campaign.csvName
   const missing = campaignMissingVars(draft, campaign)
-  const [previewOpen, setPreviewOpen] = React.useState(false)
+  const [previewOpen, setPreviewOpen] = React.useState(defaultPreviewOpen)
   // Coverage AHA: the moment every {{variable}} finds its column, the green
   // check pops. Keyed so the one-shot replays.
   const varsCovered = hasCsv && missing.length === 0 && extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0

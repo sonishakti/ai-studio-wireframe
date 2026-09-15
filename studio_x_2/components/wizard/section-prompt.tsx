@@ -69,10 +69,16 @@ export function SectionPrompt({
   )
 
   return (
-    <SectionRow
-      id="wz-3-prompt"
-      label="Set up your agent's foundational context"
-    >
+    <>
+      {/* Three rows, not one stack of fields (owner 2026-09-15): the system
+          prompt, the opening and the failure message are separate decisions,
+          so each gets the builder's own [label | controls] row and the
+          hairline between them does the separating. */}
+      <SectionRow
+        id="wz-3-prompt"
+        label="System prompt"
+        hint="What the agent knows about itself. Start from a template, then edit."
+      >
       {/* Template first (Figma): the prompt below is what it writes. */}
       {templateSlot && (
         <div className="space-y-1.5">
@@ -83,10 +89,11 @@ export function SectionPrompt({
 
       {/* System prompt + Rewrite */}
       <div className="space-y-1.5">
-        <Label htmlFor="wz-prompt" className="flex items-center gap-1.5 text-sm font-medium">
-          System prompt
-          {overridden("systemPrompt") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
-        </Label>
+        {overridden("systemPrompt") && (
+          <span className="flex items-center gap-1.5 text-sm font-medium">
+            <Lock className="h-3 w-3 text-warning" aria-hidden /> Locked
+          </span>
+        )}
         {overridden("systemPrompt") && <OverrideFlag field="systemPrompt" />}
         <div key={templateFlash} className={templateFlash > 0 ? "wz-anchor-flash relative" : "relative"}>
           <Textarea
@@ -136,8 +143,16 @@ export function SectionPrompt({
         )}
       </div>
 
+      </SectionRow>
+
       {/* Opening (design 04): who speaks first · greeting · interruptible ·
           AI disclosure · "Callers hear" · silence recap · Hear the opening. */}
+      <SectionRow
+        id="wz-3-opening"
+        focusId="opening"
+        label="Opening"
+        hint="The first seconds of every call, in the order the caller hears them."
+      >
       <SectionOpening
         draft={draft}
         update={update}
@@ -156,27 +171,31 @@ export function SectionPrompt({
         </p>
       )}
 
+      </SectionRow>
+
       {/* Failure message (proposal — new field). */}
+      <SectionRow
+        id="wz-3-failure"
+        label="Failure message"
+        hint="Played when the agent can't respond: a model error, tool timeout, or dropped connection."
+      >
       <div className="space-y-1.5">
-        <Label htmlFor="wz-failure" className="flex items-center gap-1.5 text-sm font-medium">
-          Failure Message
-          {overridden("failureMessage") && <Lock className="h-3 w-3 text-warning" aria-hidden />}
-        </Label>
+        {overridden("failureMessage") && (
+          <span className="flex items-center gap-1.5 text-sm font-medium">
+            <Lock className="h-3 w-3 text-warning" aria-hidden /> Locked
+          </span>
+        )}
         {overridden("failureMessage") && <OverrideFlag field="failureMessage" />}
         <Textarea
           id="wz-failure"
           value={draft.failureMessage}
           onChange={(e) => update({ failureMessage: e.target.value })}
           disabled={overridden("failureMessage")}
-          className={cn("min-h-[64px] text-sm", overridden("failureMessage") && "border-warning/50 opacity-80")}
+          className={cn("min-h-[64px] text-sm italic", overridden("failureMessage") && "border-warning/50 opacity-80")}
           placeholder="Oops, I can't seem to answer that."
         />
-        {/* When it plays — the field arrived with no trigger doc (journey
-            test 2026-07-22 D1: "when does that play?"). */}
-        <p className="text-xs text-muted-foreground">
-          Played when the agent can&apos;t respond: a model error, tool timeout, or dropped connection.
-        </p>
       </div>
+      </SectionRow>
 
       <RewritePromptDialog
         open={rewriteOpen}
@@ -193,7 +212,7 @@ export function SectionPrompt({
           })
         }}
       />
-    </SectionRow>
+    </>
   )
 }
 

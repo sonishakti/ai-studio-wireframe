@@ -107,13 +107,66 @@ export function VoiceSection({
 
   const modelsOverridden = overriddenSections(draft).some((s) => s === "asr" || s === "llm" || s === "tts")
 
+  /** "Or configure models manually" — the door to the custom stack. It renders
+   *  directly under the line that names the chosen preset, so picking a preset
+   *  and building your own are two neighbouring choices, not two screens
+   *  (owner 2026-09-15). */
+  const manualDoor = (
+    <div className="rounded-lg border border-border">
+      <button
+        type="button"
+        onClick={() => setManualOpen((o) => !o)}
+        aria-expanded={manualOpen}
+        className="flex w-full items-center justify-between gap-2 rounded-lg px-3.5 py-2.5 text-left text-sm font-medium transition-colors hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      >
+        <span className="flex items-center gap-2">
+          <Wrench className="h-4 w-4 text-muted-foreground" aria-hidden /> Or configure models manually
+        </span>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", manualOpen && "rotate-180")} aria-hidden />
+      </button>
+      {manualOpen && (
+        <div className={cn("space-y-4 border-t border-border p-3.5", modelsOverridden && "pointer-events-none opacity-50")}>
+          <ManualStackConfig
+            stack={draft.stack}
+            onChange={handleStackChange}
+            backup={backupOf(draft.backup)}
+            onBackupChange={(b) => update({ backup: b })}
+            hosting={draftHosting(draft)}
+            onUnpinRegion={onUnpinRegion}
+            voices={voices}
+            selectedVoiceId={draft.voice?.id}
+            onPickVoice={pickVoice}
+            useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
+            language={draft.stack.language}
+          />
+          <HistoryField
+            id="wz-1-history"
+            value={draft.advanced}
+            onChange={(advanced) => update({ advanced })}
+          />
+          {/* Power door — the JSON that outranks all of this. */}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("sx:open-config-drawer", { cancelable: true }))}
+            className="flex w-full items-center gap-2.5 rounded-lg border border-dashed border-border px-3.5 py-2.5 text-left text-sm transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Code2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium">Custom Config (JSON)</span>
+              <span className="block text-xs text-muted-foreground">Override engine sections as JSON: overridden sections lock in the UI.</span>
+            </span>
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <>
       {/* The model stack — slider + the manual door (Figma 2861-61019). */}
       <SectionRow
         id="wz-1-tier"
-        label="Sets up Agora Conversational AI Engine"
-        hint={<InfoHint label="What each stop changes">Each stop bundles Agora-tuned STT, model, and voice vendors.</InfoHint>}
+        label="Set up Agora Conversational AI Engine"
       >
         {/* Overridden by Custom Config (Figma 2987-92308) — the JSON drawer
             owns these sections; the visual controls gray out until emptied. */}
@@ -137,60 +190,17 @@ export function VoiceSection({
             <Gauge className="h-4 w-4 text-muted-foreground" aria-hidden /> Choose your Model Stack
           </h4>
           {mllm ? (
-            <p className="text-sm text-muted-foreground">
-              Runs a realtime model. No tier slider. Switch pipelines under Configure models manually.
-            </p>
+            <>
+              <p className="pb-3 text-sm text-muted-foreground">
+                Runs a realtime model. No tier slider. Switch pipelines under Configure models manually.
+              </p>
+              {manualDoor}
+            </>
           ) : (
-            <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} lean />
-          )}
-        </div>
-
-        {/* "Or Configure models manually" — inline expander (Figma 2998-93809). */}
-        <div className="border-t border-border pt-3">
-          <button
-            type="button"
-            onClick={() => setManualOpen((o) => !o)}
-            aria-expanded={manualOpen}
-            className="flex w-full items-center justify-between gap-2 rounded text-left text-sm font-medium transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <span className="flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-muted-foreground" aria-hidden /> Or Configure models manually
-            </span>
-            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", manualOpen && "rotate-180")} aria-hidden />
-          </button>
-          {manualOpen && (
-            <div className={cn("space-y-4 pt-4", modelsOverridden && "pointer-events-none opacity-50")}>
-              <ManualStackConfig
-                stack={draft.stack}
-                onChange={handleStackChange}
-                backup={backupOf(draft.backup)}
-                onBackupChange={(b) => update({ backup: b })}
-                hosting={draftHosting(draft)}
-                onUnpinRegion={onUnpinRegion}
-                voices={voices}
-                selectedVoiceId={draft.voice?.id}
-                onPickVoice={pickVoice}
-                useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
-                language={draft.stack.language}
-              />
-              <HistoryField
-                id="wz-1-history"
-                value={draft.advanced}
-                onChange={(advanced) => update({ advanced })}
-              />
-              {/* Power door — the JSON that outranks all of this. */}
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent("sx:open-config-drawer", { cancelable: true }))}
-                className="flex w-full items-center gap-2.5 rounded-lg border border-dashed border-border px-3.5 py-2.5 text-left text-sm transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <Code2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block font-medium">Custom Config (JSON)</span>
-                  <span className="block text-xs text-muted-foreground">Override engine sections as JSON: overridden sections lock in the UI.</span>
-                </span>
-              </button>
-            </div>
+            /* The manual door sits directly under the line that names the
+               chosen stack (owner 2026-09-15): preset or custom, one after the
+               other, with nothing between them. */
+            <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} lean afterRecap={manualDoor} />
           )}
         </div>
       </SectionRow>

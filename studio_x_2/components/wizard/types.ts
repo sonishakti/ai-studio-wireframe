@@ -21,7 +21,7 @@ export const STEP_TITLES = [
   "Deployment",
   "Prompt & knowledge",
   "Test",
-  "Go Live",
+  "Go live",
 ] as const
 
 export const SECTION_COUNT = STEP_TITLES.length
@@ -52,14 +52,9 @@ export function resolveStepParam(n: number): number | null {
   return null
 }
 
-export function stepTitle(n: number, draft: AgentDraft): string {
-  // §5 echoes the chosen deployment type — "Go Live · Batch" — so Deployment
-  // (pick the type) and Go Live (launch it) read as one flow (user-test
-  // 2026-07-30). Owner-locked labels themselves are untouched.
-  if (n === 5) {
-    const c = draft.channels[0]
-    const echo = c === "batch" ? "Batch" : c === "inbound" ? "Inbound" : c === "code" ? "Code" : null
-    return echo ? `${STEP_TITLES[4]} · ${echo}` : STEP_TITLES[4]
-  }
+export function stepTitle(n: number, _draft: AgentDraft): string {
+  // One name per section. §5 used to echo the chosen deployment type ("Go Live
+  // · Batch"), which renamed a rail item under the user and read as a
+  // different destination each time (owner 2026-09-15).
   return STEP_TITLES[n - 1]
 }

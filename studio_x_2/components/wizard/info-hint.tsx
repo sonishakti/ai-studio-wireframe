@@ -43,8 +43,12 @@ export function InfoHint({
           one-liner pill — long prose lays out oddly in it (owner 2026-07-21).
           Override to a block panel: left-aligned, roomier padding, relaxed
           leading, and visible link/code styling against the inverted bg. */}
+      {/* The base tooltip is an INVERTED pill (bg-foreground / text-background).
+          A prose panel reads as a light card dropped into a dark UI, and any
+          nested text-foreground inside it disappears (owner 2026-09-15). This
+          one uses the popover surface instead, arrow included. */}
       <TooltipContent
-        className="block max-w-[320px] px-3.5 py-2.5 text-left text-xs font-normal leading-relaxed [&_a]:underline [&_a]:underline-offset-2 [&_code]:font-mono [&_em]:not-italic [&_em]:font-medium"
+        className="block max-w-[320px] rounded-md border border-border bg-popover px-3.5 py-2.5 text-left text-xs font-normal leading-relaxed text-popover-foreground shadow-md [&>svg]:bg-popover [&>svg]:fill-popover [&_a]:underline [&_a]:underline-offset-2 [&_code]:font-mono [&_em]:not-italic [&_em]:font-medium"
       >
         {children}
       </TooltipContent>
