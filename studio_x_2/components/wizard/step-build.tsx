@@ -65,7 +65,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     // [label | content] rows (owner 2026-07-21): each resource names itself on
     // the LHS; the host's <SectionRows> owns the container.
     <>
-        <SectionRow id="wz-5-kb" label="Knowledge Base">
+        <SectionRow id="wz-5-kb" label="Knowledge base">
           <ResourceField
             hideHeader
             icon={BookOpen}
@@ -90,7 +90,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
           />
         </SectionRow>
 
-        <SectionRow id="wz-5-mcp" label="MCP Server">
+        <SectionRow id="wz-5-mcp" label="MCP servers">
           <ResourceField
             hideHeader
             icon={Plug}
@@ -114,7 +114,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
 
         {/* Tools & Connectors (Figma 2867-53592): count header · Name/Status
             table with per-row toggles · + Add Connector. */}
-        <SectionRow id="wz-5-connectors" label="Tools & Connectors">
+        <SectionRow id="wz-5-connectors" label="Tools & connectors">
           <div className="space-y-2 rounded-lg border border-border p-3.5">
             <div className="flex items-center justify-between gap-3">
               <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">

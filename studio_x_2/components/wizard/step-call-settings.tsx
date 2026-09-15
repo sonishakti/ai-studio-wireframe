@@ -47,8 +47,8 @@ export function InboundEndCallRow({
   return (
     <SectionRow
       id="wz-4-inbound"
-      label="Inbound Settings and Structured Outputs"
-      hint="How answered calls end, and what each call records."
+      label="Inbound call settings"
+      hint="How answered calls end."
     >
       <BehaviorToggle
         label="End call"

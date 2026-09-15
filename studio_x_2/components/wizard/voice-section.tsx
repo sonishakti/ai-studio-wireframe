@@ -187,7 +187,7 @@ export function VoiceSection({
         )}
         <div className={cn(modelsOverridden && "pointer-events-none opacity-50")} aria-disabled={modelsOverridden || undefined}>
           <h4 className="flex items-center gap-2 pb-3 text-base font-medium">
-            <Gauge className="h-4 w-4 text-muted-foreground" aria-hidden /> Choose your Model Stack
+            <Gauge className="h-4 w-4 text-muted-foreground" aria-hidden /> Choose your model stack
           </h4>
           {mllm ? (
             <>
@@ -208,7 +208,7 @@ export function VoiceSection({
       {/* The VOICE handle — dropdown trigger + inline sound test. */}
       <SectionRow
         id="wz-1-voice"
-        label="Agent Voice and Spoken Language"
+        label="Agent voice and spoken language"
         hint={<InfoHint label="Seeds prompt & greeting">A voice pick seeds the prompt and greeting while they&apos;re empty.</InfoHint>}
       >
         {/* Voice | Spoken language — parallel choices, side by side (Figma
@@ -273,7 +273,7 @@ export function VoiceSection({
             Settings" — models moved inline above). */}
         <div>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAdvancedOpen(true)}>
-            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced Speech Settings
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced speech settings
           </Button>
         </div>
       </SectionRow>

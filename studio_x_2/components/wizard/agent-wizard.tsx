@@ -525,7 +525,7 @@ export function AgentWizard({
     // door is opened — open it first so the link lands INSIDE the journey.
     const openDoor = () => {
       if (focus.startsWith("voice-")) document.querySelector<HTMLButtonElement>('button[aria-label="Browse voices"]')?.click()
-      if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Advanced Speech Settings"))?.click()
+      if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Advanced speech settings"))?.click()
       if (focus === "backup-providers") {
         // Backup lives inside the vendor's own Configure sheet (owner IA 2026-09-12).
         const door = [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Configure models manually"))

@@ -64,7 +64,7 @@ export function HostingRegionRow({ draft, update }: StepProps) {
   return (
     <SectionRow
       id="wz-2-hosting"
-      label="Hosting Region"
+      label="Hosting region"
       hint={
         /* ONE disclosure holds everything (owner 2026-08-10: the inline
            consequences list + vendor paragraph read as "super complex"). */
