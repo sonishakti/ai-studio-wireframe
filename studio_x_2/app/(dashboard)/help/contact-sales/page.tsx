@@ -171,7 +171,7 @@ export default function ContactSalesPage() {
               </a>
               <button
                 type="button"
-                onClick={() => toast.info("Mock: Book a 30-min intro call")}
+                onClick={() => toast.info("Booking is not available yet")}
                 className="flex items-center gap-2.5 text-muted-foreground hover:text-foreground"
               >
                 <Calendar className="h-4 w-4" /> Book a 30-min intro call

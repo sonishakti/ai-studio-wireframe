@@ -382,7 +382,7 @@ function CertCard({ label, masked, meta, helper, toggle, onEnable }: CertCardPro
             size="icon"
             className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
             onClick={() => {
-              void navigator.clipboard.writeText("mock-certificate-value")
+              void navigator.clipboard.writeText("-----BEGIN CERTIFICATE-----")
               toast.success(`${label} copied`)
             }}
           >

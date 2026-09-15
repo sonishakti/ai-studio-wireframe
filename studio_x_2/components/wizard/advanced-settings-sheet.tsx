@@ -83,9 +83,6 @@ export function AdvancedSettingsSheet({
       >
         <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
           <SheetTitle className="text-base">Advanced settings</SheetTitle>
-          <p className="text-sm text-muted-foreground">
-            Everything {draft.name || "this agent"} can do that the main flow does not ask for.
-          </p>
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1">

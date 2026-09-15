@@ -131,7 +131,7 @@ export function AgentIdentityCard({
           three sessions — while the evals feature itself stays gated. */}
       {talking && (
         <div className="mt-4 space-y-2 rounded-lg border border-border bg-muted/20 p-3 text-left">
-          <SimulatedBanner label="Simulated test call" />
+          <SimulatedBanner label="Test call" />
           <AgentStateChips state={talkState} />
           <SimTranscript key={displayName} turns={SAMPLE_TALK} stream onState={setTalkState} compact />
         </div>

@@ -142,6 +142,15 @@ export function VoiceSection({
     </div>
   )
 
+  const doors = (
+    <div className="space-y-3">
+      {manualDoor}
+      <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openAdvanced("models")}>
+        <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced settings
+      </Button>
+    </div>
+  )
+
   return (
     <>
       {/* The model stack — slider + the manual door (Figma 2861-61019). */}
@@ -175,13 +184,13 @@ export function VoiceSection({
               <p className="pb-3 text-sm text-muted-foreground">
                 Runs a realtime model. No tier slider. Switch pipelines under Configure models manually.
               </p>
-              {manualDoor}
+              {doors}
             </>
           ) : (
             /* The manual door sits directly under the line that names the
                chosen stack (owner 2026-09-15): preset or custom, one after the
                other, with nothing between them. */
-            <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} lean afterRecap={manualDoor} />
+            <StackTradeoffSlider stack={draft.stack} onChange={handleStackChange} lean afterRecap={doors} />
           )}
         </div>
       </SectionRow>

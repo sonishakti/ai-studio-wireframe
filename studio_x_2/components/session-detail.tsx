@@ -139,7 +139,7 @@ export function SessionDetail({ trace }: { trace: SessionTrace }) {
       label: "Recording",
       disabled: !hasRecording,
       reason: !voice ? "No audio on a chat session" : audio === "none" ? "No recording. It never connected" : audio === "not-retained" ? "Not retained · Retention: 30 days" : undefined,
-      onSelect: () => toast.success("Mock: recording downloaded"),
+      onSelect: () => toast.success("Download is not available yet"),
     },
     { label: "Transcript (.txt)", onSelect: () => downloadText(`session-${trace.id}-transcript.txt`, timelineToTxt(transcriptTimeline()), "text/plain") },
     {

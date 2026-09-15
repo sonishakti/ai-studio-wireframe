@@ -258,7 +258,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
       label: "Recording",
       disabled: !hasRecording,
       reason: audio === "none" ? "No recording. It never connected" : audio === "not-retained" ? `Not retained · ${RETENTION_LABEL}` : undefined,
-      onSelect: () => toast.success("Mock: recording downloaded"),
+      onSelect: () => toast.success("Download is not available yet"),
     },
     {
       label: "Transcript (.txt)",

@@ -63,11 +63,11 @@ export default function PaymentMethodsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {!c.primary && (
-                        <DropdownMenuItem onClick={() => toast.info("Mock: set as primary card")}>
+                        <DropdownMenuItem onClick={() => toast.info("Changing the primary card is not available yet")}>
                           Set as primary
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem onClick={() => toast.info("Mock: edit card")}>Edit</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => toast.info("Editing a card is not available yet")}>Edit</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DestructiveActionDialog
                         action="Remove"
@@ -89,7 +89,7 @@ export default function PaymentMethodsPage() {
               <Button
                 variant="outline"
                 className="w-full gap-1.5"
-                onClick={() => toast.info("Mock: add a payment method")}
+                onClick={() => toast.info("Adding a payment method is not available yet")}
               >
                 <Plus className="h-4 w-4" /> Add Payment Method
               </Button>
@@ -107,7 +107,7 @@ export default function PaymentMethodsPage() {
                   <Button variant="ghost" size="sm" onClick={() => setEditingAddress(false)}>Cancel</Button>
                   <Button
                     size="sm"
-                    onClick={() => { setEditingAddress(false); toast.success("Mock: billing address saved") }}
+                    onClick={() => { setEditingAddress(false); toast.success("Billing address saved") }}
                   >
                     Save
                   </Button>

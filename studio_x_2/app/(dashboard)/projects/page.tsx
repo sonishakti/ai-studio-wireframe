@@ -83,7 +83,7 @@ export default function ProjectsPage() {
         title="Projects"
         description="Each project has its own credentials, usage, and quotas."
         actions={
-          <Button onClick={() => toast.info("Mock: New Project")}>
+          <Button onClick={() => toast.info("Creating a project is not available yet")}>
             <Plus className="h-4 w-4" /> New Project
           </Button>
         }
@@ -242,7 +242,7 @@ export default function ProjectsPage() {
             {!hasFilters && (
               <button
                 type="button"
-                onClick={() => toast.info("Mock: New Project")}
+                onClick={() => toast.info("Creating a project is not available yet")}
                 className="rounded-xl border border-dashed flex items-center justify-center cursor-pointer hover:border-foreground/40 transition-colors min-h-40"
               >
                 <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
@@ -266,7 +266,7 @@ export default function ProjectsPage() {
               <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                 A project holds your agents, credentials, and usage. Create one to get started.
               </p>
-              <Button className="mt-4" onClick={() => toast.info("Mock: New Project")}>
+              <Button className="mt-4" onClick={() => toast.info("Creating a project is not available yet")}>
                 <Plus className="h-4 w-4" /> New Project
               </Button>
             </CardContent>

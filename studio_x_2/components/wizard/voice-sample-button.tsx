@@ -49,7 +49,7 @@ export function useSimulatedPlayer(): SimulatedPlayer {
       if (timer.current != null) window.clearTimeout(timer.current)
       active = { token, stop }
       setPlayingId(voice.id)
-      toast("Simulated preview", {
+      toast("Preview audio is not available yet", {
         description: `Preview audio is not available yet.`,
       })
       timer.current = window.setTimeout(() => {

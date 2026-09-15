@@ -223,7 +223,7 @@ export function ComposerChat({
           className="h-8 w-8"
           aria-label="Chat history"
           title="History"
-          onClick={() => toast.info("Mock: would open chat history")}
+          onClick={() => toast.info("Chat history is not available yet")}
         >
           <History className="h-3.5 w-3.5" />
         </Button>
@@ -524,7 +524,7 @@ function assistantActionsFor(prompt: string, router: AppRouter): ChatMessage["ac
   if (lower.includes("support") || lower.includes("agent")) {
     return [
       { label: "Open in editor", onClick: () => router.push("/agents/new/edit") },
-      { label: "Change defaults", onClick: () => toast.info("Mock: would open model picker") },
+      { label: "Change defaults", onClick: () => toast.info("Choosing a model is not available yet") },
     ]
   }
   return undefined

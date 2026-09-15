@@ -265,7 +265,7 @@ export default function BillingUsagePage() {
           size="sm"
           className="h-8 gap-1.5"
           disabled={!hasUsage}
-          onClick={() => toast.info("Mock: exporting usage")}
+          onClick={() => toast.info("Export is not available yet")}
         >
           <Download className="h-3.5 w-3.5" /> Export
         </Button>

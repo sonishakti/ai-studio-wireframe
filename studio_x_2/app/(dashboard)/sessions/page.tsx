@@ -64,7 +64,7 @@ export default function SessionsPage() {
           <Button
             variant="outline" size="sm" className="gap-1.5"
             disabled={SESSIONS.length === 0}
-            onClick={() => toast.info("Mock: exporting sessions to CSV…")}
+            onClick={() => toast.info("Export is not available yet")}
           >
             <Download className="h-3.5 w-3.5" /> Export
           </Button>

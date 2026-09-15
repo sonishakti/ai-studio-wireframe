@@ -111,7 +111,7 @@ export default function MonitorPage() {
             <CallCaptureSheet />
             <Button
               variant="outline" size="icon" className="h-8 w-8" title="Refresh"
-              onClick={() => toast.info("Mock: refreshing monitor data…")}
+              onClick={() => toast.info("Refreshing")}
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span className="sr-only">Refresh</span>

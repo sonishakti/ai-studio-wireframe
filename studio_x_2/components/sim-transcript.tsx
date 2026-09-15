@@ -54,7 +54,7 @@ export function AgentStateChips({ state }: { state: SimState }) {
 }
 
 /** The "this is a test, not a real call" banner — never let a sim look real. */
-export function SimulatedBanner({ label = "Simulated call" }: { label?: string }) {
+export function SimulatedBanner({ label = "Test call" }: { label?: string }) {
   return (
     <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/[0.06] px-3 py-2 text-xs">
       <FlaskConical className="h-3.5 w-3.5 shrink-0 text-warning" />

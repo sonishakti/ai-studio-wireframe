@@ -276,3 +276,57 @@ buoy drift check          # Quick validation
 buoy show drift          # Detailed drift analysis
 buoy drift fix --dry-run  # See suggested fixes
 ```
+
+## ⚑ Product copy — write for someone who arrived a minute ago
+
+**The reader has no context.** They did not see the previous design, they were not
+in the review, and they do not know what we argued about. Every string in the
+product is read cold. This section is a hard gate: copy that fails it does not
+ship, and `node scripts/copy-lint.mjs` checks the mechanical half.
+
+### Never write about the design
+
+The product must not narrate its own construction, defend a decision, or answer a
+question only a reviewer would ask.
+
+| Don't | Why it fails | Do |
+| --- | --- | --- |
+| "Every stop costs the same $0.10. The slider trades speed against capability, **not money**." | "not money" answers an objection the reader never had. It only makes sense if you saw the cost axis we removed. | Say what each option is for. Let the price sit where prices sit. |
+| "It reads the same at every stop **on purpose**." | Defends a choice. | State the fact. |
+| "**Read-only.** The AI sentence and the greeting, in the order callers hear them." | Explains the widget instead of being one. | Make it look read-only. |
+| "Wireframe estimates." · "Simulated preview" · "(simulated) I want to…" | Talks about the artefact. | "Estimated from this stack." · "Preview audio is not available yet." · the line itself. |
+| "Everything this agent can do that **the main flow** does not ask for." | "main flow" is our IA word. | "Settings most agents never need to change." |
+| "Only the last four characters are kept **for the picker**." | "the picker" is our word for it. | "Only the last four characters are stored." |
+
+### The four tests
+
+1. **Cold-read test.** Would this sentence make sense to someone who has never seen
+   another version of this screen? If it only lands for someone who saw the old
+   one, cut it.
+2. **Objection test.** Is it answering a question the reader has not asked? If the
+   sentence contains *not*, *actually*, *on purpose*, *instead*, *no longer*, or
+   *rather than*, it is probably defending a decision. Cut it.
+3. **Artefact test.** Does it mention the wireframe, the prototype, the simulation,
+   the flow, the section, the picker, the panel? Those are our words. Say what the
+   user gets instead.
+4. **Deletion test.** Remove the sentence. Is anything lost? Copy that restates
+   what the control already shows gets deleted, not rewritten.
+
+### Also standing (see the memory note `copy-and-typography-rules`)
+
+- No widows: a title never breaks with one word on the last line. Use
+  `text-wrap: balance`, not a shorter title.
+- Titles are verbs in sentence case. Row labels name what the row holds, and never
+  re-ask the question the section already asked.
+- No arrows, no em dashes, no AI-slop in prose.
+- Lines the agent speaks out loud get quotes and italics, always.
+- Never put explanatory prose inside a disabled input. Hide the fields, say one
+  sentence.
+- Numbers that need a caveat go in a tooltip, not in a paragraph under the control.
+
+### Before you ship a screen
+
+```bash
+node scripts/copy-lint.mjs        # banned patterns in user-facing strings
+node scripts/copy-lint.mjs --all  # include lower-confidence hits to eyeball
+```

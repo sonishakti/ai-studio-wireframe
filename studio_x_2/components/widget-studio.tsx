@@ -495,7 +495,7 @@ function ConfigSections({ cfg, set, lean }: { cfg: WidgetConfig; set: SetCfg; le
             variant="outline"
             size="sm"
             className="gap-1.5"
-            onClick={() => toast.info("Mock: image picker")}
+            onClick={() => toast.info("Choosing an image is not available yet")}
           >
             <ImagePlus className="h-4 w-4" /> Choose Image
           </Button>

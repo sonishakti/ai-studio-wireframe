@@ -49,7 +49,7 @@ export default function InvoicesPage() {
               variant="outline"
               size="sm"
               className="h-8 gap-1.5"
-              onClick={() => toast.info("Mock: pick a date range")}
+              onClick={() => toast.info("Date ranges are not available yet")}
             >
               <Filter className="h-3.5 w-3.5" /> Date range
             </Button>
@@ -59,7 +59,7 @@ export default function InvoicesPage() {
                 size="sm"
                 className="h-8 gap-1.5"
                 disabled={!hasInvoices}
-                onClick={() => toast.info("Mock: exporting invoices")}
+                onClick={() => toast.info("Export is not available yet")}
               >
                 <Download className="h-3.5 w-3.5" /> Export
               </Button>

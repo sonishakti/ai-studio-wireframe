@@ -44,7 +44,7 @@ export default function AuditLogsPage() {
           size="sm"
           className="gap-1.5"
           disabled={!hasLogs}
-          onClick={() => toast.info("Mock: exporting audit logs as CSV")}
+          onClick={() => toast.info("Export is not available yet")}
         >
           <Download className="h-3.5 w-3.5" /> Export
         </Button>

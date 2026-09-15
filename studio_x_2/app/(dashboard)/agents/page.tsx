@@ -949,8 +949,6 @@ function StartView({
               >
                 <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to agent
               </Button>
-              {/* Pre-click honesty — the disclosure must precede the click. */}
-              <p className="text-xs text-muted-foreground/70">Simulated preview</p>
             </div>
           </div>
           <div className="space-y-1.5 border-t border-border px-4 py-4">

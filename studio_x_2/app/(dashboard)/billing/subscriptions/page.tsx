@@ -33,7 +33,7 @@ export default function SubscriptionsPage() {
           <Button
             variant="outline"
             className="gap-1.5"
-            onClick={() => toast.info("Mock: opening the Stripe billing portal")}
+            onClick={() => toast.info("The billing portal is not available yet")}
           >
             <ExternalLink className="h-4 w-4" /> Manage via Stripe
           </Button>
@@ -109,7 +109,7 @@ export default function SubscriptionsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => toast.info(`Mock: ${s.product} details`)}>View details</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toast.info("Mock: change plan")}>Change plan</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info("Changing plan is not available yet")}>Change plan</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DestructiveActionDialog
                             action="Cancel"

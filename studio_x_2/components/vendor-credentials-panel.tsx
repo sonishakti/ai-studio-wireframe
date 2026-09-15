@@ -39,7 +39,7 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
               Third-party API keys your agents&apos; stacks use. LLM, TTS, STT, Telephony.
             </p>
           </div>
-          <Button size="sm" className="gap-1.5" onClick={() => toast.info("Mock: Add credential")}>
+          <Button size="sm" className="gap-1.5" onClick={() => toast.info("Adding a credential here is not available yet")}>
             <Plus className="h-4 w-4" /> Add Credential
           </Button>
         </div>
@@ -103,7 +103,7 @@ export function VendorCredentialsPanel({ showHeader = false }: { showHeader?: bo
                       <Button
                         size="sm"
                         className="gap-1.5 mt-2"
-                        onClick={() => toast.info("Mock: Add credential")}
+                        onClick={() => toast.info("Adding a credential here is not available yet")}
                       >
                         <Plus className="h-4 w-4" /> Add Credential
                       </Button>
