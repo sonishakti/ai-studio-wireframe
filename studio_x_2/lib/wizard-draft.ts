@@ -264,6 +264,24 @@ export function newCampaignId(): string {
   return `cmp_${Date.now().toString(36)}${campaignSeq}`
 }
 
+/** The agent's first batch run, saved or not yet. A fixed id so Deployment and
+ *  Go live edit the same object rather than each seeding their own. */
+export const FIRST_RUN_ID = "cmp_run_01"
+
+export function firstRun(d: AgentDraft): CampaignDraft {
+  return d.campaigns[0] ?? {
+    ...makeCampaign("Run 01"),
+    id: FIRST_RUN_ID,
+    numberId: d.config.batch?.callerId,
+  }
+}
+
+/** Write a patch to that run, creating it on the first edit. */
+export function patchFirstRun(d: AgentDraft, patch: Partial<CampaignDraft>): CampaignDraft[] {
+  if (d.campaigns.length > 0) return d.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c))
+  return [{ ...firstRun(d), ...patch }]
+}
+
 export function makeCampaign(name: string): CampaignDraft {
   return {
     id: newCampaignId(),

@@ -12,8 +12,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
-  DEFAULT_DISCLOSURE, composeOpening, openingOf, type AgentDraft, type OpeningConfig,
+  DEFAULT_DISCLOSURE, composeOpening, openingOf, draftHosting, hasChannel,
+  type AgentDraft, type OpeningConfig,
 } from "@/lib/wizard-draft"
+import { disclosureFor } from "@/lib/ai-disclosure"
 
 /**
  * Opening (design 04 · Greeting, filler & disclaimer — ported from the
@@ -60,6 +62,11 @@ export function SectionOpening({
   const patch = (p: Partial<OpeningConfig>) => update({ opening: { ...o, ...p } })
   const callerFirst = o.speaksFirst === "caller"
   const hears = composeOpening(draft)
+  // What the law asks for where this agent runs, with its primary source. The
+  // region is where the AGENT runs; the law follows the CALLER, so this is a
+  // prompt with a citation, never a determination (owner 2026-09-15).
+  const law = disclosureFor(draftHosting(draft).area)
+  const outbound = hasChannel(draft, "batch")
 
   return (
     <div className="space-y-5">
@@ -138,15 +145,44 @@ export function SectionOpening({
                   disabled={overridden}
                   className="text-sm italic"
                 />
-                {o.disclosure !== DEFAULT_DISCLOSURE && (
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground"
-                    onClick={() => patch({ disclosure: DEFAULT_DISCLOSURE })}
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  <span className={cn("font-medium", law.binding ? "text-warning" : "text-foreground")}>
+                    {law.binding ? "Required where this agent runs." : "Not required where this agent runs."}
+                  </span>{" "}
+                  {law.requirement}{" "}
+                  <a
+                    href={law.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground underline underline-offset-4"
                   >
-                    Reset to the default
-                  </button>
+                    {law.sourceLabel}
+                  </a>
+                  . This is where the agent runs. The rule that binds you is the one where your caller is.
+                </p>
+                {outbound && law.outbound && (
+                  <p className="text-xs leading-relaxed text-warning">{law.outbound}</p>
                 )}
+                <div className="flex flex-wrap items-center gap-3">
+                  {o.disclosure.trim() !== law.sentence && (
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-foreground underline underline-offset-4"
+                      onClick={() => patch({ disclosure: law.sentence })}
+                    >
+                      Use the suggested sentence
+                    </button>
+                  )}
+                  {o.disclosure !== DEFAULT_DISCLOSURE && (
+                    <button
+                      type="button"
+                      className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                      onClick={() => patch({ disclosure: DEFAULT_DISCLOSURE })}
+                    >
+                      Reset to the default
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

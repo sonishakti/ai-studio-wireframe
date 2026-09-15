@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
 import { CampaignContacts } from "@/components/wizard/campaigns-card"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
-  channelLabel, inboundSurfaces, makeCampaign,
+  channelLabel, inboundSurfaces, firstRun, patchFirstRun,
   type AgentDraft, type CampaignDraft, type DeployChannel, type InboundSurface,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
@@ -241,22 +241,12 @@ function BatchContactsBlock({
   draft, update, onGoToStep,
 }: StepProps & { onGoToStep: (n: number) => void }) {
   const [open, setOpen] = React.useState(true)
-  const saved: CampaignDraft | undefined = draft.campaigns[0]
   // A run to fill in, whether or not one has been saved yet: batch dials a
   // list, so the list is asked for the moment batch is chosen. The first edit
-  // commits it to the draft.
-  const seed = React.useMemo(
-    () => ({ ...makeCampaign("Run 01"), numberId: draft.config.batch?.callerId }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  )
-  const run = saved ?? seed
+  // commits it, and Go live edits the same run.
+  const run: CampaignDraft = firstRun(draft)
   const patchRun = (patch: Partial<CampaignDraft>) =>
-    update({
-      campaigns: saved
-        ? draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c))
-        : [{ ...seed, ...patch }],
-    })
+    update({ campaigns: patchFirstRun(draft, patch) })
 
   return (
     <SectionRow

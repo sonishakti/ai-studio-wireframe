@@ -15,7 +15,7 @@ import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { HostingRegionRow } from "@/components/wizard/hosting-region"
 import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { StepPublish } from "@/components/wizard/step-publish"
-import { hasChannel } from "@/lib/wizard-draft"
+import { hasChannel, firstRun, patchFirstRun } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
 /** Wireframe seed for the version-history table (property · when · old → new
@@ -93,11 +93,11 @@ export function DeploySection({
             number it dials from were already chosen in Deployment, and asking
             again read as a trap (owner 2026-09-15). Retries and concurrency
             are in Advanced settings. */}
-        {batch && draft.campaigns[0] && (
+        {batch && (
           <SectionRow id="wz-4-launch" label="When to start" hint="Calling begins when you deploy, or at the time you set.">
             <CampaignLaunchFields
-              campaign={draft.campaigns[0]}
-              onChange={(patch) => update({ campaigns: draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c)) })}
+              campaign={firstRun(draft)}
+              onChange={(patch) => update({ campaigns: patchFirstRun(draft, patch) })}
             />
           </SectionRow>
         )}

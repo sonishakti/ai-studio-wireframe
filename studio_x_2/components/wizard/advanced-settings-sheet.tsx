@@ -12,6 +12,7 @@ import { StepAdvanced, HistoryField } from "@/components/wizard/step-advanced"
 import { TurnTakingRow } from "@/components/wizard/turn-taking-row"
 import { ListeningRows } from "@/components/wizard/listening-rows"
 import { HangupSettings, PacingSettings, TransferSettings, CampaignDialingFields } from "@/components/wizard/step-call-settings"
+import { firstRun, patchFirstRun } from "@/lib/wizard-draft"
 import type { StepProps } from "@/components/wizard/types"
 
 /**
@@ -171,11 +172,11 @@ export function AdvancedSettingsSheet({
                 <TransferSettings draft={draft} update={update} />
                 {/* Batch only: how hard it dials. Kept off the main flow, but
                     findable from the contents list beside it. */}
-                {draft.channels[0] === "batch" && draft.campaigns[0] && (
+                {draft.channels[0] === "batch" && (
                   <SectionRow label="Dialling" hint="How many calls run at once, and what happens when nobody answers.">
                     <CampaignDialingFields
-                      campaign={draft.campaigns[0]}
-                      onChange={(p) => update({ campaigns: draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...p } : c)) })}
+                      campaign={firstRun(draft)}
+                      onChange={(p) => update({ campaigns: patchFirstRun(draft, p) })}
                     />
                   </SectionRow>
                 )}

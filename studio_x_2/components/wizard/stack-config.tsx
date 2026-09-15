@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDown, RotateCcw, SlidersHorizontal, Plus, X, ShieldCheck } from "lucide-react"
+import { ChevronDown, RotateCcw, SlidersHorizontal, Plus, X, ShieldCheck, Gauge, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -14,6 +14,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
@@ -1188,19 +1189,27 @@ export function StackTradeoffSlider({
   // Proposal 2639-102124: the slider reads Lowest Cost → Fastest left-to-
   // right, inside a card with a mono "LATENCY VS COST" label and the two
   // extremes' real numbers at the track ends.
-  const DISPLAY: StackPreset[] = ["cheapest", "balanced", "fastest"]
+  // Agora charges a flat $0.10 per agent-minute and its docs say the price is
+  // the same under bring-your-own-key, so the old "Lowest Cost … Fastest" axis
+  // was measuring a number that never moves (docs.agora.io/en/ai/reference/pricing).
+  // What the stops actually trade is how fast the agent answers against how much
+  // it can handle.
+  const DISPLAY: StackPreset[] = ["fastest", "balanced", "cheapest"]
+  const STOP_LABEL: Record<StackPreset, string> = {
+    fastest: "Fastest",
+    balanced: "Balanced",
+    cheapest: "Most capable",
+  }
   const displayIdx = Math.max(0, DISPLAY.indexOf(SLIDER_ORDER[idx]))
-  const cheapEst = stackEstimateFor(stackFor("cheapest", stack.modality))
-  const fastEst = stackEstimateFor(stackFor("fastest", stack.modality))
 
   return (
     <section className={cn("@container space-y-4", !lean && "rounded-lg border border-border bg-card p-5", className)}>
-      {!lean && <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Latency vs cost</p>}
+      {!lean && <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Speed and capability</p>}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className={cn(displayIdx === 0 && "font-medium")}>Lowest Cost</span>
-          <span className={cn(displayIdx === 1 && "font-medium")}>Balanced</span>
-          <span className={cn(displayIdx === 2 && "font-medium")}>Fastest</span>
+          {DISPLAY.map((preset, n) => (
+            <span key={preset} className={cn(displayIdx === n && "font-medium")}>{STOP_LABEL[preset]}</span>
+          ))}
         </div>
         <Slider
           value={[displayIdx]}
@@ -1210,13 +1219,65 @@ export function StackTradeoffSlider({
           onValueChange={([v]) => setPreset(DISPLAY[v])}
           aria-label="Latency versus cost"
         />
-        {!lean && (
-          <div className="flex items-baseline justify-between font-mono text-xs tabular-nums text-muted-foreground">
-            <span>{cheapEst.latencyMs} ms · ~${cheapEst.costPerMin.toFixed(2)}/min</span>
-            <span>{fastEst.latencyMs} ms · ~${fastEst.costPerMin.toFixed(2)}/min</span>
-          </div>
-        )}
       </div>
+
+      {/* Two badges, and only one of them ever changes. Speed moves with the
+          models; price is a state, not a figure, until a slot leaves the
+          managed key — which is the one place the money is real. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex cursor-help items-center gap-1.5 rounded-full border border-stroke px-2.5 py-1 text-xs tabular-nums text-muted-foreground">
+              <Gauge className="size-3.5" aria-hidden />
+              {est.latencyMs > 0 ? `~${est.latencyMs} ms model time` : "Speed not estimated for this model"}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-80 text-xs leading-relaxed">
+            Speech to text, then the model&apos;s first token, then the first audio out, plus turn taking.
+            It does not include your caller&apos;s network hop, or the silence Agora waits through before it
+            decides the caller has stopped. That silence is 640 ms by default and it is the single biggest
+            thing you can change. Typical for this stack, not a guarantee.
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className={cn(
+                "inline-flex cursor-help items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs tabular-nums",
+                cost.allManaged ? "border-stroke text-muted-foreground" : "border-warning/50 text-warning",
+              )}
+            >
+              <Wallet className="size-3.5" aria-hidden />
+              {cost.allManaged ? "$0.10/min included" : `~$${cost.totalPerMin.toFixed(2)}/min`}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-80 text-xs leading-relaxed">
+            {cost.allManaged ? (
+              <>
+                Agora charges ${AGORA_RATE_PER_MIN.toFixed(2)} a minute for the agent whatever stack you pick,
+                and on an Agora Managed Key the speech, language and voice models are inside that price.
+                Moving this slider does not change it. Audio minutes bill separately. The first 300 agent
+                minutes are free.
+              </>
+            ) : (
+              <>
+                Agora still charges ${AGORA_RATE_PER_MIN.toFixed(2)}/min. Your own {cost.byoSlots.join(" and ")} key
+                adds about ${cost.vendorPerMin.toFixed(2)}/min on top of it, it does not replace it. That vendor
+                bills you directly and Agora never meters it.
+              </>
+            )}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* The answer to "if it is all $0.10, what does this change?", in the
+          product rather than in a doc (owner 2026-09-15). */}
+      {cost.allManaged && (
+        <p className="text-xs text-muted-foreground">
+          Every stop costs the same ${AGORA_RATE_PER_MIN.toFixed(2)} a minute. The slider trades how fast the
+          agent answers against how much it can handle, not money.
+        </p>
+      )}
       {/* Name the bundle, not just its numbers (user-test 2026-07-29): the
           preset is a VENDOR bundle, and real model control exists — both must
           read without hovering. Diverged mixes are named honestly — AND the
@@ -1224,30 +1285,15 @@ export function StackTradeoffSlider({
       {lean ? (
         /* Figma 2861-61019: "Agora Balanced:  Deepgram Nova + GPT-5 nano +
            Flash v2.5 (250 ms, ~$0.10/min)" — name the bundle, then its parts. */
-        <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-          <span className="font-medium">
-            {diverged ? "Custom Stack:" : `Agora ${STACK_PRESETS[stack.preset].label}:`}
-          </span>
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
-            {stack.asr.vendor} + {stack.llm.model} + {stack.tts.vendor} ({est.latencyMs} ms, ~${est.costPerMin.toFixed(2)}/min)
-          </span>
+        <p className="font-mono text-xs tabular-nums text-muted-foreground">
+          {stack.asr.vendor} + {stack.llm.model} + {stack.tts.vendor}
         </p>
       ) : (
         <p className="font-mono text-xs tabular-nums text-muted-foreground">
-          Current: {bundleLine(stack, diverged)} · ~{est.latencyMs} ms · ~${est.costPerMin.toFixed(2)}/min
+          {bundleLine(stack, diverged)}
         </p>
       )}
       {afterRecap}
-      {/* Your own key adds a bill rather than replacing one, so the split is
-          worth printing — but only when there IS a split. */}
-      {!cost.allManaged && (
-        <p className="text-xs tabular-nums text-muted-foreground">
-          Agora ${cost.platformPerMin.toFixed(2)}/min plus your {cost.byoSlots.join(" and ")} vendor
-          {cost.byoSlots.length > 1 ? "s" : ""} at about ${cost.vendorPerMin.toFixed(2)}/min, so about
-          <span className="font-medium text-foreground"> ${cost.totalPerMin.toFixed(2)}/min</span>.
-          Agora charges ${AGORA_RATE_PER_MIN.toFixed(2)}/min either way.
-        </p>
-      )}
       <Button
         type="button"
         variant="outline"
