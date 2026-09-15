@@ -1,6 +1,6 @@
 {
  "title": "Agent builder — Future scope removed, NG-style chrome, six research features (01 · 02 · 04 · 07 · 10 · 11)",
- "date": "2026-09-12 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main ba26db4 · production ai-studio-console-redesign-7qcx6msas",
+ "date": "2026-09-15 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main 64498e5 · production ai-studio-console-redesign-ar6vrcr9p",
  "deploy": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
  "commits": [
   {
@@ -54,6 +54,18 @@
   {
    "sha": "ba26db4",
    "msg": "builder(01,07): backup lives in each model's Configure sheet with its own credential, no separate section; recommended voices are badged rows in one table with a frozen header; one door to the voice dialog; runs empty state on the shared pattern; builder header frozen"
+  },
+  {
+   "sha": "dbc017e",
+   "msg": "builder: backup chains with per-backup model, vendor and key; manual door under the stack; Opening as its own row; batch gets its contact list"
+  },
+  {
+   "sha": "9d5ad59",
+   "msg": "copy(builder): sentence-case row labels, and name the rows for what they hold"
+  },
+  {
+   "sha": "64498e5",
+   "msg": "strategy: agent-builder KPIs, assumption ledger and telemetry plan, plus the board's strategy panel"
   }
  ],
  "intro": [
@@ -63,7 +75,8 @@
   "The NG token pass (Phase 1 of the revamp) is still ahead: these screens carry the Studio X look. One token was fixed on the way: --muted-foreground now clears AA, which removed most of the Phase-0 axe nodes.",
   "Second pass, same evening: seven owner notes on the first delivery — strip removed, ghost More, NG-style header controls, a better test rail, Figma overlaps fixed, contrast, and a where-it-lives table (below) — plus three follow-ups from screenshots: one header line, side-by-side architecture cards, one primary CTA per fold.",
   "Third and fourth pass (2026-09-12): ten owner notes on the chrome (Run test scenarios as a header door, full-height rail, Undo to live, Callers hear as a field, hosting region as label + value, red End test, no em dashes anywhere in copy) and three on the models fold (voice selection in the TTS config, + Add backup beside every vendor, credentials as a switch modelled on the NG console). Then a presence check of all six features on production: every marker matched.",
-  "Fifth pass (2026-09-12, owner IA notes): five surfaces had drifted into new designs of things that already had a home. Backup providers were a section of their own plus an inline select with no key; recommended voices were a list above the voice table; a Browse voices button duplicated the voice field; the runs empty state was centered while every other empty state is a left-aligned row; the builder header scrolled away while everything under it stuck. Each is now a state of the surface that already renders that kind of thing. The rule is recorded: things that belong together live together and look the same, and a default Agora handles needs no control."
+  "Fifth pass (2026-09-12, owner IA notes): five surfaces had drifted into new designs of things that already had a home. Backup providers were a section of their own plus an inline select with no key; recommended voices were a list above the voice table; a Browse voices button duplicated the voice field; the runs empty state was centered while every other empty state is a left-aligned row; the builder header scrolled away while everything under it stuck. Each is now a state of the surface that already renders that kind of thing. The rule is recorded: things that belong together live together and look the same, and a default Agora handles needs no control.",
+  "Sixth pass (2026-09-15): twenty owner notes on the models sheet, the Opening section, the deployment flow and the copy. A backup is now a chain, not one pick: each link carries its own vendor, model, credential and on/off switch, because the owner's question was \"what about the keys for the backup?\" and a backup without a key is not a backup. Prompt & knowledge splits into three labelled rows. Batch calling gets its contact list at the point of decision. And the builder now carries a KPI strategy: a north star, a 180-second time budget with parts, three guardrails with owners, and eleven assumptions stated with numbers so they can be refuted."
  ],
  "features": [
   {
@@ -250,6 +263,68 @@
        "why": "The same row as Knowledge base and MCP server: copy on the left, the door on the right. The centered block that broke the grid is gone."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after7-stack-door.png",
+     "caption": "After (sixth pass): the manual door sits under the line that names the chosen stack",
+     "marks": [
+      {
+       "name": "The manual door sits under the stack it replaces",
+       "why": "Pick a preset on the slider, or open the door directly beneath the line that names it. Two neighbouring choices, nothing in between."
+      },
+      {
+       "name": "Set up, not Sets up",
+       "why": "Row titles are verbs and sentence case throughout. The stop-bundle explainer is gone; so is the end-to-end latency note and the all-in prose."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after7-prompt-rows.png",
+     "caption": "After (sixth pass): System prompt, Opening and Failure message are three rows, not one flat list",
+     "marks": [
+      {
+       "name": "Opening is a row, not a floating title",
+       "why": "System prompt, Opening and Failure message are three separate decisions, so each takes the builder's own label column and the hairline between them does the separating."
+      },
+      {
+       "name": "What the agent says is set in quotes and italics",
+       "why": "Spoken lines are never confusable with the interface's own words. The greeting, the AI sentence and the composed line all carry it."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after7-caller-first.png",
+     "caption": "After (sixth pass): caller-first hides the fields it disables",
+     "marks": [
+      {
+       "name": "Caller first hides what it disables",
+       "why": "A row of greyed-out controls with prose sitting in the input read as broken. One sentence says the same thing and nothing is left to misread."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after7-batch-contacts.png",
+     "caption": "After (sixth pass): picking Batch shows the caller ID and the contact list, with the table open",
+     "marks": [
+      {
+       "name": "Picking Batch seeds the first run and opens its list",
+       "why": "Choosing Batch used to change nothing on screen. The caller ID and the contact list now appear at the point of decision, with the table already showing."
+      },
+      {
+       "name": "Caller ID, not how callers reach you",
+       "why": "An outbound run dials from a number; it does not receive on one. The old label asked the inbound question."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after7-runs-open.png",
+     "caption": "After (sixth pass): the first run opens as a form",
+     "marks": [
+      {
+       "name": "The first run opens as a form, not an empty state",
+       "why": "A draft run is an unfinished form. Its fields are asked straight away; New run appears only once a run has left draft, and the No-runs-yet explainer is gone."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -264,7 +339,11 @@
     "Third pass (owner notes, 2026-09-12): the scenario suite left the rail's tab strip and became a header door, Run test scenarios, beside Custom config and Voice call; the open door reads as pressed. The rail is the viewport height so its border reaches the bottom. Reset to live is now Undo to live. Callers hear is a read-only field like Greeting, with Hear the opening on the same line and no new behaviour. Hosting region options carry their name only. End test, Delete and Remove use the destructive variant (a tint of red).",
     "Copy rule, standing: no em dash in user-facing text. Every one was rewritten: label pairs use a middot, sentence elaborations a period or colon. The failure, judge and hosting hints now read as sentences.",
     "Fifth pass (owner, 2026-09-12): the builder header (name, status, id, actions) is sticky under the app bar at all times; the rail, section headers and test rail stick under it, so the three columns keep one continuous line while scrolling.",
-    "The runs empty state was a centered block; every other empty state in the builder is a left-aligned bordered row with the door on the right. It now uses that row. Same thing, same look."
+    "The runs empty state was a centered block; every other empty state in the builder is a left-aligned bordered row with the door on the right. It now uses that row. Same thing, same look.",
+    "Sixth pass (owner, 2026-09-15): the manual door moved directly under the stack recap, so choosing a preset and building your own are neighbouring choices. Prompt & knowledge became three labelled rows with hairlines between them, because a system prompt, an opening and a failure message are three decisions and they had been reading as one list under a floating Opening title.",
+    "Caller-first used to grey out four controls and put explanatory prose inside a disabled input. It now hides them and says one sentence. Lines the agent speaks are set in quotes and italics wherever they appear, so what the caller hears is never confusable with the interface's own words.",
+    "Copy struck on the owner's instruction: the end-to-end latency note, the all-in explainer, the slider warning, the stop-bundle hint and the deployment blurb. Row titles are verbs in sentence case, and the label column balances its lines so no title ends on a single orphan word.",
+    "Deployment: picking Batch used to change nothing on screen. It now shows the caller ID and the contact list with its table open, and the rail carries a Contact list door while Batch is the chosen type. Go live keeps one name instead of renaming itself after the channel."
    ],
    "copy": [
     "Help",
@@ -371,7 +450,8 @@
     "Fourth pass (owner, 2026-09-12): the Configure TTS sheet carries a Voice field that names the picked voice and opens the Select voice dialog, the way the NG console's TTS drawer opens its voice library (src/components/console/agent-config-drawer.tsx). Browse voices is a labelled button beside the field, not an icon; the pick updates vendor and voice together.",
     "Fifth pass (owner, 2026-09-12): the Recommended strip was a second list with its own row design above the table. It is gone: the three recommended voices sort to the top of the same rows and wear a Recommended badge (tooltip: ranked from voice tags against the prompt and greeting, not benchmarks). The header (Voice, Traits, Voice ID, Compare) is frozen and never highlights. Add your own voice moved to the filter row.",
     "Browse voices duplicated the voice field, which already opens the dialog; the button is removed in Voice & Models and in the Configure TTS sheet. One door per action.",
-    "Read my greeting with no greeting written is not a disabled checkbox any more: the tray links to the Greeting field, closes the dialog and lands on it."
+    "Read my greeting with no greeting written is not a disabled checkbox any more: the tray links to the Greeting field, closes the dialog and lands on it.",
+    "Sixth pass: the voice field is the only door to the Select voice dialog, in Voice & Models and in the Configure TTS sheet. The extra button did the same thing."
    ],
    "copy": [
     "Recommended for {useCase} / Recommended",
@@ -598,6 +678,24 @@
        "why": "Google STT is bring-your-own-key: the switch locks on and the select offers your saved credentials, No credential selected and Create credential. Until a key is picked the recap says needs your Google key."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after7-backup-chain.png",
+     "caption": "After (sixth pass): vendor and model on one row, and every backup a full row with its own switch and key",
+     "marks": [
+      {
+       "name": "Vendor and model on one row",
+       "why": "The pair a person names together is one decision. Its credential sits directly under it, primary and backup alike."
+      },
+      {
+       "name": "Every backup is a full row with its own switch and key",
+       "why": "Backup 01 carries vendor, model and credential. The switch takes it out of the chain without losing the key; the cross removes it."
+      },
+      {
+       "name": "Add backup appends the next one",
+       "why": "A slot can hold a chain, tried in order. The vendors already used, primary included, drop out of the next picker."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -609,7 +707,9 @@
     "Same-day fix (bfb4406): the inline component existed but was never mounted in the slot rows, so the first production check found no + Add backup. The shots above are from the fixed deploy.",
     "Fifth pass (owner IA, 2026-09-12): the separate Backup providers section and the inline + Add backup are gone. A backup belongs to the model it protects, so it is set in that model's Configure sheet after the vendor, its credential and the model: Backup vendor (primary listed but disabled, ineligible vendors say why, No backup is a choice) and the backup's own credential, the same CredentialField as the primary. Agora's pool (AssemblyAI, Cartesia) and resold vendors run on Agora Managed Key; any other backup needs one of your saved credentials, and until then the recap says needs your {vendor} key. That answers the owner's question: what about the keys for the backup?",
     "A default, managed Agora stack shows no backup control at all. One sentence in the cost card says Agora switches to its backup and nothing needs setting up. Backup UI appears only once you configure models manually, where the right panel already owns configuration, sequence and keys.",
-    "Why it drifted: the 07 verdict said one row, on by default, and I drew that row as a new section instead of extending the sheet that already held vendor and credential. The rule now: extend the existing surface, never add a sibling one. Test failover waits for the Engine failover contract (Nov) and is no longer a dead button on screen."
+    "Why it drifted: the 07 verdict said one row, on by default, and I drew that row as a new section instead of extending the sheet that already held vendor and credential. The rule now: extend the existing surface, never add a sibling one. Test failover waits for the Engine failover contract (Nov) and is no longer a dead button on screen.",
+    "Sixth pass (owner, 2026-09-15): \"what about the keys for the backup? Hence this will NOT work.\" A backup is now a chain, not a single pick. Vendor and model sit on one row, the credential under it, and each backup repeats that anatomy with its own on/off switch. Add backup appends the next; the switch takes one out of the chain without losing its key.",
+    "The Engine tries them in order. A backup whose vendor is not in Agora's pool asks for one of your saved credentials and is skipped until it has one, which the recap line says out loud."
    ],
    "copy": [
     "Backup · If {vendor} is slow, down or blocked in your region, the call continues on the backup. Switching is never silent: every switch shows in the session log.",
@@ -826,12 +926,12 @@
    "result": "after4-* and after5-* all markers matched on production (after5-add-backup after the bfb4406 fix)"
   },
   {
-   "name": "annotate-shots, fifth pass",
-   "result": "after6-* all 7 shots, every marker matched on production (deploy 7qcx6msas)"
+   "name": "annotate-shots, sixth pass",
+   "result": "after7-* all 6 shots, every marker matched on production (deploy ar6vrcr9p)"
   },
   {
-   "name": "Live check (2026-09-12, fifth pass)",
-   "result": "header sticky at 48 px, 64 px tall, rail at 112 px while scrolled; no Browse voices button; no Backup providers section; /agents/agt_default/edit answers 200"
+   "name": "Live check (2026-09-15)",
+   "result": "backup chain, three prompt rows, batch contact list and the rail door all confirmed on production; tsc and next build clean; no new lint errors"
   }
  ],
  "where": [
@@ -876,6 +976,13 @@
    "area": "Monitor",
    "path": "Monitor › Call History › call sheet › Diagnosis · SIP; Call History list › All · With issues",
    "href": "https://ai-studio-console-redesign.vercel.app/calls?call=CALLS4"
+  },
+  {
+   "n": "KPI",
+   "name": "Strategy, assumptions and telemetry",
+   "area": "Project level",
+   "path": "docs/strategy/agent-builder-kpis.md · references/telemetry/event-spec.json · studio_x_2/lib/analytics.ts",
+   "href": "https://claude.ai/code/artifact/a1d57eb9-2121-484c-b2f6-2d728cbd1466"
   }
  ]
 }

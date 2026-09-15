@@ -1,0 +1,130 @@
+[
+ {
+  "name": "after7-stack-door",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 6000,
+  "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+  "preWait": 600,
+  "marks": [
+   {
+    "text": "Or configure models manually",
+    "up": 1,
+    "maxH": 150,
+    "name": "The manual door sits under the stack it replaces",
+    "why": "Pick a preset on the slider, or open the door directly beneath the line that names it. Two neighbouring choices, nothing in between."
+   },
+   {
+    "sel": "[data-wz-row-label]",
+    "name": "Set up, not Sets up",
+    "why": "Row titles are verbs and sentence case throughout. The stop-bundle explainer is gone; so is the end-to-end latency note and the all-in prose."
+   }
+  ]
+ },
+ {
+  "name": "after7-backup-chain",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Or configure models manually'));if(b&&b.getAttribute('aria-expanded')==='false')b.click();await wait(900);document.querySelector('button[aria-label=\"Configure STT vendor and credential\"]')?.click();await wait(1000);const add=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='Add backup');add&&add.click();await wait(700);})()",
+  "preWait": 1200,
+  "marks": [
+   {
+    "sel": "#wz-slot-asr-vendor",
+    "up": 1,
+    "maxH": 150,
+    "name": "Vendor and model on one row",
+    "why": "The pair a person names together is one decision. Its credential sits directly under it, primary and backup alike."
+   },
+   {
+    "sel": "#wz-backup-asr-vendor",
+    "up": 2,
+    "maxH": 240,
+    "name": "Every backup is a full row with its own switch and key",
+    "why": "Backup 01 carries vendor, model and credential. The switch takes it out of the chain without losing the key; the cross removes it."
+   },
+   {
+    "text": "Add backup",
+    "tags": "button",
+    "name": "Add backup appends the next one",
+    "why": "A slot can hold a chain, tried in order. The vendors already used, primary included, drop out of the next picker."
+   }
+  ]
+ },
+ {
+  "name": "after7-prompt-rows",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=opening",
+  "wait": 6500,
+  "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+  "preWait": 800,
+  "marks": [
+   {
+    "sel": "#wz-3-opening [data-wz-row-label]",
+    "up": 0,
+    "maxH": 90,
+    "name": "Opening is a row, not a floating title",
+    "why": "System prompt, Opening and Failure message are three separate decisions, so each takes the builder's own label column and the hairline between them does the separating."
+   },
+   {
+    "sel": "#wz-opening-hears",
+    "up": 1,
+    "maxH": 120,
+    "name": "What the agent says is set in quotes and italics",
+    "why": "Spoken lines are never confusable with the interface's own words. The greeting, the AI sentence and the composed line all carry it."
+   }
+  ]
+ },
+ {
+  "name": "after7-caller-first",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=opening",
+  "wait": 6500,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';await new Promise(r=>setTimeout(r,600));const caller=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='Caller');caller&&caller.click();await new Promise(r=>setTimeout(r,600));document.getElementById('wz-3-opening')?.scrollIntoView({block:'center'});})()",
+  "preWait": 1000,
+  "marks": [
+   {
+    "text": "The agent waits and answers what it hears",
+    "up": 2,
+    "maxH": 180,
+    "name": "Caller first hides what it disables",
+    "why": "A row of greyed-out controls with prose sitting in the input read as broken. One sentence says the same thing and nothing is left to misread."
+   }
+  ]
+ },
+ {
+  "name": "after7-batch-contacts",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(1200);const pickBatch=async()=>{for(let i=0;i<20;i++){const r=[...document.querySelectorAll('[role=radio][value=\"batch\"]')].find(e=>e.getBoundingClientRect().width>0);if(r&&r.getAttribute('aria-checked')==='true')return true;if(r)r.click();await wait(400);}return false;};await pickBatch();await wait(1600);document.getElementById('wz-2-contacts')?.scrollIntoView({block:'center'});await wait(700);})()",
+  "preWait": 1800,
+  "marks": [
+   {
+    "sel": "#wz-2-contacts [data-wz-row-label]",
+    "up": 0,
+    "maxH": 90,
+    "name": "Picking Batch seeds the first run and opens its list",
+    "why": "Choosing Batch used to change nothing on screen. The caller ID and the contact list now appear at the point of decision, with the table already showing."
+   },
+   {
+    "text": "Caller ID",
+    "tags": "h4",
+    "name": "Caller ID, not how callers reach you",
+    "why": "An outbound run dials from a number; it does not receive on one. The old label asked the inbound question."
+   }
+  ]
+ },
+ {
+  "name": "after7-runs-open",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(1200);const pickBatch=async()=>{for(let i=0;i<20;i++){const r=[...document.querySelectorAll('[role=radio][value=\"batch\"]')].find(e=>e.getBoundingClientRect().width>0);if(r&&r.getAttribute('aria-checked')==='true')return true;if(r)r.click();await wait(400);}return false;};await pickBatch();await wait(1600);const h=[...document.querySelectorAll('p')].find(x=>x.textContent.startsWith('Campaign runs'));h&&h.scrollIntoView({block:'start'});await wait(700);})()",
+  "preWait": 1800,
+  "marks": [
+   {
+    "text": "Campaign runs",
+    "tags": "p",
+    "up": 1,
+    "maxH": 260,
+    "name": "The first run opens as a form, not an empty state",
+    "why": "A draft run is an unfinished form. Its fields are asked straight away; New run appears only once a run has left draft, and the No-runs-yet explainer is gone."
+   }
+  ]
+ }
+]
