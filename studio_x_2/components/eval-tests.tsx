@@ -405,7 +405,7 @@ export function AddCaseSheet({
           <SheetDescription>
             {prefill
               ? "We kept the caller and transcript. Just say what should always be true."
-              : "Cast a simulated caller, then say what must always be true."}
+              : "Cast a caller, then say what must always be true."}
           </SheetDescription>
         </SheetHeader>
 
@@ -416,7 +416,7 @@ export function AddCaseSheet({
           </div>
 
           <div className="space-y-2 rounded-lg border border-border p-3">
-            <p className="text-xs font-medium">The simulated caller</p>
+            <p className="text-xs font-medium">The caller</p>
             <div className="space-y-1.5">
               <Label htmlFor="tc-id" className="text-xs text-muted-foreground">Identity</Label>
               <Input id="tc-id" value={persona.identity} onChange={(e) => setPersona({ ...persona, identity: e.target.value })} placeholder="Jordan, ops lead at a startup" />

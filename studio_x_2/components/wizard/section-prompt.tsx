@@ -31,7 +31,6 @@ export function SectionPrompt({
   onUnlock,
   templateSlot,
   onHearOpening,
-  onChangeSilence,
 }: StepProps & {
   /** Bumped by the template menu when a template overwrites the prompt —
    *  flashes the editor so the swap visibly lands. */
@@ -43,7 +42,6 @@ export function SectionPrompt({
   /** Opening › "Hear the opening" — opens the test rail and starts the call. */
   onHearOpening?: () => void
   /** Opening › silence recap "Change" — jumps to the call rules. */
-  onChangeSilence?: () => void
 }) {
   const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
   const batch = hasChannel(draft, "batch")
@@ -159,7 +157,6 @@ export function SectionPrompt({
         overridden={overridden("greeting")}
         overrideFlag={<OverrideFlag field="greeting" />}
         onHearOpening={onHearOpening}
-        onChangeSilence={onChangeSilence}
       />
       {/* Rename nudge (user-test 2026-07-28): a functional agent name
           spoken aloud — "this is Payment Reminder" — sounds wrong to the
@@ -207,9 +204,7 @@ export function SectionPrompt({
           update({
             systemPrompt: `${base}${base ? "\n\n" : ""}Tone & style: ${instruction.trim().replace(/\.$/, "")}.`,
           })
-          toast("Prompt rewritten", {
-            description: "Simulated: a model would restructure the whole prompt here, not just append the direction.",
-          })
+          toast("Prompt rewritten")
         }}
       />
     </>

@@ -10,10 +10,8 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
-import { CampaignsCard } from "@/components/wizard/campaigns-card"
-import {
-  InboundCallSettings, InboundEndCallRow, HangupSettings, PacingSettings, TransferSettings,
-} from "@/components/wizard/step-call-settings"
+import { CampaignLaunchFields, InboundEndCallRow } from "@/components/wizard/step-call-settings"
+import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { HostingRegionRow } from "@/components/wizard/hosting-region"
 import { StepAnalysis } from "@/components/wizard/step-analysis"
 import { StepPublish } from "@/components/wizard/step-publish"
@@ -63,8 +61,6 @@ export function DeploySection({
   onFix: (step: number) => void
   publishRegionRef: React.Ref<HTMLDivElement>
 }) {
-  const [behaviorOpen, setBehaviorOpen] = React.useState(false)
-  const [inboundAdvOpen, setInboundAdvOpen] = React.useState(false)
   const [historyOpen, setHistoryOpen] = React.useState(false)
   // A draft that has never deployed has no versions — an agentId is only
   // minted by the first deploy, so its presence is the honest signal.
@@ -83,32 +79,32 @@ export function DeploySection({
   return (
     <div className="space-y-6">
       {/* Campaign-run management — full width (the 50/50 CSV grid needs it). */}
-      {batch && (
-        <div className="space-y-2">
-          <CampaignsCard draft={draft} update={update} />
-          <div className="flex flex-wrap items-center gap-1">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setBehaviorOpen(true)}>
-              <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced Settings
-            </Button>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setHistoryOpen(true)}>
-              <History className="h-3.5 w-3.5" aria-hidden /> Version history
-            </Button>
-          </div>
-        </div>
-      )}
-      {!batch && (
-        <div>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setHistoryOpen(true)}>
-            <History className="h-3.5 w-3.5" aria-hidden /> Version history
-          </Button>
-        </div>
-      )}
+      <div className="flex flex-wrap items-center gap-1">
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => openAdvanced("call")}>
+          <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced settings
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setHistoryOpen(true)}>
+          <History className="h-3.5 w-3.5" aria-hidden /> Version history
+        </Button>
+      </div>
 
       <SectionRows>
+        {/* Batch asks one thing here: when to start. The contact list and the
+            number it dials from were already chosen in Deployment, and asking
+            again read as a trap (owner 2026-09-15). Retries and concurrency
+            are in Advanced settings. */}
+        {batch && draft.campaigns[0] && (
+          <SectionRow id="wz-4-launch" label="When to start" hint="Calling begins when you deploy, or at the time you set.">
+            <CampaignLaunchFields
+              campaign={draft.campaigns[0]}
+              onChange={(patch) => update({ campaigns: draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c)) })}
+            />
+          </SectionRow>
+        )}
         {/* Inbound hot path (Figma 2919-59124): End call + the Advanced
             Settings door — the full rules live in the sheet. */}
         {inbound && (
-          <InboundEndCallRow draft={draft} update={update} onOpenAdvanced={() => setInboundAdvOpen(true)} />
+          <InboundEndCallRow draft={draft} update={update} onOpenAdvanced={() => openAdvanced("call")} />
         )}
 
         {/* Hosting Region lives in Go Live for inbound + code (Figma
@@ -201,56 +197,6 @@ export function DeploySection({
         </SheetContent>
       </Sheet>
 
-      {/* Agent-level batch behavior — off the hot path (Figma 2872-2895). */}
-      <Sheet open={behaviorOpen} onOpenChange={setBehaviorOpen}>
-        <SheetContent
-          side="right"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl"
-        >
-          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-            <SheetTitle className="text-base">Advanced Settings</SheetTitle>
-            <p className="text-sm text-muted-foreground">
-              Agent-level rules every campaign follows: per-campaign window, concurrency,
-              and retries live on each campaign.
-            </p>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-            <SectionRows>
-              <HangupSettings draft={draft} update={update} />
-              <PacingSettings draft={draft} update={update} />
-              <TransferSettings draft={draft} update={update} />
-            </SectionRows>
-          </div>
-          <div className="shrink-0 border-t border-border px-5 py-3">
-            <Button className="w-full" onClick={() => setBehaviorOpen(false)}>Done</Button>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Inbound advanced settings (Figma 2924-104389). */}
-      <Sheet open={inboundAdvOpen} onOpenChange={setInboundAdvOpen}>
-        <SheetContent
-          side="right"
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl"
-        >
-          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-            <SheetTitle className="text-base">Advanced Settings</SheetTitle>
-            <p className="text-sm text-muted-foreground">
-              Agent-level rules that every inbound call follows.
-            </p>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-            <SectionRows>
-              <InboundCallSettings draft={draft} update={update} />
-            </SectionRows>
-          </div>
-          <div className="shrink-0 border-t border-border px-5 py-3">
-            <Button className="w-full" onClick={() => setInboundAdvOpen(false)}>Done</Button>
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   )
 }

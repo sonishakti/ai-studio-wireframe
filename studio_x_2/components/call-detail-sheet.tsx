@@ -248,7 +248,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
   const togglePlay = () => {
     if (!playing && !saidSimulated.current) {
       saidSimulated.current = true
-      toast("Simulated preview", { description: "No live audio in this wireframe. The clock advances so the transcript follows it." })
+      toast("Playback is not available yet", { description: "The clock still advances, so the transcript follows it." })
     }
     setPlaying((p) => !p)
   }

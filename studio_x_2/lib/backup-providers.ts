@@ -35,6 +35,8 @@ export type BackupSlot = "asr" | "llm" | "tts"
 export interface BackupEntry {
   /** BACKUP_CANDIDATES id — a vendor + model pair. */
   id: string
+  /** A model id typed by hand, overriding the candidate's own. */
+  model?: string
   /** Off keeps the row and its key; the Engine skips it. */
   enabled: boolean
   /** Whose key this backup runs on. Absent = Agora's, where Agora holds one. */
@@ -108,6 +110,8 @@ export const candidateById = (id: string): BackupCandidate | undefined => BACKUP
 /** One resolved link in the chain: what it is, whether it can actually serve. */
 export interface BackupLink {
   candidate: BackupCandidate
+  /** The model actually used: the candidate's, or a custom id. */
+  model: string
   enabled: boolean
   /** Runs on the builder's own key. */
   byo: boolean
@@ -188,7 +192,7 @@ export function planBackups(input: {
     if (!entries) {
       // Untouched: Agora's default is the first eligible backup it holds a key for.
       const auto = eligible.find(backupManaged)
-      links = auto ? [{ candidate: auto, enabled: true, byo: false, auto: true }] : []
+      links = auto ? [{ candidate: auto, model: auto.model, enabled: true, byo: false, auto: true }] : []
     } else {
       links = entries
         .map((e): BackupLink | null => {
@@ -204,7 +208,7 @@ export function planBackups(input: {
               : byo && !e.credentialId
                 ? `needs your ${candidate.vendor} key`
                 : undefined
-          return { candidate, enabled: e.enabled, byo, credentialId: e.credentialId, problem }
+          return { candidate, model: e.model?.trim() || candidate.model, enabled: e.enabled, byo, credentialId: e.credentialId, problem }
         })
         .filter((l): l is BackupLink => !!l)
     }

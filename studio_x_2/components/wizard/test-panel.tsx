@@ -447,7 +447,7 @@ function SessionStatistics({ draft }: { draft: AgentDraft }) {
         <StatRow label="Avg. LLM TTFT" value={`${ttftMs} ms`} title="Time to first token. How fast the model starts responding" />
         <StatRow label="Avg. cost" value={`$${est.costPerMin.toFixed(2)} / min`} />
       </dl>
-      <p className="pt-2 text-xs text-muted-foreground/70">Wireframe estimates.</p>
+      <p className="pt-2 text-xs text-muted-foreground/70">Estimated from this stack.</p>
     </section>
   )
 }

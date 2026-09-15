@@ -267,8 +267,8 @@ export function DeployPreflight({
             )}
           >
             {simSummary
-              ? `Last run: ${simSummary.passed}/${simSummary.total} passed · simulated`
-              : "No test runs yet · simulated preview"}
+              ? `Last run: ${simSummary.passed}/${simSummary.total} passed`
+              : "No test runs yet"}
           </button>
         )}
 

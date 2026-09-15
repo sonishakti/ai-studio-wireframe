@@ -13,9 +13,8 @@ import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
 import { VoiceSampleButton, useSimulatedPlayer } from "@/components/wizard/voice-sample-button"
-import { VoiceAdvancedSheet } from "@/components/wizard/voice-advanced-sheet"
 import { StackTradeoffSlider, ManualStackConfig } from "@/components/wizard/stack-config"
-import { HistoryField } from "@/components/wizard/step-advanced"
+import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { allVoices, PRESET_VOICES, type VoiceArtifact } from "@/lib/voice-artifacts"
 import { STACK_PRESETS, STACK_CATALOG, type AgentStack } from "@/lib/campaign-data"
 import { draftHosting, hasChannel, overriddenSections, type AgentDraft } from "@/lib/wizard-draft"
@@ -56,7 +55,6 @@ export function VoiceSection({
   React.useEffect(() => { setVoices(allVoices()) }, [])
 
   const [browserOpen, setBrowserOpen] = React.useState(false)
-  const [advancedOpen, setAdvancedOpen] = React.useState(false)
   const [manualOpen, setManualOpen] = React.useState(false)
   // The Models-row ▶/■ shares the one simulated player with the browser dialog.
   const player = useSimulatedPlayer()
@@ -139,23 +137,6 @@ export function VoiceSection({
             useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
             language={draft.stack.language}
           />
-          <HistoryField
-            id="wz-1-history"
-            value={draft.advanced}
-            onChange={(advanced) => update({ advanced })}
-          />
-          {/* Power door — the JSON that outranks all of this. */}
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent("sx:open-config-drawer", { cancelable: true }))}
-            className="flex w-full items-center gap-2.5 rounded-lg border border-dashed border-border px-3.5 py-2.5 text-left text-sm transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Code2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-            <span className="min-w-0 flex-1">
-              <span className="block font-medium">Custom Config (JSON)</span>
-              <span className="block text-xs text-muted-foreground">Override engine sections as JSON: overridden sections lock in the UI.</span>
-            </span>
-          </button>
         </div>
       )}
     </div>
@@ -272,7 +253,7 @@ export function VoiceSection({
         {/* Speech tuning leaves the hot path (Figma: "Advanced Speech
             Settings" — models moved inline above). */}
         <div>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAdvancedOpen(true)}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openAdvanced("speech")}>
             <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced speech settings
           </Button>
         </div>
@@ -289,13 +270,7 @@ export function VoiceSection({
         onSelect={pickVoice}
       />
 
-      <VoiceAdvancedSheet
-        open={advancedOpen}
-        onOpenChange={setAdvancedOpen}
-        draft={draft}
-        update={update}
-        onStackChange={onStackChange}
-      />
+
     </>
   )
 }

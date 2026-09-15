@@ -7,8 +7,8 @@
  */
 
 import {
-  KNOWLEDGE_BASES, MCP_SERVERS, CONNECTORS,
-  type KnowledgeBase, type McpServer, type Connector,
+  KNOWLEDGE_BASES, MCP_SERVERS, CONNECTORS, VENDOR_CREDENTIALS,
+  type KnowledgeBase, type McpServer, type Connector, type VendorCredential,
 } from "@/lib/campaign-data"
 
 // ─── ids ──────────────────────────────────────────────────────────────────────
@@ -246,4 +246,45 @@ export function setConnectorConnected(id: string, connected: boolean) {
 export function effectiveConnectorStatus(c: Connector): Connector["status"] {
   if (c.status === "coming-soon") return "coming-soon"
   return isConnectorConnected(c.id) ? "connected" : "available"
+}
+
+
+// ─── Vendor credentials ───────────────────────────────────────────────────────
+//
+// Made inside the builder, never by sending the user to another page: leaving
+// the flow to add a key is the one exit that reliably loses people (owner
+// 2026-09-15). Same localStorage shape as knowledge bases and MCP servers.
+
+const CRED_KEY = "sx:vendor_credentials"
+
+function listUserCredentials(): VendorCredential[] {
+  return readList<VendorCredential>(CRED_KEY)
+}
+
+/** Catalog credentials plus anything the user made in this browser. */
+export function allVendorCredentials(): VendorCredential[] {
+  return [...VENDOR_CREDENTIALS, ...listUserCredentials()]
+}
+
+export function createVendorCredential(input: {
+  vendor: string
+  name: string
+  key: string
+  category?: VendorCredential["category"]
+}): VendorCredential {
+  const key = input.key.trim()
+  const cred: VendorCredential = {
+    id: mintId("vc"),
+    vendor: input.vendor,
+    category: input.category ?? "LLM",
+    name: input.name.trim() || `${input.vendor} key`,
+    // Only the tail is ever kept or shown. The key itself is not stored.
+    keyHint: key.length > 4 ? `${key.slice(0, 3)}\u2022\u2022\u2022\u2022${key.slice(-4)}` : "\u2022\u2022\u2022\u2022",
+    status: "valid",
+    usedBy: 0,
+    added: "Just now",
+    mode: "byo",
+  }
+  writeList(CRED_KEY, [...listUserCredentials(), cred])
+  return cred
 }

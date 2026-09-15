@@ -945,7 +945,7 @@ function StartView({
                 variant="secondary"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => toast("Simulated preview", { description: `No live audio in this wireframe · ${tpl.name} would answer here.` })}
+                onClick={() => toast("Preview audio is not available yet")}
               >
                 <Mic className="h-3.5 w-3.5" aria-hidden /> Talk to agent
               </Button>

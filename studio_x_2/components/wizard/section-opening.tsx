@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CircleHelp, Play } from "lucide-react"
+import { CircleHelp, Play, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,9 +9,10 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
-  DEFAULT_CALL_BEHAVIOR, DEFAULT_DISCLOSURE, composeOpening, openingOf, type AgentDraft, type OpeningConfig,
+  DEFAULT_DISCLOSURE, composeOpening, openingOf, type AgentDraft, type OpeningConfig,
 } from "@/lib/wizard-draft"
 
 /**
@@ -47,7 +48,6 @@ export function SectionOpening({
   overridden,
   overrideFlag,
   onHearOpening,
-  onChangeSilence,
 }: {
   draft: AgentDraft
   update: (patch: Partial<AgentDraft>) => void
@@ -55,20 +55,11 @@ export function SectionOpening({
   overrideFlag?: React.ReactNode
   /** Opens the test rail on Test Agent and starts the call. */
   onHearOpening?: () => void
-  /** Jumps to the call rules (silence hang-up) in Deployment. */
-  onChangeSilence?: () => void
 }) {
   const o = openingOf(draft)
   const patch = (p: Partial<OpeningConfig>) => update({ opening: { ...o, ...p } })
   const callerFirst = o.speaksFirst === "caller"
   const hears = composeOpening(draft)
-  const [editing, setEditing] = React.useState(false)
-  // Absent = untouched → the defaults apply, so the recap never says "stays
-  // quiet" for an agent that will in fact hang up after 120 s.
-  const cb = draft.callBehavior ?? DEFAULT_CALL_BEHAVIOR
-  const silenceLine = cb.silenceHangup
-    ? `Hangs up after ${cb.silenceTimeoutSec}s of silence`
-    : "Stays quiet if the caller goes silent"
 
   return (
     <div className="space-y-5">
@@ -137,67 +128,56 @@ export function SectionOpening({
               <Switch id="wz-opening-disclose" checked={o.disclose} onCheckedChange={(v) => patch({ disclose: v })} disabled={overridden} />
             </div>
             {o.disclose && (
-              <div className="flex items-center gap-2">
-                {editing ? (
-                  <Input
-                    autoFocus
-                    value={o.disclosure}
-                    onChange={(e) => patch({ disclosure: e.target.value })}
-                    onBlur={() => setEditing(false)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditing(false) }}
-                    className="h-8 text-xs italic"
-                    aria-label="Disclosure sentence"
-                  />
-                ) : (
-                  <span className="text-xs text-foreground">
-                    <Spoken>{o.disclosure || DEFAULT_DISCLOSURE}</Spoken>
-                  </span>
-                )}
-                <button type="button" className="text-xs font-medium text-muted-foreground hover:text-foreground" onClick={() => setEditing((e) => !e)}>
-                  {editing ? "Done" : "Edit"}
-                </button>
+              <div className="space-y-1.5">
+                <Label htmlFor="wz-opening-disclosure" className="text-sm font-medium">Disclosure sentence</Label>
+                <Input
+                  id="wz-opening-disclosure"
+                  value={o.disclosure}
+                  onChange={(e) => patch({ disclosure: e.target.value })}
+                  placeholder={DEFAULT_DISCLOSURE}
+                  disabled={overridden}
+                  className="text-sm italic"
+                />
                 {o.disclosure !== DEFAULT_DISCLOSURE && (
-                  <button type="button" className="text-xs font-medium text-muted-foreground hover:text-foreground" onClick={() => patch({ disclosure: DEFAULT_DISCLOSURE })}>
-                    Reset
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                    onClick={() => patch({ disclosure: DEFAULT_DISCLOSURE })}
+                  >
+                    Reset to the default
                   </button>
                 )}
               </div>
             )}
           </div>
 
-          {/* Callers hear: the composed line, read-only, in a field like
-              Greeting; Hear the opening sits on the same line. */}
+          {/* Not a field. It looked like one, so people tried to type in it
+              (owner 2026-09-15): it is the composed line, shown as a line. */}
           <div className="space-y-1.5">
-            <Label htmlFor="wz-opening-hears" className="text-sm font-medium">Callers hear</Label>
+            <Label className="text-sm font-medium" id="wz-opening-hears-label">Callers hear</Label>
             <div className="flex items-start gap-2">
-              <Textarea
+              <p
                 id="wz-opening-hears"
-                readOnly
-                rows={2}
-                value={hears ? `“${hears}”` : ""}
-                placeholder="Write a greeting above"
-                aria-describedby="wz-opening-hears-hint"
+                aria-labelledby="wz-opening-hears-label"
                 data-testid="wz-opening-callers-hear"
-                className="min-h-[60px] flex-1 resize-none text-sm italic"
-              />
+                className="min-h-[44px] flex-1 rounded-md bg-muted/40 px-3 py-2.5 text-sm leading-relaxed"
+              >
+                {hears ? <Spoken>{hears}</Spoken> : <span className="text-muted-foreground">Write a greeting above</span>}
+              </p>
               <Button type="button" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={onHearOpening} disabled={!hears}>
                 <Play className="h-3.5 w-3.5" aria-hidden /> Hear the opening
               </Button>
             </div>
-            <p id="wz-opening-hears-hint" className="text-xs text-muted-foreground">
-              Read-only. The AI sentence and the greeting, in the order callers hear them.
-            </p>
           </div>
         </>
       )}
 
-      {/* Silence recap → call rules */}
-      <p className="text-xs text-muted-foreground">
-        {silenceLine}
-        {onChangeSilence && (
-          <button type="button" className="ml-2 font-medium text-foreground hover:underline" onClick={onChangeSilence}>Change</button>
-        )}
-      </p>
+      {/* What happens when nobody speaks is a CALL rule, not an opening one.
+          It sat here as a stray recap line (owner 2026-09-15); the door goes
+          to the same advanced panel every other section uses. */}
+      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => openAdvanced("call")}>
+        <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced settings
+      </Button>
     </div>
   )
 }

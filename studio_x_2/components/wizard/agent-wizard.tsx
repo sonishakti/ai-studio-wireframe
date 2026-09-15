@@ -28,6 +28,7 @@ import { STEP_TITLES, SECTION_COUNT, SECTION_GROUPS, STEP_ICONS, stepTitle, reso
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events, builderOpened, agentAudioHeard } from "@/lib/analytics"
+import { AdvancedSettingsSheet, type AdvancedAnchor } from "@/components/wizard/advanced-settings-sheet"
 import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
 import {
   getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
@@ -874,6 +875,20 @@ export function AgentWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // One advanced-settings panel for the whole builder. Sections ask for a
+  // group; the panel decides nothing else (owner 2026-09-15).
+  const [advOpen, setAdvOpen] = React.useState(false)
+  const [advAnchor, setAdvAnchor] = React.useState<AdvancedAnchor>("speech")
+  React.useEffect(() => {
+    const onOpen = (e: Event) => {
+      const anchor = (e as CustomEvent<AdvancedAnchor>).detail
+      setAdvAnchor(anchor ?? "speech")
+      setAdvOpen(true)
+    }
+    window.addEventListener("sx:open-advanced", onOpen)
+    return () => window.removeEventListener("sx:open-advanced", onOpen)
+  }, [])
+
   const testStartedAt = React.useRef<number | null>(null)
   const toggleTest = () => {
     const channel = primaryChannel(draft) ?? "unknown"
@@ -1324,7 +1339,6 @@ export function AgentWizard({
                         templateFlash={templateFlash}
                         onUnlock={unlockOverride}
                         onHearOpening={() => { openTest("agent"); if (!testing) toggleTest() }}
-                        onChangeSilence={() => openRow(5)}
                         templateSlot={
                           <TemplateMenu
                             draft={draft}
@@ -1385,6 +1399,13 @@ export function AgentWizard({
           onAgentSpoke={(turnCount) =>
             agentAudioHeard(ttfaKey, { trigger: "rail", turnCount, configuredByUser })
           }
+        />
+        <AdvancedSettingsSheet
+          open={advOpen}
+          onOpenChange={setAdvOpen}
+          anchor={advAnchor}
+          draft={draft}
+          update={update}
         />
       </div>
 

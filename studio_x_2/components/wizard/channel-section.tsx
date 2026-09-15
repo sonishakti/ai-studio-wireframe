@@ -285,7 +285,7 @@ function BatchContactsBlock({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-        <span>Schedule, retries and concurrency: set them in Go live, or later.</span>
+        <span>Set the schedule in Go live.</span>
         <button
           type="button"
           onClick={() => onGoToStep(5)}

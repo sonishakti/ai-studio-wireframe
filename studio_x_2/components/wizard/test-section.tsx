@@ -169,11 +169,11 @@ function synthTranscript(d: AgentDraft, goal: string, fail?: string | null): Eva
   const greeting = d.greeting.trim() || "Hi, thanks for calling. How can I help you today?"
   return [
     { role: "agent" as const, text: greeting },
-    { role: "caller", text: `(simulated) I want to ${goal}.` },
+    { role: "caller", text: `I want to ${goal}.` },
     fail
       ? { role: "agent", text: "…", note: fail }
-      : { role: "agent", text: `(simulated) The agent handles it the way the prompt directs, staying in persona.` },
-    { role: "caller", text: "(simulated) Okay. That works. Thanks." },
+      : { role: "agent", text: `The agent handles it the way the prompt directs, staying in persona.` },
+    { role: "caller", text: "Okay. That works. Thanks." },
   ]
 }
 

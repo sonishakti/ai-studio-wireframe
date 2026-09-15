@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Rocket, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { publishBlocks, channelTarget, primaryChannel, hasChannel, activeCampaigns, draftHosting, type AgentDraft } from "@/lib/wizard-draft"
+import { publishBlocks, channelTarget, primaryChannel, activeCampaigns, draftHosting, MOCK_CSV_ROWS, type AgentDraft } from "@/lib/wizard-draft"
 import { stackLine, stackEstimateFor } from "@/lib/campaign-data"
 import { hostingSummary } from "@/lib/hosting-regions"
 import { getVoiceArtifact } from "@/lib/voice-artifacts"
@@ -39,6 +39,8 @@ export function StepPublish({
   const batchOnly = primary === "batch"
   const codeOnly = primary === "code"
   const campaignCount = activeCampaigns(draft).length
+  const run = draft.campaigns[0]
+  const contacts = run?.contacts ?? (run?.csvName ? MOCK_CSV_ROWS : 0)
 
   return (
     <div className="space-y-5">
@@ -69,13 +71,18 @@ export function StepPublish({
         </div>
       )}
 
-      {/* Deployment Summary (Figma 2867-111374): mono-labeled facts, values
-          right-aligned, the full-width Deploy INSIDE the card — deploying is
-          the end of this journey, not a header shortcut. */}
-      <section className="space-y-4 rounded-lg border border-border bg-card p-5">
-        <h4 className="text-sm font-semibold">Deployment Summary</h4>
+      {/* Mono-labeled facts over hairlines. No card: nothing else in this
+          section has one, and a container here read as a different kind of
+          object (owner 2026-09-15). */}
+      <section className="space-y-4">
         <dl className="divide-y divide-border">
           <ReviewRow label="Deployed to" value={draft.channels.length ? channelTarget(draft) : "Not set yet"} />
+          {batchOnly && (
+            <ReviewRow
+              label="Calling"
+              value={contacts > 0 ? `${contacts.toLocaleString()} contacts · ${run?.csvName ?? "contact list"}` : "No contact list yet"}
+            />
+          )}
           <ReviewRow label="Models" value={stackLine(draft.stack, { full: true })} />
           <ReviewRow label="Voice" value={voice ? `${voice.name} · ${voice.tagline}` : "Not set yet"} />
           <ReviewRow label="Cost" value={`~$${est.costPerMin.toFixed(2)}/min`} />
@@ -87,24 +94,13 @@ export function StepPublish({
           <Rocket className="h-4 w-4" aria-hidden /> {ctaLabel ?? (live ? "Redeploy" : "Deploy")}
         </Button>
         <p className="text-sm text-muted-foreground">
-          {/* Outcome first, destination second. Code deploys stay on this page
-              (the snippets need the minted ID); everything else opens Monitor. */}
-          {live
-            ? batchOnly
-              ? `Starts ${campaignCount > 1 ? `${campaignCount} campaign runs` : "your campaign run"} after one confirmation. Opens Monitor.`
-              : codeOnly
-              ? `Updates the agent your app connects to. You stay on this page.`
-              : `Your changes take effect on the next call. Opens Monitor.`
-            : codeOnly
-            ? `Creates the agent ID for the snippets above. You stay on this page.`
-            : hasChannel(draft, "batch") && campaignCount > 0
-            ? `Puts ${agentName} live${campaignCount > 1 ? ` and starts ${campaignCount} campaign runs` : " and starts your campaign run"}. Opens Monitor.`
-            : `Puts ${agentName} live. Opens Monitor.`}
-        </p>
-        {/* Off-switch pointer (user-test 2026-07-29): a header Pause is vetoed,
-            so the fine print names where the existing one lives. */}
-        <p className="text-xs text-muted-foreground/80">
-          To take this agent offline, use Pause in the ⋯ menu on its row in All Agents.
+          {codeOnly
+            ? "Creates the agent ID for the snippets above. You stay on this page."
+            : live
+            ? "Your changes take effect on the next call."
+            : batchOnly
+            ? "Starts calling after one confirmation."
+            : `Puts ${agentName} live.`}
         </p>
       </section>
     </div>

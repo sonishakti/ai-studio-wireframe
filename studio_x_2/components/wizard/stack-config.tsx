@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
+import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
+import { allVendorCredentials, createVendorCredential } from "@/lib/agent-resources"
 import type { VoiceArtifact } from "@/lib/voice-artifacts"
 import type { HostingConfig } from "@/lib/hosting-regions"
 import {
@@ -27,8 +32,7 @@ import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import {
   STACK_PRESETS, STACK_CATALOG, stackFor, stackEstimateFor, stackNonStreaming,
   stackCost, slotMode, MANAGED_PROVIDERS, AGORA_RATE_PER_MIN,
-  type StackPreset, type AgentStack, type CredentialMode,
-  VENDOR_CREDENTIALS,
+  type StackPreset, type AgentStack, type CredentialMode, type VendorCredential,
 } from "@/lib/campaign-data"
 
 /**
@@ -512,21 +516,35 @@ function CredentialField({
   label?: string
 }) {
   const byo = !resellable || mode === "byo"
-  // Saved credentials for this vendor (wireframe: the Vendor Credentials list).
-  const saved = VENDOR_CREDENTIALS.filter((c) => c.vendor.toLowerCase() === vendor.toLowerCase() && c.mode === "byo")
+  // Catalog keys plus anything made in this browser. Read after mount so the
+  // server and the first client render agree.
+  const [all, setAll] = React.useState<VendorCredential[]>([])
+  React.useEffect(() => { setAll(allVendorCredentials()) }, [])
+  const [createOpen, setCreateOpen] = React.useState(false)
+  const saved = all.filter((c) => c.vendor.toLowerCase() === vendor.toLowerCase() && c.mode === "byo")
+
   return (
     <div className="space-y-2" id={`${id}-field`}>
-      <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id} className="text-sm font-medium">{label}</Label>
-        <Switch id={id} checked={byo} disabled={!resellable} onCheckedChange={(v) => onMode(v ? "byo" : "managed")} />
-      </div>
+      {/* A checkbox, not a switch: the sheet already carries one switch per
+          backup, and a column of toggles that mean different things reads as
+          noise (owner 2026-09-15). */}
+      <label className="flex items-center gap-2 text-sm font-medium">
+        <Checkbox
+          id={id}
+          checked={byo}
+          disabled={!resellable}
+          onCheckedChange={(v) => onMode(v ? "byo" : "managed")}
+        />
+        {label}
+      </label>
       {byo ? (
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground" htmlFor={`${id}-pick`}>Credential</Label>
           <Select
             value={credentialId ?? "__none__"}
             onValueChange={(v) => {
-              if (v === "__create__") { window.location.assign("/project/vendor-credentials"); return }
+              // Making a key never leaves the builder (owner 2026-09-15).
+              if (v === "__create__") { setCreateOpen(true); return }
               onCredential(v === "__none__" ? undefined : v)
             }}
           >
@@ -548,17 +566,66 @@ function CredentialField({
           <p className="text-xs text-muted-foreground">
             {!resellable
               ? `${vendor} is bring-your-own-key only. Agora doesn't resell it.`
-              : `${vendor} bills you directly, on top of Agora's rate.`}
+              : `${vendor} bills you directly.`}
           </p>
         </div>
       ) : (
         <div className="flex h-9 items-center gap-2 rounded-md border border-stroke bg-muted/40 px-3 text-sm" aria-label="Credential: Agora Managed Key">
           <ShieldCheck className="size-4 text-success" aria-hidden />
           Agora Managed Key
-          <span className="ml-auto text-xs text-muted-foreground">Included, no key to add</span>
         </div>
       )}
+      <CreateCredentialDialog
+        vendor={vendor}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(c) => { setAll(allVendorCredentials()); onCredential(c.id) }}
+      />
     </div>
+  )
+}
+
+/** Make a key without leaving the builder. The key itself is never stored —
+ *  only its last four characters, which is all the picker ever shows. */
+function CreateCredentialDialog({
+  vendor, open, onOpenChange, onCreated,
+}: {
+  vendor: string
+  open: boolean
+  onOpenChange: (o: boolean) => void
+  onCreated: (c: VendorCredential) => void
+}) {
+  const [name, setName] = React.useState("")
+  const [key, setKey] = React.useState("")
+  React.useEffect(() => { if (open) { setName(""); setKey("") } }, [open])
+  const save = () => {
+    const c = createVendorCredential({ vendor, name: name || `${vendor} key`, key })
+    onCreated(c)
+    onOpenChange(false)
+  }
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add a {vendor} key</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="cred-name" className="text-sm font-medium">Name</Label>
+            <Input id="cred-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={`${vendor} production`} className="text-sm" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="cred-key" className="text-sm font-medium">API key</Label>
+            <Input id="cred-key" type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Paste the key" className="font-mono text-sm" />
+            <p className="text-xs text-muted-foreground">Only the last four characters are kept for the picker.</p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={save} disabled={!key.trim()}>Save key</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -645,6 +712,8 @@ function ConfigureSlotSheet({
   const [voiceOpen, setVoiceOpen] = React.useState(false)
   /** The slot's backup chain, local until Save. */
   const [chain, setChain] = React.useState<BackupEntry[]>([])
+  /** Which backups are typing a model id by hand. */
+  const [customBackup, setCustomBackup] = React.useState<Record<number, boolean>>({})
 
   React.useEffect(() => {
     if (!open) return
@@ -770,8 +839,8 @@ function ConfigureSlotSheet({
               }
             />
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Checkbox checked={custom} onCheckedChange={(c) => setCustom(!!c)} aria-label="Custom model id" />
-              Custom
+              <Checkbox checked={custom} onCheckedChange={(c) => setCustom(!!c)} aria-label="Custom model ID" />
+              Custom model ID
             </label>
             <CredentialField
               id={`wz-cred-${slot}`}
@@ -835,16 +904,37 @@ function ConfigureSlotSheet({
                       vendor={v}
                       onVendor={(nv) => {
                         const next = candidateFor(nv, backupModels(nv)[0] ?? "")
-                        if (next) patchLink(i, { id: next.id, credentialMode: backupManaged(next) ? "managed" : "byo", credentialId: undefined })
+                        if (next) patchLink(i, { id: next.id, model: undefined, credentialMode: backupManaged(next) ? "managed" : "byo", credentialId: undefined })
                       }}
                       models={backupModels(v)}
-                      model={cand?.model ?? ""}
+                      model={entry.model ?? cand?.model ?? ""}
                       onModel={(m) => {
                         const next = candidateFor(v, m)
-                        if (next) patchLink(i, { id: next.id })
+                        if (next) patchLink(i, { id: next.id, model: undefined })
                       }}
                       modelLabel={slot === "tts" ? "Voice model" : "Model"}
+                      modelSlot={customBackup[i] ? (
+                        <Input
+                          value={entry.model ?? ""}
+                          onChange={(e) => patchLink(i, { model: e.target.value })}
+                          placeholder={slot === "tts" ? "custom-voice-id" : "custom-model-id"}
+                          className="font-mono text-sm"
+                        />
+                      ) : undefined}
                     />
+                    {/* A backup can take a model id by hand too — it was on the
+                        primary and missing here (owner 2026-09-15). */}
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Checkbox
+                        checked={!!customBackup[i]}
+                        onCheckedChange={(c) => {
+                          setCustomBackup((m) => ({ ...m, [i]: !!c }))
+                          if (!c) patchLink(i, { model: undefined })
+                        }}
+                        aria-label={`Custom model ID for backup ${i + 1}`}
+                      />
+                      Custom model ID
+                    </label>
                     {entry.enabled && cand && (
                       <CredentialField
                         id={`wz-bcred-${slot}${i === 0 ? "" : `-${i}`}`}
@@ -947,47 +1037,26 @@ export function ManualStackConfig({
 
   // One line under each model: its backup and whose key it runs on. Read-only
   // here; the sheet behind the row is the only place it is set.
+  /** One line, and only what it is: "Backup: Deepgram, Nova-3". Whose key it
+   *  runs on belongs in the sheet, not under every row (owner 2026-09-15). */
   const recap = (slot: Slot) => {
     const s = plan.slots.find((p) => p.slot === slot)
     if (!s) return null
     const live = s.links.filter((l) => l.enabled)
     const first = live.find((l) => !l.problem) ?? live[0]
-    const more = Math.max(0, live.length - 1)
     const gap = s.state === "needs-key" || s.state === "no-match"
-    const key = first
-      ? first.problem
-        ? first.problem
-        : first.byo
-          ? (VENDOR_CREDENTIALS.find((c) => c.id === first.credentialId)?.name ?? "your key")
-          : "Agora Managed Key"
-      : null
     return (
       <button
         type="button"
         onClick={() => setOpenSlot(slot)}
         aria-label={`Configure ${SLOT_LABEL[slot]} backup`}
         className={cn(
-          "flex flex-wrap items-center gap-x-1.5 rounded text-left text-xs transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "rounded text-left text-xs transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           gap ? "text-warning" : "text-muted-foreground",
         )}
       >
-        <span className="font-medium">{live.length > 1 ? "Backups" : "Backup"}</span>
-        <span aria-hidden>·</span>
-        {!first ? (
-          <span>{s.note ?? "none"}</span>
-        ) : (
-          <>
-            <span>{first.candidate.label}</span>
-            <span aria-hidden>·</span>
-            <span>{key}</span>
-            {more > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span>{more} more</span>
-              </>
-            )}
-          </>
-        )}
+        <span className="font-medium">Backup:</span>{" "}
+        {first ? `${first.candidate.vendor}, ${first.model}` : (s.note ?? "none")}
       </button>
     )
   }
@@ -1169,31 +1238,25 @@ export function StackTradeoffSlider({
         </p>
       )}
       {afterRecap}
-      {/* Where the money actually goes. Agora charges its platform rate either
-          way and managed absorbs the vendor bill, so managed is CHEAPER — the
-          inverse of every competitor, and previously invisible. Arithmetic, not
-          adjectives: the two numbers and their sum. */}
-      <div className="rounded-lg border border-border bg-muted/30 p-2.5 text-xs">
-        {cost.allManaged ? (
-          <p>
-            <span className="font-medium">${cost.totalPerMin.toFixed(2)}/min, all in.</span>
-          </p>
-        ) : (
-          <div className="space-y-0.5">
-            <p className="tabular-nums">
-              Agora ${cost.platformPerMin.toFixed(2)}/min
-              {" + "}
-              your {cost.byoSlots.join(" and ")} vendor{cost.byoSlots.length > 1 ? "s" : ""} ~${cost.vendorPerMin.toFixed(2)}/min
-              {" = "}
-              <span className="font-medium">~${cost.totalPerMin.toFixed(2)}/min</span>
-            </p>
-            <p className="text-muted-foreground">
-              Agora&apos;s rate is the same either way, so your own key adds a bill rather than
-              replacing one. Switch {cost.byoSlots.join("/")} to managed to pay only ${AGORA_RATE_PER_MIN.toFixed(2)}/min.
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Your own key adds a bill rather than replacing one, so the split is
+          worth printing — but only when there IS a split. */}
+      {!cost.allManaged && (
+        <p className="text-xs tabular-nums text-muted-foreground">
+          Agora ${cost.platformPerMin.toFixed(2)}/min plus your {cost.byoSlots.join(" and ")} vendor
+          {cost.byoSlots.length > 1 ? "s" : ""} at about ${cost.vendorPerMin.toFixed(2)}/min, so about
+          <span className="font-medium text-foreground"> ${cost.totalPerMin.toFixed(2)}/min</span>.
+          Agora charges ${AGORA_RATE_PER_MIN.toFixed(2)}/min either way.
+        </p>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="gap-1.5"
+        onClick={() => openAdvanced("models")}
+      >
+        <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden /> Advanced settings
+      </Button>
       {nonStreaming.length > 0 && (
         <p className="text-xs text-warning">
           {nonStreaming.join(", ")} doesn&apos;t stream. It transcribes only after the caller

@@ -50,7 +50,7 @@ export function useSimulatedPlayer(): SimulatedPlayer {
       active = { token, stop }
       setPlayingId(voice.id)
       toast("Simulated preview", {
-        description: `No live audio in this wireframe · ${voice.name} would play here.`,
+        description: `Preview audio is not available yet.`,
       })
       timer.current = window.setTimeout(() => {
         timer.current = null
