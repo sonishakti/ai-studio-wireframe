@@ -238,7 +238,7 @@ export function CampaignsCard({ draft, update }: StepProps) {
           {visible.map((c) => {
             const meta = STATUS_META[c.status]
             const missing = c.status !== "completed"
-              ? [!c.numberId && "caller ID", !c.csvName && "contacts CSV"].filter(Boolean)
+              ? [!c.numberId && "phone number", !c.csvName && "contacts CSV"].filter(Boolean)
               : []
             const total = c.contacts ?? (c.csvName ? MOCK_CSV_ROWS : 0)
             const dialed = campaignDialed(c)
@@ -392,7 +392,7 @@ function CampaignEditor({
     const id = `pn_new_${Date.now().toString(36)}`
     setSessionNumbers((s) => [...s, { id, ...n }])
     onChange({ numberId: id })
-    toast.success(`${n.number} set as caller ID`, {
+    toast.success(`${n.number} set as the number to dial from`, {
       description: "This run dials from it once you deploy.",
     })
   }
@@ -415,7 +415,7 @@ function CampaignEditor({
       {locked && (
         <p className="rounded-md border border-warning/50 bg-warning/10 px-3 py-2 text-xs text-foreground">
           Config is locked to the original run: upload the new contact list and set the timing.
-          Caller ID, language, and dialing stay identical so analytics aggregate across runs.
+          Phone number, language, and dialing stay identical so analytics aggregate across runs.
           Need changes? Use <span className="font-medium">Duplicate</span> instead.
         </p>
       )}
@@ -444,7 +444,7 @@ function CampaignEditor({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium">Caller-ID number</Label>
+          <Label className="text-sm font-medium">Phone number</Label>
           <Select
             disabled={locked}
             value={campaign.numberId ?? ""}

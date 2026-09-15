@@ -208,8 +208,11 @@ export function ChannelSection({
   )
 }
 
-// ─── Batch — the agent-level caller ID (Figma 2875-83511) ─────────────────────
+// ─── Batch — the agent-level number it dials from (Figma 2875-83511) ─────────
 
+/** "Caller ID" here, "Phone number" one channel over, for the same thing in the
+ *  same dropdown (owner 2026-09-15). Phone number is what the rest of the
+ *  console calls it, so it wins everywhere and the hint carries the direction. */
 function BatchCallerIdBlock({ draft, update }: StepProps) {
   const callerId = draft.config.batch?.callerId
   const setCallerId = (id: string) =>
@@ -218,14 +221,14 @@ function BatchCallerIdBlock({ draft, update }: StepProps) {
   return (
     <SectionRow
       id="wz-2-batch"
-      label="Caller ID"
+      label="Phone number"
       hint="The number your agent dials from. Every run starts with it."
     >
       <PhoneNumberSelect
         value={callerId}
         onChange={setCallerId}
         placeholder="Choose a phone number"
-        ariaLabel="Caller ID"
+        ariaLabel="Phone number"
       />
     </SectionRow>
   )
@@ -275,13 +278,13 @@ function BatchContactsBlock({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-        <span>Set the schedule in Go live.</span>
+        <span>Configure in Go Live.</span>
         <button
           type="button"
           onClick={() => onGoToStep(5)}
           className="inline-flex items-center gap-1 rounded font-medium text-foreground transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          Open Go live <ArrowRight className="h-3 w-3" aria-hidden />
+          Open Go Live <ArrowRight className="h-3 w-3" aria-hidden />
         </button>
       </div>
     </SectionRow>

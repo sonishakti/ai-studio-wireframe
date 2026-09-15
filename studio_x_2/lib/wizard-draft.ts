@@ -809,7 +809,7 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
       blocks.push({ reason: "Create a campaign run to start batch calling.", step: 5, action: "New run" })
     }
     for (const c of active) {
-      if (!c.numberId) blocks.push({ reason: `"${c.name}" needs a caller-ID number.`, step: 5, action: "Pick a number" })
+      if (!c.numberId) blocks.push({ reason: `"${c.name}" needs a phone number.`, step: 5, action: "Pick a number" })
       if (!c.csvName) blocks.push({ reason: `"${c.name}" is missing its contacts CSV.`, step: 5, action: "Add contacts" })
       if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
         blocks.push({ reason: `"${c.name}" is scheduled but has no start date, time, and timezone.`, step: 5, action: "Set schedule" })

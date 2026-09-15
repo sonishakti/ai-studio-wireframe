@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Switch } from "@/components/ui/switch"
+import { Slider } from "@/components/ui/slider"
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
@@ -1140,14 +1141,16 @@ export function ManualStackConfig({
 
 // ─── Choosing a model stack ───────────────────────────────────────────────────
 
-/** Three bundles, named for what they are good at.
+/** Three bundles, named for what they are good at, on one track.
  *
- *  This was a Lowest-Cost-to-Fastest slider until 2026-09-15. Agora's rate card
- *  is a flat $0.10 per agent-minute and its docs say the price is the same under
- *  bring-your-own-key, so one end of that axis could never move the bill — and a
- *  slider with one real axis is a dial with nothing to dial. Three options that
- *  say what they are for is the honest shape, and each one can carry its own
- *  answer time. Hidden on a realtime model, which owns the whole pipeline. */
+ *  Briefly three stacked radio cards (2026-09-15). They read well and they cost
+ *  three card heights inside the first fold of Step 1, which is the one place
+ *  height is expensive — so the stops went back on a slider (owner 2026-09-15).
+ *  The axis is speed against capability, never money: Agora's rate card is a
+ *  flat $0.10 per agent-minute and its docs say the price holds under
+ *  bring-your-own-key, so no stop on this track can move the bill. The chosen
+ *  stop names itself and carries its own answer time under the track. Hidden on
+ *  a realtime model, which owns the whole pipeline. */
 const STACK_STOPS: { preset: StackPreset; title: string; description: string }[] = [
   { preset: "fastest", title: "Fastest", description: "Answers quickest. Best for routing and short questions." },
   { preset: "balanced", title: "Balanced", description: "Good speed, and handles most conversations." },
@@ -1174,6 +1177,11 @@ export function StackTradeoffSlider({
   const diverged = divergedFromPreset(stack)
   const cost = stackCost(stack)
   const nonStreaming = stackNonStreaming(stack)
+  // A per-slot override leaves the track parked on the preset it started from,
+  // and unemphasised: the numbers below then come from the real stack, not the
+  // stop, so a custom mix never reads as one of the three.
+  const stopIdx = Math.max(0, STACK_STOPS.findIndex((s) => s.preset === stack.preset))
+  const stopMs = stackEstimateFor(stack).latencyMs
 
   const setPreset = (preset: StackPreset) => {
     const base = stackFor(preset, stack.modality)
@@ -1193,31 +1201,32 @@ export function StackTradeoffSlider({
     <section className={cn("@container space-y-4", !lean && "rounded-lg border border-border bg-card p-5", className)}>
       {!lean && <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Model stack</p>}
 
-      <RadioCardGroup
-        value={diverged ? "" : stack.preset}
-        onValueChange={(v) => v && setPreset(v as StackPreset)}
-        aria-label="Model stack"
-        className="gap-3 @2xl:grid-cols-3"
-      >
-        {STACK_STOPS.map((s) => {
-          const ms = stackEstimateFor(stackFor(s.preset, stack.modality)).latencyMs
-          return (
-            <RadioCard
-              key={s.preset}
-              value={s.preset}
-              title={s.title}
-              description={
-                <>
-                  <span className="block">{s.description}</span>
-                  <span className="mt-1.5 flex items-center gap-1.5 font-mono text-xs tabular-nums text-muted-foreground">
-                    <Gauge className="size-3.5" aria-hidden /> ~{ms} ms to answer
-                  </span>
-                </>
-              }
-            />
-          )
-        })}
-      </RadioCardGroup>
+      {/* Stop names sit on the track, and only the chosen one is emphasised.
+          Its sentence and its answer time follow, so the stack still explains
+          itself in one line instead of three cards. */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          {STACK_STOPS.map((s, n) => (
+            <span key={s.preset} className={cn(n === stopIdx && !diverged ? "font-medium" : "text-muted-foreground")}>
+              {s.title}
+            </span>
+          ))}
+        </div>
+        <Slider
+          value={[stopIdx]}
+          min={0}
+          max={STACK_STOPS.length - 1}
+          step={1}
+          onValueChange={([v]) => setPreset(STACK_STOPS[v].preset)}
+          aria-label="Model stack"
+        />
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+          <span>{diverged ? "Custom mix of models." : STACK_STOPS[stopIdx].description}</span>
+          <span className="flex items-center gap-1.5 font-mono text-xs tabular-nums">
+            <Gauge className="size-3.5" aria-hidden /> ~{stopMs} ms to answer
+          </span>
+        </p>
+      </div>
 
       {/* The vendors behind the choice, and the one price that covers them. */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">

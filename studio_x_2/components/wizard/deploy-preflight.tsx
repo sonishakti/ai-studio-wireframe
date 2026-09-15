@@ -38,7 +38,7 @@ interface CheckRow {
 }
 
 function campaignWarn(draft: AgentDraft, c: CampaignDraft): { value: string; fixStep: number; fixLabel: string } | null {
-  if (!c.numberId) return { value: `"${c.name}" needs a caller-ID number.`, fixStep: 5, fixLabel: "Pick a number" }
+  if (!c.numberId) return { value: `"${c.name}" needs a phone number.`, fixStep: 5, fixLabel: "Pick a number" }
   if (!c.csvName) return { value: `"${c.name}" is missing its contacts CSV.`, fixStep: 5, fixLabel: "Add contacts" }
   if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
     return { value: `"${c.name}" is scheduled but has no start time.`, fixStep: 5, fixLabel: "Set schedule" }
