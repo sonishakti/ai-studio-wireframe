@@ -62,6 +62,11 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          // Grid children default to min-width:auto — without this, long content
+          // pushes through the panel edge instead of wrapping.
+          "[&>*]:min-w-0",
+          // A tall dialog scrolls inside itself instead of running off screen.
+          "max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain",
           className
         )}
         {...props}
@@ -89,7 +94,8 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2", className)}
+      // pr-10 keeps a long title clear of the close button.
+      className={cn("flex min-w-0 flex-col gap-2 pr-10", className)}
       {...props}
     />
   )
@@ -107,7 +113,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end",
         className
       )}
       {...props}
@@ -129,7 +135,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("font-heading leading-none font-medium", className)}
+      className={cn("font-heading text-balance font-medium leading-tight", className)}
       {...props}
     />
   )

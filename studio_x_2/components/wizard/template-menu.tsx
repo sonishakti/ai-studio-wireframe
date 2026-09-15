@@ -98,38 +98,38 @@ export function TemplateMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Apply {pending?.name ?? "this template"}?</AlertDialogTitle>
             <AlertDialogDescription>
-              A template now sets more than the prompt: here&apos;s exactly what changes.
+              This replaces your prompt, greeting and model stack.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {/* The diff. A binary replace-or-cancel gave no way to judge the
               trade, and now that templates carry a real payload there is
               genuinely more at stake than one text field. */}
           {pending && (
-            <ul className="space-y-1.5 rounded-lg border border-border bg-muted/30 p-3 text-sm">
-              <li className="flex gap-2">
+            <ul className="space-y-2 rounded-lg border border-border bg-muted/30 p-3 text-sm">
+              <li className="grid grid-cols-[6rem_minmax(0,1fr)] gap-3">
                 <span className="text-muted-foreground">Prompt</span>
-                <span className="ml-auto text-right">
+                <span className="min-w-0 text-right">
                   {draft.systemPrompt.trim() ? "replaced" : "written"} · {pending.prompt.split("\n\n").length} sections
                 </span>
               </li>
-              <li className="flex gap-2">
+              <li className="grid grid-cols-[6rem_minmax(0,1fr)] gap-3">
                 <span className="text-muted-foreground">Greeting</span>
-                <span className="ml-auto truncate text-right">&ldquo;{pending.greeting}&rdquo;</span>
+                <span className="min-w-0 break-words text-right italic">&ldquo;{pending.greeting}&rdquo;</span>
               </li>
-              <li className="flex gap-2">
+              <li className="grid grid-cols-[6rem_minmax(0,1fr)] gap-3">
                 <span className="text-muted-foreground">Model stack</span>
-                <span className="ml-auto text-right">{STACK_PRESETS[pending.preset].label}</span>
+                <span className="min-w-0 text-right">{STACK_PRESETS[pending.preset].label}</span>
               </li>
               {pending.extract.length > 0 && (
-                <li className="flex gap-2">
-                  <span className="shrink-0 text-muted-foreground">Extracts</span>
-                  <span className="ml-auto text-right text-xs text-muted-foreground">
+                <li className="grid grid-cols-[6rem_minmax(0,1fr)] gap-3">
+                  <span className="text-muted-foreground">Extracts</span>
+                  <span className="min-w-0 break-words text-right text-xs text-muted-foreground">
                     {pending.extract.join(" · ")}
                   </span>
                 </li>
               )}
-              <li className="flex gap-2 border-t border-border pt-1.5 text-xs text-muted-foreground">
-                <span>Your voice, channel, and knowledge stay as they are.</span>
+              <li className="border-t border-border pt-2 text-xs text-muted-foreground">
+                Your voice, channel and knowledge stay as they are.
               </li>
             </ul>
           )}

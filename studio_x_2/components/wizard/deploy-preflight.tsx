@@ -213,7 +213,7 @@ export function DeployPreflight({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {batch && ready.length > 0
-              ? `Deploying starts the runs · ${draft.name || "your agent"} dials every contact in each list. Checking the configuration first:`
+              ? `${draft.name || "Your agent"} will call every contact on the list.`
               : `What ${draft.name || "your agent"} goes live with:`}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -225,14 +225,14 @@ export function DeployPreflight({
             <li
               key={r.id}
               className={cn(
-                "sx-check-in flex items-center gap-2.5 rounded-md border px-3 py-2",
+                "sx-check-in grid grid-cols-[1rem_6rem_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md border px-3 py-2",
                 r.state === "warn" ? "border-warning/40 bg-warning/5" : "border-border bg-background/50",
               )}
               style={{ animationDelay: `${i * stagger}ms` }}
             >
               <r.icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-              <span className="w-16 shrink-0 font-mono text-xs uppercase tracking-wider text-muted-foreground">{r.label}</span>
-              <span className="min-w-0 flex-1 truncate text-sm" title={r.value}>{r.value}</span>
+              <span className="truncate font-mono text-xs uppercase tracking-wider text-muted-foreground">{r.label}</span>
+              <span className="min-w-0 truncate text-sm" title={r.value}>{r.value}</span>
               {r.state === "ok" ? (
                 <Check
                   className="sx-tick-pop h-4 w-4 shrink-0 text-success"
@@ -275,9 +275,9 @@ export function DeployPreflight({
         {/* Batch manifest — the numbers that matter at the moment of spend,
             one line per ready campaign. */}
         {batch && ready.length > 0 && (
-          <ul className="space-y-1 text-sm text-muted-foreground">
+          <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground marker:text-muted-foreground/60">
             {liveInboundNumber && (
-              <li>· {draft.name || "Your agent"} stops answering {liveInboundNumber} while on Batch calls</li>
+              <li>{draft.name || "Your agent"} stops answering {liveInboundNumber} while on Batch calls</li>
             )}
             {ready.map((c) => {
               // Per-run cost projection (user-test 2026-07-28: the only money
@@ -286,7 +286,7 @@ export function DeployPreflight({
               const contacts = c.contacts ?? MOCK_CSV_ROWS
               return (
                 <li key={c.id} className="tabular-nums">
-                  · {c.name}: {PHONE_NUMBERS.find((n) => n.id === c.numberId)?.number ?? "selected number"} ·{" "}
+                  {c.name}: {PHONE_NUMBERS.find((n) => n.id === c.numberId)?.number ?? "selected number"} ·{" "}
                   {c.launch?.mode === "scheduled"
                     ? `starts ${c.launch.startDate} ${c.launch.startTime ?? ""} ${c.launch.timezone ? `(${c.launch.timezone})` : ""}`
                     : "starts on deploy"} ·{" "}
@@ -297,18 +297,20 @@ export function DeployPreflight({
               )
             })}
             <li className="tabular-nums">
-              · Estimate: ~${Math.round(totalContacts * 2 * est.costPerMin)} if every call runs ~2 min at ${est.costPerMin.toFixed(2)}/min , {" "}
-              <InfoHint label="what's in this estimate?">
-                Sums the stack&apos;s list prices per minute (speech recognition + model + voice) and
-                Agora platform minutes. Carrier/SIP charges from your own trunk are NOT included.
-                Actual spend appears in Billing › Usage as calls complete.
+              {ready.length > 1 && (
+                <>About ${Math.round(totalContacts * 2 * est.costPerMin)} in total.{" "}</>
+              )}
+              <InfoHint label="What is in this estimate?">
+                Agora platform minutes at ${est.costPerMin.toFixed(2)} a minute, assuming about two minutes a
+                call. Carrier charges from your own SIP trunk are not included. Real spend appears in
+                Billing, Usage, as calls complete.
               </InfoHint>
             </li>
             {/* Post-launch orientation (user-test 2026-07-24: the pre-flight
                 committed a 500-call batch without saying where to WATCH it) —
                 a real link, not a sentence (user-test 2026-07-29 P1). */}
             <li>
-              · Watch them live in{" "}
+              Watch them live in{" "}
               <a href="/calls" className="underline underline-offset-2 hover:text-foreground">
                 Monitor › Call History
               </a>{" "}
