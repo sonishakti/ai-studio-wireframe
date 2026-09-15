@@ -76,11 +76,6 @@ export function ChannelSection({
       patch.config = { ...draft.config, inbound: { numberIds: [], surfaces: ["phone"] } }
     }
     if (c === "code") patch.config = { ...draft.config, code: { added: true } }
-    // Batch without a contact list is an empty promise: seed the first run so
-    // the CSV drop appears the moment the type is picked (owner 2026-09-15).
-    if (c === "batch" && draft.campaigns.length === 0) {
-      patch.campaigns = [{ ...makeCampaign("Run 01"), numberId: draft.config.batch?.callerId }]
-    }
     update(patch)
     // Switching away from a configured/live channel: say the setup is KEPT.
     if (current && (liveChannels?.includes(current) ||
@@ -246,10 +241,22 @@ function BatchContactsBlock({
   draft, update, onGoToStep,
 }: StepProps & { onGoToStep: (n: number) => void }) {
   const [open, setOpen] = React.useState(true)
-  const run: CampaignDraft | undefined = draft.campaigns[0]
-  if (!run) return null
+  const saved: CampaignDraft | undefined = draft.campaigns[0]
+  // A run to fill in, whether or not one has been saved yet: batch dials a
+  // list, so the list is asked for the moment batch is chosen. The first edit
+  // commits it to the draft.
+  const seed = React.useMemo(
+    () => ({ ...makeCampaign("Run 01"), numberId: draft.config.batch?.callerId }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+  const run = saved ?? seed
   const patchRun = (patch: Partial<CampaignDraft>) =>
-    update({ campaigns: draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c)) })
+    update({
+      campaigns: saved
+        ? draft.campaigns.map((c, i) => (i === 0 ? { ...c, ...patch } : c))
+        : [{ ...seed, ...patch }],
+    })
 
   return (
     <SectionRow

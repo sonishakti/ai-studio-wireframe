@@ -70,9 +70,11 @@ export function CampaignsCard({ draft, update }: StepProps) {
   // opens with its fields already asked (owner 2026-09-15): a draft run is an
   // unfinished form, not a row to go and find.
   const [editing, setEditing] = React.useState<string | null>(
-    () => campaigns.find((c) => c.status === "draft")?.id ?? null,
+    () => (campaigns.length === 0 ? "new" : campaigns.find((c) => c.status === "draft")?.id ?? null),
   )
-  const [newDraft, setNewDraft] = React.useState<CampaignDraft | null>(null)
+  const [newDraft, setNewDraft] = React.useState<CampaignDraft | null>(
+    () => (campaigns.length === 0 ? { ...makeCampaign("Run 01"), numberId: draft.config.batch?.callerId } : null),
+  )
   const [filter, setFilter] = React.useState<RunFilter>("all")
 
   const roll = campaignRollup(draft)
