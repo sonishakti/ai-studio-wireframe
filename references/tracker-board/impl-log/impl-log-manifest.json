@@ -1,6 +1,6 @@
 {
  "title": "Agent builder — Future scope removed, NG-style chrome, six research features (01 · 02 · 04 · 07 · 10 · 11)",
- "date": "2026-09-15 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main 64498e5 · production ai-studio-console-redesign-ar6vrcr9p",
+ "date": "2026-09-15 · Studio X 2 (ai-studio-console-redesign/studio_x_2) · main 32bb4e2 · production ai-studio-console-redesign-lier7wepq",
  "deploy": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
  "commits": [
   {
@@ -66,6 +66,14 @@
   {
    "sha": "64498e5",
    "msg": "strategy: agent-builder KPIs, assumption ledger and telemetry plan, plus the board's strategy panel"
+  },
+  {
+   "sha": "69f968c",
+   "msg": "builder: one advanced-settings panel, credentials made in place, and Go live stops asking twice"
+  },
+  {
+   "sha": "32bb4e2",
+   "msg": "models: the slider trades speed against capability, not money; disclosure carries its source"
   }
  ],
  "intro": [
@@ -76,7 +84,8 @@
   "Second pass, same evening: seven owner notes on the first delivery — strip removed, ghost More, NG-style header controls, a better test rail, Figma overlaps fixed, contrast, and a where-it-lives table (below) — plus three follow-ups from screenshots: one header line, side-by-side architecture cards, one primary CTA per fold.",
   "Third and fourth pass (2026-09-12): ten owner notes on the chrome (Run test scenarios as a header door, full-height rail, Undo to live, Callers hear as a field, hosting region as label + value, red End test, no em dashes anywhere in copy) and three on the models fold (voice selection in the TTS config, + Add backup beside every vendor, credentials as a switch modelled on the NG console). Then a presence check of all six features on production: every marker matched.",
   "Fifth pass (2026-09-12, owner IA notes): five surfaces had drifted into new designs of things that already had a home. Backup providers were a section of their own plus an inline select with no key; recommended voices were a list above the voice table; a Browse voices button duplicated the voice field; the runs empty state was centered while every other empty state is a left-aligned row; the builder header scrolled away while everything under it stuck. Each is now a state of the surface that already renders that kind of thing. The rule is recorded: things that belong together live together and look the same, and a default Agora handles needs no control.",
-  "Sixth pass (2026-09-15): twenty owner notes on the models sheet, the Opening section, the deployment flow and the copy. A backup is now a chain, not one pick: each link carries its own vendor, model, credential and on/off switch, because the owner's question was \"what about the keys for the backup?\" and a backup without a key is not a backup. Prompt & knowledge splits into three labelled rows. Batch calling gets its contact list at the point of decision. And the builder now carries a KPI strategy: a north star, a 180-second time budget with parts, three guardrails with owners, and eleven assumptions stated with numbers so they can be refuted."
+  "Sixth pass (2026-09-15): twenty owner notes on the models sheet, the Opening section, the deployment flow and the copy. A backup is now a chain, not one pick: each link carries its own vendor, model, credential and on/off switch, because the owner's question was \"what about the keys for the backup?\" and a backup without a key is not a backup. Prompt & knowledge splits into three labelled rows. Batch calling gets its contact list at the point of decision. And the builder now carries a KPI strategy: a north star, a 180-second time budget with parts, three guardrails with owners, and eleven assumptions stated with numbers so they can be refuted.",
+  "Seventh pass (2026-09-15, same day): twenty-three more owner notes, and one of them sent me to Agora's own pricing docs. The rate is a flat $0.10 per agent-minute and the docs say it is the same with your own key, so the slider's Lowest-Cost end was measuring a number that never moves. The axis is now speed against capability with two badges, one that changes and one that does not. Advanced settings became a single panel with a contents list instead of four hiding places. Credentials are made inside the builder. Go live stopped asking for things Deployment already collected."
  ],
  "features": [
   {
@@ -325,6 +334,48 @@
        "why": "A draft run is an unfinished form. Its fields are asked straight away; New run appears only once a run has left draft, and the No-runs-yet explainer is gone."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after8-advanced-panel.png",
+     "caption": "After (seventh pass): one advanced-settings panel with a contents page",
+     "marks": [
+      {
+       "name": "One panel with a contents page",
+       "why": "There were four hiding places and no way to know which held what. Every group is named here with what it holds, and a section's button lands you on its group rather than opening a different sheet."
+      },
+      {
+       "name": "Conversation history was loose in the model expander",
+       "why": "It is an advanced setting, so it lives with the others. Custom config JSON came with it."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after8-opening-fields.png",
+     "caption": "After (seventh pass): the disclosure is a field and cites the law; Callers hear is a line",
+     "marks": [
+      {
+       "name": "The disclosure is a field, and it cites the law",
+       "why": "It was a line of text with an Edit link. It is a sentence the caller hears, so it is edited like one, and the rule for the pinned region sits under it with a link to the primary source."
+      },
+      {
+       "name": "Callers hear stopped pretending to be a field",
+       "why": "A read-only textarea invites typing. It is the composed line, shown as a line, and the sentence explaining that it was read-only is gone."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after8-go-live.png",
+     "caption": "After (seventh pass): Go live asks when to start, and the summary says how many it will call",
+     "marks": [
+      {
+       "name": "The summary says how many it will call",
+       "why": "It listed the models and the voice but never the size of the batch. The card around it is gone too: nothing else in this section has one."
+      },
+      {
+       "name": "Go live asks one thing",
+       "why": "The campaign-runs card, its roll-up, its status filter and its second caller-ID picker are gone. The contact list and the number were chosen in Deployment; asking again read as a trap."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -343,7 +394,11 @@
     "Sixth pass (owner, 2026-09-15): the manual door moved directly under the stack recap, so choosing a preset and building your own are neighbouring choices. Prompt & knowledge became three labelled rows with hairlines between them, because a system prompt, an opening and a failure message are three decisions and they had been reading as one list under a floating Opening title.",
     "Caller-first used to grey out four controls and put explanatory prose inside a disabled input. It now hides them and says one sentence. Lines the agent speaks are set in quotes and italics wherever they appear, so what the caller hears is never confusable with the interface's own words.",
     "Copy struck on the owner's instruction: the end-to-end latency note, the all-in explainer, the slider warning, the stop-bundle hint and the deployment blurb. Row titles are verbs in sentence case, and the label column balances its lines so no title ends on a single orphan word.",
-    "Deployment: picking Batch used to change nothing on screen. It now shows the caller ID and the contact list with its table open, and the rail carries a Contact list door while Batch is the chosen type. Go live keeps one name instead of renaming itself after the channel."
+    "Deployment: picking Batch used to change nothing on screen. It now shows the caller ID and the contact list with its table open, and the rail carries a Contact list door while Batch is the chosen type. Go live keeps one name instead of renaming itself after the channel.",
+    "Seventh pass (owner, 2026-09-15): four advanced-settings doors became one panel with a contents list naming what each group holds, so nothing depends on remembering which sheet hid what. Conversation history and the raw config JSON moved there from the model expander; the silence rule moved there from the Opening section, where it had been sitting as a stray recap line.",
+    "The AI-disclosure sentence is a field like the greeting, and it carries what the pinned region actually requires with a link to the primary source: EU AI Act Article 50, Korea's AI Framework Act Article 31, Utah 13-77-104, MeitY's IT Rules FAQ, Japan's AI Promotion Act. It says plainly that the region is where the agent runs and the binding rule is where the caller is. Outbound adds the FCC's 2024 ruling that an AI voice is an artificial voice under the TCPA.",
+    "Go live lost the campaign-runs card, its roll-up, its status filter and its second caller-ID picker. The contact list and the number were chosen in Deployment, so it asks one thing: when to start. The deploy summary lost its card and gained the size of the batch.",
+    "Every string that talked about the prototype instead of the product is gone: no wireframe estimates, no simulated previews, no parenthetical annotations in the transcript."
    ],
    "copy": [
     "Help",
@@ -441,6 +496,20 @@
        "why": "The field opens Select voice. The extra Browse voices button did the same thing and is gone; the TTS sheet's Voice field is the same control."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after8-slider.png",
+     "caption": "After (seventh pass): the slider trades speed against capability, and price is a state",
+     "marks": [
+      {
+       "name": "The axis is speed against capability, not money",
+       "why": "Agora charges a flat $0.10 per agent-minute and its docs say the price is the same with your own key, so Lowest Cost was measuring a number that never moves."
+      },
+      {
+       "name": "Price is a state until the money is real",
+       "why": "It reads the same at every stop on purpose. It becomes a figure only when a slot leaves the Agora Managed Key, which is the one place a stack choice changes the bill."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -451,7 +520,8 @@
     "Fifth pass (owner, 2026-09-12): the Recommended strip was a second list with its own row design above the table. It is gone: the three recommended voices sort to the top of the same rows and wear a Recommended badge (tooltip: ranked from voice tags against the prompt and greeting, not benchmarks). The header (Voice, Traits, Voice ID, Compare) is frozen and never highlights. Add your own voice moved to the filter row.",
     "Browse voices duplicated the voice field, which already opens the dialog; the button is removed in Voice & Models and in the Configure TTS sheet. One door per action.",
     "Read my greeting with no greeting written is not a disabled checkbox any more: the tray links to the Greeting field, closes the dialog and lands on it.",
-    "Sixth pass: the voice field is the only door to the Select voice dialog, in Voice & Models and in the Configure TTS sheet. The extra button did the same thing."
+    "Sixth pass: the voice field is the only door to the Select voice dialog, in Voice & Models and in the Configure TTS sheet. The extra button did the same thing.",
+    "Seventh pass, from Agora's published pricing: the rate is a flat $0.10 per agent-minute and the docs say it is charged the same under bring-your-own-key, so the Lowest-Cost end of the slider could never move the bill. The axis is Fastest, Balanced, Most capable, with a speed badge that changes and a price badge that stays \"$0.10/min included\" until a slot leaves the managed key. One sentence answers the question in the product. \"$0.10/min, all in\" is gone: audio minutes bill separately, so it was falsifiable on Agora's own worked example."
    ],
    "copy": [
     "Recommended for {useCase} / Recommended",
@@ -696,6 +766,30 @@
        "why": "A slot can hold a chain, tried in order. The vendors already used, primary included, drop out of the next picker."
       }
      ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after8-credentials.png",
+     "caption": "After (seventh pass): the credential control is a checkbox, and custom model IDs reach the backups",
+     "marks": [
+      {
+       "name": "A checkbox, not another switch",
+       "why": "The sheet already carries one switch per backup. A column of toggles that mean different things reads as noise, so the credential choice is a checkbox and the Agora Managed Key line dropped its explainer."
+      },
+      {
+       "name": "Custom is about the model, and says so",
+       "why": "It was labelled just Custom, and it was missing from backups entirely. Both now take a model id by hand."
+      }
+     ]
+    },
+    {
+     "img": "references/research/_after-2026-09-11/after8-create-credential.png",
+     "caption": "After (seventh pass): a key is made in the builder, not on another page",
+     "marks": [
+      {
+       "name": "Keys are made without leaving the builder",
+       "why": "Create credential used to navigate to another page, which throws away the draft's React state. It is a dialog now. Only the last four characters are kept, which is all the picker ever shows."
+      }
+     ]
     }
    ],
    "rationale": [
@@ -709,7 +803,9 @@
     "A default, managed Agora stack shows no backup control at all. One sentence in the cost card says Agora switches to its backup and nothing needs setting up. Backup UI appears only once you configure models manually, where the right panel already owns configuration, sequence and keys.",
     "Why it drifted: the 07 verdict said one row, on by default, and I drew that row as a new section instead of extending the sheet that already held vendor and credential. The rule now: extend the existing surface, never add a sibling one. Test failover waits for the Engine failover contract (Nov) and is no longer a dead button on screen.",
     "Sixth pass (owner, 2026-09-15): \"what about the keys for the backup? Hence this will NOT work.\" A backup is now a chain, not a single pick. Vendor and model sit on one row, the credential under it, and each backup repeats that anatomy with its own on/off switch. Add backup appends the next; the switch takes one out of the chain without losing its key.",
-    "The Engine tries them in order. A backup whose vendor is not in Agora's pool asks for one of your saved credentials and is skipped until it has one, which the recap line says out loud."
+    "The Engine tries them in order. A backup whose vendor is not in Agora's pool asks for one of your saved credentials and is skipped until it has one, which the recap line says out loud.",
+    "Seventh pass: the credential control is a checkbox, not another switch, because each backup already carries one. Create credential opens a dialog in the builder; it used to navigate away, which throws the draft's React state away. Only the last four characters of a key are kept, which is all the picker ever shows. Dropped \"Included, no key to add\" and \"on top of Agora's rate\".",
+    "Custom model ID is named for what it is and now reaches the backups too. The recap under each model row says \"Backup: vendor, model\" and nothing else."
    ],
    "copy": [
     "Backup · If {vendor} is slow, down or blocked in your region, the call continues on the backup. Switching is never silent: every switch shows in the session log.",
@@ -926,12 +1022,12 @@
    "result": "after4-* and after5-* all markers matched on production (after5-add-backup after the bfb4406 fix)"
   },
   {
-   "name": "annotate-shots, sixth pass",
-   "result": "after7-* all 6 shots, every marker matched on production (deploy ar6vrcr9p)"
+   "name": "annotate-shots, seventh pass",
+   "result": "after8-* all 6 shots, every marker matched on production (deploy lier7wepq)"
   },
   {
-   "name": "Live check (2026-09-15)",
-   "result": "backup chain, three prompt rows, batch contact list and the rail door all confirmed on production; tsc and next build clean; no new lint errors"
+   "name": "Live check (2026-09-15, seventh pass)",
+   "result": "credential checkbox, in-builder key dialog, advanced panel with three groups, Go live without the runs card, and the two slider badges all confirmed on production; tsc and next build clean"
   }
  ],
  "where": [

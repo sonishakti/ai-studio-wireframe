@@ -132,7 +132,7 @@ function strategyPanel(s) {
   <nav class="nav" aria-label="Sections">
     <a href="#northstar">North star</a><a href="#inputs">Input metrics</a><a href="#budget">Time budget</a>
     <a href="#guardrails">Guardrails</a><a href="#assumptions">Assumptions</a><a href="#next">Next</a>
-    <a href="#telemetry">Telemetry</a><a href="#decisions">Decisions for you</a><a href="#delivery">Delivery</a>
+    <a href="#telemetry">Telemetry</a><a href="#pricing">Pricing</a><a href="#decisions">Decisions for you</a><a href="#delivery">Delivery</a>
   </nav>
 
   <h2 id="northstar">The bet, and the one number that says whether it worked</h2>
@@ -220,6 +220,20 @@ function strategyPanel(s) {
   </table>
   <p class="note"><b>Rules the spec obeys.</b></p>
   <ul class="note" style="padding-left:18px">${s.telemetry.rules.map((r) => `<li style="margin:4px 0">${esc(r)}</li>`).join("")}</ul>
+
+  ${s.pricing ? `<h2 id="pricing">What the pricing docs changed</h2>
+  <div class="ns">
+    <div class="ns-l">
+      <p class="ns-def" style="color:var(--ink);font-size:15px;margin-bottom:14px">${esc(s.pricing.headline)}</p>
+      <ul style="margin:0;padding-left:18px">${s.pricing.facts.map((f) => `<li style="margin:5px 0;font-size:12.5px;color:var(--ink-2)">${esc(f)}</li>`).join("")}</ul>
+    </div>
+    <div class="ns-r">
+      <p class="tiny">What changed in the builder</p>
+      <p class="ns-note" style="margin-top:6px">${esc(s.pricing.change)}</p>
+      <p class="tiny" style="margin-top:16px">Source</p>
+      <p class="ns-note" style="margin-top:4px"><a href="https://${esc(s.pricing.source)}" target="_blank" rel="noopener">${esc(s.pricing.source)}</a></p>
+    </div>
+  </div>` : ""}
 
   <h2 id="decisions">Decisions waiting on you</h2>
   <ul class="qs">

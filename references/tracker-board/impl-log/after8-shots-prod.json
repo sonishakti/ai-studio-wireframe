@@ -1,0 +1,133 @@
+[
+ {
+  "name": "after8-slider",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+  "preWait": 800,
+  "marks": [
+   {
+    "text": "Most capable",
+    "tags": "span",
+    "up": 1,
+    "maxH": 150,
+    "name": "The axis is speed against capability, not money",
+    "why": "Agora charges a flat $0.10 per agent-minute and its docs say the price is the same with your own key, so Lowest Cost was measuring a number that never moves."
+   },
+   {
+    "text": "$0.10/min included",
+    "tags": "span",
+    "up": 0,
+    "maxH": 90,
+    "name": "Price is a state until the money is real",
+    "why": "It reads the same at every stop on purpose. It becomes a figure only when a slot leaves the Agora Managed Key, which is the one place a stack choice changes the bill."
+   }
+  ]
+ },
+ {
+  "name": "after8-credentials",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(900);const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Or configure models manually'));if(b&&b.getAttribute('aria-expanded')==='false')b.click();await wait(900);document.querySelector('button[aria-label=\"Configure STT vendor and credential\"]')?.click();await wait(1100);document.querySelector('#wz-cred-asr-field')?.scrollIntoView({block:'center'});await wait(400);})()",
+  "preWait": 1400,
+  "marks": [
+   {
+    "sel": "#wz-cred-asr-field",
+    "up": 1,
+    "maxH": 180,
+    "name": "A checkbox, not another switch",
+    "why": "The sheet already carries one switch per backup. A column of toggles that mean different things reads as noise, so the credential choice is a checkbox and the Agora Managed Key line dropped its explainer."
+   },
+   {
+    "text": "Custom model ID",
+    "tags": "label",
+    "name": "Custom is about the model, and says so",
+    "why": "It was labelled just Custom, and it was missing from backups entirely. Both now take a model id by hand."
+   }
+  ]
+ },
+ {
+  "name": "after8-create-credential",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(900);const b=[...document.querySelectorAll('button')].find(x=>x.textContent.includes('Or configure models manually'));if(b&&b.getAttribute('aria-expanded')==='false')b.click();await wait(900);document.querySelector('button[aria-label=\"Configure STT vendor and credential\"]')?.click();await wait(1100);document.querySelector('#wz-cred-asr')?.click();await wait(700);const t=document.querySelector('#wz-cred-asr-pick');t&&t.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,pointerType:'mouse',pointerId:1}));await wait(600);const opt=[...document.querySelectorAll('[role=option]')].find(o=>o.textContent.includes('Create credential'));if(opt){opt.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',pointerId:1}));opt.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,pointerType:'mouse',pointerId:1}));}await wait(900);})()",
+  "preWait": 1400,
+  "marks": [
+   {
+    "sel": "#cred-key",
+    "up": 3,
+    "maxH": 260,
+    "name": "Keys are made without leaving the builder",
+    "why": "Create credential used to navigate to another page, which throws away the draft's React state. It is a dialog now. Only the last four characters are kept, which is all the picker ever shows."
+   }
+  ]
+ },
+ {
+  "name": "after8-advanced-panel",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(900);const adv=[...document.querySelectorAll('button')].filter(x=>x.textContent.trim()==='Advanced settings');adv[0]&&adv[0].click();await wait(1200);})()",
+  "preWait": 1400,
+  "marks": [
+   {
+    "sel": "nav[aria-label='Advanced settings']",
+    "up": 0,
+    "maxH": 300,
+    "name": "One panel with a contents page",
+    "why": "There were four hiding places and no way to know which held what. Every group is named here with what it holds, and a section's button lands you on its group rather than opening a different sheet."
+   },
+   {
+    "text": "Conversation history",
+    "tags": "h4",
+    "name": "Conversation history was loose in the model expander",
+    "why": "It is an advanced setting, so it lives with the others. Custom config JSON came with it."
+   }
+  ]
+ },
+ {
+  "name": "after8-opening-fields",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=opening",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(1800);for(let i=0;i<12;i++){const a=[...document.querySelectorAll('[role=radio]')].find(r=>r.textContent.trim()==='Agent'&&r.getBoundingClientRect().width>0);if(a&&a.getAttribute('aria-checked')==='true')break;if(a)a.click();await wait(350);}await wait(700);for(let i=0;i<12;i++){const sw=document.getElementById('wz-opening-disclose');if(sw&&sw.getAttribute('aria-checked')==='true')break;if(sw)sw.click();await wait(350);}await wait(800);document.getElementById('wz-opening-disclosure')?.scrollIntoView({block:'center'});await wait(600);})()",
+  "preWait": 1600,
+  "marks": [
+   {
+    "sel": "#wz-opening-disclosure",
+    "up": 1,
+    "maxH": 200,
+    "name": "The disclosure is a field, and it cites the law",
+    "why": "It was a line of text with an Edit link. It is a sentence the caller hears, so it is edited like one, and the rule for the pinned region sits under it with a link to the primary source."
+   },
+   {
+    "sel": "#wz-opening-hears",
+    "up": 1,
+    "maxH": 120,
+    "name": "Callers hear stopped pretending to be a field",
+    "why": "A read-only textarea invites typing. It is the composed line, shown as a line, and the sentence explaining that it was read-only is gone."
+   }
+  ]
+ },
+ {
+  "name": "after8-go-live",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit",
+  "wait": 7000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(1000);for(let i=0;i<20;i++){const r=[...document.querySelectorAll('[role=radio][value=\"batch\"]')].find(e=>e.getBoundingClientRect().width>0);if(r&&r.getAttribute('aria-checked')==='true')break;if(r)r.click();await wait(400);}await wait(1400);const go=[...document.querySelectorAll('nav button')].find(x=>x.textContent.includes('Go live'));go&&go.click();await wait(1600);const h=[...document.querySelectorAll('dt')].find(x=>x.textContent.trim()==='Deployed to');h&&h.scrollIntoView({block:'center'});await wait(600);})()",
+  "preWait": 1600,
+  "marks": [
+   {
+    "text": "Calling",
+    "tags": "dt",
+    "up": 2,
+    "maxH": 240,
+    "name": "The summary says how many it will call",
+    "why": "It listed the models and the voice but never the size of the batch. The card around it is gone too: nothing else in this section has one."
+   },
+   {
+    "text": "When to start",
+    "tags": "h4",
+    "name": "Go live asks one thing",
+    "why": "The campaign-runs card, its roll-up, its status filter and its second caller-ID picker are gone. The contact list and the number were chosen in Deployment; asking again read as a trap."
+   }
+  ]
+ }
+]
