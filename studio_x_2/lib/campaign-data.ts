@@ -321,7 +321,7 @@ export const EVAL_RUN: EvalRun = {
       ],
     },
     {
-      caseId: "ec_offscript", verdict: "pass", mode: "text",
+      caseId: "ec_offscript", verdict: "pass", mode: "text", seconds: 38,
       transcript: [
         { role: "caller", text: "Quick one. What's the capital of Mongolia?" },
         { role: "agent", text: "Ha, I'll stay focused on getting you set up: want to pick a demo time?" },

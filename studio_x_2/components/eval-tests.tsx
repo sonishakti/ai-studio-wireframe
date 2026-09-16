@@ -177,7 +177,9 @@ export function TestsSection({
       setRunningAll(false)
       const eligible = mode === "audio" ? cases.filter(canRunWithAudio) : cases
       const results = allResults.filter((r) => eligible.some((c) => c.id === r.caseId))
-      setRanIds(new Set(results.map((r) => r.caseId)))
+      // MERGE, never replace: an audio run skips the decision checks, and a
+      // skipped check must not lose the result it already has.
+      setRanIds((prev) => new Set([...prev, ...results.map((r) => r.caseId)]))
       setRanMode((m) => {
         const next = new Map(m)
         results.forEach((r) => next.set(r.caseId, mode))
