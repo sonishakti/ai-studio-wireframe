@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-  Play, Plus, CheckCircle2, XCircle, MessageSquareText, Wrench, Braces, ClipboardCheck,
+  Play, Plus, Trash2, CheckCircle2, XCircle, MessageSquareText, Wrench, Braces, ClipboardCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -80,9 +80,33 @@ export function TestsSection({
   // The suite is STATE so authored cases actually land in the table —
   // "Add case" silently discarding work was the round-6 #1 trust break.
   const [authored, setAuthored] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
+  // Deleted rows (owner 2026-09-16). One set covers both sources: a generated
+  // case belongs to the parent, so it can only be hidden here — and Regenerate
+  // remounts this component, which is the right moment for the suite to come
+  // back whole.
+  const [removed, setRemoved] = React.useState<Set<string>>(new Set())
   // Generated (contextual) cases lead; the starter suite + authored follow.
-  const cases = React.useMemo(() => [...extra.map((e) => e.case), ...authored], [extra, authored])
+  const cases = React.useMemo(
+    () => [...extra.map((e) => e.case), ...authored].filter((c) => !removed.has(c.id)),
+    [extra, authored, removed],
+  )
   const setCases = (fn: (prev: EvalCase[]) => EvalCase[]) => setAuthored(fn)
+  // Deleting a scenario can throw away authored work, so it undoes — the same
+  // bargain every other destructive switch in the builder makes.
+  const removeCase = (c: EvalCase) => {
+    setRemoved((prev) => new Set([...prev, c.id]))
+    toast(`"${c.name}" deleted`, {
+      action: {
+        label: "Undo",
+        onClick: () =>
+          setRemoved((prev) => {
+            const next = new Set(prev)
+            next.delete(c.id)
+            return next
+          }),
+      },
+    })
+  }
   const [addOpen, setAddOpen] = React.useState(false)
   const [running, setRunning] = React.useState<EvalCase | null>(null)
   const [openResult, setOpenResult] = React.useState<EvalCaseResult | null>(null)
@@ -142,7 +166,7 @@ export function TestsSection({
             size="sm"
             variant="outline"
             className="gap-1.5"
-            disabled={runningAll}
+            disabled={runningAll || cases.length === 0}
             onClick={runAll}
           >
             <Play className="h-3.5 w-3.5" />{" "}
@@ -180,6 +204,13 @@ export function TestsSection({
             </TableRow>
           </TableHeader>
           <TableBody>
+            {cases.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={variant === "section" ? 4 : 3} className="py-6 text-center text-xs text-muted-foreground">
+                  No scenarios left. Add a case, or generate a set from your agent&apos;s context.
+                </TableCell>
+              </TableRow>
+            )}
             {cases.map((c) => {
               const res = resultFor(c.id)
               return (
@@ -220,6 +251,15 @@ export function TestsSection({
                       onClick={() => runOne(c)}
                     >
                       <Play className="h-3.5 w-3.5" aria-hidden />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-7 text-muted-foreground"
+                      aria-label={`Delete ${c.name}`}
+                      onClick={() => removeCase(c)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden />
                     </Button>
                   </TableCell>
                 </TableRow>

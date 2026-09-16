@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, AudioLines, ListChecks } from "lucide-react"
+import { Rocket, Undo2, ChevronRight, Bot, Copy, Check, EllipsisVertical, AudioLines, FlaskConical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -1064,7 +1064,7 @@ export function AgentWizard({
             aria-pressed={testOpen && testTab === "simulations"}
             onClick={() => (testOpen && testTab === "simulations" ? setRailOpen(false) : openTest("simulations"))}
           >
-            <ListChecks className="size-4" aria-hidden /> Run test scenarios
+            <FlaskConical className="size-4" aria-hidden /> Run test scenarios
           </Button>
           <Button
             variant="outline"
