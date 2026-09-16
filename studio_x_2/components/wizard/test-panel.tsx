@@ -16,8 +16,7 @@ import { WidgetPreviewCard } from "@/components/widget-studio"
 import { generateContextualCases } from "@/components/wizard/test-section"
 import { DEFAULT_ADVANCED, hasWebWidget, type AdvancedConfig, type AgentDraft } from "@/lib/wizard-draft"
 import {
-  stackEstimateFor, stackLatencyDetail, type EvalCase, type EvalCaseResult, type EvalTurn,
-} from "@/lib/campaign-data"
+  stackEstimateFor, stackLatencyDetail, type EvalCase, type EvalCaseResult, type EvalTurn, type RunMode } from "@/lib/campaign-data"
 import { interruptVerdict } from "@/lib/turn-taking"
 
 /** Below lg (1024) the docked column doesn't exist — the panel falls back to
@@ -97,7 +96,7 @@ export function TestPanel({
   agentName: string
   widgetGreeting?: string
   /** Bubbles each completed "Run all" up to the Test strip's verdict line. */
-  onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
+  onRunSummary?: (s: { passed: number; failed: number; total: number; mode?: RunMode }) => void
   /** Host-owned talk state — SHARED with the inline section-4 test so the two
    *  surfaces can never disagree about whether a call is up. */
   talking?: boolean

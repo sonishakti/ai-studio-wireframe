@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { TestsSection } from "@/components/eval-tests"
-import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn } from "@/lib/campaign-data"
+import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn, type RunMode } from "@/lib/campaign-data"
 import {
   hasChannel, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
 } from "@/lib/wizard-draft"
@@ -212,7 +212,7 @@ export function TestSection({
 }: Pick<StepProps, "draft"> & {
   agentName: string
   /** Bubbles each completed run up to the Test strip's verdict line. */
-  onRunSummary?: (s: { passed: number; failed: number; total: number }) => void
+  onRunSummary?: (s: { passed: number; failed: number; total: number; mode?: RunMode }) => void
 }) {
   const [generated, setGenerated] = React.useState<{ case: EvalCase; result: EvalCaseResult }[]>([])
   const [generating, setGenerating] = React.useState(false)

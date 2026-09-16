@@ -29,7 +29,7 @@ import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events, builderOpened, agentAudioHeard } from "@/lib/analytics"
 import { AdvancedSettingsSheet, type AdvancedAnchor } from "@/components/wizard/advanced-settings-sheet"
-import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig, type RunMode } from "@/lib/campaign-data"
 import {
   getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -156,7 +156,7 @@ export function AgentWizard({
   }
 
   // The Test strip's verdict line — fed by the sims panel's "Run all".
-  const [simSummary, setSimSummary] = React.useState<{ passed: number; failed: number; total: number } | null>(null)
+  const [simSummary, setSimSummary] = React.useState<{ passed: number; failed: number; total: number; mode?: RunMode } | null>(null)
 
   // The docked Test panel — the RIGHT RAIL (Figma 2861-52041). It opens by
   // default at lg+ so the rail is part of the layout rather than a surface you

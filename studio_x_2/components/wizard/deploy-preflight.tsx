@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, Check, AlertTriangle, ArrowRight, Waypoints, FileText, AudioLines, Cpu, ClipboardCheck, Users, Globe } from "lucide-react"
+import { Rocket, Check, AlertTriangle, ArrowRight, Waypoints, FileText, AudioLines, Cpu, ClipboardCheck, Users, Globe, FlaskConical } from "lucide-react"
 import {
   AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
@@ -13,7 +13,7 @@ import {
   MOCK_CSV_ROWS, DEFAULT_ANALYSIS, type AgentDraft, type CampaignDraft,
 } from "@/lib/wizard-draft"
 import { hostingSummary, isPinned } from "@/lib/hosting-regions"
-import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS } from "@/lib/campaign-data"
+import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS, type RunMode } from "@/lib/campaign-data"
 
 /**
  * DeployPreflight — the validation moment (owner 2026-07-24: "when user
@@ -54,7 +54,10 @@ function campaignWarn(draft: AgentDraft, c: CampaignDraft): { value: string; fix
   return null
 }
 
-function buildRows(draft: AgentDraft): CheckRow[] {
+function buildRows(
+  draft: AgentDraft,
+  simSummary?: { passed: number; failed: number; total: number; mode?: RunMode } | null,
+): CheckRow[] {
   const blocks = publishBlocks(draft)
   const blockFor = (step: number) => blocks.find((b) => b.step === step)
   const rows: CheckRow[] = []
@@ -136,6 +139,31 @@ function buildRows(draft: AgentDraft): CheckRow[] {
     state: "ok",
   })
 
+  // Tests (D graft, 2026-09-16). The gate already echoed a pass count; what it
+  // never said is WHICH MACHINE produced it. A suite that passed in text has
+  // proved the words and nothing about how the call sounds — going live on
+  // that is a decision, so the pre-flight makes it one instead of a silent tick.
+  if (simSummary) {
+    const textOnly = simSummary.mode !== "audio"
+    rows.push({
+      id: "tests", icon: FlaskConical, label: "Tests",
+      value: simSummary.failed > 0
+        ? `${simSummary.failed} of ${simSummary.total} failing${textOnly ? " · text only" : " · with audio"}`
+        : textOnly
+          ? `${simSummary.passed}/${simSummary.total} passed as text. Not yet heard with audio`
+          : `${simSummary.passed}/${simSummary.total} passed with audio`,
+      state: simSummary.failed > 0 || textOnly ? "warn" : "ok",
+      fixStep: simSummary.failed > 0 || textOnly ? 4 : undefined,
+      fixLabel: simSummary.failed > 0 ? "Open tests" : "Run with audio",
+    })
+  } else {
+    rows.push({
+      id: "tests", icon: FlaskConical, label: "Tests",
+      value: "No test has been run against this agent",
+      state: "warn", fixStep: 4, fixLabel: "Open tests",
+    })
+  }
+
   // Structured outputs
   const an = { ...DEFAULT_ANALYSIS, ...draft.analysis }
   rows.push({
@@ -178,11 +206,11 @@ export function DeployPreflight({
   /** The Test strip's last sim verdict — echoed here so the gate and the
    *  strip tell the SAME story (user-test 2026-07-29: nobody deploys past a
    *  red run unseen). */
-  simSummary?: { passed: number; failed: number; total: number } | null
+  simSummary?: { passed: number; failed: number; total: number; mode?: RunMode } | null
   /** Close + open the sims panel. */
   onViewSims?: () => void
 }) {
-  const rows = React.useMemo(() => (open ? buildRows(draft) : []), [open, draft])
+  const rows = React.useMemo(() => (open ? buildRows(draft, simSummary) : []), [open, draft, simSummary])
   const warns = rows.filter((r) => r.state === "warn")
   const allGo = warns.length === 0
   const batch = hasChannel(draft, "batch")

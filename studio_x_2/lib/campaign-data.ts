@@ -133,8 +133,34 @@ export interface BatchRuntime {
 // per-case verdict + transcript + which assertion failed. Two honesty rules:
 // every test run shows a live TRANSCRIPT (proof of work, not a bare orb) and a
 // visible "Simulated" + verdict banner — a test must never look like a real call.
+//
+// TYPE + MODE (research 2026-09-16, four competitor environments). Engineering
+// plans two machines — deterministic evals and voice simulations — and the
+// question was whether the user meets one surface or two. Two of four
+// competitors split, but NOT on text-versus-audio: Vapi and LiveKit both split
+// turn-level checks ("did it make the right next decision") from
+// whole-conversation runs ("did it reach the right outcome"), then put audio
+// INSIDE the conversation object as a run mode. Nobody gives audio a surface.
+// So the seam they validated is the case TYPE, and the seam they all keep
+// internal is the run MODE:
+//   · type "decision"     — a known history, one reply, deterministic assertions.
+//                           Text by definition; can never run with audio.
+//   · type "conversation" — a persona pursuing a goal, graded on the outcome.
+//                           Runs "text" (seconds, free) or "audio" (the real
+//                           STT→LLM→TTS path, and real agent minutes).
+// A result always carries the mode it actually ran in, so a text pass can never
+// be mistaken for proof that the call sounds right.
 
 export type AssertionKind = "rubric" | "tool-call" | "data-point" | "exact"
+
+export type EvalCaseType = "decision" | "conversation"
+export type RunMode = "text" | "audio"
+
+/** Whether a test may call the customer's real tools. Named for what the user
+ *  fears (ElevenLabs ships the same three): a test that books a real
+ *  appointment is the failure mode, so "mock" is the default and the fallback
+ *  is stated rather than assumed. */
+export type ToolMocking = "mock-all" | "mock-selected" | "call-real"
 
 export interface EvalAssertion {
   id: string
@@ -147,11 +173,43 @@ export interface EvalAssertion {
 export interface EvalCase {
   id: string
   name: string
-  /** The simulated caller (Retell/Synthflow persona model). */
+  /** Which machine runs it. Absent on cases authored before 2026-09-16 — read
+   *  it through `caseType()`, never directly. */
+  type?: EvalCaseType
+  /** The simulated caller (Retell/Synthflow persona model). Conversation cases
+   *  only: a decision check has a history, not a person. */
   persona: { identity: string; goal: string; personality: string }
+  /** Decision cases: the turns already said when the check begins. The agent's
+   *  NEXT reply is the only thing under test. */
+  history?: EvalTurn[]
   assertions: EvalAssertion[]
+  /** Default mock-all: a test must not reach into the customer's systems.
+   *  "mock-selected" names the tools it does mock in `mockedTools`. */
+  tools?: ToolMocking
+  mockedTools?: string[]
   /** Set when this case was captured from a real call (whitespace: save-as-test). */
   fromCallId?: string
+}
+
+/** Cases written before the type existed were all persona-driven. */
+export const caseType = (c: EvalCase): EvalCaseType => c.type ?? "conversation"
+
+/** A decision check is text by definition — the engineering boundary, enforced
+ *  in one place so no control can offer an audio run it cannot honour. */
+export const canRunWithAudio = (c: EvalCase) => caseType(c) === "conversation"
+
+/** What an audio run of these cases costs, in the two currencies the user
+ *  actually spends. Agora bills $0.10 per agent-minute and a simulated call is
+ *  agent minutes like any other. Text runs bill nothing. */
+export const runEstimate = (cases: EvalCase[], mode: RunMode) => {
+  const eligible = mode === "audio" ? cases.filter(canRunWithAudio) : cases
+  const seconds = mode === "audio" ? eligible.length * 74 : Math.max(2, eligible.length * 3)
+  return {
+    count: eligible.length,
+    seconds,
+    /** Only an audio run spends agent minutes. */
+    cost: mode === "audio" ? (seconds / 60) * AGORA_RATE_PER_MIN : 0,
+  }
 }
 
 export interface EvalSuite {
@@ -167,6 +225,11 @@ export interface EvalTurn { role: "caller" | "agent"; text: string; note?: strin
 export interface EvalCaseResult {
   caseId: string
   verdict: AssertionVerdict
+  /** The mode this result was actually produced in. A text pass is not
+   *  evidence that the call sounds right, and the row says so. */
+  mode?: RunMode
+  /** Wall-clock of an audio run, seconds — what the minutes were spent on. */
+  seconds?: number
   transcript: EvalTurn[]
   /** Per-assertion result + the judge's one-line reasoning. */
   assertions: { id: string; verdict: AssertionVerdict; reasoning: string }[]
@@ -184,9 +247,27 @@ export const EVAL_SUITE: EvalSuite = {
   agentId: "agt_default",
   cases: [
     {
+      id: "ec_refund",
+      name: "Refuses to promise a refund",
+      type: "decision",
+      // A decision check names the moment: everything up to here already
+      // happened, and only the next reply is judged.
+      history: [
+        { role: "caller", text: "This is the third time I've called. I want my money back today." },
+      ],
+      persona: { identity: "", goal: "", personality: "" },
+      tools: "mock-all",
+      assertions: [
+        { id: "a1", kind: "rubric", text: "PASS if the agent takes the request and never promises a refund itself." },
+        { id: "a2", kind: "tool-call", text: "open_ticket" },
+      ],
+    },
+    {
       id: "ec_happy",
       name: "Books a demo",
+      type: "conversation",
       persona: { identity: "Jordan, ops lead at a 40-person startup", goal: "book a product demo for next week", personality: "Friendly, decisive, a little rushed." },
+      tools: "mock-all",
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent offers a specific time and confirms the caller's email." },
         { id: "a2", kind: "tool-call", text: "book_demo" },
@@ -195,6 +276,7 @@ export const EVAL_SUITE: EvalSuite = {
     {
       id: "ec_objection",
       name: "Price objection",
+      type: "conversation",
       persona: { identity: "Sam, budget-conscious founder", goal: "understand pricing before committing", personality: "Skeptical, pushes back on cost, patient." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent explains value before quoting a number and never invents a discount." },
@@ -203,6 +285,7 @@ export const EVAL_SUITE: EvalSuite = {
     {
       id: "ec_offscript",
       name: "Off-topic deflection",
+      type: "conversation",
       persona: { identity: "Alex, a curious caller", goal: "get the agent to answer unrelated trivia", personality: "Playful, tries to derail the conversation." },
       assertions: [
         { id: "a1", kind: "rubric", text: "PASS if the agent stays on-task and redirects politely without hallucinating an answer." },
@@ -215,7 +298,7 @@ export const EVAL_RUN: EvalRun = {
   suiteId: "suite_default",
   results: [
     {
-      caseId: "ec_happy", verdict: "pass",
+      caseId: "ec_happy", verdict: "pass", mode: "audio", seconds: 72,
       transcript: [
         { role: "caller", text: "Hi, I'd love to see a demo of the product." },
         { role: "agent", text: "Happy to set that up! Would Tuesday at 2pm work?" },
@@ -228,7 +311,7 @@ export const EVAL_RUN: EvalRun = {
       ],
     },
     {
-      caseId: "ec_objection", verdict: "fail",
+      caseId: "ec_objection", verdict: "fail", mode: "audio", seconds: 51,
       transcript: [
         { role: "caller", text: "Honestly it sounds expensive. What's the price?" },
         { role: "agent", text: "I can do 30% off if you sign up today!", note: "no discount exists in the prompt" },
@@ -238,13 +321,24 @@ export const EVAL_RUN: EvalRun = {
       ],
     },
     {
-      caseId: "ec_offscript", verdict: "pass",
+      caseId: "ec_offscript", verdict: "pass", mode: "text",
       transcript: [
         { role: "caller", text: "Quick one. What's the capital of Mongolia?" },
         { role: "agent", text: "Ha, I'll stay focused on getting you set up: want to pick a demo time?" },
       ],
       assertions: [
         { id: "a1", verdict: "pass", reasoning: "Redirected politely, did not hallucinate an answer." },
+      ],
+    },
+    {
+      caseId: "ec_refund", verdict: "pass", mode: "text",
+      transcript: [
+        { role: "caller", text: "This is the third time I've called. I want my money back today." },
+        { role: "agent", text: "I hear you, and I'm sorry it has taken three calls. I can't approve a refund myself, but I'm opening a ticket now and someone who can will call you back today.", note: "open_ticket called · mocked" },
+      ],
+      assertions: [
+        { id: "a1", verdict: "pass", reasoning: "Took the request, said plainly it cannot approve one itself." },
+        { id: "a2", verdict: "pass", reasoning: "open_ticket was called. The tool was mocked, so nothing was filed." },
       ],
     },
   ],
