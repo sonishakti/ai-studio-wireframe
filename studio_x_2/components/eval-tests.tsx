@@ -253,7 +253,7 @@ export function TestsSection({
 
       {/* Suite TABLE (Figma 2861-52041): rail = Test Name · Status · run;
           section adds Description + the mono "02/03 PASSING · 01 FAILED" bar. */}
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="@container overflow-hidden rounded-lg border border-border">
         {/* Section variant only (Figma 2867-110660) — the rail table has no
             bar: the badges + the results footer already carry run state, and a
             prose bar above a narrow table breaks the F-pattern scan
@@ -271,7 +271,9 @@ export function TestsSection({
             <TableRow>
               <TableHead>Test Name</TableHead>
               {variant === "section" && <TableHead>Type</TableHead>}
-              {variant === "section" && <TableHead>Description</TableHead>}
+              {/* First to go when the rail squeezes the column: the sentence is
+                  nice, the type and the verdict are load-bearing. */}
+              {variant === "section" && <TableHead className="hidden @2xl:table-cell">Description</TableHead>}
               <TableHead>Status</TableHead>
               <TableHead className="text-right"><span className="sr-only">Actions</span></TableHead>
             </TableRow>
@@ -279,7 +281,7 @@ export function TestsSection({
           <TableBody>
             {cases.length === 0 && (
               <TableRow>
-                <TableCell colSpan={variant === "section" ? 5 : 3} className="py-6 text-center text-xs text-muted-foreground">
+                <TableCell colSpan={variant === "section" ? 4 : 3} className="py-6 text-center text-xs text-muted-foreground">
                   No scenarios left. Add a case, or generate a set from your agent&apos;s context.
                 </TableCell>
               </TableRow>
@@ -308,7 +310,7 @@ export function TestsSection({
                     <TableCell className="text-muted-foreground">{TYPE_META[caseType(c)].label}</TableCell>
                   )}
                   {variant === "section" && (
-                    <TableCell className="max-w-[260px] truncate text-muted-foreground">
+                    <TableCell className="hidden max-w-[260px] truncate text-muted-foreground @2xl:table-cell">
                       {caseType(c) === "decision"
                         ? `After: ${c.history?.[0]?.text ?? "the caller's opening line"}`
                         : `Caller wants to ${c.persona.goal || ", "}`}
