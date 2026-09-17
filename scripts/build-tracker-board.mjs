@@ -8,7 +8,7 @@
 // order and are never reordered here. Edit the JSON, rebuild, republish the
 // same Artifact. Status tags are exactly: Not Done · WIP · Pending review · Done.
 import { execFileSync } from "node:child_process"
-import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -63,6 +63,31 @@ const inlineImage = (file) => {
     ], { stdio: "ignore" })
   }
   return `data:image/jpeg;base64,${readFileSync(thumb).toString("base64")}`
+}
+
+// EXTERNAL IMAGE MODE (BOARD_EXTERNAL_IMAGES=1). Inlining every thumbnail as
+// base64 put the board at 14.1 MB against the 16 MB artifact cap, and rows
+// 13 to 22 would not have fitted. With the flag set, each thumbnail is written
+// to references/tracker-board/img/<key>.jpg and the registry holds that path
+// instead of a data URL. The loader at the foot of the page assigns whatever
+// the registry gives it, so nothing else changes and the board is published as
+// a page plus its images rather than one enormous file.
+const EXTERNAL = process.env.BOARD_EXTERNAL_IMAGES === "1"
+const IMG_DIR = resolve(root, "references/tracker-board/img")
+const imageSrc = (file) => {
+  if (!EXTERNAL) return inlineImage(file)
+  const src = resolve(root, file)
+  const thumb = `${src}.thumb.jpg`
+  if (!existsSync(thumb) || statSync(thumb).mtimeMs < statSync(src).mtimeMs) {
+    execFileSync("sips", [
+      "-s", "format", "jpeg", "-s", "formatOptions", "72",
+      "-Z", String(THUMB_WIDTH), src, "--out", thumb,
+    ], { stdio: "ignore" })
+  }
+  mkdirSync(IMG_DIR, { recursive: true })
+  const name = `${registry.get(file)}.jpg`
+  copyFileSync(thumb, resolve(IMG_DIR, name))
+  return `img/${name}`
 }
 
 const links = (items) =>
@@ -368,7 +393,7 @@ ${data.rows.map(row).join("\n")}
   <p class="legend"><b>Status:</b> Not Done = nothing started · WIP = research or build in progress · Pending review = built or blocked, needs your review or a decision · Done = reviewed and accepted. <b>Secondary research:</b> one screenshot per competitor (Vapi · Retell · ElevenLabs · LiveKit) of the equivalent screen — <span class="kind">docs</span> = public documentation, <span class="kind">product</span> = the logged-in builder UI; "pending" marks a capture still to do. Rows are never reordered. Source: <code>references/tracker-board/tracker-board.json</code> → <code>node scripts/build-tracker-board.mjs</code>.</p>
 </div>
 <div class="lb" id="lb" role="dialog" aria-label="Screenshot"><img alt="" id="lbimg"></div>
-<script type="application/json" id="imgs">${JSON.stringify(Object.fromEntries([...registry].map(([file, key]) => [key, inlineImage(file)])))}</script>
+<script type="application/json" id="imgs">${JSON.stringify(Object.fromEntries([...registry].map(([file, key]) => [key, imageSrc(file)])))}</script>
 <script>
 (function(){var m=JSON.parse(document.getElementById('imgs').textContent);document.querySelectorAll('img[data-img]').forEach(function(im){var src=m[im.getAttribute('data-img')];if(src)im.src=src})})();
 </script>
