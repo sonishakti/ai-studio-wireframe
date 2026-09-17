@@ -87,7 +87,9 @@ function write(key: string, value: unknown) {
 
 // ─── The suite ────────────────────────────────────────────────────────────────
 
-export function readSuiteState(agentId: string, seed: EvalCase[]): SuiteState {
+/** The suite this browser holds for one agent. The seed is empty by default:
+ *  a case exists because someone wrote it (owner 2026-09-17). */
+export function readSuiteState(agentId: string, seed: EvalCase[] = []): SuiteState {
   const fallback: SuiteState = { cases: [...(seed ?? [])], removed: [] }
   if (typeof window === "undefined" || !agentId) return fallback
   const stored = read<Partial<SuiteState> | null>(suiteKey(agentId), null)

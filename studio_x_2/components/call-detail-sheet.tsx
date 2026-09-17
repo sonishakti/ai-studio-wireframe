@@ -33,7 +33,6 @@ import {
 import { AddCaseSheet } from "@/components/eval-tests"
 import { callTurnsToEvalTurns } from "@/lib/scorecard"
 import { readSuiteState, writeSuiteState } from "@/lib/eval-runs"
-import { EVAL_SUITE } from "@/lib/campaign-data"
 
 export interface CallTranscriptTurn {
   speaker: "Agent" | "Customer"
@@ -577,7 +576,7 @@ function CallDetailBody({ call }: { call: CallDetail }) {
         callId: call.id,
       }}
       onSave={(c) => {
-        const suite = readSuiteState(suiteAgent, EVAL_SUITE.cases)
+        const suite = readSuiteState(suiteAgent)
         writeSuiteState(suiteAgent, { ...suite, cases: [...suite.cases, c] })
         toast.success(`"${c.name}" saved to this agent's tests`, { description: "It runs with the next Run all." })
       }}

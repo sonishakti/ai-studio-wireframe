@@ -18,7 +18,7 @@ import {
   type Scorecard,
 } from "@/lib/scorecard"
 import { RUN_EVENT, latestRun, readSuiteState, type StoredRun } from "@/lib/eval-runs"
-import { EVAL_SUITE, type AssertionKind, type EvalAssertion, type EvalCase } from "@/lib/campaign-data"
+import { type AssertionKind, type EvalAssertion, type EvalCase } from "@/lib/campaign-data"
 
 /**
  * Scorecard block — the ONE editor for the checks an agent is graded on, and
@@ -103,21 +103,35 @@ export function ScorecardBlock({ agentId, transcribe }: { agentId: string; trans
           <p className="text-sm font-medium">Scorecard</p>
           <p className="text-xs text-muted-foreground">The named checks every test run is graded on.</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="shrink-0 gap-1.5"
-          disabled={atLimit}
-          onClick={() => setEditing("new")}
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden /> Add criterion
-        </Button>
+        {/* The door lives once: on the empty-state row while there is nothing,
+            up here once there is a list to add to. */}
+        {criteria.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 gap-1.5"
+            disabled={atLimit}
+            onClick={() => setEditing("new")}
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add criterion
+          </Button>
+        )}
       </div>
 
       {criteria.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-          No criteria yet. Add one check to start grading.
-        </p>
+        /* The house empty-state row (Knowledge base · MCP server · runs). */
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">No criteria yet</p>
+            <p className="text-xs text-muted-foreground">
+              A criterion is one thing that has to be true every time this agent takes a call: add
+              one so a verdict can say what it judged.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => setEditing("new")}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add criterion
+          </Button>
+        </div>
       ) : (
         <div className="space-y-2">
           <div className="flex items-baseline justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -305,12 +319,12 @@ function stateFor(crit: EvalAssertion, cases: EvalCase[], run: StoredRun | undef
 export function ScorecardSummary({ agentId }: { agentId: string }) {
   const [sc] = useScorecard(agentId)
   const [run, setRun] = React.useState<StoredRun | undefined>(undefined)
-  const [cases, setCases] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
+  const [cases, setCases] = React.useState<EvalCase[]>([])
 
   React.useEffect(() => {
     const reread = () => {
       setRun(latestRun(agentId))
-      setCases(readSuiteState(agentId, EVAL_SUITE.cases).cases)
+      setCases(readSuiteState(agentId).cases)
     }
     reread()
     window.addEventListener(RUN_EVENT, reread)
@@ -322,9 +336,23 @@ export function ScorecardSummary({ agentId }: { agentId: string }) {
   return (
     <div className="space-y-2">
       {criteria.length === 0 ? (
-        <p className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-          No criteria yet.
-        </p>
+        /* Read-only surface, so its door is the editor's, not a second one. */
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">No criteria yet</p>
+            <p className="text-xs text-muted-foreground">
+              Nothing grades a run yet: write one check so a pass says what the agent got right.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() => window.dispatchEvent(new CustomEvent("sx:focus", { detail: "scorecard" }))}
+          >
+            Open scorecard
+          </Button>
+        </div>
       ) : (
         criteria.map((c) => {
           const state = stateFor(c, cases, run)
@@ -345,18 +373,20 @@ export function ScorecardSummary({ agentId }: { agentId: string }) {
           )
         })
       )}
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          {pad2(criteria.length)}/{CRITERIA_LIMIT}
-        </span>
-        <button
-          type="button"
-          className="rounded text-xs text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onClick={() => window.dispatchEvent(new CustomEvent("sx:focus", { detail: "scorecard" }))}
-        >
-          Open scorecard
-        </button>
-      </div>
+      {criteria.length > 0 && (
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+            {pad2(criteria.length)}/{CRITERIA_LIMIT}
+          </span>
+          <button
+            type="button"
+            className="rounded text-xs text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => window.dispatchEvent(new CustomEvent("sx:focus", { detail: "scorecard" }))}
+          >
+            Open scorecard
+          </button>
+        </div>
+      )}
     </div>
   )
 }

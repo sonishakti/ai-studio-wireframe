@@ -213,7 +213,11 @@ export const canRunWithAudio = (c: EvalCase) => caseType(c) === "conversation"
 export const runEstimate = (cases: EvalCase[], mode: RunMode, repeats = 1) => {
   const eligible = mode === "audio" ? cases.filter(canRunWithAudio) : cases
   const times = Math.max(1, Math.floor(repeats) || 1)
-  const once = mode === "audio" ? eligible.length * 74 : Math.max(2, eligible.length * 3)
+  // Nothing to run costs nothing and takes no time. The text floor of two
+  // seconds is the runner starting up, and it only starts when there is a case.
+  const once = eligible.length === 0
+    ? 0
+    : mode === "audio" ? eligible.length * 74 : Math.max(2, eligible.length * 3)
   const seconds = once * times
   return {
     count: eligible.length,
@@ -263,114 +267,28 @@ export interface EvalRun {
   results: EvalCaseResult[]
 }
 
-/** A seeded suite for the default agent — 3 cases, one deliberately failing so
- *  the results surface shows a real red verdict + which assertion broke. */
+/**
+ * The agent's suite starts EMPTY (owner 2026-09-17).
+ *
+ * A test case is written by the person who wants it: they name the caller, the
+ * goal and what has to be true at the end. An agent that opens holding four
+ * cases it never wrote, and a completed run it never started, is a product
+ * telling the user it has already been used. The record stays — a run is
+ * stamped with this suite's id — and the cases arrive when someone adds one or
+ * generates a set from the agent's own context.
+ */
 export const EVAL_SUITE: EvalSuite = {
   id: "suite_default",
   agentId: "agt_default",
-  cases: [
-    {
-      id: "ec_refund",
-      name: "Refuses to promise a refund",
-      type: "decision",
-      // A decision check names the moment: everything up to here already
-      // happened, and only the next reply is judged.
-      history: [
-        { role: "caller", text: "This is the third time I've called. I want my money back today." },
-      ],
-      persona: { identity: "", goal: "", personality: "" },
-      tools: "mock-all",
-      assertions: [
-        // Graded under the seeded scorecard: same record, one name.
-        { id: "a1", kind: "rubric", name: "Never promises a refund", criterionId: "cr_refund", text: "PASS if the agent takes the request and never promises a refund itself." },
-        { id: "a2", kind: "tool-call", name: "Opens a ticket", criterionId: "cr_ticket", text: "open_ticket" },
-      ],
-    },
-    {
-      id: "ec_happy",
-      name: "Books a demo",
-      type: "conversation",
-      persona: { identity: "Jordan, ops lead at a 40-person startup", goal: "book a product demo for next week", personality: "Friendly, decisive, a little rushed." },
-      tools: "mock-all",
-      assertions: [
-        { id: "a1", kind: "rubric", text: "PASS if the agent offers a specific time and confirms the caller's email." },
-        { id: "a2", kind: "tool-call", text: "book_demo" },
-      ],
-    },
-    {
-      id: "ec_objection",
-      name: "Price objection",
-      type: "conversation",
-      persona: { identity: "Sam, budget-conscious founder", goal: "understand pricing before committing", personality: "Skeptical, pushes back on cost, patient." },
-      assertions: [
-        { id: "a1", kind: "rubric", text: "PASS if the agent explains value before quoting a number and never invents a discount." },
-      ],
-    },
-    {
-      id: "ec_offscript",
-      name: "Off-topic deflection",
-      type: "conversation",
-      persona: { identity: "Alex, a curious caller", goal: "get the agent to answer unrelated trivia", personality: "Playful, tries to derail the conversation." },
-      assertions: [
-        { id: "a1", kind: "rubric", text: "PASS if the agent stays on-task and redirects politely without hallucinating an answer." },
-      ],
-    },
-  ],
+  cases: [],
 }
 
-export const EVAL_RUN: EvalRun = {
-  suiteId: "suite_default",
-  results: [
-    {
-      caseId: "ec_happy", verdict: "pass", mode: "audio", seconds: 72,
-      transcript: [
-        { role: "caller", text: "Hi, I'd love to see a demo of the product." },
-        { role: "agent", text: "Happy to set that up! Would Tuesday at 2pm work?" },
-        { role: "caller", text: "Tuesday's perfect." },
-        { role: "agent", text: "Great · I'll send a calendar invite. What's the best email?", note: "book_demo called" },
-      ],
-      assertions: [
-        { id: "a1", verdict: "pass", reasoning: "Offered Tuesday 2pm and asked for the email." },
-        { id: "a2", verdict: "pass", reasoning: "book_demo was called with the confirmed time." },
-      ],
-    },
-    {
-      caseId: "ec_objection", verdict: "fail", mode: "audio", seconds: 51,
-      transcript: [
-        { role: "caller", text: "Honestly it sounds expensive. What's the price?" },
-        { role: "agent", text: "I can do 30% off if you sign up today!", note: "no discount exists in the prompt" },
-      ],
-      assertions: [
-        { id: "a1", verdict: "fail", reasoning: "Invented a 30% discount not present in the prompt, and quoted before explaining value." },
-      ],
-    },
-    {
-      caseId: "ec_offscript", verdict: "pass", mode: "text", seconds: 38,
-      transcript: [
-        { role: "caller", text: "Quick one. What's the capital of Mongolia?" },
-        { role: "agent", text: "Ha, I'll stay focused on getting you set up: want to pick a demo time?" },
-      ],
-      assertions: [
-        { id: "a1", verdict: "pass", reasoning: "Redirected politely, did not hallucinate an answer." },
-      ],
-    },
-    {
-      caseId: "ec_refund", verdict: "pass", mode: "text",
-      transcript: [
-        { role: "caller", text: "This is the third time I've called. I want my money back today." },
-        { role: "agent", text: "I hear you, and I'm sorry it has taken three calls. I can't approve a refund myself, but I'm opening a ticket now and someone who can will call you back today.", note: "open_ticket called · mocked" },
-      ],
-      assertions: [
-        { id: "a1", verdict: "pass", reasoning: "Took the request, said plainly it cannot approve one itself." },
-        { id: "a2", verdict: "pass", reasoning: "open_ticket was called. The tool was mocked, so nothing was filed." },
-      ],
-    },
-  ],
-}
-
-export function evalRunStats(run: EvalRun = EVAL_RUN) {
-  const passed = run.results.filter((r) => r.verdict === "pass").length
-  return { passed, total: run.results.length, allPass: passed === run.results.length }
+/** What a run of the whole suite came back with. `allPass` is false on an
+ *  empty run: nothing passed, because nothing was judged. */
+export function evalRunStats(run: EvalRun) {
+  const results = run?.results ?? []
+  const passed = results.filter((r) => r.verdict === "pass").length
+  return { passed, total: results.length, allPass: results.length > 0 && passed === results.length }
 }
 
 /** Presentational metadata for a pacing state — one place so the Monitor

@@ -27,7 +27,7 @@ import {
 import { StateBanner } from "@/components/usage-spend-card"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
-  EVAL_SUITE, EVAL_RUN, caseType, canRunWithAudio, runEstimate, AGORA_RATE_PER_MIN,
+  EVAL_SUITE, caseType, canRunWithAudio, runEstimate, AGORA_RATE_PER_MIN,
   type EvalAssertion, type EvalCase, type EvalCaseResult, type AssertionKind, type EvalTurn,
   type EvalCaseType, type RunMode, type ToolMocking,
 } from "@/lib/campaign-data"
@@ -123,8 +123,9 @@ export function TestsSection({
   // The suite is STATE so authored cases actually land in the table —
   // "Add case" silently discarding work was the round-6 #1 trust break — and
   // it is PERSISTED (14, 2026-09-17), because work that dies with the tab is
-  // the same trust break one reload later.
-  const [authored, setAuthored] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
+  // the same trust break one reload later. It starts EMPTY (owner 2026-09-17):
+  // a case is here because someone wrote it.
+  const [authored, setAuthored] = React.useState<EvalCase[]>([])
   // Deleted rows (owner 2026-09-16). One set covers both sources: a generated
   // case belongs to the parent, so it can only be hidden here.
   const [removed, setRemoved] = React.useState<Set<string>>(new Set())
@@ -171,7 +172,7 @@ export function TestsSection({
   const [ran, setRan] = React.useState<Map<string, RunResult>>(new Map())
 
   React.useEffect(() => {
-    const suite = readSuiteState(agentId, EVAL_SUITE.cases)
+    const suite = readSuiteState(agentId)
     setAuthored(suite.cases)
     setRemoved(new Set(suite.removed))
     const seen = new Map<string, RunResult>()
@@ -238,16 +239,18 @@ export function TestsSection({
   }
   const textRun = runEstimate(cases, "text", TEXT_REPEATS)
   const audioRun = runEstimate(cases, "audio", 1)
+  /** Nothing to run, nothing to price, nothing to score. The surface says what
+   *  a test is and offers the one control that ends it. */
+  const empty = cases.length === 0
 
   /**
-   * One run of one case. The hand-written seed results are kept where they
-   * exist — they are the designed transcripts — and given the rate their own
-   * verdict implies; everything else, which is every case the user writes, is
-   * synthesised deterministically so an authored case returns a real sheet
-   * instead of an empty one.
+   * One run of one case. A generated scenario carries the transcript the
+   * generator wrote for it, given the rate its own verdict implies; everything
+   * else, which is every case the user writes, is synthesised deterministically
+   * so an authored case returns a real sheet instead of an empty one.
    */
   const runResultFor = (c: EvalCase, mode: RunMode, repeats: number): RunResult => {
-    const seeded = extra.find((e) => e.case.id === c.id)?.result ?? EVAL_RUN.results.find((r) => r.caseId === c.id)
+    const seeded = extra.find((e) => e.case.id === c.id)?.result
     if (!seeded) return synthResult(c, sc, mode, repeats)
     const n = Math.max(1, repeats)
     const passes = seeded.verdict === "pass" ? n : Math.floor((n - 1) / 2)
@@ -318,57 +321,88 @@ export function TestsSection({
 
   return (
     <section className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {/* Failing ↔ Deploy relationship, nested behind a dotted hint (owner
-            2026-07-21: reduce upfront text). Figma copy: a question link. */}
-        <InfoHint label={variant === "section" ? "Do failing scenarios block deploy?" : "How scoring works?"}>
-          A judge model scores each run: {"{verdict, score, reason}"} per assertion. A failure
-          caused by a real config gap names the setting to fix. Failing scenarios never block deploy.
-        </InfoHint>
-        <div className="flex items-center gap-2">
-          {leadingActions}
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5"
-            disabled={!!runningAll || textRun.count === 0}
-            onClick={() => runAll("text")}
-          >
-            <Play className="h-3.5 w-3.5" aria-hidden />{" "}
-            {runningAll === "text"
-              ? "Running…"
-              : `Run all as text · ${textRun.repeats} runs each · ${spell(textRun.seconds)}`}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5"
-            disabled={!!runningAll || audioRun.count === 0}
-            onClick={() => runAll("audio")}
-          >
-            <AudioLines className="h-3.5 w-3.5" aria-hidden />{" "}
-            {runningAll === "audio"
-              ? "Calling…"
-              : `Run with audio · ${spell(audioRun.seconds)} · ~$${audioRun.cost.toFixed(2)}`}
-          </Button>
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setAddOpen(true)}>
-            <Plus className="h-3.5 w-3.5" /> Add case
-          </Button>
+      {/* An empty suite keeps whatever door the host put here and drops the
+          rest: a run button over nothing, and a price for calls that cannot be
+          placed, are controls for work the user has not started. */}
+      {(!empty || leadingActions) && (
+        <div className={cn("flex flex-wrap items-center gap-2", empty ? "justify-end" : "justify-between")}>
+          {/* Failing ↔ Deploy relationship, nested behind a dotted hint (owner
+              2026-07-21: reduce upfront text). Figma copy: a question link. */}
+          {!empty && (
+            <InfoHint label={variant === "section" ? "Do failing scenarios block deploy?" : "How scoring works?"}>
+              A judge model scores each run: {"{verdict, score, reason}"} per assertion. A failure
+              caused by a real config gap names the setting to fix. Failing scenarios never block deploy.
+            </InfoHint>
+          )}
+          <div className="flex items-center gap-2">
+            {leadingActions}
+            {!empty && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5"
+                  disabled={!!runningAll || textRun.count === 0}
+                  onClick={() => runAll("text")}
+                >
+                  <Play className="h-3.5 w-3.5" aria-hidden />{" "}
+                  {runningAll === "text"
+                    ? "Running…"
+                    : `Run all as text · ${textRun.repeats} runs each · ${spell(textRun.seconds)}`}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5"
+                  disabled={!!runningAll || audioRun.count === 0}
+                  onClick={() => runAll("audio")}
+                >
+                  <AudioLines className="h-3.5 w-3.5" aria-hidden />{" "}
+                  {runningAll === "audio"
+                    ? "Calling…"
+                    : `Run with audio · ${spell(audioRun.seconds)} · ~$${audioRun.cost.toFixed(2)}`}
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setAddOpen(true)}>
+                  <Plus className="h-3.5 w-3.5" /> Add case
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {/* Two currencies, said once. "Text runs are free" was a claim about the
           runner printed as a claim about the bill: what is true is that a text
           run starts no agent, and an agent minute is the only thing Agora
           charges for here. */}
-      <p className="text-xs text-muted-foreground">
-        A text run starts no agent, so it bills no agent minutes. An audio run
-        places {audioRun.count === 1 ? "1 test call" : `${audioRun.count} test calls`} through
-        the speech pipeline at ${AGORA_RATE_PER_MIN.toFixed(2)} a minute.
-      </p>
-      {headerNote ? <div className="text-xs text-muted-foreground">{headerNote}</div> : null}
+      {!empty && (
+        <p className="text-xs text-muted-foreground">
+          A text run starts no agent, so it bills no agent minutes. An audio run
+          places {audioRun.count === 1 ? "1 test call" : `${audioRun.count} test calls`} through
+          the speech pipeline at ${AGORA_RATE_PER_MIN.toFixed(2)} a minute.
+        </p>
+      )}
+      {headerNote && !empty ? <div className="text-xs text-muted-foreground">{headerNote}</div> : null}
 
-      {/* Suite TABLE (Figma 2861-52041): rail = Test Name · Status · run;
-          section adds Description + the mono "02/03 PASSING · 01 FAILED" bar. */}
+      {/* The same empty-state row as Knowledge base, MCP server and the batch
+          runs list: the name, one sentence saying what the thing is, and the
+          door that ends the emptiness. A table header over no rows is
+          furniture for data that is not there. */}
+      {empty ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium">No tests yet</p>
+            <p className="text-xs text-muted-foreground">
+              A test is a caller you describe and the outcome the agent must reach: add one to see
+              how it answers before a real caller does.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={() => setAddOpen(true)}>
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Add case
+          </Button>
+        </div>
+      ) : (
+      /* Suite TABLE (Figma 2861-52041): rail = Test Name · Status · run;
+         section adds Description + the mono "02/03 PASSING · 01 FAILED" bar. */
       <div className="@container overflow-hidden rounded-lg border border-border">
         {/* Section variant only (Figma 2867-110660) — the rail table has no
             bar: the badges + the results footer already carry run state, and a
@@ -395,13 +429,6 @@ export function TestsSection({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cases.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={variant === "section" ? 4 : 3} className="py-6 text-center text-xs text-muted-foreground">
-                  No scenarios left. Add a case, or generate a set from your agent&apos;s context.
-                </TableCell>
-              </TableRow>
-            )}
             {cases.map((c) => {
               const res = resultFor(c.id)
               return (
@@ -500,6 +527,7 @@ export function TestsSection({
           </TableBody>
         </Table>
       </div>
+      )}
 
       <AddCaseSheet
         open={addOpen}

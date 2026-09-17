@@ -8,7 +8,7 @@
  * scorecard is read and written per browser, so it lives here and not in
  * `lib/campaign-data.ts`, which is seed constants and pure helpers with no
  * browser storage anywhere — a store in there would pull localStorage into
- * every import of EVAL_SUITE. Same `sx:` guards as `lib/agent-store.ts` and
+ * every import of the suite. Same `sx:` guards as `lib/agent-store.ts` and
  * `lib/journey-progress.ts`, and every write emits `sx:scorecard` so the
  * builder's editor and the Test section's summary re-read together.
  *
@@ -37,36 +37,22 @@ export interface Scorecard {
 export const CRITERIA_LIMIT = 30
 
 /**
- * The seed every agent starts from. Three written checks rather than a blank
- * page — the same bargain the scenario generator makes in the Test section.
- * The first two are EVAL_SUITE's `ec_refund` assertions word for word, because
- * that case is graded under these criteria by id.
+ * The scorecard an agent starts with: named, and with nothing in it yet
+ * (owner 2026-09-17).
+ *
+ * It used to open holding three written checks, one of them a refund policy
+ * for a business the user may not be in. A criterion is a sentence about this
+ * agent's calls, so it can only be written by the person whose calls they are.
+ * An empty list is a real state everything downstream already reads: the
+ * pre-flight names what grades the agent and finds nothing, and a run graded
+ * on no criteria says so.
  */
 export const DEFAULT_SCORECARD: Scorecard = {
   id: "sc_default",
-  name: "Refund policy",
+  name: "Scorecard",
   agentId: "agt_default",
   version: 1,
-  criteria: [
-    {
-      id: "cr_refund",
-      kind: "rubric",
-      name: "Never promises a refund",
-      text: "PASS if the agent takes the request and never promises a refund itself.",
-    },
-    {
-      id: "cr_ticket",
-      kind: "tool-call",
-      name: "Opens a ticket",
-      text: "open_ticket",
-    },
-    {
-      id: "cr_callback",
-      kind: "rubric",
-      name: "Confirms a callback",
-      text: "PASS if the agent states when someone will call back.",
-    },
-  ],
+  criteria: [],
   updatedAt: "2026-09-17T09:00:00.000Z",
 }
 
