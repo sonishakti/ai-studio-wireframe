@@ -29,6 +29,11 @@ export const Events = {
   agent_template_browsed:     "agent_template_browsed",
   agent_template_selected:    "agent_template_selected",
   agent_created:              "agent_created",
+  // Import as a way to START, not a tool beside the list (design 09). The
+  // counts are the honesty of the promise: what carried, and what did not.
+  agent_import_reviewed:      "agent_import_reviewed",       // { source, mapped, dropped, entry }
+  agent_imported:             "agent_imported",              // { source, mapped, dropped }
+  legacy_config_updated:      "legacy_config_updated",       // { keys } — retired settings rewritten
   agent_switched:             "agent_switched",              // { to_id, status } — change deploy target
   stack_preset_changed:       "stack_preset_changed",        // { agent_id, preset } — cost-vs-speed dimension picked
   test_outcome_selected:      "test_outcome_selected",        // { outcome, agent_id } the test→deploy hinge
@@ -196,6 +201,9 @@ export type EventPayloads = {
   quota_warning_clicked:       { meter: string; pct_used: number }
   test_outcome_selected:       { outcome: "tweak" | "deploy"; agent_id: string }
   agent_switched:              { to_id: string; status: "live" | "draft" | "paused" }
+  agent_import_reviewed:       { source: string; mapped: number; dropped: number; entry: "create" | "list" }
+  agent_imported:              { source: string; mapped: number; dropped: number }
+  legacy_config_updated:       { keys: string[] }
   stack_preset_changed:        { agent_id: string; preset: "fastest" | "balanced" | "cheapest" }
   free_minutes_halfway:        { used: number; ungated: number }
   card_captured:               { agent_id: string; at_minute: number }

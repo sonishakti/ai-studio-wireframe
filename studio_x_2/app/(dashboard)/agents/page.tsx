@@ -780,6 +780,13 @@ export default function AgentsPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreate={createAgent}
+        importSlot={
+          <ImportAgentSheet onImported={(c) => { setCreateOpen(false); onListImported(c) }}>
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <Upload className="h-4 w-4" aria-hidden /> Import from another platform
+            </Button>
+          </ImportAgentSheet>
+        }
       />
 
       {/* Templates sheet — returning users browse without leaving the list */}

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Rocket, Check, AlertTriangle, ArrowRight, Waypoints, FileText, AudioLines, Cpu, ClipboardCheck, Users, Globe, FlaskConical } from "lucide-react"
+import { Rocket, Check, AlertTriangle, ArrowRight, Waypoints, FileText, AudioLines, Cpu, ClipboardCheck, Users, Globe, FlaskConical, PhoneOff } from "lucide-react"
 import {
   AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
@@ -10,9 +10,11 @@ import { InfoHint } from "@/components/wizard/info-hint"
 import { cn } from "@/lib/utils"
 import {
   publishBlocks, channelTarget, campaignMissingVars, activeCampaigns, hasChannel, draftHosting,
-  MOCK_CSV_ROWS, DEFAULT_ANALYSIS, type AgentDraft, type CampaignDraft,
+  MOCK_CSV_ROWS, DEFAULT_ANALYSIS, DEFAULT_CALL_BEHAVIOR, type AgentDraft, type CampaignDraft,
 } from "@/lib/wizard-draft"
 import { hostingSummary, isPinned } from "@/lib/hosting-regions"
+import { ladderLine, ruleIssues } from "@/lib/call-rules"
+import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS, type RunMode } from "@/lib/campaign-data"
 
 /**
@@ -35,6 +37,8 @@ interface CheckRow {
   /** Journey section (1 Voice · 2 Channel · 3 Context · 4 Go Live) that fixes a warn row. */
   fixStep?: number
   fixLabel?: string
+  /** For a row whose fix lives behind a door rather than in a section. */
+  fixAction?: () => void
 }
 
 function campaignWarn(draft: AgentDraft, c: CampaignDraft): { value: string; fixStep: number; fixLabel: string } | null {
@@ -164,6 +168,20 @@ function buildRows(
     })
   }
 
+  // Call rules (design 05). The gate is where a rule that can never fire has
+  // to be caught: a reminder set after the hang-up costs nothing until the
+  // first real caller goes quiet, and then it costs the call.
+  const cb = { ...DEFAULT_CALL_BEHAVIOR, ...draft.callBehavior }
+  const ruleProblems = ruleIssues(cb, { telephony: hasChannel(draft, "inbound") || hasChannel(draft, "batch") })
+  const blocker = ruleProblems.find((i) => i.level === "blocker") ?? ruleProblems[0]
+  rows.push({
+    id: "call-rules", icon: PhoneOff, label: "Call rules",
+    value: blocker ? blocker.message : ladderLine(cb),
+    state: blocker ? "warn" : "ok",
+    fixLabel: blocker ? "Open call rules" : undefined,
+    fixAction: blocker ? () => openAdvanced("call") : undefined,
+  })
+
   // Structured outputs
   const an = { ...DEFAULT_ANALYSIS, ...draft.analysis }
   rows.push({
@@ -272,7 +290,11 @@ export function DeployPreflight({
                   variant="ghost"
                   size="sm"
                   className="h-6 shrink-0 gap-1 px-1.5 text-xs text-warning hover:text-warning"
-                  onClick={() => { onOpenChange(false); r.fixStep && onFix(r.fixStep) }}
+                  onClick={() => {
+                    onOpenChange(false)
+                    if (r.fixAction) r.fixAction()
+                    else if (r.fixStep) onFix(r.fixStep)
+                  }}
                 >
                   <AlertTriangle className="h-3 w-3" aria-hidden /> {r.fixLabel ?? "Fix"} <ArrowRight className="h-3 w-3" aria-hidden />
                 </Button>

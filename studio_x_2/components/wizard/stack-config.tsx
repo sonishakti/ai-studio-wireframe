@@ -20,6 +20,10 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
 import { VoiceBrowser } from "@/components/wizard/voice-browser"
+import { RecognitionSection, recognitionRecap } from "@/components/wizard/recognition-section"
+import { DeliverySection } from "@/components/wizard/delivery-section"
+import { recognitionOf, type RecognitionConfig } from "@/lib/asr-vocabulary"
+import { deliveryRecap, type DeliveryConfig } from "@/lib/tts-expression"
 import { allVendorCredentials, createVendorCredential } from "@/lib/agent-resources"
 import type { VoiceArtifact } from "@/lib/voice-artifacts"
 import type { HostingConfig } from "@/lib/hosting-regions"
@@ -640,6 +644,16 @@ interface BackupOwnerProps {
   onUnpinRegion?: () => void
 }
 
+/** What the STT and TTS sheets need to own how the agent hears and speaks
+ *  (designs 03 and 06). Both are optional: the Playground renders the same
+ *  sheets without them. */
+export interface SpeechOwnerProps {
+  recognition?: RecognitionConfig
+  onRecognitionChange?: (r: RecognitionConfig) => void
+  delivery?: DeliveryConfig
+  onDeliveryChange?: (d: DeliveryConfig) => void
+}
+
 /** Vendor + model on one row — the pair a person names together ("Deepgram
  *  Nova-2"), so they read as one decision (owner IA 2026-09-15). */
 function VendorModelRow({
@@ -690,13 +704,14 @@ function VendorModelRow({
 function ConfigureSlotSheet({
   slot, stack, onChange, open, onOpenChange, voices, selectedVoiceId, onPickVoice, useCaseHint, language,
   backup, onBackupChange, hosting, onUnpinRegion,
+  recognition, onRecognitionChange, delivery, onDeliveryChange,
 }: {
   slot: Slot
   stack: AgentStack
   onChange: (next: AgentStack) => void
   open: boolean
   onOpenChange: (o: boolean) => void
-} & VoicePickProps & BackupOwnerProps) {
+} & VoicePickProps & BackupOwnerProps & SpeechOwnerProps) {
   const current = stack[slot]
   const vendors = React.useMemo(() => {
     const list = slot === "tts" ? STACK_CATALOG.tts : slot === "asr" ? STACK_CATALOG.stt : STACK_CATALOG.llm
@@ -714,6 +729,10 @@ function ConfigureSlotSheet({
   const [chain, setChain] = React.useState<BackupEntry[]>([])
   /** Which backups are typing a model id by hand. */
   const [customBackup, setCustomBackup] = React.useState<Record<number, boolean>>({})
+  /** How it hears and how it speaks, local until Save like every other field
+   *  in this sheet. */
+  const [rec, setRec] = React.useState<RecognitionConfig>(() => recognitionOf(recognition, stack.language))
+  const [del, setDel] = React.useState<DeliveryConfig>(() => delivery ?? {})
 
   React.useEffect(() => {
     if (!open) return
@@ -722,6 +741,8 @@ function ConfigureSlotSheet({
     setMode(slotMode(stack, slot))
     setCustom(false)
     setCredentialId(stack.credentials?.[slot])
+    setRec(recognitionOf(recognition, stack.language))
+    setDel(delivery ?? {})
     // Untouched slot: seed the chain from Agora's own default so the switch
     // shows what is actually running, rather than an empty panel.
     const saved = b.entries[slot]
@@ -780,6 +801,8 @@ function ConfigureSlotSheet({
   const save = () => {
     onChange(localStack)
     onBackupChange?.(localBackup)
+    if (slot === "asr") onRecognitionChange?.(rec)
+    if (slot === "tts") onDeliveryChange?.(del)
     onOpenChange(false)
   }
 
@@ -856,7 +879,7 @@ function ConfigureSlotSheet({
           {/* BACKUP CHAIN — the same anatomy, once per backup, each with its
               own switch and its own key (owner IA 2026-09-15). */}
           {onBackupChange && (
-            <section className="mt-6 space-y-3 border-t border-border pt-5">
+            <section data-design-focus="backup-providers" className="mt-6 space-y-3 border-t border-border pt-5">
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                 <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Backup</p>
                 <p className="text-xs text-muted-foreground">Tried in order if {vendor} fails.</p>
@@ -988,6 +1011,15 @@ function ConfigureSlotSheet({
               )}
             </section>
           )}
+
+          {/* How it hears (design 03) and how it speaks (design 06) sit with
+              the vendor that does the work, not on a screen of their own. */}
+          {slot === "asr" && onRecognitionChange && (
+            <RecognitionSection stack={localStack} backup={localBackup} value={rec} onChange={setRec} />
+          )}
+          {slot === "tts" && onDeliveryChange && (
+            <DeliverySection stack={localStack} value={del} onChange={setDel} />
+          )}
         </div>
         <div className="shrink-0 border-t border-border px-5 py-3">
           <Button className="w-full" onClick={save}>Save changes</Button>
@@ -1019,7 +1051,8 @@ function ConfigureSlotSheet({
  *  slot with a ⚙ door to its Configure sheet. */
 export function ManualStackConfig({
   stack, onChange, className, backup, onBackupChange, hosting, onUnpinRegion, voices, selectedVoiceId, onPickVoice, useCaseHint, language,
-}: StackPieceProps & VoicePickProps & BackupOwnerProps) {
+  recognition, onRecognitionChange, delivery, onDeliveryChange,
+}: StackPieceProps & VoicePickProps & BackupOwnerProps & SpeechOwnerProps) {
   const [openSlot, setOpenSlot] = React.useState<Slot | null>(null)
   const plan = React.useMemo(() => planBackups({ stack, hosting, backup: backupOf(backup) }), [stack, hosting, backup])
   const pipeline: Pipeline = stack.pipeline ?? "stt-llm-tts"
@@ -1109,7 +1142,16 @@ export function ManualStackConfig({
                   <SlidersHorizontal className="h-4 w-4" aria-hidden />
                 </Button>
               </div>
-              {backup && onBackupChange && recap(slot)}
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                {backup && onBackupChange && recap(slot)}
+                {/* What the sheet holds, readable without opening it. */}
+                {slot === "asr" && onRecognitionChange && (
+                  <span className="text-xs text-muted-foreground">{recognitionRecap(recognition, stack.language)}</span>
+                )}
+                {slot === "tts" && onDeliveryChange && deliveryRecap(delivery, stack.tts.vendor) && (
+                  <span className="text-xs text-muted-foreground">{deliveryRecap(delivery, stack.tts.vendor)}</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -1133,6 +1175,10 @@ export function ManualStackConfig({
           onBackupChange={onBackupChange}
           hosting={hosting}
           onUnpinRegion={onUnpinRegion}
+          recognition={recognition}
+          onRecognitionChange={onRecognitionChange}
+          delivery={delivery}
+          onDeliveryChange={onDeliveryChange}
         />
       )}
     </div>

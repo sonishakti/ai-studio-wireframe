@@ -136,6 +136,10 @@ export function VoiceSection({
             onPickVoice={pickVoice}
             useCaseHint={{ systemPrompt: draft.systemPrompt, greeting: draft.greeting, templateName: draft.templateName }}
             language={draft.stack.language}
+            recognition={draft.recognition}
+            onRecognitionChange={(recognition) => update({ recognition })}
+            delivery={draft.delivery}
+            onDeliveryChange={(delivery) => update({ delivery })}
           />
         </div>
       )}

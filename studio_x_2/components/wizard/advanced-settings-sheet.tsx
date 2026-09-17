@@ -11,7 +11,8 @@ import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { StepAdvanced, HistoryField } from "@/components/wizard/step-advanced"
 import { TurnTakingRow } from "@/components/wizard/turn-taking-row"
 import { ListeningRows } from "@/components/wizard/listening-rows"
-import { HangupSettings, PacingSettings, TransferSettings, CampaignDialingFields } from "@/components/wizard/step-call-settings"
+import { PacingSettings, TransferSettings, CampaignDialingFields } from "@/components/wizard/step-call-settings"
+import { CallRules } from "@/components/wizard/call-rules"
 import { firstRun, patchFirstRun } from "@/lib/wizard-draft"
 import type { StepProps } from "@/components/wizard/types"
 
@@ -164,7 +165,7 @@ export function AdvancedSettingsSheet({
             <section id="adv-call" className="mt-8 scroll-mt-4 border-t border-border pt-6">
               <h3 className="pb-1 text-sm font-semibold">Call behaviour</h3>
               <SectionRows>
-                <HangupSettings draft={draft} update={update} />
+                <CallRules draft={draft} update={update} />
                 <PacingSettings draft={draft} update={update} />
                 <TransferSettings draft={draft} update={update} />
                 {/* Batch only: how hard it dials. Kept off the main flow, but

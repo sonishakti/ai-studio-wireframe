@@ -19,6 +19,8 @@ import { PRESET_VOICES } from "@/lib/voice-artifacts"
 import { clearWidgetState } from "@/lib/widget-config"
 import { DEFAULT_HOSTING, normalizeHosting, type HostingConfig } from "@/lib/hosting-regions"
 import type { BackupConfig } from "@/lib/backup-providers"
+import type { RecognitionConfig } from "@/lib/asr-vocabulary"
+import type { DeliveryConfig } from "@/lib/tts-expression"
 
 /** Legacy single-channel type — still the vocabulary of the published
  *  `Agent.channel` mock and `publishDeployment`'s mode. */
@@ -198,6 +200,19 @@ export interface CallBehaviorConfig {
   transferCriteria: string
   /** Outbound: minimum gap between placed calls (rate pacing). */
   minIntervalMs: number
+
+  // ── the silence ladder (design 05) ───────────────────────────────────────
+  /** Speak up when the caller goes quiet, before hanging up on them. */
+  remind?: boolean
+  /** Seconds of quiet before the agent speaks up. Engine range is 1 to 60. */
+  remindAfterSec?: number
+  /** What it says. An empty line is a blocker, not a default. */
+  remindText?: string
+  /** Let the agent finish its sentence when something stops the call. */
+  finishSpeaking?: boolean
+  finishSpeakingSec?: number
+  /** What happens when an answering machine picks up. */
+  voicemailPolicy?: "hangup" | "leaveMessage"
 }
 
 export const DEFAULT_CALL_BEHAVIOR: CallBehaviorConfig = {
@@ -212,6 +227,12 @@ export const DEFAULT_CALL_BEHAVIOR: CallBehaviorConfig = {
   transferDest: "",
   transferCriteria: "",
   minIntervalMs: 1000,
+  remind: true,
+  remindAfterSec: 8,
+  remindText: "Are you still there?",
+  finishSpeaking: true,
+  finishSpeakingSec: 30,
+  voicemailPolicy: "hangup",
 }
 
 /** When a batch starts dialing (Figma "Launch Timing"). */
@@ -411,6 +432,10 @@ export interface AgentDraft {
   opening?: OpeningConfig
   /** Section 1 › Backup providers (design 07) — absent until touched. */
   backup?: BackupConfig
+  /** Voice & Models › Configure STT (design 03) — absent until touched. */
+  recognition?: RecognitionConfig
+  /** Voice & Models › Configure TTS (design 06) — absent until touched. */
+  delivery?: DeliveryConfig
   /** What the agent says when it can't answer (proposal 2026-07-22). */
   failureMessage: string
   /** The starter template applied — shown as the header chip next to the name. */

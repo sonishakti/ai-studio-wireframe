@@ -13,6 +13,7 @@ import {
 import { useCopyFeedback } from "@/hooks/use-copy-feedback"
 import { CustomConfigDrawer } from "@/components/custom-config-drawer"
 import { ImportAgentSheet } from "@/components/import-agent-sheet"
+import { ContractUpdateBanner } from "@/components/wizard/contract-update"
 import { VoiceSection } from "@/components/wizard/voice-section"
 import { ChannelSection } from "@/components/wizard/channel-section"
 import { SectionPrompt } from "@/components/wizard/section-prompt"
@@ -28,7 +29,7 @@ import { STEP_TITLES, SECTION_COUNT, SECTION_GROUPS, STEP_ICONS, stepTitle, reso
 import { publishDeployment } from "@/components/wizard/channel-configs"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events, builderOpened, agentAudioHeard } from "@/lib/analytics"
-import { AdvancedSettingsSheet, type AdvancedAnchor } from "@/components/wizard/advanced-settings-sheet"
+import { AdvancedSettingsSheet, openAdvanced, type AdvancedAnchor } from "@/components/wizard/advanced-settings-sheet"
 import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig, type RunMode } from "@/lib/campaign-data"
 import {
   getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
@@ -519,6 +520,9 @@ export function AgentWizard({
     const owner: Record<string, number> = {
       opening: 3, greeting: 3, prompt: 3,
       voice: 1, "voice-recommended": 1, "voice-compare": 1, "backup-providers": 1, "turn-taking": 1, listening: 1,
+      // Designs 03 and 06 live inside a vendor's Configure sheet; design 05
+      // lives in the Advanced panel. All three are doors, handled below.
+      recognition: 1, delivery: 1, "call-rules": 1,
       deployment: 2, test: 4, golive: 5,
     }
     const n = owner[focus] ?? 3
@@ -526,12 +530,18 @@ export function AgentWizard({
     // door is opened — open it first so the link lands INSIDE the journey.
     const openDoor = () => {
       if (focus.startsWith("voice-")) document.querySelector<HTMLButtonElement>('button[aria-label="Browse voices"]')?.click()
-      if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Advanced speech settings"))?.click()
-      if (focus === "backup-providers") {
+      if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => /advanced speech settings/i.test(b.textContent ?? ""))?.click()
+      if (focus === "call-rules") openAdvanced("call")
+      if (focus === "recognition" || focus === "delivery" || focus === "backup-providers") {
         // Backup lives inside the vendor's own Configure sheet (owner IA 2026-09-12).
-        const door = [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent?.includes("Configure models manually"))
+        // Case-insensitive on purpose: the label went to sentence case in a
+        // later copy pass and this matcher silently stopped finding it, which
+        // took the backup-providers review link with it.
+        const door = [...document.querySelectorAll<HTMLButtonElement>("button")]
+          .find((b) => /configure models manually/i.test(b.textContent ?? ""))
         if (door?.getAttribute("aria-expanded") === "false") door.click()
-        window.setTimeout(() => document.querySelector<HTMLButtonElement>('button[aria-label="Configure STT vendor and credential"]')?.click(), 350)
+        const slot = focus === "delivery" ? "TTS" : "STT"
+        window.setTimeout(() => document.querySelector<HTMLButtonElement>(`button[aria-label="Configure ${slot} vendor and credential"]`)?.click(), 350)
       }
     }
     let tries = 0
@@ -1081,6 +1091,13 @@ export function AgentWizard({
           </Button>
         </div>
       </header>
+
+      {/* An agent carrying settings the contract retired says so here, once,
+          and offers the rewrite rather than leaving the homework (design 09). */}
+      <ContractUpdateBanner
+        customConfig={draft.customConfig}
+        onApply={(customConfig) => update({ customConfig })}
+      />
 
       {/* Test strip REMOVED (owner 2026-08-10, matching Figma): testing lives
           in the collapsible RHS panel; the header waveform button reopens it. */}

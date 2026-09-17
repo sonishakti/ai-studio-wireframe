@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { CodeBlock } from "@/components/code-block"
-import { track } from "@/lib/analytics"
+import { track, Events } from "@/lib/analytics"
 import {
   IMPORT_SOURCES, parseImport, VENDOR_EXAMPLES, VENDOR_FIELD_HINTS,
   type ImportSource, type ImportParseResult,
@@ -44,11 +44,11 @@ export function ImportAgentSheet({
   const handleImport = () => {
     const config = validation?.config
     if (!config) return
-    track("agent_imported" as never, {
-      source: config.source,
+    track(Events.agent_imported, {
+      source: config.source ?? "Generic JSON",
       mapped: validation?.mapped?.length ?? 0,
       dropped: validation?.dropped?.length ?? 0,
-    } as never)
+    })
     onImported?.(config)
   }
 

@@ -104,12 +104,16 @@ export function CreateAgentDialog({
   onOpenChange,
   onCreate,
   defaultTemplateId = "blank",
+  importSlot,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
   onCreate: (v: CreateAgentValue) => void
   /** A Start-landing template row can still pre-seed the description. */
   defaultTemplateId?: string
+  /** The third way to start (design 09): the Import sheet's own trigger,
+   *  passed in so this dialog stays unaware of how importing works. */
+  importSlot?: React.ReactNode
 }) {
   const [description, setDescription] = React.useState("")
   const [kindId, setKindId] = React.useState("blank")
@@ -197,6 +201,21 @@ export function CreateAgentDialog({
               ))}
             </div>
           </div>
+
+          {/* The third way in (design 09). It was a toolbar button beside the
+              list, which is a place a first-time user has already left by the
+              time they are creating an agent. Someone arriving from Vapi or
+              Retell has their answer written down already. */}
+          {importSlot && (
+            <div className="space-y-2 border-t border-border pt-4">
+              <Label className="text-sm font-medium">Or bring one you already have</Label>
+              {importSlot}
+              <p className="text-xs text-muted-foreground">
+                Vapi, Retell, ElevenLabs and Bland exports. You see what carried across before
+                anything is created, and API keys are never read.
+              </p>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="border-t border-border px-6 py-3">

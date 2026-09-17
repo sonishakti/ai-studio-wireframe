@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils"
 // (Chat History removed 2026-06-16 — not approved by product.)
 const TABS = [
   { label: "Overview", href: "/monitor" },
+  // What is happening now sits before what already happened (design 12).
+  { label: "Live calls", href: "/monitor/live" },
   { label: "Call History", href: "/calls" },
   { label: "Sessions", href: "/sessions" },
   { label: "Diagnostics", href: "/monitor/diagnostics" },
