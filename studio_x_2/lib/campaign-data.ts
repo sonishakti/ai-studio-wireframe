@@ -77,6 +77,8 @@ export interface Deployment {
 
   metrics: {
     calls: number
+    /** Calls the agent picked up: the aggregate's totalAnswered. Never above `calls`. */
+    answered: number
     successRate: number
     avgHandleTimeSec: number
   }
@@ -1331,7 +1333,7 @@ export const DEPLOYMENTS: Deployment[] = [
     prompt: SUPPORT_PROMPT,
     greeting: "Thanks for calling Acme support. How can I help today?",
     failure: "Let me put you through to a teammate.",
-    metrics: { calls: 1240, successRate: 78, avgHandleTimeSec: 204 },
+    metrics: { calls: 1240, answered: 1116, successRate: 78, avgHandleTimeSec: 204 },
     ringsPerWeek: 1240,
   },
   {
@@ -1350,7 +1352,7 @@ timeline) and book a demo with an account executive.
 Two qualifying questions max before offering the demo. Keep it under 30 words per turn.`,
     greeting: "Hi, you've reached Acme sales. What brings you in today?",
     failure: "One moment, connecting you to the sales team.",
-    metrics: { calls: 340, successRate: 62, avgHandleTimeSec: 112 },
+    metrics: { calls: 340, answered: 268, successRate: 62, avgHandleTimeSec: 112 },
     ringsPerWeek: 340,
   },
   {
@@ -1364,7 +1366,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     prompt: SUPPORT_PROMPT + `\n\n# LOCALE\nUK English. Quote prices in GBP. Office hours are 9:00–17:30 GMT.`,
     greeting: "Thanks for ringing Acme support. How can I help?",
     failure: "Bear with me, I'll transfer you to a colleague.",
-    metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
+    metrics: { calls: 0, answered: 0, successRate: 0, avgHandleTimeSec: 0 },
     ringsPerWeek: 0,
   },
   {
@@ -1378,7 +1380,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     prompt: SUPPORT_PROMPT,
     greeting: "Thanks for calling the Acme help line. What can I do for you?",
     failure: "Let me get a teammate to pick this up.",
-    metrics: { calls: 1860, successRate: 82, avgHandleTimeSec: 236 },
+    metrics: { calls: 1860, answered: 1702, successRate: 82, avgHandleTimeSec: 236 },
     ringsPerWeek: 1320,
   },
   {
@@ -1392,7 +1394,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     prompt: SUPPORT_PROMPT + `\n\n# CHANNEL\nText chat. Short paragraphs, link to help articles where useful.`,
     greeting: "Hi! I'm Acme's assistant. Ask me anything.",
     failure: "I'll hand this over to a human agent.",
-    metrics: { calls: 760, successRate: 79, avgHandleTimeSec: 188 },
+    metrics: { calls: 760, answered: 669, successRate: 79, avgHandleTimeSec: 188 },
     ringsPerWeek: 520,
   },
   {
@@ -1406,7 +1408,7 @@ Two qualifying questions max before offering the demo. Keep it under 30 words pe
     prompt: SUPPORT_PROMPT + `\n\n# CHANNEL\nWhatsApp. Casual register, emojis sparingly, one question at a time.`,
     greeting: "Hey! Acme support here 👋 What can I help with?",
     failure: "Passing you to a teammate, one sec.",
-    metrics: { calls: 220, successRate: 74, avgHandleTimeSec: 154 },
+    metrics: { calls: 220, answered: 178, successRate: 74, avgHandleTimeSec: 154 },
     ringsPerWeek: 140,
   },
 
@@ -1434,7 +1436,7 @@ Lead with the 20% win-back discount. If not interested, thank and end within 15 
       rowCount: 5000,
       columns: ["phone", "name", "company", "last_active", "previous_plan"],
     },
-    metrics: { calls: 3421, successRate: 24, avgHandleTimeSec: 162 },
+    metrics: { calls: 3421, answered: 1471, successRate: 24, avgHandleTimeSec: 162 },
     progress: { completed: 3421, total: 5000 },
     startDate: "May 20, 2026",
     // PACED — 10/10 lines busy, a queue building. The demo's headline case:
@@ -1469,7 +1471,7 @@ Customer: {{name}}, current plan {{plan}}, account owner {{owner_email}}.`,
       rowCount: 12000,
       columns: ["phone", "name", "plan", "owner_email"],
     },
-    metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
+    metrics: { calls: 0, answered: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 12000 },
     startDate: "Jun 1, 2026",
     // SCHEDULED — zero progress, but for a KNOWN reason (honesty req #8).
@@ -1503,7 +1505,7 @@ Remind customers their Acme subscription renews soon and confirm payment details
       rowCount: 2800,
       columns: ["phone", "name", "renewal_date", "amount"],
     },
-    metrics: { calls: 2800, successRate: 31, avgHandleTimeSec: 145 },
+    metrics: { calls: 2800, answered: 1204, successRate: 31, avgHandleTimeSec: 145 },
     progress: { completed: 2800, total: 2800 },
     startDate: "May 10, 2026",
     // DONE — but "Completed — Partial" honesty (Bland's pattern): not every
@@ -1541,7 +1543,7 @@ Identify the company immediately. Never threaten. Offer the hardship line if ask
       rowCount: 1500,
       columns: ["phone", "name", "invoice_id", "days_overdue", "balance"],
     },
-    metrics: { calls: 742, successRate: 18, avgHandleTimeSec: 198 },
+    metrics: { calls: 742, answered: 223, successRate: 18, avgHandleTimeSec: 198 },
     progress: { completed: 742, total: 1500 },
     startDate: "May 15, 2026",
     // DEGRADED — auto-paused by the circuit breaker (carrier failures spiked).
@@ -1577,7 +1579,7 @@ Run a 2-question NPS survey: score 0–10, then one open follow-up.
       rowCount: 8000,
       columns: ["phone", "name", "product"],
     },
-    metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
+    metrics: { calls: 0, answered: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 8000 },
     startDate: ", ",
   },
@@ -1601,7 +1603,7 @@ Offer the Black Friday deal ({{discount}} off annual plans) to warm leads.
       rowCount: 24000,
       columns: ["phone", "name", "company", "interest", "discount"],
     },
-    metrics: { calls: 0, successRate: 0, avgHandleTimeSec: 0 },
+    metrics: { calls: 0, answered: 0, successRate: 0, avgHandleTimeSec: 0 },
     progress: { completed: 0, total: 24000 },
     startDate: "Nov 24, 2026",
   },

@@ -7,11 +7,14 @@ const COLOR: Record<Health, string> = {
   healthy: "bg-primary",
   degraded: "bg-warning",
   unhealthy: "bg-destructive",
+  // Hollow: nothing has been measured here, so the dot carries no colour to read.
+  no_data: "bg-transparent border border-stroke",
 }
 const LABEL: Record<Health, string> = {
   healthy: "Healthy",
   degraded: "Degraded",
   unhealthy: "Unhealthy",
+  no_data: "No data",
 }
 
 /** A small status dot for an agent/deployment/call's diagnosed health. */

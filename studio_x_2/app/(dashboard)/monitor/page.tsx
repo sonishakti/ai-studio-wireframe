@@ -3,20 +3,15 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  PhoneCall,
   CheckCircle2,
-  Clock,
-  Timer,
   RefreshCw,
-  TrendingUp,
-  TrendingDown,
   ArrowRight,
   AlertTriangle,
   ShieldCheck,
   Wrench,
   BarChart3,
+  PhoneForwarded,
 } from "lucide-react"
-import { toast } from "sonner"
 import { MonitorNav } from "@/components/monitor-nav"
 import { CallCaptureSheet } from "@/components/call-capture-sheet"
 import { Button } from "@/components/ui/button"
@@ -28,50 +23,128 @@ import {
 import { SeverityBadge } from "@/components/severity-badge"
 import { HealthDot } from "@/components/health-dot"
 import { FreeMinutesNudge } from "@/components/free-minutes-nudge"
-import { cn } from "@/lib/utils"
+import { MetricCard } from "@/components/metric-section"
+import { Sparkline } from "@/components/sparkline"
+import { MetricWatchSheet, WatchButton } from "@/components/metric-watch-sheet"
+import { DesignFocus } from "@/components/design-focus"
 import {
   DEPLOYMENTS, AGENTS, getDeployment, deploymentHref, listDeployments, STATUS_BADGE,
+  type DeploymentKind,
 } from "@/lib/campaign-data"
 import { allOpenIssues, deploymentHealth, fixHref } from "@/lib/diagnostics"
 import { track, Events, recordRemediation, remediationKey } from "@/lib/analytics"
+import {
+  ANSWER_SPEED, METRIC_DEFS, formatMetric, monitorSummary,
+  type MetricKey, type MonitorRange,
+} from "@/lib/monitor-metrics"
+import {
+  SAME_WINDOW, WINDOW_PHRASE, describeWatch, evaluateWatches, listWatches,
+  type Watch, type WatchIncident,
+} from "@/lib/monitor-watches"
 
-// ─── KPI sparkline data (wireframe) ──────────────────────────────────────────
+// ─── Words ───────────────────────────────────────────────────────────────────
 
-const SPARK_DOWN = [42, 40, 44, 38, 30, 33, 36, 34, 28, 26]
-const SPARK_FLAT = [60, 62, 61, 63, 64, 63, 65, 64, 66, 67]
-const SPARK_UP = [20, 24, 30, 38, 44, 50, 58, 66, 74, 82]
+const RANGE_LABEL: Record<MonitorRange, string> = {
+  "24h": "Last 24 hours",
+  "7d": "Last 7 days",
+  "30d": "Last 30 days",
+  "90d": "Last 90 days",
+}
 
-const KPIS = [
-  { label: "Answered Calls", value: "120 / 208", delta: "Down by 16%", down: true, icon: PhoneCall, series: SPARK_DOWN },
-  { label: "Answer Rate (Avg.)", value: "95%", delta: "Up by 0.4%", down: false, icon: CheckCircle2, series: SPARK_FLAT },
-  { label: "Call Duration (Avg.)", value: "5 min", delta: "Up by 4%", down: false, icon: Clock, series: SPARK_FLAT },
-  { label: "Call Duration (Total)", value: "5,500 min", delta: "Up by 4%", down: false, icon: Timer, series: SPARK_UP },
-]
+/** The window a delta compares against. 90 days spans the whole series, so it
+ *  has no earlier period and the tile says so. */
+const PRIOR_PHRASE: Record<MonitorRange, string> = {
+  "24h": "the previous 24 hours",
+  "7d": "the previous 7 days",
+  "30d": "the previous 30 days",
+  "90d": "",
+}
 
-// ─── Call-status distribution ────────────────────────────────────────────────
+/** The four tiles that carry a number, in reading order. */
+const METRIC_ORDER: MetricKey[] = ["total_calls", "answered_calls", "answer_rate", "handle_time"]
 
-const STATUS_SEGMENTS = [
-  { label: "Answered", pct: 20, stroke: "stroke-success", dot: "bg-success" },
-  { label: "Failed", pct: 24, stroke: "stroke-destructive", dot: "bg-destructive" },
-  { label: "Voicemail", pct: 15, stroke: "stroke-chart-3", dot: "bg-chart-3" },
-  { label: "Transferred", pct: 10, stroke: "stroke-warning", dot: "bg-warning" },
-  { label: "Unanswered", pct: 5, stroke: "stroke-chart-1", dot: "bg-chart-1" },
-  { label: "Transfer Failed", pct: 1, stroke: "stroke-muted-foreground", dot: "bg-muted-foreground" },
-]
-const TOTAL_CALLS = 4000
+const isRange = (v: string | null): v is MonitorRange =>
+  v === "24h" || v === "7d" || v === "30d" || v === "90d"
 
-const TOP_AGENTS = [
-  { name: "Agent Alpha", sessions: 5432, success: 89 },
-  { name: "Agent Beta", sessions: 880, success: 70 },
-  { name: "Agent Gamma", sessions: 250, success: 44 },
-]
+/** Small counts read as words in a sentence. Anything larger keeps its digits. */
+const WORD = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"]
+
+/** How much of the filtered set is behind the number. Silent when every
+ *  deployment in view has carried a call: there is nothing to qualify. */
+function coverageLine(coverage: { counted: number; total: number }): string | undefined {
+  const quiet = coverage.total - coverage.counted
+  if (quiet <= 0) return undefined
+  const word = WORD[quiet] ?? String(quiet)
+  return `Counts ${coverage.counted} of ${coverage.total} deployments. ${word} took no calls.`
+}
+
+/** The delta line under a tile: a rate moves in points, everything else in
+ *  percent, and a window with nothing before it says that instead. */
+function deltaLine(key: MetricKey, value: number | null, prior: number | null, range: MonitorRange): string | undefined {
+  if (value === null) return undefined
+  if (prior === null || !PRIOR_PHRASE[range]) return "No prior period to compare"
+  const against = PRIOR_PHRASE[range]
+  if (key === "answer_rate") {
+    const points = Math.round(value) - Math.round(prior)
+    if (points === 0) return `No change from ${against}`
+    return `${points > 0 ? "Up" : "Down"} ${Math.abs(points)} point${Math.abs(points) === 1 ? "" : "s"} from ${against}`
+  }
+  if (prior === 0) return `No change from ${against}`
+  const pct = Math.round(((value - prior) / prior) * 100)
+  if (pct === 0) return `No change from ${against}`
+  return `${pct > 0 ? "Up" : "Down"} ${Math.abs(pct)}% from ${against}`
+}
+
+/** The headline on the Needs attention card, in both of its states. */
+function incidentTitle(inc: WatchIncident): string {
+  const def = METRIC_DEFS[inc.watch.metricKey]
+  const be = def.count ? "are" : "is"
+  if (inc.state === "resolved") {
+    if (inc.watch.comparison === "no_calls") return `${def.label} ${be} coming in again`
+    const side = inc.watch.comparison === "below" ? "above" : "below"
+    const limit =
+      inc.watch.basis === "previous"
+        ? "the period before"
+        : formatMetric(inc.watch.metricKey, inc.watch.threshold)
+    return `${def.label} ${be} back ${side} ${limit}`
+  }
+  if (inc.watch.comparison === "no_calls") return `${def.label} dropped to zero`
+  const verb = inc.watch.comparison === "below" ? "dropped" : "rose"
+  return `${def.label} ${verb} ${describeWatch(inc.watch)}`
+}
+
+/** "412 over the last hour on Collections Outreach." */
+function incidentLine(inc: WatchIncident): string {
+  return `${formatMetric(inc.watch.metricKey, inc.value)} ${WINDOW_PHRASE[inc.watch.frequency]} on ${inc.deployment.name}.`
+}
 
 export default function MonitorPage() {
   React.useEffect(() => {
     track(Events.monitor_viewed)
   }, [])
 
-  const [campaignFilter, setCampaignFilter] = React.useState("all")
+  // ── Filters. All four are controlled and all four feed one derivation, so
+  // every number on this page comes out of the same window.
+  const [range, setRange] = React.useState<MonitorRange>("7d")
+  const [kind, setKind] = React.useState<DeploymentKind | "all">("all")
+  const [agentId, setAgentId] = React.useState("all")
+  const [deploymentId, setDeploymentId] = React.useState("all")
+  const [tick, setTick] = React.useState(0)
+  const reload = React.useCallback(() => setTick((t) => t + 1), [])
+
+  // ?range= survives a refresh and travels in a shared link — window.location on
+  // mount, the same idiom the ?deployed banner below uses (no Suspense bail-out).
+  React.useEffect(() => {
+    const r = new URLSearchParams(window.location.search).get("range")
+    if (isRange(r)) setRange(r)
+  }, [])
+
+  const changeRange = (next: MonitorRange) => {
+    setRange(next)
+    const url = new URL(window.location.href)
+    url.searchParams.set("range", next)
+    window.history.replaceState(null, "", url.toString())
+  }
 
   // "You're live" confirmation — set when arriving straight from a deploy wizard
   // (?deployed=…). Read window.location.search (not useSearchParams) to avoid a
@@ -84,25 +157,52 @@ export default function MonitorPage() {
   }, [])
 
   // Persistent health surface — survives refresh (data-derived, unlike the
-  // transient ?deployed banner). "Needs attention" = the single most severe open
-  // issue; "Live deployments" = everything currently carrying traffic.
+  // transient ?deployed banner). "Needs attention" = the breach if a watch has
+  // one, otherwise the single most severe open issue.
   const topIssue = React.useMemo(() => allOpenIssues()[0], [])
   const liveDeployments = React.useMemo(
     () => listDeployments().filter((d) => d.status === "active" || d.status === "in_progress"),
     [],
   )
 
+  // Every number on the page, from one window. Refresh re-runs it.
+  const summary = React.useMemo(() => {
+    void tick
+    return monitorSummary({ range, kind, agentId, deploymentId })
+  }, [range, kind, agentId, deploymentId, tick])
+
+  // Watches live in localStorage, which is empty on the server: reading them in
+  // an effect keeps the first client render identical to the server's.
+  // evaluateWatches ADVANCES each watch's state, so it runs once per tick.
+  const [watches, setWatches] = React.useState<Watch[]>([])
+  const [incident, setIncident] = React.useState<WatchIncident | null>(null)
+  React.useEffect(() => {
+    setWatches(listWatches())
+    setIncident(evaluateWatches()[0] ?? null)
+  }, [tick])
+
+  // The watch's scope is whatever the deployment filter names; with the filter on
+  // all deployments the sheet asks for one.
+  const scope = deploymentId === "all" ? null : deploymentId
+  const watchOn = (key: MetricKey): Watch | undefined =>
+    scope ? watches.find((w) => w.metricKey === key && w.deploymentId === scope) : undefined
+
+  const [watchMetric, setWatchMetric] = React.useState<MetricKey | null>(null)
+
   // Real traffic signal — sum of calls across every deployment. A brand-new
   // account (auto-provisioned Aria, zero traffic) has 0 here, so we must NOT
-  // show fabricated KPIs / donut / charts. Gate the whole analytics block on it.
+  // show fabricated KPIs / charts. Gate the whole analytics block on it.
   const totalCalls = React.useMemo(
     () => DEPLOYMENTS.reduce((sum, d) => sum + d.metrics.calls, 0),
     [],
   )
   const hasTraffic = totalCalls > 0
+  const answeredPct = summary.calls > 0 ? (summary.answered / summary.calls) * 100 : 0
 
   return (
     <div className="flex flex-col flex-1">
+      {/* A review link (?focus=…) opens at the control it names. */}
+      <DesignFocus />
       <MonitorNav
         action={
           <>
@@ -111,7 +211,7 @@ export default function MonitorPage() {
             <CallCaptureSheet />
             <Button
               variant="outline" size="icon" className="h-8 w-8" title="Refresh"
-              onClick={() => toast.info("Refreshing")}
+              onClick={reload}
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span className="sr-only">Refresh</span>
@@ -142,9 +242,74 @@ export default function MonitorPage() {
           </div>
         )}
 
-        {/* Needs attention — the single most severe open issue, with a Fix
-            deep-link. The remediation loop's entry point on Monitor. */}
-        {topIssue ? (
+        {/* Needs attention — a watch that has something to say outranks the
+            diagnosed queue, because the user asked for that one by name. */}
+        {incident ? (
+          incident.state === "open" ? (
+            <Card className="border-destructive/30">
+              <CardContent className="flex flex-wrap items-start gap-3 p-4">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">Needs attention</p>
+                  <p className="mt-0.5 text-sm">{incidentTitle(incident)}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{incidentLine(incident)}</p>
+                  {incident.cause ? (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Top cause {SAME_WINDOW[incident.watch.frequency]}: {incident.cause.issue.title}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {incident.cause ? (
+                    <Button asChild size="sm" variant="outline" className="gap-1.5">
+                      <Link
+                        href={fixHref(incident.cause.issue.fixTarget)}
+                        onClick={() => {
+                          const cause = incident.cause!
+                          track(Events.alert_fix_opened, {
+                            metric: incident.watch.metricKey,
+                            deployment_id: incident.deployment.id,
+                            rule_id: cause.issue.ruleId,
+                          })
+                          track(Events.remediation_link_clicked, {
+                            rule_id: cause.issue.ruleId,
+                            severity: cause.issue.severity,
+                            level: cause.issue.fixTarget.level,
+                            target_id: cause.issue.fixTarget.id,
+                            section: cause.issue.fixTarget.section,
+                            surface: "monitor",
+                          })
+                          recordRemediation(remediationKey(cause.issue.ruleId, incident.deployment.id))
+                        }}
+                      >
+                        <Wrench className="h-3.5 w-3.5" /> Fix
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button asChild size="sm" variant="outline" className="gap-1.5">
+                      <Link href={`/calls?deployment=${incident.deployment.id}`}>
+                        <PhoneForwarded className="h-3.5 w-3.5" /> See the calls
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-success/40">
+              <CardContent className="flex flex-wrap items-start gap-3 p-4">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">{incidentTitle(incident)}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{incidentLine(incident)}</p>
+                </div>
+                <Button variant="ghost" size="sm" className="shrink-0" onClick={() => setIncident(null)}>
+                  Dismiss
+                </Button>
+              </CardContent>
+            </Card>
+          )
+        ) : topIssue ? (
           <Card className="border-destructive/30">
             <CardContent className="flex flex-wrap items-start gap-3 p-4">
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
@@ -246,220 +411,148 @@ export default function MonitorPage() {
         <>
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          <Select defaultValue="7d">
+          <Select value={range} onValueChange={(v) => changeRange(v as MonitorRange)}>
             <SelectTrigger className="h-9 w-40 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="24h">Last 24 hours</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="90d">Last 90 Days</SelectItem>
+              {(Object.keys(RANGE_LABEL) as MonitorRange[]).map((r) => (
+                <SelectItem key={r} value={r}>{RANGE_LABEL[r]}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select defaultValue="all">
+          <Select value={agentId} onValueChange={setAgentId}>
             <SelectTrigger className="h-9 w-40 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Agents</SelectItem>
+              <SelectItem value="all">All agents</SelectItem>
               {AGENTS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Select defaultValue="all">
+          <Select value={kind} onValueChange={(v) => setKind(v as DeploymentKind | "all")}>
             <SelectTrigger className="h-9 w-40 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Call Types</SelectItem>
+              <SelectItem value="all">All call types</SelectItem>
               <SelectItem value="inbound">Inbound</SelectItem>
-              <SelectItem value="outbound">Outbound</SelectItem>
+              <SelectItem value="batch">Outbound</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={campaignFilter} onValueChange={setCampaignFilter}>
+          <Select value={deploymentId} onValueChange={setDeploymentId}>
             <SelectTrigger className="h-9 w-44 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All deployments</SelectItem>
               {DEPLOYMENTS.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          {campaignFilter !== "all" && (
+          {deploymentId !== "all" && (
             <Button variant="outline" size="sm" asChild className="gap-1.5">
-              <Link href={getDeployment(campaignFilter) ? deploymentHref(getDeployment(campaignFilter)!) : "/deploy"}>Open deployment <ArrowRight className="h-3.5 w-3.5" /></Link>
+              <Link href={getDeployment(deploymentId) ? deploymentHref(getDeployment(deploymentId)!) : "/deploy"}>Open deployment <ArrowRight className="h-3.5 w-3.5" /></Link>
             </Button>
           )}
         </div>
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {KPIS.map((k) => (
-            <Card key={k.label}>
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium text-muted-foreground">{k.label}</p>
-                  <k.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-                <p className="text-2xl font-semibold tabular-nums">{k.value}</p>
-                <div className="flex items-center justify-between gap-2">
-                  <span className={cn("inline-flex items-center gap-1 text-xs", k.down ? "text-destructive" : "text-success")}>
-                    {k.down ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
-                    {k.delta}
-                  </span>
-                  <Sparkline series={k.series} up={!k.down} />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* The tiles. Four numbers the contract returns, then the one it does
+            not: each says where it came from, and carries its own watch. */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {METRIC_ORDER.map((key) => {
+            const def = METRIC_DEFS[key]
+            const value = summary.values[key]
+            const series = summary.series[key]
+            const outboundGap = key === "answer_rate" && value === null
+            const mute = value === null || summary.calls === 0
+            const muteValue = outboundGap
+              ? "Not available for inbound calls"
+              : key === "handle_time" && summary.calls > 0
+                ? "No answered calls yet"
+                : "No calls yet"
+            return (
+              <MetricCard
+                key={key}
+                label={def.label}
+                definition={def.definition}
+                value={mute ? muteValue : formatMetric(key, value as number)}
+                mute={mute}
+                delta={mute ? undefined : deltaLine(key, value, summary.prior[key], range)}
+                deltaPositive={
+                  !mute && summary.prior[key] !== null && (value as number) >= (summary.prior[key] as number)
+                }
+                sub={key === "total_calls" && !mute ? coverageLine(summary.coverage) : undefined}
+                chart={!mute && series.length > 1 ? <Sparkline data={series} height={40} /> : undefined}
+                action={
+                  mute ? undefined : (
+                    <WatchButton
+                      watch={watchOn(key)}
+                      focusId={key === "answered_calls" ? "watch-answered-calls" : undefined}
+                      onClick={() => setWatchMetric(key)}
+                    />
+                  )
+                }
+              />
+            )
+          })}
+
+          {/* The fifth row: a call records when it started and when it ended,
+              and nothing in between. It keeps its place and shows no number. */}
+          <MetricCard
+            label={ANSWER_SPEED.label}
+            definition={ANSWER_SPEED.definition}
+            value="Requires Engine"
+            mute
+          />
         </div>
 
-        {/* Donut + task success */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Card>
-            <CardContent className="p-5">
-              <p className="text-sm font-semibold">Call Status Distribution</p>
-              <p className="text-xs text-muted-foreground mb-4">Breakdown of all calls&apos; status</p>
-              <div className="flex items-center gap-6">
-                <Donut segments={STATUS_SEGMENTS} centerLabel={TOTAL_CALLS.toLocaleString()} centerSub="Total calls" />
-                <div className="flex-1 space-y-1.5">
-                  {STATUS_SEGMENTS.map((s) => (
-                    <div key={s.label} className="flex items-center justify-between text-sm">
-                      <span className="inline-flex items-center gap-2">
-                        <span className={cn("h-2 w-2 rounded-full", s.dot)} />
-                        {s.label}
-                      </span>
-                      <span className="tabular-nums text-muted-foreground">{s.pct}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-5">
-              <p className="text-sm font-semibold">Task Success Rate</p>
-              <p className="text-xs text-muted-foreground mb-4">Percentage of successful calls out of total answered calls.</p>
-              <AreaChart series={[40, 55, 70, 72, 68, 60, 48, 44, 46, 50]} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Top performing agents */}
+        {/* Call outcomes — two segments, both counts, summing to the call total. */}
         <Card>
           <CardContent className="p-5">
-            <p className="text-sm font-semibold">Top Performing Agents</p>
-            <p className="text-xs text-muted-foreground mb-4">Agents ranked by session volume and performance.</p>
-            <div className="space-y-2">
-              {TOP_AGENTS.map((a, i) => {
-                const max = Math.max(...TOP_AGENTS.map((x) => x.sessions))
-                const pct = Math.round((a.sessions / max) * 100)
-                return (
-                  <div key={a.name} className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium tabular-nums shrink-0">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium truncate">
-                          {a.name} <span className="text-xs text-muted-foreground">{a.sessions.toLocaleString()} sessions</span>
-                        </span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                    <span className="text-sm tabular-nums text-muted-foreground shrink-0 w-24 text-right">
-                      {a.success}% success
-                    </span>
-                  </div>
-                )
-              })}
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold">Call outcomes</p>
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {formatMetric("total_calls", summary.calls)} calls
+              </span>
             </div>
+            {summary.calls === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">No calls yet</p>
+            ) : (
+              <>
+                <div
+                  className="mt-4 flex h-3 w-full overflow-hidden rounded-full bg-muted"
+                  role="img"
+                  aria-label={`Answered ${summary.answered}, no answer ${summary.noAnswer}`}
+                >
+                  <div className="bg-primary" style={{ width: `${answeredPct}%` }} />
+                  <div className="bg-muted-foreground/30" style={{ width: `${100 - answeredPct}%` }} />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-sm">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-primary" />
+                    Answered
+                    <span className="tabular-nums text-muted-foreground">
+                      {formatMetric("answered_calls", summary.answered)}
+                    </span>
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+                    No answer
+                    <span className="tabular-nums text-muted-foreground">
+                      {formatMetric("total_calls", summary.noAnswer)}
+                    </span>
+                  </span>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
         </>
         )}
       </main>
+
+      {watchMetric ? (
+        <MetricWatchSheet
+          open
+          onOpenChange={(o) => { if (!o) setWatchMetric(null) }}
+          metricKey={watchMetric}
+          deploymentId={scope}
+          summary={summary}
+          onSaved={reload}
+        />
+      ) : null}
     </div>
-  )
-}
-
-// ─── tiny SVG charts ─────────────────────────────────────────────────────────
-
-function Sparkline({ series, up }: { series: number[]; up: boolean }) {
-  const w = 72, h = 24
-  const min = Math.min(...series), max = Math.max(...series)
-  const range = max - min || 1
-  const pts = series.map((v, i) => `${(i / (series.length - 1)) * w},${h - ((v - min) / range) * h}`).join(" ")
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-6 w-20" preserveAspectRatio="none" aria-hidden>
-      <polyline
-        points={pts}
-        fill="none"
-        strokeWidth={1.5}
-        className={up ? "stroke-success" : "stroke-destructive"}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function Donut({
-  segments,
-  centerLabel,
-  centerSub,
-}: {
-  segments: { label: string; pct: number; stroke: string }[]
-  centerLabel: string
-  centerSub: string
-}) {
-  const r = 42
-  const c = 2 * Math.PI * r
-  const total = segments.reduce((s, x) => s + x.pct, 0) || 1
-  let offset = 0
-  const summary = segments.map((s) => `${s.label} ${s.pct}%`).join(", ")
-  return (
-    <div
-      className="relative shrink-0"
-      style={{ width: 120, height: 120 }}
-      role="img"
-      aria-label={`Call status distribution: ${summary}`}
-    >
-      <svg viewBox="0 0 120 120" className="-rotate-90" aria-hidden>
-        <circle cx="60" cy="60" r={r} fill="none" strokeWidth={14} className="stroke-muted" />
-        {segments.map((s) => {
-          const len = (s.pct / total) * c
-          const seg = (
-            <circle
-              key={s.label}
-              cx="60"
-              cy="60"
-              r={r}
-              fill="none"
-              strokeWidth={14}
-              className={s.stroke}
-              strokeDasharray={`${len} ${c - len}`}
-              strokeDashoffset={-offset}
-            />
-          )
-          offset += len
-          return seg
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg font-semibold tabular-nums leading-none">{centerLabel}</span>
-        <span className="text-xs text-muted-foreground">{centerSub}</span>
-      </div>
-    </div>
-  )
-}
-
-function AreaChart({ series }: { series: number[] }) {
-  const w = 480, h = 140
-  const min = 0, max = 100
-  const range = max - min || 1
-  const pts = series.map((v, i) => `${(i / (series.length - 1)) * w},${h - ((v - min) / range) * h}`)
-  const line = pts.join(" ")
-  const area = `0,${h} ${line} ${w},${h}`
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-auto" preserveAspectRatio="none" role="img" aria-label="Task success rate over time">
-      <polygon points={area} className="fill-primary/10" />
-      <polyline points={line} fill="none" strokeWidth={2} className="stroke-primary" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
   )
 }

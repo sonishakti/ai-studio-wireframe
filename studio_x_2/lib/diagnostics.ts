@@ -35,7 +35,10 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Severity = "critical" | "warning" | "info"
-export type Health = "healthy" | "degraded" | "unhealthy"
+/** "no_data" is a real verdict, not a missing one: a deployment that has never
+ *  taken a call has nothing to diagnose, and reading its empty issue list as
+ *  healthy is how four untouched deployments came to wear a green dot. */
+export type Health = "healthy" | "degraded" | "unhealthy" | "no_data"
 export type CallOutcome = "Successful" | "Failed" | "Cannot Predict"
 
 /** Where a fix lives — becomes a deep-link in the UI (agent editor / deployment /
@@ -407,6 +410,11 @@ export function allOpenIssues(): AggregatedIssue[] {
 
 /** Health roll-up for one deployment (used for header dots + the queue summary). */
 export function deploymentHealth(deploymentId: string): { status: Health; criticals: number; warnings: number } {
+  // No traffic, no verdict: aggregateIssues returns [] for a deployment that has
+  // never carried a call, and healthOf reads an empty list as healthy.
+  if (getDeployment(deploymentId)?.metrics.calls === 0) {
+    return { status: "no_data", criticals: 0, warnings: 0 }
+  }
   const agg = aggregateIssues(deploymentId)
   const base = healthOf(agg.map((a) => a.issue))
   // D1 parity: a batch auto-paused by the circuit breaker (pacing "degraded")

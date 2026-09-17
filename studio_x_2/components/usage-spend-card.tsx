@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import {
@@ -526,20 +527,26 @@ function SpendControlsSheet({
               value={capInput}
               onChange={(e) => setCapInput(e.target.value.replace(/[^\d]/g, ""))}
             />
-            <div className="flex gap-2">
+            {/* Chips, not fills: three primary buttons in one row read as three
+                calls to action. The selected one is ink-tinted, the same idiom
+                the phone-number sheet and the metric watch use. */}
+            <ToggleGroup
+              type="single"
+              value={quickCaps.includes(capNum) ? String(capNum) : ""}
+              onValueChange={(v) => { if (v) setCapInput(v) }}
+              variant="outline"
+              aria-label="Quick caps"
+            >
               {quickCaps.map((q) => (
-                <Button
+                <ToggleGroupItem
                   key={q}
-                  type="button"
-                  variant={capNum === q ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 text-xs tabular-nums"
-                  onClick={() => setCapInput(String(q))}
+                  value={String(q)}
+                  className="h-7 px-3 text-xs font-medium tabular-nums data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
                 >
                   ${q}
-                </Button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
             {!cardOnFile && (
               <p className="text-xs text-muted-foreground">
                 No card on file yet. This cap is saved now and arms automatically with
@@ -558,18 +565,23 @@ function SpendControlsSheet({
           <div className="space-y-2">
             <Label htmlFor="spend-alert">Alert me at</Label>
             <div className="flex items-center gap-2">
-              {[50, 75, 90].map((p) => (
-                <Button
-                  key={p}
-                  type="button"
-                  variant={pctClamped === p ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 text-xs tabular-nums"
-                  onClick={() => setPct(p)}
-                >
-                  {p}%
-                </Button>
-              ))}
+              <ToggleGroup
+                type="single"
+                value={[50, 75, 90].includes(pctClamped) ? String(pctClamped) : ""}
+                onValueChange={(v) => { if (v) setPct(Number(v)) }}
+                variant="outline"
+                aria-label="Alert threshold"
+              >
+                {[50, 75, 90].map((p) => (
+                  <ToggleGroupItem
+                    key={p}
+                    value={String(p)}
+                    className="h-7 px-3 text-xs font-medium tabular-nums data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
+                  >
+                    {p}%
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
               <Input
                 id="spend-alert"
                 inputMode="numeric"

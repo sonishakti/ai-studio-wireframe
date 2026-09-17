@@ -17,28 +17,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { CATEGORIES, type NotificationChannel } from "@/lib/notifications-data"
 
-const CHANNELS: { key: "email" | "inApp" | "slack" | "webhook"; label: string }[] = [
+const CHANNELS: { key: NotificationChannel; label: string }[] = [
   { key: "email", label: "Email" },
   { key: "inApp", label: "In-app" },
   { key: "slack", label: "Slack" },
   { key: "webhook", label: "Webhook" },
 ]
 
-const CATEGORIES = [
-  { id: "campaigns", label: "Campaign events",     desc: "Start, complete, paused, failed", email: true,  inApp: true,  slack: false, webhook: false },
-  { id: "calls",     label: "Call events",          desc: "Per-call outcomes and transcripts (high-volume)", email: false, inApp: false, slack: false, webhook: true  },
-  { id: "agents",    label: "Agent errors",         desc: "Vendor key issues, timeouts, runtime failures",   email: true,  inApp: true,  slack: true,  webhook: true  },
-  { id: "billing",   label: "Billing & usage",      desc: "Threshold alerts, invoice receipts",              email: true,  inApp: true,  slack: false, webhook: false },
-  { id: "security",  label: "Security",             desc: "New API keys, credential rotation, audit events", email: true,  inApp: true,  slack: true,  webhook: false },
-  { id: "product",   label: "Product announcements",desc: "Release notes, new features, deprecations",       email: false, inApp: true,  slack: false, webhook: false },
-]
-
 export default function ProjectNotificationsPage() {
   const [prefs, setPrefs] = React.useState(CATEGORIES)
   const [dirty, setDirty] = React.useState(false)
 
-  const update = (id: string, channel: "email" | "inApp" | "slack" | "webhook", value: boolean) => {
+  const update = (id: string, channel: NotificationChannel, value: boolean) => {
     setPrefs((prev) => prev.map((p) => (p.id === id ? { ...p, [channel]: value } : p)))
     setDirty(true)
   }

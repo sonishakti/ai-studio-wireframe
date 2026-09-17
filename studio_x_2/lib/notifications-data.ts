@@ -48,3 +48,33 @@ export type Notification = (typeof NOTIFICATIONS)[number]
 export function unreadCount(items: readonly Notification[] = NOTIFICATIONS) {
   return items.filter((n) => !n.read).length
 }
+
+// ─── Delivery preferences — the table on Project › Notifications ─────────────
+//
+// The defaults live here, not on the page, because two surfaces read them: the
+// page, which owns the channels, and the Monitor watch sheet, whose "Sent to"
+// line reads back the watches row rather than offering a second set of
+// channels beside it. One door per action. (A Next page may only export the
+// fields the framework knows, so a shared constant cannot live on one.)
+
+export type NotificationChannel = "email" | "inApp" | "slack" | "webhook"
+
+export interface NotificationCategory {
+  id: string
+  label: string
+  desc: string
+  email: boolean
+  inApp: boolean
+  slack: boolean
+  webhook: boolean
+}
+
+export const CATEGORIES: NotificationCategory[] = [
+  { id: "campaigns", label: "Campaign events",     desc: "Start, complete, paused, failed", email: true,  inApp: true,  slack: false, webhook: false },
+  { id: "calls",     label: "Call events",          desc: "Per-call outcomes and transcripts (high-volume)", email: false, inApp: false, slack: false, webhook: true  },
+  { id: "agents",    label: "Agent errors",         desc: "Vendor key issues, timeouts, runtime failures",   email: true,  inApp: true,  slack: true,  webhook: true  },
+  { id: "watches",   label: "Monitor watches",      desc: "A number you watch crosses the line you set",     email: true,  inApp: true,  slack: false, webhook: false },
+  { id: "billing",   label: "Billing & usage",      desc: "Threshold alerts, invoice receipts",              email: true,  inApp: true,  slack: false, webhook: false },
+  { id: "security",  label: "Security",             desc: "New API keys, credential rotation, audit events", email: true,  inApp: true,  slack: true,  webhook: false },
+  { id: "product",   label: "Product announcements",desc: "Release notes, new features, deprecations",       email: false, inApp: true,  slack: false, webhook: false },
+]

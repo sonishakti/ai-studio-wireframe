@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Search, ArrowUpRight, ShieldCheck } from "lucide-react"
 import { MonitorNav } from "@/components/monitor-nav"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -21,6 +22,7 @@ export default function DiagnosticsPage() {
   const [query, setQuery] = React.useState("")
   const [sev, setSev] = React.useState<SevFilter>("all")
   const [pageSize, setPageSize] = React.useState(25)
+  const [page, setPage] = React.useState(0)
 
   // Deep link (?sev=critical|warning) — the sidebar's needs-attention badge
   // lands here pre-filtered. window.location on mount, same idiom as the
@@ -32,13 +34,19 @@ export default function DiagnosticsPage() {
 
   const allIssues = React.useMemo(() => allOpenIssues(), [])
 
-  // Deployment-level health roll-up for the summary strip.
+  // Deployment-level health roll-up for the summary strip. Only deployments that
+  // are actually running: a draft, a paused batch and a scheduled one have no
+  // health to report, and counting them is how a strip headed "Live" came to
+  // report twelve.
   const summary = React.useMemo(() => {
-    const statuses = listDeployments().map((d) => deploymentHealth(d.id).status)
+    const statuses = listDeployments()
+      .filter((d) => d.status === "active" || d.status === "in_progress")
+      .map((d) => deploymentHealth(d.id).status)
     return {
       unhealthy: statuses.filter((s) => s === "unhealthy").length,
       degraded: statuses.filter((s) => s === "degraded").length,
       healthy: statuses.filter((s) => s === "healthy").length,
+      noData: statuses.filter((s) => s === "no_data").length,
     }
   }, [])
 
@@ -55,7 +63,13 @@ export default function DiagnosticsPage() {
     })
   }, [allIssues, sev, query])
 
-  const visible = rows.slice(0, pageSize)
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize))
+  const current = Math.min(page, pageCount - 1)
+  const visible = rows.slice(current * pageSize, current * pageSize + pageSize)
+
+  // A narrowed feed starts at its own first page, never on a page that no
+  // longer exists.
+  React.useEffect(() => { setPage(0) }, [sev, query, pageSize])
 
   return (
     <div className="flex flex-col flex-1">
@@ -65,15 +79,17 @@ export default function DiagnosticsPage() {
         {/* Summary — deployment health roll-up. The remediation loop closes here:
             every issue routes to the config that fixes it, then re-checks. */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-border bg-card px-4 py-3">
-          <p className="text-sm font-medium">Live deployment health</p>
+          <p className="text-sm font-medium">Deployment health</p>
           <HealthDot status="unhealthy" label />
           <span className="-ml-1 text-sm tabular-nums">{summary.unhealthy} unhealthy</span>
           <HealthDot status="degraded" label />
           <span className="-ml-1 text-sm tabular-nums">{summary.degraded} degraded</span>
           <HealthDot status="healthy" label />
           <span className="-ml-1 text-sm tabular-nums">{summary.healthy} healthy</span>
+          <HealthDot status="no_data" label />
+          <span className="-ml-1 text-sm tabular-nums">{summary.noData} no data</span>
           <span className="ml-auto text-xs text-muted-foreground">
-            {rows.length} open issue{rows.length === 1 ? "" : "s"}, ranked by severity × frequency
+            {rows.length} open issue{rows.length === 1 ? "" : "s"} from the last 7 days of calls, ranked by severity × frequency
           </span>
         </div>
 
@@ -148,6 +164,22 @@ export default function DiagnosticsPage() {
               </SelectContent>
             </Select>
             <span className="tabular-nums">{rows.length} issues</span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline" size="sm" className="h-8"
+                disabled={current === 0}
+                onClick={() => setPage(current - 1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline" size="sm" className="h-8"
+                disabled={current >= pageCount - 1}
+                onClick={() => setPage(current + 1)}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       </main>

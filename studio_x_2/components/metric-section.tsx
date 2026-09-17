@@ -1,14 +1,17 @@
+"use client"
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Info } from "lucide-react"
 
 /**
  * MetricSection — LiveKit-style grouped block of metric cards.
  *
  * Pattern: small section header (chevron + title), then a stack of children
- * (usually MetricCard rows or grids). Used on /home, /billing/usage, and per-
- * campaign analytics.
+ * (usually MetricCard rows or grids). Its first consumer is the Monitor tile
+ * set, which reads every number out of lib/monitor-metrics.ts.
  */
 export function MetricSection({
   title,
@@ -30,29 +33,39 @@ export function MetricSection({
 
 /**
  * MetricCard — single metric in the LiveKit overview pattern.
- * Label, optional info icon, value with unit, optional delta + sparkline.
+ * Label, definition tooltip, value with unit, optional delta + sparkline.
  *
  * `mute` = empty/no-data state — renders the value as muted helper copy
  * inside the card instead of as a number.
+ *
+ * `definition` puts a sentence behind the Info glyph, which carried no tooltip,
+ * no title and no handler; the glyph is hidden when a card has nothing to say.
+ * `action` is the slot at the end of the label row where a control that belongs
+ * to THIS number sits (the Monitor tiles put the watch there). Both optional, so
+ * every other card keeps the anatomy it had.
  */
 export function MetricCard({
   label,
+  definition,
   value,
   unit,
   delta,
   deltaPositive,
   sub,
   chart,
+  action,
   mute,
   className,
 }: {
   label: string
+  definition?: string
   value: string
   unit?: string
   delta?: string
   deltaPositive?: boolean
   sub?: string
   chart?: React.ReactNode
+  action?: React.ReactNode
   mute?: boolean
   className?: string
 }) {
@@ -60,11 +73,25 @@ export function MetricCard({
     <Card className={cn("p-4", className)}>
       <CardContent className="p-0 space-y-3">
         {/* Label */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex min-h-6 items-center gap-1.5">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {label}
           </p>
-          <Info className="h-2.5 w-2.5 text-muted-foreground/40" />
+          {definition ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-sm text-muted-foreground/60 transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                >
+                  <Info className="h-3 w-3" />
+                  <span className="sr-only">What {label.toLowerCase()} means</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-64">{definition}</TooltipContent>
+            </Tooltip>
+          ) : null}
+          {action}
         </div>
 
         {/* Value */}

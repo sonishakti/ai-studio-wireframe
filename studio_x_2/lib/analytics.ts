@@ -143,6 +143,16 @@ export const Events = {
   remediation_resolved:       "remediation_resolved",      // ★ user marked a fix done → re-running checks
   config_drift_detected:      "config_drift_detected",     // { level, id, ran_version, current_version }
 
+  // ── Monitor watches (13, 2026-09-17) — the alert loop's own counter-metric set.
+  // watch_fired MUST precede alert_fix_opened for the same watch: a config edit
+  // after a degradation with no watch_fired before it is the miss this set
+  // exists to catch, and page views cannot see it.
+  monitor_watch_set:          "monitor_watch_set",         // { metric, deployment_id, comparison, basis, frequency }
+  monitor_watch_removed:      "monitor_watch_removed",     // { metric, deployment_id }
+  watch_fired:                "watch_fired",               // ★ { metric, deployment_id, comparison, value } — the number crossed the line
+  watch_resolved:             "watch_resolved",            // { metric, deployment_id, value } — the all-clear
+  alert_fix_opened:           "alert_fix_opened",          // ★ { metric, deployment_id, rule_id } — the breach routed to a fix
+
   // ── Project switching ──────────────────────────────────────────────────────
   project_switcher_opened:    "project_switcher_opened",
   project_switched:           "project_switched",

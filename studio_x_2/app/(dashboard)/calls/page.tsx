@@ -220,9 +220,16 @@ export default function CallHistoryPage() {
     window.history.replaceState(null, "", url.toString())
   }, [])
 
-  // Deep-link: open the call named in ?call= on first load (bookmark / shared link).
+  // Deep-link: open the call named in ?call= on first load (bookmark / shared
+  // link), and narrow to the deployment named in ?deployment= — which is where
+  // a Monitor breach with no diagnosis sends you: the calls under the number.
+  // It reuses the search filter, which already matches on campaignName, so
+  // there is no second control for the same narrowing.
   React.useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get("call")
+    const params = new URLSearchParams(window.location.search)
+    const deployment = params.get("deployment")
+    if (deployment) setQuery(getDeployment(deployment)?.name ?? "")
+    const id = params.get("call")
     if (!id) return
     const c = CALLS.find((x) => x.id === id)
     if (c) openCall(c)
