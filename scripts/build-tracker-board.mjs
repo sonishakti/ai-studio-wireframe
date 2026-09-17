@@ -35,9 +35,13 @@ const esc = (v) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
 
-// Thumbnails keep the board small: each image is inlined as an 800px-wide
-// copy (<file>.thumb.png, generated with macOS sips and cached next to the
+// Thumbnails keep the board small: each image is inlined as a 1080px-wide JPEG
+// (<file>.thumb.jpg, generated with macOS sips and cached next to the
 // original). The full-size capture stays in the repo for close reading.
+//
+// JPEG, not PNG: with five more features carrying seven vendors each the PNG
+// board reached 25 MB, and the artifact cap is 16. Same pass the impl log made
+// for the same reason.
 const THUMB_WIDTH = 1080
 // Each unique image is inlined ONCE in a registry at the end of the page; every
 // <img> carries data-img="<key>" and a tiny script copies the src in on load,
@@ -49,15 +53,16 @@ const imageKey = (file) => {
 }
 const inlineImage = (file) => {
   const src = resolve(root, file)
-  const thumb = `${src}.thumb.png`
+  const thumb = `${src}.thumb.jpg`
   const stale =
     !existsSync(thumb) || statSync(thumb).mtimeMs < statSync(src).mtimeMs
   if (stale) {
-    execFileSync("sips", ["-Z", String(THUMB_WIDTH), src, "--out", thumb], {
-      stdio: "ignore",
-    })
+    execFileSync("sips", [
+      "-s", "format", "jpeg", "-s", "formatOptions", "72",
+      "-Z", String(THUMB_WIDTH), src, "--out", thumb,
+    ], { stdio: "ignore" })
   }
-  return `data:image/png;base64,${readFileSync(thumb).toString("base64")}`
+  return `data:image/jpeg;base64,${readFileSync(thumb).toString("base64")}`
 }
 
 const links = (items) =>

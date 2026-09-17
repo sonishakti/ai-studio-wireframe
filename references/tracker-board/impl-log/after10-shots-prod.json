@@ -1,0 +1,205 @@
+[
+  {
+    "name": "after10-03-vocabulary",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=recognition",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const key=(el,k)=>el.dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true}));await wait(4000);const model=document.getElementById('wz-slot-asr-model');if(model){model.focus();key(model,'Enter');await wait(700);for(let i=0;i<8;i++){const it=[...document.querySelectorAll('[role=option]')];const n=it.find(x=>/nova-3/i.test(x.textContent||''));if(n){n.focus();key(n,'Enter');break;}key(document.activeElement||document.body,'ArrowDown');await wait(150);}}await wait(1200);const inp=document.getElementById('rec-word');if(inp){const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;set.call(inp,'Nyquist, SmartFlow Pro, EBITDA, Vantiq, Ceridian');inp.dispatchEvent(new Event('input',{bubbles:true}));await wait(300);const add=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add');if(add)add.click();}await wait(900);const sec=document.querySelector('[data-design-focus=recognition]');if(sec)sec.scrollIntoView({block:'center'});})()",
+    "preWait": 2000,
+    "marks": [
+      {
+        "sel": "[data-design-focus=recognition]",
+        "up": 0,
+        "maxH": 460,
+        "name": "One list, mapped to the field this vendor really has",
+        "why": "Vapi makes you learn a different field per provider and Retell hides its one list in the API. This is Retell's single list with ElevenLabs' honesty: the count against the vendor's own cap, the field named underneath, and a dead row with the reason on any recogniser that has no field at all."
+      }
+    ]
+  },
+  {
+    "name": "after10-03-backup-carry",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=recognition",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const key=(el,k)=>el.dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true}));await wait(4000);const model=document.getElementById('wz-slot-asr-model');if(model){model.focus();key(model,'Enter');await wait(700);for(let i=0;i<8;i++){const it=[...document.querySelectorAll('[role=option]')];const n=it.find(x=>/nova-3/i.test(x.textContent||''));if(n){n.focus();key(n,'Enter');break;}key(document.activeElement||document.body,'ArrowDown');await wait(150);}}await wait(900);const bv=document.getElementById('wz-backup-asr-vendor');if(bv){bv.focus();key(bv,'Enter');await wait(700);for(let i=0;i<8;i++){const it=[...document.querySelectorAll('[role=option]')];const g=it.find(x=>/^Google$/i.test((x.textContent||'').trim()));if(g){g.focus();key(g,'Enter');break;}key(document.activeElement||document.body,'ArrowDown');await wait(150);}}await wait(900);const inp=document.getElementById('rec-word');if(inp){const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;set.call(inp,'Nyquist, SmartFlow Pro, EBITDA');inp.dispatchEvent(new Event('input',{bubbles:true}));await wait(300);const add=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add');if(add)add.click();}await wait(1200);})()",
+    "preWait": 2000,
+    "marks": [
+      {
+        "text": "If Deepgram fails",
+        "tags": "p",
+        "up": 1,
+        "maxH": 150,
+        "name": "What the backup will lose",
+        "why": "Vapi lets each fallback transcriber carry its own config and never says what does not survive the switch. This is the rainy path stated before the call: the backup takes over and the brand names start coming back wrong."
+      }
+    ]
+  },
+  {
+    "name": "after10-05-call-rules",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=call-rules",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+    "preWait": 3500,
+    "marks": [
+      {
+        "text": "On this agent:",
+        "tags": "span",
+        "up": 1,
+        "maxH": 90,
+        "name": "The result, above the settings that produce it",
+        "why": "Vapi has a silence timeout and a maximum duration on one screen, a scroll apart, and never states the order they fire in. The order is what a caller experiences, so it is the first line here."
+      }
+    ]
+  },
+  {
+    "name": "after10-05-rules-sentences",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=call-rules",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+    "preWait": 3500,
+    "marks": [
+      {
+        "text": "If the caller goes quiet for",
+        "tags": "p",
+        "up": 1,
+        "maxH": 250,
+        "name": "Rules you can read out loud",
+        "why": "This was a column of switches with a number field under some of them. Each was true on its own and the set said nothing. Two rungs are new: speaking up before hanging up, and finishing the sentence when the call is stopped, both engine fields the console never exposed."
+      }
+    ]
+  },
+  {
+    "name": "after10-05-broken-rung",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=call-rules",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(4000);const inp=document.getElementById('cr-remind-secs');if(inp){const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;set.call(inp,'60');inp.dispatchEvent(new Event('input',{bubbles:true}));}await wait(400);const s=document.getElementById('cr-silence-secs');if(s){const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;set.call(s,'30');s.dispatchEvent(new Event('input',{bubbles:true}));}await wait(1200);})()",
+    "preWait": 2000,
+    "marks": [
+      {
+        "text": "never plays",
+        "tags": "span",
+        "up": 1,
+        "maxH": 90,
+        "name": "A rule that can never fire, caught before the call",
+        "why": "Set the reminder later than the hang-up and it costs nothing until the first real caller goes quiet. Nothing in the product used to say so. The pre-flight fails on this too, so it cannot ship."
+      }
+    ]
+  },
+  {
+    "name": "after10-06-delivery",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=delivery",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+    "preWait": 3500,
+    "marks": [
+      {
+        "text": "Pace",
+        "tags": "label",
+        "up": 2,
+        "maxH": 150,
+        "name": "One handle, every vendor that has a speed field",
+        "why": "ElevenLabs runs 0.7 to 1.2, MiniMax 0.5 to 2.0, Tencent calls normal zero and runs to 6. Nobody should learn twelve scales to slow a voice down, so 50 is always this voice's normal and the vendor's own number rides beside it."
+      }
+    ]
+  },
+  {
+    "name": "after10-06-tone-dead",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=delivery",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+    "preWait": 3500,
+    "marks": [
+      {
+        "text": "takes no direction for the voice",
+        "tags": "p",
+        "up": 0,
+        "maxH": 110,
+        "name": "A control the vendor cannot honour is never drawn",
+        "why": "The alternative was writing tone into the system prompt, which changes what the agent SAYS in order to change how it sounds. Pronunciation still works here, by text swap rather than dictionary, and the row names which one you are getting."
+      }
+    ]
+  },
+  {
+    "name": "after10-09-import-row",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents?view=list",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(3000);const b=[...document.querySelectorAll('button')].find(x=>/Create New Agent/i.test(x.textContent||''));if(b)b.click();await wait(1600);})()",
+    "preWait": 1600,
+    "marks": [
+      {
+        "text": "Or bring one you already have",
+        "tags": "label",
+        "up": 1,
+        "maxH": 170,
+        "name": "Import is a way to start, not a tool beside the list",
+        "why": "It was a toolbar button on the agents list, which is a place a first-time user has already left by the time they are creating an agent. Someone arriving from Vapi or Retell has their answer written down already."
+      }
+    ]
+  },
+  {
+    "name": "after10-12-live-calls",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor/live",
+    "wait": 8000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';",
+    "preWait": 1200,
+    "marks": [
+      {
+        "text": "The caller has asked for a person twice.",
+        "tags": "span",
+        "up": 2,
+        "maxH": 120,
+        "name": "Issues first, with the reason in the caller's words",
+        "why": "Retell's live table sorts by start time, which with forty calls up tells an operator nothing about which one to open. The calls that have gone wrong sort to the top and say why on the row, because nobody scanning forty rows hovers for a tooltip."
+      }
+    ]
+  },
+  {
+    "name": "after10-12-clock",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor/live",
+    "wait": 8000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(2500);const p=[...document.querySelectorAll('button')].find(x=>/^Pause$/.test((x.textContent||'').trim()));if(p)p.click();await wait(3000);})()",
+    "preWait": 1500,
+    "marks": [
+      {
+        "text": "Paused",
+        "tags": "p",
+        "up": 1,
+        "maxH": 80,
+        "name": "The lag is named, and it can be held still",
+        "why": "LiveKit is the only one of the four that treats freshness as a control rather than a promise. A row that slides away while it is being read is worse than a row that is a few seconds old and says so."
+      }
+    ]
+  },
+  {
+    "name": "after10-12-operator-verbs",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor/live",
+    "wait": 8000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(2500);const b=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='Open');if(b)b.click();await wait(2000);})()",
+    "preWait": 1500,
+    "marks": [
+      {
+        "text": "Take over",
+        "tags": "button",
+        "up": 2,
+        "maxH": 200,
+        "name": "Four verbs, written from the caller's side",
+        "why": "Taken from Vapi's control API, which is the only documented set in the field: listen over a socket, say, mute the assistant, end the call. The two a caller would notice are confirmed, and the confirmation says what the caller experiences rather than what the system does."
+      }
+    ]
+  },
+  {
+    "name": "after10-12-takeover",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor/live",
+    "wait": 8000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));await wait(2500);const b=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()==='Open');if(b)b.click();await wait(1800);const t=[...document.querySelectorAll('button')].find(x=>/Take over/i.test(x.textContent||''));if(t)t.click();await wait(1200);const ok=[...document.querySelectorAll('button')].find(x=>/^Take over$/i.test((x.textContent||'').trim())&&x.closest('[role=alertdialog]'));if(ok)ok.click();await wait(1800);})()",
+    "preWait": 1800,
+    "marks": [
+      {
+        "text": "You are on the line.",
+        "tags": "span",
+        "up": 1,
+        "maxH": 110,
+        "name": "Barge-in is immediate, and the state says so",
+        "why": "The failure this exists to prevent is an operator taking over while the agent keeps talking. The agent is muted on the same tick, mid-sentence if it was speaking, and the drawer says the agent will not speak again until this ends."
+      }
+    ]
+  }
+]

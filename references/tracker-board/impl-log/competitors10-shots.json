@@ -1,0 +1,274 @@
+[
+  {
+    "name": "vapi-03-custom-keywords",
+    "url": "https://docs.vapi.ai/customization/custom-keywords",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "keyterm",
+        "tags": "h2",
+        "up": 0,
+        "maxH": 120,
+        "name": "Vapi: a different field per provider",
+        "why": "Deepgram keywords with an intensifier, Deepgram keyterm without one, AssemblyAI keytermsPrompt. The builder has to learn the vendor's API to boost a brand name."
+      }
+    ],
+    "pre": "(()=>{const t=\"keyterm\";const els=[...document.querySelectorAll(\"h2\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<120&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "vapi-03-transcriber-fallback",
+    "url": "https://docs.vapi.ai/customization/transcriber-fallback-plan",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "Manual fallbacks",
+        "tags": "p, li, strong, h3",
+        "up": 0,
+        "maxH": 200,
+        "name": "Vapi: an ordered list of backup recognisers",
+        "why": "Each fallback may carry its own language, and nothing states what the vocabulary loses when one takes over."
+      }
+    ],
+    "pre": "(()=>{const t=\"manual fallbacks\";const els=[...document.querySelectorAll(\"p, li, strong, h3\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "retell-03-boosted-keywords",
+    "url": "https://docs.retellai.com/api-references/create-agent",
+    "wait": 7000,
+    "marks": [
+      {
+        "text": "boosted_keywords",
+        "tags": "span, code, h3",
+        "up": 1,
+        "maxH": 200,
+        "name": "Retell: one list, provider agnostic",
+        "why": "A single array of strings biases whichever transcriber is running. The right shape, but it lives in the API and never appears as a control."
+      }
+    ],
+    "pre": "(()=>{const t=\"boosted_keywords\";const els=[...document.querySelectorAll(\"span, code, h3\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "livekit-03-stt-vendors",
+    "url": "https://docs.livekit.io/agents/models/stt/",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "Speech-to-text (STT) models",
+        "tags": "h1, h2",
+        "up": 0,
+        "maxH": 140,
+        "name": "LiveKit: a vendor table and an escape hatch",
+        "why": "Recognition is a plugin choice in code. There is no vocabulary control at all, which is what a console is for."
+      }
+    ],
+    "pre": "(()=>{const t=\"speech-to-text (stt) models\";const els=[...document.querySelectorAll(\"h1, h2\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<140&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "vapi-05-voicemail-detection",
+    "url": "https://docs.vapi.ai/calls/voicemail-detection",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "beepMaxAwaitSeconds",
+        "tags": "span, code, td",
+        "up": 1,
+        "maxH": 200,
+        "name": "Vapi: voicemail detection is windowed",
+        "why": "It waits a bounded time for the beep, then speaks. Detection is never certain, so the window is part of the setting."
+      }
+    ],
+    "pre": "(()=>{const t=\"beepmaxawaitseconds\";const els=[...document.querySelectorAll(\"span, code, td\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "retell-05-handle-voicemail",
+    "url": "https://docs.retellai.com/build/handle-voicemail",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "Leave a message",
+        "tags": "p, li, strong, h3, td",
+        "up": 0,
+        "maxH": 200,
+        "name": "Retell: voicemail is a two-way choice",
+        "why": "Hang up, or leave a message from a prompt or a fixed sentence. Our engine can only do the first, which is why the second is shown as a choice you cannot pick yet."
+      }
+    ],
+    "pre": "(()=>{const t=\"leave a message\";const els=[...document.querySelectorAll(\"p, li, strong, h3, td\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "elevenlabs-05-keypad-tone",
+    "url": "https://elevenlabs.io/docs/agents-platform/customization/tools/system-tools/play-keypad-touch-tone",
+    "wait": 7000,
+    "marks": [
+      {
+        "text": "play_keypad_touch_tone",
+        "tags": "h1, h2, code, span",
+        "up": 0,
+        "maxH": 160,
+        "name": "ElevenLabs: keypad input is a system tool",
+        "why": "Vapi, Retell and ElevenLabs all ship this. Ours has no engine field, so it is named as missing rather than left out."
+      }
+    ],
+    "pre": "(()=>{const t=\"play_keypad_touch_tone\";const els=[...document.querySelectorAll(\"h1, h2, code, span\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<160&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "livekit-05-session-events",
+    "url": "https://docs.livekit.io/reference/agents/events/",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "user_state_changed",
+        "tags": "code, h3, span, td",
+        "up": 0,
+        "maxH": 160,
+        "name": "LiveKit: silence is an event, not a setting",
+        "why": "You write the hang-up rule yourself in code. The rule exists either way, so the only question is whether a builder can see it."
+      }
+    ],
+    "pre": "(()=>{const t=\"user_state_changed\";const els=[...document.querySelectorAll(\"code, h3, span, td\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<160&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "vapi-06-speech-configuration",
+    "url": "https://docs.vapi.ai/customization/speech-configuration",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "Speech configuration",
+        "tags": "h1, h2",
+        "up": 0,
+        "maxH": 140,
+        "name": "Vapi: speed as a raw slider",
+        "why": "Labelled Slower against Faster, with no number. The ends of the scale are the decision, which is the grammar we took."
+      }
+    ],
+    "pre": "(()=>{const t=\"speech configuration\";const els=[...document.querySelectorAll(\"h1, h2\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<140&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "retell-06-pronunciation",
+    "url": "https://docs.retellai.com/build/add-pronunciation",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "alphabet",
+        "tags": "span, code, td, h3",
+        "up": 1,
+        "maxH": 200,
+        "name": "Retell: pronunciation needs a phonetic alphabet",
+        "why": "IPA, CMU, Pinyin or Jyutping per word. Correct, and it asks a builder to know phonetics; ours takes a spelling."
+      }
+    ],
+    "pre": "(()=>{const t=\"alphabet\";const els=[...document.querySelectorAll(\"span, code, td, h3\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "livekit-06-tts-models",
+    "url": "https://docs.livekit.io/agents/models/tts/",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "Text-to-speech (TTS) models",
+        "tags": "h1, h2",
+        "up": 0,
+        "maxH": 140,
+        "name": "LiveKit: expressiveness depends on the model",
+        "why": "The knob exists per vendor and nowhere in a single place. That is the fact behind showing vendor-native handles only when the vendor has them."
+      }
+    ],
+    "pre": "(()=>{const t=\"text-to-speech (tts) models\";const els=[...document.querySelectorAll(\"h1, h2\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<140&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "retell-09-quickstart",
+    "url": "https://docs.retellai.com/get-started/quick-start",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "phone agent",
+        "tags": "h1, h2, h3, p",
+        "up": 0,
+        "maxH": 200,
+        "name": "Retell: first run starts from a template",
+        "why": "Every rival walls the first run behind create-an-agent, and none of them offers a way in from a competitor's config."
+      }
+    ],
+    "pre": "(()=>{const t=\"phone agent\";const els=[...document.querySelectorAll(\"h1, h2, h3, p\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "livekit-09-starter",
+    "url": "https://docs.livekit.io/agents/start/voice-ai/",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "Voice AI quickstart",
+        "tags": "h1, h2",
+        "up": 0,
+        "maxH": 140,
+        "name": "LiveKit: the first run is a repository",
+        "why": "A starter app you clone. Fine for an SDK, and it means the first minute belongs to a terminal rather than a console."
+      }
+    ],
+    "pre": "(()=>{const t=\"voice ai quickstart\";const els=[...document.querySelectorAll(\"h1, h2\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<140&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "vapi-12-live-call-control",
+    "url": "https://docs.vapi.ai/calls/call-features",
+    "wait": 7000,
+    "marks": [
+      {
+        "text": "mute-assistant",
+        "tags": "span, code, li, td",
+        "up": 1,
+        "maxH": 220,
+        "name": "Vapi: the operator verbs, as an API",
+        "why": "say, add-message, mute-assistant, end-call, transfer, handoff, plus a listen socket. The only documented set in the field, and it has no interface on top of it."
+      }
+    ],
+    "pre": "(()=>{const t=\"mute-assistant\";const els=[...document.querySelectorAll(\"span, code, li, td\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<220&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "elevenlabs-12-client-events",
+    "url": "https://elevenlabs.io/docs/agents-platform/customization/events/client-events",
+    "wait": 7000,
+    "marks": [
+      {
+        "text": "interruption",
+        "tags": "span, code, td, h3",
+        "up": 1,
+        "maxH": 200,
+        "name": "ElevenLabs: interruption is an event you receive",
+        "why": "You can watch a call from the outside. Nothing here lets a person step into one."
+      }
+    ],
+    "pre": "(()=>{const t=\"interruption\";const els=[...document.querySelectorAll(\"span, code, td, h3\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<200&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  },
+  {
+    "name": "vapi-09-dashboard-quickstart",
+    "url": "https://docs.vapi.ai/quickstart/phone",
+    "wait": 6000,
+    "marks": [
+      {
+        "text": "assistant",
+        "tags": "h2, h3",
+        "up": 0,
+        "maxH": 160,
+        "name": "Vapi: create an assistant, then a number",
+        "why": "The first run is a blank assistant plus a template picker. Nothing reads a config you already own somewhere else."
+      }
+    ],
+    "pre": "(()=>{const t=\"assistant\";const els=[...document.querySelectorAll(\"h2, h3\")];const el=els.find(e=>(e.textContent||'').trim().toLowerCase().includes(t)&&e.getBoundingClientRect().height<160&&e.getBoundingClientRect().width>40);if(el){el.scrollIntoView({block:'center'});window.scrollBy(0,-160);}return !!el})()",
+    "preWait": 1000
+  }
+]
