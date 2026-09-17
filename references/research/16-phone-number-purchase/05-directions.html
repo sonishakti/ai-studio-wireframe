@@ -1,0 +1,538 @@
+<title>Phone Number Purchase Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: the document is light, every app mock is painted in the Studio_X dark builder. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3{font-size:16px;margin:26px 0 6px}
+p{max-width:78ch;margin:6px 0}
+code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.card>header{padding:13px 16px 10px;border-bottom:1px solid var(--doc-rule)}
+.card>header h3{margin:0;font-size:17px}
+.card>header .who{font-size:13px;color:var(--doc-ink-2);margin-top:3px}
+.card .body{padding:14px 16px;font-size:14px}
+.card .body p{margin:0 0 10px}
+.split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:0;align-items:stretch}
+.split>.mockwrap{border-left:1px solid var(--doc-rule);background:var(--bg)}
+.fac{border-top:1px solid var(--doc-rule);padding:12px 16px;font-size:13.5px}
+.fac dl{margin:0;display:grid;grid-template-columns:64px 1fr;gap:4px 10px}
+.fac dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding-top:3px}
+.fac dd{margin:0}
+.fac .for dt{color:#1b7f4d}.fac .against dt{color:#b3261e}.fac .cost dt{color:var(--doc-ink-2)}
+.refuse{background:#fff6f5;border-top:1px solid #f3cfcb;padding:12px 16px;font-size:13.5px}
+.refuse b{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:16px;height:100%}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sec-h .chev{margin-left:auto;color:var(--ink-3)}
+.rowx{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:14px;border-bottom:1px solid var(--line)}
+.rowx:last-child{border-bottom:0}
+.lbl{color:var(--ink-2);font-size:12.5px;line-height:1.35}
+.lbl small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:3px}
+.ctl{min-width:0}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px}
+.field .cv{margin-left:auto;color:var(--ink-3);white-space:nowrap}
+.field.ph{color:var(--ink-3)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.wide{width:100%}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.seg{display:flex;border:1px solid var(--stroke);border-radius:6px;overflow:hidden}
+.seg span{flex:1;text-align:center;padding:6px 8px;font-size:12px;color:var(--ink-2);border-right:1px solid var(--stroke)}
+.seg span:last-child{border-right:0}
+.seg span.on{background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand-dim)}
+.pick{border:1px solid var(--line);border-radius:6px;padding:9px 11px;background:var(--panel-2);display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pick.on{box-shadow:inset 0 0 0 1px var(--brand);border-color:var(--brand-dim)}
+.pick .num{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink)}
+.pick .mo{margin-left:auto;color:var(--ink-2);font-size:12px;white-space:nowrap}
+table.mx{width:100%;border-collapse:collapse;font-size:12px}
+table.mx th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mx tr:last-child td{border-bottom:0}
+table.mx .m{font-family:"JetBrains Mono",monospace}
+.log{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-family:"JetBrains Mono",monospace;font-size:11.5px;line-height:1.75;color:var(--ink-2)}
+.log b{color:var(--ink);font-weight:500}
+.log .t{color:var(--ink-3)}
+.note{font-size:11.5px;color:var(--ink-3);margin:9px 0 5px}
+.pin{margin-top:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:12px;color:var(--ink-2)}
+.pin b{color:var(--ink);font-weight:500;display:block;margin-bottom:3px}
+/* ---- audit ---- */
+table.audit{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:12px}
+table.audit th{text-align:left;padding:7px 9px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);border-bottom:1px solid var(--doc-rule);background:#eef3f6;font-weight:600}
+table.audit td{padding:6px 9px;border-bottom:1px solid #eaf0f3;vertical-align:top}
+table.audit tr:last-child td{border-bottom:0}
+table.audit td.s{text-align:center;width:52px;font-weight:600}
+table.audit .grp td{background:#f7fafb;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2)}
+.y{color:#1b7f4d}.h{color:#a9730d}.n{color:#b3261e}.x{color:#93a3ab}
+.legend{font-size:12.5px;color:var(--doc-ink-2);margin-top:8px}
+.verdict{background:#fff;border:2px solid var(--doc-brand);border-radius:6px;padding:18px 20px;margin-top:14px}
+.verdict h3{margin-top:18px}
+.verdict h3:first-child{margin-top:0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:12px 16px;margin-top:14px}
+.copy table{width:100%;border-collapse:collapse;font-size:13px}
+.copy td{padding:4px 8px 4px 0;vertical-align:top;border-bottom:1px solid #eef3f6}
+.copy td:first-child{width:220px;color:var(--doc-ink-2);font-size:12px;font-family:"JetBrains Mono",monospace}
+.plan table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.plan th{text-align:left;padding:7px 10px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);background:#eef3f6;border-bottom:1px solid var(--doc-rule);font-weight:600}
+.plan td{padding:8px 10px;border-bottom:1px solid #eaf0f3;vertical-align:top}
+.plan td:first-child{font-family:"JetBrains Mono",monospace;font-size:12px;white-space:nowrap}
+.plan tr:last-child td{border-bottom:0}
+.deep{font-family:"JetBrains Mono",monospace;font-size:13px;background:#0b0f13;color:#7fe0ff;padding:10px 14px;border-radius:6px;display:inline-block;margin-top:6px}
+@media (max-width:1080px){.split{grid-template-columns:1fr}.split>.mockwrap{border-left:0;border-top:1px solid var(--doc-rule)}.facts{grid-template-columns:1fr 1fr}}
+@media (max-width:700px){.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 16 · Phone number purchase · step 5 diverge</p>
+<h1>Phone Number Purchase Directions</h1>
+<p><strong>JTBD.</strong> When my agent already answers me in the browser and the only thing between it and a real customer is a number they can dial, I want to get one and hear it ring on my own phone in the same sitting.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>The number field in the builder's Deployment section (<code>PhoneNumberSelect</code>, <code>channel-section.tsx:298-355</code>), the sheet its footer opens (<code>add-phone-number-sheet.tsx</code>), and the inventory row (<code>deploy/phone-numbers/page.tsx</code>).</div>
+  <div><b>Agora facts</b>Engine is $0.10 per agent minute, the same with your own key. Telephony is Beta and free. A rented number is the platform's first recurring per-resource fee; no meter, plan card or spend cap models one.</div>
+  <div><b>Contract</b><code>provider</code> is a closed <code>byo | twilio</code>. The add payload is seven fields: no country, price, capability, status, owner or identity record. <code>delete</code> removes the config, not the number.</div>
+  <div><b>Locked</b>One door per action. Third branch of the existing sheet, never a fourth door. Included and purchased stay separate numbers. Commit buttons carry exact amounts. The flow ends on a placed call.</div>
+</div>
+
+<p>Five directions. Each is a different answer to one question: <strong>where does the decision live, and who holds the wait between paying and ringing?</strong> Everything below the fold of that question (which area code field, which price format) follows from it.</p>
+
+<!-- ─────────────────────────── A ─────────────────────────── -->
+<div class="card">
+  <header>
+    <h3>A · A Buy a number page</h3>
+    <div class="who">The obvious one. A new route under Deploy with search, results, checkout and an order history.</div>
+  </header>
+  <div class="split">
+    <div class="body">
+      <p>Give purchasing its own address, <code>/deploy/phone-numbers/buy</code>, reached from a second primary on the inventory header. Search by country and area code, filter by capability, compare prices in a table, add identity documents, check out. The page has room to grow a country picker, a KYC record, a per-country requirements panel and an order list, all of which Phase 2 will ask for.</p>
+      <p>This is what a Console does. It is also what a designer reaches for when a ticket says "let customers search available US numbers, see capabilities and pricing, purchase a number".</p>
+    </div>
+    <div class="mockwrap"><div class="mock">
+      <div class="sec">
+        <div class="sec-h">Deploy › Phone numbers › Buy <span class="chev">⌄</span></div>
+        <div style="padding:12px">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div class="field" style="width:110px">United States <span class="cv">⌄</span></div>
+            <div class="field" style="width:96px">415</div>
+            <div class="field ph" style="flex:1">Local <span class="cv">⌄</span></div>
+            <span class="btn primary">Search</span>
+          </div>
+          <table class="mx">
+            <thead><tr><th>Number</th><th>City</th><th>Capability</th><th>Monthly</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="m">+1 (415) 555-0142</td><td>San Francisco</td><td><span class="chip">Answers and dials</span></td><td class="m">$2.00</td><td><span class="btn">Buy</span></td></tr>
+              <tr><td class="m">+1 (415) 555-0188</td><td>San Francisco</td><td><span class="chip">Answers and dials</span></td><td class="m">$2.00</td><td><span class="btn">Buy</span></td></tr>
+              <tr><td class="m">+1 (415) 555-0203</td><td>San Francisco</td><td><span class="chip">Answers calls</span></td><td class="m">$1.15</td><td><span class="btn">Buy</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="note">And the builder, unchanged, two navigations away:</p>
+      <div class="sec">
+        <div class="rowx"><div class="lbl">Phone number</div><div class="ctl">
+          <div class="field ph">Choose a phone number <span class="cv">⌄</span></div>
+          <div style="margin-top:6px"><span class="chip">＋ Add phone number</span></div>
+        </div></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="fac">
+    <dl>
+      <dt class="for" style="color:#1b7f4d">For</dt><dd>Room for every Phase 2 requirement without a second redesign: country picker, identity bundle per country, order history, bulk purchase. Matches the ticket's own sentence and matches Twilio's shape.</dd>
+      <dt class="against" style="color:#b3261e">Against</dt><dd>It is a fourth door to an object that already has one. Every existing entry point opens <code>AddPhoneNumberSheet</code>; this one does not, so the buy path is the only way to get a number that the number field does not offer. It also takes the user out of the deployment they were configuring, which is the one place they were asking the question. The page it lands beside has no home in the navigation (defect 17), so a second page inherits that problem and doubles it.</dd>
+      <dt class="cost" style="color:var(--doc-ink-2)">Cost</dt><dd>High. A route, an empty state, a second primary on the inventory header, and a permanent fork between "get a number" and "add a number".</dd>
+    </dl>
+  </div>
+  <div class="refuse"><b>Refused.</b> Not because a page is wrong for Phase 2, but because it breaks the standing rule that things which belong together live together: a bought number and a brought number are the same object, acquired two ways. The day a country picker is needed, the buy branch grows a country field. It does not need a building to live in first.</div>
+</div>
+
+<!-- ─────────────────────────── B ─────────────────────────── -->
+<div class="card">
+  <header>
+    <h3>B · A third branch of the sheet, ending at the receipt</h3>
+    <div class="who">Buy sits beside Quick connect and Manual SIP. Money moves, the sheet closes, the row says Turning up.</div>
+  </header>
+  <div class="split">
+    <div class="body">
+      <p>The toggle at the top of <code>AddPhoneNumberSheet</code> goes from two to three: <strong>Buy · Quick connect · Manual SIP</strong>. The buy branch is one field and a result list, because that is all a Phase 1 purchase needs: Vapi asks for an area code, Retell's <code>area_code</code> is "3 digit integer. Currently only supports US area code", LiveKit takes a country code and an area code. Pick, pay, done. The number lands in the list with a Turning up badge and the user goes back to what they were doing.</p>
+      <p>Every existing entry point inherits it for free: the list header, the empty state, the channels panel, the channel hero, and the number field's footer.</p>
+    </div>
+    <div class="mockwrap"><div class="mock">
+      <div class="sec">
+        <div class="sec-h">Add a phone number</div>
+        <div style="padding:12px">
+          <div class="seg" style="margin-bottom:10px"><span class="on">Buy</span><span>Quick connect</span><span>Manual SIP</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div class="field" style="width:96px">415</div>
+            <span class="btn primary" style="flex:1">Search numbers</span>
+          </div>
+          <div class="pick on"><span class="num">+1 (415) 555-0142</span><span class="chip">Answers and dials</span><span class="mo">$2.00 / mo</span></div>
+          <div class="pick"><span class="num">+1 (415) 555-0203</span><span class="chip">Answers calls</span><span class="mo">$1.15 / mo</span></div>
+          <span class="btn primary wide" style="margin-top:8px">Buy +1 (415) 555-0142 · $1.42 today</span>
+        </div>
+      </div>
+      <p class="note">Then the sheet closes and the inventory carries the wait:</p>
+      <div class="sec" style="padding:8px">
+        <table class="mx">
+          <tbody><tr><td class="m">+1 (415) 555-0142</td><td>Agora</td><td><span class="chip warn"><span class="dot"></span>Turning up</span></td></tr></tbody>
+        </table>
+      </div>
+    </div></div>
+  </div>
+  <div class="fac">
+    <dl>
+      <dt class="for" style="color:#1b7f4d">For</dt><dd>One door, one toggle, five entry points inherit it. The cheapest honest thing that answers the headline job, and it is the shape three of four vendors ship.</dd>
+      <dt class="against" style="color:#b3261e">Against</dt><dd>It ends on a checkmark. A3's durable rule is that provisioning success is not call success, and this direction hands the user a receipt for a line that cannot yet take a call. It leaks exactly where the north star is measured: the success event is <code>first_live_call_received</code>, not a purchase, and nobody in the teardown ends a purchase on a call. It also leaves the inventory untouched, so the row that now has to carry a rented number still has a Vendor column, two status words and one Release action.</dd>
+      <dt class="cost" style="color:var(--doc-ink-2)">Cost</dt><dd>Low. One branch component, one toggle item, one catalog module.</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- ─────────────────────────── C ─────────────────────────── -->
+<div class="card">
+  <header>
+    <h3>C · The same branch, ending on a ringing phone <span style="color:var(--doc-brand)">· recommended core</span></h3>
+    <div class="who">The sheet holds the wait. The turn-up is a fact log, and the last step is a call the user places.</div>
+  </header>
+  <div class="split">
+    <div class="body">
+      <p>B's branch, and then the sheet stays open. The wait between "it is mine" and "it works" is the single state nobody in the teardown designs: Vapi warns in prose that "Calls will not work until activation is complete", LiveKit ships a <code>pending</code> status and leaves you to poll it. Here the wait is the same timestamped fact log the quick-connect branch already uses instead of a spinner, and the flow ends the way A3 ends: the user presses <strong>Call it now</strong>, their own phone rings, the agent speaks.</p>
+      <p>The identity requirement is stated above the price, not at checkout, because that is the one move no vendor makes: Retell's KYC is found by "click[ing] on any of your numbers", and Twilio's Regulatory Bundle blocks the purchase you already chose. Cheapest differentiator in the feature.</p>
+    </div>
+    <div class="mockwrap"><div class="mock">
+      <div class="sec">
+        <div class="sec-h">Add a phone number</div>
+        <div style="padding:12px">
+          <div class="seg" style="margin-bottom:10px"><span class="on">Buy</span><span>Quick connect</span><span>Manual SIP</span></div>
+          <div style="font-size:11.5px;color:var(--ink-3);margin-bottom:8px">US numbers need a business name and a street address before they can dial out.</div>
+          <div class="pick on"><span class="num">+1 (415) 555-0142</span><span class="chip">Answers and dials</span><span class="mo">$2.00 / mo</span></div>
+          <div class="log" style="margin-top:9px">
+            <span class="t">09:00</span> <b>Number reserved</b> · +1 (415) 555-0142<br>
+            <span class="t">09:07</span> <b>Routing configured</b> · inbound to Sales Qualifier<br>
+            <span class="t">09:14</span> <b>Line turned up</b> · ready for calls
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
+            <span class="btn primary">Call it now</span>
+            <span class="chip on"><span class="dot"></span>Answered · two-way audio confirmed</span>
+          </div>
+        </div>
+      </div>
+      <p class="note">Before the line is up, the same fold says so and offers nothing else:</p>
+      <div class="sec" style="padding:11px">
+        <div style="font-size:12.5px">Turning up +1 (415) 555-0142</div>
+        <div style="font-size:11.5px;color:var(--ink-3);margin-top:3px">Calls do not connect until this finishes.</div>
+      </div>
+    </div></div>
+  </div>
+  <div class="fac">
+    <dl>
+      <dt class="for" style="color:#1b7f4d">For</dt><dd>The only direction whose last step is the metric. Answers rainy 8 (owned and not working) inside the flow rather than on a badge the user has to find; answers rainy 4 and 3 by naming the identity requirement before the price; answers rainy 17 because a call that rang and was hung up is not congratulated. Reuses the fact log, the proration math and the exact-amount commit button that are already in the product.</dd>
+      <dt class="against" style="color:#b3261e">Against</dt><dd>The sheet now holds a wait that can outlast the user's attention, so the turn-up state has to be true in two places at once: inside the sheet and on the row of anyone who closed it. That is a real cost, and it is the cost D exists to pay.</dd>
+      <dt class="cost" style="color:var(--doc-ink-2)">Cost</dt><dd>Low to medium. B plus a stage machine that already exists one file over, plus a shared ledger so closing the sheet does not lose the number.</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- ─────────────────────────── D ─────────────────────────── -->
+<div class="card">
+  <header>
+    <h3>D · The row learns where a number came from, what it costs, and how to give it back</h3>
+    <div class="who">The inventory half. Provenance, a third status, a monthly figure, and two destructive verbs instead of one.</div>
+  </header>
+  <div class="split">
+    <div class="body">
+      <p>Retell stamps every number <code>retell-twilio | retell-telnyx | custom</code> in the same response that carries the agent binding, so bought and brought numbers live in one list and tell each other apart there. Today our only origin column is <strong>Vendor</strong>, which prints Bandwidth for a customer's own trunk on the same day Bandwidth becomes the carrier Agora resells through. Vendor becomes <strong>From</strong>, and an Agora number says Agora.</p>
+      <p>Status gains <strong>Turning up</strong>, and a turning-up number stays visible in the number field as a disabled option rather than vanishing from the only place it can be assigned. Release splits in two, because release is a money event and delete is not: <strong>End the rental</strong> for an Agora number, <strong>Remove from Agora</strong> for a brought one, each with the sentence that is true for it.</p>
+    </div>
+    <div class="mockwrap"><div class="mock">
+      <div class="sec" style="padding:8px">
+        <table class="mx">
+          <thead><tr><th>Number</th><th>Label</th><th>From</th><th>Monthly</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="m">+1 (415) 555-0142</td><td>Sales line</td><td>Agora</td><td class="m">$2.00</td><td><span class="chip warn"><span class="dot"></span>Turning up</span></td></tr>
+            <tr><td class="m">+1 (415) 555-0101</td><td>Support Line</td><td>Twilio</td><td>Your carrier</td><td><span class="chip on"><span class="dot"></span>Active</span></td></tr>
+            <tr><td class="m">+1 (415) 555-0300</td><td>Reserved</td><td>Twilio</td><td>Your carrier</td><td><span class="chip">Unassigned</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Two rows, two verbs, two sentences:</p>
+      <div class="pin"><b>End the rental</b>These digits go back to the carrier and you cannot get this exact number again. The final charge shows on your next invoice.</div>
+      <div class="pin"><b>Remove from Agora</b>Agora stops routing this number. Your carrier still owns it and still bills you.</div>
+      <p class="note">And in the builder's number field:</p>
+      <div class="sec" style="padding:8px">
+        <div class="pick" style="opacity:.55"><span class="num">+1 (415) 555-0142</span><span class="mo">Turning up</span></div>
+        <div class="pick"><span class="num">+1 (628) 555-0260</span><span class="mo">Sandbox test number</span></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="fac">
+    <dl>
+      <dt class="for" style="color:#1b7f4d">For</dt><dd>Answers the three defects the Before agent ranked first, and the six rainy scenarios that live after the purchase rather than during it: 19, 20, 21 (release is a money event), 22 (which ones do I rent), 8 and 18 (owned and not working, someone else moved it). Every one of them is a row change, not a page.</dd>
+      <dt class="against" style="color:#b3261e">Against</dt><dd>On its own it answers nothing the headline job asks for. A perfect inventory with no way to acquire anything is the screen we already have. It is a graft, and saying otherwise would be pretending a data model is a feature.</dd>
+      <dt class="cost" style="color:var(--doc-ink-2)">Cost</dt><dd>Low. Two model fields, one column swap, one badge, one menu split. Five of the six changes are deletions or renames.</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- ─────────────────────────── E ─────────────────────────── -->
+<div class="card">
+  <header>
+    <h3>E · Make the first number honest</h3>
+    <div class="who">The lock seam. Aria claims a number the account never acquired, and four surfaces disagree about which number it is.</div>
+  </header>
+  <div class="split">
+    <div class="body">
+      <p>The ceremony sells the payoff as "no number to buy", the landing then says Aria is live on +1 (628) 555-0188, the inventory says those digits are Sales Inbound on a Twilio trunk behind a different deployment, the sandbox seed is +1 (628) 555-0260, and the constant it claims to match is +1 (415) 555-0100. Four values, one number. The day numbers are purchasable, a new account is told it already has one.</p>
+      <p>What this direction can decide and what it cannot are different things. <strong>Whether first run offers a number, gates a card on it, or grants one free is owner question 1</strong> and it is not designable from here. <strong>That the number Aria answers on must be one number, named as a sandbox line, and the same number on every surface that shows it</strong> is true under all three answers, costs four seed edits, and stops the product lying before the feature ships.</p>
+    </div>
+    <div class="mockwrap"><div class="mock">
+      <p class="note">Today, three surfaces:</p>
+      <div class="sec" style="padding:11px;font-size:12px;line-height:1.9">
+        Ceremony · <span style="color:var(--bad)">no number to buy, nothing to configure</span><br>
+        Landing · Aria is live on <span style="color:var(--bad)">+1 (628) 555-0188</span> · 42 sample calls<br>
+        Inventory · <span style="color:var(--bad)">+1 (628) 555-0188</span> = Sales Inbound · Twilio · dp_ib_02<br>
+        Sandbox seed · <span style="color:var(--bad)">+1 (628) 555-0260</span>
+      </div>
+      <p class="note">After, with question 1 still open:</p>
+      <div class="sec" style="padding:11px;font-size:12px;line-height:1.9">
+        Ceremony · nothing to configure<br>
+        Landing · Aria is live on <span style="color:var(--ok)">+1 (628) 555-0260</span> · 42 sample calls<br>
+        Inventory · <span style="color:var(--ok)">+1 (628) 555-0260</span> = Aria sandbox line · Agora · Active<br>
+        Number field · <span style="color:var(--ok)">+1 (628) 555-0260</span> · Sandbox test number
+      </div>
+      <div class="pin"><b>What stays undecided</b>Whether first run offers Get a number as a second step, captures a card there, or grants one. Three products, one sentence of copy, one owner.</div>
+    </div></div>
+  </div>
+  <div class="fac">
+    <dl>
+      <dt class="for" style="color:#1b7f4d">For</dt><dd>The only direction that touches the thing the lock is actually about. Answers rainy 14 outright and removes the evidence the owner has to argue against. Every edit in it is a deletion or a seed value, so it is reversible under any answer to question 1.</dd>
+      <dt class="against" style="color:#b3261e">Against</dt><dd>It is not a purchase flow, and shipping it alone would close the tracker task without letting anyone buy anything. Taken alone it is a bug fix wearing a direction's clothes.</dd>
+      <dt class="cost" style="color:var(--doc-ink-2)">Cost</dt><dd>Very low. Four seed values, one deleted clause, one label.</dd>
+    </dl>
+  </div>
+</div>
+
+<!-- ─────────────────────────── AUDIT ─────────────────────────── -->
+<h2>Audit</h2>
+<p>Every direction against the 25 rainy scenarios in <code>01-jtbd.md</code> and the 5 numbered learnings in <code>03-learnings.md</code>. <span class="y">●</span> answered on screen · <span class="h">◐</span> partly, or answered only by a state the direction does not draw · <span class="n">○</span> not answered · <span class="x">–</span> out of scope for every direction here, named in the verdict.</p>
+
+<table class="audit">
+  <thead><tr><th style="width:56%">Rainy scenario</th><th class="s">A</th><th class="s">B</th><th class="s">C</th><th class="s">D</th><th class="s">E</th></tr></thead>
+  <tbody>
+    <tr class="grp"><td colspan="6">Getting one</td></tr>
+    <tr><td>1 · Nothing here yet, and the page only says bring one from your carrier</td><td class="s y">●</td><td class="s y">●</td><td class="s y">●</td><td class="s h">◐</td><td class="s n">○</td></tr>
+    <tr><td>2 · My country is not in the slice</td><td class="s h">◐</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>3 · The country forbids me specifically (local address, no PO box)</td><td class="s h">◐</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>4 · Identity is the checkout step</td><td class="s h">◐</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>5 · Identity still pending after the money moved</td><td class="s n">○</td><td class="s n">○</td><td class="s h">◐</td><td class="s h">◐</td><td class="s n">○</td></tr>
+    <tr><td>6 · The number went while I was looking at it</td><td class="s h">◐</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>7 · The provider is down and says so badly</td><td class="s n">○</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr class="grp"><td colspan="6">Owning one</td></tr>
+    <tr><td>8 · It says it is mine and calls do not connect</td><td class="s n">○</td><td class="s h">◐</td><td class="s y">●</td><td class="s y">●</td><td class="s n">○</td></tr>
+    <tr><td>9 · There is no card on the account</td><td class="s h">◐</td><td class="s y">●</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>10 · The card declined at the last step</td><td class="s n">○</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>11 · Billing is not mine to touch</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>12 · I hit my spend cap and the number I rent is in it</td><td class="s n">○</td><td class="s h">◐</td><td class="s y">●</td><td class="s h">◐</td><td class="s n">○</td></tr>
+    <tr><td>13 · The plan already promised me one</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td></tr>
+    <tr><td>14 · Aria already claims a number</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td></tr>
+    <tr><td>15 · It only answers, it cannot dial</td><td class="s y">●</td><td class="s y">●</td><td class="s y">●</td><td class="s h">◐</td><td class="s n">○</td></tr>
+    <tr><td>16 · The trunk refuses the call</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>17 · I hang up first and it congratulates me anyway</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>18 · Someone else moved it while I had the page open</td><td class="s n">○</td><td class="s n">○</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td></tr>
+    <tr class="grp"><td colspan="6">Giving it back</td></tr>
+    <tr><td>19 · I released it and the money did not stop</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td></tr>
+    <tr><td>20 · Release and delete are the same word</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td></tr>
+    <tr><td>21 · I want those exact digits back</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td></tr>
+    <tr><td>22 · I cannot tell which ones I rent</td><td class="s h">◐</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s h">◐</td></tr>
+    <tr class="grp"><td colspan="6">Not this feature</td></tr>
+    <tr><td>23 · My batch crawls and nothing names CPS as the reason</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td></tr>
+    <tr><td>24 · The carrier calls me spam</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td></tr>
+    <tr><td>25 · My brand does not show</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td><td class="s x">–</td></tr>
+    <tr class="grp"><td colspan="6">Learnings</td></tr>
+    <tr><td>L1 · Provenance belongs on the row, not on a second page</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s h">◐</td></tr>
+    <tr><td>L2 · The purchase control is one field, so Phase 1 is a search box inside the existing sheet</td><td class="s n">○</td><td class="s y">●</td><td class="s y">●</td><td class="s x">–</td><td class="s x">–</td></tr>
+    <tr><td>L3 · A bought number is not yet a working number, and the list needs a word for the gap</td><td class="s n">○</td><td class="s h">◐</td><td class="s y">●</td><td class="s y">●</td><td class="s n">○</td></tr>
+    <tr><td>L4 · Identity gates money, and every vendor makes you find it by accident</td><td class="s h">◐</td><td class="s h">◐</td><td class="s y">●</td><td class="s n">○</td><td class="s n">○</td></tr>
+    <tr><td>L5 · Release is a money event and delete is not, so they cannot share a word</td><td class="s n">○</td><td class="s n">○</td><td class="s n">○</td><td class="s y">●</td><td class="s n">○</td></tr>
+  </tbody>
+</table>
+
+<p class="legend"><strong>Three directions fail the audit on their own and the table says which way.</strong> <strong>A</strong> answers the happy path and almost nothing after it: it scores on search, capability and country and then goes blank for eleven consecutive rows, because a buy page has no opinion about a number you already own. <strong>B</strong> answers the happy path and stops at the receipt: every ◐ in its column is the same defect wearing a different scenario number, a state it creates and then hands to a screen it does not change. <strong>D</strong> and <strong>E</strong> fail the top half of the table outright, which is the correct result for a graft and a bug fix. Only <strong>C</strong> carries the getting-one block, and only <strong>D</strong> carries the giving-it-back block. Neither is the feature alone.</p>
+<p class="legend">Rainy 11 is unanswered in every column and stays unanswered. <code>hasBillingAccess</code> requires the <code>FinanceCenter</code> permission in the live Console and there is no permission model in the prototype at all, so a "you cannot buy this, ask your admin" state would be drawn against nothing. It is named in the verdict, not faked.</p>
+
+<!-- ─────────────────────────── VERDICT ─────────────────────────── -->
+<h2>Verdict</h2>
+<div class="verdict">
+  <h3>C, with D grafted and E's designable half taken now.</h3>
+  <p>Buy is the third branch of the sheet every number already comes through, it is one field because every vendor's purchase control is one field, and it ends on a call the user places because a number that never rings earns Agora nothing. The row learns three facts it does not have today: where the number came from, what it costs a month, and which of the two destructive verbs applies to it. Aria's number becomes one number on every surface that shows it.</p>
+
+  <h3>What I am not doing, and why</h3>
+  <p><strong>Not a Buy a number page.</strong> A is the direction a lazy reading of the ticket produces, and the ticket's own sentence supports it. It is refused because the number field is where the question is asked and a page answers it two navigations away, and because a bought number and a brought number are one object. When Phase 2 brings a country picker, the branch grows a country field. The room A buys is room for requirements nobody has written yet: 868kj8ux7 and 868kj8u4v are both empty descriptions.</p>
+  <p><strong>Not a country picker.</strong> The two tickets disagree, US/Canada/Peru/Brazil against US/Chile. A country picker for a list nobody has agreed on is a control that would be redrawn the day it is answered. The buy branch states <em>United States</em> as a fact and offers the BYO path for everywhere else, which is true whichever way question 2 falls.</p>
+  <p><strong>Not verified and branded calling.</strong> 868kykk8y is a second object with its own lifecycle, its own per-country enrollment states and its own honesty clause. Drawing it now means shipping a business calling profile before a number model exists to attach it to.</p>
+  <p><strong>Not the invoice.</strong> The commit button carries an exact amount and the end-rental dialog says the final charge shows on the next invoice. Whether the rental is a line beside the $0.10 minutes or its own SKU is 868kj8u4v, and no copy here claims either.</p>
+  <p><strong>Not a permission state.</strong> Rainy 11 is real in the live Console and has nothing to stand on in the prototype. A blocked-buyer screen drawn against no permission model would be theatre.</p>
+
+  <h3>The open question, which is not designable without an answer</h3>
+  <p><strong>What does the first-run home become once numbers are purchasable?</strong> Three answers, three products:</p>
+  <p>(a) <strong>Nothing changes.</strong> Aria stays on a sandbox line, the card is still captured at minute 150, and buying a number is a later deliberate act. Cheapest, protects the one thing no competitor does, and leaves the thing that makes an agent real behind a wall the first run never mentions.<br>
+  (b) <strong>The card moves to the number.</strong> First run offers Get a number as its second step. Matches four of five competitors and makes the first paid moment concrete, at the price of putting a paywall back into a first run built without one and breaking the half-tier nudge, whose whole premise is a card before exhaustion rather than a card before value.<br>
+  (c) <strong>One free number, then card.</strong> Agora grants a number the way it grants Aria. Strongest activation story, the only answer that keeps both, and it spends real carrier money on every signup including the bots.</p>
+  <p>Blocking on the same answer: <code>billing/plans/page.tsx:48-49</code> already promises "1 phone number" on Free and "10 phone numbers" on Pro, and nothing grants either. Under (a) and (b) those two strings are a bug and get deleted, which is what the plan below does. Under (c) they become the specification and get written back with a number the product actually hands over. The build does not wait on this: nothing in C or D depends on it, and E's half deliberately stops short of it.</p>
+
+  <h3>What the contract cannot express, which is Engine work to file now</h3>
+  <p>Six things appear on screen in this design and have nothing to read from. <code>provider</code> is a closed <code>byo | twilio</code>, so the <strong>From</strong> column cannot say Agora. The list response carries no status, so <strong>Turning up</strong> cannot be read back. No endpoint returns available numbers, a price or a capability set, so the results list has no source. <code>TelephonyErrorResponse</code> is free text, so the taken-number and provider-error lines have no codes. The add payload has no field for a business name or address, so the identity step has nowhere to write. And nothing anywhere carries a monthly charge, so the <strong>Monthly</strong> column and the final-charge line are computed by the prototype alone.</p>
+</div>
+
+<!-- ─────────────────────────── PLAN ─────────────────────────── -->
+<h2>Prototype plan</h2>
+<p>Build order for <code>studio_x_2</code>. Design-mode state lives in <code>localStorage</code> and in <code>lib/</code>; nothing calls a backend.</p>
+
+<h3>The deep link</h3>
+<p>The review opens in the builder's Deployment section, on an agent that has no number yet, at the field where the question is asked.</p>
+<div class="deep">/agents/agt_sales_qualifier/edit?step=2&amp;focus=get-a-number</div>
+<p><code>agt_sales_qualifier</code> is seeded with no <code>channel</code> (<code>lib/campaign-data.ts:674-681</code>), so the Deployment section opens on the three deployment cards. <code>openDoor()</code> in <code>agent-wizard.tsx:531</code> gains a <code>get-a-number</code> branch that clicks the Inbound card, which seeds <code>surfaces: ["phone"]</code> and renders <code>InboundNumbersBlock</code> with an empty number field. The focus resolves to <code>data-design-focus="get-a-number"</code> on that row and pulses the ring.</p>
+
+<h3>Files to add</h3>
+<div class="plan">
+<table>
+  <thead><tr><th>Path</th><th>What it is, and why the sibling could not be extended</th></tr></thead>
+  <tbody>
+    <tr><td>lib/number-catalog.ts</td><td>The US catalog and the owned-number ledger. Exports <code>CatalogNumber</code>, <code>US_CATALOG</code> (18 rows across 415, 628, 212, 800; one row flagged <code>taken</code> for rainy 6), <code>searchNumbers(areaCode, type)</code>, <code>proratedToday(monthlyUsd)</code> derived from <code>PLAN_USAGE.periodDaysTotal - periodDaysElapsed</code>, <code>US_IDENTITY_REQUIREMENT</code>, <code>TURN_UP_MS</code>, and <code>readOwned · addOwned · markTurnedUp · endRental</code> over <code>localStorage["sx:owned_numbers"]</code>, each emitting <code>sx:numbers-store</code>.<br><em>Not <code>campaign-data.ts</code>:</em> that module is a static seed with a standing rule against clock reads and browser storage (its own comment at :1160), and a bought number has to survive a reload inside one review. <em>Not <code>agent-store.ts</code>:</em> its exported shape is <code>SessionAgent</code> and its keys are agent keys; a number ledger inside it would fork what that file means. This file copies its idiom, not its contents.</td></tr>
+    <tr><td>components/buy-number-panel.tsx</td><td>The buy branch body: <code>search · results · checkout · turning-up · verify</code>, in that order. Takes <code>onBought(n)</code> and <code>onSwitchToOwn()</code>, the same two-prop shape as <code>SipQuickConnect</code>.<br><em>Why a file:</em> the sibling branch of this exact sheet is already its own file (<code>sip-quick-connect.tsx</code>), and <code>add-phone-number-sheet.tsx</code> is 305 lines holding a toggle and two branches. Following the precedent is the reuse move; inlining a third branch is the new one.</td></tr>
+    <tr><td>components/fact-log.tsx</td><td><code>&lt;FactLog lines /&gt;</code> plus the <code>pushLine</code> helper, lifted verbatim from <code>sip-quick-connect.tsx:89-92</code> and its renderer.<br><em>Why a file:</em> two branches of one sheet must show the same wait, and a second copy forks the timestamp format the day either one is touched. Exporting it from <code>sip-quick-connect.tsx</code> instead would make the quick-connect branch the owner of a primitive the buy branch depends on.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Files to touch</h3>
+<div class="plan">
+<table>
+  <thead><tr><th>Path</th><th>Anchor and edit</th></tr></thead>
+  <tbody>
+    <tr><td>components/add-phone-number-sheet.tsx</td><td><code>type Mode</code> at :24 becomes <code>"buy" | "quick" | "manual"</code>. The <code>ToggleGroup</code> at :103-118 gains a third <code>ToggleGroupItem value="buy"</code>, first in the row. The <code>SheetDescription</code> at :94-97 becomes per-branch and loses the sentence this feature reverses. A <code>mode === "buy"</code> branch renders <code>&lt;BuyNumberPanel&gt;</code> beside the <code>mode === "quick"</code> branch at :122-128. The success fold's <code>Summary</code> stack at :212-217 shows Number · Monthly · Answers for a bought number, and the existing four rows for a brought one.</td></tr>
+    <tr><td>components/wizard/channel-section.tsx</td><td><code>PhoneNumberSelect</code> at :311: the filter takes <code>status === "unassigned" || status === "turning-up"</code>, and a turning-up option renders <code>disabled</code> with a trailing "Turning up". The footer at :338-344: <code>ADD_SENTINEL</code> (:296) is joined by <code>BUY_SENTINEL</code>, rendered above it as "Get a number"; the existing item's label at :341 becomes "Connect a number you own". <code>InboundNumbersBlock</code>'s <code>SectionRow</code> at :382 gains <code>focusId="get-a-number"</code>. The <code>InfoHint</code> at :147-154 loses "Agora doesn't sell numbers." and gains the rent-or-connect sentence.</td></tr>
+    <tr><td>components/wizard/agent-wizard.tsx</td><td><code>openDoor()</code> at :531: add <code>if (focus === "get-a-number") document.querySelector&lt;HTMLButtonElement&gt;('button[role="radio"][value="inbound"]')?.click()</code>, with a text-content fallback on <code>/^Inbound/</code> for the same reason the backup-providers matcher is case-insensitive.</td></tr>
+    <tr><td>lib/campaign-data.ts</td><td><code>interface PhoneNumber</code> at :393-403: <code>status</code> gains <code>"turning-up"</code>, and a required <code>origin: "agora" | "byo"</code> is added. <code>PHONE_NUMBERS</code> at :1612-1688: every seed gains <code>origin: "byo"</code>; <code>pn_06</code> at :1654-1662 becomes <code>origin: "agora"</code>, label "Sandbox test number", <code>assignedAgent: { id: "agt_default", name: "Aria" }</code>, <code>status: "active"</code>. <code>agt_default.channel</code> at :653 repoints <code>numberId</code> from <code>pn_02</code> to <code>pn_06</code>.</td></tr>
+    <tr><td>app/(dashboard)/deploy/phone-numbers/page.tsx</td><td>Header at :128-133: <strong>Vendor</strong> becomes <strong>From</strong> and a <strong>Monthly</strong> column is added after it. Cell at :143 prints "Agora" or the vendor; the new cell prints the monthly figure or "Your carrier". Badge at :176-180 gains the turning-up case. Counts at :99-109 gain a turning-up segment when the count is above zero. Row menu at :193 links "Assign to batch" to <code>/deploy/batch-calls/new</code> (it has no <code>onSelect</code> today). <code>DestructiveActionDialog</code> at :195-208 splits by <code>origin</code> into "End the rental" and "Remove from Agora", each with its own description. Empty state at :64-77: two actions, "Get a number" primary and "Connect a number you own" outline, and the <code>PageHeader</code> action at :56-62 is dropped in that branch so the fold has one primary.</td></tr>
+    <tr><td>components/free-minutes-nudge.tsx</td><td>Extract the card inputs and the spend-cap checkbox from <code>AddCardSheet</code> (:138-241) into an exported <code>CardFields</code> that <code>AddCardSheet</code> itself renders, so the checkout step reuses the same three inputs and the same <code>card_captured</code> event. One card form in the product, two hosts.</td></tr>
+    <tr><td>components/sip-quick-connect.tsx</td><td>Replace the inline log renderer with <code>&lt;FactLog&gt;</code>. Rename the mock labels at :46-50: "Purchased" becomes "On your account", freeing the word for a number bought from Agora.</td></tr>
+    <tr><td>lib/analytics.ts</td><td>After the telephony block at :118-119: <code>number_purchase_completed</code>, <code>number_purchase_blocked</code> (codes only, never the provider's text), <code>number_purchase_declined</code>. The last one is not in the JTBD's event list; it is there because A6's rule is that declining is first class with a tracked decline rate.</td></tr>
+    <tr><td>components/channels-panel.tsx</td><td><code>ch_02</code> at :50: identifier becomes +1 (628) 555-0260 and the label becomes "Aria sandbox line". <code>ch_07</code> at :54: <code>backs: ", "</code> becomes "Available". The header button at :80-84 is relabelled "Add phone number", settling the fifth of the five names.</td></tr>
+    <tr><td>app/(dashboard)/agents/page.tsx</td><td><code>agt_default</code> at :84: <code>channelLabel</code> becomes +1 (628) 555-0260. The banner at :866 prints the same digits.</td></tr>
+    <tr><td>components/provisioning-ceremony.tsx</td><td>:131-132: delete "no number to buy," from the payoff sentence. A deletion, so it needs no replacement, and the replacement is question 1.</td></tr>
+    <tr><td>app/(dashboard)/billing/plans/page.tsx</td><td>:48 and :49: delete "1 phone number" and "10 phone numbers" from the Free and Pro feature lists. Nothing grants either today. If question 1 answers (c), they come back as a number the product hands over.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Copy</h3>
+<div class="copy">
+<table>
+  <tr><td>sheet · toggle</td><td>Buy · Quick connect · Manual SIP</td></tr>
+  <tr><td>sheet · description, buy</td><td>United States numbers, rented by the month.</td></tr>
+  <tr><td>buy · country line</td><td>Outside the US, connect a number you own.</td></tr>
+  <tr><td>buy · field label</td><td>Area code</td></tr>
+  <tr><td>buy · field hint</td><td>Leave it blank to see numbers from anywhere in the US.</td></tr>
+  <tr><td>buy · type toggle</td><td>Local · Toll-free</td></tr>
+  <tr><td>buy · search button</td><td>Search numbers</td></tr>
+  <tr><td>buy · identity line, above the results</td><td>US numbers need a business name and a street address before they can dial out.</td></tr>
+  <tr><td>buy · capability chips</td><td>Answers calls · Answers and dials</td></tr>
+  <tr><td>buy · no results</td><td>No numbers free in 415 right now. Try another area code.</td></tr>
+  <tr><td>buy · taken</td><td>That number was taken a moment ago. Pick another.</td></tr>
+  <tr><td>buy · provider error</td><td>The number search is not answering. Try again in a minute, or connect a number you own.</td></tr>
+  <tr><td>buy · identity fields</td><td>Business name · Street address · City · ZIP code</td></tr>
+  <tr><td>buy · commit button</td><td>Buy +1 (415) 555-0142 · $1.42 today</td></tr>
+  <tr><td>buy · under the commit button</td><td>Then $2.00 / mo. Your spend cap covers per-minute usage, and the rental bills beside it.</td></tr>
+  <tr><td>buy · decline</td><td>Connect a number you own instead</td></tr>
+  <tr><td>buy · waiting title</td><td>Turning up +1 (415) 555-0142</td></tr>
+  <tr><td>buy · waiting line</td><td>Calls do not connect until this finishes.</td></tr>
+  <tr><td>buy · fact log</td><td>Number reserved · Routing configured · Line turned up</td></tr>
+  <tr><td>buy · verify button</td><td>Call it now</td></tr>
+  <tr><td>buy · verify states</td><td>Ringing your phone · Test call answered · two-way audio confirmed</td></tr>
+  <tr><td>buy · success rows</td><td>Number · Monthly · Answers for</td></tr>
+  <tr><td>field · footer items</td><td>Get a number · Connect a number you own</td></tr>
+  <tr><td>field · turning-up option</td><td>Turning up</td></tr>
+  <tr><td>builder · deployment hint</td><td>Rent a number from Agora, or connect your carrier's over SIP from any phone-number field below. Code / SDK and the web widget need no number.</td></tr>
+  <tr><td>list · columns</td><td>Number · Label · From · Monthly · Assigned to · Status</td></tr>
+  <tr><td>list · monthly, brought number</td><td>Your carrier</td></tr>
+  <tr><td>list · status badges</td><td>Active · Unassigned · Turning up</td></tr>
+  <tr><td>list · header action</td><td>Add phone number</td></tr>
+  <tr><td>list · empty state</td><td>No phone numbers yet</td></tr>
+  <tr><td>list · empty state body</td><td>Rent a number from Agora, or connect one you already own.</td></tr>
+  <tr><td>list · empty state actions</td><td>Get a number · Connect a number you own</td></tr>
+  <tr><td>row menu · rented</td><td>End the rental</td></tr>
+  <tr><td>dialog · rented</td><td>These digits go back to the carrier and you cannot get this exact number again. The final charge shows on your next invoice.</td></tr>
+  <tr><td>row menu · brought</td><td>Remove from Agora</td></tr>
+  <tr><td>dialog · brought</td><td>Agora stops routing this number. Your carrier still owns it and still bills you.</td></tr>
+  <tr><td>channels panel · agent cell</td><td>Available</td></tr>
+  <tr><td>agents landing · banner</td><td>Aria, your sample agent, is live on +1 (628) 555-0260 · 42 sample calls</td></tr>
+  <tr><td>ceremony · payoff</td><td>The moment this finishes, Aria can take a real call: in your browser, mic on, nothing to configure.</td></tr>
+</table>
+</div>
+
+<h2>Audit corrections</h2>
+<p>Three hostile audits read the build plan against <code>studio_x_2</code> and refuted it. What follows is
+what they killed, and the two things kept against them. The plan that ships is the one below, not the one
+in <em>Prototype plan</em> above.</p>
+
+<h3>Killed by the audits</h3>
+<div class="plan">
+<table>
+  <tr><th>What went</th><th>Why</th></tr>
+  <tr><td>Every price</td><td><code>monthlyUsd</code>, <code>proratedToday</code>, the Monthly column, "Buy +1 (415) 555-0142 · $1.42 today" and "Then $2.00 / mo". Agora's pricing page documents no telephony charge and the release notes put telephony in Beta free of charge, so the only rates in evidence were Retell's $2 and LiveKit's $1 wearing an Agora label. Open question 3 owns the number. The commit button reads "Get this number" and carries the house Requires Engine caption instead.</td></tr>
+  <tr><td>The checkout step</td><td>With no amount there is no money moment, so the identity fields, the card fold and the spend-cap line all go with it. Stages are search, results, turning up, verify.</td></tr>
+  <tr><td>The <code>CardFields</code> extraction</td><td><code>free-minutes-nudge.tsx:135</code> says in the file that one card-capture surface exists product-wide so copy and events cannot fork. <code>card_captured</code> carries <code>at_minute</code>, which means nothing at a number purchase, and <code>PLAN_USAGE.cardOnFile</code> is a static false that can never flip. <code>components/free-minutes-nudge.tsx</code> leaves the touch list.</td></tr>
+  <tr><td>The identity requirement line</td><td>The research table records no identity check at Vapi, ElevenLabs or LiveKit, account-level at Retell, and per country and number type at Twilio, whose section is about regulated countries. A fixed US address gate is a compliance claim with no source and nowhere in the contract to write. The dependency stays filed; the fields come off the screen.</td></tr>
+  <tr><td><code>origin: "agora"</code> on <code>pn_06</code></td><td>The seed carries a written decision at <code>campaign-data.ts:1656</code>: this is the sandbox test line, not a number Agora sold. Two values cannot hold three provenances, so the plan answered the one lock it claimed to leave open. <code>origin</code> is three-valued, <code>pn_06</code> is <code>sandbox</code>, and the From cell prints "Agora sandbox".</td></tr>
+  <tr><td><code>TURN_UP_MS = 6000</code></td><td>A duration with no parent. The wait keeps the sibling's mock-timer idiom and states no time anywhere on screen.</td></tr>
+  <tr><td>The provider-error line</td><td>No path in the prototype reaches it, and an unreachable state cannot be reviewed or shot. The no-results and number-taken states stay, because a reviewer can reach both.</td></tr>
+  <tr><td>The empty-state edit</td><td><code>phone-numbers/page.tsx:48</code> computes <code>hasNumbers</code> from a nine-row static array, so the <code>!hasNumbers</code> branch at <code>:50-80</code> never renders.</td></tr>
+  <tr><td><code>lib/number-catalog.ts</code> as specified</td><td>Its reason cited <code>campaign-data.ts:1160</code> for a rule that line does not carry, and it invented a parallel <code>OwnedNumber</code> type over <code>localStorage</code>. The store is <code>lib/number-store.ts</code>, it holds <code>PhoneNumber</code> rows in <code>sessionStorage</code> the way <code>agent-store.ts:5</code> does, and the inventory merges it so the Turning up badge and the two verbs have rows to land on.</td></tr>
+  <tr><td>A second number row</td><td><code>sip-quick-connect.tsx:241-268</code> is already the selectable number row, one toggle away in the same sheet. It is extracted to <code>components/number-pick-row.tsx</code> and both branches render it, which also settles the capability wording on the existing "inbound + outbound" instead of a third variant.</td></tr>
+  <tr><td>The <code>[value="inbound"]</code> selector and the bare <code>?step=2</code></td><td>Radix strips <code>value</code> before it reaches the trigger, so the deep link's only working path was the fallback, and <code>focusOn</code>'s owner map has no <code>get-a-number</code> key, so <code>?? 3</code> expanded the wrong section. The map gains <code>"get-a-number": 2</code> and the door selects <code>button[data-slot="radio-card"]</code> by text.</td></tr>
+  <tr><td><code>defaultMode="buy"</code> opening the buy branch</td><td>The sheet reads <code>defaultMode</code> only as a <code>useState</code> initializer and inside <code>reset()</code>, so the footer's Get a number item would have opened Quick connect. <code>defaultMode</code> is re-applied when the sheet opens. No second <code>mode</code> prop is added beside it.</td></tr>
+</table>
+</div>
+
+<h3>Kept against an audit</h3>
+<div class="plan">
+<table>
+  <tr><th>What stayed</th><th>Why the direction wins</th></tr>
+  <tr><td>The flow ends on a call the user places</td><td>One audit read the mock turn-up as a reason to end on a state the user leaves and returns to. That deletes the one thing no vendor does and the house rule the sheet's sibling already keeps: <code>sip-quick-connect.tsx</code> runs the same mock timers and ends on a real test call because provisioning success is not call success. The fabricated constant went; the ending stayed.</td></tr>
+  <tr><td>Aria moves to <code>pn_06</code> and four surfaces name one number</td><td>One audit asked to leave <code>agt_default</code> on <code>pn_02</code>. Rainy 14 is then still on screen and the owner still has to argue with it. The surfaces hold string literals, so <code>TEST_INBOUND_NUMBER</code> becomes the number and the landing, the banner and the channels row read it. Naming the line a sandbox line decides nothing about question 1.</td></tr>
+  <tr><td>Deleting "1 phone number" and "10 phone numbers" from the plans page</td><td>The objection was that deleting the promise while granting Aria a number contradicts itself. With <code>pn_06</code> marked sandbox, nothing grants a number, so the two strings are a false promise and a deletion needs no permission. Under answer (c) they come back as a number the product hands over.</td></tr>
+  <tr><td>Buy as the third branch, the area-code field, the Turning up state, two destructive verbs</td><td>All three audits left these standing.</td></tr>
+</table>
+</div>
+
+<h3>What the owner still has to answer</h3>
+<p>Two answers, not one. Question 1 is the ⚠ lock and is unchanged. Question 3, whether a number is a line
+item beside the $0.10 minutes or its own subscription, is now on the critical path for what the commit
+button and the row are allowed to say: until it lands, no price appears anywhere in this feature, and the
+release dialog states what happens to the digits without stating what happens to the money.</p>
+
+<p style="margin-top:22px;font-size:13px;color:var(--doc-ink-2)">Sources: <code>00-brief.md</code> · <code>01-jtbd.md</code> · <code>03-learnings.md</code> · <code>04-before.md</code> · <code>15-simulations/05-directions.md</code> for the shape. Read against <code>studio_x_2</code> at commit state 2026-09-17.</p>
+
+</div>

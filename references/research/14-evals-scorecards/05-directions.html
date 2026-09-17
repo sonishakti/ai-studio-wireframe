@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Scorecard Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Mocks are studio_x_2 in its own light theme (app/globals.css :71-92), so the
+   sketch and the build share a palette. Scaffold = research/10 directions. */
+:root{
+  --bg:#fdfcfc; --panel:#ffffff; --panel-2:#f8f3f1; --line:#e7e6e6; --stroke:#d4d2d2;
+  --ink:#0a0a0a; --ink-2:#585757; --ink-3:#8b8989;
+  --ok:#308d2c; --ok-soft:#eaf5e9; --bad:#de2134; --bad-soft:#fdecee; --warn:#a2670a; --warn-soft:#fbf1e2;
+  --doc-bg:#f4f5f6; --doc-ink:#16191c; --doc-ink-2:#565f66; --doc-rule:#dde1e4; --doc-brand:#0b5f7d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1260px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3{text-wrap:balance}
+p{max-width:80ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.lazy{border-color:#c9a227;box-shadow:inset 0 3px 0 #c9a227}
+.card.win{border-color:var(--doc-brand);box-shadow:inset 0 3px 0 var(--doc-brand)}
+.card header{padding:12px 14px 9px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:3px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why dl{margin:0}
+.card .why dt{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;margin-top:9px}
+.card .why dd{margin:2px 0 0}
+dt.pro{color:#1b7f4d}dt.con{color:#b3261e}dt.cost{color:var(--doc-ink-2)}
+code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#edf1f3;padding:1px 5px;border-radius:3px}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-size:12.5px;padding:14px;border-top:1px solid var(--doc-rule);border-bottom:1px solid var(--doc-rule)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.ph .r{margin-left:auto;display:flex;gap:6px;font-weight:400}
+/* SectionRow: 240px label column, 560px control column, hairline dividers. */
+.row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:11px 12px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .lab{font-size:12.5px;font-weight:500}
+.row .lab i{display:block;font-style:normal;font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:400}
+.row .ctl{min-width:0}
+.crit{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:6px;padding:6px 9px;margin-bottom:5px;font-size:12px}
+.crit .n{font-weight:500}
+.crit .t{color:var(--ink-3);font-size:11px;display:block;margin-top:1px}
+.crit .g{margin-left:auto;display:flex;gap:4px;flex:none}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--panel-2);border-bottom:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+table.t{width:100%;border-collapse:collapse;font-size:12px}
+table.t th{text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);font-weight:500;padding:6px 12px;border-bottom:1px solid var(--line)}
+table.t td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t tr:last-child td{border-bottom:0}
+.mono{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--ink-3)}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--stroke);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--ink-2);background:var(--panel-2);white-space:nowrap}
+.chip.ok{border-color:#bcdcba;color:var(--ok);background:var(--ok-soft)}
+.chip.bad{border-color:#f3c3c8;color:var(--bad);background:var(--bad-soft)}
+.chip.warn{border-color:#e8d2a9;color:var(--warn);background:var(--warn-soft)}
+.chip.mute{color:var(--ink-3)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:3px 9px;font-size:11.5px;color:var(--ink);background:var(--panel)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:500}
+.btn.sel{background:var(--panel-2);border-color:var(--ink);font-weight:500}
+.ta{border:1px solid var(--stroke);border-radius:6px;padding:7px 9px;font-size:11.5px;color:var(--ink-3);background:var(--panel);min-height:46px}
+.note{padding:6px 12px;font-size:11px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.note:last-child{border-bottom:0}
+.sw{width:26px;height:15px;border-radius:999px;background:var(--stroke);position:relative;flex:none}
+.sw.on{background:var(--ink)}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.sw.on::after{left:13px}
+.gate{border:1px dashed var(--stroke);border-radius:6px;padding:9px 10px;text-align:center;font-size:11px;color:var(--ink-3)}
+.nav{display:flex;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-3)}
+.nav .on{color:var(--ink);font-weight:500}
+/* ---- audit ---- */
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule)}
+table.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:bottom}
+table.audit td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top;font-size:12.5px}
+table.audit td b{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--doc-brand);display:block;margin-bottom:2px}
+table.audit td.no{background:#fdf0f1}
+table.audit td.yes{background:#f0f7f1}
+.num{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:5px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:12px 15px;font-size:13px;margin-top:14px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:14px 18px;font-size:13.5px}
+.plan ol{margin:6px 0;padding-left:20px}.plan li{margin:7px 0}
+.plan h4{margin:16px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.q{background:#fff;border-left:3px solid #c9a227;padding:12px 15px;margin-top:14px;font-size:13.5px}
+@media (max-width:1040px){.dir,.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 14 · Evals &amp; scorecards · step 5 diverge</p>
+<h1>One sentence, two sides</h1>
+<p><strong>JTBD.</strong> When I change the agent that answers my customers, I want the same named checks to give me a number before I publish and again on the calls it actually took, so I can say it got better instead of saying I tested it.</p>
+
+<div class="facts">
+  <div><b>The lock 14 inherits</b>Feature 15 shipped ONE Tests table, the case <code>type</code> decides the runner, audio is a run <code>mode</code>. 14 extends that object. A second table is a failed design.</div>
+  <div><b>The three defects that decide it</b><code>calls/page.tsx</code> :65 fabricates the Call Outcome badge · <code>eval-tests.tsx</code> :104/:154 returns nothing for a case you authored · <code>step-analysis.tsx</code> :86 and <code>number-client.tsx</code> :49 are the same sentence twice, with opposite defaults and no reader.</div>
+  <div><b>Agora facts</b>$0.10 per agent-minute, the same with BYO keys. <code>getTurns</code> returns a finished call's shape, never its words. Words arrive as webhooks 103 / 112 and nothing stores them. No <code>eval</code>, <code>score</code>, <code>rubric</code> or <code>judge</code> field exists in the contract.</div>
+  <div><b>Standing rules</b>Reuse, don't redesign: extend the sibling, one door per action. One primary CTA per fold. Never draw a control whose value we cannot compute. Failing tests warn, they never block deploy.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses about one question: <em>is the grading sentence a field, or an object?</em> Everything else follows from the answer. Sketches are in the builder grammar the app already has: <code>SectionRows</code> with a 240px label column, the Tests table, the call sheet. Copy is <em>proposed</em>.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card lazy">
+    <header>
+      <h3>A · Keep the text box, delete the twin</h3>
+      <div class="who">The cheapest honest fix. <code>evalCriteria</code> stays a 2000-character paragraph on the agent, the phone-number copy is deleted, the switch gains the transcription gate the data points already have, and the Call Outcome badge finally reads something a person wrote.</div>
+    </header>
+    <div class="mock">
+      <div class="panel">
+        <div class="ph">Call capture <span class="r"><span class="chip mute">Applies to Aria</span></span></div>
+        <div class="row"><div class="lab">Store call transcripts</div><div class="ctl"><span class="sw on"></span></div></div>
+        <div class="row"><div class="lab">Success Evaluation<i>Successful or Failed</i></div><div class="ctl">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:6px"><span class="sw on"></span></div>
+          <div class="ta">Evaluate whether the agent's call with the user was successful. Consider whether the issue was resolved, communication clarity, professionalism&hellip;</div>
+          <div class="mono" style="text-align:right;margin-top:4px">168/2000</div>
+        </div></div>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="bar"><span>Call history</span></div>
+        <table class="t">
+          <tr><th>Call</th><th>Status</th><th>Call Outcome</th></tr>
+          <tr><td class="mono">CALLRSA</td><td><span class="chip">Answered</span></td><td><span class="chip ok">Successful</span></td></tr>
+          <tr><td class="mono">CALLRSB</td><td><span class="chip">Voicemail</span></td><td><span class="chip bad">Failed</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="why">
+      <dl>
+        <dt class="pro">For</dt>
+        <dd>Closes defects 5, 10 and 11 by deleting a file's worth of code and adding a gate. No new noun for anyone to learn, the Figma word survives, and it ships in an afternoon. Vapi ran exactly this control in production for two years, so it is not a straw man.</dd>
+        <dt class="con">Against</dt>
+        <dd>A paragraph has no rows, so <em>"Never promises a refund, met on 96 of 100"</em> cannot be printed: the badge gets a source and still cannot show its working. The sentence can never reach a test assertion, so rainy 4 survives and the JTBD stays two products. Vapi has already migrated off this control by name, telling new users to replace <code>successEvaluationPrompt</code> with a reusable object because "structured outputs are where new development happens" (learning 1). Rainy 5, 21, 22 and 23 have nowhere to land.</dd>
+        <dt class="cost">Cost</dt>
+        <dd>Lowest of the five. One file deleted, one gate, one badge re-pointed.</dd>
+      </dl>
+      <p style="margin-top:10px;color:#b3261e"><strong>Refused.</strong> The ticket asks for "rubrics and reusable scorecards" and this shape cannot produce a per-criterion number at all. It is the direction a lazy designer picks because it is the only one where nothing has to be named.</p>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header>
+      <h3>B · The scorecard becomes an object</h3>
+      <div class="who">A named <code>Scorecard</code> with criteria rows replaces the paragraph. The agent points at it, the calls list counts it, each criterion gets its own verdict and reason. Tests keep their own assertions.</div>
+    </header>
+    <div class="mock">
+      <div class="panel">
+        <div class="ph">Scorecard <span class="r"><span class="chip mute">Refund policy</span><span class="btn">Add criterion</span></span></div>
+        <div style="padding:9px 12px">
+          <div class="crit"><span><span class="n">Never promises a refund</span><span class="t">PASS if the agent takes the request and never promises one itself.</span></span></div>
+          <div class="crit"><span><span class="n">Opens a ticket</span><span class="t">PASS if open_ticket is called before the call ends.</span></span></div>
+          <div class="crit"><span><span class="n">Confirms a callback</span><span class="t">PASS if the agent states when someone will call back.</span></span></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="bar"><span>Call history</span></div>
+        <table class="t">
+          <tr><th>Call</th><th>Call Outcome</th></tr>
+          <tr><td class="mono">CALLRSA</td><td><span class="chip ok">Successful</span> <span class="mono">3/3</span></td></tr>
+          <tr><td class="mono">CALLRSB</td><td><span class="chip bad">Failed</span> <span class="mono">1/3</span></td></tr>
+          <tr><td class="mono">CALLRSC</td><td><span class="chip warn">Unknown</span> <span class="mono">2/3</span></td></tr>
+        </table>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="bar"><span>Tests</span></div>
+        <table class="t">
+          <tr><th>Test name</th><th>Assertion</th><th>Status</th></tr>
+          <tr><td>Refuses to promise a refund</td><td class="mono" style="color:var(--ink-3)">PASS if the agent takes&hellip;</td><td><span class="chip ok">Pass</span></td></tr>
+        </table>
+        <div class="note">The same sentence, written a second time, in a second place.</div>
+      </div>
+    </div>
+    <div class="why">
+      <dl>
+        <dt class="pro">For</dt>
+        <dd>"Reusable" is met: one object, many agents. Per-criterion verdicts and reasons are what both scoring vendors actually report (learning 2), which gives <code>Unknown</code> a home with a printed reason and gives an <code>opt_out</code> call somewhere to land other than a blank. Rainy 1, 2, 3, 5, 17, 18 and 22 all get an answer.</dd>
+        <dt class="con">Against</dt>
+        <dd>Criteria and assertions stay two vocabularies, so the user still writes the sentence twice and the two copies drift (rainy 4). Nothing stores a run, so "is this better than what is live" still has one side (rainy 11, defect 13). It answers the production half of the JTBD and leaves the before-and-after half where it was.</dd>
+        <dt class="cost">Cost</dt>
+        <dd>Medium. One new lib module, one new sheet, four surfaces re-pointed.</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card win">
+    <header>
+      <h3>C · One sentence, two sides <span class="chip" style="vertical-align:3px">recommended</span></h3>
+      <div class="who">B, and then the seam is removed: a criterion <em>is</em> an assertion. <code>EvalAssertion</code> gains a name and a <code>criterionId</code>, so the sentence a test runs on and the sentence a call is graded on are one record. Every run is stored, so the pre-flight can put this draft's number beside the live version's.</div>
+    </header>
+    <div class="mock">
+      <div class="panel">
+        <div class="nav"><span>Voice &amp; Models</span><span>Deployment</span><span>Prompt</span><span class="on">Test</span><span>Go live</span></div>
+        <div class="row"><div class="lab">Scorecard<i>The named checks. A run is graded on these, and so is every call this agent takes.</i></div><div class="ctl">
+          <div class="crit"><span><span class="n">Never promises a refund</span><span class="t">PASS if the agent takes the request and never promises one itself.</span></span><span class="g"><span class="chip ok">Met 96/100</span></span></div>
+          <div class="crit"><span><span class="n">Opens a ticket</span><span class="t">PASS if open_ticket is called before the call ends.</span></span><span class="g"><span class="chip ok">Met 100/100</span></span></div>
+          <div class="crit"><span><span class="n">Confirms a callback</span><span class="t">PASS if the agent states when someone will call back.</span></span><span class="g"><span class="chip bad">Met 61/100</span></span></div>
+          <div style="margin-top:7px"><span class="btn">Add criterion</span> <span class="mono" style="margin-left:6px">03/30</span></div>
+        </div></div>
+        <div class="row"><div class="lab">Scenarios<i>Generated from your agent's own prompt, channel and call behavior.</i></div><div class="ctl">
+          <div style="display:flex;gap:6px;margin-bottom:7px"><span class="btn">Generate scenarios</span><span class="btn">Run all as text · 3 runs each · ~9s</span><span class="btn">Run with audio · ~4 min · ~$2.40</span></div>
+          <div class="panel">
+            <div class="bar"><span>04/05 passing</span><span style="color:var(--bad)">01 failed</span></div>
+            <table class="t">
+              <tr><th>Test name</th><th>Type</th><th>Status</th></tr>
+              <tr><td>Refuses to promise a refund</td><td style="color:var(--ink-3)">Decision check</td><td><span class="chip ok">Pass</span> <span class="mono">3/3 · text</span></td></tr>
+              <tr><td>Books a demo</td><td style="color:var(--ink-3)">Conversation</td><td><span class="chip ok">Pass</span> <span class="mono">1/1 · audio 1:12</span></td></tr>
+              <tr><td>Price objection</td><td style="color:var(--ink-3)">Conversation</td><td><span class="chip bad">Fail</span> <span class="mono">1/3 · text</span></td></tr>
+              <tr><td>Asks for a human</td><td style="color:var(--ink-3)">Conversation</td><td><span class="chip warn">Errored</span> <span class="mono">text</span></td></tr>
+            </table>
+          </div>
+          <div class="note" style="border:1px solid var(--line);border-radius:6px;margin-top:7px">No agent starts for a text run, so it bills no agent minutes. An audio run places 3 calls at $0.10 a minute.</div>
+        </div></div>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="ph">Before you go live</div>
+        <div class="row" style="grid-template-columns:90px 1fr"><div class="lab">Tests</div><div class="ctl" style="display:flex;align-items:center;gap:8px"><span class="chip warn">Warn</span><span>4 of 5 criteria met over 3 text runs. Live is 3 of 5</span><span class="btn" style="margin-left:auto">Open tests</span></div></div>
+        <div class="row" style="grid-template-columns:90px 1fr"><div class="lab">Outputs</div><div class="ctl">transcripts · recording · Refund policy · 1 data point</div></div>
+      </div>
+    </div>
+    <div class="why">
+      <dl>
+        <dt class="pro">For</dt>
+        <dd>The JTBD sentence becomes literally true: the five checks in the builder are the five checks on the calls list, by identity and not by convention. The stored run kills defects 2 and 17 in one move and makes the comparison drawable at all, on the pre-flight row that already warns without blocking. Repeats come free on the text side, so "it passed once" stops being the evidence behind an 85% floor (learning 3). One table, one bar, one sheet: the 15 lock survives untouched.</dd>
+        <dt class="con">Against</dt>
+        <dd>A scorecard becomes a step in front of the first run, and a blank page before a first test is exactly the failure the scenario generator was built to avoid. Answered by seeding the criteria from the draft the same way <code>generateContextualCases</code> seeds scenarios, so the first visit finds three written checks and edits them. Second cost: the Call Outcome column keeps its name and changes its meaning on the day it ships.</dd>
+        <dt class="cost">Cost</dt>
+        <dd>Medium. Three new files, twelve anchored edits, no new route and no new table.</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header>
+      <h3>D · A scorecards library</h3>
+      <div class="who">C's object, given a home of its own: a route under Deploy or Project, a list of named scorecards, and an agent that points at one of them from a select.</div>
+    </header>
+    <div class="mock">
+      <div class="panel">
+        <div class="ph">Scorecards <span class="r"><span class="btn primary">New scorecard</span></span></div>
+        <table class="t">
+          <tr><th>Name</th><th>Criteria</th><th>Used by</th><th>Updated</th></tr>
+          <tr><td>Refund policy</td><td class="mono">03</td><td>Aria, Nova</td><td class="mono">2d ago</td></tr>
+          <tr><td>Booking quality</td><td class="mono">05</td><td>Aria</td><td class="mono">11d ago</td></tr>
+        </table>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="row"><div class="lab">Scorecard</div><div class="ctl"><span class="btn sel">Refund policy ⌄</span> <span class="btn">Edit</span></div></div>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="gate" style="margin:10px 12px">An account with one agent sees an empty list and a New button.</div>
+      </div>
+    </div>
+    <div class="why">
+      <dl>
+        <dt class="pro">For</dt>
+        <dd>The only direction that has an answer for rainy 23, where two people edit a criterion mid-run: a list with an owner and an updated stamp is where locking and a version history can live. It is also the shape a team with eight agents and one compliance sentence eventually needs, and it is the shape Vapi's structured outputs took.</dd>
+        <dt class="con">Against</dt>
+        <dd>It buys a nav entry and an empty list for every account that has one agent, which is every account in the product today. The object has exactly one owner right now, so the list is a page that shows one row. C's <code>Scorecard</code> already carries an id and a name, so D is a list page over the same type later, not a redesign: this is the thing to grow into, and growing into it costs nothing that C has to undo.</dd>
+        <dt class="cost">Cost</dt>
+        <dd>High. A route, a nav entry, a select, an empty state, and a sharing model nobody has asked for yet.</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header>
+      <h3>E · Score production first</h3>
+      <div class="who">Start where the lie is. Criteria are attached from the calls list, real calls get scored, and the route back into the suite is the Save-as-test door that is already built and has no button.</div>
+    </header>
+    <div class="mock">
+      <div class="panel">
+        <div class="ph">Call details <span class="r"><span class="chip">CALLRSB</span></span></div>
+        <div class="row" style="grid-template-columns:96px 1fr"><div class="lab">Call Outcome</div><div class="ctl"><span class="chip bad">Failed</span> <span class="mono">1/3</span></div></div>
+        <div style="padding:2px 12px 10px">
+          <div class="crit"><span><span class="n">Never promises a refund</span><span class="t">Offered a full refund in turn 4, with no ticket.</span></span><span class="g"><span class="chip bad">Not met</span><span class="btn">Save as test</span></span></div>
+          <div class="crit"><span><span class="n">Opens a ticket</span><span class="t">open_ticket was called after the caller repeated the request.</span></span><span class="g"><span class="chip ok">Met</span></span></div>
+          <div class="crit"><span><span class="n">Confirms a callback</span><span class="t">The caller hung up before the agent could state a time.</span></span><span class="g"><span class="chip warn">Unknown</span></span></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="gate" style="margin:10px 12px">A first publish has no calls. Nothing to score, nothing to prove, and the KPI this feature owns is a floor on publishes that were tested first.</div>
+      </div>
+    </div>
+    <div class="why">
+      <dl>
+        <dt class="pro">For</dt>
+        <dd>It starts at the most visible defect and the evidence is real calls rather than synthesized ones, which is the only evidence anybody trusts. The per-criterion rows with a reason and a per-call disagreement are exactly what Retell's Calibrate and Coval's review mode ship (rainy 21). Save-as-test is fully built, mounted nowhere, and closes the loop for free.</dd>
+        <dt class="con">Against</dt>
+        <dd>The loop runs backwards. The KPI this feature owns is evidence <em>before</em> live, with an absolute floor of 85%, and a brand-new agent has no calls to score and no way to get a number before it ships: rainy 1, 7, 8 and 11 are all first-run states and E answers none of them. It also leaves the draft side of the JTBD sentence unwritten, which is the half nobody else has built.</dd>
+        <dt class="cost">Cost</dt>
+        <dd>Medium, and the expensive half is the half that has to be built again for the draft.</dd>
+      </dl>
+    </div>
+  </div>
+
+</div>
+
+<h2>Audit</h2>
+<p>Every direction against the JTBD's rainy scenarios and the five numbered learnings, by number. Rainy scenarios owned by another feature (13 alerts, 22 usage, 24 retention) are listed once as <em>named, not built</em> and are not counted for or against anyone. A direction that only answers the happy path fails, and the row says so.</p>
+<table class="audit">
+  <thead><tr><th style="width:15%">Direction</th><th style="width:20%">Rainy answered</th><th style="width:20%">Rainy left open</th><th style="width:26%">Learnings 1 to 5</th><th style="width:19%">Verdict</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>A</b> Text box, twin deleted</td>
+      <td class="no"><span class="num">3, 18</span> and half of <span class="num">2</span>: the badge gets a source and still cannot show its working.</td>
+      <td class="no"><span class="num">1, 4, 5, 7, 8, 9, 11, 17, 21, 22, 23, 24</span></td>
+      <td class="no"><span class="num">1</span> fails outright: Vapi migrated off this exact control. <span class="num">2</span> fails: a paragraph has no per-criterion result. <span class="num">3</span> untouched. <span class="num">4</span> untouched. <span class="num">5</span> out of reach.</td>
+      <td class="no"><strong>Fails.</strong> Answers the happy path and one rainy pair. Refused on the ticket's own word, "reusable".</td>
+    </tr>
+    <tr>
+      <td><b>B</b> Scorecard as object</td>
+      <td class="yes"><span class="num">1, 2, 3, 5, 17, 18, 22</span>, and <span class="num">21</span> once a per-criterion row exists to disagree with.</td>
+      <td class="no"><span class="num">4, 6, 7, 8, 11</span> and therefore the whole before-and-after half.</td>
+      <td class="yes"><span class="num">1</span> met. <span class="num">2</span> met. <span class="num">3</span> unmet: no run record, so no rate. <span class="num">4</span> partly: the money sentence can be fixed here but nothing forces it. <span class="num">5</span> deferred.</td>
+      <td class="no"><strong>Fails.</strong> Rainy 4 is the headline scenario and B leaves the sentence written twice.</td>
+    </tr>
+    <tr>
+      <td><b>C</b> One sentence, two sides</td>
+      <td class="yes"><span class="num">1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 17, 18, 22</span>, and <span class="num">21</span> on the same rows as B.</td>
+      <td class="yes">Named on screen, not built: <span class="num">13, 14, 15</span> (22 · Usage) · <span class="num">16, 19</span> (Engine) · <span class="num">20</span> (24 · Retention) · <span class="num">24, 25</span> · <span class="num">26, 27</span> (learning 5, the Composer panel). Unanswered and it is the open question: <span class="num">23</span>.</td>
+      <td class="yes"><span class="num">1</span> met. <span class="num">2</span> met, with Unknown and a printed reason. <span class="num">3</span> met: the text side repeats 3 times and the row carries the rate. <span class="num">4</span> met: "Text runs are free" is deleted. <span class="num">5</span> respected: a failing criterion names the setting and writes nothing.</td>
+      <td class="yes"><strong>Passes.</strong> The only direction where the two halves of the JTBD sentence are the same record.</td>
+    </tr>
+    <tr>
+      <td><b>D</b> Scorecards library</td>
+      <td class="yes">Everything C answers, plus <span class="num">23</span>.</td>
+      <td class="yes">Same list as C, minus 23.</td>
+      <td class="yes">Same as C on all five.</td>
+      <td class="no"><strong>Passes and is refused on cost.</strong> One extra rainy scenario for a route, a nav entry and an empty list on every single-agent account.</td>
+    </tr>
+    <tr>
+      <td><b>E</b> Production first</td>
+      <td class="no"><span class="num">2, 4</span> (half, through save-as-test), <span class="num">17, 21, 22, 24</span></td>
+      <td class="no"><span class="num">1, 3, 5, 6, 7, 8, 11</span> and every first-run state.</td>
+      <td class="no"><span class="num">1</span> met. <span class="num">2</span> met. <span class="num">3</span> unmet: there are no draft runs to repeat. <span class="num">4</span> untouched. <span class="num">5</span> deferred.</td>
+      <td class="no"><strong>Fails.</strong> The KPI this feature owns is a floor on publishes preceded by a verified test, and E cannot produce one.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Verdict: C</h2>
+<div class="two">
+  <div class="mock" style="border:1px solid var(--doc-rule);border-radius:6px">
+    <div class="panel">
+      <div class="ph">Test <span class="r"><span class="chip mute">?focus=scorecard opens here</span></span></div>
+      <div class="row"><div class="lab">Scorecard<i>The named checks. A run is graded on these, and so is every call this agent takes.</i></div><div class="ctl">
+        <div class="crit"><span><span class="n">Never promises a refund</span><span class="t">PASS if the agent takes the request and never promises one itself.</span></span><span class="g"><span class="chip ok">Met 96/100</span></span></div>
+        <div class="crit"><span><span class="n">Opens a ticket</span><span class="t">PASS if open_ticket is called before the call ends.</span></span><span class="g"><span class="chip ok">Met 100/100</span></span></div>
+        <div class="crit"><span><span class="n">Confirms a callback</span><span class="t">PASS if the agent states when someone will call back.</span></span><span class="g"><span class="chip bad">Met 61/100</span></span></div>
+        <div style="margin-top:7px"><span class="btn">Add criterion</span> <span class="mono" style="margin-left:6px">03/30</span></div>
+      </div></div>
+    </div>
+    <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">The states, same rows:</div>
+    <div class="panel" style="margin-top:5px">
+      <div class="note">No criteria yet. Add one check to start grading.</div>
+      <div class="note">Turn on transcripts to write criteria. Your 3 saved criteria are kept, and nothing is graded while this is off.</div>
+      <div class="note">30 criteria is the limit. Remove one to add another.</div>
+      <div class="note">Live was judged on an older scorecard</div>
+      <div class="note">Waiting on the transcript · Requires Engine</div>
+      <div class="note">This call was taken with retention off, so there is nothing to judge.</div>
+    </div>
+    <div class="panel" style="margin-top:10px">
+      <div class="bar"><span>Call history</span></div>
+      <table class="t">
+        <tr><th>Call</th><th>Status</th><th>Call Outcome</th></tr>
+        <tr><td class="mono">CALLRSA</td><td><span class="chip">Answered</span></td><td><span class="chip ok">Successful</span> <span class="mono">3/3</span></td></tr>
+        <tr><td class="mono">CALLRSB</td><td><span class="chip">Answered</span></td><td><span class="chip bad">Failed</span> <span class="mono">1/3</span></td></tr>
+        <tr><td class="mono">CALLRSC</td><td><span class="chip">Transferred</span></td><td><span class="chip warn">Unknown</span> <span class="mono">2/3</span></td></tr>
+        <tr><td class="mono">CALLRSD</td><td><span class="chip">Voicemail</span></td><td><span class="chip mute">Not scoreable</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><strong>C is the spine.</strong> A criterion is an assertion with a name. <code>EvalAssertion</code> gains <code>name</code> and <code>criterionId</code>, a <code>Scorecard</code> is a named list of them, and the agent points at one. The sentence in the builder and the sentence on the calls list are one record, so they cannot drift.</li>
+      <li><strong>A's deletion survives whole.</strong> The phone-number Success Evaluation and its <code>useState</code> pair go, and the transcription gate the data points already have is extended over the criteria. That part of A was right, and it is free.</li>
+      <li><strong>B's per-criterion reporting is the call side.</strong> Met · Not met · Unknown, each with the judge's one line, plus Not scoreable with its reason. The call sheet reuses the assertion-row grammar <code>ResultSheet</code> :501-509 already draws.</li>
+      <li><strong>E gives us its one door.</strong> Save-as-test mounts on a criterion that was not met, so a real failure becomes a decision check carrying that same criterion. The sheet, the prefill path, the transcript block and the event are all built and dead today.</li>
+      <li><strong>D folds away until a second agent needs the same sentence.</strong> The <code>Scorecard</code> type carries an id and a name from day one, so the library is a list page over it later, never a migration.</li>
+    </ul>
+
+    <h4>What we are not doing, and why</h4>
+    <ul>
+      <li><strong>No Score column.</strong> Call Outcome already answers this question for every user, and putting a second column beside it would mean two columns and two answers. Its source is replaced: the badge is computed from the criteria, and the word <em>Cannot Predict</em>, which names neither a judgment nor a reason, becomes <em>Unknown</em> with a printed one.</li>
+      <li><strong>No second table.</strong> Runs are stored, and the run record is read by the rows that already exist: the status cell, the pre-flight Tests row, the call sheet. Nobody gets a Runs table.</li>
+      <li><strong>No recording review.</strong> 868ka24am needs a recording the Agora contract does not name, and four Engine rows are in flight for it. The audio row keeps its stated reason and the criteria block says Requires Engine where the playback would go.</li>
+      <li><strong>No self-improving write.</strong> One vendor ships this and it never writes on its own (learning 5). A failing criterion names the setting to fix and links the control that exists for that channel, the way <code>test-section.tsx</code> :70-93 already does. The accept-or-reject panel on the Composer is 868kbyqf6 and it needs the run record this build creates, so it goes after, not with.</li>
+      <li><strong>No repeat-count control.</strong> A text run starts no agent, so it repeats 3 times and the row carries the rate. An audio run costs $0.10 a minute and runs once, with the price on the button. Nothing to configure, and no way to quietly multiply a bill.</li>
+    </ul>
+
+    <div class="q">
+      <strong>The open question, not designable without an answer.</strong><br>
+      When a criterion is edited, do the calls already scored keep the sentence they were judged on, or does the live side re-score on the new one? The compare row cannot be drawn until this is answered. Keep the old sentence and "4 of 5 against 3 of 5" is two scorecards and two numbers that do not subtract. Re-score and it is one honest number, paid for with a judge pass over every call in the window. The build ships the honest placeholder, <code>Live was judged on an older scorecard</code>, and the row is finished once the owner picks.
+    </div>
+
+    <div class="copy"><strong>Proposed copy (needs a yes):</strong> row label <code>Scorecard</code> · hint <code>The named checks. A run is graded on these, and so is every call this agent takes.</code> · <code>Add criterion</code> · sheet <code>Add a criterion</code> / <code>Edit the criterion</code> · <code>Name</code> · <code>What should always be true?</code> · <code>No criteria yet. Add one check to start grading.</code> · <code>30 criteria is the limit. Remove one to add another.</code> · <code>Turn on transcripts to write criteria.</code> · run buttons <code>Run all as text · 3 runs each · ~9s</code> and <code>Run with audio · ~4 min · ~$2.40</code> · money line <code>No agent starts for a text run, so it bills no agent minutes. An audio run places 3 calls at $0.10 a minute.</code> · status <code>Errored</code> · pre-flight <code>4 of 5 criteria met over 3 text runs. Live is 3 of 5</code> · <code>Nothing live to compare</code> · <code>Live was judged on an older scorecard</code> · call verdicts <code>Met</code> · <code>Not met</code> · <code>Unknown</code> · <code>Not scoreable</code> · <code>This call was taken with retention off, so there is nothing to judge.</code> · <code>Waiting on the transcript</code> · <code>No scorecard. Add criteria to score this call.</code> · <code>Requires Engine</code>. Everything else is existing copy (<code>Call Outcome</code>, <code>Successful</code>, <code>Failed</code>, <code>Pass</code>, <code>Fail</code>, <code>Not Run</code>, <code>Save as test</code>).</div>
+  </div>
+</div>
+
+<h2>Prototype plan (<code>studio_x_2</code>, design mode, additive)</h2>
+<div class="plan">
+  <p><strong>Deep link the reviewer opens:</strong> <code>/agents/agt_default/edit?step=4&amp;focus=scorecard</code>. Step 4 is Test (<code>components/wizard/types.ts</code> :20-25); <code>focus</code> resolves through <code>agent-wizard.tsx</code> :519 and lands on <code>data-design-focus="scorecard"</code>, which is the first row of the section and the start of the journey.</p>
+
+  <h4>Create</h4>
+  <ol>
+    <li><code>lib/scorecard.ts</code>: <code>Scorecard {id, name, agentId, version, criteria: EvalAssertion[], updatedAt}</code>, <code>CriterionVerdict = "met" | "not-met" | "unknown"</code>, <code>CallScore {callId, scorecardId, scorecardVersion, state: "scored" | "not-scoreable" | "pending", reason?, criteria[]}</code>, <code>CRITERIA_LIMIT = 30</code>, <code>DEFAULT_SCORECARD</code> (3 seeded criteria on <code>agt_default</code>), <code>readScorecard(agentId)</code> / <code>writeScorecard(sc)</code> against <code>sx:scorecard:&lt;agentId&gt;</code>, <code>scoreCall(callId, sc)</code> (deterministic from the call id, the same seeded idiom <code>call-detail-sheet.tsx</code> :70-80 uses) and <code>callOutcome(score)</code> returning <code>Successful</code> when every criterion is met, <code>Failed</code> on any not-met, <code>Unknown</code> otherwise.<br>
+    <em>Why not extend the sibling:</em> <code>lib/campaign-data.ts</code> is 950 lines of seed constants and pure helpers with no browser storage anywhere. A scorecard is read and written per browser, so it belongs with <code>lib/agent-store.ts</code> and <code>lib/journey-progress.ts</code>, whose <code>sx:</code> guard idiom it copies. Putting a store inside the seed file would pull browser code into every import of <code>EVAL_SUITE</code>.</li>
+
+    <li><code>lib/eval-runs.ts</code>: <code>StoredRun {id, suiteId, agentId, versionLabel, scorecardId, scorecardVersion, mode, repeats, at, results: EvalCaseResult[]}</code>, <code>recordRun</code>, <code>listRuns(agentId)</code>, <code>latestRun(agentId)</code>, <code>resultFor(agentId, caseId)</code>, <code>synthResult(c, mode, repeats)</code>, plus <code>seedScore</code> and <code>synthTranscript</code> moved here. Key <code>sx:eval_runs:&lt;agentId&gt;</code>, last 20 runs kept.<br>
+    <em>Why not extend the sibling:</em> <code>seedScore</code> (<code>test-section.tsx</code> :162-166) and <code>synthTranscript</code> (:168-178) are private to a wizard component, and after this build three surfaces need them: the Tests table, the pre-flight and the call sheet. A component cannot be the store for two other surfaces, so the functions move out and <code>test-section.tsx</code> imports them back.</li>
+
+    <li><code>components/scorecard-sheet.tsx</code>: exports <code>ScorecardBlock {agentId, disabled?}</code> (the criteria rows, the count against the limit, <code>Add criterion</code>) and <code>CriterionSheet</code> (name, kind toggle, sentence, delete). Copies the row-and-sheet grammar <code>step-analysis.tsx</code> :134-150 and :155-159 already draw for data points, so the two lists in that block are the same object visually.<br>
+    <em>Why not extend the sibling:</em> <code>AddCaseSheet</code> (<code>eval-tests.tsx</code> :523) authors a case, with a persona, a history, a tool mode and a runner; a scorecard is a named list of sentences with none of those. Keeping the block inside <code>step-analysis.tsx</code> is impossible because the same rows must render in the Test section, which does not mount that component.</li>
+  </ol>
+
+  <h4>Touch</h4>
+  <ol>
+    <li><code>lib/campaign-data.ts</code>: <code>EvalAssertion</code> :165-171 gains <code>name?: string</code> and <code>criterionId?: string</code>. <code>AssertionVerdict</code> :221 becomes <code>"pass" | "fail" | "unknown" | "errored"</code>. <code>runEstimate</code> :204-213 takes <code>repeats = mode === "text" ? 3 : 1</code> and multiplies <code>seconds</code>; <code>cost</code> stays audio-only.</li>
+    <li><code>lib/wizard-draft.ts</code>: <code>AnalysisConfig</code> :160-169 drops <code>successEval</code> and <code>evalCriteria</code> and gains <code>scorecardId: string | null</code>; <code>DEFAULT_ANALYSIS</code> :171-180 sets <code>scorecardId: "sc_default"</code>. Attaching a scorecard is the switch, so a switch turned on over an empty box stops existing.</li>
+    <li><code>components/wizard/step-analysis.tsx</code>: replace the Success Evaluation block :78-104 with <code>&lt;ScorecardBlock agentId disabled={!cfg.transcribe} /&gt;</code>, gated the way Post-Call Data Extraction is gated at :114 and :119-123.</li>
+    <li><code>app/(dashboard)/deploy/phone-numbers/[id]/number-client.tsx</code>: delete the <code>successEval</code> / <code>evalCriteria</code> state :49-50 and the whole Post Call Analysis <code>Section</code> :205-219.</li>
+    <li><code>components/wizard/test-section.tsx</code>: add <code>&lt;SectionRow id="wz-4-scorecard" focusId="scorecard" label="Scorecard" hint="…"&gt;&lt;ScorecardBlock /&gt;&lt;/SectionRow&gt;</code> as the first child of <code>SectionRows</code> :234, above the Scenarios row :235. Delete <code>seedScore</code> :162-166 and <code>synthTranscript</code> :168-178 and import them from <code>lib/eval-runs</code>. Drop <code>key={generation}</code> :241 now that the suite persists.</li>
+    <li><code>components/eval-tests.tsx</code>: <code>const run = EVAL_RUN</code> :104 reads <code>latestRun(agentId)</code> with <code>EVAL_RUN</code> as the seed; <code>resultFor</code> :154 falls back to <code>synthResult(c, mode, repeats)</code> so an authored case returns a real sheet; the suite state :107 hydrates from and writes to <code>lib/eval-runs</code>; <code>runAll</code> :173-199 and <code>runOne</code> :201-205 call <code>recordRun</code>; button labels :226 and :238 carry the repeat count; the money line :247-251 is rewritten; the status cell :319-339 prints <code>{passes}/{repeats} · {mode}</code> and an <code>Errored</code> badge; the assertion picker in <code>AddCaseSheet</code> :684-699 gains the scorecard's criteria as choices, which is what sets <code>criterionId</code>.</li>
+    <li><code>components/sim-transcript.tsx</code>: <code>SimulatedBanner</code> :57-65 takes <code>mode</code>; the "no minutes billed" half renders for text only. It is currently rendered unconditionally at <code>eval-tests.tsx</code> :440, including over an audio run the button above just priced.</li>
+    <li><code>app/(dashboard)/calls/page.tsx</code>: <code>Outcome</code> :33 becomes <code>"Successful" | "Failed" | "Unknown" | "Not scoreable"</code>; delete <code>OUTCOMES</code> :51 and the modulo at :65 and call <code>callOutcome(scoreCall(id, sc))</code>; the Call Outcome cell renders the badge plus <code>{met}/{total}</code>; <code>structuredValue</code> :117-121 stops deriving Sentiment from the outcome and renders it from the call's own data points.</li>
+    <li><code>components/call-detail-sheet.tsx</code>: <code>CallDetail.outcome</code> :48 carries the <code>CallScore</code>; the Call Outcome field :305 keeps its label and gains the criteria rows underneath, reusing <code>ResultSheet</code>'s row shape (<code>eval-tests.tsx</code> :501-509); a not-met criterion carries <code>Save as test</code>, which mounts <code>AddCaseSheet</code> with the <code>prefill</code> its props :531-533 have always typed and no caller has ever passed.</li>
+    <li><code>components/wizard/deploy-preflight.tsx</code>: the Tests row :150-169 reads <code>latestRun</code> and prints the draft and live sides on one line; the Outputs row :186-196 drops <code>"success eval"</code> and prints the scorecard name.</li>
+    <li><code>components/wizard/agent-wizard.tsx</code>: add <code>scorecard: 4</code> to the <code>owner</code> map :516-522 so <code>?focus=scorecard</code> expands section 4. The section-4 summary :989-991 reads the stored run and loses the trailing artefact word.</li>
+    <li><code>lib/analytics.ts</code>: add <code>scorecard_reviewed</code> and <code>criterion_authored</code> to the eval block :106-111. Note in the comment that <code>scorecardId</code>, <code>criteriaMet</code> and <code>criteriaUnknown</code> are not on the sanitizer allowlist yet, so the event lands without properties until that list is extended.</li>
+  </ol>
+
+  <h4>What the Agora contract does not give us, each stated on screen</h4>
+  <ul>
+    <li><strong>A stored transcript for a finished call.</strong> The words arrive as webhook events 103 and 112 and nothing keeps them (roadmap line 152). On screen: <code>Waiting on the transcript</code> on the row, <code>Requires Engine</code> on the criteria block.</li>
+    <li><strong>The recording.</strong> It is Cloud Recording, a separate product, and four Engine rows are in flight. On screen: the existing disabled Recording item keeps its reason, and no criterion offers playback.</li>
+    <li><strong>The per-call retention flag.</strong> <code>opt_out</code> is set at join and is not readable back per call. On screen: <code>Not scoreable</code> with its reason, seeded in design mode.</li>
+    <li><strong>Any judge on Agora's side.</strong> Grepping the agents resource for <code>eval|score|rubric|judge</code> returns nothing. Every number on these screens is computed in Studio, and the price on the buttons is agent minutes only.</li>
+  </ul>
+
+  <p style="margin-top:14px"><strong>Design-mode state:</strong> <code>sx:scorecard:&lt;agentId&gt;</code> and <code>sx:eval_runs:&lt;agentId&gt;</code> in <code>localStorage</code>, seeded from <code>DEFAULT_SCORECARD</code> and <code>EVAL_RUN</code> on first read. Nothing calls a backend.</p>
+</div>
+
+<h2>Next</h2>
+<p>Owner answers the criterion-edit question above, then C is built on <code>design/sandbox</code> in the order listed, run through <code>scripts/copy-lint.mjs</code>, pushed, and reviewed at the deep link.</p>
+
+<h2>Audit corrections</h2>
+<p>Three hostile audits read the build plan against the locks, the honesty floor and the compiler. They
+refuted it. What follows is what they killed, what survived them, and the two places the directions were kept
+over an auditor's objection. The spine is unchanged: a criterion is an assertion with a name, one record.
+What changed is that only one of the two sides can carry a number today.</p>
+
+<h4 style="margin:16px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)">Killed on the honesty floor</h4>
+<ul class="notes">
+  <li><strong>Every production score.</strong> <code>scoreCall(callId, scorecard)</code> was handed a string and
+  asked for per-criterion verdicts and a judge's sentence. The words it would judge do not exist: the transcript
+  store is roadmap line 152. The call sheet would have printed a reason line above four canned lines of ACME
+  Corp copy that contain no refund, no ticket and no callback. Cut. The Call Outcome cell now prints one honest
+  state, <code>Not scored</code>, with the dependency named once under the table.</li>
+  <li><strong>Met 96/100.</strong> <code>generate()</code> makes 28 rows across 10 telephony deployments, and
+  the design has no window, no cohort and no sample-size control. 100 was not computable from anything on
+  screen. Cut with the production score.</li>
+  <li><strong>Not scoreable.</strong> A retention claim about a named customer call, derived from a hash.
+  <code>opt_out</code> is set at join and is not readable back per call, and <code>grep -rn opt_out</code>
+  over <code>lib components app</code> returns nothing. This was the worst line in the plan. Cut, with the
+  state, the badge and its reason string.</li>
+  <li><strong>~$2.40.</strong> <code>runEstimate</code> returns <code>(seconds / 60) &times; 0.10</code>; three
+  conversation cases at 74s is 222 seconds, which is <strong>$0.37</strong>. The button prints what the
+  derivation returns and the copy now says the same number. A 6&times; error on the one control that quotes
+  the pricing lock.</li>
+  <li><strong>Unknown, errored and the second verdict vocabulary.</strong> <code>CriterionVerdict</code> was a
+  third word list beside <code>AssertionVerdict</code>, and neither new word had a producer. This repo already
+  condemns that shape twice, at <code>campaign-data.ts</code> :154 and :163. One vocabulary,
+  <code>"pass" | "fail"</code>, and a criterion the last run never judged renders as an absence,
+  <code>Not run</code>, which needs no enum value.</li>
+  <li><strong><code>scorecard_reviewed</code>.</strong> The P0 event fires when two scored sides are on screen
+  together. One side cannot exist yet, so declaring the event would be declaring a lie.
+  <code>criterion_authored</code> ships, because it fires.</li>
+</ul>
+
+<h4 style="margin:16px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)">Killed on the locks</h4>
+<ul class="notes">
+  <li><strong>The second criteria editor.</strong> <code>ScorecardBlock</code> was mounted in
+  <code>StepAnalysis</code> and in the Test section. <code>StepAnalysis</code> itself has two mounts, so the
+  Add criterion button would have landed on four surfaces. The brief sets the ceiling in one line: "There are
+  already two Success Evaluation controls and two stores. 14 removes one, it does not add a third." One
+  editor, where the grading sentence already lives. The Test section and the docked panel mount
+  <code>ScorecardSummary</code>, read only, with one door: <strong>Open scorecard</strong>.</li>
+  <li><strong><code>scorecardId</code> on <code>AnalysisConfig</code>.</strong> That type is persisted twice,
+  in the wizard draft and at <code>sx:call_capture:agt_default</code>, so the criteria would have been shared
+  and the pointer to them would not. It also had no writer and a truthy default, which would have printed the
+  scorecard as pre-flight evidence on 100% of agents: defect 11 made unconditional. Cut. The criteria are the
+  attach state: a scorecard with no criteria is not reported as an output.</li>
+</ul>
+
+<h4 style="margin:16px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)">Killed by the compiler</h4>
+<ul class="notes">
+  <li><strong>No mount site had an <code>agentId</code>, and every store key was built from one.</strong>
+  <code>TestsSection</code>, <code>TestSection</code> and <code>StepAnalysis</code> have no such prop, and
+  <code>&lt;ScorecardBlock agentId /&gt;</code> passes <code>true</code>. The id is now threaded the way
+  <code>test-panel.tsx</code> :223 already threads it, <code>draft.agentId ?? "draft"</code>, with the Monitor
+  sheet passing <code>"agt_default"</code> to match the key it already owns.</li>
+  <li><strong>The prefill was not the type the call sheet holds.</strong> <code>CallTranscriptTurn</code> is
+  <code>{speaker, text}</code> and <code>EvalTurn</code> is <code>{role, text}</code>. An adapter ships in
+  <code>lib/scorecard.ts</code>, typed structurally so a lib never imports a component. The persona fields a
+  real call cannot know are left empty for the author to write, which the sheet's own
+  <code>canSave</code> already requires.</li>
+  <li><strong>Two deleted fields had unnamed consumers.</strong> <code>an.successEval</code> at
+  <code>deploy-preflight.tsx</code> :192 and the Call Outcome filter at <code>calls/page.tsx</code> :299,
+  which would have gone on offering "Cannot Predict" beside a column that no longer says it. Both are in the
+  plan now.</li>
+  <li><strong>Module-scope storage reads.</strong> <code>const CALLS = generate()</code> runs at module scope
+  in a client file. Under the corrected plan the calls list reads no store at all, so the hydration split
+  cannot happen.</li>
+</ul>
+
+<h4 style="margin:16px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)">Kept against an audit, with the reason</h4>
+<ul class="notes">
+  <li><strong>The stored run, the repeat count and the rate.</strong> An auditor called the run side
+  synthesized too. It is, and legitimately: Studio owns a test transcript at the moment it makes one, and
+  learning 3 is explicit that a rate, not a pass, is the evidence. What is corrected is the format. A rate
+  prints only where there is a rate: text runs repeat 3 times and the row reads <code>Pass 3/3 · text</code>,
+  and a single audio run keeps today's cell, <code>Pass · audio 1:12</code>, rather than <code>1/1</code>.
+  Giving audio three repeats would treble a bill the KPI's own counter-metric watches, and the directions
+  refused a repeat-count control for that reason.</li>
+  <li><strong>No gate on the criteria editor.</strong> Both the directions and an audit wanted the block
+  disabled when "Store call transcripts" is off, the way data points are. Refused, on a fact: criteria grade
+  every test run, and a test run needs no stored call transcript. A gate there would be a false dependency.
+  Defect 10 is closed instead by the block stating what grades what, and by the switch it was attached to
+  ceasing to exist.</li>
+</ul>
+
+<h4 style="margin:16px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)">What this costs the JTBD</h4>
+<p>Half the headline sentence ships. The named checks give a number before publishing, on a run that is
+stored, repeated and comparable across a tab reload. They do not give a number on the calls the agent took,
+because nothing keeps those words. The compare row, the criterion-edit question and the P0 event all wait on
+the same Engine row, which is why the open question for the owner has changed: it is no longer how a re-scored
+criterion subtracts, it is what the Call Outcome column shows while it cannot be computed.</p>
+
+</div>

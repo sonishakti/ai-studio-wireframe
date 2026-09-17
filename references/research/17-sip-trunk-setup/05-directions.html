@@ -1,0 +1,446 @@
+<title>SIP Trunk Setup Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: this is a mock of the Studio_X dark builder, as the designer sees it in Figma. Every color is painted explicitly. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3{font-size:15px;margin:22px 0 6px}
+p{max-width:78ch;margin:6px 0}
+code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#eaf0f4;padding:1px 5px;border-radius:3px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.win{border-color:var(--doc-brand);box-shadow:0 0 0 1px var(--doc-brand)}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}.cost{color:var(--doc-ink)}
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sec-h .chev{margin-left:auto;color:var(--ink-3)}
+.rowx{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.rowx:last-child{border-bottom:0}
+.rowx.lit{background:var(--row);box-shadow:inset 3px 0 0 var(--brand)}
+.lbl{color:var(--ink-2);font-size:12.5px;line-height:1.35}
+.lbl small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:3px}
+.ctl{min-width:0}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px}
+.field.mono{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.field .cv{margin-left:auto;color:var(--ink-3);white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.chip.sel{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.sm{padding:3px 8px;font-size:11.5px}
+.log{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-family:"JetBrains Mono",monospace;font-size:11.5px;line-height:1.75;color:var(--ink-2)}
+.log b{color:var(--ink);font-weight:500}
+.log .ok{color:var(--ok)}.log .bad{color:var(--bad)}
+.cards2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:8px 10px;font-size:12px}
+.tile b{display:block;font-size:12.5px;color:var(--ink);font-weight:600}
+.tile small{color:var(--ink-3);font-size:11px}
+.tile.sel{border-color:var(--brand);background:var(--brand-soft)}
+.step{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-3);margin-bottom:10px}
+.step span{padding:2px 8px;border:1px solid var(--line);border-radius:999px}
+.step span.now{border-color:var(--brand);color:var(--brand)}
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:12px}
+table.audit th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule);font-weight:600}
+table.audit td{padding:7px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit tr:last-child td{border-bottom:0}
+table.audit td.m{text-align:center;font-weight:600;width:56px}
+.y{color:#1b7f4d}.n{color:#b3261e}.p{color:#96690b}
+table.audit tr.tot td{background:#eef4f7;font-weight:600}
+table.audit tr.grp td{background:#f7fafb;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);font-weight:600}
+.verdict{background:#fff;border:1px solid var(--doc-brand);border-radius:6px;padding:16px 18px;margin-top:12px}
+.verdict h3{margin-top:14px}
+.verdict h3:first-child{margin-top:0}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:16px 18px;margin-top:12px}
+table.files{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+table.files th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:6px 8px;border-bottom:1px solid var(--doc-rule);font-weight:600}
+table.files td{padding:7px 8px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.files td:first-child{white-space:nowrap}
+.copybox{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:12px 16px;margin-top:12px}
+.copybox table{width:100%;border-collapse:collapse;font-size:13px}
+.copybox td{padding:5px 8px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+.copybox td:first-child{color:var(--doc-ink-2);white-space:nowrap;width:210px}
+.copybox tr:last-child td{border-bottom:0}
+@media (max-width:1140px){.dir{grid-template-columns:1fr}.card{max-width:680px}}
+@media (max-width:980px){.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 17 · SIP trunk setup · step 5 diverge</p>
+<h1>SIP Trunk Setup Directions</h1>
+<p><strong>JTBD.</strong> When my agent already talks and the only thing left between it and my customers is the carrier my company has paid for years, I want to wire that carrier in once and hear my own phone ring, so telephony stops being the part of this project I dread.</p>
+<p>Audited against <code>01-jtbd.md</code> (24 rainy scenarios), <code>03-learnings.md</code> (5 learnings), <code>04-before.md</code> (15 defects) and the shipped sibling, feature 11 (<code>sip-ladder.tsx</code> · <code>sip-verdict.tsx</code> · <code>lib/sip-trace.ts</code>). Eight roadmap tasks, six with no acceptance criteria.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>One door: <code>AddPhoneNumberSheet</code>, mounted 8 times across 6 files. One detail page: <code>deploy/phone-numbers/[id]/number-client.tsx</code>. It gets no third.</div>
+  <div><b>Agora facts</b><code>provider</code> enum is <code>byo | twilio</code>: no Telnyx value. <code>inbound_config.allowed_addresses</code> takes CIDR and is written <code>["1.1.1.1"]</code> on every number. <code>outbound_config.prefix</code> exists and nothing uses it. Three published Origination URIs, and Agora records which one you used nowhere.</div>
+  <div><b>What the market does</b>Nobody provisions a trunk from a carrier API key. Carrier is prose at four of four and a field at none. The allowlist is an authentication mode with a stated alternative. Not one of five ends setup on a call.</div>
+  <div><b>The price does not move</b>$0.10 per agent-minute, flat, the same on a BYO key. Picking Telnyx, picking a gateway or raising CPS changes nothing Agora charges. Throughput, reach and reliability are the honest axes.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five answers to one question: what is a trunk, and where does it live. Each is mocked in the real row grammar (240px label · 560px controls · hairline). Copy is proposed, not approved.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Make Quick connect real</h3><div class="who">The lazy pick. Keep the shipped five-stage machine and swap the four <code>setTimeout</code> calls for a carrier API.</div></header>
+    <div class="mock">
+      <div class="step"><span class="now">Key</span><span>Validate</span><span>Pick a number</span><span>Provision</span><span>Test call</span></div>
+      <div class="sec">
+        <div class="sec-h">Quick connect <span class="chev">&#8963;</span></div>
+        <div class="rowx"><div class="lbl">Carrier</div><div class="ctl"><div class="cards2"><div class="tile sel"><b>Twilio</b><small>we configure the SIP trunk</small></div><div class="tile"><b>Telnyx</b><small>we configure the FQDN connection</small></div></div></div></div>
+        <div class="rowx"><div class="lbl">API key</div><div class="ctl"><div class="field mono">SK&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</div></div></div>
+      </div>
+      <div class="log" style="margin-top:10px">
+        <span class="ok">&#10003;</span> Credentials valid <b>Acme Support</b><br>
+        <span class="ok">&#10003;</span> 3 numbers found<br>
+        <span class="bad">&#10007;</span> Creating SIP trunk <b>sip:agora-4f2a.pstn.telnyx.com</b><br>
+        <span class="bad">&#10007;</span> Routing configured, inbound to Agora edge
+      </div>
+      <p style="color:var(--bad);font-size:11.5px;margin-top:8px">The last two lines are the defect: no vendor ships this, and that host is not Telnyx's.</p>
+    </div>
+    <div class="why">
+      <b>For.</b>
+      <ul>
+        <li class="pro">Smallest diff on paper. The component exists, the owner has reviewed it, and the fact log and the closing test call are the two best things in the product.</li>
+        <li class="pro">Four fields to a live number is the fastest happy path anyone could draw, and A3 scoped it exactly that way.</li>
+        <li class="pro">Telnyx appears by name, which is the literal ask of 868kfdnxz.</li>
+      </ul>
+      <b>Against.</b>
+      <ul>
+        <li class="con">Learning 1 kills it. Vapi and Retell walk the user through the carrier's own portal; ElevenLabs' SID and Token only rewrite an existing number's webhook. There is no paste-your-key-get-a-trunk anywhere in this market, and the A3 card flagged the dependency in July and never got an answer.</li>
+        <li class="con">It answers one of eight tasks. There is still nowhere to put a region, an allowlist, a CPS ceiling, a header or a transfer method, so 11's three fix links still land on a table with none of them on it.</li>
+        <li class="con">It hard-fails rainy 3 and 4: a regional ITSP has no key to paste and no name to type.</li>
+      </ul>
+      <b>Cost.</b> <span class="cost">Low to build, unbounded to keep. Every carrier without a key API is a permanent hole, and the honesty floor stays broken until Engine confirms an API nobody else has.</span>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card win">
+    <header><h3>B · The trunk is a set of rows on the number</h3><div class="who">Recommended. Setup is a named handover: Agora's values out, the carrier's values back, and a call that proves it. Every one of the eight tasks is a row on the number it belongs to.</div></header>
+    <div class="mock">
+      <div class="step"><span>Carrier</span><span>At Twilio</span><span class="now">Your trunk</span><span>Call it</span></div>
+      <div class="sec">
+        <div class="sec-h">Trunk <span class="chip on" style="margin-left:auto"><span class="dot"></span>Last call got through 2h ago</span></div>
+        <div class="rowx"><div class="lbl">Carrier<small>Stored as a label. The contract sends <code style="font-size:11px">byo</code>.</small></div><div class="ctl"><div class="field">Telnyx <span class="cv">SIP connection</span></div></div></div>
+        <div class="rowx"><div class="lbl">SIP trunk address<small>Domain or IP for the outbound trunk. Ports are supported.</small></div><div class="ctl"><div class="field mono">acme.sip.telnyx.com:5061 <span class="cv">TLS</span></div></div></div>
+        <div class="rowx"><div class="lbl">Credential</div><div class="ctl"><div class="field mono">acme_prod &#183; &#8226;&#8226;&#8226;&#8226;4f2a <span class="cv">rotated 8 months ago</span></div></div></div>
+        <div class="rowx lit"><div class="lbl">Gateway location<small>The address you pasted at Telnyx.</small></div><div class="ctl"><div class="field">Asia Pacific, India and Africa <span class="cv">sbc-ap-south</span></div><div style="margin-top:6px"><span class="chip">Your carrier routes to whichever address you pasted there</span></div></div></div>
+        <div class="rowx"><div class="lbl">Allowed IP ranges<small>Calls to this number are accepted only from these ranges.</small></div><div class="ctl"><div class="field mono">185.86.151.0/24</div><div style="margin-top:6px"><span class="chip warn"><span class="dot"></span>Media travels on its own ports. Allow those at Telnyx.</span></div></div></div>
+        <div class="rowx"><div class="lbl">Call capacity</div><div class="ctl"><div class="field">10 calls per second <span class="cv">stated by Telnyx</span></div></div></div>
+        <div class="rowx"><div class="lbl">SIP headers</div><div class="ctl"><div class="field mono">X-Acme-Account &#183; {{contact.crm_id}}</div><div style="margin-top:6px"><span class="chip brand">Requires Engine &#183; Nov</span></div></div></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center"><span class="btn primary">Call this number</span><span style="font-size:11.5px;color:var(--ink-3)">Place a call to +44 20 7946 0958 and answer it.</span></div>
+    </div>
+    <div class="why">
+      <b>For.</b>
+      <ul>
+        <li class="pro">It is the only direction that gives all eight tasks somewhere to put a value, because it builds the object the A3 card named in July and nobody built.</li>
+        <li class="pro">Learnings 1 to 4 all land in one shape: the guided handover is what the market actually does, the carrier becomes a stored label against the existing <code>byo | twilio</code> enum, the allowlist sits beside Username and Password where it belongs as an authentication mode, and the gateway is recorded rather than invented.</li>
+        <li class="pro">One door and one detail page, unchanged. Everything reaches six mount points for free.</li>
+        <li class="pro">11's three fix links get the row that names the failure: the 403 opens the credential, the CPS 503 opens the capacity, and the degraded batch opens its own number's trunk.</li>
+        <li class="pro">Ends on a user-placed call in both branches, so Manual SIP stops claiming success it never earned.</li>
+      </ul>
+      <b>Against.</b>
+      <ul>
+        <li class="con">Seven rows is a long fold. Rows a trunk cannot use have to be absent, not disabled, or the page reads as a form nobody finished.</li>
+        <li class="con">Half the work happens in a browser tab we do not own, and a copy button is all the help we can give.</li>
+        <li class="con">Two of the rows are Engine dependencies wearing a chip. If Engine slips, the screen carries two inert controls.</li>
+      </ul>
+      <b>Cost.</b> <span class="cost">Medium. One new lib module, one shared row block, a rewrite of the Quick connect stage machine, and three one-line link changes.</span>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · Trunks as their own inventory</h3><div class="who">The LiveKit and Vapi topology, drawn honestly: one trunk, many numbers, its own list at <code>/deploy/telephony</code>.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Trunks <span class="btn sm" style="margin-left:auto">New trunk</span></div>
+        <div class="rowx" style="grid-template-columns:1fr"><div class="ctl">
+          <div class="field"><b style="font-weight:600">Telnyx prod</b> <span class="cv">3 numbers &#183; 10 cps</span></div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="chip on"><span class="dot"></span>Connected</span><span class="chip">sbc-ap-south</span><span class="chip">185.86.151.0/24</span></div>
+        </div></div>
+        <div class="rowx" style="grid-template-columns:1fr"><div class="ctl">
+          <div class="field"><b style="font-weight:600">Twilio backup</b> <span class="cv">1 number &#183; not set</span></div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="chip bad"><span class="dot"></span>Never called</span><span class="chip warn">Open to any IP</span></div>
+        </div></div>
+      </div>
+      <p style="color:var(--ink-3);font-size:11.5px;margin-top:8px">Every field in this list is stored per number by the contract. The grouping is the fiction.</p>
+    </div>
+    <div class="why">
+      <b>For.</b>
+      <ul>
+        <li class="pro">It is the true topology. One credential really does carry many numbers, and LiveKit, Vapi and Retell all model it this way.</li>
+        <li class="pro">A rotated password is edited once, not four times, which is the strongest answer in the set to rainy 23.</li>
+        <li class="pro">Gives 11's fix links an address that needs no number to resolve, and gives Direct Connect a place to be a trunk type if the owner says it is one.</li>
+      </ul>
+      <b>Against.</b>
+      <ul>
+        <li class="con"><code>AddPhoneNumbersRequest</code> has no trunk id and no trunk object: address, transport, credential and allowlist are all per number. A trunk list would be a grouping the API cannot store, and the first edit that touches four numbers at once is four writes that can half-fail.</li>
+        <li class="con">It is a third door and a second inventory, against the standing rule, and it splits the number from the thing that carries it.</li>
+        <li class="con">Rainy 11 gets worse: the per-number lock that protects a number a campaign owns has no equivalent at trunk level.</li>
+      </ul>
+      <b>Cost.</b> <span class="cost">High. A new route, a new list, a new detail page, a join table, and two inventories to keep in agreement forever.</span>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · A readiness checklist</h3><div class="who">The eight tasks as eight states on one panel: Done, Not set, Requires Engine. Setup is a list you work down.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Trunk readiness <span class="cv" style="margin-left:auto;color:var(--ink-3);font-size:11.5px">5 of 8</span></div>
+        <div class="rowx" style="grid-template-columns:1fr;gap:6px"><div class="ctl" style="display:grid;gap:6px">
+          <div class="field"><span class="dot" style="color:var(--ok)"></span> Carrier named <span class="cv">Telnyx</span></div>
+          <div class="field"><span class="dot" style="color:var(--ok)"></span> Trunk address <span class="cv">acme.sip.telnyx.com</span></div>
+          <div class="field"><span class="dot" style="color:var(--warn)"></span> Allowed IP ranges <span class="cv">Not set</span></div>
+          <div class="field"><span class="dot" style="color:var(--warn)"></span> Call capacity <span class="cv">Not set</span></div>
+          <div class="field" style="opacity:.6"><span class="dot" style="color:var(--ink-3)"></span> SIP headers <span class="cv">Requires Engine</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="why">
+      <b>For.</b>
+      <ul>
+        <li class="pro">Honest about state in a way no other direction manages: a never-set allowlist is visible from the first screen instead of discovered by a customer hearing silence.</li>
+        <li class="pro">Maps the roadmap one row per task, so nothing gets quietly dropped.</li>
+        <li class="pro">Cheapest surface to build and the easiest to extend when Engine lands a field.</li>
+      </ul>
+      <b>Against.</b>
+      <ul>
+        <li class="con">It is our roadmap wearing a user interface. The headline JTBD is connect it once and never touch it again, and a permanent list of unfinished items is the opposite promise.</li>
+        <li class="con">It fails the one rule every other direction inherits: a checklist completes on saves, so it hands out a full set of green ticks to a trunk that has never carried a call. Rainy 5 and 6 are exactly this.</li>
+        <li class="con">Learning 3 says the allowlist is an authentication mode with a stated alternative. As a checklist item it reads as an optional chore.</li>
+      </ul>
+      <b>Cost.</b> <span class="cost">Low, and it still needs B's object underneath it to have anything to count.</span>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · One screen per carrier</h3><div class="who">Vapi's five doc pages as five screens. Pick Telnyx and every word after that is Telnyx's word.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Connect Telnyx <span class="chev">&#8963;</span></div>
+        <div class="rowx"><div class="lbl">1. In Telnyx</div><div class="ctl"><div class="field">Voice &#8250; SIP Connections &#8250; Create <span class="cv">FQDN</span></div></div></div>
+        <div class="rowx"><div class="lbl">2. Outbound Voice Profile</div><div class="ctl"><div class="field mono">sbc-ap-south.viblinx.com:5061</div></div></div>
+        <div class="rowx"><div class="lbl">3. Authentication</div><div class="ctl"><div class="field">Credentials <span class="cv">or IP allowlist</span></div></div></div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="chip sel">Telnyx</span><span class="chip">Twilio</span><span class="chip">Exotel</span><span class="chip bad">Your carrier is not here</span></div>
+    </div>
+    <div class="why">
+      <b>For.</b>
+      <ul>
+        <li class="pro">The most useful screen a customer could be given for the three carriers we write. Telnyx says SIP Connection, Twilio says Elastic SIP Trunk, and matching their nouns removes the entire translation step.</li>
+        <li class="pro">Matches the only thing all four vendors actually publish, so nothing here is speculative.</li>
+        <li class="pro">Region guidance can be carrier-specific, which is where rainy 9 is really solved.</li>
+      </ul>
+      <b>Against.</b>
+      <ul>
+        <li class="con">Rainy 3 is the whole task 868ka68vw, and E answers it with a dead end. A regional ITSP arrives at a list its name is not on.</li>
+        <li class="con">Learning 2 says the carrier must become a field. E makes it a screen, which is a fourth carrier list and no stored value, so the inventory still cannot say who carries a number.</li>
+        <li class="con">The screens end at setup. Capacity, allowlist and headers have no home after the guide is closed, so 11's fix links still land nowhere.</li>
+      </ul>
+      <b>Cost.</b> <span class="cost">Medium per carrier, forever, and it grows with the carrier list rather than with the product.</span>
+    </div>
+  </div>
+
+</div>
+
+<h2>Audit</h2>
+<p>Every direction against the JTBD rainy scenarios and the numbered learnings. <span class="y">&#10003;</span> answered on screen · <span class="p">&#126;</span> partly, or answered by a state rather than a control · <span class="n">&#10007;</span> fails. A direction that only answers the happy path fails this table, and D does.</p>
+
+<table class="audit">
+<thead><tr><th style="width:46%">Scenario or learning</th><th class="m">A</th><th class="m">B</th><th class="m">C</th><th class="m">D</th><th class="m">E</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="6">Rainy scenarios (01-jtbd.md)</td></tr>
+<tr><td><b>R2</b> My carrier is not sayable: the form only lets me be Twilio</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>R3</b> My carrier is nowhere at all: I am a regional ITSP</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td><td class="m n">&#10007;</td></tr>
+<tr><td><b>R4</b> There is no key to paste</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>R5</b> It said saved and the first real caller got a 403</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>R6</b> No way to find out whether it works</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>R7</b> The allowlist is blocking me and nobody showed it to me</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R8</b> It connects and there is no sound (media plane)</td><td class="m n">&#10007;</td><td class="m p">&#126;</td><td class="m p">&#126;</td><td class="m p">&#126;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R9</b> I pasted the wrong one of the three Origination URIs</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>R10</b> My contract says the audio must stay in Europe</td><td class="m n">&#10007;</td><td class="m p">&#126;</td><td class="m p">&#126;</td><td class="m p">&#126;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R11</b> The number is already taken, by me</td><td class="m p">&#126;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td><td class="m n">&#10007;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R15</b> My batch crawls and nothing says what set the pace</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td></tr>
+<tr><td><b>R16</b> The limit is hit and the fix link goes nowhere</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td><td class="m n">&#10007;</td></tr>
+<tr><td><b>R20</b> Transfer drops the caller</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R21</b> My CRM needs an X- header and there is nowhere to put one</td><td class="m n">&#10007;</td><td class="m p">&#126;</td><td class="m p">&#126;</td><td class="m p">&#126;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R23</b> Security rotated the password and I heard in March</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>R24</b> Direct Connect is a word I keep being sold</td><td class="m n">&#10007;</td><td class="m n">&#10007;</td><td class="m p">&#126;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td></tr>
+<tr class="grp"><td colspan="6">Learnings (03-learnings.md)</td></tr>
+<tr><td><b>L1</b> No vendor provisions a trunk from a carrier key, so it is a named guided path</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>L2</b> Carrier is a label our own UI can close, not an enum to wait for</td><td class="m p">&#126;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td><td class="m n">&#10007;</td></tr>
+<tr><td><b>L3</b> The allowlist is an authentication mode, and signalling only</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m n">&#10007;</td><td class="m p">&#126;</td></tr>
+<tr><td><b>L4</b> Gateway region is a property of the address you were handed</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td></tr>
+<tr><td><b>L5</b> The ceiling is a trunk property with a named exhaustion reason</td><td class="m n">&#10007;</td><td class="m y">&#10003;</td><td class="m y">&#10003;</td><td class="m p">&#126;</td><td class="m n">&#10007;</td></tr>
+<tr class="tot"><td>Answered on screen, out of 21</td><td class="m">3</td><td class="m">17</td><td class="m">17</td><td class="m">10</td><td class="m">8</td></tr>
+</tbody>
+</table>
+
+<p><b>A fails the audit.</b> Three of twenty-one, and the three it wins are the happy path: name a carrier, paste a key, place a call. Everything a trunk does after the first minute has nowhere to live.</p>
+<p><b>D fails the audit too, and it is the more interesting failure.</b> It scores ten, and every one of the ten is a state it can display. It loses R5, R6 and R23 together, and those three are one defect: a checklist completes when fields are filled, so it hands a full set of ticks to a trunk that has never carried a call. Provisioning success is not call success, and a surface whose success condition is saves cannot be made honest by adding a row.</p>
+<p><b>B and C tie on the audit and separate on the contract.</b> C is the better model of reality and the worse model of what we can store.</p>
+
+<h2>Verdict</h2>
+<div class="verdict">
+  <h3>B, with C's vocabulary and E's words taken as data.</h3>
+  <p>A trunk is a set of rows on the number that carries it. Setup is a handover said out loud: here are Agora's three Origination URIs and the signalling IPs for your country, you paste them at your carrier, you tell us which one you used, you paste your address and credential and allowlist back, and then you call your own number and answer it. The call is the end of the flow in both branches, so Manual SIP stops printing added successfully over an untested trunk.</p>
+  <p>C's object survives as vocabulary. The word trunk is on screen, one lib module owns it, and the rows read as one thing rather than six fields. What does not survive is C's inventory, because <code>AddPhoneNumbersRequest</code> stores address, transport, credential and allowlist per number and has no trunk id: a trunks list would be a grouping the API cannot hold, and the first shared edit would be four writes that can half-fail. E's per-carrier wording survives as data, not as screens: <code>CARRIERS</code> carries each carrier's own noun and its own three steps, and the last entry is Another carrier with a name you type, so the guidance degrades and the name never does.</p>
+
+  <h3>What we are not doing, and why</h3>
+  <ul>
+    <li><b>Not auto-provisioning.</b> The A3 dependency was raised in July and never answered, and learning 1 answers it from the market: nobody ships it. The four <code>setTimeout</code> calls and the fabricated <code>pstn.telnyx.com</code> host come out. Quick connect keeps its name in spirit and loses the claim.</li>
+    <li><b>Not a trunks list.</b> Contract, and the one-door rule.</li>
+    <li><b>Not a readiness checklist.</b> Our roadmap is not a user interface, and a checklist completes on a save.</li>
+    <li><b>Not a second allowlist for media.</b> One field exists, under <code>inbound_config</code>, and the SDK calls it inbound call configuration. Media ships as the line that says media travels on its own ports and must be allowed at the carrier, which is the thing the customer can actually act on.</li>
+    <li><b>Not a CPS purchase.</b> The trunk's ceiling is what the carrier told you, typed once. Buying capacity is Billing and belongs to 22.</li>
+    <li><b>Not drawing Direct Connect.</b> See below.</li>
+  </ul>
+
+  <h3>The open question, not designable without an answer</h3>
+  <p><b>What is SIP Direct Connect to a user, and how does it differ from the Elastic SIP Trunk path?</b> Its metering and audio-quality siblings are both delivered; the Studio row is P0 for September and nothing in <code>references/</code> says what it exposes. Three answers, three different designs: a different connection type is a third branch in the sheet and a type field the contract does not have; a property of an existing trunk is one badge and one metering row; sales-led is a status we report and never a thing the user turns on. Every other open question in <code>00-brief.md</code> has an honest answer that needs no Engine work. This one changes whether 17 adds a door or a label, so it ships as nothing until the owner says.</p>
+</div>
+
+<h2>Prototype plan</h2>
+<div class="plan">
+  <p><b>Deep link the reviewer opens:</b> <code>/deploy/phone-numbers?focus=connect-carrier</code>. It lands on the numbers list, rings the connect button and opens the sheet at step one, which is where the journey starts.</p>
+
+  <h3>Add</h3>
+  <table class="files">
+    <thead><tr><th>File</th><th>What it holds, and why nothing existing could carry it</th></tr></thead>
+    <tbody>
+      <tr><td><code>lib/sip-trunk.ts</code></td><td><code>SipTrunk</code> · <code>CARRIERS</code> (twilio · telnyx · exotel · other, each with its own routing noun, realm hint, three handover steps, and the <code>byo | twilio</code> value the contract actually sends) · <code>GATEWAYS</code> (the three published Origination URIs, TLS 5061 and TCP or UDP 5060) · <code>AGORA_SIGNALLING_IPS</code> by country code · <code>trunkState()</code> returning <code>connected | never-called | rejected | not-set</code> · <code>trunkHref(e164)</code> and <code>numberIdForE164()</code> · <code>readTrunks/writeTrunk</code> on <code>sx:sip_trunks</code> · <code>TRUNKS</code> seeded per <code>PHONE_NUMBERS</code> id. The sibling is <code>lib/sip-trace.ts</code> and it is the read path: types for a signalling ladder, no state, no storage. <code>lib/campaign-data.ts</code> is a static seed module imported by roughly forty files and holds no localStorage. The right precedent is <code>lib/hosting-regions.ts</code> and <code>lib/backup-providers.ts</code>, which is the shape this follows.</td></tr>
+      <tr><td><code>components/trunk-section.tsx</code></td><td>The seven <code>SectionRow</code>s, rendered identically in the sheet's third step and on the number page, because the two must look the same. The only sibling is <code>FieldInput</code> inside <code>number-client.tsx</code> (<code>:272-279</code>), which is page-private, binds <code>defaultValue</code> rather than <code>value</code>, and cannot be imported by the sheet.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Touch</h3>
+  <table class="files">
+    <thead><tr><th>File and anchor</th><th>Edit</th></tr></thead>
+    <tbody>
+      <tr><td><code>components/sip-quick-connect.tsx</code><br><code>PROVIDERS :39</code> · <code>MOCK_NUMBERS :45</code> · <code>Stage :52</code> · <code>pick() :111</code> · <code>:116</code> · <code>:118</code> · <code>:158</code> · <code>:206</code></td><td>Stages become <code>carrier · handover · trunk · verify · done</code>. Delete <code>MOCK_NUMBERS</code> and <code>pick()</code> with them, since nothing enumerates a carrier's numbers. Delete the <code>sip:agora-4f2a.pstn.${provider}.com</code> line at <code>:116</code> and the routing line at <code>:118</code>. Replace the <code>we configure the SIP trunk</code> sub-line at <code>:158</code> with the carrier's own routing noun. Delete the duplicated sell-or-port sentence at <code>:206</code>, which is four rows below the sheet's own. <code>PROVIDERS</code> becomes <code>CARRIERS</code>. Keep the fact log, the masked credential strip, the scoped-key preference and the closing call.</td></tr>
+      <tr><td><code>components/add-phone-number-sheet.tsx</code><br><code>ToggleGroupItem :112</code> and <code>:115</code> · <code>onConnected :125</code> · <code>Vendor select :136-146</code> · <code>handleAdd :72</code> · <code>Summary :213-216</code></td><td>Toggle reads <code>Guided setup</code> · <code>Manual SIP</code> and gains <code>data-[state=on]:border-primary/60</code> so the selected state matches the carrier cards. <code>onConnected</code> takes the trunk, killing <code>vendor: f.vendor || "Twilio"</code>. The Vendor select reads <code>CARRIERS</code>, ending the fourth carrier list. The manual branch mounts <code>TrunkSection</code> and its primary becomes <code>Call this number</code>, so <code>handleAdd</code> no longer reaches the success phase off six filled fields. The summary prints stored values with no placeholder fallbacks.</td></tr>
+      <tr><td><code>app/(dashboard)/deploy/phone-numbers/[id]/number-client.tsx</code><br><code>Section "Phone Number Details" :114</code> · <code>Transfer Destination :175</code> · <code>FieldInput :272</code></td><td>Replace the six decorative fields with <code>&lt;TrunkSection numberId={id} /&gt;</code>, which binds state and ends <code>user123</code> and the sixteen bullets rendering on every number. Add a <code>Connection</code> row at the top of it carrying <code>data-design-focus="trunk-connection"</code>, the trunk state and <code>Call this number</code>. Under the existing Transfer destination, add a <code>Transfer method</code> row with <code>Requires Engine</code> and an <code>If nobody answers</code> choice.</td></tr>
+      <tr><td><code>app/(dashboard)/deploy/phone-numbers/page.tsx</code><br><code>PageHeader actions :88-93</code> · <code>TableHead Vendor :130</code></td><td><code>useDesignFocus()</code> at the top. The header's add button carries <code>data-design-focus="connect-carrier" data-design-focus-open</code>. The Vendor column becomes <code>Carrier</code> reading <code>CARRIERS</code>, and a <code>Trunk</code> column carries the state word and the last call that got through.</td></tr>
+      <tr><td><code>components/use-hash-scroll.tsx</code><br>after <code>useHashScroll()</code></td><td>Export <code>useDesignFocus()</code>: read <code>?focus=</code>, find <code>[data-design-focus]</code>, scroll to centre, ring it for 2.6s, and click it when it carries <code>data-design-focus-open</code>. Same behaviour as <code>agent-wizard.tsx:551-559</code>, which stays where it is.</td></tr>
+      <tr><td><code>lib/sip-trace.ts</code><br><code>403 fixHref :96</code> · <code>CPS_FAILURE fixSecondary :195</code> · <code>failure: CPS_FAILURE :304</code> · <code>failure: { code, ...meta } :343</code></td><td>Both failure sites pass through <code>withTrunkHref(f, direction === "Inbound" ? to : from)</code>, so the 403 opens that number's credential row and the CPS 503 opens its capacity row. No other line of 11 changes.</td></tr>
+      <tr><td><code>components/batch-detail.tsx</code><br><code>Check the trunk :122-124</code></td><td><code>href={trunkHref(numberOf(d))}</code> from <code>d.channel.numberId</code>, so the degraded batch opens the trunk it is actually dialling on.</td></tr>
+      <tr><td><code>app/(dashboard)/deploy/telephony/page.tsx</code><br><code>redirect :5</code></td><td>Redirect to <code>/deploy/phone-numbers?focus=trunk-column</code>. It stays a fallback for a link that lost its number and stops landing on the channels table.</td></tr>
+      <tr><td><code>components/channels-panel.tsx</code><br><code>CHANNELS :49-55</code></td><td>Phone rows link to <code>/deploy/phone-numbers/${numberIdForE164(identifier)}</code>, so Support Line opens Support Line. Fix <code>ch_07</code>'s <code>backs: ", "</code>, which renders a bare comma in the Agent column of the Before shot.</td></tr>
+      <tr><td><code>lib/analytics.ts</code><br><code>ITSP quick-connect block :85-95</code></td><td>Add <code>trunk_guide_opened</code>, <code>trunk_value_copied</code>, <code>trunk_gateway_recorded</code>, <code>trunk_allowlist_edited</code>, <code>trunk_capacity_set</code>, <code>trunk_test_call_succeeded</code>, <code>trunk_setup_blocked</code>. Remove <code>numbers_enumerated</code>, <code>number_picked</code> and <code>trunk_created</code>, whose stages no longer exist.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="copybox">
+    <p style="margin-top:0"><strong>Copy, proposed.</strong> Every string reads cold, names a fact and explains no widget.</p>
+    <table>
+      <tr><td>Sheet mode toggle</td><td>Guided setup &#183; Manual SIP</td></tr>
+      <tr><td>Step 1 title</td><td>Pick your carrier</td></tr>
+      <tr><td>Carrier chips</td><td>Twilio &#183; Telnyx &#183; Exotel &#183; Another carrier</td></tr>
+      <tr><td>Chip sub-lines</td><td>Elastic SIP Trunk &#183; SIP connection &#183; SIP trunk &#183; Any ITSP or regional telco</td></tr>
+      <tr><td>Another carrier field</td><td>Carrier name &#183; placeholder <code>The name on your bill</code></td></tr>
+      <tr><td>Step 2 title</td><td>Set this up at Telnyx</td></tr>
+      <tr><td>Step 2 lead</td><td>Paste these into your Telnyx console.</td></tr>
+      <tr><td>Step 2 rows</td><td>Origination URI &#183; Signalling IPs to allow &#183; Your country code</td></tr>
+      <tr><td>Copy action</td><td>Copy</td></tr>
+      <tr><td>Docs link</td><td>Open the Agora SIP trunk guide</td></tr>
+      <tr><td>Step 3 title</td><td>Add your trunk details</td></tr>
+      <tr><td>Row labels</td><td>Carrier &#183; SIP trunk address &#183; Transport &#183; Username &#183; Password &#183; Allowed IP ranges &#183; Gateway location &#183; Call capacity &#183; SIP headers</td></tr>
+      <tr><td>SIP trunk address hint</td><td>Domain or IP for the outbound trunk. Ports are supported.</td></tr>
+      <tr><td>Allowed IP ranges hint</td><td>Calls to this number are accepted only from these ranges. One CIDR block per line.</td></tr>
+      <tr><td>Allowlist empty state</td><td>Any IP address can reach this number.</td></tr>
+      <tr><td>Media line</td><td>Media travels on its own ports. Allow those at Telnyx.</td></tr>
+      <tr><td>Gateway location hint</td><td>The address you pasted at Telnyx.</td></tr>
+      <tr><td>Gateway location caption</td><td>Your carrier routes to whichever address you pasted there.</td></tr>
+      <tr><td>Gateway options</td><td>United States &#183; Americas, Europe and Oceania &#183; Asia Pacific, India and Africa</td></tr>
+      <tr><td>Call capacity hint</td><td>Calls per second your carrier allows on this trunk. Batches pace to it.</td></tr>
+      <tr><td>Call capacity empty state</td><td>Not set. Batches dial at the campaign's own pace.</td></tr>
+      <tr><td>SIP headers hint</td><td>Added to the INVITE on every outbound call.</td></tr>
+      <tr><td>Engine captions</td><td>Requires Engine &#183; Nov</td></tr>
+      <tr><td>Transfer method options</td><td>Blind, over SIP REFER &#183; Stay on the line, as a conference</td></tr>
+      <tr><td>Transfer precondition</td><td>Your carrier must allow transfers on this trunk.</td></tr>
+      <tr><td>If nobody answers</td><td>Bring the caller back to the agent &#183; Hang up</td></tr>
+      <tr><td>Verify lead</td><td>Your trunk is saved. Now hear it ring.</td></tr>
+      <tr><td>Verify sub-line</td><td>Place a call to +44 20 7946 0958 and answer it.</td></tr>
+      <tr><td>Primary action</td><td>Call this number</td></tr>
+      <tr><td>Ringing</td><td>Ringing 4s</td></tr>
+      <tr><td>Verified line</td><td>+44 20 7946 0958 answered in 4s with two-way audio.</td></tr>
+      <tr><td>Test call failed</td><td>The call did not connect. &#183; action: See what happened</td></tr>
+      <tr><td>Connection row states</td><td>Last call got through 2h ago &#183; Never called &#183; Carrier rejected the last call &#183; Trunk not set up</td></tr>
+      <tr><td>Credential age</td><td>Rotated 8 months ago</td></tr>
+      <tr><td>Disconnect fine print</td><td>Disconnect stops Agora using this credential. It doesn't revoke or rotate it at Telnyx.</td></tr>
+      <tr><td>List columns</td><td>Number &#183; Label &#183; Carrier &#183; Trunk &#183; Assigned to &#183; Status</td></tr>
+    </table>
+  </div>
+</div>
+
+<h2>Next</h2>
+<p>On a yes, this builds additively in <code>studio_x_2</code> behind the existing sheet and the existing number page, runs <code>tsc</code>, <code>next build</code> and <code>copy-lint</code>, deploys, and goes in front of the designer at <code>/deploy/phone-numbers?focus=connect-carrier</code> with red-marked shots. Direct Connect stays out of the build until the owner answers what it is.</p>
+<h2>Audit corrections</h2>
+<div class="verdict">
+  <p>Three hostile audits read the build plan attached to this verdict, on locks, on honesty and on buildability. All three refuted it. The direction survives; the plan was rewritten. This section records what the audits killed and what was kept against them, so the argument is readable and not only its result.</p>
+
+  <h3>Killed, and rightly</h3>
+  <ul>
+    <li><b>The credential last four and the rotation age.</b> <code>ng-console/src/features/telephony/phone-numbers/phone-number-edit-session.ts:520</code> hydrates every loaded number with <code>password: ""</code>, and <code>src/lib/telephony/phone-number-contracts.ts:84</code> and <code>:103</code> write the password and never read it back. No credential timestamp exists on the record. So <code>acme_prod &#183; &#8226;&#8226;&#8226;&#8226;4f2a &#183; rotated 8 months ago</code> was defect 7 rebuilt with better fiction. The Credential row now shows the username and one word, Set or Not set, with a Replace password action that writes and never reads.</li>
+    <li><b>The Call capacity row, and <code>cps</code> with it.</b> Nothing computes it, nothing enforces it, and the number next door disagrees: batch pace is the seed <code>cps: { target: 3 }</code> (<code>lib/campaign-data.ts:1447</code>, <code>:1481</code>, <code>:1516</code>, <code>:1555</code>) rendered as <code>target 3/s</code> at <code>components/batch-detail.tsx:168</code>. The brief already settled it: Requires Engine for the ceiling, and the task's own backlog note puts the control on Batch Calls. Learning 5 still holds; it is answered by the degraded batch opening its own number's trunk, not by an input.</li>
+    <li><b>The CPS fix link rewiring.</b> With no capacity row, <code>CPS_FAILURE</code> keeps its one door at <code>/deploy/batch-calls</code>, which is where pacing is changed. Its <code>fixSecondary</code>, "Raise the CPS limit", is deleted rather than repointed: the ceiling is the carrier's and we cannot raise it. Only the 403 is rewired, to that number's Credential row.</li>
+    <li><b><code>AGORA_SIGNALLING_IPS</code> and its Copy button.</b> The docs list the per country ACL in accordions and this research reproduced not one address. A Copy button over addresses nobody read is the fabricated <code>pstn.telnyx.com</code> host moved one stage later and made pasteable. Step 2 copies the Origination URI, which is captured and real, and links the guide for the ACL. The country code row goes with the IPs, because nothing is left to index by it.</li>
+    <li><b>The carrier API key inputs.</b> Keeping the Account SID, the secret and the scoped key toggle after deleting everything that used them is defect 3 moved from the log lines into the inputs. There is no Agora call to make with a carrier key and no field to store it. The scoped key preference survives as a principle with nothing left to apply to; the only credential in the flow is the SIP digest pair.</li>
+    <li><b>"Requires Engine &#183; Nov".</b> 868kubvcy is P1 and undated, and the only November in the codebase belongs to feature 07. The caption is the house default, "Requires Engine".</li>
+    <li><b>Carrier stored twice.</b> <code>SipTrunk.carrier</code> beside <code>PhoneNumber.vendor</code> is two records for one fact, which is the defect the verdict exists to close. <code>vendor</code> is migrated to <code>carrier</code> plus <code>carrierName</code> on <code>PhoneNumber</code>, all nine seeds re-written, and the trunk object carries no carrier at all.</li>
+    <li><b>Two gateway controls.</b> Learning 4 says gateway is never a per number dropdown. There is now one Select, in the handover step where the user is choosing which URI to paste, and a read only value on the number page.</li>
+    <li><b>Two primary fills in the number page's first fold.</b> Save at <code>number-client.tsx:76</code> stays the page's one primary. The Connection row's "Call this number" is an outline button, like Detach at <code>:107</code>.</li>
+    <li><b>The compile errors.</b> The old plan left <code>Stage</code> tests at <code>sip-quick-connect.tsx:142</code>, <code>:230</code> and <code>:238-270</code> against a union that no longer has those members, read <code>MOCK_NUMBERS</code> at <code>:216</code>, <code>:277</code> and <code>:316</code> after deleting it, changed <code>onConnected</code> without touching its type at <code>:61</code>, deleted the only writers of <code>form.sipDomain</code> and <code>form.username</code> while <code>add-phone-number-sheet.tsx:70</code> still required them, and deleted the Display Name field at <code>:147-149</code> that <code>canAdd</code> also required. Every one of those sites is now named in the edit.</li>
+    <li><b>Two fabrications found next door and fixed while the files are open.</b> <code>lib/sip-trace.ts:229</code> mints Call-IDs against <code>sbc-us-west</code>, <code>sbc-us-east</code> and <code>sbc-eu-central</code> at <code>agora.io</code>; the three published hosts are the <code>viblinx.com</code> SBCs. And <code>app/(dashboard)/calls/page.tsx:73-74</code> seeds <code>+1 (555) 555-0101</code> and <code>+1 (555) 555-0240</code>, which are in no inventory, so the 403 fix link would have resolved to nothing on every row.</li>
+  </ul>
+
+  <h3>Kept against an audit, and why</h3>
+  <ul>
+    <li><b>The recommended direction itself.</b> All three audits attacked values and anchors inside B. None attacked the audit table, and none proposed A, C, D or E. B stands.</li>
+    <li><b>The selected state fix, but not onto <code>ring-stroke</code>.</b> One audit prescribed <code>components/ui/tabs.tsx:72</code>, <code>ring-1 ring-stroke</code>, as the house precedent for a selected card. It is the tabs primitive and one instance. The selection card idiom in this codebase is <code>components/wizard/radio-cards.tsx</code>, whose own comment says it "Replaces the ad-hoc aria-pressed buttons and ToggleGroup cards that each restyled selection their own way", and <code>border-primary</code> with <code>bg-primary/5</code> appears at eight call sites. So the carrier cards become <code>RadioCardGroup</code> and <code>RadioCard</code> outright, and the mode toggle takes the same ink border and tint the two shipped <code>ToggleGroupItem</code> card rows already use. Both halves match the shipped idiom rather than each other.</li>
+    <li><b>Two helper lines on a row that has an Engine dependency.</b> One audit read the rule as one line per row always. The rule is against repeating a caption, and the house's own Engine rows already carry a description and a caption: <code>components/wizard/engine-row.tsx:72</code> puts the caption in the hint slot under the description. What was cut is the repeat: Gateway location had a hint and a caption saying the same thing, and the allowlist's media line moved to the handover step where the customer can act on it.</li>
+    <li><b>Connection state.</b> It is not a seed dressed as data: call history carries <code>toNumber</code>, <code>fromNumber</code>, <code>callTs</code>, <code>callOutcome</code> and <code>callFailedReason</code>, so last call got through, never called and carrier rejected are real derivations.</li>
+    <li><b>Feature 11's own event names.</b> The plan proposed <code>trunk_test_call_succeeded</code>. <code>test_call_connected</code> already is the success line and <code>04-before.md</code> lists it among the things that must survive, so no third name is minted for a status that exists.</li>
+  </ul>
+
+  <h3>Corrections to this document</h3>
+  <ul>
+    <li>Direction B's Against column says "Two of the rows are Engine dependencies wearing a chip". With capacity cut it is three on the trunk, Gateway location, SIP headers and Transfer method, and Gateway location was missing the chip in the mock.</li>
+    <li>The copy block's "Call capacity" rows, "Credential age", "Gateway location hint" and the "Signalling IPs to allow" and "Your country code" step 2 rows are withdrawn.</li>
+    <li>The builder row grammar is not imported into the sheet. <code>SectionRows</code> goes two column at <code>@3xl</code>, 768px of real container width; the sheet is about 536px and the number page about 728px, so the 240px label rail never appears at either. The trunk rows use the number page's own label, control and one hint line anatomy, which is what both surfaces already render.</li>
+    <li>The gateway label for the second SBC follows the docs: Americas, Europe, Oceania and Brazil.</li>
+  </ul>
+</div>
+</div>

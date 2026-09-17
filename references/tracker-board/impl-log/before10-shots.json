@@ -1,0 +1,90 @@
+[
+ {
+  "name": "before-13-monitor",
+  "url": "https://ai-studio-console-redesign.vercel.app/monitor",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-13-diagnostics",
+  "url": "https://ai-studio-console-redesign.vercel.app/monitor/diagnostics",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-14-tests",
+  "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/test",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-16-phone-numbers",
+  "url": "https://ai-studio-console-redesign.vercel.app/deploy/phone-numbers",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-17-18-channels",
+  "url": "https://ai-studio-console-redesign.vercel.app/integrations?tab=channels",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-18-widget",
+  "url": "https://ai-studio-console-redesign.vercel.app/deploy/web-widget",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-19-integrations",
+  "url": "https://ai-studio-console-redesign.vercel.app/integrations",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-19-extensions",
+  "url": "https://ai-studio-console-redesign.vercel.app/extensions",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-22-usage",
+  "url": "https://ai-studio-console-redesign.vercel.app/billing/usage",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-22-usage-hub",
+  "url": "https://ai-studio-console-redesign.vercel.app/usage",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ },
+ {
+  "name": "before-deploy-hub",
+  "url": "https://ai-studio-console-redesign.vercel.app/deploy",
+  "wait": 6000,
+  "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.setItem('theme','light')}catch(e){}await new Promise(r=>setTimeout(r,600));})()",
+  "preWait": 1200,
+  "full": true
+ }
+]

@@ -1,0 +1,512 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Monitor Watch Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme mocks: the Monitor hub in dark, as the designer sees it. Scaffold = research/10. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3{font-size:16px;margin:0}
+p{max-width:78ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;margin-top:18px}
+.d{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
+.d>header{grid-column:1/-1;padding:12px 14px 10px;border-bottom:1px solid var(--doc-rule)}
+.d>header .who{font-size:13px;color:var(--doc-ink-2);margin-top:3px;max-width:88ch}
+.d .why{padding:12px 14px 14px;font-size:13.5px;color:var(--doc-ink-2);border-left:1px solid var(--doc-rule)}
+.d .why p{margin:0 0 8px}
+.d .why b{color:var(--doc-ink)}
+.pro b{color:#1b7f4d}.con b{color:#b3261e}.cost b{color:var(--doc-brand)}
+code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+/* ---- app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:12.5px;padding:14px}
+.app{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.hd{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600}
+.hd .r{margin-left:auto;display:flex;gap:6px;font-weight:400;align-items:center}
+.nav{display:flex;gap:13px;padding:8px 12px 0;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-3)}
+.nav span{padding-bottom:7px;white-space:nowrap}
+.nav .on{color:var(--ink);border-bottom:2px solid var(--brand)}
+.nav .new{color:var(--warn)}
+.filters{display:flex;gap:6px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-size:11px;color:var(--ink-2)}
+.sel{border:1px solid var(--stroke);border-radius:6px;padding:3px 8px;background:var(--panel-2);color:var(--ink-2);white-space:nowrap}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.tiles.four{grid-template-columns:repeat(4,1fr)}
+.tile{background:var(--panel);padding:9px 10px 10px}
+.tile .l{display:flex;align-items:center;gap:5px;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tile .l i{font-style:normal;opacity:.55;font-size:10px}
+.tile .l .act{margin-left:auto;border:1px solid var(--stroke);border-radius:5px;padding:0 5px;font-size:9.5px;letter-spacing:0;text-transform:none;color:var(--ink-2);font-weight:500}
+.tile .v{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:5px;font-variant-numeric:tabular-nums}
+.tile .v.bad{color:var(--bad)}
+.tile .v.mute{font-size:12.5px;font-weight:400;color:var(--ink-3)}
+.tile .s{font-size:10.5px;color:var(--ink-3);margin-top:3px;line-height:1.35}
+.tile .d{font-size:10.5px;color:var(--ink-3);margin-top:3px}
+.tile .d.up{color:var(--ok)}.tile .d.dn{color:var(--bad)}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--stroke);border-radius:999px;padding:1px 7px;font-size:10px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.off{color:var(--ink-3);border-style:dashed}
+.pnl{padding:10px 12px;border-bottom:1px solid var(--line)}
+.pnl .t{font-weight:600;font-size:12px;display:flex;align-items:center;gap:6px}
+.pnl .sub{font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.seg{display:flex;height:12px;border-radius:3px;overflow:hidden;margin:9px 0 7px}
+.seg i{display:block}
+.seg .a{background:var(--ok)}.seg .b{background:var(--ink-3)}.seg .c{background:var(--bad)}
+.legend{display:flex;gap:14px;font-size:10.5px;color:var(--ink-2);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend b{width:7px;height:7px;border-radius:2px;display:inline-block}
+.alert{display:flex;gap:9px;padding:10px 12px;border-bottom:1px solid var(--line);background:#160f12}
+.alert.ok{background:#0e1a16}
+.alert .ic{width:16px;text-align:center;color:var(--bad)}
+.alert.ok .ic{color:var(--ok)}
+.alert .bd{flex:1;min-width:0}
+.alert .ttl{font-weight:600;font-size:12px}
+.alert .ln{font-size:11px;color:var(--ink-2);margin-top:2px}
+.alert .ln.q{color:var(--ink-3)}
+.alert .r{display:flex;gap:6px;align-items:flex-start}
+.btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--stroke);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--ink);background:var(--panel-2);white-space:nowrap}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.off{color:var(--ink-3);border-color:var(--line)}
+/* sheet */
+.sheet{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sheet .sh{padding:10px 12px;border-bottom:1px solid var(--line)}
+.sheet .sh .t{font-weight:600;font-size:12.5px}
+.sheet .sh .s{font-size:11px;color:var(--ink-3);margin-top:3px}
+.rows{padding:2px 12px}
+.rw{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);align-items:start}
+.rw:last-child{border-bottom:0}
+.rw .k{font-size:11.5px;font-weight:500}
+.rw .k em{display:block;font-style:normal;font-size:10px;color:var(--ink-3);margin-top:2px;line-height:1.35}
+.rw .c{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--ink-2)}
+.inp{border:1px solid var(--stroke);border-radius:6px;padding:3px 8px;background:var(--panel);color:var(--ink);font-variant-numeric:tabular-nums}
+.recap{padding:9px 12px;border-top:1px solid var(--line);background:var(--panel);font-size:11px;color:var(--ink-2)}
+.ft{display:flex;gap:6px;justify-content:flex-end;padding:9px 12px;border-top:1px solid var(--line)}
+.ft .l{margin-right:auto}
+/* tables inside mocks */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{text-align:left;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:7px 12px;border-bottom:1px solid var(--line);font-weight:600}
+.tbl td{padding:7px 12px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.tbl td b{color:var(--ink);font-weight:600}
+.tbl tr:last-child td{border-bottom:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px}
+.slot{border:1px dashed var(--stroke);border-radius:6px;min-height:52px;display:grid;place-items:center;color:var(--ink-3);font-size:11px}
+.ring{position:relative}
+/* doc tables */
+table.audit{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--doc-rule)}
+table.audit th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:7px 9px;border-bottom:1px solid var(--doc-rule);vertical-align:bottom}
+table.audit td{padding:6px 9px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td:first-child{width:27%}
+table.audit td b{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--doc-brand)}
+table.audit .y{color:#1b7f4d;font-weight:600}
+table.audit .n{color:#b3261e;font-weight:600}
+table.audit .p{color:#8a6a10;font-weight:600}
+table.audit .x{color:var(--doc-ink-2)}
+table.audit tr.sum td{background:#eef3f6;font-weight:600}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:5px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:11px 14px;font-size:13px;margin-top:14px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:12px 16px;font-size:13.5px}
+.plan ol{margin:6px 0;padding-left:20px}.plan li{margin:6px 0}
+.plan h4{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+@media (max-width:1040px){.d{grid-template-columns:1fr}.d .why{border-left:0;border-top:1px solid var(--doc-rule)}.two,.facts{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 13 · Dashboards &amp; alerts · step 5 diverge</p>
+<h1>Monitor Watch Directions</h1>
+<p><strong>JTBD.</strong> When my agent is live and taking real calls without me watching it, I want the product to tell me the moment a number I care about slips and to put the fix one click away, so I can put it right myself before the next caller hears it.</p>
+<p>Audited against <code>01-jtbd.md</code> (24 rainy scenarios), <code>03-learnings.md</code> (5 learnings), the three roadmap tickets <a href="https://app.clickup.com/t/868kykbfc">868kykbfc</a> · <a href="https://app.clickup.com/t/868ka69vr">868ka69vr</a> · <a href="https://app.clickup.com/t/868kyv3yg">868kyv3yg</a>, and the standing owner rules.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Monitor › Overview (<code>app/(dashboard)/monitor/page.tsx</code>) and Monitor › Diagnostics. The label stays <b>Monitor</b>. No new sidebar item, no new tab.</div>
+  <div><b>Agora facts</b>Call vocabulary is <code>state: answered | hangup</code> with <code>reason: request | hangup | failed</code>. Turns query covers 7 days. No aggregate, no group-by, no alert API. NCS offers 7 numeric events; 112 is documented and not subscribable. $0.10 per agent-minute, the same on the customer's own key.</div>
+  <div><b>Studio today</b>Four literal KPIs, a donut that sums to 75 percent, three inert filters, a refresh that fires a toast. <code>MetricCard</code> and <code>Sparkline</code> ship and nothing mounts them. The spend cap is the only threshold a user can set anywhere in the product.</div>
+  <div><b>Locks</b>12 is locked, so no live surface and no operator verb. 10 owns latency and timing definitions. 22 owns spend. Selected state is an ink chip, never a primary fill. Requires Engine is a real row.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses about where the condition lives and what the number means. Mocked in the grammar the hub already has: tabs, tiles, the Needs attention card, a sheet of labelled rows. Copy is proposed.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="d">
+    <header>
+      <h3>A · Alerts as a sixth tab</h3>
+      <div class="who">Retell's shape, copied straight: Alerting sits beside Analytics as a peer. Monitor grows a sixth tab holding a rules table, a New rule dialog with a metric picker, and an incident history. The tiles stay as they are.</div>
+    </header>
+    <div class="mock">
+      <div class="app">
+        <div class="hd">Monitor <span class="r"><span class="btn">Call capture</span><span class="btn">Refresh</span></span></div>
+        <div class="nav"><span>Overview</span><span>Live calls</span><span>Call History</span><span>Sessions</span><span>Diagnostics</span><span class="on new">Alerts</span></div>
+        <div class="filters"><span class="sel">All deployments</span><span style="margin-left:auto" class="chip warn">10 of 10 rules used</span><span class="btn primary">New rule</span></div>
+        <table class="tbl">
+          <thead><tr><th>Rule</th><th>Metric</th><th>Condition</th><th>Window</th><th>Last fired</th></tr></thead>
+          <tbody>
+            <tr><td><b>Answer rate guard</b></td><td>Answer rate</td><td>Below 90%</td><td>1 hour</td><td>09:12 today</td></tr>
+            <tr><td><b>Handle time</b></td><td>Handle time</td><td>Above 5:00</td><td>24 hours</td><td>Never</td></tr>
+            <tr><td><b>FCR watch</b></td><td class="ring" style="color:var(--warn)">First contact resolution</td><td>Below 70%</td><td>7 days</td><td>Never</td></tr>
+          </tbody>
+        </table>
+        <div class="pnl" style="border-bottom:0"><div class="sub">A metric picker has to offer a list. The list is where the invented numbers come back.</div></div>
+      </div>
+    </div>
+    <div class="why">
+      <p class="pro"><b>For.</b> One vendor ships exactly this, so it has a shipped proof. Rules get a home, a count, a history, and a single place to answer "what am I watching". It is the cheapest thing to build, because nothing on the existing screens has to be touched or corrected.</p>
+      <p class="con"><b>Against.</b> It is the direction a tired designer picks, and it fails on its own terms. The condition ends up in a second place, away from the number it watches, which is two doors for one action. A rules table needs a metric picker, and a picker needs a list of metrics: the moment you draw that list you have to put first contact resolution and answer speed in it, and neither can be computed from anything Agora returns. Retell itself does not draw the line where its nav does, because its rule reuses the same Post Call Extraction filters the chart uses. Copying the number of surfaces while ignoring where the line was drawn gives a shape that looks validated and is wrong. The hub already carries five tabs and a Diagnostics queue that cannot reach its own last 35 issues.</p>
+      <p class="cost"><b>Cost.</b> Low to build, high to live with: a sixth tab, a metric registry, a naming scheme that invites the reserved-name clash, and a permanent second home for conditions.</p>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="d">
+    <header>
+      <h3>B · The threshold rides the tile</h3>
+      <div class="who">Every number on Overview carries a quiet Watch control. Setting one opens the spend cap's sheet, re-pointed at a metric: a condition, a comparison, a frequency from a fixed list, and a recap line that reads back what you set. The tile then wears its own line, and a breach lands on the Needs attention card that already ships with a Fix deep link.</div>
+    </header>
+    <div class="mock">
+      <div class="app">
+        <div class="hd">Monitor <span class="r"><span class="chip">Updated 2 minutes ago</span><span class="btn">Refresh</span></span></div>
+        <div class="alert">
+          <span class="ic">▲</span>
+          <div class="bd">
+            <div class="ttl">Answer rate dropped below 90 percent</div>
+            <div class="ln">71 percent over the last hour on Collections Outreach.</div>
+            <div class="ln q">Top cause in the same hour: Tool call timed out.</div>
+          </div>
+          <div class="r"><span class="btn">Fix</span><span class="btn ghost">See the calls</span></div>
+        </div>
+        <div class="tiles four">
+          <div class="tile"><div class="l">Answered calls <i>i</i></div><div class="v">8,104</div><div class="s">Of 11,383 calls</div></div>
+          <div class="tile" style="box-shadow:inset 0 0 0 1px var(--brand)"><div class="l">Answer rate <i>i</i><span class="act">Watch</span></div><div class="v bad">71%</div><div class="d"><span class="chip on">Watch · below 90%</span></div></div>
+          <div class="tile"><div class="l">Handle time <i>i</i><span class="act">Watch</span></div><div class="v">2:57</div><div class="d up">Up 6 seconds from the previous 7 days</div></div>
+          <div class="tile"><div class="l">Transfer to human <i>i</i><span class="act">Watch</span></div><div class="v">7%</div><div class="d">No prior period to compare</div></div>
+        </div>
+        <div style="padding:12px">
+          <div class="sheet">
+            <div class="sh"><div class="t">Watch answer rate</div><div class="s">You get a message when this number crosses your line, and one more when it recovers.</div></div>
+            <div class="rows">
+              <div class="rw"><div class="k">Condition</div><div class="c"><span class="sel">Drops below</span><span class="inp">90</span><span>%</span></div></div>
+              <div class="rw"><div class="k">Compare with</div><div class="c"><span class="chip on">A number I set</span><span class="chip">The period before</span></div></div>
+              <div class="rw"><div class="k">Frequency</div><div class="c"><span class="sel">Every 15 minutes, over the last hour</span></div></div>
+              <div class="rw"><div class="k">Scope</div><div class="c">All deployments</div></div>
+              <div class="rw"><div class="k">Sent to</div><div class="c">Email and in-app · <span style="color:var(--brand)">Change in Project notifications</span></div></div>
+              <div class="rw"><div class="k">Delivery record</div><div class="c"><span class="chip off">Requires Engine</span></div></div>
+            </div>
+            <div class="recap">We check answer rate every 15 minutes. You get an email when it drops below 90 percent over the last hour, and one more when it is back above.</div>
+            <div class="ft"><span class="btn ghost l">Remove watch</span><span class="btn">Cancel</span><span class="btn primary">Save watch</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <p class="pro"><b>For.</b> It matches learning 1 exactly: the alert control is the spend cap's shape attached to the number it watches, so there is one door per action and no metric picker to fill with numbers we cannot compute. It reuses four live surfaces instead of adding a fifth: <code>MetricCard</code> gets the affordance, the Sheet primitive holds the form, Project notifications keeps owning delivery, and the Diagnostics engine keeps owning causes. Because the breach borrows its Fix link from the diagnosis already running on that deployment, the alert lands on the setting that caused it, which no vendor in the sweep does. It also unlocks the one condition a rate can never carry: on a count tile the condition list holds <b>No calls at all</b>, so a trunk that has refused every call since Friday fires an alert instead of reading as a quiet Sunday.</p>
+      <p class="con"><b>Against.</b> There is no single page listing every watch, so a project with ten of them has ten chips spread over a screen. A watch is scoped by whatever the deployment filter is set to, which is one fewer control and one more thing to read. And the breach is only as good as the tile beneath it: put this on today's numbers and the first alert fires on a literal.</p>
+      <p class="cost"><b>Cost.</b> Medium. One sheet, one store, one evaluator, two optional props on an existing card. It cannot ship before C.</p>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="d">
+    <header>
+      <h3>C · Name the number before you watch it</h3>
+      <div class="who">Rebuild the tile set on the vocabulary Agora actually returns, with one derivation feeding every tile, the ring and the deployment chips. Each tile carries a definition line and states its coverage. Answer speed gets a row and no number. First contact resolution gets no row at all. Health gains a fourth word so zero traffic stops reading as green.</div>
+    </header>
+    <div class="mock">
+      <div class="app">
+        <div class="hd">Monitor <span class="r"><span class="chip">Updated 2 minutes ago</span></span></div>
+        <div class="filters"><span class="sel">Last 7 days</span><span class="sel">All agents</span><span class="sel">All call types</span><span class="sel">All deployments</span></div>
+        <div class="tiles">
+          <div class="tile"><div class="l">Answered calls <i>i</i></div><div class="v">8,104</div><div class="s">Counts 8 of 12 deployments. Four took no calls.</div></div>
+          <div class="tile"><div class="l">Answer rate <i>i</i></div><div class="v">71%</div><div class="d dn">Down 4 points from the previous 7 days</div></div>
+          <div class="tile"><div class="l">Handle time <i>i</i></div><div class="v">2:57</div><div class="s">Calls you place yourself while testing are counted too.</div></div>
+          <div class="tile"><div class="l">Transfer to human <i>i</i></div><div class="v">7%</div><div class="s">Skips two phone numbers: transcripts are off there.</div></div>
+          <div class="tile"><div class="l">Answer speed <i>i</i></div><div class="v mute">Requires Engine</div><div class="s">A call records when it started and when it ended. Nothing records when it was picked up.</div></div>
+        </div>
+        <div class="pnl">
+          <div class="t">Call outcomes</div>
+          <div class="seg"><i class="a" style="width:71.2%"></i><i class="b" style="width:22%"></i><i class="c" style="width:6.8%"></i></div>
+          <div class="legend">
+            <span><b class="a" style="background:var(--ok)"></b>Answered 8,104</span>
+            <span><b style="background:var(--ink-3)"></b>Caller hung up 2,506</span>
+            <span><b style="background:var(--bad)"></b>Failed 773</span>
+            <span style="color:var(--ink-3)">11,383 calls</span>
+          </div>
+        </div>
+        <div class="pnl" style="border-bottom:0">
+          <div class="t">Deployment health</div>
+          <div class="legend" style="margin-top:7px">
+            <span><b style="background:var(--bad)"></b>8 unhealthy</span>
+            <span><b style="background:var(--warn)"></b>0 degraded</span>
+            <span><b style="background:var(--brand)"></b>0 healthy</span>
+            <span><b style="background:transparent;box-shadow:inset 0 0 0 1px var(--ink-3)"></b>4 no data</span>
+            <span style="color:var(--ink-3);margin-left:auto">Issues are diagnosed from the last 7 days of calls.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <p class="pro"><b>For.</b> It is the only direction that pays the honesty floor. The ring sums to the call count because the segments are counts, and its three labels are the two states and three reasons the contract carries, so Voicemail, Transferred and Transfer Failed leave the screen rather than being fabricated. It delivers 868ka69vr in the form the ticket asks for, a definition per metric, with answer speed marked on screen and first contact resolution absent, which is what all five vendors and the one contact-centre product between them justify. The fourth health word kills the worst bug on the surface: four deployments that never took a call currently read green Healthy on every chip, under a strip labelled Live that counts drafts.</p>
+      <p class="con"><b>Against.</b> On its own it ships nothing the tracker asked for first. The page gets truthful and stays mute: nothing can still be told what a bad number looks like, the two-thirds of 868kykbfc that is monitors and alerts is still a blank page, and <code>alert_fix_opened</code> still has nothing to fire from. It also makes the screen visibly poorer than the picture it replaces, because four invented panels come off.</p>
+      <p class="cost"><b>Cost.</b> Medium. One derivation module, five tiles mounted on the card that already exists, one word added to a type and two maps.</p>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="d">
+    <header>
+      <h3>D · Watch it from your own tools</h3>
+      <div class="who">Answer 868kyv3yg where the four vendors answer it: on the webhook that already ships. The endpoint gains a payload format and the invented event catalogue is replaced by the seven numeric events Agora actually publishes, with the turn batch named and marked.</div>
+    </header>
+    <div class="mock">
+      <div class="app">
+        <div class="hd">Webhooks <span class="r"><span class="btn primary">Add endpoint</span></span></div>
+        <div class="rows" style="padding:2px 12px">
+          <div class="rw"><div class="k">Endpoint</div><div class="c"><span class="inp" style="font-family:'JetBrains Mono',monospace">https://api.acme.com/hooks/agora</span></div></div>
+          <div class="rw"><div class="k">Events</div><div class="c"><span class="chip on">Agent joined (101)</span><span class="chip on">Agent left (102)</span><span class="chip">Agent history (103)</span><span class="chip on">Agent error (110)</span><span class="chip">Agent metrics (111)</span><span class="chip">Inbound call state (201)</span><span class="chip">Outbound call state (202)</span></div></div>
+          <div class="rw"><div class="k">Turns finished (112)<em>This event is documented and cannot be subscribed to yet.</em></div><div class="c"><span class="chip off">Requires Engine</span></div></div>
+          <div class="rw"><div class="k">Payload format</div><div class="c"><span class="sel">JSON</span><span class="chip off">OpenTelemetry · Requires Engine</span></div></div>
+        </div>
+        <div class="pnl" style="border-bottom:0"><div class="sub">Nine invented event names come off the page: call.started, call.completed, call.failed, call.transferred, three campaign names, agent.published, agent.error.</div></div>
+      </div>
+    </div>
+    <div class="why">
+      <p class="pro"><b>For.</b> It is the shape all four vendors converged on: ElevenLabs turns an existing workspace webhook into an exporter with one toggle, LiveKit does it with two environment variables and no screen at all. It costs one row rather than a connector catalogue, and it deletes the most embarrassing lie in the product, a subscribe list of nine event names that do not exist and two delivery times for deliveries that never happened.</p>
+      <p class="con"><b>Against.</b> The format row's only honest value today is JSON, because there is no OTLP anywhere in the SDK, and the one event a trace exporter wants, the batch of every turn in a session, is documented and not offered. So the row ships mostly as a named gap. It also answers none of the JTBD: a webhook is the answer "ask an engineer" wearing a nicer coat.</p>
+      <p class="cost"><b>Cost.</b> Low. One list replaced, two rows added, nothing computed.</p>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="d">
+    <header>
+      <h3>E · A dashboard you can build</h3>
+      <div class="who">The sizing row's own reading of "self-serve": a card picker over a named metric list, drag to reorder, saved views you can share, and a group-by select beside the filters. Seventeen designer-days of surface.</div>
+    </header>
+    <div class="mock">
+      <div class="app">
+        <div class="hd">Monitor <span class="r"><span class="sel">My view</span><span class="btn">Save view</span><span class="btn primary">Add tile</span></span></div>
+        <div class="filters"><span class="sel">Last 7 days</span><span class="sel" style="border-color:var(--warn);color:var(--warn)">Group by: nothing to group by</span></div>
+        <div class="grid2">
+          <div class="slot">Answer rate</div>
+          <div class="slot">Handle time</div>
+          <div class="slot">Add a tile</div>
+          <div class="slot">Add a tile</div>
+        </div>
+        <div class="pnl" style="border-bottom:0"><div class="sub">The group-by needs labels written when the agent joins the channel. Nothing writes them.</div></div>
+      </div>
+    </div>
+    <div class="why">
+      <p class="pro"><b>For.</b> It is what the sizing row says the ticket is, and "self-serve" is the only word in the title about scope. It is the direction that would survive contact with an enterprise buyer's checklist, and it is the only one where a customer can put their own post-call field next to the standard metrics, which is how both leading vendors ship business-specific outcomes.</p>
+      <p class="con"><b>Against.</b> It answers the happy path and nothing else. Every rainy scenario stays open: a builder does not know what a bad number looks like, does not fire on silence, does not say what success means, and does not state what is missing from a number. The picker needs a metric list that does not exist yet, and the group-by needs <code>labels</code> at join time, which is on the property allowlist and excluded from the configurable set, so the one control that makes a builder worth having cannot be wired. And the success event is <code>alert_fix_opened</code>: a saved view nobody acts on is the failure, not the goal.</p>
+      <p class="cost"><b>Cost.</b> High, and it buys the wrong thing first. A persistence model nobody has specified, plus a metric registry that has to lie.</p>
+    </div>
+  </div>
+
+</div>
+
+<h2>Audit</h2>
+<p>Scored by number against the 24 rainy scenarios in <code>01-jtbd.md</code> and the 5 learnings in <code>03-learnings.md</code>. Key: <span class="y">yes</span> = the direction answers it on screen · <span class="p">part</span> = answered only with a caveat named below · <span class="n">no</span> = not answered · <span class="x">n/a</span> = the scenario is not this direction's to answer. Σ counts yes 2, part 1, no 0, n/a excluded.</p>
+<table class="audit">
+  <thead><tr><th>Rainy scenario</th><th>A tab</th><th>B tile</th><th>C numbers</th><th>D webhook</th><th>E builder</th></tr></thead>
+  <tbody>
+    <tr><td><b>1</b> Nothing is configured yet</td><td class="y">yes</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>2</b> No traffic yet</td><td class="n">no, a rate rule never fires</td><td class="y">yes, No calls at all</td><td class="y">yes, No data health</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>3</b> The metric I was told to report does not exist</td><td class="n">no, the picker must lie</td><td class="p">part, inherits C's tiles</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>4</b> Retention is off on some agents</td><td class="n">no</td><td class="p">part, reads the tile's line</td><td class="y">yes, coverage line</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>5</b> The thing that produces the number is off</td><td class="n">no</td><td class="p">part</td><td class="y">yes</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>6</b> The data has not arrived yet</td><td class="p">part</td><td class="y">yes, 15 min floor</td><td class="y">yes, Updated 2 minutes ago</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>7</b> The range runs out under me</td><td class="n">no</td><td class="p">part</td><td class="y">yes, 7-day line on issues</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>8</b> Two screens, two answers</td><td class="n">no</td><td class="n">no</td><td class="p">part, one derivation in Studio</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>9</b> Success means four different things</td><td class="n">no</td><td class="p">part</td><td class="y">yes, definition names the source</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>10</b> Nothing to split it by</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="n">no, the control cannot be wired</td></tr>
+    <tr><td><b>11</b> The limit is hit</td><td class="y">yes</td><td class="y">yes, 10 watches</td><td class="n">no</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>12</b> The name is already taken</td><td class="n">no, naming invites the clash</td><td class="y">yes, the metric is the name</td><td class="x">n/a</td><td class="x">n/a</td><td class="n">no</td></tr>
+    <tr><td><b>13</b> Permission is off</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>14</b> The delivery path is dead</td><td class="p">part</td><td class="p">part, no channel is on yet</td><td class="n">no</td><td class="p">part</td><td class="n">no</td></tr>
+    <tr><td><b>15</b> The trunk rejects the call before we see it</td><td class="n">no</td><td class="y">yes, silence is the condition</td><td class="p">part, says zero, not why</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>16</b> The caller hangs up first</td><td class="n">no</td><td class="n">no</td><td class="p">part, the outcome bar splits it</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>17</b> My own test calls are in the numbers</td><td class="n">no</td><td class="n">no</td><td class="p">part, the definition says so</td><td class="n">no</td><td class="n">no</td></tr>
+    <tr><td><b>18</b> Two people at once</td><td class="p">part</td><td class="p">part, Muted until 11:40</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td></tr>
+    <tr><td><b>19</b> The storm</td><td class="p">part</td><td class="y">yes, one a day per watch</td><td class="x">n/a</td><td class="n">no</td><td class="x">n/a</td></tr>
+    <tr><td><b>20</b> It never says it is over</td><td class="y">yes</td><td class="y">yes, the all-clear</td><td class="x">n/a</td><td class="n">no</td><td class="x">n/a</td></tr>
+    <tr><td><b>21</b> The prior period is empty</td><td class="n">no</td><td class="y">yes, refuses to fire</td><td class="y">yes, No prior period</td><td class="x">n/a</td><td class="n">no</td></tr>
+    <tr><td><b>22</b> The account cannot pay</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td></tr>
+    <tr><td><b>23</b> The region forbids it</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td><td class="p">part</td><td class="x">n/a</td></tr>
+    <tr><td><b>24</b> The format is not supported</td><td class="n">no</td><td class="n">no</td><td class="n">no</td><td class="y">yes, the gap is named</td><td class="n">no</td></tr>
+    <tr><td><b>L1</b> The rule is a threshold on a tile</td><td class="n">no, it is the second place</td><td class="y">yes</td><td class="x">n/a</td><td class="x">n/a</td><td class="n">no</td></tr>
+    <tr><td><b>L2</b> Two selects, a number, an all-clear, no cron</td><td class="p">part</td><td class="y">yes</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td></tr>
+    <tr><td><b>L3</b> The customer's post-call field is the group-by</td><td class="n">no</td><td class="p">part, any tile can be watched</td><td class="p">part</td><td class="x">n/a</td><td class="p">part</td></tr>
+    <tr><td><b>L4</b> Export is a format row on the webhook</td><td class="x">n/a</td><td class="x">n/a</td><td class="x">n/a</td><td class="y">yes</td><td class="x">n/a</td></tr>
+    <tr><td><b>L5</b> Every tile needs a definition line</td><td class="n">no</td><td class="p">part</td><td class="y">yes</td><td class="x">n/a</td><td class="n">no</td></tr>
+    <tr class="sum"><td>Σ</td><td>11</td><td>31</td><td>23</td><td>6</td><td>1</td></tr>
+  </tbody>
+</table>
+<p><strong>E fails the audit.</strong> It scores one point, from a learning, and answers not a single rainy scenario. It is the only direction here that designs for a user whose numbers are already right, already defined, already arriving, and already worth arranging. Nothing on Monitor is any of those things yet.</p>
+<p><strong>D scores low and is still worth doing</strong>, because it is a different ticket. It is one list and two rows, and its score is low for the same reason its cost is: it is not a spine.</p>
+<p><strong>Scenario 10 and 13 are unanswered by every direction.</strong> Group-by is blocked on <code>labels</code> written when the agent joins the channel, so no direction draws the control. Roles are real in the live Console and absent from this wireframe, so the fix link can still land a reader on a page their role cannot change. Both are named below rather than drawn around.</p>
+
+<h2>Verdict: B on C, with D taken as a separate small ticket</h2>
+<div class="two">
+  <div class="mock" style="border:1px solid var(--line);border-radius:8px">
+    <div class="app">
+      <div class="hd">Monitor <span class="r"><span class="chip">Updated 2 minutes ago</span><span class="btn">Call capture</span><span class="btn">Refresh</span></span></div>
+      <div class="nav"><span class="on">Overview</span><span>Live calls</span><span>Call History</span><span>Sessions</span><span>Diagnostics</span></div>
+      <div class="alert">
+        <span class="ic">▲</span>
+        <div class="bd">
+          <div class="ttl">Answer rate dropped below 90 percent</div>
+          <div class="ln">71 percent over the last hour on Collections Outreach.</div>
+          <div class="ln q">Top cause in the same hour: Tool call timed out.</div>
+          <div class="ln q">3 more breaches since 09:12. You get one message a day for each watch.</div>
+        </div>
+        <div class="r"><span class="btn">Fix</span><span class="btn ghost">See the calls</span></div>
+      </div>
+      <div class="filters"><span class="sel">Last 7 days</span><span class="sel">All agents</span><span class="sel">All call types</span><span class="sel">All deployments</span></div>
+      <div class="tiles">
+        <div class="tile"><div class="l">Answered calls <i>i</i><span class="act">Watch</span></div><div class="v">8,104</div><div class="s">Counts 8 of 12 deployments. Four took no calls.</div></div>
+        <div class="tile" style="box-shadow:inset 0 0 0 1px var(--brand)"><div class="l">Answer rate <i>i</i><span class="act">Watch</span></div><div class="v bad">71%</div><div class="d"><span class="chip on">Watch · below 90%</span></div></div>
+        <div class="tile"><div class="l">Handle time <i>i</i><span class="act">Watch</span></div><div class="v">2:57</div><div class="s">Calls you place yourself while testing are counted too.</div></div>
+        <div class="tile"><div class="l">Transfer to human <i>i</i><span class="act">Watch</span></div><div class="v">7%</div><div class="s">Skips two phone numbers: transcripts are off there.</div></div>
+        <div class="tile"><div class="l">Answer speed <i>i</i></div><div class="v mute">Requires Engine</div><div class="s">A call records when it started and when it ended. Nothing records when it was picked up.</div></div>
+      </div>
+      <div class="pnl">
+        <div class="t">Call outcomes</div>
+        <div class="seg"><i class="a" style="width:71.2%"></i><i class="b" style="width:22%"></i><i class="c" style="width:6.8%"></i></div>
+        <div class="legend">
+          <span><b style="background:var(--ok)"></b>Answered 8,104</span>
+          <span><b style="background:var(--ink-3)"></b>Caller hung up 2,506</span>
+          <span><b style="background:var(--bad)"></b>Failed 773</span>
+          <span style="color:var(--ink-3)">11,383 calls</span>
+        </div>
+      </div>
+      <div class="alert ok" style="border-bottom:0">
+        <span class="ic">●</span>
+        <div class="bd"><div class="ttl">Answer rate is back above 90 percent</div><div class="ln">92 percent over the last hour on Collections Outreach.</div></div>
+        <div class="r"><span class="btn ghost">Dismiss</span></div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">The same tiles with nothing to show:</div>
+    <div class="app" style="margin-top:6px">
+      <div class="tiles four">
+        <div class="tile"><div class="l">Answered calls <i>i</i></div><div class="v mute">No calls yet</div></div>
+        <div class="tile"><div class="l">Answer rate <i>i</i></div><div class="v mute">No calls yet</div></div>
+        <div class="tile"><div class="l">Handle time <i>i</i></div><div class="v mute">No calls yet</div></div>
+        <div class="tile"><div class="l">Transfer to human <i>i</i></div><div class="v mute">Skips two phone numbers: transcripts are off there.</div></div>
+      </div>
+      <div class="pnl" style="border-bottom:0"><div class="t">Deployment health <span class="chip off">4 no data</span></div><div class="sub">Issues are diagnosed from the last 7 days of calls.</div></div>
+    </div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><b>C is the floor and it ships first.</b> One derivation feeds every tile, the outcome bar and the deployment chips, so the answered count, the rate and the bar can no longer disagree on one screen. Three labels, not six. Answer speed keeps a row and no number. First contact resolution gets nothing, because not even the contact-centre product that publishes a formula page per metric defines it.</li>
+      <li><b>B is the spine.</b> The threshold is a property of a number, so it lives on the number. The form is two selects, an input and a fixed frequency list, which is Retell's matrix without its cron, and it ships its own all-clear because a breach that never says it is over is what makes people keep checking all afternoon.</li>
+      <li><b>The breach borrows the diagnosis.</b> A watch knows a number crossed a line; it does not know why. The rules engine on that deployment does, and it already carries a root cause, a suggested fix and a deep link to the control that resolves it. The alert card shows the top cause from the same window and reuses its <code>fixHref</code>. When there is no diagnosis, the card offers See the calls instead of Fix, because a Fix button with nothing behind it is a lie.</li>
+      <li><b>Silence is a condition.</b> On a count tile the condition list holds No calls at all. It is the only rule in the design that catches a trunk refusing every call, and it is the one thing a threshold on a rate can never do.</li>
+      <li><b>Delivery stays where delivery lives.</b> Project notifications gains one row, Monitor watches, with its four channels. The watch sheet states where it will go and links there. Two doors for one action would break the standing rule, and the delivery table has been waiting for a row backed by a condition since it was drawn.</li>
+      <li><b>D goes out as its own small change.</b> Seven real event names, the turn batch named and marked, one payload format row. No destination catalogue.</li>
+    </ul>
+    <h4>What we are not doing, and why</h4>
+    <ul>
+      <li><b>No Alerts tab, no rules table, no rule names.</b> The second place is the whole failure mode: it needs a metric picker, a picker needs a list, and the list would have to carry numbers we cannot compute. A watch is named by the number it watches, so the reserved-name clash cannot happen.</li>
+      <li><b>No dashboard builder, no saved views, no card picker.</b> The screen has to be right before it is arrangeable, and the control that would make a builder worth having, the group-by, cannot be wired.</li>
+      <li><b>No group-by control.</b> It needs <code>labels</code> written when the agent joins the channel, and nothing writes them.</li>
+      <li><b>No sentiment on Monitor.</b> There is no sentiment field in any request, response or callback payload, and live sentiment trends belong to 12, which is locked.</li>
+      <li><b>No first contact resolution tile, ever, until someone writes the formula.</b></li>
+      <li><b>No cron field, no per-watch channel switches, no second refresh interval.</b></li>
+      <li><b>No live surface and no operator verb.</b> 12 is locked.</li>
+      <li><b>No cost anywhere on this surface.</b> The Engine is a flat $0.10 per agent-minute, charged the same on the customer's own key, so nothing here may suggest a threshold or a model choice moves the bill. Spend keeps its one quiet outlink.</li>
+    </ul>
+    <h4>The open question, which is not designable without an answer</h4>
+    <p>Who owns the sentence that defines success. Today the headline success number is produced by an LLM prompt the customer types into a box on one phone number, so it means something different on every number and is never comparable across deployments. Until the owner answers brief question 2, the success tile can be drawn two ways and only one of them can be watched: a watch on today's number is a watch on four different sentences, and a breach on it cannot name what broke. The prototype ships the four tiles that do not depend on that answer and leaves the success tile out.</p>
+    <div class="copy"><strong>Proposed copy, needs a yes.</strong> Tiles <code>Answered calls</code> · <code>Answer rate</code> · <code>Handle time</code> · <code>Transfer to human</code> · <code>Answer speed</code> / <code>Requires Engine</code>. Outcomes <code>Call outcomes</code> · <code>Answered</code> · <code>Caller hung up</code> · <code>Failed</code>. Watch <code>Watch</code> · <code>Watch · below 90%</code> · <code>Watch answer rate</code> · <code>You get a message when this number crosses your line, and one more when it recovers.</code> · <code>Condition</code> · <code>Drops below</code> · <code>Rises above</code> · <code>No calls at all</code> · <code>Compare with</code> · <code>A number I set</code> · <code>The period before</code> · <code>Frequency</code> · <code>Every 15 minutes, over the last hour</code> · <code>Scope</code> · <code>Sent to</code> · <code>Delivery record</code> · <code>Save watch</code> · <code>Remove watch</code>. Breach <code>Answer rate dropped below 90 percent</code> · <code>Top cause in the same hour:</code> · <code>See the calls</code> · <code>Answer rate is back above 90 percent</code> · <code>Muted until 11:40</code>. Health <code>No data</code> · <code>Deployment health</code> · <code>Issues are diagnosed from the last 7 days of calls.</code></div>
+  </div>
+</div>
+
+<h2>Prototype plan (<code>studio_x_2</code>, design mode, nothing calls a backend)</h2>
+<div class="plan">
+  <p><strong>Deep link the reviewer opens:</strong> <code>/monitor?focus=watch-answer-rate</code>. It lands on the Answer rate tile with its Watch control ringed, which is step 1 of the happy scenario. Setting a watch at 90 percent breaches immediately against the derived number, so the reviewer sees the breach card, the borrowed fix link and the all-clear by using the control, with nothing to demo and no seeded story to explain.</p>
+
+  <h4>Add</h4>
+  <ol>
+    <li><code>lib/monitor-metrics.ts</code>. One derivation for every number on Monitor. Exports <code>MonitorRange</code>, <code>MetricKey</code>, <code>METRIC_DEFS</code> (label, definition, unit, formatter, whether it is computable), <code>monitorSummary(range, deploymentId?)</code> returning <code>{ calls, answered, callerHungUp, failed, answerRate, handleTimeSec, transferRate, series, coverage: { counted, total, noTraffic, noRetention }, updatedAt }</code>, and <code>formatMetric(key, value)</code>. Reads <code>DEPLOYMENTS[].metrics</code> and buckets with the same seeded FNV-1a idiom <code>lib/diagnostics.ts:96</code> uses, so every tile, the outcome bar and the chips agree. <em>Why not extend:</em> <code>lib/diagnostics.ts</code> is a per-call rules engine over synthetic signals; these are deployment-level aggregates, and today the page holds them as four string literals.</li>
+    <li><code>lib/monitor-watches.ts</code>. The watch objects and the evaluator. Exports <code>Watch</code>, <code>WatchIncident</code>, <code>WATCH_LIMIT = 10</code>, <code>listWatches</code>, <code>saveWatch</code>, <code>removeWatch</code>, <code>muteWatch</code>, <code>evaluateWatches()</code>. Persists to <code>localStorage</code> under <code>sx:monitor_watches</code> with the same try or ignore guard as <code>lib/agent-resources.ts:22-30</code>. A breach is returned as the <code>Issue</code> shape <code>lib/diagnostics.ts:51-64</code> already exports, with <code>ruleId: "watch_breached"</code> and the <code>fixTarget</code> borrowed from <code>aggregateIssues(deploymentId)[0]</code>, falling back to <code>{ level: "calls", id: deploymentId, section: "" }</code>. Holds the storm rule (one notice per watch per 24 hours, suppressed count kept) and refuses to evaluate a previous-period comparison when the prior period is empty. <em>Why not extend:</em> the nine rules in <code>RULES</code> are hardcoded pure functions over one call's signals; a watch is a user-set threshold over an aggregate window, persisted per project.</li>
+    <li><code>components/metric-watch-sheet.tsx</code>. The rule form in the existing <code>Sheet</code>, laid out with <code>SectionRows</code> and <code>SectionRow</code>. Selected chips use the ink tint idiom at <code>components/add-phone-number-sheet.tsx:180</code>, never a primary fill. <em>Why not extend:</em> the sibling is <code>SpendControlsSheet</code>, a non-exported function inside <code>components/usage-spend-card.tsx:474-620</code> bound to <code>PLAN_USAGE</code> and cap semantics. This copies its anatomy: threshold, presets, recap line, and the promise that the warning comes before the wall.</li>
+    <li><code>components/design-focus.tsx</code>. A client mount that reads <code>?focus=</code>, waits for <code>[data-design-focus="&lt;id&gt;"]</code>, scrolls it to centre and rings it, then stands down if <code>[data-design-focus-owner]</code> is present. <em>Why not extend:</em> the only implementation today is <code>focusOn</code> inside <code>components/wizard/agent-wizard.tsx:513-570</code>, a callback closed over wizard step state. Three anchors outside the builder already carry <code>data-design-focus</code> with no handler at all (<code>app/(dashboard)/calls/page.tsx:349</code>, <code>components/sip-ladder.tsx:120</code>, <code>components/session-detail.tsx:180</code>), so their review links are dead today.</li>
+  </ol>
+
+  <h4>Change</h4>
+  <ol>
+    <li><code>app/(dashboard)/monitor/page.tsx</code>. Delete <code>SPARK_DOWN/FLAT/UP</code> (:40-42), <code>KPIS</code> (:44-49), <code>STATUS_SEGMENTS</code> (:53-60), <code>TOTAL_CALLS</code> (:61), <code>TOP_AGENTS</code> (:63-67) and the three private chart helpers <code>Sparkline</code> (:383-400), <code>Donut</code> (:402-450), <code>AreaChart</code> (:452-465). Mount five <code>MetricCard</code>s and the shared <code>Sparkline</code>; put <code>data-design-focus="watch-answer-rate"</code> on the Answer rate tile's Watch control. Make the range select at :249-257 controlled and feed it to <code>monitorSummary</code>. Replace the refresh toast at :112-118 with a re-derive that moves <code>updatedAt</code>. Extend the Needs attention card at :147-189 to take <code>watchIncidents()[0] ?? allOpenIssues()[0]</code>, add the resolved and suppressed lines, and add the See the calls button beside Fix. Track <code>alert_fix_opened</code> on that Fix link beside the existing <code>remediation_link_clicked</code> at :169-177.</li>
+    <li><code>components/metric-section.tsx</code>. <code>MetricCard</code> gains <code>definition?: string</code> and <code>action?: React.ReactNode</code>. The <code>Info</code> glyph at :67 is wrapped in the existing <code>Tooltip</code> and rendered only when a definition is passed; the action sits at the end of the label row (:61-66). Both optional, so nothing that mounts it today changes.</li>
+    <li><code>lib/diagnostics.ts</code>. <code>Health</code> at :38 gains <code>"no_data"</code>. <code>deploymentHealth</code> at :409 returns it when the deployment's <code>metrics.calls</code> is 0, before the batch pacing override at :414-417. <code>healthOf</code> is untouched: a single call always has data. <code>FixTarget.level</code> at :43 gains <code>"calls"</code> and <code>fixHref</code> at :88-93 gains one line returning <code>/calls?deployment=&lt;id&gt;</code>.</li>
+    <li><code>components/health-dot.tsx</code>. <code>COLOR</code> (:6-10) gains <code>no_data</code> as a hollow dot (transparent fill, <code>--stroke</code> ring) and <code>LABEL</code> (:11-15) gains <code>"No data"</code>.</li>
+    <li><code>app/(dashboard)/monitor/diagnostics/page.tsx</code>. The strip title at :68 becomes <code>Deployment health</code>; the summary at :36-43 counts live deployments only and adds the no-data count; the feed at :34 merges breaching watches; a line under the strip reads <code>Issues are diagnosed from the last 7 days of calls.</code>; <code>visible</code> at :58 gains a page index so the feed can reach the 60 issues its own footer counts.</li>
+    <li><code>app/(dashboard)/project/notifications/page.tsx</code>. <code>CATEGORIES</code> at :28-35 gains <code>{ id: "watches", label: "Monitor watches", desc: "A number you watch crosses the line you set", email: true, inApp: true, slack: false, webhook: false }</code> above the Billing row. The watch sheet reads these switches for its Sent to line.</li>
+    <li><code>lib/analytics.ts</code>. After <code>config_drift_detected</code> (:144) add <code>alert_received</code>, <code>alert_fix_opened</code>, <code>monitor_watch_set</code>, <code>monitor_watch_removed</code>, with the pairing note the spend trio carries at :71-72: an <code>agent_edited_after_live</code> with no <code>alert_received</code> before it is the miss this set exists to catch.</li>
+    <li><code>components/usage-spend-card.tsx:565</code>. The selected preset becomes the ink chip instead of <code>variant="default"</code>. The 50, 75 and 90 presets read as three calls to action today, and this is the control the watch sheet copies.</li>
+    <li><code>lib/campaign-data.ts</code>. <code>interface Agent</code> at :509 gains <code>optOutOfRetention?: boolean</code> after :534, set on one agent, so the coverage line has something true to count.</li>
+    <li><code>app/(dashboard)/calls/page.tsx:223-228</code>. The deep-link effect also reads <code>deployment</code> and seeds the search box with that deployment's name, so See the calls lands filtered.</li>
+    <li><code>app/(dashboard)/layout.tsx</code>. Mount <code>&lt;DesignFocus /&gt;</code> after <code>&lt;DashboardHeader /&gt;</code>.</li>
+    <li><code>components/wizard/agent-wizard.tsx:1001</code>. The root gains <code>data-design-focus-owner</code> so the shared mount stands down inside the builder.</li>
+    <li><code>app/(dashboard)/developer/webhooks/page.tsx</code>. <code>EVENTS</code> at :20-24 becomes the seven real names with their ids; <code>WEBHOOKS</code> at :15-18 loses the two invented delivery times; a Turns finished (112) row and a Payload format row are added, both marked Requires Engine.</li>
+  </ol>
+
+  <h4>Where the numbers come from</h4>
+  <p><strong>Derived from real mock data:</strong> every tile, the outcome bar, the coverage counts and the health roll-up, all from <code>DEPLOYMENTS[].metrics</code>. <strong>Held in the browser:</strong> watches and their incidents, in <code>localStorage</code>. <strong>Drawn as a named gap:</strong> answer speed, the turn batch event, the OpenTelemetry payload, the delivery record. <strong>Not drawn:</strong> first contact resolution, sentiment, group-by, saved views.</p>
+</div>
+
+<h2>Next</h2>
+<p>Owner answers brief question 2, who owns the sentence that defines success. Build B on C on <code>design/sandbox</code>, run fortify, include and articulate, deploy, and review at <code>/monitor?focus=watch-answer-rate</code>.</p>
+
+<h2>Audit corrections</h2>
+<p>Three hostile audits read the build plan for this verdict, on locks, on honesty and on buildability. All three refuted it. Their objections were sourced to line numbers and I checked every one against <code>studio_x_2/</code> and <code>ng-console/</code>. This section is the argument, so the next reader sees what was cut and what was defended.</p>
+
+<h3>What the audits killed</h3>
+<table class="audit">
+  <thead><tr><th>Killed</th><th>Why it had to go</th></tr></thead>
+  <tbody>
+    <tr><td><b>answer_speed</b> in <code>MetricKey</code></td><td>The verdict beats direction A by saying a metric picker would have to carry answer speed, which the contract cannot produce, then puts answer speed in its own key union. <code>series: Record&lt;MetricKey, number[]&gt;</code> is total, so the module would have had to manufacture a sparkline for it, and <code>Watch.metricKey</code> would have let a user set a threshold on it. Answer speed is now not a key at all: it is a fifth tile rendered through <code>MetricCard</code>'s existing <code>mute</code> prop with the words Requires Engine, no series, no delta and no Watch control.</td></tr>
+    <tr><td>The three-segment outcome bar and <b>callerHungUp</b></td><td>The Engine carries <code>state: answered | hangup</code> on the list and <code>reason: request | hangup | failed</code> only on the single-call read, so an aggregate cannot split failed out and nothing anywhere says who hung up. The bar is now two segments, Answered and No answer, both counts, summing to the call total, drawn from the two fields the Studio aggregate really returns (<code>totalCalls</code>, <code>totalAnswered</code>). <b>No answer</b> is the live Console's own word (<code>telephony-page.tsx:3049-3069</code>).</td></tr>
+    <tr><td>The <b>Transfer to human</b> tile</td><td><code>transferredRateTrend</code> is optional on both analytics types and exists only on the Studio backend, and <code>Deployment.metrics</code> in the sandbox carries no transfer count at all. A tile needs a number; inventing one to carry a caveat line is the failure this feature exists to stop.</td></tr>
+    <tr><td><b>coverage.noRetention</b> and <code>Agent.optOutOfRetention</code></td><td>The caveat had no field behind it, and the field was about to be added purely so a line of copy could count something. Coverage is now <code>{ counted, total }</code>, which is true from <code>metrics.calls === 0</code> and needs no new data.</td></tr>
+    <tr><td><b>Updated N minutes ago</b> and <code>updatedAt</code></td><td>A local re-derive has no ingest time, and <code>/api/telephony/analytics/summary</code> returns no as-of field, so the chip would have read 0 minutes forever and claimed a fetch that never happened. Refresh is still wired to re-derive; it makes no freshness claim.</td></tr>
+    <tr><td><b>See the calls</b> beside Fix</td><td>Two buttons resolving to one destination. The verdict's own sentence says the card offers See the calls <em>instead of</em> Fix when there is no diagnosis. The card now carries one button whose label and href follow the cause: Fix into <code>fixHref()</code> when the rules engine has a diagnosis on that deployment, See the calls into <code>/calls?deployment=</code> when it does not.</td></tr>
+    <tr><td>The <b>calls</b> level on <code>FixTarget</code>, and <code>Watch.deploymentId: string | null</code></td><td><code>FixTarget.id</code> is typed <code>string</code> and <code>aggregateIssues</code> takes a <code>string</code>, so the stated fallback did not compile and would have emitted <code>/calls?deployment=null</code>. Scope is now required on a watch, the Scope row preselects whatever the deployment filter names, and the incident carries its cause as <code>AggregatedIssue | null</code> rather than forging an <code>Issue</code>.</td></tr>
+    <tr><td>Merging watch breaches into the <b>Diagnostics queue</b></td><td>That queue ranks by severity times frequency and a breach has neither. The breach belongs on Needs attention, which is where the JTBD reads it. The queue keeps the three fixes that were right: the Deployment health rename, the live-only filter with a no-data count, and the page index its own footer has been counting 60 issues against.</td></tr>
+    <tr><td>Four added lines of always-on UI text</td><td>Copy discipline is a standing rule: max one short line under a control, caveats in a tooltip. The 7-day window now rides the count line the strip already has, the per-tile definitions sit behind the Info glyph's tooltip, and the suppressed count sits on the watch's own row inside the sheet.</td></tr>
+    <tr><td><b>Mute</b>, and the second all-clear card</td><td>The storm rule already answers alert fatigue with one notice per watch per day. A mute control is a second door onto the same problem. The all-clear is a state of the Needs attention card, not a second card under it.</td></tr>
+    <tr><td><code>alert_received</code></td><td>A duplicate of <code>watch_fired</code>. One name per thing.</td></tr>
+    <tr><td>Mounting <b>DesignFocus</b> in <code>app/(dashboard)/layout.tsx</code>, and <code>data-design-focus-owner</code></td><td>Nine features ship into this app at once and the layout is the file they will all reach for. <code>DesignFocus</code> is now mounted by the Monitor page itself, which this feature owns. The wizard's <code>focusOn</code> runs on the wizard page and the mount runs on Monitor, so there is nothing to coordinate and the owner flag has no work to do.</td></tr>
+  </tbody>
+</table>
+
+<h3>What was kept against an audit, and why</h3>
+<ul>
+  <li><b>The threshold still rides the tile.</b> Two audits argued back toward extending the diagnostics rules engine plus the notifications table, quoting the brief's "smallest thing that reuses two live surfaces". It is smaller and it is still a second place: a rule set with no number beside it needs a metric picker, and the picker is where the numbers we cannot compute come back. The audit table scores B at 31 against A's 11 on the same 29 rows. One door per action carries this on its own, without the answer-speed clause that convicted the verdict of its own charge.</li>
+  <li><b>MetricCard is still what the tiles are made of</b>, but the claim has changed. An audit is right that <code>components/metric-section.tsx</code> has zero consumers in <code>app/</code> or <code>components/</code>, that its doc comment at :10-11 claims otherwise, and that calling it a live surface was false. It is mounted anyway, because the orphaned card and its decorative <code>Info</code> glyph are defect 15 in the Before, and the definition line learning 5 asks for has nowhere else to live. The plan now says plainly that the Monitor tile is being replaced, and corrects the stale comment in the same commit.</li>
+  <li><b>The spend cap is still the anatomy</b>, minus its wall. An audit is right that the cap has an enforcement a metric watch does not have, so the "before anything pauses" line and the "At the cap" block do not travel. What travels is the threshold, the presets, the recap that reads back what you set, and the all-clear. Both preset rows in <code>usage-spend-card.tsx</code> (:534 and :565) move to the ink chip in the same commit as the new sheet, so the two sheets cannot ship drawn two ways.</li>
+  <li><b>The anchor moved, the design did not.</b> The live Console builds the answer-rate card only when the direction is outbound (<code>telephony-page.tsx:3151</code>), and <code>TelephonyInboundAnalytics</code> has no answer-rate field. So the Answer rate tile is now gated on the call-type filter and the review link opens on Answered calls, which exists in both directions and is the tile that carries No calls at all.</li>
+</ul>
+
+<h3>Still open</h3>
+<p>Group-by is still blocked on <code>labels</code> at join time, so the agent and deployment filters narrow the set of deployments a number covers and nothing on this screen claims to split a session any other way. The success tile is still off the screen until the owner answers who owns the sentence that defines success.</p>
+
+</div>

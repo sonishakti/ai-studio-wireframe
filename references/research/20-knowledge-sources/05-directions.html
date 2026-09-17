@@ -1,0 +1,497 @@
+<title>Knowledge Source Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Scaffold = research/10. Document light, mocks dark: the builder row and the
+   base sheet as the designer sees them. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3{font-size:16px;margin:0}
+p{max-width:80ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.wide{grid-column:1 / -1}
+.card header{padding:12px 14px 9px;border-bottom:1px solid var(--doc-rule)}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:3px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why dl{margin:0}
+.card .why dt{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-top:9px}
+.card .why dt:first-child{margin-top:0}
+.card .why dd{margin:2px 0 0;padding-left:0}
+.pro dt{color:#1b7f4d}.con dt{color:#b3261e}.cost dt{color:var(--doc-ink-2)}
+code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+.tag{display:inline-block;border:1px solid var(--doc-rule);border-radius:999px;padding:0 7px;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--doc-ink-2);vertical-align:2px;margin-left:6px}
+.tag.no{border-color:#e6b8b4;color:#b3261e;background:#fdf3f2}
+.tag.yes{border-color:#b5ddc7;color:#1b7f4d;background:#f1faf5}
+/* ---- mock grammar: builder rows + sheets ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:12.5px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock+.mock{border-top:0}
+.wz{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.wz:last-child{border-bottom:0}
+.wz .lab{font-size:12.5px;font-weight:600}
+.wz .lab i{display:block;font-style:normal;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:2px}
+.box{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.box .hd{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--line);font-weight:600;font-size:12px}
+.box .hd .r{margin-left:auto;display:flex;gap:6px;font-weight:400}
+.ln{display:flex;align-items:center;gap:9px;padding:7px 11px;border-bottom:1px solid var(--line)}
+.ln:last-child{border-bottom:0}
+.ln .m{min-width:0;flex:1}
+.ln .m p{margin:0;font-size:12px;font-weight:500}
+.ln .m span{display:block;font-size:11px;color:var(--ink-3);margin-top:1px}
+.ln .r{margin-left:auto;display:flex;align-items:center;gap:7px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--stroke);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--ink-2);background:var(--panel-2);white-space:nowrap}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.ink{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:4px 9px;font-size:11.5px;color:var(--ink);background:var(--panel-2);white-space:nowrap}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.fld{padding:8px 11px;border-bottom:1px solid var(--line)}
+.fld:last-child{border-bottom:0}
+.fld label{display:block;font-size:11.5px;font-weight:500;margin-bottom:4px}
+.fld .in{border:1px solid var(--stroke);border-radius:6px;padding:5px 8px;background:var(--panel-2);color:var(--ink-3);font-size:11.5px}
+.fld .in.v{color:var(--ink)}
+.fld .hint{font-size:11px;color:var(--ink-3);margin-top:4px}
+.fld .hint b{color:var(--ink-2);font-weight:500}
+.eng{font-size:10.5px;color:var(--warn);margin-top:4px}
+.tile{display:flex;align-items:center;gap:8px;border:1px solid var(--stroke);border-radius:8px;padding:7px 10px;font-size:11.5px;margin-bottom:6px;background:var(--panel-2)}
+.tile.on{border-color:var(--brand);background:var(--brand-soft)}
+.tile .r{margin-left:auto;color:var(--ink-3);font-size:10.5px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.grid3>div{background:var(--panel);padding:8px 11px}
+.grid3 b{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:3px}
+.grid3 em{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:15px;color:var(--ink)}
+.sld{display:flex;align-items:center;gap:9px;padding:6px 0}
+.sld .t{flex:1;height:4px;border-radius:2px;background:var(--stroke);position:relative}
+.sld .t i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--brand)}
+.sld .t b{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--brand)}
+.bub{display:flex;gap:8px;padding:6px 11px}
+.bub .n{font-size:10.5px;color:var(--ink-3);width:42px;flex:none;padding-top:5px}
+.bub .t{border-radius:12px;background:var(--row);padding:6px 10px;font-size:12px;max-width:82%}
+.bub.me{justify-content:flex-end}
+.bub.me .t{background:var(--brand-soft)}
+.rcpt{margin-top:6px;border-top:1px solid var(--line);padding-top:6px}
+.rcpt .t2{font-size:11px;color:var(--brand)}
+.rcpt .c{border:1px solid var(--line);border-radius:6px;padding:5px 8px;margin-top:5px;background:var(--panel-2)}
+.rcpt .c .mt{display:flex;justify-content:space-between;gap:8px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink-3);margin-bottom:3px}
+.rcpt .c p{margin:0;font-size:11.5px;line-height:1.45}
+.tabbar{display:flex;gap:14px;padding:8px 11px 0;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-3)}
+.tabbar span{padding-bottom:7px}
+.tabbar .on{color:var(--ink);border-bottom:2px solid var(--brand)}
+.cap{font-size:11px;color:var(--ink-3);padding:6px 11px;border-bottom:1px solid var(--line)}
+/* ---- audit ---- */
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);margin-top:10px}
+table.audit th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:7px 9px;border-bottom:1px solid var(--doc-rule);white-space:nowrap}
+table.audit th.c,table.audit td.c{text-align:center;width:62px}
+table.audit td{padding:6px 9px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td.n{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--doc-brand);width:44px}
+table.audit tr.sec td{background:#eef3f6;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--doc-ink-2)}
+table.audit tr.tot td{background:#f8fbfc;font-weight:600}
+.m-y{color:#1b7f4d;font-weight:700}
+.m-p{color:#8a6d1f;font-weight:700}
+.m-n{color:#b8c4cb}
+.m-x{color:#b3261e;font-weight:700}
+.key{font-size:12.5px;color:var(--doc-ink-2);margin-top:8px}
+.verdict{background:#fff;border:1px solid var(--doc-brand);border-radius:6px;padding:16px 18px;margin-top:10px}
+.verdict h3{font-size:17px;margin:0 0 6px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:14px 18px;font-size:13.5px}
+.plan h4{margin:18px 0 6px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.plan h4:first-child{margin-top:0}
+.plan ol{margin:6px 0;padding-left:20px}.plan li{margin:6px 0}
+.plan table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.plan th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);padding:6px 8px;border-bottom:1px solid var(--doc-rule)}
+.plan td{padding:6px 8px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+.plan td:first-child{white-space:nowrap}
+.link{display:block;background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:10px 14px;font-size:13px;margin:12px 0}
+@media (max-width:980px){.dir,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 20 · Knowledge sources · step 5 diverge</p>
+<h1>Knowledge Source Directions</h1>
+<p><strong>JTBD.</strong> When my prices, policies and help pages change every week and my agent is still answering from the PDF I uploaded in June, I want it reading the same pages my customers read, and to keep reading them without me, so a caller never gets last quarter's answer in a confident voice.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>The builder's knowledge row, <code>SectionRow id="wz-5-kb"</code> at <code>components/wizard/step-build.tsx:68</code>, plus the base sheet it opens and the Test rail's transcript. Resources › Knowledge keeps its grid.</div>
+  <div><b>Agora facts</b>The Engine contract carries no knowledge primitive. <code>llm.rag_config.search_config.kb_id</code> is a single string our code writes and no Agora doc publishes. The Studio KB record has no url, no source, no interval, no last-synced key.</div>
+  <div><b>What exists today</b>Four ingest labels, two of which do nothing. A website URL typed into the same <code>fileName</code> string a PDF uses. Four tuning dials that Save throws away. A seed base reading "URL Crawl · 5.2 Mb" holding nothing.</div>
+  <div><b>Locks</b>Reuse, don't redesign: the crawl extends the knowledge row, it is not a fifth connect-an-external-thing door. Couchbase stays behind the generic provider form (Wave 1). Flat $0.10 per agent-minute: nothing here is a cost control.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses. Copy in the mocks is proposed. Every direction is scored by number in the audit below, and a direction that only serves the happy path is named as failing it.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · One more tile<span class="tag no">the lazy pick</span></h3><div class="who">Read the five tickets literally. Add a Website crawl tile to the source picker, a depth field, a login field for the authenticated ticket, and a Refresh every select. One file changes.</div></header>
+    <div class="mock">
+      <div class="box">
+        <div class="hd">Create new knowledge base</div>
+        <div class="fld"><label>Name</label><div class="in">e.g. Product docs</div></div>
+        <div class="fld"><label>Source</label>
+          <div class="tile">PDF · raw text</div>
+          <div class="tile">Website · markdown</div>
+          <div class="tile on">Website crawl <span class="r">New</span></div>
+          <div class="tile">Segmented</div>
+          <div class="tile">Connect an existing vector index <span class="r">Advanced</span></div>
+        </div>
+        <div class="fld"><label>Start URL</label><div class="in v">https://docs.example.com</div></div>
+        <div class="fld"><label>Crawl depth</label><div class="in v">3 levels</div></div>
+        <div class="fld"><label>Login header</label><div class="in">Cookie: session=…</div>
+          <div class="hint">For pages behind a login.</div></div>
+        <div class="fld"><label>Refresh every</label><div class="in v">7 days</div></div>
+        <div class="ln"><span class="btn primary">Create knowledge base</span></div>
+      </div>
+      <div class="cap" style="border:0;padding-left:0">Result in the row: <span class="chip">Docs site · 210 chunks</span></div>
+    </div>
+    <div class="why">
+      <dl class="pro"><dt>For</dt><dd>One file, one enum value, one afternoon. It maps to the tickets one for one, so the roadmap can be ticked without an argument. The picker already swaps bodies per source, so a fifth body costs nothing structurally.</dd></dl>
+      <dl class="con"><dt>Against, and why it is refused</dt><dd>The schedule picker is a control <strong>no vendor in the set ships</strong> (learning 3): Retell fixes 24 hours, Intercom fixes weekly, ElevenLabs keeps <code>minimum_frequency_days</code> out of the dashboard. We would be inventing the one dial the market has already decided not to give. The login header is the feature <strong>nobody ships either</strong> (learning 1): private content reaches an agent through OAuth to a named system, never a credential typed onto a crawl, and Intercom prints the refusal on the page a customer reads first. Making crawl a fifth <em>kind of base</em> breaks learning 2, and it means a customer with uploads and a site keeps two bases forever. And it inherits the file's existing lie: <code>createKnowledgeBase</code> mints 210 chunks for a website (<code>lib/agent-resources.ts:163</code>), so a crawl that fetched nothing still reports a healthy number. Every failure in the audit stays invisible.</dd></dl>
+      <dl class="cost"><dt>Cost</dt><dd>Lowest to build, highest to unpick: two invented controls the owner then has to defend, and a second base type in the record.</dd></dl>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Sources inside the base<span class="tag yes">recommended spine</span></h3><div class="who">A knowledge base is a container. Files and sites are sources inside it, each with its own state, its own freshness stamp and its own Refresh now. The crawl reports a page ledger before anything is claimed.</div></header>
+    <div class="mock">
+      <div class="box">
+        <div class="hd">Support docs <span class="r"><span class="btn ghost">Delete</span></span></div>
+        <div class="cap">Sources</div>
+        <div class="ln"><div class="m"><p>docs.example.com</p><span>Read 4 days ago · 211 pages</span></div><div class="r"><span class="chip ok">Live</span><span class="btn">Refresh now</span></div></div>
+        <div class="ln"><div class="m"><p>price-list-q3.pdf</p><span>Added 12 June · 480 chunks</span></div><div class="r"><span class="chip ok">Live</span></div></div>
+        <div class="ln"><div class="m"><p>status.example.com</p><span>Reading page 318 of 500</span></div><div class="r"><span class="chip warn">Reading</span></div></div>
+        <div class="ln"><span class="btn">Add a file</span><span class="btn">Crawl a site</span></div>
+      </div>
+      <div class="box" style="margin-top:10px">
+        <div class="hd">Crawl a site</div>
+        <div class="fld"><label>Website address</label><div class="in v">https://docs.example.com</div>
+          <div class="hint">Public pages only. Pages behind a login are skipped.</div>
+          <div class="hint"><b>Our crawler reads as AgoraStudioBot/1.0 and follows robots.txt.</b> Add it to your allowlist if the site blocks unknown crawlers.</div>
+          <div class="hint">A crawl stops at 500 pages. Split a bigger site across two bases.</div>
+          <div class="eng">Requires Engine · planned</div>
+        </div>
+        <div class="ln"><span class="btn primary">Start crawl</span></div>
+      </div>
+      <div class="box" style="margin-top:10px">
+        <div class="hd">Pages found <span class="r"><span class="chip">214 in 1 min 40 s</span></span></div>
+        <div class="grid3">
+          <div><b>Kept</b><em>211</em></div><div><b>Skipped</b><em>3</em></div><div><b>Failed</b><em>0</em></div>
+        </div>
+        <div class="ln"><div class="m"><p>/careers</p><span>Blocked by robots.txt</span></div></div>
+        <div class="ln"><div class="m"><p>/blog/2019</p><span>No readable text</span></div></div>
+        <div class="ln"><div class="m"><p>/media/kit.zip</p><span>Not a supported file</span></div></div>
+        <div class="ln">
+          <div class="m"><p>Refresh weekly</p><span>Agora reads the site again every seven days.</span>
+            <span class="eng" style="display:block">Requires Engine · planned</span></div>
+          <div class="r"><span class="chip ink">on</span></div>
+        </div>
+        <div class="cap">Next run: Tuesday 24 September.</div>
+      </div>
+    </div>
+    <div class="why">
+      <dl class="pro"><dt>For</dt><dd>Learning 2 decided the container question for us: Retell's crawled URLs are sources inside one base, and ElevenLabs' crawl job takes a <code>parent_folder_id</code>. A base stops being a file bucket, so a site and a PDF and a vector index can live together, which closes rainy 14 without a rule. Freshness becomes a per-source stamp, which is the only place it can be true. The ledger is the Intercom move three of four voice vendors do not make, and it is the whole answer to rainy 6. The crawl block says who is knocking and what the cap is <em>before</em> the crawl, which is learning 5. The base sheet also gives a created base a way back in: the knowledge row's per-row menu is already built and gated on a flag knowledge never passes (<code>step-build.tsx:395</code>).</dd></dl>
+      <dl class="con"><dt>Against</dt><dd>It touches nothing about which base actually answers, so a customer can build a perfect, fresh, well-reported source list attached to a base the Engine never reads. It also does not persist a single tuning dial. The source record does not exist upstream, so every stamp on this screen is browser state until the Studio backend adds <code>url · kind · last_synced · interval</code>.</dd></dl>
+      <dl class="cost"><dt>Cost</dt><dd>Medium. One new lib module, one new sheet, and the knowledge row finally passing <code>config</code>.</dd></dl>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card">
+    <header><h3>C · The row says which base answers</h3><div class="who">The cardinality bug, drawn. One base carries an Answering mark, the rest read Attached, not read, and the menu moves the mark. The two dials that decide how much the agent reads move onto the agent and persist.</div></header>
+    <div class="mock">
+      <div class="wz">
+        <div class="lab">Knowledge base</div>
+        <div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px">
+            <span class="chip ink">Support docs · Answering</span>
+            <span class="chip">Policy docs · Attached, not read</span>
+          </div>
+          <div class="cap" style="border:0;padding:0 0 8px">One base answers each call. Requires Engine to read a second.</div>
+          <div class="box">
+            <div class="fld"><label>Chunks to retrieve · 3</label>
+              <div class="sld"><div class="t"><i style="width:28%"></i><b style="left:26%"></b></div></div>
+              <div class="hint">More context, slower turns.</div>
+            </div>
+            <div class="fld"><label>Similarity threshold · 0.60</label>
+              <div class="sld"><div class="t"><i style="width:60%"></i><b style="left:58%"></b></div></div>
+              <div class="hint">Higher is stricter: fewer but more relevant chunks.</div>
+              <div class="eng">Requires Engine · planned</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="box" style="margin-top:10px">
+        <div class="hd">Add Knowledge Base</div>
+        <div class="ln"><div class="m"><p>Support docs</p><span>Read 4 days ago · 211 pages</span></div><div class="r"><span class="chip ink">Answering</span><span class="chip">on</span></div></div>
+        <div class="ln"><div class="m"><p>Policy docs</p><span>Added 12 June · 480 chunks</span></div><div class="r"><span class="chip">Attached, not read</span><span class="chip">on</span><span class="btn ghost">Answer from this one</span></div></div>
+      </div>
+    </div>
+    <div class="why">
+      <dl class="pro"><dt>For</dt><dd>It is the only direction that touches the defect the Before agent put first: attach posts <code>knowledgeBaseIds: string[]</code>, the Engine payload carries one <code>kb_id</code>, and the second base renders identically and is never queried. Naming the inert row is the honesty floor doing its job, and it costs one badge and one menu item. Moving the dials onto the agent is where both vendors that expose tuning put them, and it is the only place the roadmap's E2 can persist, because a threshold is how <em>this</em> agent reads a shared base.</dd></dl>
+      <dl class="con"><dt>Against</dt><dd>Learning 4 refuses these dials on their own terms: the two dials are dead controls without the chunk view beside them. A builder who drags the threshold to 0.4 and hears no difference has learned nothing, and has no way to find out whether the chunk was missing or the prompt ignored it. On its own C also ships no crawl at all, which is what all five tickets asked for.</dd></dl>
+      <dl class="cost"><dt>Cost</dt><dd>Low. A <code>primaryId</code> prop on the existing <code>ResourceField</code>, two sliders lifted out of the external form, one localStorage key.</dd></dl>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · Prove it answered</h3><div class="who">A link above the agent's turn in the Test rail opens the exact chunks that were passed, with each chunk's source and how old it is. The Retell move, which nobody else in the set makes.</div></header>
+    <div class="mock">
+      <div class="box">
+        <div class="tabbar"><span class="on">Test agent</span><span>Simulations</span></div>
+        <div class="cap">Simulated call · no minutes billed, no real number dialed</div>
+        <div class="bub me"><div class="t">When will my order ship?</div><div class="n" style="text-align:right">Caller</div></div>
+        <div class="bub"><div class="n">Agent</div>
+          <div style="max-width:82%">
+            <div class="t">Orders placed today ship within two business days, so yours leaves by Thursday.</div>
+            <div class="rcpt">
+              <span class="t2">What it read · 3 chunks</span>
+              <div class="c"><div class="mt"><span>shipping-policy.md · read 4 days ago</span><span>0.91</span></div>
+                <p>Orders ship within 2 business days. A shipping label being created does not mean the parcel has left the warehouse.</p></div>
+              <div class="c"><div class="mt"><span>returns-policy.md · read 4 days ago</span><span>0.84</span></div>
+                <p>Refunds are issued to the original payment method within 5 to 7 business days of the return being received.</p></div>
+              <div class="cap" style="border:0;padding:6px 0 0">3 chunks in 204 ms. Retrieval adds this to every turn.</div>
+            </div>
+          </div>
+        </div>
+        <div class="bub me"><div class="t">And what does it cost to return it?</div><div class="n" style="text-align:right">Caller</div></div>
+        <div class="bub"><div class="n">Agent</div>
+          <div style="max-width:82%">
+            <div class="t">I am not sure about that one.</div>
+            <div class="rcpt">
+              <span class="t2">What it read · 0 chunks</span>
+              <div class="cap" style="border:0;padding:6px 0 0">Nothing matched. Lower the threshold or raise the chunk count.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <dl class="pro"><dt>For</dt><dd>It is the cheapest honest answer to "the crawl says Live and the agent still cannot answer", and it is the one thing that makes C's two dials teachable: no chunks means raise the count or lower the threshold, chunks present and ignored means the prompt. It puts the source's age on the evidence, so the JTBD sentence becomes visible at the moment it either holds or fails. It is also the shape of the success event this feature is measured by, <code>knowledge_retrieval_completed</code> with <code>sourceAgeDays</code> and <code>topScore</code>. The transcript component already renders a per-turn <code>note</code>, so the affordance exists and gains a disclosure.</dd></dl>
+      <dl class="con"><dt>Against</dt><dd>Alone it proves only that retrieval fired. It cannot say the source was stale unless something upstream stamps a last-read date, so it needs B to mean anything beyond a score. And a receipt that appears only in Test is a receipt a production incident cannot use, which is a real limit and has to be said rather than hidden.</dd></dl>
+      <dl class="cost"><dt>Cost</dt><dd>Low. One optional field on <code>EvalTurn</code> and a disclosure inside <code>SimTranscript</code>.</dd></dl>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card wide">
+    <header><h3>E · A knowledge base detail page</h3><div class="who">The Intercom shape. A full detail surface at Resources › Knowledge with tabs for Sources, Activity, Tuning and Dependent agents, plus the sync ledger, the run history and a delete guard.</div></header>
+    <div class="mock">
+      <div class="box">
+        <div class="hd">Support docs <span class="r"><span class="chip ok">Live</span><span class="btn">Refresh now</span><span class="btn ghost">Delete</span></span></div>
+        <div class="tabbar"><span class="on">Sources</span><span>Activity</span><span>Tuning</span><span>Dependent agents</span></div>
+        <div class="grid3">
+          <div><b>Sources</b><em>3</em></div><div><b>Pages</b><em>691</em></div><div><b>Last read</b><em>4 d</em></div>
+        </div>
+        <div class="ln"><div class="m"><p>Refresh on 17 September, 04:12</p><span>211 pages, 2 changed, 6 errors · started by the weekly schedule</span></div><div class="r"><span class="chip warn">6 errors</span></div></div>
+        <div class="ln"><div class="m"><p>Refresh on 10 September, 04:12</p><span>211 pages, 0 changed, 0 errors · started by the weekly schedule</span></div><div class="r"><span class="chip ok">Clean</span></div></div>
+        <div class="ln"><div class="m"><p>Aria · Support line</p><span>Answers from this base</span></div><div class="r"><span class="chip ink">Live</span></div></div>
+      </div>
+    </div>
+    <div class="why">
+      <dl class="pro"><dt>For</dt><dd>The only direction that reaches the long tail: a run history that survives the tab being closed, a dependent-agents list that makes Delete honest, and a home for the storage and region question legal asks. It is where this feature ends up in two quarters whatever we build now.</dd></dl>
+      <dl class="con"><dt>Against</dt><dd>It adds a second knowledge surface to a product whose Integrations versus Extensions Marketplace label tension is <strong>open by decision</strong>, and the design rule is that one feature does not settle it. It puts tuning on the base, where learning 4 says it does not belong, because a threshold describes how one agent reads, not what the base contains. And it answers a question nobody has yet: run history earns its keep once refreshes are plural and slow, which is a state no customer of ours is in.</dd></dl>
+      <dl class="cost"><dt>Cost</dt><dd>High. A route, a tab set, a run record and a second place to manage the same object.</dd></dl>
+    </div>
+  </div>
+
+</div>
+
+<h2>Audit</h2>
+<p>Every direction against the 26 rainy scenarios in <code>01-jtbd.md</code> and the 5 numbered learnings in <code>03-learnings.md</code>. <span class="m-y">●</span> answered on screen · <span class="m-p">◐</span> partly, or answered only with another direction · <span class="m-n">·</span> not touched · <span class="m-x">✗</span> made worse.</p>
+
+<table class="audit">
+  <tr><th>#</th><th>Rainy scenario</th><th class="c">A</th><th class="c">B</th><th class="c">C</th><th class="c">D</th><th class="c">E</th></tr>
+  <tr><td class="n">1</td><td>Empty row, no clue whether to upload or paste</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">2</td><td>PDF and DOCX only, ten files, 20 MB each</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">3</td><td>Docs behind an internal login</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">4</td><td>Source added, not a word of content in it</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">5</td><td>Green chip, and the agent still cannot answer</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-p">◐</td></tr>
+  <tr><td class="n">6</td><td>3,100 of 4,000 pages, nothing says which 900</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">7</td><td>Refresh errored on six, was the old copy wiped</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">8</td><td>Site bigger than the cap, found out at page 500</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">9</td><td>Processing for ten minutes, wait or start over</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-p">◐</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">10</td><td>Closed the tab on a 4,000-page crawl</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">11</td><td>Two bases attached, only one ever answers</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-p">◐</td></tr>
+  <tr><td class="n">12</td><td>A colleague's attach took the answer away from mine</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-n">·</td><td class="c m-n">·</td></tr>
+  <tr><td class="n">13</td><td>External index shows a dash and no upload</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">14</td><td>Cannot attach a crawled site and an index together</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-p">◐</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">15</td><td>A teammate sees a Type column and I do not</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td></tr>
+  <tr><td class="n">16</td><td>Told Couchbase is supported, offered OceanBase</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">17</td><td>Chunks and threshold reset to 3 and 0.6</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">18</td><td>The paragraph went in and the answer was invented</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-y">●</td><td class="c m-n">·</td></tr>
+  <tr><td class="n">19</td><td>Every answer got slower the day this went on</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-y">●</td><td class="c m-n">·</td></tr>
+  <tr><td class="n">20</td><td>That address is already crawled into another base</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">21</td><td>Deleted a base and three live agents went quiet</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">22</td><td>A hand edit thrown away by the next refresh</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td></tr>
+  <tr><td class="n">23</td><td>A weekly switch that never says it ran</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">24</td><td>Legal asks where the crawled copy is stored</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-p">◐</td></tr>
+  <tr><td class="n">25</td><td>What does this crawl cost me</td><td class="c m-n">·</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">26</td><td>Crawling a source no answer has needed in months</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-p">◐</td></tr>
+  <tr class="sec"><td colspan="7">Learnings</td></tr>
+  <tr><td class="n">L1</td><td>An authenticated source is a connected account, never a credential on a crawl</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">L2</td><td>A crawl fills a container, it does not become one</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">L3</td><td>One switch, one button, and the interval is copy</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-y">●</td></tr>
+  <tr><td class="n">L4</td><td>The two dials belong on the agent, and are dead without the chunk view</td><td class="c m-n">·</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-p">◐</td><td class="c m-x">✗</td></tr>
+  <tr><td class="n">L5</td><td>Say who is knocking; an empty crawl reports zero pages</td><td class="c m-x">✗</td><td class="c m-y">●</td><td class="c m-n">·</td><td class="c m-p">◐</td><td class="c m-p">◐</td></tr>
+  <tr class="tot"><td></td><td>Answered outright, of 31</td><td class="c">0</td><td class="c">19</td><td class="c">2</td><td class="c">3</td><td class="c">19</td></tr>
+</table>
+
+<p class="key"><strong>A fails the audit.</strong> It answers no rainy scenario outright, and it makes four worse. Rainy 3 gets a login field for a crawl that cannot log in, rainy 4 gets a mint-210-chunks report on an empty crawl, and rainy 23 gets a Refresh every select with no last-run stamp anywhere to prove it ever fired. It serves exactly the happy path: paste a URL, get a base. That is the whole of it, and the whole of it is why it is refused.</p>
+<p class="key"><strong>Three scenarios are answered by nobody, and stay open on purpose elsewhere.</strong> 15 (feature-flag skew between teammates) is a Console flag question, not a knowledge question. 22 (a hand edit thrown away) has no edit to throw away, because neither repo lets a document be edited. 26 (a source nothing reads) needs <code>knowledge_retrieval_completed</code> in production before a last-answered date can be true, and drawing one from test data would be a number we cannot compute. 12 is partial everywhere: the Answering mark shows which base answers <em>now</em>, and there is still no lock, no draft and no last-writer notice.</p>
+
+<h2>Verdict</h2>
+<div class="verdict">
+  <h3>B, with C's Answering mark and D's receipt grafted on.</h3>
+  <p>A knowledge base is a container, and files and sites are sources inside it. That single decision is what lets a crawl, a schedule, a freshness stamp and a page ledger exist at all, because each of them is a property of a source and none of them is a property of a base. It is also the shape both crawling vendors shipped, so it is adopted rather than invented.</p>
+  <p>C is grafted because it is not optional. Attach takes a list, the Engine payload takes one id, and today the second base renders identically to the first and is never queried. A perfect source list on a base nothing reads is the most expensive failure this feature can ship, and the fix is one badge, one line and one menu item.</p>
+  <p>D is grafted because learning 4 will not let the two dials ship alone. A threshold with no chunk view is a dial that changes an invisible number. With the receipt, the loop closes in one screen: no chunks means raise the count or lower the threshold, chunks present and ignored means the prompt, and the prompt is not this feature's to fix.</p>
+  <p><strong>What we are not doing.</strong> No schedule picker: the interval is a sentence, "Agora reads the site again every seven days", because no vendor in the set exposes one and inventing the market's only interval dial is not a differentiator, it is a support ticket. No login field on a crawl: private pages reach an agent through a connected account, which is feature 19's job, and the crawl says "Public pages only" instead of pretending. No fifth source kind: a crawl fills a base. No knowledge-base detail page: E is the right shape for the quarter after run history is plural, and today it would add a second knowledge surface to an IA tension the owner has ruled open. No Couchbase-branded door: Wave 1 settled that, and the generic provider form already carries it.</p>
+  <p><strong>The open question, not designable without an answer.</strong> Does the Engine take a list of knowledge bases, a <code>kb_ids</code> beside today's single <code>kb_id</code>? Everything about the second row turns on it. If the answer is one, "Attached, not read" is a permanent state and the Answering mark is the feature, and the honest next move is to stop letting a second base attach quietly at all. If the answer is many, the knowledge row becomes an ordered list, eligibility rules apply, and the receipt has to name which base each chunk came from, not just which page. The row cannot be drawn twice, so it waits on one word from Engine.</p>
+</div>
+
+<h2>Prototype plan</h2>
+<p>Everything below is inside <code>studio_x_2</code>. Design-mode state lives in <code>localStorage</code> under <code>sx:</code> keys or in the existing <code>lib/</code> modules. Nothing calls a backend.</p>
+
+<div class="link"><strong>The reviewer opens:</strong> <code>/agents/agt_default/edit?step=3&amp;focus=knowledge-sources</code><br>
+It lands on the knowledge row with the ring pulse, which is where the journey starts: attached bases, the Answering mark, the two dials, and the door into the sources sheet. <code>focusOn</code> resolves <code>?focus=</code> against <code>[data-design-focus]</code> at <code>components/wizard/agent-wizard.tsx:551</code>; the row carries no <code>focusId</code> today, which is why the link finds nothing (Before, defect 17).</div>
+
+<div class="plan">
+
+<h4>Create</h4>
+<table>
+  <tr><th>File</th><th>What it holds, and why the sibling could not take it</th></tr>
+  <tr><td><code>lib/knowledge-sources.ts</code></td><td>The <code>KnowledgeSource</code> record (id, kbId, kind, address or file name, pages, state, <code>lastReadAt</code>, <code>autoRefresh</code>), the crawl mock that returns a ledger of kept, skipped and failed with a reason per skipped page, the refresh mock that reports changed and errored counts and retains the old text on error, the duplicate-address check across all bases, and the per-agent retrieval settings (<code>topK</code>, <code>threshold</code>). Two localStorage keys: <code>sx:kb_sources</code> and <code>sx:kb_retrieval</code>.<br><strong>Why not <code>lib/agent-resources.ts</code>:</strong> that module owns the catalog of things that can be attached, for two families, in 290 lines. This owns what is inside one base and how old it is, with its own clock, its own two stores and its own failure taxonomy. Folding it in makes one module carry three stores and doubles the knowledge half. <code>createKnowledgeBase</code> stays where it is and gains a parameter (see Touch).</td></tr>
+  <tr><td><code>components/knowledge-source-sheet.tsx</code></td><td>The base sheet: the Sources list with a per-source freshness line and Refresh now, the Add a file and Crawl a site doors, the crawl form, the page ledger, the Refresh weekly <code>EngineRow</code>, and the delete guard naming the agents that answer from the base.<br><strong>Why not <code>McpToolsSheet</code>:</strong> it is the sibling and this copies its chrome exactly (<code>SheetContent</code> at <code>sm:max-w-xl</code>, bordered <code>SheetHeader</code>, scrolling body, one footer button) at <code>components/wizard/step-build.tsx:612-648</code>. It cannot be that component because an MCP server's body is one flat list of booleans and a base's body is sources, a ledger and a schedule. It is a new file rather than a third sheet inside <code>step-build.tsx</code> because that file is already 648 lines hosting three resource rows.</td></tr>
+</table>
+
+<h4>Touch</h4>
+<table>
+  <tr><th>File · anchor</th><th>Edit</th></tr>
+  <tr><td><code>components/wizard/step-build.tsx:68</code></td><td><code>&lt;SectionRow id="wz-5-kb"&gt;</code> gains <code>focusId="knowledge-sources"</code>. This is the deep link's anchor and the reason it currently resolves to nothing.</td></tr>
+  <tr><td><code>components/wizard/step-build.tsx:69-89</code></td><td>The knowledge <code>ResourceField</code> gains <code>config: true</code> on every item, <code>onConfigure</code> opening the new sheet, <code>onDelete</code>, and <code>primaryId={draft.knowledge[0]}</code>. <code>meta</code> becomes the freshness line from <code>lib/knowledge-sources.ts</code> instead of the size string. <code>note</code> carries "Still reading" on a base whose source is mid-crawl, which is the reason the attach switch is already disabled at <code>:390</code> without saying why.</td></tr>
+  <tr><td><code>components/wizard/step-build.tsx:194-228</code> (<code>ResourceField</code> props)</td><td>Add <code>primaryId?: string</code> and <code>onMakePrimary?: (id: string) =&gt; void</code>. The attached chip for <code>primaryId</code> renders the Answering badge, every other attached chip renders "Attached, not read", and the sheet row gains an "Answer from this one" menu item. MCP passes neither, so its rows are unchanged.</td></tr>
+  <tr><td><code>components/wizard/step-build.tsx:74-75</code> (empty-state copy)</td><td><code>emptyDesc</code> becomes "Upload a file or crawl a site." <code>emptyTitle</code> stays.</td></tr>
+  <tr><td><code>components/wizard/step-build.tsx:487-540</code> (<code>KnowledgeCreateForm</code>)</td><td>The "File or URL" input at <code>:519-531</code> is one box doing two jobs: a website address typed into the same <code>fileName</code> string a PDF uses. Split it. The file body keeps the drop zone and gains the limits line. The site body is the Website address field, the crawler identity line, the cap, the duplicate-address check and Start crawl, and it shows the ledger before the base is created. Both bodies keep <code>IngestPicker</code> above them (<code>:454-485</code>), so neither path is a dead end.</td></tr>
+  <tr><td><code>components/wizard/step-build.tsx:68-90</code> (inside the row, after the chips)</td><td>Render the two retrieval dials when <code>draft.knowledge.length &gt; 0</code>, reading and writing <code>lib/knowledge-sources.ts</code>. Labels, ranges and helper lines are lifted verbatim from <code>components/external-retrieval-form.tsx:358-371</code>, which is where they are drawn today and thrown away. Caption "Requires Engine · planned", tooltip <code>ENGINE_TOOLTIP</code> from <code>components/wizard/engine-row.tsx:42</code>.</td></tr>
+  <tr><td><code>components/external-retrieval-form.tsx:338-372</code></td><td>Delete the Chunks to retrieve and Similarity threshold sliders and the <code>topK</code> and <code>threshold</code> state at <code>:71-72</code>. Text field and Embedding field stay: those describe the customer's own index, which is a property of the base. The test-result badge at <code>:319</code> reads the threshold from <code>lib/knowledge-sources.ts</code> instead. One dial, one home.</td></tr>
+  <tr><td><code>lib/agent-resources.ts:149-168</code> (<code>createKnowledgeBase</code>)</td><td>Take <code>sources</code> instead of minting chunk counts. Delete the <code>4182 : 210 : 480</code> ternary at <code>:163</code>: a base's chunk count is the sum of its sources, and a base with no source reports zero. Add the first source through <code>lib/knowledge-sources.ts</code> so a created base is never a base with nothing in it.</td></tr>
+  <tr><td><code>lib/agent-resources.ts:45-51</code> (<code>KB_INGEST_LABEL</code>)</td><td>Drop <code>segmented</code>. It renders the PDF body, takes the 480-chunk default and has no behaviour, so it is a label that promises retrieval tuning and delivers the upload form. Three kinds remain: a file, a site, an existing index.</td></tr>
+  <tr><td><code>lib/campaign-data.ts:1724-1740</code></td><td><code>KnowledgeBase</code> gains <code>sourceCount: number</code>. Seed <code>kb_04</code> "GDPR Laws" loses <code>size: "5.2 Mb"</code>: it is a crawl that never ran holding five megabytes of nothing. Seed <code>kb_01</code> gains a crawled source so the reviewer lands on a populated freshness line rather than an empty one.</td></tr>
+  <tr><td><code>lib/campaign-data.ts:223</code> (<code>EvalTurn</code>)</td><td>Add <code>retrieval?: { chunks: RetrievedChunk[]; ms: number; sourceAgeDays: number }</code>. It sits beside the existing <code>note</code>, which is the field that already puts evidence on a turn.</td></tr>
+  <tr><td><code>components/sim-transcript.tsx:135-143</code></td><td>Under an agent turn carrying <code>retrieval</code>, render the "What it read · N chunks" disclosure: each chunk's source, its age, its score and its text, then the latency line. Zero chunks renders the one-line fix instead of a list. Same block, same evidence-on-the-turn rule as <code>note</code>.</td></tr>
+  <tr><td><code>components/wizard/test-panel.tsx:69-74</code> (<code>RAIL_TALK</code>)</td><td>The order-status turn carries a <code>retrieval</code> payload built from <code>mockRetrieval</code> and the agent's saved <code>topK</code> and <code>threshold</code>, so moving a dial changes the receipt. Add one turn that retrieves nothing, so the empty state is on screen without the reviewer having to break it.</td></tr>
+  <tr><td><code>components/wizard/agent-wizard.tsx:520-527</code> (the <code>owner</code> map)</td><td>Add <code>"knowledge-sources": 3</code>. The fallback already resolves to 3; naming it stops a later section move from silently breaking the review link, which is what happened to <code>wz-5-kb</code>.</td></tr>
+  <tr><td><code>app/(dashboard)/integrations/page.tsx:141-146</code></td><td>The line reads "Attach these to an agent from its Knowledge base row." and links to <code>/agents/agt_default/edit?step=3&amp;focus=knowledge-sources</code>. Today it points at <code>/agents?step=3</code>, a list page that ignores <code>step</code>, and ends in an arrow.</td></tr>
+  <tr><td><code>app/(dashboard)/integrations/page.tsx:166-178</code></td><td>Each card's second line becomes the freshness line, and the card opens the same sheet. One door per action: the base is managed in one place from both surfaces.</td></tr>
+  <tr><td><code>app/(dashboard)/integrations/page.tsx:149</code></td><td>Wire the search input that has no value and no handler, so typing moves the grid.</td></tr>
+</table>
+
+<h4>Copy</h4>
+<table>
+  <tr><th>Where</th><th>String</th></tr>
+  <tr><td>Row · empty state</td><td>Upload a file or crawl a site.</td></tr>
+  <tr><td>Row · under the attached list</td><td>One base answers each call. Requires Engine to read a second.</td></tr>
+  <tr><td>Row · badge</td><td>Answering</td></tr>
+  <tr><td>Row · other attached bases</td><td>Attached, not read</td></tr>
+  <tr><td>Row · menu</td><td>Answer from this one</td></tr>
+  <tr><td>Row · menu</td><td>Open sources</td></tr>
+  <tr><td>Row · dial</td><td>Chunks to retrieve · 3 / More context, slower turns.</td></tr>
+  <tr><td>Row · dial</td><td>Similarity threshold · 0.60 / Higher is stricter: fewer but more relevant chunks.</td></tr>
+  <tr><td>Row · dials caption</td><td>Requires Engine · planned</td></tr>
+  <tr><td>Row · attach switch note</td><td>Still reading</td></tr>
+  <tr><td>Sheet · doors</td><td>Add a file · Crawl a site</td></tr>
+  <tr><td>Sheet · file limits</td><td>PDF and DOCX, up to 20 MB each. Ten files per base.</td></tr>
+  <tr><td>Sheet · crawl field</td><td>Website address</td></tr>
+  <tr><td>Sheet · under the field</td><td>Public pages only. Pages behind a login are skipped.</td></tr>
+  <tr><td>Sheet · crawler identity</td><td>Our crawler reads as AgoraStudioBot/1.0 and follows robots.txt. Add it to your allowlist if the site blocks unknown crawlers.</td></tr>
+  <tr><td>Sheet · cap</td><td>A crawl stops at 500 pages. Split a bigger site across two bases.</td></tr>
+  <tr><td>Sheet · cost hint</td><td>What a crawl costs / Crawling and refreshing are free. Agora bills $0.10 per agent-minute.</td></tr>
+  <tr><td>Sheet · duplicate address</td><td>Support docs already reads this address.</td></tr>
+  <tr><td>Sheet · button</td><td>Start crawl</td></tr>
+  <tr><td>Sheet · ledger</td><td>Pages found / Kept · Skipped · Failed</td></tr>
+  <tr><td>Sheet · skip reasons</td><td>Blocked by robots.txt · No readable text · Not a supported file</td></tr>
+  <tr><td>Sheet · empty crawl</td><td>No readable text on any page. Check that the site renders without JavaScript.</td></tr>
+  <tr><td>Sheet · source line</td><td>Read 4 days ago · 211 pages</td></tr>
+  <tr><td>Sheet · never read</td><td>Not read yet</td></tr>
+  <tr><td>Sheet · button</td><td>Refresh now</td></tr>
+  <tr><td>Sheet · schedule row</td><td>Refresh weekly / Agora reads the site again every seven days.</td></tr>
+  <tr><td>Sheet · next run</td><td>Next run: Tuesday 24 September.</td></tr>
+  <tr><td>Sheet · partial failure</td><td>Refresh finished with 6 errors. The pages that failed kept the text they had.</td></tr>
+  <tr><td>Sheet · delete dialog</td><td>Delete this knowledge base? / Aria and Support Bot answer from this base. Deleting it stops them.</td></tr>
+  <tr><td>Test · receipt</td><td>What it read · 3 chunks</td></tr>
+  <tr><td>Test · receipt footer</td><td>3 chunks in 204 ms. Retrieval adds this to every turn.</td></tr>
+  <tr><td>Test · receipt empty</td><td>Nothing matched. Lower the threshold or raise the chunk count.</td></tr>
+  <tr><td>Test · chunk meta</td><td>shipping-policy.md · read 4 days ago</td></tr>
+  <tr><td>Resources · link line</td><td>Attach these to an agent from its Knowledge base row.</td></tr>
+  <tr><td>Toast</td><td>Crawl finished / 211 pages kept, 3 skipped.</td></tr>
+  <tr><td>Toast</td><td>Refreshed / 211 pages, 2 changed.</td></tr>
+</table>
+
+<h4>Named on screen, and owned by Engine</h4>
+<ol>
+  <li><strong>A list of knowledge bases in the engine payload.</strong> Today <code>llm.rag_config.search_config.kb_id</code> is one string. On screen: "One base answers each call. Requires Engine to read a second." under the attached list, and "Attached, not read" on every base after the first.</li>
+  <li><strong>A source record on the knowledge base:</strong> address, kind, last read, interval. The upstream payload at <code>ng-console/src/server/console-backend/studio-knowledge-bases.ts:121-135</code> carries none of them. On screen: "Requires Engine · planned" under "Refresh weekly".</li>
+  <li><strong>A crawl job with page counts.</strong> No crawl exists anywhere in the contract. On screen: "Requires Engine · planned" under the Website address field, above Start crawl.</li>
+  <li><strong>Retrieval settings on the agent.</strong> Top-k and threshold have no field to persist into. On screen: "Requires Engine · planned" under the two dials, with the standing tooltip that says the choice stays in this browser until it ships.</li>
+  <li><strong>A per-turn retrieval record,</strong> so the receipt can appear on a real call rather than a test one. On screen: the receipt shows only in the Test rail, under the banner that already reads "no minutes billed, no real number dialed".</li>
+</ol>
+
+</div>
+
+<h2>Audit corrections</h2>
+<p>Three hostile audits read the build plan, on locks, on honesty and on buildability, and all three refuted it.
+Their objections were checked line by line against <code>studio_x_2</code> and <code>ng-console</code>. This section
+records what the audits killed and what was kept against them, so the argument is readable and not just the result.</p>
+
+<div class="plan">
+
+<h4>Killed by the audits</h4>
+<table>
+  <tr><th>What went</th><th>Why it could not stand</th></tr>
+  <tr><td><code>getRetrieval</code> / <code>setRetrieval</code> / <code>sx:kb_retrieval</code></td><td><code>AgentDraft.agentId</code> is "set when editing an existing agent; absent for a brand-new draft" (<code>lib/wizard-draft.ts:413-414</code>), and <code>StepProps</code> passes <code>{ draft, update }</code> only (<code>components/wizard/types.ts:8-11</code>). The key has no value in the create flow, which is this feature's own JTBD. Every other per-agent setting is a field on the draft (<code>opening?</code>, <code>backup?</code>, <code>recognition?</code>, <code>delivery?</code>), so the dials become <code>draft.retrieval</code> written through <code>update()</code>. One store, not a third one beside the autosaved draft.</td></tr>
+  <tr><td>The chunk-score badge reading a store</td><td><code>ExternalRetrievalForm</code> takes <code>{ onCreated }</code> only (<code>:51-55</code>) and is also mounted from <code>app/(dashboard)/integrations/page.tsx:199</code>, where no agent exists. The badge at <code>:319</code> would have coloured itself from another agent's number. It takes a <code>threshold</code> prop defaulting to <code>DEFAULT_RETRIEVAL.threshold</code> instead, and the builder passes the agent's own value.</td></tr>
+  <tr><td><code>baseFreshnessLine</code> on the builder row and the Resources card</td><td>The five seeded bases at <code>lib/campaign-data.ts:1736-1740</code> have no crawl behind them, so the roster would print "Not read yet" beside an Active badge, or a read date nobody could compute. The roster keeps the record's own numbers. Freshness is a per-source stamp inside the sheet, which is where learning 2 puts it and where the "Requires Engine" mark sits beside it.</td></tr>
+  <tr><td><code>sourceCount</code> on <code>KnowledgeBase</code>, and a seeded crawl on <code>kb_01</code></td><td>Both existed to feed the roster line that is now gone. Dropping them also removes a type change from a file all nine features touch.</td></tr>
+  <tr><td>A chunk count per source, "Added 12 June · 480 chunks"</td><td>The same invented number the plan deleted at <code>lib/agent-resources.ts:163</code>, reprinted one surface later. A document in the contract carries <code>created_at · file_size · file_type · name · status · updated_at · uuid</code> and no chunk count. A file source reads its name and its size; <code>pages</code> stays on a crawled source, where the marked mock ledger produces it.</td></tr>
+  <tr><td>"What a crawl costs. Crawling and refreshing are free."</td><td>No crawl has been built, so no crawl has been priced, and "free" is a commercial promise invented on the spot. It also answers an objection the reader never had, which is the worked example of failure in <code>CLAUDE.md</code>. Rainy 25 goes unanswered rather than answered with a number we made up.</td></tr>
+  <tr><td><code>config: true</code> with a Delete on every base</td><td><code>KNOWLEDGE_BASES</code> is a module constant, and a delete written as <code>deleteMcpServer</code>'s sibling filters localStorage, where no seed id exists. Delete would report success and the base would return on reload. Delete moves into the base sheet and appears only for a base made in this browser; the row's menu keeps "Open sources" and "Answer from this one".</td></tr>
+  <tr><td><code>note: "Still reading"</code></td><td>It renders at <code>step-build.tsx:386</code> beside the badge that already prints "Processing" for the same state, so one row said the state twice in two vocabularies. The note now names the consequence the badge cannot, "Attach when it finishes", which is defect 10 answered without a second vocabulary.</td></tr>
+  <tr><td>"Aria and Support Bot answer from this base."</td><td>With the seeds, <code>kb_02</code> is second on Support Bot v2's list (<code>campaign-data.ts:670</code>) and first on Sales Qualifier's (<code>:679</code>). By this design's own rule Support Bot v2 does not answer from it. <code>agentsUsingBase</code> returns the two lists separately and the dialog names both: attached, and answering.</td></tr>
+  <tr><td><code>sourceAgeDays</code> on the per-turn receipt</td><td>The rail's chunks come from <code>mockRetrieval</code>, whose sources are not source records, so an age on them would be drawn from nothing. The receipt carries source, score, text and latency. The JTBD sentence about a stale answer stays visible in the sheet's freshness line instead.</td></tr>
+  <tr><td><code>segmented</code> half-removed</td><td>Dropping the entry from <code>KB_INGEST_LABEL</code> while leaving <code>KbIngest</code> at four members fails <code>Record&lt;KbIngest, string&gt;</code>. It leaves the union in the same edit. Nothing else in the app references it.</td></tr>
+  <tr><td>The hard-coded "Configure tools" menu label</td><td><code>step-build.tsx:405</code> renders it as literal text, so a knowledge base's menu would have said "Configure tools". <code>ResourceField</code> takes a <code>configureLabel</code> prop; knowledge passes "Open sources", MCP keeps its own.</td></tr>
+  <tr><td>Two dials permanently visible in the required sequence</td><td>They live behind a Collapsible labelled "Advanced" today (<code>external-retrieval-form.tsx:339-345</code>), for the reason stated at <code>step-build.tsx:492-497</code>. They move with that door, not out of it: the same Collapsible, inside the knowledge row, rendered only once a base is attached.</td></tr>
+</table>
+
+<h4>Kept against an audit, with the reason</h4>
+<table>
+  <tr><th>What stayed</th><th>Why the direction wins</th></tr>
+  <tr><td>The dials sit at the knowledge row, not in the Advanced settings panel</td><td>Audit 1 read them as a fifth hiding place and sent them to <code>advanced-settings-sheet.tsx</code> beside <code>HistoryField</code>. Learning 4 is sourced and explicit: Retell puts both on the agent after a base is attached, and the whole point is that the dial sits where the base it reads is. Moving them into a panel three clicks away is the hiding place, not the cure. The progressive-disclosure half of the objection is answered by keeping the "Advanced" Collapsible and by rendering nothing until <code>draft.knowledge.length &gt; 0</code>.</td></tr>
+  <tr><td>The Answering mark, "Attached, not read", and the second base still attaching</td><td>Audit 1 called for the shipped enforcement instead, citing <code>agent-knowledge-page.tsx:152-162</code>. That code is an OceanBase mixing rule, "Only one OceanBase knowledge base can be attached and it cannot be mixed with Default knowledge bases", not a cardinality rule: two default bases attach there today and only the first becomes <code>kb_id</code> (<code>:209-210</code>). Blocking a second attach is the owner's call, and it is the open question. Naming the inert row is the honest version that can ship before the answer arrives.</td></tr>
+  <tr><td>The crawler identity and the 500-page cap</td><td>Audit 2 read them as a fabricated Agora capability. Learning 5 is the reason they exist, and the correction is the mark, not the cut: "Requires Engine · planned" under the Website address field and above Start crawl, <code>ENGINE_TOOLTIP</code> on Start crawl, and the same caption above the ledger. Stated intent under a mark, on the screen that would otherwise ship a silent failure.</td></tr>
+  <tr><td>The per-turn receipt</td><td>Audit 1's smallest change was to cut the dials and the receipt together. Learning 4 allows that end, but the receipt is what makes the dials teachable and it is the only thing in the set that answers rainy 5 and 18. It ships, in the Test rail, under the banner that already says no minutes are billed.</td></tr>
+</table>
+
+<h4>Still open</h4>
+<p>The cardinality question is unchanged and unanswered: does the Engine take a list of knowledge bases beside today's single <code>kb_id</code>? Until it is answered, "Attached, not read" is a state we name and do not enforce. Pricing for a crawl is the second unanswered question, and the screen says nothing about it rather than guessing.</p>
+
+</div>
+
+</div>

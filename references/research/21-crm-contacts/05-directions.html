@@ -1,0 +1,609 @@
+<title>Caller Context Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: the builder is mocked in light, which is how the
+   owner opens the live link. Scaffold = research/10. */
+:root{
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-ink-3:#7c8c96; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+  /* studio_x_2 light surface */
+  --m-bg:#ffffff; --m-muted:#f6f8f9; --m-line:#e6ecef; --m-stroke:#b9c6cd; --m-ink:#101b21; --m-ink2:#5b6b74; --m-ink3:#8b9aa3;
+  --m-brand:#0091b6; --m-brand-soft:#e2f4f9; --m-ok:#1b7f4d; --m-ok-soft:#e6f5ec; --m-warn:#9a6400; --m-warn-soft:#fdf3e0; --m-bad:#b3261e; --m-bad-soft:#fdecea;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3{margin:0;font-size:16px}
+p{max-width:78ch;margin:6px 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.wide{grid-column:1 / -1}
+.card>header{padding:12px 14px 9px;border-bottom:1px solid var(--doc-rule)}
+.card>header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:3px;max-width:none}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:4px 0 0;padding-left:16px}
+.card .why li{margin:3px 0}
+.why h5{margin:9px 0 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-3)}
+.pro{color:#1b7f4d}.con{color:#b3261e}
+code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#eef3f6;padding:1px 5px;border-radius:3px}
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;border-radius:3px;padding:1px 6px;vertical-align:2px}
+.tag.no{background:var(--m-bad-soft);color:var(--m-bad)}
+.tag.yes{background:var(--m-ok-soft);color:var(--m-ok)}
+
+/* ── the builder mock ───────────────────────────────────────────────────── */
+.mock{background:var(--m-bg);color:var(--m-ink);font-family:"DM Sans",system-ui,sans-serif;font-size:12.5px;padding:14px;border-top:1px solid var(--doc-rule);border-bottom:1px solid var(--doc-rule)}
+.mock+.mock{border-top:0}
+.mock .cap{font-size:11px;color:var(--m-ink3);margin:0 0 6px}
+.mock .cap+.cap{margin-top:10px}
+/* SectionRow: [240 label | 560 controls], hairline divider */
+.srow{display:grid;grid-template-columns:132px minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--m-line)}
+.srow:last-child{border-bottom:0}
+.srow>.lab{font-size:12.5px;font-weight:500;line-height:1.35}
+.srow>.lab i{display:block;font-style:normal;font-weight:400;font-size:11px;color:var(--m-ink3);margin-top:3px;line-height:1.4}
+.panel{border:1px solid var(--m-line);border-radius:7px;overflow:hidden}
+.panel>.ph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;font-weight:500;border-bottom:1px solid var(--m-line)}
+.panel>.ph .r{font-weight:400;color:var(--m-ink3);font-size:11px}
+.panel .pb{padding:9px 10px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--m-line);background:var(--m-muted);border-radius:7px;padding:7px 10px}
+.bar .n{font-weight:500}
+.bar .f{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--m-ink3)}
+.btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--m-stroke);border-radius:6px;padding:3px 9px;font-size:11.5px;background:#fff;color:var(--m-ink);white-space:nowrap}
+.btn.q{border-color:transparent;color:var(--m-ink2);text-decoration:underline;text-underline-offset:2px;padding-left:2px;padding-right:2px}
+.btn.pri{background:var(--m-brand);border-color:var(--m-brand);color:#fff;font-weight:600}
+.btn.off{color:var(--m-ink3);border-color:var(--m-line);background:var(--m-muted)}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--m-stroke);border-radius:999px;padding:1px 8px;font-size:10.5px;background:#fff;color:var(--m-ink2);font-family:"JetBrains Mono",monospace}
+.chip.on{border-color:var(--m-brand);background:var(--m-brand-soft);color:#064e60}
+.chip.warn{border-color:var(--m-warn);background:var(--m-warn-soft);color:var(--m-warn)}
+.chip.ok{border-color:var(--m-ok);background:var(--m-ok-soft);color:var(--m-ok)}
+.line{font-size:11.5px;color:var(--m-ink2);margin:6px 0 0}
+.line.ok{color:var(--m-ok)}
+.alert{display:flex;gap:8px;border:1px solid var(--m-bad);background:var(--m-bad-soft);border-radius:6px;padding:7px 9px;font-size:11.5px;color:var(--m-ink);margin-top:6px}
+.alert.w{border-color:var(--m-warn);background:var(--m-warn-soft)}
+table.g{width:100%;border-collapse:collapse;font-size:11.5px}
+table.g th{text-align:left;font-weight:500;color:var(--m-ink3);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:5px 8px;border-bottom:1px solid var(--m-line);background:var(--m-muted)}
+table.g td{padding:5px 8px;border-bottom:1px solid var(--m-line);vertical-align:middle}
+table.g tr:last-child td{border-bottom:0}
+table.g td.m{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--m-ink2)}
+table.g td.k{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--m-ink);font-weight:500}
+.spoken{background:var(--m-muted);border-radius:6px;padding:8px 10px;font-size:12.5px;font-style:italic;line-height:1.55}
+.gap{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:10.5px;border:1px solid var(--m-warn);background:var(--m-warn-soft);color:var(--m-warn);border-radius:3px;padding:0 4px}
+.fill{font-style:normal;font-weight:600}
+.step{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--m-ink2)}
+.step b{display:inline-grid;place-items:center;width:18px;height:18px;border:1px solid var(--m-stroke);border-radius:4px;font-weight:400;background:#fff}
+.field{border:1px solid var(--m-stroke);border-radius:6px;padding:3px 8px;font-size:11.5px;background:#fff;min-width:96px;display:inline-block}
+.field.dis{background:var(--m-muted);border-color:var(--m-line);color:var(--m-ink3)}
+.rail{border:1px solid var(--m-line);border-radius:7px;padding:8px;font-size:11.5px;width:150px;flex:none}
+.rail div{padding:3px 6px;border-radius:4px;color:var(--m-ink2)}
+.rail div.on{background:var(--m-brand-soft);color:#064e60;font-weight:600}
+.rail b{display:block;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--m-ink3);padding:6px 6px 2px;font-weight:600}
+.flexmock{display:flex;gap:10px;align-items:flex-start}
+
+/* ── audit ──────────────────────────────────────────────────────────────── */
+table.audit{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--doc-rule)}
+table.audit th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:bottom}
+table.audit td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td b{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--doc-brand);display:block}
+table.audit td.num{font-family:"JetBrains Mono",monospace;font-size:11.5px;line-height:1.7}
+table.audit tr.win td{background:#f2fbf6}
+table.audit tr.lose td{background:#fdf6f5}
+.two{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:5px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:11px 14px;font-size:13px;margin-top:14px}
+.copy dl{margin:6px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12.5px}
+.copy dt{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-3);padding-top:3px;white-space:nowrap}
+.copy dd{margin:0}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:12px 16px;font-size:13.5px}
+.plan ol{margin:6px 0;padding-left:20px}.plan li{margin:7px 0}
+.plan h4{margin:16px 0 2px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.deep{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#0d2a37;color:#dff3fa;border-radius:6px;padding:9px 12px;display:inline-block;margin-top:6px}
+@media (max-width:980px){.dir,.two,.facts{grid-template-columns:1fr}.card.wide{grid-column:auto}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 21 · CRM &amp; contacts · step 5 diverge</p>
+<h1>Caller Context Directions</h1>
+<p><strong>JTBD.</strong> When a customer who is already on file rings in and my agent opens with &ldquo;how can I help you today&rdquo; like it has never met them, I want it to say their name and the thing they called about, and to put the outcome back on their record before I get to it.</p>
+<p>Audited against <code>01-jtbd.md</code> (26 rainy scenarios), <code>03-learnings.md</code> (5 learnings), <code>04-before.md</code> (19 defects), and the standing builder locks. Only the read half is P0: <a href="https://app.clickup.com/t/868kyjfp4">868kyjfp4</a>. The write half is <a href="https://app.clickup.com/t/868kykbfx">868kykbfx</a> and the store is <a href="https://app.clickup.com/t/868kykbf7">868kykbf7</a>, both P1.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Section 2 Deployment: <code>#wz-2-contacts</code> (batch) and a new inbound sibling. Section 3 Prompt: the variable chips and the Opening&rsquo;s <code>Callers hear</code> line. Section 5 Go live: <code>#wz-4-outputs</code>. No new page, no new rail item.</div>
+  <div><b>Agora facts</b><code>llm.template_variables</code> substitutes into system prompt, greeting, failure message and the silence prompt, at the start of each call only (release notes v2.1). <code>labels</code> carries a record id into every callback. Contact list requires <code>phone_number</code> in E.164, caps at 25 MB and 50,000 rows, supports <code>prompt_override</code>. No contact, audience, memory store or pre-greeting webhook exists.</div>
+  <div><b>Product today</b><code>attachCsv</code> (campaigns-card.tsx:543) invents 248 rows and never opens a file picker. <code>campaignMissingVars</code> (wizard-draft.ts:781) compares the prompt to a five-item constant that spells the required column <code>phone</code>. The coverage line prints <code>length/length</code>. Inbound has one sentence: section-prompt.tsx:139.</div>
+  <div><b>Locks</b>One contact list; a second is a failed design. One door per action. Extend the sibling before drawing a new control. Selected state is an ink chip, never the primary fill. $0.10 per agent-minute whoever owns the key: no control may imply a lookup moves the bill. &ldquo;Requires Engine&rdquo; is a real row.</div>
+</div>
+
+<h2>Five directions</h2>
+<p>Same JTBD, five theses, drawn in the row grammar the builder already has: a 240px label column, a 560px control column, hairline dividers. Copy in the mocks is proposed.</p>
+
+<div class="dir">
+
+  <!-- A ─────────────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <header>
+      <h3>A &middot; Contacts, the page</h3>
+      <p class="who">A project-level contact store in the left rail. One row per person, keyed by phone number, with audiences, a do-not-call flag, a memory note and a CRM sync. The shape the ticket title describes, and the shape a lazy designer draws from that title without opening the SDK.</p>
+    </header>
+    <div class="mock">
+      <div class="flexmock">
+        <div class="rail">
+          <b>Build</b>
+          <div>Go live</div><div>Agents</div>
+          <div class="on">Contacts</div>
+          <div>Integrations</div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="bar" style="margin-bottom:8px">
+            <span class="n">4,210 contacts</span>
+            <span><span class="chip">All</span> <span class="chip on">Overdue</span> <span class="chip">Do not call</span> <span class="btn">Import</span></span>
+          </div>
+          <table class="g">
+            <thead><tr><th>Phone number</th><th>Name</th><th>Last call</th><th>Memory</th></tr></thead>
+            <tbody>
+              <tr><td class="k">+19168888860</td><td>John Doe</td><td class="m">2 Sep</td><td class="m">Paid in full, wants email only</td></tr>
+              <tr><td class="k">+14155550142</td><td>Ava Chen</td><td class="m">28 Aug</td><td class="m">Asked to be called after 6pm</td></tr>
+              <tr><td class="k">+16285550199</td><td>Liam Patel</td><td class="m">None</td><td class="m">None</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cap" style="margin-top:9px">Every column above is a Console database we would be specifying. None of it exists in <code>agora-agents@2.4.0</code>.</p>
+    </div>
+    <div class="why">
+      <h5>For</h5>
+      <ul>
+        <li class="pro">It is the only shape where a contact has an id, so write-back can say which record it touched and cross-session memory has somewhere to live. Learning 2&rsquo;s vendor makes the phone number the identity of the row, exactly this way.</li>
+        <li class="pro">It answers rainy 11 (duplicates), 13 (do not call), 14 (stale), 19 (two editors) and 21 (memory outgrew the field) structurally rather than with a warning.</li>
+        <li class="pro">It names the ticket back to the owner word for word: contacts, audiences, cross-session context.</li>
+      </ul>
+      <h5>Against</h5>
+      <ul>
+        <li class="con"><strong>It is a second contact list.</strong> The standing lock from 2026-09-15 says one run, one id, one list, and a second one is a failed design. Every row on this page duplicates a row in <code>CampaignContacts</code>.</li>
+        <li class="con">The Engine exposes no contact, audience, segment, suppression list or memory store. Six of the seven columns would be invented, which is the honesty floor broken across a whole surface rather than in one caption.</li>
+        <li class="con"><strong>It does not answer the P0 task at all.</strong> An inbound agent with a Contacts page still has no way to get a value into the greeting. Rainy 1, 2, 4, 5, 9, 12 and 26 are untouched.</li>
+        <li class="con">It reopens open IA tension #3 by putting per-caller data beside project-scoped Extensions with no label that separates them.</li>
+      </ul>
+      <h5>Cost</h5>
+      <p style="margin:2px 0 0">Very high, and mostly spent specifying a backend. <strong>Refused</strong>, for the reason in the verdict.</p>
+    </div>
+  </div>
+
+  <!-- B ─────────────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <header>
+      <h3>B &middot; Make the list true, and stop there</h3>
+      <p class="who">No new surface. <code>CampaignContacts</code> opens a real file picker, parses the header, counts the rows it actually has, and reconciles the prompt against those headers. The required column becomes <code>phone_number</code>. Everything the parse can see becomes a check.</p>
+    </header>
+    <div class="mock">
+      <div class="srow">
+        <div class="lab">Contact list<i>One row per contact. Its columns fill the {{variables}} in your prompt.</i></div>
+        <div>
+          <div class="bar">
+            <span><span class="n">3,912 contacts</span><br><span class="f">collections-sep.csv</span></span>
+            <span><span class="btn q">Preview 24 rows</span> <span class="btn">Replace file</span></span>
+          </div>
+          <p class="line">2 duplicate numbers &middot; 1 number that will not dial &middot; 4 blank cells in balance</p>
+          <p class="line ok">3 of 3 variables have a column.</p>
+          <table class="g" style="margin-top:8px;border:1px solid var(--m-line);border-radius:6px;overflow:hidden">
+            <thead><tr><th>phone_number</th><th>first_name</th><th>balance</th><th>due_date</th></tr></thead>
+            <tbody>
+              <tr><td class="k">+19168888860</td><td>John</td><td class="m">$412.20</td><td class="m">2026-08-14</td></tr>
+              <tr><td class="k">+14155550142</td><td>Ava</td><td class="m">$88.00</td><td class="m">2026-08-21</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cap" style="margin-top:9px">And for an inbound agent, unchanged from today:</p>
+      <div class="srow" style="border-bottom:0">
+        <div class="lab">Prompt</div>
+        <div><span class="chip">{{first_name}}</span> <span class="chip">{{balance}}</span>
+          <p class="line">Inbound agents: per-call variables via API: coming soon.</p></div>
+      </div>
+    </div>
+    <div class="why">
+      <h5>For</h5>
+      <ul>
+        <li class="pro">Every defect it fixes is real and checked: 1, 2, 3, 4, 10, 11, 16 and 17. Nothing on screen is invented, because every number is read off the file the builder chose.</li>
+        <li class="pro">It has to happen under any other direction. Coverage cannot be extended onto a constant, and learning 3 names that check as the one thing to keep.</li>
+        <li class="pro">Learning 2 lands in the same commit: <code>phone_number</code> becomes the key column, so a prompt written from the docs stops blocking deploy (defect 4, rainy 9).</li>
+      </ul>
+      <h5>Against</h5>
+      <ul>
+        <li class="con"><strong>It answers the batch happy path and nothing else.</strong> 868kyjfp4 is the P0 ticket, it is about inbound, and this direction leaves section-prompt.tsx:139 as its entire design.</li>
+        <li class="con">Rainy 2, 4, 5, 6, 7, 8, 14, 15, 16, 17, 18, 19, 20, 21, 22, 24 and 25 all stay open. Seventeen of twenty-six.</li>
+        <li class="con">Learning 1 is ignored: three of four vendors ship a source row with a published budget, and this direction ships no source row at all.</li>
+      </ul>
+      <h5>Cost</h5>
+      <p style="margin:2px 0 0">Low. One parser, one panel rewritten. Right as a floor, wrong as a spine.</p>
+    </div>
+  </div>
+
+  <!-- C ─────────────────────────────────────────────────────────────────── -->
+  <div class="card wide">
+    <header>
+      <h3>C &middot; One context block per deployment &middot; <span style="color:var(--doc-brand)">recommended</span></h3>
+      <p class="who">The question is never &ldquo;who are my contacts&rdquo;. It is &ldquo;what will the agent know when it opens its mouth&rdquo;, and the answer has a different source per deployment. Batch keeps the contact list. Inbound gets its sibling, <strong>Caller context</strong>, with the same anatomy and a different source. Both feed one sentence: the Opening&rsquo;s existing <code>Callers hear</code> line, now resolved against a real row.</p>
+    </header>
+    <div class="mock">
+      <p class="cap">Section 2 &middot; Deployment &middot; Batch calls</p>
+      <div class="srow">
+        <div class="lab">Contact list<i>One row per contact. Its columns fill the {{variables}} in your prompt.</i></div>
+        <div>
+          <div class="bar">
+            <span><span class="n">3,912 contacts</span><br><span class="f">collections-sep.csv</span></span>
+            <span><span class="btn q">Preview 24 rows</span> <span class="btn">Replace file</span></span>
+          </div>
+          <p class="line">2 duplicate numbers &middot; 1 number that will not dial &middot; 4 blank cells in balance</p>
+          <div class="alert"><span>Missing 1 column: {{account}}. Add it to the file, or remove it from the prompt. Deploy stays blocked until they match.</span></div>
+        </div>
+      </div>
+      <p class="cap" style="margin-top:12px">Section 2 &middot; Deployment &middot; Inbound &middot; the sibling, same anatomy</p>
+      <div class="srow">
+        <div class="lab">Caller context<i>What the agent knows about the caller before it speaks.</i></div>
+        <div>
+          <div class="panel">
+            <div class="ph">Where values come from <span class="r">3</span></div>
+            <table class="g">
+              <tbody>
+                <tr><td style="width:40%">Your app</td><td><span class="chip ok">Active</span></td><td style="text-align:right"><span class="btn">View snippet</span></td></tr>
+                <tr><td>Phone calls<div style="font-size:10.5px;color:var(--m-ink3)">Callers on a phone number arrive with no values.</div></td><td colspan="2" style="color:var(--m-ink3)">Requires Engine</td></tr>
+                <tr><td>HubSpot lookup<div style="font-size:10.5px;color:var(--m-ink3)">Matching a caller&rsquo;s number to a record.</div></td><td colspan="2" style="color:var(--m-ink3)">Requires Engine</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <table class="g" style="margin-top:8px;border:1px solid var(--m-line);border-radius:6px;overflow:hidden">
+            <thead><tr><th>Variable</th><th>If it is missing</th></tr></thead>
+            <tbody>
+              <tr><td class="k">{{first_name}}</td><td><span class="field">there</span></td></tr>
+              <tr><td class="k">{{balance}}</td><td><span class="field">&nbsp;</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="cap" style="margin-top:12px">Section 3 &middot; Prompt &amp; knowledge &middot; the chips carry the state, and one line names the door</p>
+      <div class="srow">
+        <div class="lab">Prompt</div>
+        <div>
+          <span style="font-size:11.5px;color:var(--m-ink2)">Variables detected:</span>
+          <span class="chip ok">{{first_name}}</span> <span class="chip warn">{{balance}}</span>
+          <p class="line">Where the values come from: <span style="text-decoration:underline;text-underline-offset:2px;color:var(--m-ink)">Caller context</span>.</p>
+        </div>
+      </div>
+      <div class="srow" style="border-bottom:0">
+        <div class="lab">Opening</div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px">
+            <span style="font-size:12.5px;font-weight:500">Callers hear</span>
+            <span class="step"><b>&lsaquo;</b> Contact 1 of 3,912 <b>&rsaquo;</b></span>
+          </div>
+          <div class="spoken">&ldquo;Hi <span class="fill">John</span>, I can see your balance is <span class="gap">balance</span>.&rdquo;</div>
+          <p class="line">A value with no source is read aloud as nothing.</p>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div>
+          <h5>For</h5>
+          <ul>
+            <li class="pro">Learning 1 exactly: the P0 read half is a declared variable list plus a source row with its state, not a CRM record picker. The three sources sit in one place with one honest status each.</li>
+            <li class="pro">Learning 3 is the whole point of the resolved line. No vendor shows the builder the sentence the next caller hears; Vapi hides the extra columns outright. This is the one thing in the feature nobody else ships.</li>
+            <li class="pro">It is the only direction that <em>draws a stranger&rsquo;s call</em>. Rainy 4, 5 and 12 stop being a support ticket and become a line the builder reads before going live.</li>
+            <li class="pro">Nothing new is invented. The list block, the chips and <code>Callers hear</code> all exist; the inbound row is their sibling and diffs against the connectors row it copies its Name/Status grammar from.</li>
+            <li class="pro">One door: the chip in section 3 links to the one row that owns the value, and the source is named on that row and nowhere else.</li>
+          </ul>
+        </div>
+        <div>
+          <h5>Against</h5>
+          <ul>
+            <li class="con">Two of the three inbound sources read <em>Requires Engine</em> on day one, so the row ships more state than control. It is honest, and it is thin.</li>
+            <li class="con">Two blocks now have to stay in step. The list and Caller context must be diffed against each other before every shot, or they drift the way the connectors row and the Resources tab already have (defect 12).</li>
+            <li class="con">The fallback column is a new control on a behaviour Agora does not document. It is computable and it is client-side, but it is one more field on a screen the owner has asked to keep quiet.</li>
+          </ul>
+          <h5>Cost</h5>
+          <p style="margin:2px 0 0">Medium. One parser, one new block, three files extended, no new route and no new nav item.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D ─────────────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <header>
+      <h3>D &middot; Lookup by caller number through the connector</h3>
+      <p class="who">The CRM answers. On answer the agent matches the caller&rsquo;s number against HubSpot, and a mapping table says which field fills which variable. Owner question 1A, and the closest thing in the feature to the JTBD sentence.</p>
+    </header>
+    <div class="mock">
+      <div class="srow" style="border-bottom:0">
+        <div class="lab">Caller context</div>
+        <div>
+          <span class="chip">Your app</span> <span class="chip on">HubSpot lookup</span>
+          <table class="g" style="margin-top:8px;border:1px solid var(--m-line);border-radius:6px;overflow:hidden">
+            <thead><tr><th>Variable</th><th>HubSpot field</th></tr></thead>
+            <tbody>
+              <tr><td class="k">{{first_name}}</td><td><span class="field dis">&nbsp;</span></td></tr>
+              <tr><td class="k">{{balance}}</td><td><span class="field dis">&nbsp;</span></td></tr>
+            </tbody>
+          </table>
+          <div class="alert w" style="margin-top:8px"><span>Requires Engine. No connector publishes the fields it will accept.</span></div>
+          <p class="line">Matched on the number the caller dialled from. Withheld numbers do not match.</p>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <h5>For</h5>
+      <ul>
+        <li class="pro">The only option that asks nothing of the customer&rsquo;s backend, which is what the JTBD sentence actually describes.</li>
+        <li class="pro">The connector exists in both repos and is attached in a row the builder already uses, so this adds no new attach surface (the 19 boundary holds).</li>
+        <li class="pro">It is the only route to rainy 14, a record that went stale between the sale and the call.</li>
+      </ul>
+      <h5>Against</h5>
+      <ul>
+        <li class="con"><strong>Every cell in the mapping table would be an invented field name.</strong> The docs never say which HubSpot objects or fields the connector touches. That is the honesty floor, not a caption.</li>
+        <li class="con">Agora publishes no budget for a pre-greeting lookup, so the latency line competitors print as a fact would be a number we made up. Rainy 3 gets worse, not better.</li>
+        <li class="con">One provider. Rainy 7 and 8 fail by construction, and a connector still has no word for being broken (defect 10), so rainy 6 has nothing to render.</li>
+      </ul>
+      <h5>Cost</h5>
+      <p style="margin:2px 0 0">Medium to build, unbuildable honestly today. Taken as the third row on C&rsquo;s block, present and named, with its state.</p>
+    </div>
+  </div>
+
+  <!-- E ─────────────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <header>
+      <h3>E &middot; Write-back on the outputs the agent already extracts</h3>
+      <p class="who">The write half, as a mapping table rather than a live tool. Each <code>DataPoint</code> the agent already extracts gains a destination and an update mode. Post-call only, so a caller can never talk the agent into writing something mid-conversation.</p>
+    </header>
+    <div class="mock">
+      <div class="srow" style="border-bottom:0">
+        <div class="lab">Structured outputs<i>What each call records. Results appear in Call History.</i></div>
+        <div>
+          <table class="g" style="border:1px solid var(--m-line);border-radius:6px;overflow:hidden">
+            <thead><tr><th>Data point</th><th>Writes to</th><th>Mode</th></tr></thead>
+            <tbody>
+              <tr><td>Call outcome<div style="font-size:10.5px;color:var(--m-ink3)">Boolean</div></td><td style="color:var(--m-ink3)">Nothing</td><td><span class="chip">Overwrite</span></td></tr>
+              <tr><td>Promise to pay<div style="font-size:10.5px;color:var(--m-ink3)">Text</div></td><td><span class="field dis">&nbsp;</span></td><td><span class="chip">Fill if empty</span> <span class="chip">Merge</span></td></tr>
+            </tbody>
+          </table>
+          <div class="alert w" style="margin-top:8px"><span>Requires Engine. No connector publishes the fields it will accept.</span></div>
+          <p class="line">Nothing is written back until you pick a field.</p>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <h5>For</h5>
+      <ul>
+        <li class="pro">Learning 4 and learning 5 together: a visible mapping table with Overwrite, Fill if empty and Merge is the whole of what the category ships, and it needs no store.</li>
+        <li class="pro">It reuses <code>DataPoint</code> and the row that already authors it. No second definition of &ldquo;what a call produced&rdquo;.</li>
+        <li class="pro">Post-call only is the answer to rainy 15 and 22 at once: the boundary is that a caller cannot reach it, and the default is that nothing is written.</li>
+      </ul>
+      <h5>Against</h5>
+      <ul>
+        <li class="con">It cannot say <em>which</em> record it wrote to until <code>labels</code> carries a record id, so the JTBD&rsquo;s last step has nothing to link. That is the open question.</li>
+        <li class="con">Rainy 16, a write that silently does nothing, needs a result the Engine does not return. The row can state the mode and not the outcome.</li>
+        <li class="con">P1. Shipping it beside a P0 read half risks the read half arriving thin.</li>
+      </ul>
+      <h5>Cost</h5>
+      <p style="margin:2px 0 0">Low as a column on an existing table. Blocked on one owner answer before it can do anything.</p>
+    </div>
+  </div>
+
+</div>
+
+<h2>Audit</h2>
+<p>Rainy scenarios by number from <code>01-jtbd.md</code>. <strong>Answered</strong> means the screen changes what the builder does. <strong>Stated</strong> means the screen tells the truth about a thing we cannot do, which the honesty floor counts as a pass. <strong>Failed</strong> means the scenario happens and nothing on screen acknowledges it. Learnings are the five in <code>03-learnings.md</code>.</p>
+<table class="audit">
+  <thead><tr><th>Direction</th><th>Rainy answered</th><th>Rainy stated</th><th>Rainy failed</th><th>Learnings</th><th>Locks</th><th>Honesty</th><th>&Sigma;</th></tr></thead>
+  <tbody>
+    <tr class="lose">
+      <td><b>A</b> Contacts, the page</td>
+      <td class="num">11 · 13 · 14<br>19 · 21 · 25</td>
+      <td class="num">none</td>
+      <td class="num">1 · 2 · 3 · 4 · 5<br>9 · 12 · 26</td>
+      <td>2 only. Contradicts 1 and 3.</td>
+      <td><span class="tag no">fail</span> a second contact list</td>
+      <td><span class="tag no">fail</span> six invented columns</td>
+      <td><b>6</b></td>
+    </tr>
+    <tr>
+      <td><b>B</b> Make the list true</td>
+      <td class="num">1 · 9 · 10 · 11<br>12 · 13 · 26</td>
+      <td class="num">none</td>
+      <td class="num">2 · 3 · 4 · 5 · 6 · 7 · 8<br>14 · 15 · 16 · 17 · 18 · 19<br>20 · 21 · 22 · 24 · 25</td>
+      <td>2, and half of 3.</td>
+      <td><span class="tag yes">pass</span></td>
+      <td><span class="tag yes">pass</span></td>
+      <td><b>7</b></td>
+    </tr>
+    <tr class="win">
+      <td><b>C</b> One context block per deployment</td>
+      <td class="num">1 · 2 · 4 · 5 · 9 · 10<br>11 · 12 · 13 · 25 · 26</td>
+      <td class="num">3 · 6 · 7<br>8 · 14 · 18</td>
+      <td class="num">15 · 16 · 17 · 19<br>20 · 21 · 22 · 23 · 24</td>
+      <td>1 · 2 · 3</td>
+      <td><span class="tag yes">pass</span></td>
+      <td><span class="tag yes">pass</span></td>
+      <td><b>17</b></td>
+    </tr>
+    <tr>
+      <td><b>D</b> Connector lookup</td>
+      <td class="num">3 · 4 · 14<br><span style="color:var(--doc-ink-3)">if the field model existed</span></td>
+      <td class="num">7 · 8</td>
+      <td class="num">5 · 6 · 19</td>
+      <td>Serves 1 as a row. Contradicts 1 as a spine.</td>
+      <td><span class="tag yes">pass</span></td>
+      <td><span class="tag no">fail</span> invented fields, invented budget</td>
+      <td><b>5</b></td>
+    </tr>
+    <tr>
+      <td><b>E</b> Write-back on the outputs</td>
+      <td class="num">15 · 17 · 22</td>
+      <td class="num">16 · 21</td>
+      <td class="num">19 · 20 · 24</td>
+      <td>4 · 5</td>
+      <td><span class="tag yes">pass</span></td>
+      <td><span class="tag yes">pass</span></td>
+      <td><b>5</b></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>B fails the audit as a spine, and I am saying so.</strong> It answers seven scenarios and every one of them is on the batch happy path: a file that parses, a column that matches, a row that dials. The P0 ticket is inbound, and B leaves the whole inbound half as the one sentence that is there today. A direction that only fixes the path the product already draws is a correction, not a design. It ships as C&rsquo;s floor and never on its own.</p>
+<p><strong>A also fails, for the opposite reason.</strong> It is ambitious about a half nobody has asked for at P0 and silent about the half that is P0.</p>
+
+<h2>Verdict &middot; C, floored by B, with D as a row and E as the second commit</h2>
+<div class="two">
+  <div class="mock" style="border:1px solid var(--doc-rule);border-radius:6px">
+    <p class="cap">The converged read half, on the default agent (Aria, inbound, phone)</p>
+    <div class="srow">
+      <div class="lab">Prompt<i>What the agent knows about itself.</i></div>
+      <div>
+        <div style="border:1px solid var(--m-stroke);border-radius:6px;padding:8px 10px;font-size:11.5px;color:var(--m-ink2);line-height:1.5">You are a collections agent for Acme. Open by confirming who you are speaking to.</div>
+        <div style="margin-top:7px">
+          <span style="font-size:11.5px;color:var(--m-ink2)">Variables detected:</span>
+          <span class="chip ok">{{first_name}}</span> <span class="chip warn" title="No value from your app.">{{balance}}</span>
+        </div>
+        <p class="line">Where the values come from: <span style="text-decoration:underline;text-underline-offset:2px;color:var(--m-ink)">Caller context</span>.</p>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="lab">Opening<i>The first seconds of every call, in the order the caller hears them.</i></div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px">
+          <span style="font-size:12.5px;font-weight:500">Callers hear</span>
+          <span class="btn">Hear the opening</span>
+        </div>
+        <div class="spoken">&ldquo;Hi <span class="fill">there</span>, I can see your balance is <span class="gap">balance</span>.&rdquo;</div>
+        <p class="line">A value with no source is read aloud as nothing.</p>
+      </div>
+    </div>
+    <div class="srow" style="border-bottom:0">
+      <div class="lab">Caller context<i>What the agent knows about the caller before it speaks.</i></div>
+      <div>
+        <div class="panel">
+          <div class="ph">Where values come from <span class="r">3</span></div>
+          <table class="g">
+            <tbody>
+              <tr><td style="width:44%">Your app</td><td><span class="chip ok">Active</span></td><td style="text-align:right"><span class="btn">View snippet</span></td></tr>
+              <tr><td>Phone calls<div style="font-size:10.5px;color:var(--m-ink3)">Callers on a phone number arrive with no values.</div></td><td colspan="2" style="color:var(--m-ink3)">Requires Engine</td></tr>
+              <tr><td>HubSpot lookup<div style="font-size:10.5px;color:var(--m-ink3)">Matching a caller&rsquo;s number to a record.</div></td><td colspan="2" style="color:var(--m-ink3)">Requires Engine</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <table class="g" style="margin-top:8px;border:1px solid var(--m-line);border-radius:6px;overflow:hidden">
+          <thead><tr><th>Variable</th><th>If it is missing</th></tr></thead>
+          <tbody>
+            <tr><td class="k">{{first_name}}</td><td><span class="field">there</span></td></tr>
+            <tr><td class="k">{{balance}}</td><td><span class="field">&nbsp;</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <h4>What we take from each</h4>
+    <ul>
+      <li><strong>C is the spine.</strong> One question, asked once, answered beside the thing that supplies the value: the contact list for batch, Caller context for inbound. The chips in section 3 carry the state and link to the one row that owns it.</li>
+      <li><strong>B is the floor and ships first.</strong> A real file picker, a real header parse, a real count, and <code>phone_number</code> as the required column. Coverage stops being a comparison against a five-item constant, which is the only way learning 3&rsquo;s check can be extended at all.</li>
+      <li><strong>D becomes one row, not a screen.</strong> HubSpot lookup sits in the source list with <em>Requires Engine</em> beside it. The field mapping is not drawn, because every field name in it would be invented.</li>
+      <li><strong>E is the second commit.</strong> A <code>Writes to</code> column on the outputs table with the three update modes, defaulting to nothing. It draws the boundary now so nobody builds an unbounded <code>POST</code> later.</li>
+      <li><strong>A folds away entirely.</strong> Nothing from it survives except learning 2: the phone number is the key of the row, not one of its variables.</li>
+    </ul>
+    <h4>Why not A, which is what the ticket asks for</h4>
+    <p>868kykbf7 says &ldquo;manage contacts, audiences, and cross-session context&rdquo;, and a Contacts page is the literal reading. It is refused for three reasons, in order of weight. It is a second contact list, which the owner has already called a failed design. Six of its seven columns describe a store the Engine does not expose, so it is a backend specification wearing a UI. And it does not touch the P0 ticket: a Contacts page does not put one value into one inbound greeting. When the Engine ships a contact object, the list block in C is where it lands, because C already keys the row on <code>phone_number</code>.</p>
+    <h4>Why not D as the spine</h4>
+    <p>D is the direction the JTBD sentence describes and it is the one the docs cannot support. Three of four vendors answer inbound context with a customer-hosted webhook and a published budget; only one ships a CRM lookup, and it states a hard regional limit on it. Drawing a HubSpot field picker today means typing field names nobody has published and a latency figure nobody has measured. The row stays, with its real state on it, until that changes.</p>
+    <h4>The open question, not designable without an answer</h4>
+    <p>Whether <code>labels</code> becomes a builder-visible field or stays a hidden field the CRM feature writes. It is listed in <code>reusablePropertyKeys</code> and then removed from <code>configurablePropertyKeys</code> (<code>ng-console/src/lib/convoai/agent-properties.ts</code>:22&ndash;24), a shipped decision I am not going to reverse in a wireframe. It is also the only field that carries a record id from the dial into every notification callback. Without it, no call row can name the record it touched, so the JTBD&rsquo;s last step has nothing to link to and every write in E is unattributable. The read half ships either way; the write half cannot.</p>
+    <div class="copy"><strong>Proposed copy, needs a yes.</strong>
+      <dl>
+        <dt>List, empty</dt><dd>One row per contact. A phone_number column is required. &middot; <code>Upload contacts CSV</code> &middot; <code>Use the sample list</code> &middot; <code>Download the template</code> &middot; link <code>Contact list format</code></dd>
+        <dt>List, checks</dt><dd>2 duplicate numbers · 1 number that will not dial · 4 blank cells in balance &middot; This file has no phone_number column, so there is nothing to dial. &middot; 50,000 rows is the limit. This file has 80,412. &middot; prompt_override replaces the prompt for that row.</dd>
+        <dt>Coverage</dt><dd>3 of 3 variables have a column. &middot; Missing 1 column: {{account}}. Add it to the file, or remove it from the prompt. Deploy stays blocked until they match.</dd>
+        <dt>Caller context</dt><dd>Row label <code>Caller context</code> &middot; hint <code>What the agent knows about the caller before it speaks.</code> &middot; <code>Where values come from</code> &middot; <code>Your app</code> / <code>Your app passes them when the session starts.</code> / <code>View snippet</code> &middot; <code>Phone calls</code> / <code>Callers on a phone number arrive with no values.</code> &middot; <code>HubSpot lookup</code> / <code>Matching a caller&rsquo;s number to a record.</code> &middot; <code>Requires Engine</code> &middot; columns <code>Variable</code> · <code>If it is missing</code></dd>
+        <dt>Prompt</dt><dd>Variables detected: &middot; Where the values come from: Contact list. &middot; Where the values come from: Caller context. &middot; No {{variables}} in your prompt yet. Add one to greet each caller by name.</dd>
+        <dt>Opening</dt><dd>Callers hear <span style="color:var(--doc-ink-3)">(existing)</span> &middot; A value with no source is read aloud as nothing. &middot; Contact 1 of 3,912 &middot; aria <code>Previous contact</code> · <code>Next contact</code></dd>
+        <dt>Write-back</dt><dd><code>Writes to</code> &middot; <code>Nothing</code> &middot; <code>Overwrite</code> · <code>Fill if empty</code> · <code>Merge</code> &middot; Nothing is written back until you pick a field. &middot; Requires Engine. No connector publishes the fields it will accept.</dd>
+        <dt>Deleted</dt><dd>Inbound agents: per-call variables via API: coming soon. &middot; Contacts CSV &middot; Download CSV Template &middot; Variables detected (filled from your campaign CSVs):</dd>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<h2>Prototype plan</h2>
+<p>All paths relative to <code>studio_x_2</code>. Design mode only: the parse runs in the browser, state lands in the draft and in <code>localStorage</code>, and nothing calls a backend.</p>
+<div class="plan">
+  <h4>Add</h4>
+  <ol>
+    <li><code>lib/contact-list.ts</code> &middot; the parse and the substitution, in one module because three surfaces have to agree on the answers. Exports <code>REQUIRED_COLUMN = "phone_number"</code>, <code>MAX_ROWS = 50000</code>, <code>MAX_BYTES = 26214400</code>, <code>interface ParsedContactList { fileName · columns · rows · rowCount · duplicates · unusable · blanksByColumn · overCap · hasKey }</code>, <code>parseContactCsv(file: File): Promise&lt;ParsedContactList&gt;</code>, <code>isE164(v)</code>, <code>resolveText(text, row, fallbacks): { text, gaps }</code>, <code>sampleContactList()</code>, and <code>saveList / loadList</code> on <code>sx:contact_list:&lt;agentId&gt;:&lt;runId&gt;</code> (first 200 rows kept for the preview, counts kept whole). Why not extended: <code>lib/campaign-data.ts</code> is the fixture catalog and <code>lib/wizard-draft.ts</code> is the draft shape; neither reads a file, and <code>copy-lint</code> skips <code>campaign-data</code> precisely because it holds data, not behaviour.</li>
+    <li><code>components/wizard/caller-context.tsx</code> &middot; <code>CallerContextBlock({ draft, update })</code>, a <code>SectionRow id="wz-2-caller-context" focusId="caller-context"</code> holding the source table and the fallback table. Why not extended: <code>CampaignContacts</code> takes a <code>CampaignDraft</code> and writes <code>csvName</code> and <code>contacts</code> onto a run. An inbound agent has no run and must never create one, because a run is a batch dial. The two blocks share the row grammar and <code>lib/contact-list.ts</code>, not a component.</li>
+  </ol>
+  <h4>Touch</h4>
+  <ol>
+    <li><code>lib/wizard-draft.ts</code> &middot; <b>:773</b> <code>MOCK_CSV_COLUMNS</code> ships <code>phone_number</code> in place of <code>phone</code>. <b>interface <code>CampaignDraft</code></b> (:256&ndash;280) gains <code>columns?: string[]</code> and <code>listChecks?: { duplicates: number; unusable: number; overCap: boolean; hasKey: boolean }</code> after <code>contacts?: number</code>, so the pre-flight and the publish gate read the parse without reaching into storage. New export <code>promptVars(d)</code> = <code>extractVars(systemPrompt + greeting + failureMessage)</code>; every existing <code>extractVars</code> caller switches to it, which closes defect 6. <b>symbol <code>campaignMissingVars</code></b> (:781) filters against <code>c.columns</code> when present and <code>MOCK_CSV_COLUMNS</code> otherwise. <b>symbol <code>publishBlocks</code></b>, the <code>if (c.csvName)</code> branch at :843, gains a block for a list with no <code>phone_number</code> column.</li>
+    <li><code>components/wizard/campaigns-card.tsx</code> &middot; <b>symbol <code>attachCsv</code></b> (:543) becomes a hidden <code>&lt;input type="file" accept=".csv"&gt;</code> calling <code>parseContactCsv</code> and writing <code>{ csvName, contacts, columns, listChecks }</code> through <code>onChange</code>. <b>Empty state</b> (:550&ndash;580): the dead docs link at :569 repoints to <code>https://docs.agora.io/en/ai/studio/deploy/campaign</code>; the buttons become Upload, Use the sample list, Download the template. <b>Summary bar</b> (:585&ndash;598) reads the parsed count; a checks line sits under it. <b>Coverage</b> (:600&ndash;622) reads real columns and keeps its two ways out verbatim. <b>Preview table</b> (:625&ndash;658) takes its columns from the file with <code>phone_number</code> first. <b>Constants <code>PREVIEW_NAMES</code> / <code>PREVIEW_ROWS</code></b> (:506&ndash;518) move behind <code>sampleContactList()</code>.</li>
+    <li><code>components/wizard/channel-section.tsx</code> &middot; mount <code>&lt;CallerContextBlock&gt;</code> beside the inbound blocks at <b>:178&ndash;187</b>, after <code>InboundNumbersBlock</code>. <b>symbol <code>BatchContactsBlock</code></b> (:243) gains <code>focusId="contact-list"</code> on its <code>SectionRow</code>. <b>symbol <code>CodeConfigure</code></b>: the <code>connect</code> template at <b>:457</b> and the install line at <b>:495</b> drop the package that does not exist, <code>@agora/agent-sdk</code> for <code>agora-agents</code> and <code>AgentClient</code> for <code>AgoraClient</code>, and the join call passes <code>templateVariables</code> and <code>labels</code>. That snippet is what <code>View snippet</code> opens.</li>
+    <li><code>components/wizard/section-prompt.tsx</code> &middot; <b>:46</b> <code>vars</code> reads <code>promptVars(draft)</code>. <b>The chip block at :121&ndash;134</b> is wrapped in <code>&lt;div data-design-focus="variables"&gt;</code>, renders always (its empty line included), and each chip takes <code>ok</code> or <code>warn</code> from the same reconciliation the list uses, with the reason on <code>title</code>. <b>:136&ndash;142</b>, the inbound sentence, is replaced by the one line naming the door.</li>
+    <li><code>components/wizard/section-opening.tsx</code> &middot; <b>the <code>Callers hear</code> block at :155&ndash;169</b> resolves <code>hears</code> through <code>resolveText</code> against the selected row and the fallbacks, renders a gap as a warning chip inside the existing <code>Spoken</code> line, and gains a contact stepper in the label row when a list is attached. <code>Hear the opening</code> speaks the resolved sentence.</li>
+    <li><code>components/wizard/agent-wizard.tsx</code> &middot; the <b><code>owner</code> map at :520&ndash;528</b> gains <code>variables: 3</code>, <code>"contact-list": 2</code>, <code>"caller-context": 2</code>, <code>"write-back": 5</code>.</li>
+    <li><code>components/wizard/deploy-preflight.tsx</code> &middot; <b>:92&ndash;101</b>, the batch row stops appending the words &ldquo;variables covered&rdquo; from nothing and stops falling back to <code>MOCK_CSV_ROWS</code>; it reads <code>c.contacts</code>, <code>c.columns</code> and <code>campaignMissingVars</code>.</li>
+    <li><code>components/wizard/step-analysis.tsx</code> &middot; the data-point list gains a <code>Writes to</code> cell and an update-mode chip group per row, both disabled with the Requires Engine caption, and the default line under the table. <code>AnalysisConfig.dataPoints</code> entries gain <code>writeTo?: string</code> and <code>writeMode?: "overwrite" | "fill" | "merge"</code> on <code>DataPoint</code> (<code>lib/wizard-draft.ts</code>:151&ndash;158). This is the second commit.</li>
+    <li><code>lib/analytics.ts</code> &middot; add <code>caller_context_received</code> to <code>Events</code> with the property list from <code>01-jtbd.md</code> (<code>source · matched · varCount · valuedCount · missCount · lookupMsBucket</code>). It is the P0 success event and it is server-anchored, so the wireframe fires it only from the test rail.</li>
+  </ol>
+  <h4>The deep link</h4>
+  <p><code>?focus=variables</code> resolves to <code>[data-design-focus="variables"]</code>, which <code>agent-wizard.tsx</code>:551 scrolls to and rings. It opens on Aria, the default agent, which is inbound on a phone number, which is the P0 case.</p>
+  <div class="deep">/agents/agt_default/edit?focus=variables</div>
+  <h4>Order</h4>
+  <p>One commit per area, as the revamp brief requires. B first (the parse, the column name, the real coverage), then C&rsquo;s inbound block and the resolved opening, then E. Gate each with <code>pnpm tsc --noEmit</code>, <code>pnpm next build</code> and <code>node scripts/copy-lint.mjs</code>, then push and deploy, because the owner reviews the live link.</p>
+</div>
+
+<h2>Next</h2>
+<p>Owner answers the <code>labels</code> question &middot; build C on <code>design/sandbox</code> &middot; run fortify and articulate over the new states &middot; deploy and shoot the red-marked before and after &middot; log to <code>06-after</code> and move the tracker row.</p>
+
+<h2>Audit corrections</h2>
+<p>Three hostile audits read the build plan drawn from this verdict, on locks, on honesty and on
+buildability. All three refuted it. Their objections were checked line by line against
+<code>studio_x_2/</code> and against <code>ng-console/node_modules/agora-agents</code>, and most of them
+were right. The verdict below stands; its inbound half ships smaller and truer. What follows is what
+came out, and what stayed in over an objection.</p>
+
+<h4>Cut, because the audits were right</h4>
+<table class="audit">
+  <tr><th>What went</th><th>Why</th></tr>
+  <tr class="lose"><td><b>Your app &middot; Active</b> and its View snippet door</td><td>Nothing in the product observes whether a customer&rsquo;s app passes <code>llm.template_variables</code>, so the Console cannot paint the green badge that <code>step-build.tsx</code>:143 reserves for a connection it has verified. The door was dead anyway: <code>CodeConfigure</code> renders only under <code>current === "code"</code> (<code>channel-section.tsx</code>:198&ndash;206) and the channel is one choice, so an inbound agent never sees it.</td></tr>
+  <tr class="lose"><td><b>HubSpot lookup &middot; Requires Engine</b></td><td>No Agora doc, release note or SDK resource mentions a caller-number-to-record lookup in any state, so the row invents the capability it then dates. HubSpot also already carries a status two sections along, and one vendor cannot read Active in section 5 and Requires Engine in section 2. The idiom itself refuses it: every shipped &ldquo;Requires Engine&rdquo; caption carries a month or &ldquo;planned&rdquo; (<code>listening-rows.tsx</code>:110, :124).</td></tr>
+  <tr class="lose"><td>The <b>Variable / If it is missing</b> table and <code>AgentDraft.varFallbacks</code></td><td><code>template_variables</code> is set on the Start call and is absent from <code>UpdateAgentsRequest.Properties</code>. For an inbound session the Console makes no start call, so a fallback the builder types reaches no agent. It is also the artefact learning 3 rejects in ElevenLabs, rebuilt on our own row.</td></tr>
+  <tr class="lose"><td>The three-row <b>Where values come from</b> table</td><td>With two of its three rows gone, one row remains, and a one-row status table is a sentence. It would also have been a third status grammar beside <code>FlatRow</code> / <code>EngineRow</code> and the connector list.</td></tr>
+  <tr class="lose"><td><b>Direction E</b>: <code>DataPoint.writeTo</code>, <code>writeMode</code>, the Writes to column</td><td>Overwrite &middot; Fill if empty &middot; Merge is Retell&rsquo;s vocabulary and there is no Agora field under it. This verdict already says E is blocked on the <code>labels</code> answer, so it cannot ship its data shape ahead of that answer. It returns when the owner answers.</td></tr>
+  <tr class="lose"><td>The <code>CodeConfigure</code> snippet fix at <code>channel-section.tsx</code>:457 and :495</td><td>Feature 18 owns those two lines with a different and better fix: <code>agora-agent-client-toolkit</code> with <code>ConversationalAIAPI</code>, which is the client-side package that block&rsquo;s heading promises. <code>AgoraClient</code> from <code>agora-agents</code> is a server client whose options require Customer ID and Secret, and it exports no <code>joinChannel</code>. Two verdicts cannot own one hunk.</td></tr>
+  <tr class="lose"><td>&ldquo;A value with no source is read aloud as nothing.&rdquo;</td><td>Agora documents no behaviour for an unfilled <code>{{var}}</code>. The gap now renders as the token itself, which says we do not know without pretending we do.</td></tr>
+  <tr class="lose"><td>&ldquo;Contact 1 of 3,912&rdquo;</td><td>Only the first 200 rows are held for the preview, so the index claims a position the control cannot reach. The stepper stays; it is labelled with the row&rsquo;s own <code>phone_number</code> and claims no total.</td></tr>
+  <tr class="lose"><td>The always-rendered chip block and its new <code>&lt;div data-design-focus="variables"&gt;</code></td><td>The anchor was free. <code>SectionRow</code> already takes <code>focusId</code>, and the System prompt row at <code>section-prompt.tsx</code>:75 always renders, so the review link lands without adding a block that shows when it has nothing to show. <code>variables: 3</code> in the owner map goes too: <code>agent-wizard.tsx</code>:528 already falls back to 3.</td></tr>
+  <tr class="lose"><td>&ldquo;duplicate numbers&rdquo; and &ldquo;a number that will not dial&rdquo;</td><td>Agora&rsquo;s contact-list spec says nothing about repeats, and &ldquo;will not dial&rdquo; predicts Engine behaviour. The checks line now states facts about the file: <em>2 numbers appear twice &middot; 1 number is not in E.164 format &middot; 4 blank cells in balance</em>.</td></tr>
+  <tr class="lose"><td>A publish block on the row cap</td><td>The cap ships as a fact on screen, not as a new gate. <code>phone_number</code> missing still blocks, because a list with no key column cannot dial at all.</td></tr>
+</table>
+
+<h4>Kept, over an objection</h4>
+<table class="audit">
+  <tr><th>What stayed</th><th>The objection, and why it loses</th></tr>
+  <tr class="win"><td>The <b>Caller context</b> row</td><td>Two audits wanted it deferred or cut to nothing. C beats B on evidence: learning 1 is that three of four vendors answer inbound context with a source row carrying its state, 868kyjfp4 is the P0 ticket and it is inbound, and <code>04-before.md</code> says the honest sentence &ldquo;is replaced by a real row, never by silence&rdquo;. What survives is honest and much smaller: it names the variables the prompt declares, the mechanism that leaves them empty, and the two ways out, in the grammar the batch coverage panel already uses.</td></tr>
+  <tr class="win"><td>Deleting &ldquo;Inbound agents: per-call variables via API: coming soon.&rdquo;</td><td>Defended as the only honest sentence in the feature. It is an undated promise with no Engine item behind it. The replacement states more truth, not less: why no value arrives, and what the builder can do about it today.</td></tr>
+  <tr class="win"><td>The 25 MB and 50,000-row caps on screen</td><td>Called unconfirmed. They come from the same docs page that is the sole authority for <code>phone_number</code> in E.164, which every audit accepts as the fix for defect 4. The page cannot be authoritative for one field and not the other.</td></tr>
+  <tr class="win"><td>The door lines from the prompt chips</td><td>Called new UI text added without asking. Rainy 1 is the defect they answer: the builder types <code>{{first_name}}</code> and nothing on screen says where a first name comes from. They ship as proposed copy needing a yes, like every other string here.</td></tr>
+  <tr class="win"><td><code>MOCK_CSV_COLUMNS</code> moving to <code>phone_number</code> in this slice</td><td>Open question 5 asked whether to defer it to a correction slice. It is the floor every other change stands on: coverage cannot be extended onto a constant that spells the required column wrong.</td></tr>
+</table>
+
+<h4>Also corrected</h4>
+<ul class="notes" style="padding-left:18px">
+  <li><code>resolveText</code> takes two arguments and resolves only where a parsed row exists, which is batch. <code>SectionOpening</code> reads the list itself from the <code>draft</code> it already has, so its five props are unchanged and nothing named <code>selectedRow</code> has to be invented.</li>
+  <li>Every <code>extractVars</code> caller switches to <code>promptVars</code>, all seven: <code>section-prompt.tsx</code>:46, <code>campaigns-card.tsx</code>:535, :608, :609, <code>deploy-preflight.tsx</code>:107, <code>test-section.tsx</code>:148 and :153. Leaving two behind would recreate defect 6 in the test rail and compute the coverage tick and its sentence from two different expressions.</li>
+  <li>The coverage refusal names the tokens as variables and the missing thing as a column: <em>Missing 1 column: {{account}}.</em></li>
+  <li><code>caller_context_received</code> lands after <code>campaign_launched</code> in <code>lib/analytics.ts</code>. Neither <code>first_live_call_received</code> nor <code>call_reviewed</code> exists in that file. It is declared, not fired: the wireframe firing it from the test rail would contradict the event&rsquo;s own definition, which is a live, non-test call.</li>
+</ul>
+
+</div>

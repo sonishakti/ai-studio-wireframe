@@ -1,0 +1,520 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Usage and concurrency directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: this is a mock of the Studio_X dark console, as the designer sees it in Figma. Every color is painted explicitly. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3.sec{font-size:16px;margin:26px 0 6px}
+p{max-width:78ch;margin:6px 0}
+code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#eaf0f4;padding:1px 5px;border-radius:3px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.lock{background:#fff6f5;border:1px solid #f3cdc8;border-left:3px solid #b3261e;border-radius:0 6px 6px 0;padding:12px 16px;margin:18px 0;font-size:13.5px;color:#8d2a20}
+.lock b{color:#b3261e}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-top:14px}
+.dir.one{grid-template-columns:1fr}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.pick{border-color:var(--doc-brand);box-shadow:0 0 0 1px var(--doc-brand)}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:5px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}.cost{color:var(--doc-ink)}
+.refuse{background:#fff6f5;border-top:1px solid #f3cdc8;padding:10px 14px;font-size:13px;color:#8d2a20}
+.refuse b{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px}
+.cap{font-size:11.5px;color:var(--ink-3);margin:0 0 6px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sec-h .chev{margin-left:auto;color:var(--ink-3);font-weight:400;font-size:11.5px}
+.sec-b{padding:12px 14px}
+.banner{border:1px solid var(--brand-dim);background:var(--brand-soft);border-radius:8px;padding:11px 12px;display:flex;gap:10px}
+.banner.warn{border-color:#6a541a;background:var(--warn-soft)}
+.banner.ok{border-color:#1d5c46;background:var(--ok-soft)}
+.banner.bad{border-color:#6d2a2a;background:var(--bad-soft)}
+.banner .ic{width:30px;height:30px;border-radius:7px;background:rgba(0,194,255,.12);color:var(--brand);display:flex;align-items:center;justify-content:center;flex:none;font-size:14px}
+.banner.warn .ic{background:rgba(242,184,74,.13);color:var(--warn)}
+.banner.ok .ic{background:rgba(61,220,151,.13);color:var(--ok)}
+.banner.bad .ic{background:rgba(255,107,107,.13);color:var(--bad)}
+.banner .t{font-size:12.5px;font-weight:600;margin:0}
+.banner .s{font-size:11.5px;color:var(--ink-3);margin:3px 0 0;line-height:1.45}
+.meter{height:8px;border-radius:999px;background:#232b33;position:relative;overflow:hidden;margin:7px 0 6px}
+.meter i{display:block;height:100%;background:var(--brand);border-radius:999px}
+.meter .seam{position:absolute;top:0;bottom:0;width:1px;background:rgba(232,237,241,.45)}
+.mrow{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-3)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.mute{border-color:var(--line);color:var(--ink-3);background:transparent}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.sm{padding:4px 9px;font-size:11.5px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.dead{color:var(--ink-3);border-color:var(--line);background:transparent}
+.rowline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.note{font-size:11.5px;color:var(--ink-3);margin-top:7px;line-height:1.45}
+.note.red{color:#ff9d9d}
+table.mx{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mx th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mx tr:last-child td{border-bottom:0}
+table.mx td.n{text-align:right;font-variant-numeric:tabular-nums}
+table.mx tr.sub td{background:#0f1419;color:var(--ink-3);font-size:11.5px}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sheet-h{padding:10px 13px;border-bottom:1px solid var(--line)}
+.sheet-h .t{font-weight:600;font-size:13px}
+.sheet-h .s{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.sheet-b{padding:12px 13px}
+.sheet-f{padding:9px 13px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px;justify-content:flex-end}
+.fieldrow{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.num{background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:5px 9px;font-size:12.5px;width:70px;text-align:center;font-variant-numeric:tabular-nums}
+.box{border:1px solid var(--line);background:#0f1419;border-radius:7px;padding:10px 12px;margin-top:11px}
+.box .h{font-size:12px;font-weight:600;margin:0 0 5px}
+.box p{font-size:11.5px;color:var(--ink-3);margin:4px 0;line-height:1.5;max-width:none}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tabs span{border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-size:11.5px;color:var(--ink-3)}
+.tabs span.on{border-color:var(--stroke);background:var(--panel-2);color:var(--ink)}
+.quotas{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.q{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:10px}
+.q .l{font-size:11px;color:var(--ink-3)}
+.q .v{font-size:16px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.q.hot{border-color:#6a541a}
+/* audit */
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:12px}
+table.audit th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);padding:8px 10px;border-bottom:1px solid var(--doc-rule);background:#eef3f6}
+table.audit td{padding:7px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td.s{text-align:center;width:54px;font-weight:600}
+table.audit tr.grp td{background:#eef3f6;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);font-weight:600}
+.y{color:#1b7f4d}.n{color:#b3261e}.h{color:#a06a00}
+.tot td{font-weight:700;background:#fbfdff}
+.copy{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:12px}
+.copy table{width:100%;border-collapse:collapse;font-size:13.5px}
+.copy th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);padding:8px 10px;border-bottom:1px solid var(--doc-rule);background:#eef3f6}
+.copy td{padding:7px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+.copy td.k{white-space:nowrap;color:var(--doc-ink-2);font-size:12.5px}
+.build{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:14px 16px;margin-top:12px}
+.build h4{margin:16px 0 6px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.build h4:first-child{margin-top:0}
+.build ol{margin:0;padding-left:20px}
+.build li{margin:8px 0}
+.build em{color:var(--doc-ink-2)}
+.verdict{background:#fff;border-left:3px solid var(--doc-brand);border-radius:0 6px 6px 0;padding:14px 18px;margin-top:12px}
+.verdict p{max-width:82ch}
+.deep{display:inline-block;background:#0b2b38;color:#bfe9ff;font-family:"JetBrains Mono",monospace;font-size:12.5px;padding:7px 11px;border-radius:5px;margin-top:6px}
+@media (max-width:1140px){.dir{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}.quotas{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.facts{grid-template-columns:1fr}.quotas{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 22 · Usage, credits &amp; concurrency · stop 5 diverge</p>
+<h1>Usage and concurrency directions</h1>
+<p><strong>JTBD.</strong> When my batch starts queueing and my first real invoice is about to land, I want to see where the minutes went and add capacity myself in the same sitting, so I can keep the calls moving and answer finance instead of filing a ticket and waiting.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Billing overview, the two money cards mounted by <code>billing-future-cards.tsx</code> :18–25, and the Usage tab at <code>billing/usage/page.tsx</code>. Nothing new in the nav.</div>
+  <div><b>Engine contract</b>No concurrency field to read or set. One error, <code>ConcurrencyLimitExceeded</code> on a 422. One published number: 20 peak concurrent users per App ID. Minutes are <code>stop_ts - start_ts</code>; <code>pipeline_id</code> is the only join back to a Studio agent.</div>
+  <div><b>What the sandbox has</b>A gauge whose denominator is invented (<code>campaign-data.ts</code> :1213) and a sheet whose price is invented (:1224). Four mounts of that sheet, four private counters, three of them passing <code>capHeadroomUsd={null}</code>.</div>
+  <div><b>Pricing</b>Flat $0.10 per agent-minute, the same on a customer key. Model choice cannot move the Agora line of the bill. Audio RTC bills separately at about $0.00099 per participant-minute.</div>
+</div>
+
+<div class="lock">
+<b>Partial lock.</b> Capacity SKUs and the CPS upsell were deliberately not built (Wave 2). No direction below may charge a card, and the one that does is refused for that reason. <b>Nobody knows what Archer is.</b> It appears three times in this repo, all of them the same roadmap row, and nowhere in <code>ng-console</code> or on docs.agora.io. 868khqb6d has no surface in any direction here, and saying so is the deliverable for it.
+</div>
+
+<p>Five directions. Same JTBD, five places to put the decision, each mocked inside the real card and row grammar. Copy is proposed, not approved.</p>
+
+<h2>A and B</h2>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Wire the sheet up and sell the lines</h3><div class="who">The smallest diff. Lift the four private counters into one store, make <code>capHeadroomUsd</code> real in all four doors, keep the $8 price and the 10 included lines, fix the Cost column. Ship.</div></header>
+    <div class="mock">
+      <p class="cap">Billing › Concurrent lines</p>
+      <div class="sec">
+        <div class="sec-h">Concurrent lines <span class="chev">10 lines</span></div>
+        <div class="sec-b">
+          <div class="banner"><div class="ic">&#9679;</div><div>
+            <p class="t">All 10 lines are in use. New batch calls queue. Nothing drops or fails.</p>
+            <p class="s">+5 lines ≈ your queue clears ~12 min sooner · Estimate · 186 queued calls × ~2 min ÷ lines.</p>
+            <div class="rowline"><span class="btn primary sm">Add lines</span><span class="btn sm">Keep queuing</span></div>
+          </div></div>
+          <p class="cap" style="margin-top:12px">10 of 10 lines in use right now</p>
+          <div class="meter"><i style="width:100%"></i></div>
+          <div class="mrow"><span>10 included free</span><span>add more at $8/line/mo</span></div>
+        </div>
+      </div>
+      <div class="sheet" style="margin-top:12px">
+        <div class="sheet-h"><div class="t">Concurrent lines</div><div class="s">10 today · 10 included free. Changes apply instantly.</div></div>
+        <div class="sheet-b">
+          <div class="fieldrow"><span class="btn primary sm">+5</span><span class="btn sm">+10</span><span class="num">5</span></div>
+          <p class="note">5 × $8/mo = $40/mo · $28.39 prorated for the 22 days left this cycle · then $40/mo total <span class="chip warn">wireframe pricing</span></p>
+        </div>
+        <div class="sheet-f"><span class="btn sm">Cancel</span><span class="btn primary sm">Add 5 lines · $28.39 today</span></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> it is the only direction that answers rainy 24 outright. The product's current answer to "I need more capacity" is the sentence "For a higher quota, please contact support" (<code>ng-console</code> i18n :4207–4209), and A is the sentence 868ka690p exists to delete.</li>
+        <li class="pro"><b>For:</b> nothing is drawn that does not already exist. <code>AddLinesSheet</code>, <code>StateBanner</code> and the seam in the gauge all ship today, the proration already derives from <code>PLAN_USAGE.periodDays*</code>, and the differentiator at :340–349 starts firing the moment the three <code>null</code>s are removed. Four files, one afternoon.</li>
+        <li class="con"><b>Against:</b> both numbers on screen are invented and the code says so in its own comments. <code>included: 10</code> at :1213 admits "no public ceiling is documented"; <code>pricePerLineMo: 8</code> at :1224 admits "wireframe placeholder (competitive w/ Retell's $8)". The real ceiling is a server-granted flag no surface reads, and 10 is not it.</li>
+        <li class="con"><b>Against:</b> Engine has no settable concurrency limit, so the commit button writes to nothing. The button would say "$28.39 today" over an entitlement that cannot move.</li>
+        <li class="cost"><b>Cost:</b> low to build, and the highest of the five to be wrong about.</li>
+      </ul>
+    </div>
+    <div class="refuse"><b>Refused.</b> Capacity SKUs were deliberately not built, and a prototype that takes a card teaches the reviewer a price finance has never set. A reviewer who approves this screen has approved $8 a line without being asked. The honest half of A, one store and a live headroom number, survives inside C.</div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · Print the granted ceiling and stop</h3><div class="who">Read the number the server already grants, show how close the account is, name who set it, and end where the live Console ends: contact support.</div></header>
+    <div class="mock">
+      <p class="cap">Billing › Concurrent lines</p>
+      <div class="sec">
+        <div class="sec-h">Concurrent lines <span class="chev">15 lines</span></div>
+        <div class="sec-b">
+          <p class="cap">15 of 15 lines in use right now</p>
+          <div class="meter"><i style="width:100%"></i></div>
+          <div class="mrow"><span>15 granted</span><span>186 calls queued</span></div>
+          <p class="note">15 lines are granted to this project. Agora sets that number. For more, contact support.</p>
+          <div class="rowline"><span class="btn sm">Contact support</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> every number on screen is true, and it is the first time any surface in either codebase prints the agent ceiling at all. Four of five competitors show theirs; we show none.</li>
+        <li class="pro"><b>For:</b> it cannot drift, because it reads the same flag the campaign form already clamps to, and it makes the wizard's "Max concurrent" default of 10 and the Console's clamp of 15 stop being two answers to one question.</li>
+        <li class="con"><b>Against:</b> it is the ticket, redrawn. The tracker's JTBD is "buy more capacity themselves" and B answers the first half of that sentence and deletes the second.</li>
+        <li class="con"><b>Against:</b> removing the sheet removes the cap-versus-capacity warning, which learning 4 identifies as the only idea in this feature no competitor ships. Vapi, Retell, ElevenLabs and LiveKit all ship a spend control and a capacity lever, and not one connects them.</li>
+        <li class="cost"><b>Cost:</b> lowest of the five. Two numbers and a sentence.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>C, the spine</h2>
+
+<div class="dir one">
+  <div class="card pick">
+    <header><h3>C · One ceiling, one door: see it, ask for it, give it back</h3><div class="who">The gauge reads the granted number. The sheet stops selling and starts asking, and it carries the sentence the whole feature turns on: lines change how fast you spend, not how much. One store behind all four mounts, so the number cannot disagree with itself.</div></header>
+    <div class="mock wide">
+      <div class="sec">
+        <div class="sec-h">Concurrent lines <span class="chev">15 lines</span></div>
+        <div class="sec-b">
+          <div class="banner"><div class="ic">&#9679;</div><div>
+            <p class="t">All 15 lines are in use. New batch calls queue. Nothing drops or fails.</p>
+            <p class="s">186 queued calls clear in about 25 minutes at 15 lines: 186 calls × about 2 minutes ÷ 15 lines.</p>
+            <div class="rowline"><span class="btn primary sm">Request more lines</span><span class="btn sm">Keep queuing</span></div>
+          </div></div>
+          <p class="cap" style="margin-top:12px">15 of 15 lines in use right now</p>
+          <div class="meter"><i style="width:100%"></i><span class="seam" style="left:75%"></span></div>
+          <div class="mrow"><span>15 granted</span><span>186 calls queued</span></div>
+          <p class="note">Lines are granted with your project. Your spend cap governs per-minute usage.</p>
+        </div>
+      </div>
+
+      <div class="sheet" style="margin-top:14px">
+        <div class="sheet-h"><div class="t">Concurrent lines</div><div class="s">15 granted · 15 in use · 186 queued</div></div>
+        <div class="sheet-b">
+          <p class="cap">Lines you want</p>
+          <div class="fieldrow"><span class="btn primary sm">20</span><span class="btn sm">Back to 15</span><span class="num">20</span></div>
+          <p class="note">20 lines is the published ceiling for one App ID. Above 20, Agora sets the number.</p>
+
+          <div class="box">
+            <p class="h">Lines and your budget</p>
+            <p>Lines change how fast you spend, not how much. Clearing 186 queued calls takes about 372 agent minutes either way: $37.20 at $0.10 a minute.</p>
+            <p>You have 150 free minutes left, so calls pause about 10 minutes in at 15 lines, or about 8 minutes in at 20. Add a card to keep going at $0.10 a minute under a cap you set.</p>
+            <div class="rowline"><span class="btn sm">Add a card</span></div>
+          </div>
+          <p class="note">Requires Engine · Sep</p>
+        </div>
+        <div class="sheet-f"><span class="btn sm">Cancel</span><span class="btn primary sm">Request 20 lines</span></div>
+      </div>
+
+      <div class="banner ok" style="margin-top:12px"><div class="ic">&#10003;</div><div>
+        <p class="t">Requested 20 lines on Sep 17. Agora replies by email.</p>
+        <p class="s">Nothing has changed on your project yet. Calls keep queuing at 15 lines.</p>
+      </div></div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> it is the only direction where the four mounts read one number. <code>concurrency-card.tsx</code> :206, <code>monitor/live/page.tsx</code> :208, <code>batch-detail.tsx</code> :238 and <code>step-call-settings.tsx</code> :478 each hold a private <code>purchased</code> counter today, and the batch door throws its commit away with <code>onCommit={() =&gt; setOpen(false)}</code>. One store kills rainy 22 and defect 15 in the same change.</li>
+        <li class="pro"><b>For:</b> the differentiator fires everywhere, and it gets better. The shipped warning compares cap headroom against minutes <em>saved</em>. The true comparison is headroom against the time to clear at the new line count, and the truest line of all is that the queue costs 372 agent minutes at any line count. That sentence is worth more than the warning it replaces, and no vendor in the teardown can say it.</li>
+        <li class="pro"><b>For:</b> the budget line switches unit the way X1's meter already does, minutes while the free tier lasts and dollars of cap once paid. That is a locked rule reused, not a new idea, and it means the warning fires in the shipped fixture where <code>cardOnFile</code> is false, instead of needing a card to exist first.</li>
+        <li class="pro"><b>For:</b> every refusal has a number attached. Rainy 10 is "it refused the eleventh with no number attached", and the published 20 per App ID is a real number to quote. Rainy 9 is the downgrade, and the sheet clamps to the lines carrying calls right now and says why.</li>
+        <li class="con"><b>Against:</b> a request is still a ticket. It has a state, a number and a home on the surface that caused it, which is better than a support link in a different tool, but it is not self-serve and the audit scores it as a partial on rainy 24.</li>
+        <li class="con"><b>Against:</b> renaming <code>purchased</code> to <code>granted</code> touches copy on four surfaces, and if the owner answers question 2 with "sell it" the word goes back.</li>
+        <li class="cost"><b>Cost:</b> medium. One new lib module, the sheet rewritten in place, four mounts repointed.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>D and E</h2>
+
+<div class="dir">
+
+  <!-- D -->
+  <div class="card pick">
+    <header><h3>D · Give usage a grain: agent, model and mode, in minutes</h3><div class="who">The perspective toggle that already sits on the Usage page becomes the grain control. Agents perspective swaps the service table for a per-agent breakdown, expandable to the three slots, with a mode column and no money beside a model name.</div></header>
+    <div class="mock">
+      <p class="cap">Billing › Usage</p>
+      <div class="tabs"><span>All</span><span class="on">Agents</span><span>RTE</span></div>
+      <div class="sec">
+        <div class="sec-h">By agent and model <span class="chev">150 min this period</span></div>
+        <table class="mx">
+          <tr><th>Agent</th><th>Mode</th><th class="n">Minutes</th><th class="n">Share</th></tr>
+          <tr><td>Collections Outreach</td><td><span class="chip mute">Mixed</span></td><td class="n">89</td><td class="n">59.3%</td></tr>
+          <tr class="sub"><td colspan="4">Deepgram nova-3 · Agora managed &nbsp;·&nbsp; OpenAI gpt-4o-mini · your key &nbsp;·&nbsp; MiniMax speech-2.6-turbo · Agora managed</td></tr>
+          <tr><td>Support Bot v2</td><td><span class="chip on">Agora managed</span></td><td class="n">44</td><td class="n">29.3%</td></tr>
+          <tr><td>Aria</td><td><span class="chip on">Agora managed</span></td><td class="n">17</td><td class="n">11.4%</td></tr>
+        </table>
+        <div class="sec-b" style="border-top:1px solid var(--line)">
+          <p class="note">Every model in a call carries the same minutes. Agora charges $0.10 a minute whichever model runs.</p>
+          <p class="note">Your own key: that vendor bills you directly, and Agora never sees the invoice.</p>
+          <p class="note">This estimates charges so far this period. The bill is generated at the start of next month.</p>
+        </div>
+      </div>
+      <p class="cap" style="margin-top:12px">Quotas</p>
+      <div class="quotas">
+        <div class="q hot"><div class="l">Agent concurrent lines</div><div class="v">15 / 15</div></div>
+        <div class="q"><div class="l">Conversational AI free minutes</div><div class="v">150 / 300</div></div>
+        <div class="q"><div class="l">RTC concurrent channels</div><div class="v">12 / 50</div></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> it deletes the <code>"$0.00"</code> literal on all six rows of <code>TOP_SERVICES</code> without putting a dollar beside a model name. Learning 2 is the constraint: even OpenAI, where the model genuinely moves the bill, keeps usage on <code>model</code> and money on <code>line_item</code> and warns they do not reconcile.</li>
+        <li class="pro"><b>For:</b> no new control. The grain is the perspective toggle at :242–250, which already exists and already means exactly this.</li>
+        <li class="pro"><b>For:</b> the mode column is the honest home for the managed question, and drawing it forces the <code>MANAGED_PROVIDERS</code> fix. That list offers Agora-managed Anthropic and Agora-managed ElevenLabs, neither of which Agora resells, and refuses managed MiniMax, which it does. Ship the column without the fix and the lie appears on a second surface.</li>
+        <li class="con"><b>Against:</b> alone it does nothing for concurrency, and the ceiling meter it adds has nowhere to lead without C.</li>
+        <li class="con"><b>Against:</b> the per-agent minutes are not metered by anything today. <code>convoai-agent-call-minutes</code> in the live catalog carries <code>metrics: []</code>, and the agent API has no usage object at all.</li>
+        <li class="cost"><b>Cost:</b> medium. One page, one fixture, one three-line catalog correction.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · Call it credits</h3><div class="who">The feature's own name, taken literally. One wallet on Billing that folds the balance, the free minutes and any capacity fee into a single number that counts down.</div></header>
+    <div class="mock">
+      <p class="cap">Billing › Credits</p>
+      <div class="sec">
+        <div class="sec-h">Credits <span class="chev">$1,286 available</span></div>
+        <div class="sec-b">
+          <div class="meter"><i style="width:62%"></i></div>
+          <div class="mrow"><span>300 free minutes converted</span><span>$12 reserved</span></div>
+          <div class="rowline"><span class="btn primary sm">Buy credits</span><span class="btn sm">Auto top-up</span></div>
+          <p class="note red">No object on this screen exists in either codebase.</p>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> it is the one direction that makes the word on the tracker row mean something, and a countdown wallet is what three of the five competitors ship.</li>
+        <li class="pro"><b>For:</b> it would answer rainy 25 by construction, because there would be exactly one money noun instead of three.</li>
+        <li class="con"><b>Against:</b> there is no credits object. The real nouns are <code>accountBalance - reservedBalance</code> and two free-tier entitlements, and billing is postpaid, which is the opposite of a prepaid wallet. Converting free minutes into dollars invents an exchange rate.</li>
+        <li class="con"><b>Against:</b> answering "I cannot tell whether credits and balance are the same money" by inventing the credits is not answering it. The answer is to stop saying credits.</li>
+        <li class="cost"><b>Cost:</b> high, and none of it is design work. It is a finance decision wearing a card.</li>
+      </ul>
+    </div>
+    <div class="refuse"><b>Refused.</b> Honesty floor. The only place "credits" is a product noun today belongs to RTC pre-paid, a different product on the same page.</div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<p>Every direction against the 25 rainy scenarios in <code>01-jtbd.md</code> and the 5 learnings in <code>03-learnings.md</code>, by number. <span class="y">Y</span> answers it on screen. <span class="h">P</span> answers part of it, or answers it only by naming what is missing. <span class="n">N</span> leaves it where the Before found it.</p>
+
+<table class="audit">
+<tr><th>#</th><th>Rainy scenario</th><th class="s">A</th><th class="s">B</th><th class="s">C</th><th class="s">D</th><th class="s">E</th></tr>
+<tr><td>1</td><td>Nothing has run yet</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>2</td><td>The money column is zero and I know it is not</td><td class="s h">P</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s h">P</td></tr>
+<tr><td>3</td><td>The figure on the page is not the bill</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>4</td><td>The minutes have not landed yet</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>5</td><td>My free minutes went and I never made a call</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>6</td><td>The ceiling is invisible</td><td class="s h">P</td><td class="s y">Y</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>7</td><td>The wall arrives as an error code</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>8</td><td>I bought lines and the cap stopped everything anyway</td><td class="s h">P</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>9</td><td>I cannot give the lines back</td><td class="s h">P</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>10</td><td>There is a ceiling on the ceiling</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>11</td><td>I can see the meter and I cannot buy</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>12</td><td>The card is not mine to type in</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>13</td><td>The account cannot pay</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>14</td><td>My entity is not the one checkout knows</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>15</td><td>The model I want is not sold managed</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>16</td><td>The builder offered me a managed key Agora does not sell</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>17</td><td>Half the bill is not Agora's to show</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>18</td><td>A model name beside a dollar reads as a price</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>19</td><td>The failover changed who was paying mid-call</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>20</td><td>The vendor failed and I paid for the silence</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>21</td><td>The caller hung up and the meter kept running</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>22</td><td>Two of us changed it at once</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>23</td><td>The plan already promised me the capacity</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>24</td><td>The only answer left is a ticket</td><td class="s y">Y</td><td class="s n">N</td><td class="s h">P</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>25</td><td>The word on the screen is not a thing I own</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr class="grp"><td colspan="7">Learnings</td></tr>
+<tr><td>L1</td><td>The ceiling is a readable object, and Retell publishes the field list</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>L2</td><td>Model-level usage is a minutes column, never a money column</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>L3</td><td>Concurrency belongs inside the usage breakdown</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>L4</td><td>Cap versus capacity is the only idea no competitor ships</td><td class="s h">P</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>L5</td><td>The wall stays designed behaviour, not a purchase prompt</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr class="tot"><td></td><td>Answered fully</td><td class="s">1</td><td class="s">4</td><td class="s">10</td><td class="s">12</td><td class="s">0</td></tr>
+</table>
+
+<h3 class="sec">What the audit says out loud</h3>
+<p><strong>A fails.</strong> One row out of thirty. It happens to be the row the tracker's JTBD sentence is written on, and it is the row we are not allowed to answer yet. Everything else A touches it touches by accident, because fixing three <code>null</code>s is not the same as fixing the surface they were passed to. A direction that only answers the happy path fails the audit, and A answers the happy path by charging for it.</p>
+<p><strong>E fails, and it fails on the honesty floor rather than on the count.</strong> A zero column usually means a weak direction. Here it means the direction is a finance proposal with a card drawn around it.</p>
+<p><strong>C and D together answer 21 of 30 rows fully and 6 in part, and they do not overlap once.</strong> That is not a coincidence and it is not two features: C is the acting half of the JTBD and D is the understanding half, and the JTBD's own happy path ends at step 8, on D's screen, not at step 7 on C's.</p>
+<p><strong>Rainy 14, 20 and 21 have no Y in any column, and should not have one.</strong> 14 is a checkout processor, and no direction that survives has a checkout. 20 is the vendor failing mid-call: the audio task bills per minute with no exclusion for a failed component, so drawing a credit would invent a refund we do not give. 21 is the caller hanging up while the meter runs: minutes are <code>stop_ts - start_ts</code> and nothing in the contract ties the agent's stop to the caller's, so the only honest surface for it is a bug report against Engine, not a control.</p>
+<p><strong>Rainy 24 is the one C cannot close.</strong> A request has a state, a number and a home on the surface that caused it, which beats a support link in a different tool, but it is still a human on the other end. It closes when owner question 2 is answered, and not before.</p>
+
+<h2>Verdict</h2>
+<div class="verdict">
+<p><strong>C, with D as the second half rather than a graft.</strong> One capacity object read by every mount, and a usage page whose finest grain is an agent and a model, in minutes.</p>
+<p>The reason is one sentence that the shipped sheet almost says and no competitor says at all: <strong>lines change how fast you spend, not how much.</strong> Clearing 186 queued calls costs about 372 agent minutes at 15 lines and about 372 agent minutes at 20. The shipped warning compares cap headroom against minutes saved, which is the weaker half of that idea; the strong half is that the money is fixed and only the clock moves, so the control the account actually needs at the wall is often the cap, not the lines. Once that is the sentence, the purchase path stops being the point of the feature, which is exactly the position the lock leaves us in.</p>
+<p><strong>What I am not doing, and why.</strong> Not selling lines. The price is a placeholder the code admits to and the ceiling is a flag Engine cannot set, so the sheet asks instead of charging, and the commit says Agora replies by email rather than naming an amount. Not drawing credits. There is no credits object in either codebase or on docs.agora.io, the account has a balance and two entitlements, and the fix for "I cannot tell whether credits and balance are the same money" is to stop saying credits. Not putting money beside a model. Agora charges $0.10 a minute whichever model runs, a Cost tab built on vendor list prices was deleted after audit on 2026-05-26, and the mode column plus a minutes column is the version that is both useful and true. <strong>Not building Archer.</strong> It appears three times in this repo, all of them the same roadmap row, and nowhere in <code>ng-console</code> or on docs.agora.io. 868khqb6d is a P0 due this month and it has no surface here, on purpose, until somebody says what it is.</p>
+<p><strong>The open question, not designable without an answer.</strong> Is capacity sold, requested, or sales-assisted? The prototype ships the request, because it is the only one of the three that can be built without a price finance has set and it is the only one that makes the ceiling visible, which nothing does today. If the answer is "sell it", the sheet's footer gains a prorated amount and <code>lines_added</code> starts firing, and every other line on the screen stays as drawn. If the answer is "sales-assisted", the request becomes a mailto and the sheet loses its number input. The screen is built so that either answer is a footer change.</p>
+</div>
+
+<h2>Prototype plan</h2>
+<p>Additive on <code>design/sandbox</code>, inside <code>studio_x_2</code>. Two new files, ten touched. No backend: the store is localStorage under an <code>sx:</code> key beside the existing ones, and every figure derives from <code>PLAN_USAGE</code> and <code>CONCURRENCY</code> the way X1 and A6 already require.</p>
+
+<div class="build">
+<h4>The deep link the reviewer opens</h4>
+<span class="deep">https://ai-studio-console-redesign.vercel.app/billing?focus=concurrent-lines</span>
+<p style="margin-top:8px;font-size:13.5px;color:var(--doc-ink-2)">The seed puts the account at the wall with 186 calls queued, so the link lands on the wall banner with the spend card directly above it: rainy 6 and rainy 8 in one fold, and the first frame of the JTBD. <code>?focus=</code> resolves to <code>[data-design-focus="concurrent-lines"]</code> on the <code>ConcurrencyCard</code> root, scrolls it to centre and pulses the ring.</p>
+
+<h4>Create</h4>
+<ol>
+<li><code>studio_x_2/lib/billing-state.ts</code>. The one store behind both money cards and all four capacity mounts. Exports <code>CapacityState</code>, <code>MoneyOverlay</code>, <code>readCapacity</code>, <code>writeCapacity</code>, <code>readMoney</code>, <code>writeMoney</code>, <code>effectivePlanUsage</code>, <code>capacityBudget</code>, <code>queueMath</code>, <code>requestCapacity</code>, <code>clearCapacityRequest</code>, <code>PUBLISHED_PCU_CEILING = 20</code>.
+<br><em>Why not extend the sibling:</em> the sibling is <code>CONCURRENCY</code> and <code>concurrencyStats()</code> in <code>lib/campaign-data.ts</code> :1226–1243, a fixture and a pure function with no store. This feature's whole defect is that there is no shared write path: four mounts hold four private counters and the batch door discards its commit. A store with localStorage, a pending-request state machine and the queue and budget math is domain logic, and the sandbox idiom is one lib module per domain (<code>turn-taking.ts</code>, <code>call-rules.ts</code>, <code>backup-providers.ts</code>). <code>campaign-data.ts</code> is also the one file <code>copy-lint.mjs</code> skips, so user-facing sentences must not be born there. <code>concurrencyStats()</code>, <code>freeMinutesStats()</code> and <code>spendStats()</code> are imported, never reimplemented.</li>
+<li><code>studio_x_2/components/design-focus.tsx</code>. A client component rendering nothing: reads <code>?focus=</code>, finds <code>[data-design-focus]</code>, scrolls it to centre and pulses a ring, with the same retry loop and the same 2.6s outline as the wizard.
+<br><em>Why not extend the sibling:</em> the sibling is <code>focusOn</code> inside <code>components/wizard/agent-wizard.tsx</code> :519–566. It is not exported, and it is a closure over wizard state: it expands a numbered step and clicks a Configure door before it looks for the anchor. <code>/billing</code> is not the wizard. Six <code>data-design-focus</code> anchors outside the wizard are dead today (<code>calls/page.tsx</code> :349, <code>sip-ladder.tsx</code> :120, <code>session-detail.tsx</code> :180, <code>sip-verdict.tsx</code> :47, <code>call-detail-sheet.tsx</code> :281 and :444), and this mount makes all of them live.</li>
+</ol>
+
+<h4>Touch</h4>
+<ol>
+<li><code>lib/campaign-data.ts</code> :1212–1232, <code>ConcurrencyState</code> and <code>CONCURRENCY</code>. Fields become <code>base</code>, <code>granted</code>, <code>inUse</code>, <code>queued</code>, <code>source</code>. <code>pricePerLineMo</code> is deleted. Seed <code>base: 15</code> (the live Console's own default when the flag is absent, <code>campaign-call-settings-limits.ts</code> :6), <code>granted: 0</code>, <code>inUse: 15</code>, <code>queued: 186</code> (the 248-contact campaign <code>cmp_q2_west</code> mid-run), <code>source: "flag_default"</code>. Both invented-value comments are replaced by the flag path in <code>ng-console/src/lib/agents/studio-feature-access.ts</code> :23–27 and the published 20 PCU per App ID.</li>
+<li><code>lib/campaign-data.ts</code> :1234–1243, <code>concurrencyStats()</code>. <code>totalLines</code> becomes <code>base + granted</code>, <code>monthlyLineFeeUsd</code> is deleted with the price, and the function gains <code>minutesToClear(limit)</code> and <code>agentMinutesToClear</code> so the queue math has one home. Signature keeps the override parameter, so <code>monitor/live</code> can pass its live call count.</li>
+<li><code>lib/campaign-data.ts</code> :1257, <code>SpendState</code>. Add <code>"exhausted_no_card"</code> and return it from <code>spendStats()</code> :1273–1280 when free minutes are gone and no card is on file. That state is the one the product spends most of its first month in and it currently reports as <code>"free"</code>, which <code>concurrency-card.tsx</code> :56 and <code>batch-detail.tsx</code> :54 both inherit.</li>
+<li><code>lib/campaign-data.ts</code> :1834–1839, <code>MANAGED_PROVIDERS</code>. Drop Anthropic and ElevenLabs, add MiniMax and ARES, against the published managed catalog. Forced by the mode column: without it the new breakdown prints "Agora managed" beside a vendor Agora does not resell. :1843 <code>keyHint: ", "</code> on the ElevenLabs row becomes a real hint, and the same two stray characters at <code>usage-spend-card.tsx</code> :225 and :378 go with it.</li>
+<li><code>components/concurrency-card.tsx</code> :49–217, <code>ConcurrencyCard</code>. Root gains <code>data-design-focus="concurrent-lines"</code>. Local <code>purchased</code> state is replaced by <code>readCapacity()</code>. Gauge labels become granted and queued; the seam marks base against granted. Footer sentence becomes the lines-and-cap line without the fee claim. The wall banner keeps its locked sentence, gains the clear-time estimate with its inputs, and its second button stays "Keep queuing".</li>
+<li><code>components/concurrency-card.tsx</code> :221–366, <code>AddLinesSheet</code>. Renamed <code>CapacitySheet</code> and rewritten in place: the input is a target line count, not a quantity to buy; quick picks are the published ceiling and "Back to {base}"; the clamp floor is <code>inUse</code> with the reason stated; the price and proration block is deleted; the "Lines and your spend cap" box at :334–350 becomes "Lines and your budget", carrying <code>queueMath()</code> and <code>capacityBudget()</code> so it fires with or without a cap; the footer carries "Requires Engine · Sep" and commits a request.</li>
+<li><code>app/(dashboard)/monitor/live/page.tsx</code> :55–56 and :208–215. <code>concurrencyStats({ ...CONCURRENCY, purchased })</code> becomes the store read with <code>inUse: calls.length</code>; the sheet import becomes <code>CapacitySheet</code>; <code>capHeadroomUsd={null}</code> at :214 is deleted because the sheet now derives the budget itself.</li>
+<li><code>components/batch-detail.tsx</code> :228–248, <code>AddLinesSheetLauncher</code>. Reads the store instead of <code>purchased={0} queued={0} totalLines={10}</code>, passes the batch's own queue depth, and <code>onCommit={() =&gt; setOpen(false)}</code> becomes the store write. Button label becomes "Request more lines". :54–55 <code>capHeadroom</code> is deleted; the sheet owns it.</li>
+<li><code>components/wizard/step-call-settings.tsx</code> :456–489, <code>CampaignCapacityNote</code>. Reads the store; the note names the granted count; the button becomes "Request more lines"; :484 <code>capHeadroomUsd={null}</code> goes. :229–237 the "Max concurrent" input's default becomes the granted limit instead of the literal 10, so the wizard and the Console stop giving two answers to one question.</li>
+<li><code>components/usage-spend-card.tsx</code> :63–72. The five pieces of local overlay state become <code>readMoney()</code> and <code>writeMoney()</code>, so the concurrency card sees a card added here. :93–95 the local <code>exhaustedNoCard</code> boolean is deleted in favour of the enum. :222–265 the two banners fire <code>spend_alert_fired</code> and <code>spend_cap_hit</code>, which are declared at <code>analytics.ts</code> :74–76 and fired nowhere, which currently voids X1's locked counter-metric.</li>
+<li><code>app/(dashboard)/billing/usage/page.tsx</code>. :190–197 <code>TOP_SERVICES</code> loses the <code>"$0.00"</code> Cost column and gains the estimate disclosure, and its Conversational AI row's minutes derive from <code>PLAN_USAGE</code> rather than the standalone 18,420, so the Usage page and the spend card stop describing two different accounts. :39–41 the Agent Minutes series ends on the same number. :242–250 the perspective toggle becomes the grain control and fires <code>usage_grain_changed</code>; under Agents the second tab renders the per-agent breakdown built from <code>AGENTS</code>, <code>stackCost()</code> and <code>slotMode()</code>, summing to that same figure. :175–188 the quota list gains an "Agent concurrent lines" meter derived from the store and linking to <code>/billing?focus=concurrent-lines</code>, one door, no second sheet mount. :223–224 <code>hasUsage</code> reads agent minutes rather than free minutes burned. :54 <code>MONTHS</code> ends at the current month. :127 and :142 the runtime <code>replace("bg-", "stroke-")</code> classes become a static map so the chart draws its lines. :385–400 the card promising 50× minutes, unlimited agents and priority routing is replaced by the true grant. :263–271 Export keeps its toast until the Console's CSV is ported.</li>
+<li><code>app/(dashboard)/billing/plans/page.tsx</code> :47–49. Delete the Pro tier. A 10,000-minute allowance sold for $99 is $1,000 of minutes at the published rate, and it is the reason rainy 23 exists. Free becomes 300 minutes a month then $0.10 a minute; Enterprise stays. The RTC pre-paid rows at :53–54 are untouched: they belong to a different product.</li>
+<li><code>app/(dashboard)/layout.tsx</code> :32. Mount <code>&lt;DesignFocus /&gt;</code> inside the content wrapper.</li>
+<li><code>lib/analytics.ts</code> :80–82. Add <code>capacity_change_requested</code>, <code>capacity_limit_changed</code>, <code>capacity_request_blocked</code> and <code>usage_grain_changed</code> with typed payloads at :208–219. <code>concurrency_wall_viewed</code> gains <code>source</code>, because the wall has four mounts and we cannot tell them apart. <code>lines_added</code> stays declared and unfired with one comment naming owner question 2.</li>
+</ol>
+
+<h4>Requires Engine, each one named on screen</h4>
+<ol>
+<li><strong>A settable concurrency limit.</strong> The contract exposes no field to read or set, only <code>ConcurrencyLimitExceeded</code> on a 422 alongside <code>ResourceQuotaLimitExceeded</code> and <code>AccountSuspended</code>. On screen: the sheet's footer caption and the commit that promises an email, not a change.</li>
+<li><strong>A readable ceiling.</strong> The six fields to file against Engine are Retell's, verbatim: <code>current_concurrency</code>, <code>base_concurrency</code>, <code>purchased_concurrency</code>, <code>concurrency_limit</code>, <code>concurrency_purchase_limit</code>, <code>remaining_purchase_limit</code>. Until they exist the gauge reads the Console's own feature flag. On screen: "Agora sets that number."</li>
+<li><strong>Minutes attributed per agent and per model.</strong> There is no usage object in the agent API; minutes are <code>stop_ts - start_ts</code> and <code>pipeline_id</code> is the only join back to a Studio agent. The live catalog's <code>convoai-agent-call-minutes</code> row carries <code>metrics: []</code>. On screen: the breakdown's estimate disclosure.</li>
+<li><strong>A capacity price and a purchase path.</strong> Deliberately not built, and no per-line price exists that finance has set. On screen: the request path, which names no amount.</li>
+<li><strong>Multimodal models on a managed key.</strong> Verbatim from the docs: no MLLM vendor-model is available under an Agora Managed Key, and the Console enforces it in one line. On screen: the mode column's MLLM state.</li>
+<li><strong>Managed-mode billing.</strong> The PRD's own blocking question: postpaid or a new SKU. It decides whether managed and BYO produce different invoice lines. On screen: the mode column carries no money at all, which is the only version that survives either answer.</li>
+<li><strong>Archer.</strong> Not an Engine gap, a definition gap. Nothing is drawn for 868khqb6d, and the build must not invent a surface for it.</li>
+</ol>
+</div>
+
+<h2>Copy</h2>
+<div class="copy">
+<table>
+<tr><th>Where</th><th>Text</th></tr>
+<tr><td class="k">Card · wall banner</td><td>All 15 lines are in use. New batch calls queue. Nothing drops or fails.</td></tr>
+<tr><td class="k">Card · wall estimate</td><td>186 queued calls clear in about 25 minutes at 15 lines: 186 calls × about 2 minutes ÷ 15 lines.</td></tr>
+<tr><td class="k">Card · primary</td><td>Request more lines</td></tr>
+<tr><td class="k">Card · decline</td><td>Keep queuing</td></tr>
+<tr><td class="k">Card · declined</td><td>Calls dial as lines free up.</td></tr>
+<tr><td class="k">Card · gauge</td><td>15 of 15 lines in use right now</td></tr>
+<tr><td class="k">Card · gauge feet</td><td>15 granted · 186 calls queued</td></tr>
+<tr><td class="k">Card · footer</td><td>Lines are granted with your project. Your spend cap governs per-minute usage.</td></tr>
+<tr><td class="k">Card · ceiling</td><td>15 lines are granted to this project. Agora sets that number.</td></tr>
+<tr><td class="k">Sheet · title</td><td>Concurrent lines</td></tr>
+<tr><td class="k">Sheet · summary</td><td>15 granted · 15 in use · 186 queued</td></tr>
+<tr><td class="k">Sheet · field</td><td>Lines you want</td></tr>
+<tr><td class="k">Sheet · ceiling</td><td>20 lines is the published ceiling for one App ID. Above 20, Agora sets the number.</td></tr>
+<tr><td class="k">Sheet · floor</td><td>You cannot go below the 15 lines carrying calls right now.</td></tr>
+<tr><td class="k">Sheet · budget title</td><td>Lines and your budget</td></tr>
+<tr><td class="k">Sheet · the sentence</td><td>Lines change how fast you spend, not how much. Clearing 186 queued calls takes about 372 agent minutes either way: $37.20 at $0.10 a minute.</td></tr>
+<tr><td class="k">Sheet · budget, free tier</td><td>You have 150 free minutes left, so calls pause about 10 minutes in at 15 lines, or about 8 minutes in at 20. Add a card to keep going at $0.10 a minute under a cap you set.</td></tr>
+<tr><td class="k">Sheet · budget, under a cap</td><td>Your $50 cap has $37.20 of this queue to cover. At 20 lines it lasts about 25 minutes and the queue needs about 19.</td></tr>
+<tr><td class="k">Sheet · budget, cap bites first</td><td>Your cap pauses new calls about 6 minutes in, and the queue needs about 19 minutes at 20 lines. Raise the cap or let the queue run.</td></tr>
+<tr><td class="k">Sheet · engine caption</td><td>Requires Engine · Sep</td></tr>
+<tr><td class="k">Sheet · commit</td><td>Request 20 lines</td></tr>
+<tr><td class="k">Card · requested</td><td>Requested 20 lines on Sep 17. Agora replies by email.</td></tr>
+<tr><td class="k">Card · requested, second line</td><td>Nothing has changed on your project yet. Calls keep queuing at 15 lines.</td></tr>
+<tr><td class="k">Usage · breakdown title</td><td>By agent and model</td></tr>
+<tr><td class="k">Usage · mode values</td><td>Agora managed · Your keys · Mixed</td></tr>
+<tr><td class="k">Usage · model note</td><td>Every model in a call carries the same minutes. Agora charges $0.10 a minute whichever model runs.</td></tr>
+<tr><td class="k">Usage · BYO note</td><td>Your own key: that vendor bills you directly, and Agora never sees the invoice.</td></tr>
+<tr><td class="k">Usage · estimate note</td><td>This estimates charges so far this period. The bill is generated at the start of next month.</td></tr>
+<tr><td class="k">Usage · MLLM state</td><td>No multimodal model is sold on an Agora managed key yet.</td></tr>
+<tr><td class="k">Usage · quota meter</td><td>Agent concurrent lines</td></tr>
+<tr><td class="k">Usage · grant row</td><td>15 lines and 300 free minutes a month come with this project. Ask Agora to change either one.</td></tr>
+<tr><td class="k">Usage · grant row button</td><td>View concurrent lines</td></tr>
+<tr><td class="k">Wizard · capacity note</td><td>40 at once is above the 15 lines granted to this project. Calls beyond 15 queue until a line frees. Nothing drops.</td></tr>
+<tr><td class="k">Plans · Free tier</td><td>300 minutes a month, then $0.10 a minute</td></tr>
+</table>
+</div>
+
+<p class="note" style="color:var(--doc-ink-2);margin-top:14px">Owner question, and the only one that changes what gets built: is capacity sold, requested, or sales-assisted? The prototype ships the request, and the screen is drawn so that either other answer is a footer change.</p>
+
+
+<h2>Audit corrections</h2>
+<p class="note">Three hostile audits read this verdict, on locks, on honesty and on buildability. All three refuted it. What follows is what they killed, and what was kept against them. The build plan is the corrected one, not the one drawn above.</p>
+
+<h3>Killed by the audits</h3>
+<ol class="build">
+<li><b>The capacity request, its pending state and its reply channel.</b> <code>requestCapacity()</code>, <code>clearCapacityRequest()</code>, the <code>above_published_ceiling</code> refusal and the line "Requested 20 lines on Sep 17. Agora replies by email." No request endpoint exists, no ticket id comes back, and nothing published says 20 is the most Agora will grant. A stored "pending" chip asserts that Agora received something. The escalation now routes to <code>/help/contact</code>, which is a real surface in this app and is the Console's own answer at <code>ng-console</code> i18n :4207-4209. It also stops the verdict from silently answering owner question 2, which the brief's partial lock reserves.</li>
+<li><b>Two entitlements on one number line.</b> <code>base: 15</code> came from <code>DEFAULT_CAMPAIGN_CONCURRENCY_MAX</code>, the fallback ceiling on <em>one campaign's</em> concurrency field, granted per customer through a feature flag. <code>PUBLISHED_PCU_CEILING = 20</code> is Engine's peak concurrent users per App ID. An account-wide gauge reading 15 of 15 with a quick pick asking support for 20 draws a value neither source can produce. One number survives: 20, the only one Agora publishes. <code>base</code>, <code>granted</code> and <code>source</code> are gone with it, and so are "granted to this project" and "Agora sets that number".</li>
+<li><b><code>queued: 186</code>, and the money hung off it.</b> 186 is not computable from <code>cmp_q2_west</code>, which carries 248 contacts and no dialed counter. The only queue depths in the data are <code>batchRuntime.queued</code>. The card now sums the dialing batches, which is 214, one queue with one source.</li>
+<li><b><code>AVG_CALL_MIN</code>, and every figure downstream of it.</b> "about 372 agent minutes" and "$37.20" are 186 times an unmeasured 2, times the rate. The house derivation for this exact question is <code>batchEta()</code>, on observed pace, locked at LEARNINGS :519 rule 5. Promoting the guess into a lib module and multiplying it into a dollar amount put two clocks on one queue. The wall estimate is now <code>batchEta()</code>, the same clock the batch page prints.</li>
+<li><b>The fifth mount.</b> <code>BatchRuntime</code> carries its own <code>linesInUse</code> and <code>linesTotal</code>, all 10, and its reason string renders verbatim. "One capacity object every mount reads" left the batch page saying 10 lines while billing said 15. <code>linesTotal</code> is deleted and the batch page reads the store; the reason at :1449 loses its line count.</li>
+<li><b>The seed that could not count.</b> <code>readCapacity({ inUse: calls.length })</code> made /monitor/live say "5 of 15 in use right now" while /billing said "15 of 15". <code>inUse</code> is now composed from the parts that exist: five live calls plus the dialing batch's lines. Raising that batch to 15 puts the account at 20 of 20, so the wall is reachable without a fake ceiling.</li>
+<li><b>The <code>MANAGED_PROVIDERS</code> edit and the mode column that forced it.</b> The list is <code>Record&lt;string, number&gt;</code> and the number prints as a bring-your-own per-minute rate; ARES has no key to bring and no rate any source carries. Dropping ElevenLabs without migrating <code>vc_02</code> leaves a managed row for a vendor the catalog no longer resells, two surfaces disagreeing. Three consumers read the list, two of them feature 07's. Both the list and the mode column are filed against owner question 6, and the breakdown ships without a mode claim rather than putting the existing lie on a second surface.</li>
+<li><b><code>"exhausted_no_card"</code>.</b> <code>PLAN_USAGE</code> ships 150 of 300 free minutes, so the new member is unreachable, which is the same charge the verdict laid against <code>CONCURRENCY</code>. It is filed with the fixture move that makes it reachable, and the branches it forces are written in that pass.</li>
+<li><b>A second global handler for <code>?focus=</code>.</b> Mounted in the dashboard layout it would have raced the wizard's own <code>focusOn</code> on every builder route, two smooth scrolls and two outlines over one anchor, and <code>useSearchParams</code> there would have de-opted every dashboard route from static prerender. The focus mount is scoped to Billing and reads <code>window.location.search</code>. The six dead anchors elsewhere are not this feature's to revive.</li>
+<li><b>Four doors onto one action.</b> The store fixed the arithmetic and left four front doors. Owner question 7 is answered the way "one door per action" answers it: the sheet has one mount, and monitor, batch and the wizard link to <code>/billing?focus=concurrent-lines</code>. That deletes the <code>capHeadroomUsd={null}</code> problem rather than routing around it, and it deletes the undefined prop contract the third audit found.</li>
+<li><b>Two claimed facts that do not hold.</b> <code>copy-lint.mjs</code> collects <code>.tsx</code> only, so every <code>.ts</code> file is already outside it and moving sentences into <code>lib/billing-state.ts</code> buys no coverage. And the cap warning is dead in four doors, not three: two hardcode <code>null</code>, the other two compute it from a <code>spendCapUsd</code> that is <code>null</code>. Neither claim is used as a reason any more.</li>
+</ol>
+
+<h3>Kept against the audits</h3>
+<ol class="build">
+<li><b>The spine, C with D as its second half.</b> One capacity object every surface reads, and a usage page whose finest grain is an agent in minutes. Both audits that attacked the plan attacked its values, not its shape, and the third confirmed every other line citation.</li>
+<li><b>The sentence, and the sheet that carries it.</b> "Lines change how fast you spend, not how much" needs no average call length: it follows from the flat $0.10 rate. The half that needed an assumption is cut; the half that does not is arithmetic on the free minutes left and the line count. The first audit would have deleted the sheet with the request. It stays, because it is where the only idea no competitor ships now lives, and because it is the footer the owner's answer changes.</li>
+<li><b>The A6 rule sentence at <code>concurrency-card.tsx</code> :190-193.</b> Learning 3 says it keeps its sentence and the first audit was right to say the plan deleted the line it named. It keeps the rule and loses the price token: "At capacity, batch calls queue. Nothing drops. Your spend cap governs per-minute spend."</li>
+<li><b>"Keep queuing" as a first-class, tracked decline.</b> Untouched, and now reachable, which it was not.</li>
+<li><b>The shared money overlay.</b> The one genuine write path: a card added in the spend card has to move the budget line in the concurrency card directly below it. This is what <code>lib/billing-state.ts</code> is for now that capacity is read-only.</li>
+<li><b>Deleting the Pro tier.</b> A 10,000-minute allowance sold for $99 is $1,000 of minutes at the published rate. No audit contested it.</li>
+</ol>
+
+<h3>Dropped for scope, not for truth</h3>
+<p class="note">The included-versus-purchased seam in the gauge goes with the purchase: with nothing purchased there is no seam to draw. The per-model mode column and the <code>MANAGED_PROVIDERS</code> correction go to feature 07 and 868kbyqe9. The dead period select on the Usage page stays dead in this slice, because the second window of data does not exist and inventing it would fabricate history. <code>PLAN_USAGE.periodLabel</code> still reads July while the chart ends in September; that fixture belongs to the money model, not to this surface.</p>
+
+<p class="note" style="color:var(--doc-ink-2);margin-top:14px">Owner questions after the corrections. First, and still the only one that changes what gets built: is capacity sold, requested, or sales-assisted? The build ships the honest floor, a published ceiling and a support route, because a request path with no endpoint draws a state the contract cannot produce. Second: does <code>MANAGED_PROVIDERS</code> get corrected here, in feature 07, or with the catalog task? Until it does, no surface in this feature prints a per-vendor managed claim.</p>
+
+</div>

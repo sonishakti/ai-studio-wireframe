@@ -1,0 +1,543 @@
+<title>Channel Directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: a mock of the Studio_X dark builder, as the designer sees it in Figma. Every color is painted explicitly. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3.sub{font-size:15px;margin:26px 0 6px;letter-spacing:-.01em}
+p{max-width:78ch;margin:6px 0}
+code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#eaf0f4;padding:1px 5px;border-radius:3px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.lockbar{background:#fff;border:1px solid var(--doc-rule);border-left:4px solid var(--doc-brand);border-radius:6px;padding:14px 16px;margin:18px 0}
+.lockbar h4{margin:0 0 4px;font-size:14px}
+.lockbar ol{margin:6px 0 0;padding-left:18px;font-size:13.5px;color:var(--doc-ink-2)}
+.lockbar li{margin:3px 0}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.rec{border-color:var(--doc-brand);box-shadow:0 0 0 1px var(--doc-brand)}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:4px 0}
+.card .body{padding:10px 14px 0;font-size:13.5px;color:var(--doc-ink-2)}
+.pro{color:#1b7f4d}.con{color:#b3261e}.cost{color:var(--doc-ink)}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px;border:1px solid var(--line);border-radius:8px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sec-h .chev{margin-left:auto;color:var(--ink-3)}
+.rowx{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:14px;border-bottom:1px solid var(--line)}
+.rowx:last-child{border-bottom:0}
+.lbl{color:var(--ink-2);font-size:12.5px;line-height:1.35}
+.lbl small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:3px}
+.ctl{min-width:0}
+.cards2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sfc{position:relative;border:1px solid var(--stroke);border-radius:8px;background:var(--panel-2);padding:9px 34px 9px 10px}
+.sfc .t{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sfc .d{font-size:11.5px;color:var(--ink-3);margin-top:3px;line-height:1.35}
+.sfc .bx{position:absolute;right:9px;top:9px;width:15px;height:15px;border-radius:4px;border:1px solid var(--stroke);display:grid;place-items:center;font-size:10px;color:#04131a}
+.sfc.on{border-color:var(--brand)}
+.sfc.on .bx{background:var(--brand);border-color:var(--brand)}
+.sfc.off{opacity:.55}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--stroke);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--ink-2);background:var(--panel-2);white-space:nowrap}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:5px 11px;font-size:12px;color:var(--ink);background:var(--panel-2)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.dead{opacity:.45}
+.muted{color:var(--ink-3);font-size:11.5px}
+table.mx{width:100%;border-collapse:collapse;font-size:12px}
+table.mx th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mx tr:last-child td{border-bottom:0}
+.sheet{background:var(--panel);border:1px solid var(--stroke);border-radius:8px 0 0 8px;overflow:hidden;margin-left:26px}
+.sheet-h{padding:11px 14px;border-bottom:1px solid var(--line)}
+.sheet-h .tt{font-size:13.5px;font-weight:600}
+.sheet-h .ds{font-size:11.5px;color:var(--ink-3);margin-top:3px}
+.srow{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+.subrow{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-top:1px dashed var(--line);font-size:11.5px;color:var(--ink-2)}
+.subrow:first-of-type{border-top:0}
+.subrow b{color:var(--ink);font-weight:500;min-width:62px;display:inline-block}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:6px 9px;font-size:12px}
+.code{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-2);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:8px 10px;line-height:1.7;overflow-x:auto;white-space:pre}
+.code .k{color:var(--brand)}
+.code .x{color:var(--bad);text-decoration:line-through}
+/* ---- audit ---- */
+table.audit{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:10px}
+table.audit th{text-align:left;padding:7px 9px;border-bottom:1px solid var(--doc-rule);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+table.audit td{padding:6px 9px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit tr:last-child td{border-bottom:0}
+table.audit td.s{text-align:center;font-weight:600;width:62px}
+table.audit .y{color:#1b7f4d}table.audit .n{color:#b3261e}table.audit .p{color:#9a6a00}
+table.audit tbody tr:nth-child(even){background:#fafcfd}
+table.audit .grp td{background:#eef4f7;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);font-weight:600}
+.score td{background:#e7f0f5;font-weight:700}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+.notes{font-size:13.5px}
+.notes h4{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:5px 0}
+.copy{background:#fff;border:1px dashed var(--doc-brand);border-radius:6px;padding:12px 14px;font-size:13px;margin-top:14px}
+.plan{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:0;overflow:hidden;margin-top:12px}
+.plan table{width:100%;border-collapse:collapse;font-size:12.5px}
+.plan th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--doc-rule);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.plan td{padding:8px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+.plan tr:last-child td{border-bottom:0}
+.plan td:first-child{white-space:nowrap}
+.link{color:var(--doc-brand)}
+@media (max-width:1140px){.dir{grid-template-columns:1fr}.card{max-width:680px}}
+@media (max-width:980px){.two,.facts{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 18 · Channels · ⚠ lock · step 5 diverge</p>
+<h1>Channel Directions</h1>
+<p><strong>JTBD.</strong> When my agent already answers the phone and half the people who need her message us instead of calling, I want to put that same agent on WhatsApp and on the chat box on our site without building a second agent, so the customers who will never dial get the same answers as the ones who do.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Builder › Deployment › Inbound channels (<code>channel-section.tsx</code>:158-177) and Resources › Deployment Channels (<code>channels-panel.tsx</code>). Two views, one object.</div>
+  <div><b>Agora facts</b>WhatsApp: no field at any version. SMS: no field, and <code>turn_detection</code> assumes duplex audio. Text-only: <code>channel</code> and <code>token</code> are required on join and the billed unit is an Audio Task. Flat $0.10 per agent-minute, the same with BYOK.</div>
+  <div><b>Ships today</b><code>agora-agent-client-toolkit@2.10.0</code> and its React peer, documented. <code>@agora/agent-sdk</code> and <code>cdn.agora.io/agent-widget.js</code> both 404, and we print both.</div>
+  <div><b>The seam</b>Six channel taxonomies, two exported constants both called <code>CHANNEL_LABEL</code> with different key sets (<code>campaign-data.ts</code>:1788, <code>session-trace.ts</code>:21). Any new channel makes it worse.</div>
+</div>
+
+<div class="lockbar">
+  <h4>⚠ The lock survives: one agent ↔ one channel (2026-06-11, re-affirmed 2026-07-29)</h4>
+  <p style="margin:2px 0 0;font-size:13.5px;color:var(--doc-ink-2)">Every direction below is drawn inside it. Three pieces of evidence, none of them ours:</p>
+  <ol>
+    <li>Five competitor environments produce no argument for a channel matrix in the builder. ElevenLabs and Fin both run one agent across many channels and both pay for it with a per-channel override layer, not a matrix (<code>03-learnings.md</code> §What this does not change).</li>
+    <li>The Engine already enforces the lock for the only channel that exists: <code>UpdatePhoneNumbersRequest</code> binds one <code>pipeline_id</code> for inbound and one for outbound, and the Console form is <code>agentId: string</code>, singular.</li>
+    <li>Two of the three channels a matrix would display have no API at any version, so a matrix could not be drawn honestly.</li>
+  </ol>
+  <p style="margin:8px 0 0;font-size:13.5px;color:var(--doc-ink-2)">What moves is the <strong>surface list under Inbound</strong>, which already prints <em>WhatsApp · Telegram · soon</em> and already has the door. What does not move is the intent radio.</p>
+</div>
+
+<h2>The before, in one line per defect</h2>
+<p>Three defects decide this document. The status enum is <code>"active" | "scheduled" | "unassigned"</code> (<code>channels-panel.tsx</code>:44) and this feature is made of the words it lacks. Five of the six types the inventory lists have no door in or out: Manage on the WhatsApp row returns to the page it was clicked from (<code>channels-panel.tsx</code>:51 into <code>deploy/whatsapp/page.tsx</code>:5). And both code artifacts we hand the user are fake: <code>npm install @agora/agent-sdk</code> (<code>channel-section.tsx</code>:495) and <code>https://cdn.agora.io/agent-widget.js</code> (<code>widget-config.ts</code>:72). One more, small and exact: the Toll-Free row carries <code>backs: ", "</code> (<code>channels-panel.tsx</code>:55), printed unguarded, so an unassigned number renders its Agent cell as a bare comma. The same literal is the publish fallback at <code>agent-wizard.tsx</code>:838, so one missing binding puts a comma on screen and a comma in the funnel.</p>
+
+<h2>Five directions</h2>
+<p>Same lock, five places to put a channel's truth. Each is mocked inside the real row grammar: 240px label column, 560px control column, hairline dividers.</p>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Two more cards, greyed out</h3><div class="who">The cheapest thing that is not a lie. Six lines of code.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Deployment <span class="chev">⌃</span></div>
+        <div class="rowx">
+          <div class="lbl">Inbound channels<small>Pick every way callers reach this agent.</small></div>
+          <div class="ctl">
+            <div class="cards2">
+              <div class="sfc on"><span class="bx">✓</span><div class="t">Phone number</div><div class="d">Answer calls 24/7.</div></div>
+              <div class="sfc"><span class="bx"></span><div class="t">Web widget</div><div class="d">A floating widget for your site.</div></div>
+              <div class="sfc off"><span class="bx"></span><div class="t">WhatsApp <span class="chip">Soon</span></div><div class="d">&nbsp;</div></div>
+              <div class="sfc off"><span class="bx"></span><div class="t">Telegram <span class="chip">Soon</span></div><div class="d">&nbsp;</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For.</b> <code>ToggleCard</code> already carries <code>badge</code> and <code>disabled</code> (<code>radio-cards.tsx</code>:39, :48), so nothing is invented and no IA moves. A grey caption becomes two cards a screen reader can reach. It is honest in the narrowest sense: it promises nothing.</li>
+        <li class="con"><b>Against.</b> It answers the happy path's step 2 and no rainy scenario at all. "Soon" carries no date, no ticket, and no way to say you wanted it, so the demand signal <code>channel_blocked</code> exists to capture is thrown away at the exact moment the user asks. A card with two states has no room for learning 2's two runtimes or learning 3's approval ladder, so <em>Pending carrier review</em> and <em>Rejected</em> still have nowhere to live. And it puts Telegram, which is in no ticket and no contract, on the same footing as a P0.</li>
+        <li class="cost"><b>Cost.</b> Trivial, which is exactly what it buys. <strong>Refused</strong> in the audit below: a direction that answers only the happy path fails.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · A readiness word on every surface</h3><div class="who">One enum, six words, in both views. No new surface.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Deployment Channels <span class="chev">⌃</span></div>
+        <div style="padding:6px 8px 8px">
+          <table class="mx">
+            <thead><tr><th>Channel</th><th>Agent</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Support Line<div class="muted">+1 (415) 555-0101</div></td><td>Support Bot v2</td><td><span class="chip on"><span class="dot"></span>Ready</span></td></tr>
+              <tr><td>Help widget<div class="muted">acme.com/help</div></td><td>Support Bot v2</td><td><span class="chip warn"><span class="dot"></span>No traffic yet</span></td></tr>
+              <tr><td>Toll-Free<div class="muted">+1 (800) 555-0199</div></td><td class="muted">No agent yet</td><td><span class="chip warn"><span class="dot"></span>No agent yet</span></td></tr>
+              <tr><td>Acme WhatsApp<div class="muted">+1 (415) 555-0142</div></td><td class="muted">No agent yet</td><td><span class="chip bad"><span class="dot"></span>Not supported yet</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:9px">The same six words on the builder card:</div>
+      <div class="cards2" style="margin-top:6px">
+        <div class="sfc on"><span class="bx">✓</span><div class="t">Phone number <span class="chip on"><span class="dot"></span>Ready</span></div><div class="d">Answer calls 24/7.</div></div>
+        <div class="sfc off"><span class="bx"></span><div class="t">SMS <span class="chip bad"><span class="dot"></span>Not supported yet</span></div><div class="d">Text on a number a carrier approves.</div></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For.</b> It is the direct answer to owner question 6 and to the enum defect: <code>Ready · No agent yet · No traffic yet · In carrier review · Rejected · Not supported yet</code> in one module both views import, so a Monitor row and a deployment row stop labelling the same run two different ways. It kills the bare comma, because an unbound row has a word instead of a fallback string.</li>
+        <li class="con"><b>Against.</b> A word is not a door. Manage still loops back to the page it was clicked from, the fake package and the fake CDN still ship, and the widget still has no origin, so a public snippet still runs on anyone's site. A vocabulary with nothing behind it is a rename.</li>
+        <li class="cost"><b>Cost.</b> Low. One new module, two files read it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="card rec">
+    <header><h3>C · The card is the door, and the door opens one sheet</h3><div class="who">Recommended. B's vocabulary, plus the one place a channel's truth lives.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Deployment <span class="chev">⌃</span></div>
+        <div class="rowx">
+          <div class="lbl">Inbound channels<small>Pick every way callers reach this agent.</small></div>
+          <div class="ctl">
+            <div class="cards2">
+              <div class="sfc on"><span class="bx">✓</span><div class="t">Phone number <span class="chip on"><span class="dot"></span>Ready</span></div><div class="d">Answer calls 24/7: link one or several numbers.</div></div>
+              <div class="sfc"><span class="bx"></span><div class="t">Web widget <span class="chip warn"><span class="dot"></span>No traffic yet</span></div><div class="d">A floating voice widget for your website.</div></div>
+              <div class="sfc off"><span class="bx"></span><div class="t">WhatsApp <span class="chip bad"><span class="dot"></span>Requires Engine</span></div><div class="d">Messages and calls on one Business number.</div></div>
+              <div class="sfc off"><span class="bx"></span><div class="t">SMS <span class="chip bad"><span class="dot"></span>Requires Engine</span></div><div class="d">Text conversations on a number a carrier approves.</div></div>
+            </div>
+            <div style="margin-top:9px"><span class="btn">See what each channel needs</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="muted" style="margin:10px 0 6px">The sheet, opened from that button and from every Manage in the inventory:</div>
+      <div class="sheet">
+        <div class="sheet-h">
+          <div class="tt">See what each channel needs</div>
+          <div class="ds">Phone and web work today. WhatsApp and SMS do not run on Agora yet.</div>
+        </div>
+        <div class="srow">
+          <div class="lbl">Phone number</div>
+          <div class="ctl"><span class="chip on"><span class="dot"></span>Ready</span> <span class="muted">+1 (628) 555-0188 answers Aria.</span></div>
+        </div>
+        <div class="srow">
+          <div class="lbl">Web widget</div>
+          <div class="ctl">
+            <span class="chip warn"><span class="dot"></span>No traffic yet</span>
+            <div class="subrow" style="margin-top:7px"><b>Allowed sites</b><div style="flex:1"><div class="field">acme.com <span style="margin-left:auto;color:var(--ink-3)">✕</span></div><div class="muted" style="margin-top:4px">The widget loads only on sites you list here. <span class="chip bad" style="margin-left:4px">Requires Engine</span></div></div></div>
+            <div class="subrow"><b>Chat only</b><div>Text in and text out, with no voice leg. <span class="chip bad">Requires Engine · 868kyjfnv</span></div></div>
+          </div>
+        </div>
+        <div class="srow">
+          <div class="lbl">WhatsApp<small>Meta's account, not Agora's.</small></div>
+          <div class="ctl">
+            <span class="chip bad"><span class="dot"></span>Not supported by Agora yet</span>
+            <div class="subrow" style="margin-top:7px"><b>Messages</b><div>Text behaviour inside a 24 hour reply window.</div></div>
+            <div class="subrow"><b>Calls</b><div>Voice behaviour, the same as a phone call.</div></div>
+            <div class="muted" style="margin-top:6px">Requires Engine · 868ka6ajk</div>
+          </div>
+        </div>
+        <div class="srow">
+          <div class="lbl">SMS</div>
+          <div class="ctl">
+            <span class="chip bad"><span class="dot"></span>Not supported by Agora yet</span>
+            <div class="muted" style="margin-top:6px">A carrier reviews the business, the brand and the campaign before the first message sends.</div>
+            <div class="muted" style="margin-top:4px">Requires Engine · 868kyjfp2</div>
+          </div>
+        </div>
+        <div class="srow" style="grid-template-columns:1fr"><div><span class="btn primary">Ask for this channel</span></div></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For.</b> It closes the loop without inventing a page: a sheet is a fixed primitive, so every Manage opens the same surface instead of a route that redirects back. It puts learning 2 on screen as two named sub-rows, <em>Messages</em> and <em>Calls</em>, which is the thing a single toggle can never say. It gives learning 3's approval ladder the only home it can have. It is the one place the origin allowlist can live, and both LiveKit and ElevenLabs refuse to serve a widget without one. And it turns the moment of asking into the count that unblocks the Engine ticket.</li>
+        <li class="con"><b>Against.</b> A sheet opened from two places has to read correctly in both, and the builder's copy must not drift into a second editor of what the Deployment section already owns. It also has to resist growing a form: the moment it takes a WhatsApp account id, it is drawing an API nobody has written.</li>
+        <li class="cost"><b>Cost.</b> Medium. One module, one sheet, eight touched files, and three of those are deletions of fiction.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · The inventory is the spine</h3><div class="who">Channels are created in Resources; the builder picks from what exists.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Deployment Channels <span class="btn primary" style="margin-left:auto">Connect a channel</span></div>
+        <div style="padding:10px">
+          <div class="muted" style="margin-bottom:6px">Step 1 of the create path:</div>
+          <div class="cards2">
+            <div class="sfc on"><span class="bx">✓</span><div class="t">Phone number</div><div class="d">Bring your carrier over SIP.</div></div>
+            <div class="sfc"><span class="bx"></span><div class="t">Web widget</div><div class="d">Embed on your site.</div></div>
+            <div class="sfc off"><span class="bx"></span><div class="t">WhatsApp</div><div class="d">&nbsp;</div></div>
+            <div class="sfc off"><span class="bx"></span><div class="t">SMS</div><div class="d">&nbsp;</div></div>
+          </div>
+          <div class="muted" style="margin-top:9px">Then the builder's surface cards read from what this page produced, and nothing else.</div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For.</b> The only direction that fixes the header line head on: the page that calls itself "everywhere your agents answer" can currently add one of the five types it lists. One inventory, one create path, one place a channel is born.</li>
+        <li class="con"><b>Against.</b> It moves the deployment decision out of the section the locked IA puts it in and the journey starts in. It builds a create path for three types that do not exist. And it breaks "no control for what Agora does by default": the web widget is created by turning it on, not by provisioning it, so a Connect step for it is a step that does nothing.</li>
+        <li class="cost"><b>Cost.</b> High, and most of it spent on a wizard for channels with no API.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · A per-channel override layer</h3><div class="who">The ElevenLabs and Fin shape. Right shape, wrong month.</div></header>
+    <div class="mock">
+      <div class="sec">
+        <div class="sec-h">Acme WhatsApp <span class="chev">⌃</span></div>
+        <div class="rowx">
+          <div class="lbl">On this channel<small>Overrides the agent's prompt.</small></div>
+          <div class="ctl">
+            <div class="code">WhatsApp. Casual register, emojis sparingly,
+one question at a time.</div>
+            <div class="muted" style="margin-top:6px">Messages use this. Calls use the voice prompt.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For.</b> It is the shape both multi-channel vendors converged on, and the data already ships it: <code>campaign-data.ts</code>:1410 carries a channel prompt suffix on the WhatsApp deployment. <code>04-before.md</code> names it as a thing that must survive any redesign. It is the answer to rainy 5, the agent tuned for messages who reads her chat style out loud when a call comes in.</li>
+        <li class="con"><b>Against.</b> An override layer for a channel with no API is a drawing of an API. Rainy 5 cannot happen until WhatsApp exists, and when it does the override belongs on the binding this feature is defining, not beside it.</li>
+        <li class="cost"><b>Cost.</b> Medium, and all of it idle until the Engine ships WhatsApp.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="border-style:dashed">
+    <header><h3>What none of them does</h3><div class="who">Named so the audit is read honestly.</div></header>
+    <div class="body">
+      <p style="margin-top:0">No direction here gives WhatsApp an outbound half. Every batch deployment in the data is <code>{kind: "telephony"}</code> and the Console contract is telephony-shaped end to end: <code>phoneNumberId</code>, a required <code>phone_number</code> CSV column, ring and voicemail settings. ElevenLabs solves it by adding <code>whatsapp_params</code> to the same batch object rather than building a second campaign type, and that is the right shape, but it needs a sender identity and a message-window rule first, and neither exists.</p>
+      <p>No direction here ships pause and resume, which <code>03-learnings.md</code> learning 4 calls the one unoccupied square on the board. It belongs to the run, and the run lives in Go Live.</p>
+      <p>No direction here turns concurrency into a reservation (learning 5). A ceiling you can raise with money hangs off 22 · Usage, credits &amp; concurrency, its own ⚠ lock.</p>
+      <p style="margin-bottom:14px">All three are named in the verdict as the stated next step, not smuggled into this wave.</p>
+    </div>
+  </div>
+</div>
+
+<h2>Audit</h2>
+<p>Every direction against the JTBD rainy scenarios this feature owns, by number, and the five numbered learnings. The scenarios owned by 16 · Phone number purchase, 17 · SIP trunk setup, 21 · CRM &amp; contacts and 22 · Usage are excluded, per <code>01-jtbd.md</code> §What this is not. <span class="y">✓</span> answered on screen · <span class="p">◐</span> shape stated, not shipped · <span class="n">✗</span> untouched.</p>
+
+<table class="audit">
+  <thead><tr><th style="width:44%">Scenario or learning</th><th class="s">A</th><th class="s">B</th><th class="s">C</th><th class="s">D</th><th class="s">E</th></tr></thead>
+  <tbody>
+    <tr class="grp"><td colspan="6">JTBD rainy scenarios</td></tr>
+    <tr><td><b>1</b> Manage on the WhatsApp row returns to the page it was clicked from.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s y">✓</td><td class="s n">✗</td></tr>
+    <tr><td><b>2</b> A live-looking WhatsApp row with a sender and 220 calls behind it.</td><td class="s n">✗</td><td class="s y">✓</td><td class="s y">✓</td><td class="s y">✓</td><td class="s n">✗</td></tr>
+    <tr><td><b>3</b> Agora does not do this yet and the product never says so.</td><td class="s p">◐</td><td class="s y">✓</td><td class="s y">✓</td><td class="s y">✓</td><td class="s n">✗</td></tr>
+    <tr><td><b>4</b> The connector I picked carries calls only, so my message goes nowhere.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s p">◐</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>5</b> One binding, two runtimes: she reads my chat style out loud on a call.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s y">✓</td></tr>
+    <tr><td><b>6</b> The account is connected and nobody is behind it.</td><td class="s n">✗</td><td class="s y">✓</td><td class="s y">✓</td><td class="s y">✓</td><td class="s n">✗</td></tr>
+    <tr><td><b>8</b> I am not allowed to speak first: free-form only inside an open window.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s p">◐</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>14</b> SMS is an application, not a toggle: three approvals, two to three weeks.</td><td class="s n">✗</td><td class="s p">◐</td><td class="s y">✓</td><td class="s p">◐</td><td class="s n">✗</td></tr>
+    <tr><td><b>15</b> The rejection came from a level I never filled in.</td><td class="s n">✗</td><td class="s p">◐</td><td class="s y">✓</td><td class="s p">◐</td><td class="s n">✗</td></tr>
+    <tr><td><b>20</b> We already draw a text agent that does not exist.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>21</b> The install line does not resolve: <code>@agora/agent-sdk</code>, <code>cdn.agora.io</code>.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>22</b> The widget runs anywhere, including on someone else's site.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>27</b> Monitor says Chat, the deployment row says WhatsApp, and they disagree.</td><td class="s n">✗</td><td class="s y">✓</td><td class="s y">✓</td><td class="s y">✓</td><td class="s n">✗</td></tr>
+    <tr><td><b>28</b> Live since this morning, empty all day.</td><td class="s n">✗</td><td class="s y">✓</td><td class="s y">✓</td><td class="s y">✓</td><td class="s n">✗</td></tr>
+    <tr><td><b>29</b> The outbound half does not exist: batch dials phone numbers only.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s n">✗</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>31</b> The retry control is fiction: it exists in no contract and no vendor.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr class="grp"><td colspan="6">Learnings</td></tr>
+    <tr><td><b>1</b> ElevenLabs ships a section named Channels, so the 07-30 retirement is now factually wrong.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>2</b> WhatsApp is two runtimes on one account binding, not a fourth toggle.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s y">✓</td><td class="s n">✗</td><td class="s y">✓</td></tr>
+    <tr><td><b>3</b> SMS is an approval queue with a rejection cascade, so its resting state is pending.</td><td class="s n">✗</td><td class="s p">◐</td><td class="s y">✓</td><td class="s p">◐</td><td class="s n">✗</td></tr>
+    <tr><td><b>4</b> Nobody pauses and resumes, and nobody has our retry control: drop retries.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s p">◐</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr><td><b>5</b> Concurrency is asked backwards: the useful question is what to hold back.</td><td class="s n">✗</td><td class="s n">✗</td><td class="s n">✗</td><td class="s n">✗</td><td class="s n">✗</td></tr>
+    <tr class="score"><td>Answered on screen, of 21</td><td class="s">0</td><td class="s">7</td><td class="s">15</td><td class="s">7</td><td class="s">2</td></tr>
+  </tbody>
+</table>
+
+<p style="margin-top:12px"><strong>A fails the audit.</strong> It answers the happy path's step 2, where WhatsApp becomes a real choice next to Phone number and Web widget, and it answers no rainy scenario in full and no learning at all. It is in this document because it is what gets built when nobody reads the research: two greyed cards look like progress, ship in an afternoon, and leave every one of the sixteen failure modes exactly where it was.</p>
+<p><strong>E scores 2 and is still right.</strong> The score measures this wave, not the shape. E is the next move once WhatsApp exists, and its column will fill from the row C defines.</p>
+<p><strong>Nothing answers rainy 29 or learning 5.</strong> That is a scope call, not an oversight: the outbound half needs a sender identity and a message-window rule the Engine has not written, and concurrency as a reservation belongs to 22 · Usage, its own ⚠ lock.</p>
+
+<h2>Verdict</h2>
+<div class="two">
+  <div class="mock wide">
+    <div class="sec">
+      <div class="sec-h">Deployment <span class="chev">⌃</span></div>
+      <div class="rowx">
+        <div class="lbl">Inbound channels<small>Pick every way callers reach this agent. It can serve several at once.</small></div>
+        <div class="ctl">
+          <div class="cards2">
+            <div class="sfc on"><span class="bx">✓</span><div class="t">Phone number <span class="chip on"><span class="dot"></span>Ready</span></div><div class="d">Answer calls 24/7: link one or several numbers.</div></div>
+            <div class="sfc"><span class="bx"></span><div class="t">Web widget</div><div class="d">A floating voice widget for your website.</div></div>
+            <div class="sfc off"><span class="bx"></span><div class="t">WhatsApp <span class="chip bad"><span class="dot"></span>Requires Engine</span></div><div class="d">Messages and calls on one Business number.</div></div>
+            <div class="sfc off"><span class="bx"></span><div class="t">SMS <span class="chip bad"><span class="dot"></span>Requires Engine</span></div><div class="d">Text conversations on a number a carrier approves.</div></div>
+          </div>
+          <div style="margin-top:9px"><span class="btn">See what each channel needs</span></div>
+        </div>
+      </div>
+      <div class="rowx">
+        <div class="lbl">Phone numbers<small>Link one or several. The agent answers them all.</small></div>
+        <div class="ctl"><div class="field">+1 (628) 555-0188 – Sales Inbound <span style="margin-left:auto;color:var(--ink-3)">⌄</span></div></div>
+      </div>
+    </div>
+    <div class="muted" style="margin:12px 0 6px">Resources › Deployment Channels, same words, same sheet behind Manage:</div>
+    <div class="sec">
+      <div style="padding:6px 8px 8px">
+        <table class="mx">
+          <thead><tr><th>Channel</th><th>Type</th><th>Agent</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Sales Inbound<div class="muted">+1 (628) 555-0188</div></td><td><span class="chip">Phone number</span></td><td>Aria</td><td><span class="chip on"><span class="dot"></span>Ready</span></td><td style="text-align:right"><span class="btn" style="padding:3px 8px">Manage</span></td></tr>
+            <tr><td>Toll-Free<div class="muted">+1 (800) 555-0199</div></td><td><span class="chip">Phone number</span></td><td class="muted">No agent yet</td><td><span class="chip warn"><span class="dot"></span>No agent yet</span></td><td style="text-align:right"><span class="btn" style="padding:3px 8px">Manage</span></td></tr>
+            <tr><td>Help widget<div class="muted">acme.com/help</div></td><td><span class="chip">Web widget</span></td><td>Support Bot v2</td><td><span class="chip warn"><span class="dot"></span>No traffic yet</span></td><td style="text-align:right"><span class="btn" style="padding:3px 8px">Manage</span></td></tr>
+            <tr><td>WhatsApp<div class="muted">Meta Business account</div></td><td><span class="chip">WhatsApp</span></td><td class="muted">No agent yet</td><td><span class="chip bad"><span class="dot"></span>Not supported yet</span></td><td style="text-align:right"><span class="btn" style="padding:3px 8px">Manage</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="muted" style="margin:12px 0 6px">And the two snippets stop lying:</div>
+    <div class="code"><span class="x">npm install @agora/agent-sdk</span>
+npm install <span class="k">agora-agent-client-toolkit</span>
+
+<span class="x">&lt;script src="https://cdn.agora.io/agent-widget.js"&gt;</span>
+import { <span class="k">ConversationalAIAPI</span> } from "agora-agent-client-toolkit"</div>
+  </div>
+
+  <div class="notes">
+    <h4>The call</h4>
+    <p style="margin-top:0"><strong>C, with B's vocabulary as its spine and E named as the next move.</strong> One module owns what a channel is and how ready it is. Two views render it: the four cards in the builder, where the journey starts, and the table in Resources, where a user reads an agent's whole reach in one place, which no competitor ships. One sheet is the door from both, and it is a sheet rather than a page because a page for a channel with no API is a page that redirects, which is the defect we are here to remove.</p>
+
+    <h4>What we are not doing, and why</h4>
+    <ul>
+      <li><strong>Not a channel matrix.</strong> The lock survives on three pieces of evidence, none of them ours. Reversing it a third time in six months needs a reason neither prior round produced.</li>
+      <li><strong>Not Telegram.</strong> It is in no ticket and no contract and no release note. WhatsApp and SMS at least have Engine tickets to name. A card for Telegram would be the only thing on this screen with nothing behind it.</li>
+      <li><strong>Not SMS as a working surface.</strong> It is a different runtime: <code>turn_detection</code> and <code>interruption</code> assume a duplex audio stream, and SMS is asynchronous and turn-less. It is drawn inert, in the grid, because a missing card teaches nothing and the badge is the whole promise.</li>
+      <li><strong>Not a text-only agent type.</strong> We already draw one: <code>interactionMode: "chat"</code> renders a full typed conversation. The honest move is to mark the option we ship, not to add a second one, because <code>channel</code> and <code>token</code> are required on every pipeline join and the billed unit is an Audio Task.</li>
+      <li><strong>Not the outbound half.</strong> Option B in the brief is right and it should follow a written sender identity and message-window rule, not precede one.</li>
+      <li><strong>Not the retry control.</strong> It exists in no Agora contract, in no Console endpoint and in no vendor. It comes out, and the file the Console already exports takes its place as the answer.</li>
+      <li><strong>Not a rename of the feature.</strong> Learning 1 shows the 2026-07-30 retirement of the word "Channel" is now factually wrong, and the row already says <em>Inbound channels</em> while the tab says <em>Deployment Channels</em>. Keeping the word costs nothing today. Changing it is a vocabulary pass across two surfaces and belongs to that pass.</li>
+    </ul>
+
+    <h4>The open question, not designable without an answer</h4>
+    <p><strong>Who owns the widget bundle.</strong> The snippet we print today points at <code>https://cdn.agora.io/agent-widget.js</code>, which 404s, and there is no embeddable widget anywhere in the Agora documentation: no page, no bundle, no script tag. Studio's own answer to "put this agent somewhere" is a copyable REST call. The SDK half of the task ships today as <code>agora-agent-client-toolkit@2.10.0</code>. The widget half has three possible owners and the primary action on the web surface is a different string for each: Agora hosts the bundle and the action stays <em>Copy embed code</em>; we ship a React component on the toolkit and the action becomes an install; or neither, and the action is the REST snippet Studio already documents. The correction ships either way, because the fake package name and the fake CDN URL come out in the first slice whatever the answer is. The button above them cannot be final until someone answers.</p>
+
+    <h4>One thing the sheet must not become</h4>
+    <p>A form. The moment it takes a WhatsApp Business account id, a sender, or a template name, it is a drawing of an API nobody has specified. It states readiness and it records an ask. Nothing else.</p>
+  </div>
+</div>
+
+<h2>Prototype plan</h2>
+<p>Build order for <code>studio_x_2</code>. Two files added, eight touched, three of the touches deletions. Design-mode state is <code>localStorage</code> under the existing <code>sx:</code> guard idiom; nothing calls a backend.</p>
+
+<h3 class="sub">Deep link the reviewer opens</h3>
+<p><code>/agents/agt_default/edit?step=2&amp;focus=inbound-surfaces</code></p>
+<p>Aria is live on <code>pn_02</code> as an inbound phone agent (<code>campaign-data.ts</code>:646-661), which is the opening state of the happy scenario word for word: her line already rings. The link opens the Deployment section and pulses the four-card grid, which is happy step 2. It needs one map entry: <code>"inbound-surfaces": 2</code> in the owner table at <code>agent-wizard.tsx</code>:520-527, and <code>focusId="inbound-surfaces"</code> on the surfaces row, which <code>SectionRow</code> already forwards to <code>data-design-focus</code> (<code>section-row.tsx</code>:34, :46).</p>
+
+<h3 class="sub">Add</h3>
+<div class="plan"><table>
+<thead><tr><th>File</th><th>Why the sibling could not be extended</th><th>Exports</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>lib/channels.ts</code></td>
+  <td>The two candidates own different nouns. <code>lib/wizard-draft.ts</code> owns what the builder <em>picked</em> (<code>InboundSurface</code>, :37) and is draft state; <code>lib/campaign-data.ts</code> owns deployments and runs. Readiness is account state, read by a Resources panel that must not import the builder. This is the single source owner question 6 asks for; the other five taxonomies derive from it or are deleted.</td>
+  <td><code>ChannelSurface = "phone" | "web" | "whatsapp" | "sms"</code> · <code>SurfaceReadiness = "ready" | "no_agent" | "no_traffic" | "in_review" | "rejected" | "not_supported"</code> · <code>SURFACE_LABEL</code> · <code>READINESS_LABEL</code> · <code>READINESS_TONE</code> mapping to success · warning · danger · <code>SURFACE_SUPPORTED: Record&lt;ChannelSurface, boolean&gt;</code> · <code>ENGINE_TICKET: Partial&lt;Record&lt;ChannelSurface, string&gt;&gt;</code> · <code>CHANNEL_BINDINGS: ChannelBinding[]</code> where <code>agent: string | null</code> · <code>readDemand()</code> and <code>askForSurface(s)</code> over <code>sx:channel_demand</code>.</td>
+</tr>
+<tr>
+  <td><code>components/channel-sheet.tsx</code></td>
+  <td><code>AddPhoneNumberSheet</code> is a SIP credential form with a two-phase state machine (<code>add-phone-number-sheet.tsx</code>:22, <code>Phase = "form" | "success"</code>) for one surface. This sheet has no form and covers four. What is reused is the primitive underneath, <code>components/ui/sheet</code>, unrestyled.</td>
+  <td><code>ChannelSheet({ open, onOpenChange, surface? })</code> · rows built from <code>SectionRows</code> / <code>SectionRow</code>, one per <code>ChannelSurface</code>, opened scrolled to <code>surface</code> when given. The WhatsApp row carries two sub-rows, Messages and Calls. The foot carries one primary button that calls <code>askForSurface</code> and fires <code>channel_blocked</code>.</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 class="sub">Touch</h3>
+<div class="plan"><table>
+<thead><tr><th>File · anchor</th><th>Edit</th></tr></thead>
+<tbody>
+<tr><td><code>components/wizard/channel-section.tsx</code><br><span class="muted">:52 <code>SURFACE_CARDS</code></span></td><td>Grows from two entries to four, typed <code>ChannelSurface</code>. WhatsApp: <em>Messages and calls on one Business number.</em> SMS: <em>Text conversations on a number a carrier approves.</em></td></tr>
+<tr><td><code>components/wizard/channel-section.tsx</code><br><span class="muted">:159 <code>&lt;SectionRow id="wz-2-surfaces"&gt;</code></span></td><td>Add <code>focusId="inbound-surfaces"</code>. This is the anchor the review link lands on.</td></tr>
+<tr><td><code>components/wizard/channel-section.tsx</code><br><span class="muted">:164-174 the <code>ToggleCard</code> grid</span></td><td>Pass <code>badge</code> from <code>READINESS_LABEL</code> and <code>disabled={!SURFACE_SUPPORTED[sf.id]}</code>. Both props already exist (<code>radio-cards.tsx</code>:39, :48); no new card variant.</td></tr>
+<tr><td><code>components/wizard/channel-section.tsx</code><br><span class="muted">:175 <code>&lt;p&gt;WhatsApp · Telegram · soon&lt;/p&gt;</code></span></td><td>Delete. Replace with the sheet door: a secondary button, <em>See what each channel needs</em>. The row's one primary action stays the card grid.</td></tr>
+<tr><td><code>components/wizard/channel-section.tsx</code><br><span class="muted">:457 and :495 in <code>CodeConfigure</code></span></td><td><code>npm install @agora/agent-sdk</code> becomes <code>npm install agora-agent-client-toolkit</code>. The <code>AgentClient</code> import becomes <code>ConversationalAIAPI</code> from the same package, configured with an RTC client and an RTM client, because <code>IConversationalAIAPIConfig</code> requires both.</td></tr>
+<tr><td><code>components/wizard/agent-wizard.tsx</code><br><span class="muted">:520-527 the <code>owner</code> map</span></td><td>Add <code>"inbound-surfaces": 2</code> so the link expands the Deployment section rather than defaulting to section 3.</td></tr>
+<tr><td><code>components/wizard/agent-wizard.tsx</code><br><span class="muted">:838 <code>channel: …join(" · ") || ", "</code></span></td><td>The comma fallback comes out. The value becomes the channel label plus the surfaces in effect, and <code>surfaces</code> is passed to <code>publishDeployment</code> as its own argument, so the north-star event can tell a widget deploy from a phone line.</td></tr>
+<tr><td><code>components/channels-panel.tsx</code><br><span class="muted">:28 <code>ChannelType</code>, :44 <code>status</code>, :48-56 <code>CHANNELS</code></span></td><td>All three come from <code>lib/channels.ts</code>. <code>backs: ", "</code> on the Toll-Free row (:55) becomes <code>agent: null</code>, rendered as <em>No agent yet</em>. The six-word ladder replaces the three-word enum.</td></tr>
+<tr><td><code>components/channels-panel.tsx</code><br><span class="muted">:157 the status <code>Badge</code></span></td><td><code>active</code> stops mapping to <code>variant="default"</code>. A status never carries the primary fill: six of seven rows currently do, so the heaviest ink in the table is a state. Outline plus a tone dot.</td></tr>
+<tr><td><code>components/channels-panel.tsx</code><br><span class="muted">the row menu's <code>Manage</code> item</span></td><td>Opens <code>ChannelSheet</code> with that row's surface instead of pushing <code>c.href</code>. This is the one edit that ends the loop on every row at once. The header's single CTA, <em>Connect a number (SIP)</em>, is unchanged: three of the remaining types cannot be connected and the fourth is created by turning it on.</td></tr>
+<tr><td><code>lib/widget-config.ts</code><br><span class="muted">:13-40 <code>WidgetConfig</code>, :42 <code>WIDGET_DEFAULTS</code></span></td><td>Add <code>origins: string[]</code>, default <code>[]</code>. It is the field both LiveKit and ElevenLabs require before a widget will load at all, and ours has no origin concept.</td></tr>
+<tr><td><code>lib/widget-config.ts</code><br><span class="muted">:70-81 <code>widgetSnippet</code></span></td><td>Stop emitting <code>https://cdn.agora.io/agent-widget.js</code>. Emit the toolkit import and the RTC plus RTM config that the documented Web toolkit API actually takes.</td></tr>
+<tr><td><code>components/widget-studio.tsx</code><br><span class="muted">:115-138 <code>EmbedTruthLine</code></span></td><td>The line stops claiming a widget is embedded, which we cannot compute with no origin, no token exchange and no server side. It answers the question it can: whether the snippet on the clipboard matches the current config.</td></tr>
+<tr><td><code>components/widget-studio.tsx</code><br><span class="muted">:173-176 the header buttons</span></td><td>Two buttons calling <code>studio.copySnippet</code> collapse to one, and the fill moves off the vaguer verb. The surviving label is the one <code>WidgetStyleConfig</code> already uses, <em>Copy embed code</em>.</td></tr>
+<tr><td><code>components/widget-studio.tsx</code><br><span class="muted"><code>ConfigSections</code> › Behaviour › <code>SelectItem value="chat"</code></span></td><td>Label becomes <em>Chat only · Requires Engine</em>, disabled. This is the text-only agent we already draw, marked rather than removed.</td></tr>
+<tr><td><code>components/wizard/channel-configs.tsx</code><br><span class="muted">:64-109 <code>publishDeployment</code></span></td><td>Takes <code>surfaces: ChannelSurface[]</code> and passes it on the <code>deployment_went_live</code> payload. Its <code>channel</code> argument stays, for the toast and the Monitor query.</td></tr>
+<tr><td><code>components/wizard/channel-configs.tsx</code><br><span class="muted">:306-315 <code>EmbedConfig</code>, :338-344</span></td><td>The same two fakes, second copy. Swap the package name and the script URL here too, so the correction is not half done and the next agent does not copy it forward.</td></tr>
+<tr><td><code>lib/analytics.ts</code><br><span class="muted">:58 beside <code>deploy_blocked</code>, :414 beside <code>DeployBlockedCode</code></span></td><td>Add <code>channel_blocked</code>, its <code>EventPayloads</code> entry, and <code>ChannelBlockedCode = "not_supported_yet" | "engine_ticket_open" | "carrier_review_pending" | "carrier_rejected" | "no_agent" | "origin_missing"</code>. Codes only, never a provider's free text. Add a <code>deployment_went_live</code> payload entry carrying <code>surfaces</code>.</td></tr>
+<tr><td><code>components/wizard/step-call-settings.tsx</code><br><span class="muted">:240-270, the <code>Retry unanswered</code> label and its interval select</span></td><td>Delete both. Neither <code>retries</code> nor <code>retryIntervalMin</code> exists in the Console campaign contract or the published docs, and no vendor ships the control. The field stays on the draft type; only the control goes.</td></tr>
+</tbody>
+</table></div>
+
+<h3 class="sub">Copy</h3>
+<div class="copy">
+<p style="margin-top:0"><strong>Proposed, needs a yes.</strong> Everything else on these surfaces is existing copy or a recap of a value.</p>
+<p><strong>Surface cards.</strong> <code>WhatsApp</code> · <code>Messages and calls on one Business number.</code> — <code>SMS</code> · <code>Text conversations on a number a carrier approves.</code></p>
+<p><strong>Badges, from the ladder.</strong> <code>Ready</code> · <code>No agent yet</code> · <code>No traffic yet</code> · <code>In carrier review</code> · <code>Rejected</code> · <code>Not supported yet</code>. On a card that Agora cannot serve at all the badge is <code>Requires Engine</code>, which is the idiom already on screen at <code>engine-row.tsx</code>:50.</p>
+<p><strong>The door and the sheet.</strong> Button and sheet title share one string: <code>See what each channel needs</code>. Sheet description: <code>Phone and web work today. WhatsApp and SMS do not run on Agora yet.</code></p>
+<p><strong>Sheet rows.</strong> <code>Not supported by Agora yet</code> · WhatsApp sub-rows <code>Messages</code> · <code>Text behaviour inside a 24 hour reply window.</code> and <code>Calls</code> · <code>Voice behaviour, the same as a phone call.</code> · SMS body <code>A carrier reviews the business, the brand and the campaign before the first message sends.</code> · captions <code>Requires Engine · 868ka6ajk</code> and <code>Requires Engine · 868kyjfp2</code> and <code>Requires Engine · 868kyjfnv</code>.</p>
+<p><strong>The widget's missing field.</strong> Label <code>Allowed sites</code> · hint <code>The widget loads only on sites you list here.</code> · action <code>Add a site</code>.</p>
+<p><strong>The ask.</strong> Button <code>Ask for this channel</code> · toast title <code>Asked for WhatsApp</code> · toast body <code>You will see it here when it ships.</code></p>
+<p><strong>Embed truth.</strong> <code>Not copied yet</code> · <code>Your edits are not in the snippet you copied</code> · <code>The snippet you copied is up to date</code>.</p>
+<p style="margin-bottom:0"><strong>Interaction mode.</strong> <code>Chat only · Requires Engine</code>.</p>
+</div>
+
+<h2>Next</h2>
+<p>Answer the widget-bundle question, then build C in <code>studio_x_2</code> behind the Deployment section and the Deployment Channels tab, run fortify · include · articulate, deploy, annotate, and open the review at <code>/agents/agt_default/edit?step=2&amp;focus=inbound-surfaces</code>. E is the next wave, on the binding this one defines. The outbound half waits for a sender identity and a message-window rule from the Engine, and the demand count that arrives from <code>channel_blocked</code> is the argument for writing them.</p>
+
+<h2>Audit corrections</h2>
+<p>Three hostile auditors read the build plan this document produced: one on the locks, one on honesty, one on buildability. All three refuted it, and most of their objections were sourced and right. The call survives: <strong>C, with B's vocabulary as its spine</strong>. Two of the mechanisms C was going to be built out of do not. This section is the argument, so the log records what was cut and what was kept over an objection.</p>
+
+<h3 class="sub">Killed by the audits</h3>
+<div class="plan">
+<table>
+<thead><tr><th>What comes out</th><th>Why it cannot ship</th></tr></thead>
+<tbody>
+<tr><td>WhatsApp and SMS as a third and fourth <code>ToggleCard</code>, disabled</td><td><code>03-learnings.md</code> learning 2 forbids it by file and line. <code>ToggleCard</code> is styled <code>disabled:pointer-events-none disabled:opacity-50</code> (<code>radio-cards.tsx</code>:63), so a disabled card cannot be clicked, focused or hovered: it is not the door this document's headline calls it, and it leaves the explanation inside a dead control. Both surfaces move under the grid as <code>EngineRow</code>s (<code>engine-row.tsx</code>:50), the shipped idiom that keeps the control live, names the dependency in the tooltip and records the ask at the control. The two-card grid is untouched, so <code>InboundSurface</code> (<code>wizard-draft.ts</code>:37) is never widened and nothing in the wizard has to be rewritten to compile.</td></tr>
+<tr><td>The readiness word <code>no_traffic</code>, "No traffic yet"</td><td>Nothing counts traffic. There is no <code>first_live_call_received</code> in <code>lib/analytics.ts</code>, <code>deployment_went_live</code> fires at publish, and no widget session count exists anywhere. A warning-toned zero on a surface with no counter is the bare comma again, in better clothes. Rainy 28 drops to ◐.</td></tr>
+<tr><td><code>in_review</code>, <code>rejected</code>, <code>submittedOn</code>, <code>rejectedReason</code></td><td>There is no carrier, no submission, no reviewer and no reason field at any version of the contract. Learning 3 says what SMS's resting state will be once a vendor exists; porting it now prints an invented date and an invented reason. Rainy 14 and 15 drop to ◐. The sheet still states that a carrier reviews the business, the brand and the campaign, because that is a fact about the world and not a value about this account.</td></tr>
+<tr><td>The editable Allowed sites list, <code>origins: string[]</code> on <code>WidgetConfig</code>, and the line "The widget loads only on sites you list here"</td><td>Nothing would honour it. With no token exchange and no server side, the widget still loads off-list, so the sentence is a security promise the product cannot keep, on the one row where being wrong is a breach. It becomes one <code>EngineRow</code> that states the gap instead. Rainy 22 drops to ◐.</td></tr>
+<tr><td>"Chat only · Requires Engine", disabled</td><td><code>chat(agentUserId, message)</code> is a first-class browser call since toolkit v1.7 and <code>widget-studio.tsx</code> already renders the typed conversation. What is unbuilt is removing the audio leg, not text. This document said <em>mark</em> the mode we ship; the plan escalated that to <em>disable</em> it, which denies a capability that works. The option stays enabled and carries one line of truth: it still opens a voice session and bills the same as voice.</td></tr>
+<tr><td>Ticket ids in on-screen captions, <code>Requires Engine · 868ka6ajk</code></td><td>The shipped idiom is a month, and <code>engine-row.tsx</code>:53 already defaults the caption to <code>Requires Engine</code>. A ClickUp id means nothing to the person reading it. The ids stay in <code>ENGINE_TICKET</code> and ride the <code>channel_blocked</code> payload, which is internal.</td></tr>
+<tr><td>The sheet's footer primary, "Ask for this channel"</td><td>Opened from the builder the sheet has no single surface, so the button called <code>askForSurface(undefined)</code> under a body listing four channels, two of which already work. The ask sits on each row's switch, where it names one channel. The footer holds Close.</td></tr>
+<tr><td>A hand-written <code>CHANNEL_BINDINGS</code> array</td><td>It is a second record of data <code>PHONE_NUMBERS</code> and <code>DEPLOYMENTS</code> already hold, which is the exact defect this feature exists to remove (04-before defect 2). The rows derive: numbers from <code>PHONE_NUMBERS</code>, the widget and live batch runs from <code>DEPLOYMENTS</code>, and one synthesized row per unsupported surface. A deployment on an unsupported channel produces no row at all, so the invented Acme WhatsApp record stops reaching this page without anyone editing Monitor's fixtures.</td></tr>
+<tr><td>A new four-word surface union, and the claim that it answers owner question 6</td><td><code>ChannelKind</code> (<code>campaign-data.ts</code>:21) already names telephony · whatsapp · sms · web, and owner question 6 lists it first. <code>lib/channels.ts</code> now derives from it and from <code>DeployChannel</code> rather than declaring a seventh taxonomy, and the one label that disagreed is migrated in place (<code>telephony</code> reads "Phone number"). <code>session-trace.ts</code>'s <code>CHANNEL_LABEL</code> is left alone: collapsing it belongs to stop 0, so rainy 27 drops to ◐ and the claim comes off the verdict.</td></tr>
+<tr><td>Keying the inventory off the surface union, which deleted Batch calls and Code / SDK</td><td>Both are live kinds with rows, <code>TYPE_META</code> labels, filters and computed counts (<code>channels-panel.tsx</code>:34-35, :63-64, :98). <code>ChannelRowKind</code> keeps them, and <code>scheduled</code> stays a readiness word because a scheduled batch run is a state the data can produce.</td></tr>
+<tr><td>The toast after an ask</td><td>The tooltip already says the choice stays in this browser until it ships. A toast on every switch flip is noise.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 class="sub">Kept, over an objection</h3>
+<div class="plan">
+<table>
+<thead><tr><th>What stays</th><th>The objection, and why it loses</th></tr></thead>
+<tbody>
+<tr><td>WhatsApp and SMS named in the builder's fold</td><td>Read strictly, <code>00-brief.md</code>:221 leaves SMS with no home and the audits asked for it to be parked. A missing surface teaches nothing, and <code>channel_blocked</code> is the count that argues the Engine tickets into existence. They are named as rows that state what they need, not as surfaces you can pick, which is what learning 2 actually rules out.</td></tr>
+<tr><td>No Telegram</td><td>One audit called the test uneven. It is not: WhatsApp and SMS each carry an Engine ticket and a P0 tracker row, and Telegram is in no ticket, no contract and no release note. The muted line that promised it comes out, and the comment at <code>wizard-draft.ts</code>:31 that repeats the promise comes out with it, in the same commit.</td></tr>
+<tr><td>The sheet as the one place a channel's truth lives</td><td>A page for a channel with no API is a page that redirects, which is the defect being removed. The sheet is the door from the builder and from every inventory row that has no page; rows that do have a real page (numbers, the widget studio, a batch run, an agent's own builder) keep it, because replacing a working page with a sheet is not an improvement.</td></tr>
+<tr><td><code>channel_blocked</code> as its own event</td><td>One audit wanted it folded into <code>deploy_blocked</code> as a code. Asking for a channel that does not exist is not a blocked deploy, and mixing them would bury the one number that unblocks the tickets. It is added to <code>lib/analytics.ts</code> beside its sibling and follows the same rule: codes only, never a vendor's free text.</td></tr>
+<tr><td>Both package corrections, both snippet rewrites, the retry deletion, and the status badge losing the primary fill</td><td>Untouched by all three audits, and the strongest half of the plan. <code>@agora/agent-sdk</code> and <code>cdn.agora.io/agent-widget.js</code> both 404 and we print both, twice each.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="copy">
+<p><strong>The score, recounted.</strong> The footer row of the audit table printed 0 · 7 · 15 · 7 · 2 while the cells above it carried A 0 · B 5 · C 16 · D 6 · E 2. Both numbers were asserted rather than counted, in a document whose whole argument is that asserted values are the defect. After these corrections C answers <strong>9 of 21 on screen</strong>, with seven more stated and not shipped. It still leads every other column, and it leads by more than the arithmetic shows, because the five marks it loses are the five it could not have drawn honestly.</p>
+<p style="margin-bottom:0"><strong>One more, on process.</strong> The buildability audit read a truncated copy of the plan and reported <code>lib/analytics.ts</code>, <code>channel-configs.tsx</code>, <code>widget-config.ts</code>, <code>widget-studio.tsx</code> and <code>step-call-settings.tsx</code> as missing from the touch list. The full plan carries all five. Its compile finding on <code>InboundSurface</code> stands, and is the reason the surface grid is now left exactly as it is.</p>
+</div>
+
+</div>

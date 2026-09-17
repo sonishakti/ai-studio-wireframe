@@ -1,0 +1,579 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tools and connectors directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single-theme by design: this is a mock of the Studio_X dark builder, as the designer sees it in Figma. Every color is painted explicitly. */
+:root{
+  --bg:#0b0f13; --panel:#12171c; --panel-2:#171d23; --row:#1b2229; --line:#242c34; --stroke:#4a5560;
+  --ink:#e8edf1; --ink-2:#aab5be; --ink-3:#6f7c87; --brand:#00c2ff; --brand-dim:#0a6f93; --brand-soft:#0d2a37;
+  --ok:#3ddc97; --warn:#f2b84a; --bad:#ff6b6b; --ok-soft:#0f2b22; --warn-soft:#332a10; --bad-soft:#3a1a1a;
+  --doc-bg:#f4f7f9; --doc-ink:#14232b; --doc-ink-2:#4b5d67; --doc-rule:#d8e2e8; --doc-brand:#00658d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:"Instrument Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.page{max-width:1240px;margin:0 auto;padding:36px 28px 90px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--doc-brand);font-weight:600;margin:0 0 6px}
+h1{font-size:30px;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px;margin:44px 0 10px;letter-spacing:-.01em}
+h3.sec{font-size:16px;margin:26px 0 6px}
+p{max-width:78ch;margin:6px 0}
+code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#eaf0f4;padding:1px 5px;border-radius:3px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--doc-rule);border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin:18px 0}
+.facts>div{background:#fff;padding:12px 14px;font-size:13.5px}
+.facts b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--doc-ink-2);margin-bottom:4px}
+.dir{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-top:14px}
+.dir.one{grid-template-columns:1fr}
+.card{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden}
+.card.pick{border-color:var(--doc-brand);box-shadow:0 0 0 1px var(--doc-brand)}
+.card header{padding:12px 14px 8px;border-bottom:1px solid var(--doc-rule)}
+.card header h3{margin:0;font-size:16px}
+.card header .who{font-size:12.5px;color:var(--doc-ink-2);margin-top:2px}
+.card .why{padding:10px 14px 14px;font-size:13.5px;color:var(--doc-ink-2)}
+.card .why ul{margin:6px 0 0;padding-left:16px}
+.card .why li{margin:4px 0}
+.pro{color:#1b7f4d}.con{color:#b3261e}.cost{color:var(--doc-ink)}
+.refuse{background:#fff6f5;border-top:1px solid #f3cdc8;padding:10px 14px;font-size:13px;color:#8d2a20}
+.refuse b{color:#b3261e}
+/* ---- the app mock ---- */
+.mock{background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:13px;padding:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mock.wide{padding:18px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sec-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sec-h .chev{margin-left:auto;color:var(--ink-3)}
+.rowx{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:13px 14px;border-bottom:1px solid var(--line)}
+.rowx:last-child{border-bottom:0}
+.lbl{color:var(--ink-2);font-size:12.5px;line-height:1.35}
+.lbl small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.ctl{min-width:0}
+.cap{font-size:11.5px;color:var(--ink-3);margin:0 0 6px}
+.field{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:6px;padding:7px 10px;font-size:12.5px}
+.field .cv{margin-left:auto;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);background:var(--panel-2)}
+.chip.on{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.brand{border-color:var(--brand-dim);color:var(--brand);background:var(--brand-soft)}
+.chip .x{color:var(--ink-3);margin-left:1px}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.sw{position:relative;width:30px;height:17px;border-radius:999px;background:var(--brand);flex:none}
+.sw::after{content:"";position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#fff}
+.sw.off{background:var(--stroke)}.sw.off::after{right:auto;left:2px;background:var(--ink-2)}
+.sw.dead{background:#262f38;opacity:.5}
+.link{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--brand-dim);font-size:12px}
+table.mx{width:100%;border-collapse:collapse;font-size:12.5px}
+table.mx th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:5px 9px;border-bottom:1px solid var(--line);font-weight:600}
+table.mx td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mx tr:last-child td{border-bottom:0}
+table.mx tr.off td{opacity:.55}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);border-radius:6px;padding:6px 11px;font-size:12.5px;color:var(--ink);background:var(--panel-2)}
+.btn.sm{padding:4px 8px;font-size:11.5px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#04131a;font-weight:600}
+.btn.dead{color:var(--ink-3);border-color:var(--line);background:transparent}
+.emptyrow{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:8px;padding:11px 13px}
+.emptyrow p{margin:0}
+.emptyrow .t{font-size:12.5px;font-weight:500}
+.emptyrow .s{font-size:11.5px;color:var(--ink-3)}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sheet-h{padding:10px 13px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.sheet-b{padding:11px 13px}
+.sheet-f{padding:9px 13px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.sheet-f .count{font-size:11.5px;color:var(--ink-3)}
+.result{margin-top:9px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.result .rh{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--panel-2);font-size:12px}
+.result pre{margin:0;padding:9px 10px;font-family:"JetBrains Mono",monospace;font-size:11px;line-height:1.6;color:var(--ink-2);white-space:pre-wrap}
+.note{font-size:11.5px;color:var(--ink-3);margin-top:7px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tabs span{border:1px solid var(--line);border-radius:6px;padding:4px 9px;font-size:11.5px;color:var(--ink-3)}
+.tabs span.on{border-color:var(--stroke);background:var(--panel-2);color:var(--ink)}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cc{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:10px}
+.cc .n{font-size:12.5px;font-weight:600}
+.cc .d{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.35}
+.cc.mute{opacity:.45}
+/* audit */
+table.audit{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:12px}
+table.audit th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);padding:8px 10px;border-bottom:1px solid var(--doc-rule);background:#eef3f6}
+table.audit td{padding:7px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+table.audit td.s{text-align:center;width:58px;font-weight:600}
+table.audit tr.grp td{background:#eef3f6;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);font-weight:600}
+.y{color:#1b7f4d}.n{color:#b3261e}.h{color:#a06a00}
+.tot td{font-weight:700;background:#fbfdff}
+.copy{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;overflow:hidden;margin-top:12px}
+.copy table{width:100%;border-collapse:collapse;font-size:13.5px}
+.copy th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2);padding:8px 10px;border-bottom:1px solid var(--doc-rule);background:#eef3f6}
+.copy td{padding:7px 10px;border-bottom:1px solid var(--doc-rule);vertical-align:top}
+.copy td.k{white-space:nowrap;color:var(--doc-ink-2);font-size:12.5px}
+.build{background:#fff;border:1px solid var(--doc-rule);border-radius:6px;padding:14px 16px;margin-top:12px}
+.build h4{margin:14px 0 6px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--doc-ink-2)}
+.build h4:first-child{margin-top:0}
+.build ol{margin:0;padding-left:20px}
+.build li{margin:7px 0}
+.verdict{background:#fff;border-left:3px solid var(--doc-brand);border-radius:0 6px 6px 0;padding:14px 18px;margin-top:12px}
+.verdict p{max-width:82ch}
+.deep{display:inline-block;background:#0b2b38;color:#bfe9ff;font-family:"JetBrains Mono",monospace;font-size:12.5px;padding:7px 11px;border-radius:5px;margin-top:6px}
+@media (max-width:1140px){.dir{grid-template-columns:1fr}.mgrid{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.facts{grid-template-columns:1fr}.cards{grid-template-columns:1fr}}
+</style>
+
+<div class="page">
+<p class="eyebrow">Design Tracker 19 · Tools &amp; connectors · stop 5 diverge</p>
+<h1>Tools and connectors directions</h1>
+<p><strong>JTBD.</strong> When a caller asks the one thing only our own system knows, like where their order is, I want to hand the agent the endpoint we already run and watch it come back with the real answer, so the call ends with the job done instead of a promise that someone will call back.</p>
+
+<div class="facts">
+  <div><b>Where it lands</b>Builder › Prompt &amp; knowledge, the third row of <code>SectionKnowledgeTools</code> (<code>step-build.tsx</code> :117). Roster and create form in the same sheet. Resources gains the list view.</div>
+  <div><b>Engine contract</b><code>llm.tools[]</code> shipped v2.12 on 2026-09-10. <code>server.method</code> is GET or POST only. <code>server.timeout_ms</code> is [1000, 100000]. Max 32 tools after filtering. <code>advanced_features.enable_tools</code> defaults to <code>false</code>.</div>
+  <div><b>What the sandbox has</b>No tool object anywhere. The row named after this feature holds six connectors and no tool. <code>ResourceField</code>, the sibling that attaches by id, sits two rows above it.</div>
+  <div><b>Pricing</b>Flat $0.10 per agent-minute, the same on a customer key. A tool that takes eight seconds costs eight seconds of agent-minute and nothing else. No control implies otherwise.</div>
+</div>
+
+<p>Five directions. Same JTBD, five places to put the decision, each mocked inside the real row grammar (240px label, 560px controls, hairline dividers). Copy is proposed, not approved.</p>
+
+<h2>A and B</h2>
+
+<div class="dir">
+
+  <!-- A -->
+  <div class="card">
+    <header><h3>A · Port the shipped Console</h3><div class="who">The catalog answer. Resources gains a Custom Tools tab with the live Console's three-section form; the Connectors grid keeps its cards; the builder row is left alone.</div></header>
+    <div class="mock">
+      <p class="cap">Resources</p>
+      <div class="tabs"><span>Knowledge Base</span><span>MCP</span><span class="on">Custom Tools</span><span>Connectors</span><span>Vendor Credentials</span><span>Deployment Channels</span></div>
+      <div class="sec">
+        <div class="sec-h">Custom tools <span class="chev">3</span></div>
+        <table class="mx">
+          <tr><td>lookup_order</td><td><span class="chip">GET</span></td><td style="text-align:right"><span class="btn sm">Edit</span></td></tr>
+          <tr><td>create_ticket</td><td><span class="chip">POST</span></td><td style="text-align:right"><span class="btn sm">Edit</span></td></tr>
+        </table>
+      </div>
+      <p class="cap" style="margin-top:12px">Builder, unchanged</p>
+      <div class="sec">
+        <div class="rowx"><div class="lbl">Tools &amp; connectors</div><div class="ctl">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);letter-spacing:.08em">00 CONNECTORS ADDED</div>
+          <table class="mx" style="margin-top:6px">
+            <tr><td>HubSpot</td><td style="text-align:right"><span class="chip on"><span class="dot"></span>Active</span></td><td style="width:36px"><span class="sw off"></span></td></tr>
+            <tr class="off"><td>Salesforce</td><td style="text-align:right;color:var(--ink-3)">Connect in Resources</td><td><span class="sw dead"></span></td></tr>
+            <tr class="off"><td>Stripe</td><td style="text-align:right;color:var(--ink-3)">Coming soon</td><td><span class="sw dead"></span></td></tr>
+          </table>
+        </div></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> field for field the shipped product, so nothing is invented and handoff needs no translation. B3 locks the marketplace to Resources and this obeys it. F4 already established the capability exists, so the work is a UI over it.</li>
+        <li class="pro"><b>For:</b> it is the only direction that ships the three named form sections users of the live Console already know.</li>
+        <li class="con"><b>Against:</b> it does not touch the two defects the Before ranked first. The row labelled "Tools &amp; connectors" still holds no tools, and it is still the one row in its section that is not a <code>ResourceField</code>. Rainy 1 is answered by moving the empty state to a page the user was not on.</li>
+        <li class="con"><b>Against:</b> it ports the live Console's second MCP door (<code>agent-tools-page.tsx</code> :145–169) and its five-method picker, so rainy 5 and rainy 22 arrive with the copy.</li>
+        <li class="cost"><b>Cost:</b> medium. A tab, a form, a card grid, and no new thinking.</li>
+      </ul>
+    </div>
+    <div class="refuse"><b>Refused.</b> "Reuse, don't redesign" is a rule about the sibling on the same screen, not about the other repo. The sibling here is <code>ResourceField</code>, two rows up, and A never opens it. Porting a surface that already carries three doors to one action imports the defect along with the layout.</div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <header><h3>B · One Tools row, built from ResourceField</h3><div class="who">The third row stops being a hand-rolled table and becomes the fourth <code>ResourceField</code>. One roster holds HTTP tools, connectors and the code kind we cannot run.</div></header>
+    <div class="mock">
+      <p class="cap">Builder › Prompt &amp; knowledge</p>
+      <div class="sec">
+        <div class="rowx"><div class="lbl">Knowledge base</div><div class="ctl"><div class="chips"><span class="chip">Compliance Laws v2 <span class="x">&times;</span></span></div></div></div>
+        <div class="rowx"><div class="lbl">MCP servers</div><div class="ctl"><div class="chips"><span class="chip">Shopify MCP <span class="x">&times;</span></span></div></div></div>
+        <div class="rowx" style="background:var(--row)"><div class="lbl">Tools</div><div class="ctl">
+          <div class="emptyrow">
+            <div><p class="t">No tools added</p><p class="s">Create one or add an existing tool</p></div>
+            <span class="btn">+ Add tool</span>
+          </div>
+        </div></div>
+      </div>
+      <p class="cap" style="margin-top:12px">The sheet behind Add tool</p>
+      <div class="sheet">
+        <div class="sheet-h">Add tools</div>
+        <div class="sheet-b">
+          <div class="field">Search by name<span class="cv"></span></div>
+          <table class="mx" style="margin-top:8px">
+            <tr><td>lookup_order<div style="font-size:11px;color:var(--ink-3)">GET api.acme.com</div></td><td style="width:36px"><span class="sw"></span></td></tr>
+            <tr><td>HubSpot<div style="font-size:11px;color:var(--ink-3)">Connected · 4 tools</div></td><td><span class="sw off"></span></td></tr>
+            <tr class="off"><td>Hosted code<div style="font-size:11px;color:var(--ink-3)">Hosted code is not available yet</div></td><td><span class="sw dead"></span></td></tr>
+          </table>
+          <div style="margin-top:8px"><span class="btn" style="width:100%;justify-content:center">+ Create new tool</span></div>
+        </div>
+        <div class="sheet-f"><span class="btn primary" style="flex:1;justify-content:center">Save</span></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> it answers defects 1 and 2 at once. The feature's object exists, and the row that names the feature is now the same shape as the two above it, which is the owner rule stated literally.</li>
+        <li class="pro"><b>For:</b> learning 1 arrives free. A tool is a workspace record attached by id, the create form lives behind the sheet's existing Create New door, and nothing writes an editor onto <code>AgentDraft</code>.</li>
+        <li class="pro"><b>For:</b> the code kind gets an honest row instead of silence, which is learning 5's position taken rather than left blank.</li>
+        <li class="con"><b>Against:</b> nothing on this screen can still say whether any of it works. A tool created two minutes ago and a tool whose token expired in June render identically, which is rainy 3 and rainy 13 untouched and the market whitespace unclaimed.</li>
+        <li class="con"><b>Against:</b> the 32-tool ceiling has no expression, so rainy 7 lands after the install as it does today.</li>
+        <li class="cost"><b>Cost:</b> low. One lib module, one row rewritten into a component that already exists, one create form beside its two siblings.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<h2>C, the recommended one</h2>
+
+<div class="dir one">
+  <div class="card pick">
+    <header><h3>C · B, and every tool carries its last result</h3><div class="who">B's roster, plus the one thing no vendor of the four does and our own server already can: a tool you can prove. The create form ends with Run test, not Save. Every row and every chip carries Working, Never tested or Failing, with the time it was last checked.</div></header>
+    <div class="mock wide">
+      <div class="mgrid">
+        <div>
+          <p class="cap">The row, once three tools are attached</p>
+          <div class="sec">
+            <div class="sec-h">Prompt &amp; knowledge <span class="chev">&#8963;</span></div>
+            <div class="rowx"><div class="lbl">Knowledge base</div><div class="ctl"><div class="chips"><span class="chip">Compliance Laws v2 <span class="x">&times;</span></span></div></div></div>
+            <div class="rowx"><div class="lbl">MCP servers</div><div class="ctl"><div class="chips"><span class="chip on"><span class="dot"></span>Shopify MCP · Working <span class="x">&times;</span></span></div></div></div>
+            <div class="rowx" style="background:var(--row)"><div class="lbl">Tools</div><div class="ctl">
+              <div class="chips">
+                <span class="chip on"><span class="dot"></span>lookup_order · Working <span class="x">&times;</span></span>
+                <span class="chip warn"><span class="dot"></span>refund_order · Never tested <span class="x">&times;</span></span>
+                <span class="chip bad"><span class="dot"></span>HubSpot · Failing <span class="x">&times;</span></span>
+              </div>
+              <div style="margin-top:9px"><span class="btn sm">+ Add tool</span></div>
+            </div></div>
+          </div>
+          <p class="cap" style="margin-top:14px">The same row on a realtime agent</p>
+          <div class="sec">
+            <div class="rowx" style="background:var(--row)"><div class="lbl">Tools</div><div class="ctl">
+              <div class="emptyrow" style="opacity:.6">
+                <div><p class="t">Realtime agents can use MCP servers only.</p></div>
+                <span class="btn dead">+ Add tool</span>
+              </div>
+            </div></div>
+          </div>
+          <p class="note">The block is not hidden. The reason is on the row, the way the live Console already states it for MLLM agents.</p>
+        </div>
+
+        <div>
+          <p class="cap">The roster, with the state and the ceiling</p>
+          <div class="sheet">
+            <div class="sheet-h">Add tools</div>
+            <div class="sheet-b">
+              <div class="field">Search by name<span class="cv"></span></div>
+              <table class="mx" style="margin-top:8px">
+                <tr>
+                  <td>lookup_order<div style="font-size:11px;color:var(--ink-3)">GET api.acme.com</div></td>
+                  <td><span class="chip on"><span class="dot"></span>Working</span><div style="font-size:11px;color:var(--ink-3);margin-top:3px">Checked 2 days ago</div></td>
+                  <td style="width:40px"><span class="btn sm">Test</span></td>
+                  <td style="width:36px"><span class="sw"></span></td>
+                </tr>
+                <tr>
+                  <td>refund_order<div style="font-size:11px;color:var(--ink-3)">POST api.acme.com · used by 2 agents</div></td>
+                  <td><span class="chip warn"><span class="dot"></span>Never tested</span></td>
+                  <td><span class="btn sm">Test</span></td>
+                  <td><span class="sw"></span></td>
+                </tr>
+                <tr>
+                  <td>HubSpot<div style="font-size:11px;color:var(--ink-3)">Connected · 4 tools</div></td>
+                  <td><span class="chip bad"><span class="dot"></span>Failing</span><div style="font-size:11px;color:var(--ink-3);margin-top:3px">Checked 6 minutes ago</div></td>
+                  <td><span class="btn sm">Test</span></td>
+                  <td><span class="sw"></span></td>
+                </tr>
+                <tr class="off">
+                  <td>Hosted code<div style="font-size:11px;color:var(--ink-3)">Hosted code is not available yet</div></td>
+                  <td></td><td></td><td><span class="sw dead"></span></td>
+                </tr>
+              </table>
+              <div style="margin-top:8px"><span class="btn" style="width:100%;justify-content:center">+ Create new tool</span></div>
+            </div>
+            <div class="sheet-f"><span class="count">18 of 32 tools attached</span><span class="btn primary" style="margin-left:auto">Save</span></div>
+          </div>
+
+          <p class="cap" style="margin-top:14px">The create form ends with the test, not with Save</p>
+          <div class="sheet">
+            <div class="sheet-h">Create new tool</div>
+            <div class="sheet-b">
+              <div class="field">Method<span class="cv">GET</span></div>
+              <div class="field" style="margin-top:7px">URL<span class="cv">https://api.acme.com/orders/{{order_id}}</span></div>
+              <div class="field" style="margin-top:7px">Authorization<span class="cv">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull; Stored as a secret</span></div>
+              <div class="field" style="margin-top:7px">Function name<span class="cv">lookup_order</span></div>
+              <div style="margin-top:9px"><span class="btn primary">Run test</span></div>
+              <div class="result">
+                <div class="rh"><span class="chip on"><span class="dot"></span>Working</span><span style="color:var(--ink-3)">HTTP 200 · 340 ms</span></div>
+                <pre>{ "order_id": "4471", "status": "in_transit",
+  "delivery_date": "2026-09-19" }</pre>
+              </div>
+              <p class="note">Save is the second button and it is never blocked. A tool that has never returned 200 attaches, and says so everywhere it appears.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> it claims learning 2's whitespace. Vapi's only test is a CLI command, Retell and ElevenLabs put a Run button on the code tool and none on the HTTP one, LiveKit offers a whole-agent preview, and our own server already answers <code>POST /custom-tools/{toolId}/test</code>. Moving that from a dialog behind an overflow menu to the form's finish is the whole move.</li>
+        <li class="pro"><b>For:</b> one prop carries it. <code>AttachItem</code> gains a <code>check</code> field, so the MCP row inherits a last-known state on the same commit, which answers rainy 13 for servers as well as tools.</li>
+        <li class="pro"><b>For:</b> the ceiling becomes a number a user sees before they spend it, not after. The footer counts every tool the agent exposes, including the ones an attached MCP server contributes, which is the only place that number can be true.</li>
+        <li class="pro"><b>For:</b> the success event lands on a real control. <code>tool_verified</code> fires at the first 2xx for a <code>toolId</code>, and attached-but-never-verified becomes a counter-metric with a state on screen behind it.</li>
+        <li class="con"><b>Against:</b> the check proves the endpoint answers us. It does not prove the model ever calls it, because <code>advanced_features.enable_tools</code> defaults to <code>false</code> and no per-call result is documented. A green Working next to an agent that never invokes the tool is the one lie this direction can still tell.</li>
+        <li class="con"><b>Against:</b> three states on a chip is more ink in a row that already carries chips for two other resources. The row has to stay readable at three attached tools and at eighteen.</li>
+        <li class="cost"><b>Cost:</b> low to medium over B. One lib module, one prop on <code>AttachItem</code>, one result block reused by the form and the roster row, and copy.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>D and E</h2>
+
+<div class="dir">
+
+  <!-- D -->
+  <div class="card">
+    <header><h3>D · Proof belongs to the agent, not the tool</h3><div class="who">Put the whole question in section 4. Run a conversation and watch each tool call fire, with its arguments, its result and its latency, beside the turn that triggered it.</div></header>
+    <div class="mock">
+      <p class="cap">Builder › Test</p>
+      <div class="sec">
+        <div class="sec-h">Test <span class="chev">&#8963;</span></div>
+        <div style="padding:12px 14px">
+          <div style="font-size:12.5px;color:var(--ink-2)"><em>"Where is order 4471?"</em></div>
+          <div class="result" style="margin-top:8px">
+            <div class="rh"><span class="chip brand">lookup_order</span><span style="color:var(--ink-3)">HTTP 200 · 340 ms</span></div>
+            <pre>order_id: "4471"
+delivery_date: "2026-09-19"</pre>
+          </div>
+          <div style="font-size:12.5px;color:var(--ink-2);margin-top:9px"><em>"It arrives Saturday the nineteenth."</em></div>
+          <div class="result" style="margin-top:10px">
+            <div class="rh"><span class="chip bad"><span class="dot"></span>Not called</span><span style="color:var(--ink-3)">refund_order</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> the only direction that answers rainy 4 structurally. "The tool is attached, the agent hears the question, and it makes an answer up" is a sentence about invocation, and this is the only screen where invocation is visible.</li>
+        <li class="pro"><b>For:</b> it sits beside the Test section that already exists, so it costs no new home.</li>
+        <li class="con"><b>Against:</b> it answers nothing a user meets before this point. There is no tool to test until a tool exists, so rainy 1, 2, 5, 6, 8, 9, 11, 12 and 21 are all untouched. It is a second act with no first act.</li>
+        <li class="con"><b>Against:</b> it is blocked. No per-tool result is documented on the join contract or in the v2.12 release note. The <code>not_invoked</code> state it depends on is exactly the north-star event that is unowned.</li>
+        <li class="cost"><b>Cost:</b> high, and it cannot ship honestly today.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="card">
+    <header><h3>E · One schema library</h3><div class="who">A tool's <code>function.parameters</code> and a call's extracted data points are the same object: a named JSON Schema. Store it once in Resources, attach it by id to a tool's input and to a call's extraction.</div></header>
+    <div class="mock">
+      <p class="cap">Resources › Schemas</p>
+      <div class="sec">
+        <table class="mx">
+          <tr><td>Order lookup<div style="font-size:11px;color:var(--ink-3)">order_id · string</div></td><td style="text-align:right;color:var(--ink-3)">Used by 1 tool</td></tr>
+          <tr><td>Call outcome<div style="font-size:11px;color:var(--ink-3)">resolved · boolean · reason · string</div></td><td style="text-align:right;color:var(--ink-3)">Used by 3 agents</td></tr>
+        </table>
+      </div>
+      <p class="cap" style="margin-top:12px">The same record, two rows apart</p>
+      <div class="sec">
+        <div class="rowx"><div class="lbl">Tools</div><div class="ctl"><div class="field">Parameters<span class="cv">Order lookup</span></div></div></div>
+        <div class="rowx"><div class="lbl">Call data</div><div class="ctl"><div class="field">Extract<span class="cv">Call outcome</span></div></div></div>
+      </div>
+    </div>
+    <div class="why">
+      <ul>
+        <li class="pro"><b>For:</b> the only direction that answers 868khqaqj as a resource, and the only one that closes rainy 23. Today <code>step-analysis.tsx</code> and <code>call-capture-sheet.tsx</code> write one object into two keys, one of which names a single agent in its key string.</li>
+        <li class="pro"><b>For:</b> learning 4 says structured outputs become a resource by being attached by id, not by getting a better editor, and Vapi is the one vendor that already did it.</li>
+        <li class="con"><b>Against:</b> the object it is built on is the one thing the JTBD explicitly puts outside this feature. The extraction fields and the call-detail rendering belong to 10 · Session &amp; call logs, and the brief's open question 3 is still unanswered.</li>
+        <li class="con"><b>Against:</b> one name has to cover a tool input and a post-call field, and no vendor has found that name. Cheapest to build, hardest to say out loud.</li>
+        <li class="cost"><b>Cost:</b> high, and it diverges on two unrelated objects in one feature.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<h2>Audit</h2>
+<p>Every direction against the 23 rainy scenarios in <code>01-jtbd.md</code> and the 5 learnings in <code>03-learnings.md</code>, by number. <span class="y">Y</span> answers it on screen. <span class="h">P</span> answers part of it, or answers it only by naming what is missing. <span class="n">N</span> leaves it where the Before found it.</p>
+
+<table class="audit">
+<tr><th>#</th><th>Rainy scenario</th><th class="s">A</th><th class="s">B</th><th class="s">C</th><th class="s">D</th><th class="s">E</th></tr>
+<tr><td>1</td><td>Nothing here yet: pick from a list or build from scratch?</td><td class="s h">P</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>2</td><td>The connector I need is not in the catalog</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>3</td><td>The endpoint answers with a failure and I cannot tell whose fault</td><td class="s h">P</td><td class="s n">N</td><td class="s y">Y</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>4</td><td>It saves and then never fires</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td></tr>
+<tr><td>5</td><td>The method I need is not a method the agent can use</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>6</td><td>Save is refused for a reason I have to decode</td><td class="s h">P</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s y">Y</td></tr>
+<tr><td>7</td><td>The 32-tool limit lands after the install, not before it</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>8</td><td>The function name is already taken</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>9</td><td>My key is sitting in the open</td><td class="s h">P</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>10</td><td>The call cannot get out of the building: which IP calls us?</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>11</td><td>Not supported by this agent's stack</td><td class="s h">P</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>12</td><td>The tools it found are not my tools</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>13</td><td>It worked for three weeks and then a caller found out it did not</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>14</td><td>Connected, but not by me</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>15</td><td>Two people, one tool</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>16</td><td>Deleting something that is in use</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s h">P</td></tr>
+<tr><td>17</td><td>The answer is too big to say</td><td class="s n">N</td><td class="s n">N</td><td class="s h">P</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>18</td><td>The caller leaves before the answer arrives</td><td class="s h">P</td><td class="s h">P</td><td class="s y">Y</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>19</td><td>The region I pinned does not cover this</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>20</td><td>Someone else's meter ran out</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>21</td><td>The thing I did at the other vendor is not here</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>22</td><td>Two doors to the same thing, and they disagree</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s h">P</td></tr>
+<tr><td>23</td><td>I fixed it in one place and the other place kept the old copy</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td></tr>
+<tr class="grp"><td colspan="7">Learnings</td></tr>
+<tr><td>L1</td><td>A tool belongs to the workspace, not to the agent</td><td class="s y">Y</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s y">Y</td></tr>
+<tr><td>L2</td><td>Nobody lets you prove a no-code HTTP tool works, and we already can</td><td class="s h">P</td><td class="s n">N</td><td class="s y">Y</td><td class="s h">P</td><td class="s n">N</td></tr>
+<tr><td>L3</td><td>The marketplace the market has is one native card and a door to everything else</td><td class="s n">N</td><td class="s h">P</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr><td>L4</td><td>Structured outputs become a resource by being attached by id</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s n">N</td><td class="s y">Y</td></tr>
+<tr><td>L5</td><td>Hosted code tools are shipped product at half the market: state the position</td><td class="s n">N</td><td class="s y">Y</td><td class="s y">Y</td><td class="s n">N</td><td class="s n">N</td></tr>
+<tr class="tot"><td></td><td>Answered fully</td><td class="s">1</td><td class="s">10</td><td class="s">19</td><td class="s">1</td><td class="s">3</td></tr>
+</table>
+
+<h3 class="sec">What the audit says out loud</h3>
+<p><strong>A fails.</strong> It answers the happy path and one rainy scenario. Twenty of the twenty-eight rows are left exactly where the Before found them, and two of them get worse, because A ports the five-method picker and the second MCP door along with the layout. A direction that only answers the happy path fails the audit, and this is that direction.</p>
+<p><strong>D fails as a spine and is right as a graft.</strong> It is the only column with a Y on rainy 4, and it has an N on every scenario a user meets before a tool exists. It also cannot ship: the per-tool result it renders is undocumented on the join contract.</p>
+<p><strong>Rainy 20 has no Y in any column, and should not have one.</strong> When a third-party MCP vendor's own meter empties, nothing on the Agora side moves: the Engine is a flat $0.10 per agent-minute either way. The tool goes to Failing and the user reads the raw body. Drawing anything more here would be inventing a bill we do not send.</p>
+
+<h2>Verdict</h2>
+<div class="verdict">
+<p><strong>C.</strong> One Tools row, built from the <code>ResourceField</code> two rows above it, and a last result on every tool, every connector and every MCP server.</p>
+<p>The row that names this feature becomes the object it names. That is defect 1 and defect 2 in one change, and it costs a rewrite of 45 lines into a component that already exists. Then the create form ends where the job actually ends: a green 200 with the customer's own JSON under it. That is the market's whitespace, our server already answers it, and it converts the proposed <code>tool_verified</code> event from a wish into a hook on a real button.</p>
+<p><strong>What I am not doing, and why.</strong> Not a marketplace. The server refuses every provider but HubSpot, Retell's eleven is the ceiling among four vendors, ElevenLabs advertises over 400 behind one native connector, and three of the four route the long tail through a single MCP URL. A grid of one live card and five placards is a roadmap dressed as a catalog, so the Connectors tab leads with Add your own, keeps HubSpot as the one card, and drops the four that today complete an authorize dialog the server would reject. Not a hosted code tool. <code>execution.mode</code> has one value and <code>server</code> is required, so there is nothing to run customer code on; it gets a named row, visibly disabled, with the reason on it. Not a schema library. Direction E is the right shape for 868khqaqj and it is built on the object the JTBD puts in 10 · Session &amp; call logs, so it waits for the owner to settle whose feature it is.</p>
+<p><strong>The open question, not designable without an answer.</strong> Does Studio set <code>advanced_features.enable_tools</code> when an agent has at least one tool attached, or does the customer have to set it? The flag defaults to <code>false</code>, and the contract says tools are then validated and not invoked. If Studio sets it, no control belongs on this screen at all, and the design ships as drawn. If it does not, then a tool can pass its test, attach cleanly, show Working, and never fire, and the row needs a state that says so before the call, not after it. The prototype ships the first answer and adds <code>advanced_features</code> to the Custom config drawer so the flag is at least visible, which is the honest minimum while the question is open.</p>
+</div>
+
+<h2>Prototype plan</h2>
+<p>Additive on <code>design/sandbox</code>, inside <code>studio_x_2</code>. One new lib module, six files touched. No backend: the store is localStorage beside the MCP store, and the check is deterministic from the URL so the same URL always gives the same answer.</p>
+
+<div class="build">
+<h4>The deep link the reviewer opens</h4>
+<span class="deep">https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=tools</span>
+<p style="margin-top:8px;font-size:13.5px;color:var(--doc-ink-2)">Aria ships with <code>knowledge: []</code> and <code>actions: []</code> (<code>campaign-data.ts</code> :646), so the link lands on an empty Tools row: rainy 1, the first frame of the journey. <code>focusOn</code> expands section 3, scrolls the row to centre and pulses the ring (<code>agent-wizard.tsx</code> :519–560).</p>
+
+<h4>Create</h4>
+<ol>
+<li><code>studio_x_2/lib/agent-tools.ts</code>. The tool object, the Engine's constraints and the check runner. Exports <code>AgentTool</code>, <code>ToolKind</code>, <code>ToolCheck</code>, <code>TOOL_METHODS</code>, <code>TOOL_CEILING</code>, <code>validateTool</code>, <code>runToolCheck</code>, <code>listTools</code>, <code>allTools</code>, <code>createTool</code>, <code>saveToolCheck</code>, <code>deleteTool</code>, <code>toolCount</code>, <code>usedByAgents</code>.
+<br><em>Why not extend the sibling:</em> <code>lib/agent-resources.ts</code> is a store with zero validation in 290 lines, imported by four surfaces. The Engine's tool contract is domain logic, and the sandbox's idiom is one lib module per domain: <code>turn-taking.ts</code>, <code>call-rules.ts</code>, <code>backup-providers.ts</code>, <code>tts-expression.ts</code>. The localStorage read and write helpers are imported from <code>agent-resources.ts</code> rather than copied.</li>
+</ol>
+
+<h4>Touch</h4>
+<ol>
+<li><code>components/wizard/step-build.tsx</code> :117–163, the <code>SectionRow id="wz-5-connectors"</code> block. Delete the hand-rolled table and render <code>&lt;ResourceField&gt;</code>. Label becomes <code>Tools</code>, the row gains <code>focusId="tools"</code>, items are <code>allTools()</code> mapped to <code>AttachItem</code>, <code>selectedIds={draft.tools}</code>, <code>create</code> renders <code>ToolCreateForm</code>, <code>footer</code> is the ceiling line.</li>
+<li><code>components/wizard/step-build.tsx</code> :174–186, <code>interface AttachItem</code>. Add <code>check?: ToolCheck</code> and <code>tools?: number</code>. The MCP row at :101 passes the same two fields, so it inherits the state badge on the same commit.</li>
+<li><code>components/wizard/step-build.tsx</code> :367–418, the roster <code>&lt;li&gt;</code>. Render the state chip and its last-checked line beside the existing Active/Processing badge, and a <code>Test</code> button that calls <code>runToolCheck</code> and <code>saveToolCheck</code>.</li>
+<li><code>components/wizard/step-build.tsx</code> :273–298, the attached chips. A chip whose <code>check</code> is absent or failing carries the state after the name, using the existing <code>disabled</code> branch's destructive treatment for Failing.</li>
+<li><code>components/wizard/step-build.tsx</code>, after <code>McpCreateForm</code> ends at :608. Add and export <code>ToolCreateForm</code> and <code>ToolCheckResult</code>, beside <code>KnowledgeCreateForm</code> and <code>McpCreateForm</code>, so Resources imports all four from one place as it already does at <code>integrations/page.tsx</code> :23.</li>
+<li><code>components/wizard/step-build.tsx</code> :545 and :549 and :602 and :604. <code>McpCreateForm</code>: transport defaults to <code>http</code>, the validator becomes <code>/^https:\/\//</code> so it enforces the rule its own error line states, <code>createMcpServer</code> receives the headers the form collected, and the button reads <code>Create and check</code>.</li>
+<li><code>lib/agent-resources.ts</code> :197–203 <code>discoverTools</code>. Take the URL and derive the list from its host, so two servers stop reporting the same three tool names. :204 <code>createMcpServer</code>: accept and persist <code>headers</code>. :180 <code>McpTool</code>: unchanged.</li>
+<li><code>lib/wizard-draft.ts</code> :443–446 <code>AgentDraft</code>. Add <code>tools: string[]</code> under <code>mcp</code>. :516–518 <code>EMPTY_DRAFT</code>: <code>tools: []</code>, which is what carries old stored drafts through <code>migrateDraft</code> at :609. :726–728 <code>agentToDraft</code>: <code>tools: [...(agent.tools ?? [])]</code>.</li>
+<li><code>lib/wizard-draft.ts</code> :106–108 <code>CUSTOM_CONFIG_SECTIONS</code> and :110–119 <code>CUSTOM_CONFIG_SKELETON</code>. Add <code>advanced_features</code>, so <code>enable_tools</code> typed into the drawer is reported as overriding something instead of being silently dropped.</li>
+<li><code>components/wizard/agent-wizard.tsx</code> :519–528, the <code>owner</code> map inside <code>focusOn</code>. Add <code>tools: 3</code> beside <code>opening: 3</code>.</li>
+<li><code>components/wizard/agent-wizard.tsx</code> :985–986. Replace <code>draft.mcp.length + draft.connectors.length</code> with <code>toolCount(draft)</code>, so the rail's "N tools" is the number the model sees, not the number of attachments.</li>
+<li><code>app/(dashboard)/integrations/page.tsx</code> :34 <code>TABS</code> and :120–126 the tab list. Add <code>"tools"</code> between <code>mcp</code> and <code>connectors</code>, labelled <code>Tools</code>, with a <code>TabsContent</code> that lists <code>allTools()</code> with the same state chip and Test button as the roster row.</li>
+<li><code>app/(dashboard)/integrations/page.tsx</code> :286–341, the Connectors tab. Lead with an Add your own block holding two doors, HTTP tool and MCP server, then the HubSpot card under <code>Ready to connect</code>. Delete the mock authorize dialog at :326–341 and the four connectors the server refuses.</li>
+<li><code>lib/campaign-data.ts</code> :1772–1779 <code>CONNECTORS</code>. Keep <code>conn_hubspot</code>, drop the four that fake a connection and the one placard. :1751–1756 <code>MCP_SERVERS</code>: give each seed a named tool list so the count and the Configure button stop contradicting each other.</li>
+<li><code>components/wizard/hosting-region.tsx</code> :72–74. The disclosure names a fourth endpoint: "LLM, TTS and ASR vendors, and any tool you attach, process data at their own endpoints".</li>
+</ol>
+
+<h4>Requires Engine, each one named on screen</h4>
+<ol>
+<li>Whether the model ever called the tool inside a real conversation. No per-tool result on the join contract or in the v2.12 release note. On screen: the check says the endpoint answered, and never says the agent called it.</li>
+<li>Hosted code tools. <code>execution.mode</code> has the single value <code>sync</code> and <code>server</code> is required. On screen: a roster row reading "Hosted code is not available yet".</li>
+<li>Native connectors past HubSpot. The Studio server throws <code>INVALID_BODY "provider must be hubspot"</code>. On screen: one card under Ready to connect, and Add your own above it.</li>
+<li>Structured outputs as a declared schema. No <code>response_format</code> and no output schema anywhere in the contract. On screen: nothing in this build, and the reason is in the verdict.</li>
+<li>The egress IP a customer allowlists. Retell publishes <code>35.166.138.221</code>; Agora documents none. On screen: the header row help line says the IP we call from is not published yet.</li>
+<li>A stored reference for a secret header value. Agora treats <code>Authorization</code>, <code>api-key</code>, <code>token</code>, <code>secret</code> and <code>cookie</code> as secrets by name only. On screen: the value masks and reads "Stored as a secret", which is true of the name and not yet of the value.</li>
+<li>Async or long-running tools. <code>execution.mode</code> is sync only, ceiling 100000 ms. On screen: the timeout field stops at 100000 and the check prints the round trip beside it.</li>
+</ol>
+
+<h4>Copy</h4>
+<div class="copy" style="margin-top:0">
+<table>
+<tr><th>Where</th><th>String</th></tr>
+<tr><td class="k">Row label, <code>step-build.tsx</code> :117</td><td>Tools</td></tr>
+<tr><td class="k">Row empty state, title</td><td>No tools added</td></tr>
+<tr><td class="k">Row empty state, line</td><td>Create one or add an existing tool</td></tr>
+<tr><td class="k">Attach door</td><td>Add tool</td></tr>
+<tr><td class="k">Sheet title</td><td>Add tools</td></tr>
+<tr><td class="k">Create door, under the roster</td><td>Create new tool</td></tr>
+<tr><td class="k">Roster footer</td><td>18 of 32 tools attached</td></tr>
+<tr><td class="k">Roster footer, over the ceiling</td><td>The agent can use 32 tools. Remove 4.</td></tr>
+<tr><td class="k">Check state, passing</td><td>Working</td></tr>
+<tr><td class="k">Check state, never run</td><td>Never tested</td></tr>
+<tr><td class="k">Check state, failing</td><td>Failing</td></tr>
+<tr><td class="k">Check state, under the chip</td><td>Checked 2 days ago</td></tr>
+<tr><td class="k">Check button, first run</td><td>Run test</td></tr>
+<tr><td class="k">Check button, later runs</td><td>Test again</td></tr>
+<tr><td class="k">Check result, no answer</td><td>The request timed out after 10 seconds.</td></tr>
+<tr><td class="k">Code kind, roster row</td><td>Hosted code</td></tr>
+<tr><td class="k">Code kind, reason</td><td>Hosted code is not available yet</td></tr>
+<tr><td class="k">Realtime agent, row line</td><td>Realtime agents can use MCP servers only.</td></tr>
+<tr><td class="k">Create form, group</td><td>Request</td></tr>
+<tr><td class="k">Create form, group</td><td>Agent function</td></tr>
+<tr><td class="k">Header row, secret value</td><td>Stored as a secret</td></tr>
+<tr><td class="k">Header row, help line</td><td>The IP we call from is not published yet.</td></tr>
+<tr><td class="k">Placeholder error</td><td>Add "order_id" as a parameter, or remove it from the request.</td></tr>
+<tr><td class="k">Function name error</td><td>Use letters and numbers, starting with a letter.</td></tr>
+<tr><td class="k">Roster row meta, shared tool</td><td>Used by 2 agents</td></tr>
+<tr><td class="k">Connectors tab, heading</td><td>Add your own</td></tr>
+<tr><td class="k">Connectors tab, door</td><td>HTTP tool</td></tr>
+<tr><td class="k">Connectors tab, door</td><td>MCP server</td></tr>
+<tr><td class="k">Connectors tab, shelf heading</td><td>Ready to connect</td></tr>
+<tr><td class="k">Resources, Tools tab label</td><td>Tools</td></tr>
+<tr><td class="k">Resources, Tools tab line</td><td>Attach these to an agent from its Tools row.</td></tr>
+<tr><td class="k">MCP create button, :604</td><td>Create and check</td></tr>
+<tr><td class="k">MCP check, no answer</td><td>The server did not answer.</td></tr>
+<tr><td class="k">Hosting disclosure, :72</td><td>LLM, TTS and ASR vendors, and any tool you attach, process data at their own endpoints</td></tr>
+</table>
+</div>
+
+<h4>Owner question</h4>
+<p style="font-size:13.5px;color:var(--doc-ink-2);margin-top:4px">Does 19 ship the structured-outputs promotion (868khqaqj), or does it move to 10 · Session &amp; call logs? Open question 3 in <code>00-brief.md</code> is unanswered, and it decides whether this build has one object or two. The plan above assumes it moves.</p>
+</div>
+
+
+<h2>Audit corrections</h2>
+<p>The build plan written from this document went to three hostile auditors, on locks, on honesty and on
+buildability. All three refuted it, and their objections were sourced to line numbers that check out
+against <code>studio_x_2</code>. Direction C survives. The plan that ships is smaller in four places and
+compiles in nine. What follows is the argument, so the next reader sees it and not only the result.</p>
+
+<h3 class="sec">What the audits killed</h3>
+<table class="audit">
+<tr><th>Drawn in this document</th><th>Why it cannot ship</th><th>What ships instead</th></tr>
+<tr><td><code>HubSpot &middot; Connected &middot; 4 tools &middot; Failing &middot; Checked 6 minutes ago</code> (:274-276)</td><td><code>Connector</code> is <code>id &middot; name &middot; category &middot; description &middot; initials &middot; status</code> (<code>campaign-data.ts</code> :1762-1769). No tool count, no health, no prober. The two probers in evidence cover custom tools and MCP servers only.</td><td>The connector row carries its name, its category and Connected or Connect in Resources, read through the existing <code>effectiveConnectorStatus</code>. No chip, no count, no Test button.</td></tr>
+<tr><td>"a primary Run test button &hellip; then Save"</td><td>Two primary fills in one fold, against the standing lock, and the test endpoint is keyed on a saved <code>toolId</code>, so there is nothing to call before Save.</td><td>One button, <b>Create and test</b>: it creates the tool, runs the test, and renders the result in place. Pressed again it reads Test again and re-runs without creating a second tool.</td></tr>
+<tr><td><code>HTTP 200 &middot; 340 ms</code> (:299)</td><td>The test result normalizes to <code>{ success, statusCode, headers, body, error }</code>. There is no duration in it.</td><td><code>ToolCheck.ms</code> is cut. The result header reads the state and <code>HTTP 200</code>.</td></tr>
+<tr><td>A 200 body echoing <code>"order_id": "4471"</code> for a URL holding <code>{{order_id}}</code></td><td>Nothing binds the placeholder. <code>runToolCheck(tool)</code> took the tool and no input, while the shipped dialog carries a <b>Function input (JSON)</b> textarea for exactly this.</td><td>The Agent function group gains that same field, and the result echoes the value that was bound.</td></tr>
+<tr><td><code>Checked 2 days ago</code> under an HTTP tool's chip</td><td>The tool envelope is <code>toolId &middot; name &middot; description &middot; status &middot; type &middot; createdAt &middot; updatedAt &middot; method &middot; url</code>. No last-test field. MCP is the opposite case: <code>GET /mcp/{id}/status</code> returns <code>lastDetectedAt</code>.</td><td>An MCP row keeps the age. A tool row states the result and not its age, and the storage ask is named.</td></tr>
+<tr><td><code>used by 2 agents</code> (:268)</td><td><code>interface Agent</code> has no <code>tools</code>, so the count was structurally zero for every custom tool.</td><td><code>Agent.connectors?</code>, which no seed uses, is renamed to <code>tools?: string[]</code> and two seed agents carry a tool. The number is counted.</td></tr>
+<tr><td><code>18 of 32 tools attached</code> (:286)</td><td>32 is real and Engine-enforced. The left side added "each attached connector's tools", which no record holds, so a true ceiling was fed an invented addend.</td><td>The footer counts HTTP tools one each plus each attached MCP server's tool count, both real fields. With a connector attached the line adds: Connector tools are not counted yet.</td></tr>
+<tr><td><code>Working</code> on every passing tool</td><td><code>advanced_features.enable_tools</code> defaults to <code>false</code> and tools are then validated and not invoked. Working claims the agent's tool works; the test only proves the endpoint answered us.</td><td>Three states that name what the test knows: <b>Test passed &middot; Test failed &middot; Not tested yet</b>. The flag question goes to the owner, and <code>advanced_features</code> joins the Custom config drawer.</td></tr>
+<tr><td><code>TOOL_SEEDS</code> carrying <code>conn_hubspot</code> and a code row inside one required shape</td><td>It forked the connector catalog that <code>campaign-data.ts</code> :1758 calls canonical, and it forced a method, a URL and a JSON-Schema function onto two kinds that have none.</td><td><code>lib/agent-tools.ts</code> owns HTTP tools only. The roster composes tools, <code>CONNECTORS</code> read through the one catalog, and one static disabled code row.</td></tr>
+<tr><td><code>/^[A-Za-z][A-Za-z0-9_]{0,63}$/</code></td><td>A third variant: the shipped Console validator is <code>^[A-Za-z_][A-Za-z0-9_]{0,63}$</code> and the join contract is stricter than both.</td><td>The Console's validator, with an error line that states the rule it enforces. The contract conflict is a named ask.</td></tr>
+<tr><td>The row renamed to Tools, and nothing else renamed</td><td>Defect 12 is "one destination has five names". Renaming one made six.</td><td>The row is Tools, the section keeps its own title, and the command palette, the journey breadcrumb, both Resources links, the connector toast and the Resources breadcrumb label move in the same commit.</td></tr>
+<tr><td>Methods restricted to GET and POST, transport left offering SSE</td><td>The same honesty applied to one field and withheld from its neighbour. <code>llm.mcp_servers[].transport</code> takes <code>streamable_http</code> only.</td><td>The transport toggle comes out. A server is created as streamable HTTP, which is also no control for what Agora does by default.</td></tr>
+<tr><td>Named tool lists invented for the four seed MCP servers</td><td>Deepwiki, Shopify and Notion are named third parties. Writing their tool names is the same fabrication as a connector's health.</td><td>The seeds keep their counts, and Configure tools renders only where a tool list exists.</td></tr>
+<tr><td><code>ToolCeiling</code>, <code>toAttachItem</code>, <code>onDelete={...}</code>, <code>agent.tools</code>, <code>readList</code>, a missing <code>description</code>, a missing <code>Wrench</code>, a Test button with no way to reach the tool</td><td>Eight things the plan wrote and never declared. <code>pnpm tsc --noEmit</code> fails on four of them.</td><td>Each one is a named entry: an <code>onTest</code> prop on <code>ResourceField</code>, exported store helpers, a declared mapper and ceiling, and the icon in the import.</td></tr>
+</table>
+
+<h3 class="sec">What is kept against the audits, and why</h3>
+<ul>
+<li><b>The fourth <code>ResourceField</code>, labelled Tools.</b> One audit offered to keep "Tools &amp; connectors" so that no name moved. Kept: the row holds tools now, and defect 12 is answered by moving all six names in one commit, which the plan does.</li>
+<li><b>The check itself.</b> One audit would cut it wherever a prober is missing. It is missing for connectors and cut there. It is documented for custom tools (<code>POST /custom-tools/{toolId}/test</code>) and for MCP servers (<code>GET /mcp/{id}/status</code>), so it stays on both, which is learning 2's whitespace and the hook the proposed <code>tool_verified</code> event needs.</li>
+<li><b>The ceiling footer.</b> Read as fabricated, but only its connector addend was. 32 is Engine-enforced, and a number the user sees before spending it is the answer to rainy 7.</li>
+<li><b>Hosted code as a visibly disabled row.</b> No audit killed the position, only its typing. Learning 5 says state it rather than leave a blank, and the live Console already states a stack refusal this way.</li>
+<li><b>The realtime line, verbatim.</b> "Realtime agents can use MCP servers only." The sandbox has two pipelines, so the shortened sentence is true here. It must not be copied onto a surface that grows a default-LLM path.</li>
+<li><b>Dropping the four connectors that complete an authorize dialog the server refuses, and the one placard.</b> Learning 3, unchallenged.</li>
+</ul>
+
+<h3 class="sec">One departure from this document</h3>
+<p><code>ToolCreateForm</code> does not live inside <code>step-build.tsx</code> beside its two siblings, as the prototype
+plan above says. It lives in <code>components/wizard/tool-create-form.tsx</code> and both surfaces import it from
+there. The reason is scope, not taste: nine features land in one app through one integrator, and
+<code>step-build.tsx</code> is already the most-edited file in this plan. The property the sibling comment at
+<code>integrations/page.tsx</code> :21-23 actually asserts, that Resources and the builder create the same record
+through the same component, is kept.</p>
+
+<h3 class="sec">The owner question, restated</h3>
+<p>Unchanged and still unanswered: does Studio set <code>advanced_features.enable_tools</code> when an agent holds a
+tool? The design no longer depends on the answer, because no state on screen claims the agent called
+anything. If the answer is that Studio does not set it, the row needs a fourth state before the call,
+and that is a follow-up, not a blocker. The second question, whether 868khqaqj ships here or moves to
+10 &middot; Session &amp; call logs, is assumed to move, and direction E is the design if it stays.</p>
+
+</div>
