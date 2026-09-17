@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AudioLines, CircleHelp, SlidersHorizontal } from "lucide-react"
+import { AudioLines, ChevronLeft, ChevronRight, CircleHelp, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -12,8 +12,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
-  DEFAULT_DISCLOSURE, composeOpening, openingOf, type AgentDraft, type OpeningConfig,
+  DEFAULT_DISCLOSURE, composeOpening, openingOf, hasChannel, firstRun,
+  type AgentDraft, type OpeningConfig,
 } from "@/lib/wizard-draft"
+import { resolveText, REQUIRED_COLUMN } from "@/lib/contact-list"
+import { useContactList } from "@/hooks/use-contact-list"
 
 /**
  * Opening (design 04 · Greeting, filler & disclaimer — ported from the
@@ -60,6 +63,17 @@ export function SectionOpening({
   const patch = (p: Partial<OpeningConfig>) => update({ opening: { ...o, ...p } })
   const callerFirst = o.speaksFirst === "caller"
   const hears = composeOpening(draft)
+  // The one thing nobody in the category shows: the sentence the NEXT caller
+  // hears, with this row's own values in it. Only where a real row exists —
+  // on inbound there is none, so the braces stay and the product claims
+  // nothing about a call it cannot preview.
+  const batch = hasChannel(draft, "batch")
+  const list = useContactList(draft.agentId ?? "new", firstRun(draft).id)
+  const rows = batch ? list?.rows ?? [] : []
+  const [ix, setIx] = React.useState(0)
+  const at = rows.length > 0 ? Math.min(ix, rows.length - 1) : 0
+  const row = rows[at] ?? null
+  const resolved = resolveText(hears, row)
 
   return (
     <div className="space-y-5">
@@ -154,7 +168,38 @@ export function SectionOpening({
           {/* Not a field. It looked like one, so people tried to type in it
               (owner 2026-09-15): it is the composed line, shown as a line. */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium" id="wz-opening-hears-label">Callers hear</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label className="text-sm font-medium" id="wz-opening-hears-label">Callers hear</Label>
+              {/* The stepper names the row it is reading, and claims no total:
+                  only the first rows of the file are held. */}
+              {rows.length > 1 && (
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    aria-label="Previous contact"
+                    onClick={() => setIx((i) => (i <= 0 ? rows.length - 1 : i - 1))}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
+                  </Button>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {row?.[REQUIRED_COLUMN] || "no number"}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    aria-label="Next contact"
+                    onClick={() => setIx((i) => (i >= rows.length - 1 ? 0 : i + 1))}
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="flex items-start gap-2">
               <p
                 id="wz-opening-hears"
@@ -162,7 +207,26 @@ export function SectionOpening({
                 data-testid="wz-opening-callers-hear"
                 className="min-h-[44px] flex-1 rounded-md bg-muted/40 px-3 py-2.5 text-sm leading-relaxed"
               >
-                {hears ? <Spoken>{hears}</Spoken> : <span className="text-muted-foreground">Write a greeting above</span>}
+                {hears ? (
+                  <Spoken>
+                    {row
+                      ? resolved.parts.map((part, i) =>
+                          part.kind === "gap" ? (
+                            <span
+                              key={i}
+                              className="rounded border border-warning/50 bg-warning/10 px-1 font-mono text-xs not-italic"
+                            >
+                              {part.value}
+                            </span>
+                          ) : (
+                            <React.Fragment key={i}>{part.value}</React.Fragment>
+                          ),
+                        )
+                      : hears}
+                  </Spoken>
+                ) : (
+                  <span className="text-muted-foreground">Write a greeting above</span>
+                )}
               </p>
               <Button type="button" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={onHearOpening} disabled={!hears}>
                 <AudioLines className="h-3.5 w-3.5" aria-hidden /> Hear the opening

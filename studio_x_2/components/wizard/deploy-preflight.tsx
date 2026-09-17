@@ -9,13 +9,13 @@ import { Button } from "@/components/ui/button"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { cn } from "@/lib/utils"
 import {
-  publishBlocks, channelTarget, campaignMissingVars, activeCampaigns, hasChannel, draftHosting,
-  MOCK_CSV_ROWS, DEFAULT_ANALYSIS, DEFAULT_CALL_BEHAVIOR, type AgentDraft, type CampaignDraft,
+  publishBlocks, channelTarget, campaignMissingVars, promptVars, activeCampaigns, hasChannel, draftHosting,
+  DEFAULT_ANALYSIS, DEFAULT_CALL_BEHAVIOR, type AgentDraft, type CampaignDraft,
 } from "@/lib/wizard-draft"
 import { hostingSummary, isPinned } from "@/lib/hosting-regions"
 import { ladderLine, ruleIssues } from "@/lib/call-rules"
 import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
-import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS, type RunMode } from "@/lib/campaign-data"
+import { stackLine, stackEstimateFor, PHONE_NUMBERS, type RunMode } from "@/lib/campaign-data"
 import { latestRun } from "@/lib/eval-runs"
 import { hasCriteria, readScorecard } from "@/lib/scorecard"
 
@@ -46,6 +46,10 @@ interface CheckRow {
 function campaignWarn(draft: AgentDraft, c: CampaignDraft): { value: string; fixStep: number; fixLabel: string } | null {
   if (!c.numberId) return { value: `"${c.name}" needs a phone number.`, fixStep: 5, fixLabel: "Pick a number" }
   if (!c.csvName) return { value: `"${c.name}" is missing its contacts CSV.`, fixStep: 5, fixLabel: "Add contacts" }
+  // Same words as the publish block, so the two screens agree.
+  if (c.listChecks?.hasKey === false) {
+    return { value: `"${c.name}"'s list has no phone_number column.`, fixStep: 5, fixLabel: "Add contacts" }
+  }
   if (c.launch?.mode === "scheduled" && !(c.launch.startDate && c.launch.startTime && c.launch.timezone)) {
     return { value: `"${c.name}" is scheduled but has no start time.`, fixStep: 5, fixLabel: "Set schedule" }
   }
@@ -97,7 +101,7 @@ function buildRows(
         id: `campaign-${c.id}`, icon: Users, label: i === 0 ? "Batch" : "",
         value: warn
           ? warn.value
-          : `${c.name} · ${c.contacts ?? MOCK_CSV_ROWS} contacts · ${c.csvName} · variables covered`,
+          : `${c.name} · ${c.contacts ?? 0} contacts · ${c.csvName}`,
         state: warn ? "warn" : "ok",
         fixStep: warn?.fixStep, fixLabel: warn?.fixLabel,
       })
@@ -106,7 +110,7 @@ function buildRows(
 
   // Prompt (Context)
   const prBlock = blockFor(3)
-  const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
+  const vars = promptVars(draft)
   rows.push({
     id: "prompt", icon: FileText, label: "Prompt",
     value: prBlock
@@ -260,7 +264,7 @@ export function DeployPreflight({
   const allGo = warns.length === 0
   const batch = hasChannel(draft, "batch")
   const ready = batch ? activeCampaigns(draft).filter((c) => !campaignWarn(draft, c)) : []
-  const totalContacts = ready.reduce((sum, c) => sum + (c.contacts ?? MOCK_CSV_ROWS), 0)
+  const totalContacts = ready.reduce((sum, c) => sum + (c.contacts ?? 0), 0)
   const est = stackEstimateFor(draft.stack)
   const stagger = 140
 
@@ -360,7 +364,7 @@ export function DeployPreflight({
               // Per-run cost projection (user-test 2026-07-28: the only money
               // number anywhere was per-minute — at the moment of dialing a
               // whole list): contacts × ~2 min × tier $/min.
-              const contacts = c.contacts ?? MOCK_CSV_ROWS
+              const contacts = c.contacts ?? 0
               return (
                 <li key={c.id} className="tabular-nums">
                   {c.name}: {PHONE_NUMBERS.find((n) => n.id === c.numberId)?.number ?? "selected number"} ·{" "}

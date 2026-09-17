@@ -11,9 +11,8 @@ import { Label } from "@/components/ui/label"
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { extractVars } from "@/lib/campaign-data"
 import { SectionRow } from "@/components/wizard/section-row"
-import { hasChannel, greetingSpeaksName } from "@/lib/wizard-draft"
+import { hasChannel, greetingSpeaksName, promptVars, campaignMissingVars, firstRun } from "@/lib/wizard-draft"
 import { SectionOpening } from "@/components/wizard/section-opening"
 import type { StepProps } from "@/components/wizard/types"
 
@@ -43,8 +42,13 @@ export function SectionPrompt({
   onHearOpening?: () => void
   /** Opening › silence recap "Change" — jumps to the call rules. */
 }) {
-  const vars = extractVars(`${draft.systemPrompt} ${draft.greeting}`)
+  // ONE definition of the prompt's variables, shared with the contact list,
+  // the pre-flight and the test rail — the failure message counts too.
+  const vars = promptVars(draft)
   const batch = hasChannel(draft, "batch")
+  // On batch, a chip whose token has no column is the same fact the coverage
+  // panel states; on inbound the Caller context row states it once instead.
+  const uncovered = batch ? campaignMissingVars(draft, firstRun(draft)) : []
   const overridden = (field: string) => (draft.configOverrides ?? []).includes(field)
   const [rewriteOpen, setRewriteOpen] = React.useState(false)
 
@@ -74,6 +78,7 @@ export function SectionPrompt({
           hairline between them does the separating. */}
       <SectionRow
         id="wz-3-prompt"
+        focusId="variables"
         label="System prompt"
         hint="What the agent knows about itself. Start from a template, then edit."
       >
@@ -119,24 +124,46 @@ export function SectionPrompt({
             </Button>
           )}
         </div>
-        {/* Variable chips: on Batch calls these are filled from each
-            campaign's CSV — the dependency runs Go Live → prompt. */}
+        {/* Variable chips, and the ONE door to the row that owns the values:
+            the contact list on batch, Caller context on inbound. The caption
+            used to promise "filled from your campaign CSVs" for tokens no
+            column supplied, and told inbound builders to wait. */}
         {vars.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-xs text-muted-foreground">
-              Variables detected{batch ? " (filled from your campaign CSVs)" : ""}:
-            </span>
-            {vars.map((v) => (
-              <Badge key={v} variant="secondary" className="h-6 px-2 font-mono text-xs">{`{{${v}}}`}</Badge>
-            ))}
+            <span className="text-xs text-muted-foreground">Variables detected:</span>
+            {vars.map((v) => {
+              const missing = uncovered.includes(v)
+              return (
+                <Badge
+                  key={v}
+                  variant="secondary"
+                  title={missing ? "No column in your contact list." : undefined}
+                  className={cn(
+                    "h-6 px-2 font-mono text-xs",
+                    missing && "border border-warning/50 bg-warning/10 text-foreground",
+                  )}
+                >
+                  {`{{${v}}}`}
+                </Badge>
+              )
+            })}
           </div>
         )}
-        {/* Inbound has no CSV to fill from — name the roadmap item instead of
-            leaving the variables unexplained (user-test 2026-07-29: the
-            Retell-webhook switcher hit silence here). */}
-        {vars.length > 0 && !batch && hasChannel(draft, "inbound") && (
+        {vars.length > 0 && (batch || hasChannel(draft, "inbound")) && (
           <p className="text-xs text-muted-foreground">
-            Inbound agents: per-call variables via API: coming soon.
+            Where the values come from:{" "}
+            <button
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("sx:focus", { detail: batch ? "contact-list" : "caller-context" }),
+                )
+              }
+              className="rounded font-medium text-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {batch ? "Contact list" : "Caller context"}
+            </button>
+            .
           </p>
         )}
       </div>

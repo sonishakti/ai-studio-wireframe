@@ -8,9 +8,9 @@ import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { TestsSection } from "@/components/eval-tests"
 import { ScorecardSummary } from "@/components/scorecard-block"
 import { seedScore, synthTranscript } from "@/lib/eval-runs"
-import { extractVars, type EvalCase, type EvalCaseResult, type RunMode } from "@/lib/campaign-data"
+import { type EvalCase, type EvalCaseResult, type RunMode } from "@/lib/campaign-data"
 import {
-  hasChannel, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
+  hasChannel, promptVars, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
 } from "@/lib/wizard-draft"
 import { type StepProps } from "@/components/wizard/types"
 
@@ -147,12 +147,12 @@ const SCENARIO_SEEDS: {
     name: "Personalization check",
     identity: "A contact from the CSV",
     goal: (d) => {
-      const vars = extractVars(`${d.systemPrompt} ${d.greeting}`)
+      const vars = promptVars(d)
       return vars.length ? `hear their own {{${vars[0]}}} used correctly` : "be addressed consistently by the agent"
     },
     personality: "Attentive to detail.",
     assertion: (d) => {
-      const vars = extractVars(`${d.systemPrompt} ${d.greeting}`)
+      const vars = promptVars(d)
       return vars.length
         ? `PASS if every variable (${vars.map((v) => `{{${v}}}`).join(", ")}) is filled. No raw placeholders spoken aloud.`
         : "PASS if the agent never speaks a raw {{placeholder}}."

@@ -23,12 +23,17 @@ import {
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { CampaignDialingFields, CampaignLaunchFields } from "@/components/wizard/step-call-settings"
-import { PHONE_NUMBERS, extractVars } from "@/lib/campaign-data"
+import { PHONE_NUMBERS } from "@/lib/campaign-data"
 import {
-  MOCK_CSV_COLUMNS, MOCK_CSV_ROWS, campaignMissingVars, makeCampaign, newCampaignId,
+  MOCK_CSV_COLUMNS, MOCK_CSV_ROWS, campaignMissingVars, promptVars, makeCampaign, newCampaignId,
   campaignRollup, campaignDialed,
   type AgentDraft, type CampaignDraft, type CampaignStatus,
 } from "@/lib/wizard-draft"
+import {
+  MAX_ROWS, REQUIRED_COLUMN, parseContactCsv, sampleContactList, saveList,
+  type ParsedContactList,
+} from "@/lib/contact-list"
+import { useContactList } from "@/hooks/use-contact-list"
 import { type StepProps } from "@/components/wizard/types"
 
 /**
@@ -501,22 +506,6 @@ function CampaignEditor({
 
 // ─── Contacts — the campaign's CSV (upload · coverage · scrolling preview) ────
 
-// Deterministic preview rows (wireframe): enough to show real shape + internal
-// scrolling without ever growing the page.
-const PREVIEW_NAMES = [
-  "Ava Chen", "Liam Patel", "Maya Ortiz", "Noah Kim", "Zoe Ahmed", "Eli Novak",
-  "Ivy Santos", "Owen Brooks", "Lea Fischer", "Max Rivera", "Nia Kowalski", "Theo Lang",
-  "Ana Costa", "Ben Haddad", "Mia Johansson", "Raj Mehta", "Sara Lind", "Tom Baker",
-  "Uma Rao", "Vik Sharma", "Wes Cole", "Ines Duarte", "Yara Aziz", "Zack Moore",
-]
-const PREVIEW_ROWS = PREVIEW_NAMES.map((name, i) => ({
-  phone: `+1 (415) 555-${String(1204 + i * 7).slice(-4)}`,
-  name,
-  account: `AC-${2400 + i * 13}`,
-  balance: `$${(140 + i * 37) % 900}.${String(20 + (i * 7) % 80).padStart(2, "0")}`,
-  dueDate: `2026-08-${String(1 + (i % 28)).padStart(2, "0")}`,
-}))
-
 export function CampaignContacts({
   draft, campaign, onChange, defaultPreviewOpen = false,
 }: {
@@ -528,11 +517,18 @@ export function CampaignContacts({
   defaultPreviewOpen?: boolean
 }) {
   const hasCsv = !!campaign.csvName
+  const required = promptVars(draft)
   const missing = campaignMissingVars(draft, campaign)
   const [previewOpen, setPreviewOpen] = React.useState(defaultPreviewOpen)
+  const fileRef = React.useRef<HTMLInputElement>(null)
+  // The rows the panel and the Opening both read — one parsed list per run, so
+  // the preview here and the sentence three sections up cannot disagree.
+  const agentId = draft.agentId ?? "new"
+  const held = useContactList(agentId, campaign.id)
+  const checks = campaign.listChecks
   // Coverage AHA: the moment every {{variable}} finds its column, the green
   // check pops. Keyed so the one-shot replays.
-  const varsCovered = hasCsv && missing.length === 0 && extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
+  const varsCovered = hasCsv && missing.length === 0 && required.length > 0
   const prevCovered = React.useRef(varsCovered)
   const [coveredFlash, setCoveredFlash] = React.useState(0)
   React.useEffect(() => {
@@ -540,59 +536,143 @@ export function CampaignContacts({
     prevCovered.current = varsCovered
   }, [varsCovered])
 
-  const attachCsv = () => {
-    onChange({ csvName: "contacts.csv", contacts: MOCK_CSV_ROWS })
-    toast.success("contacts.csv attached", {
-      description: `${MOCK_CSV_ROWS} contacts · columns: ${MOCK_CSV_COLUMNS.join(", ")}`,
+  /** One place a list becomes a run's contacts, whether it was chosen from
+   *  disk or taken from the sample. */
+  const adopt = (list: ParsedContactList) => {
+    saveList(agentId, campaign.id, list)
+    onChange({
+      csvName: list.fileName,
+      contacts: list.rowCount,
+      columns: list.columns,
+      listChecks: {
+        repeats: list.checks.repeats,
+        notE164: list.checks.notE164,
+        overCap: list.checks.overCap,
+        hasKey: list.checks.hasKey,
+        hasOverride: list.checks.hasOverride,
+      },
+    })
+    toast.success(`${list.fileName} attached`, {
+      description: `${list.rowCount} contacts · columns: ${list.columns.join(", ")}`,
     })
   }
+
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    // Reset first: choosing the same file twice must fire onChange again.
+    e.target.value = ""
+    if (file) adopt(await parseContactCsv(file))
+  }
+
+  /** The file input lives on both states, so Replace file reaches it too. */
+  const picker = (
+    <input
+      ref={fileRef}
+      type="file"
+      accept=".csv,text/csv"
+      className="sr-only"
+      onChange={onPick}
+      aria-hidden
+      tabIndex={-1}
+    />
+  )
 
   if (!hasCsv) {
     return (
       <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Contacts CSV</Label>
+        {picker}
         <div className="flex flex-wrap items-center gap-3">
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={attachCsv}>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => fileRef.current?.click()}>
             <Upload className="h-3.5 w-3.5" aria-hidden /> Upload contacts CSV
           </Button>
           <button
             type="button"
-            onClick={() => toast("Template downloaded", { description: `Columns: ${MOCK_CSV_COLUMNS.join(", ")}` })}
+            onClick={() => adopt(sampleContactList())}
             className="rounded text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Download CSV Template
+            Use the sample list
+          </button>
+          <button
+            type="button"
+            onClick={() => toast("Template downloaded", { description: `Columns: ${sampleContactList().columns.join(", ")}` })}
+            className="rounded text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Download the template
           </button>
         </div>
         <p className="text-xs text-muted-foreground">
-          One row per contact · columns become {"{{variables}}"}.{" "}
+          One row per contact. A phone_number column is required.{" "}
           <a
-            href="https://docs.agora.io/en/conversational-ai"
+            href="https://docs.agora.io/en/ai/studio/deploy/campaign"
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-2 hover:text-foreground"
           >
-            Learn how {"{{dynamic vars}}"} work
+            Contact list format
           </a>
         </p>
       </div>
     )
   }
 
+  // Facts about the file the builder chose — each one a count of rows in it,
+  // printed only when there is something to count.
+  const blanks = Object.entries(held?.checks.blanksByColumn ?? {})
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1])
+  const notes: string[] = []
+  if (checks?.repeats) notes.push(`${checks.repeats} number${checks.repeats > 1 ? "s appear" : " appears"} twice`)
+  if (checks?.notE164) notes.push(`${checks.notE164} number${checks.notE164 > 1 ? "s are" : " is"} not in E.164 format`)
+  for (const [col, n] of blanks) notes.push(`${n} blank cell${n > 1 ? "s" : ""} in ${col}`)
+
+  // The file's own header, with the required column first when it carries one.
+  const own = campaign.columns?.length ? campaign.columns : MOCK_CSV_COLUMNS
+  const columns = own.includes(REQUIRED_COLUMN)
+    ? [REQUIRED_COLUMN, ...own.filter((c) => c !== REQUIRED_COLUMN)]
+    : own
+  const rows = held?.rows ?? []
+
   return (
     <div className="space-y-2.5">
-      {/* One summary bar — file · count · coverage · actions. */}
+      {picker}
+      {/* One summary bar — file · count · what the file turned out to be. */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3.5 py-2.5">
         <div className="min-w-0">
-          <p className="text-sm font-medium">{campaign.contacts ?? MOCK_CSV_ROWS} contacts</p>
+          <p className="text-sm font-medium">{campaign.contacts ?? 0} contacts</p>
           <p className="truncate font-mono text-xs text-muted-foreground">{campaign.csvName}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => setPreviewOpen((v) => !v)}>
-            {previewOpen ? "Hide preview" : `Preview ${PREVIEW_ROWS.length} rows`}
-          </Button>
-          <Button variant="outline" size="sm" onClick={attachCsv}>Replace file</Button>
+          {rows.length > 0 && (
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => setPreviewOpen((v) => !v)}>
+              {previewOpen ? "Hide preview" : `Preview ${rows.length} rows`}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>Replace file</Button>
         </div>
       </div>
+
+      {notes.length > 0 && <p className="text-xs text-muted-foreground">{notes.join(" · ")}</p>}
+      {checks?.hasOverride && (
+        <p className="text-xs text-muted-foreground">prompt_override replaces the prompt for that row.</p>
+      )}
+
+      {checks?.hasKey === false && (
+        <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+          <p className="text-xs leading-relaxed text-foreground">
+            This file has no phone_number column, so there is nothing to dial.
+          </p>
+        </div>
+      )}
+      {checks?.overCap && (
+        <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+          <p className="text-xs leading-relaxed text-foreground">
+            {MAX_ROWS.toLocaleString("en-US")} rows is the limit. This file has{" "}
+            {(campaign.contacts ?? 0).toLocaleString("en-US")}.
+          </p>
+        </div>
+      )}
 
       {/* Prompt-variable coverage — it's about THIS list, so it lives here. */}
       {missing.length === 0 ? (
@@ -605,43 +685,48 @@ export function CampaignContacts({
           )}
         >
           {varsCovered && <Check className={cn("mt-0.5 h-3.5 w-3.5 shrink-0 text-success", coveredFlash > 0 && "sx-tick-pop")} />}
-          {extractVars(`${draft.systemPrompt} ${draft.greeting}`).length > 0
-            ? `${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length}/${extractVars(`${draft.systemPrompt} ${draft.greeting}`).length} {{variables}} covered.`
+          {required.length > 0
+            ? `${required.length} of ${required.length} variables have a column.`
             : "No {{variables}} in your prompt yet. Add them in Prompt & knowledge to personalize each call."}
         </p>
       ) : (
         <div className="flex items-start gap-2.5 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
           <p className="text-xs leading-relaxed text-foreground">
-            Missing {missing.length} prompt variable{missing.length > 1 ? "s" : ""}:{" "}
-            {missing.map((v) => `{{${v}}}`).join(", ")}. Add the columns, or remove them from
-            the prompt. Deploy stays blocked until they match.
+            Missing {missing.length} column{missing.length > 1 ? "s" : ""}:{" "}
+            {missing.map((v) => `{{${v}}}`).join(", ")}. Add {missing.length > 1 ? "them" : "it"} to
+            the file, or remove {missing.length > 1 ? "them" : "it"} from the prompt. Deploy stays
+            blocked until they match.
           </p>
         </div>
       )}
 
       {/* Preview collapsed by default (owner 2026-07-29: cut the visual mass —
-          the table scrolls inside its panel when opened). */}
-      {previewOpen && (
+          the table scrolls inside its panel when opened). The header is the
+          file's own, phone_number first, so a list with five columns is not
+          drawn as if it had the five we imagined. */}
+      {previewOpen && rows.length > 0 && (
         <div className="max-h-[300px] overflow-y-auto rounded-md border border-border">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-card">
               <TableRow>
-                <TableHead>Phone number</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead>Due date</TableHead>
+                {columns.map((col) => <TableHead key={col} className="font-mono text-xs">{col}</TableHead>)}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {PREVIEW_ROWS.map((r) => (
-                <TableRow key={r.phone}>
-                  <TableCell className="font-mono text-xs">{r.phone}</TableCell>
-                  <TableCell className="text-sm">{r.name}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{r.account}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{r.balance}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{r.dueDate}</TableCell>
+              {rows.map((r, i) => (
+                <TableRow key={`${r[REQUIRED_COLUMN] ?? ""}-${i}`}>
+                  {columns.map((col) => (
+                    <TableCell
+                      key={col}
+                      className={cn(
+                        "font-mono text-xs",
+                        col === REQUIRED_COLUMN ? "text-foreground" : "text-muted-foreground",
+                      )}
+                    >
+                      {r[col] ?? ""}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>

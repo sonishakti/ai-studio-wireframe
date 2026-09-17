@@ -546,6 +546,11 @@ export function AgentWizard({
       // The criteria editor lives in Go Live's Structured outputs row, so the
       // review link has to expand section 5 before the ring can find it.
       scorecard: 5,
+      // Where the agent's values come from (21, 2026-09-17): the contact list
+      // on batch, Caller context on inbound. Both rows live in Deployment, and
+      // section bodies are hidden rather than unmounted, so without these the
+      // doors from the prompt chips land on a display:none node.
+      "contact-list": 2, "caller-context": 2,
     }
     const n = owner[focus] ?? 3
     // Controls that live in a dialog or sheet are not in the DOM until their

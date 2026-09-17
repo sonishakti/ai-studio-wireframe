@@ -143,6 +143,11 @@ export const Events = {
   number_purchase_declined:   "number_purchase_declined",    // { step } — left for a number they own
   campaign_created:           "campaign_created",
   campaign_launched:          "campaign_launched",
+  // What the agent knew when it opened its mouth (21, 2026-09-17). DECLARED,
+  // not fired: its definition is a live, non-test call, and firing it from a
+  // simulated one would make the counter lie. Its property keys need the
+  // ng-console sanitiser allowlist before it ships.
+  caller_context_received:    "caller_context_received",     // { channel, direction, source, matched, varCount, valuedCount, missCount }
 
   // ── Insights (wayfinding the Insights group solves) ────────────────────────
   monitor_viewed:             "monitor_viewed",

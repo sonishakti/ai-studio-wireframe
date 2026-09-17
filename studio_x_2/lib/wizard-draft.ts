@@ -254,8 +254,22 @@ export interface CampaignDraft {
   /** Caller-ID number — single (load-balancing across numbers is deferred). */
   numberId?: string
   csvName?: string | null
-  /** Mock row count of the attached CSV. */
+  /** Rows the chosen file holds — the whole count, even when only the first
+   *  `ROWS_KEPT` rows are held for the preview (`lib/contact-list.ts`). */
   contacts?: number
+  /** The header row of the file the builder chose. Absent on a legacy draft,
+   *  which falls back to `MOCK_CSV_COLUMNS`. */
+  columns?: string[]
+  /** What that file turned out to be — counts, never predictions. Mirrors
+   *  `ListChecks` minus `blanksByColumn`, which the panel reads from the
+   *  parsed list itself rather than the draft. */
+  listChecks?: {
+    repeats: number
+    notE164: number
+    overCap: boolean
+    hasKey: boolean
+    hasOverride: boolean
+  }
   /** Region/language tag, e.g. "Spanish (MX)" — labels the row. */
   language?: string
   callWindow?: "business" | "extended" | "anytime"
@@ -764,19 +778,33 @@ export function templateToDraft(tpl: AgentTemplate): AgentDraft {
 // supplied by each campaign CSV's columns. Deploy stays blocked until every
 // referenced variable has a matching column.
 
-/** Columns a freshly-uploaded contacts CSV is mocked to contain (wireframe). */
-export const MOCK_CSV_COLUMNS = ["name", "account", "balance", "due_date", "phone"]
+/** Columns a legacy draft's CSV is assumed to carry, for drafts saved before
+ *  the file was actually read. `phone_number` is the documented required
+ *  column (<https://docs.agora.io/en/ai/studio/deploy/campaign>) — it used to
+ *  read "phone", so a prompt written from that page reported its own required
+ *  variable missing and blocked its own deploy. */
+export const MOCK_CSV_COLUMNS = ["name", "account", "balance", "due_date", "phone_number"]
 
 /** Row count of that mocked CSV — single source for the upload toast, the
  *  contacts panel, and the batch pre-flight confirmation (they must agree). */
 export const MOCK_CSV_ROWS = 248
 
-/** {{vars}} the prompt/greeting reference that THIS campaign's CSV does NOT
- *  supply. With no CSV yet, every referenced var counts as missing. */
+/** Every {{variable}} the prompt declares, across all four lines Agora
+ *  substitutes into. The failure message was missing here, so a variable
+ *  written into it got no chip, no count and no block although the agent
+ *  speaks it. ONE definition, so the panel, the pre-flight and the test rail
+ *  cannot report three different numbers. */
+export function promptVars(d: AgentDraft): string[] {
+  return extractVars(`${d.systemPrompt} ${d.greeting} ${d.failureMessage}`)
+}
+
+/** {{vars}} the prompt/greeting reference that THIS campaign's list does NOT
+ *  supply. With no list yet, every referenced var counts as missing. */
 export function campaignMissingVars(d: AgentDraft, c: CampaignDraft): string[] {
-  const required = extractVars(`${d.systemPrompt} ${d.greeting}`)
+  const required = promptVars(d)
   if (!c.csvName) return required
-  return required.filter((v) => !MOCK_CSV_COLUMNS.includes(v))
+  const columns = c.columns ?? MOCK_CSV_COLUMNS
+  return required.filter((v) => !columns.includes(v))
 }
 
 export interface PublishBlock {
@@ -835,6 +863,11 @@ export function publishBlocks(d: AgentDraft): PublishBlock[] {
         blocks.push({ reason: `"${c.name}" is scheduled but has no start date, time, and timezone.`, step: 5, action: "Set schedule" })
       }
       if (c.csvName) {
+        // A file with no phone_number column cannot dial at all — the row cap
+        // is stated on the panel as a fact, but this one is a block.
+        if (c.listChecks?.hasKey === false) {
+          blocks.push({ reason: `"${c.name}"'s list has no phone_number column.`, step: 5, action: "Add contacts" })
+        }
         const missing = campaignMissingVars(d, c)
         if (missing.length) blocks.push({
           reason: `"${c.name}"'s CSV is missing ${missing.length} variable${missing.length > 1 ? "s" : ""}: ${missing.map((v) => `{{${v}}}`).join(", ")}.`,

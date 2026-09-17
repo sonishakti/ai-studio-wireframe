@@ -18,6 +18,7 @@ import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { cn } from "@/lib/utils"
 import { CampaignContacts } from "@/components/wizard/campaigns-card"
+import { CallerContextBlock } from "@/components/wizard/caller-context"
 import { PHONE_NUMBERS, type PhoneNumber } from "@/lib/campaign-data"
 import { readSessionNumbers, addSessionNumber, subscribeNumberStore } from "@/lib/number-store"
 import { readDemand, setDemand, type ChannelAsk } from "@/lib/channels"
@@ -191,6 +192,12 @@ export function ChannelSection({
         </SectionRow>
       )}
 
+      {/* The inbound sibling of the contact list: a phone caller and a web
+          visitor both arrive with no values, for the same reason, so the row
+          sits outside the surface checks. It renders nothing until the prompt
+          declares a variable. */}
+      {current === "inbound" && <CallerContextBlock draft={draft} />}
+
       {/* BATCH (Figma 2875-83511) — the number it dials from, then the list it
           dials. Schedules, retries and concurrency stay in Go live. */}
       {current === "batch" && (
@@ -259,6 +266,7 @@ function BatchContactsBlock({
   return (
     <SectionRow
       id="wz-2-contacts"
+      focusId="contact-list"
       label="Contact list"
       hint="One row per contact. Its columns fill the {{variables}} in your prompt."
     >
