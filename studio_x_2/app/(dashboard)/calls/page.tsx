@@ -450,7 +450,9 @@ export default function CallHistoryPage() {
                           return b ? (
                             <Badge variant="outline" className="font-normal" title={BLAME_CHIP[b]}>{BLAME_CELL[b]}</Badge>
                           ) : (
-                            <span className="text-muted-foreground">, </span>
+                            // An unblamed row prints nothing. It used to print a
+                            // bare comma, which read as a value (owner 2026-09-17).
+                            <span className="text-muted-foreground">No cause found</span>
                           )
                         })()}
                       </TableCell>
