@@ -162,17 +162,12 @@ export interface AnalysisConfig {
   transcribe: boolean
   /** Store call audio recordings (Figma splits this from transcripts). */
   record: boolean
-  /** Judge each call "Successful" / "Failed" against the criteria below. */
-  successEval: boolean
-  evalCriteria: string
   dataPoints: DataPoint[]
 }
 
 export const DEFAULT_ANALYSIS: AnalysisConfig = {
   transcribe: true,
   record: true,
-  successEval: false,
-  evalCriteria: "",
   // Figma 2867-111374 seeds one extraction: "Call Outcome · Boolean".
   dataPoints: [
     { id: "dp_call_outcome", name: "Call Outcome", type: "boolean", description: "Whether the call achieved its purpose." },

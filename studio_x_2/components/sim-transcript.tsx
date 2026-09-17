@@ -4,7 +4,7 @@ import * as React from "react"
 import { Ear, Brain, AudioLines, CheckCircle2, XCircle, FlaskConical, Wrench } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import type { EvalTurn } from "@/lib/campaign-data"
+import type { EvalTurn, RunMode } from "@/lib/campaign-data"
 
 /**
  * SimTranscript — the orb-replacement (F-Eval, 2026-07-09). For THREE user-test
@@ -53,13 +53,23 @@ export function AgentStateChips({ state }: { state: SimState }) {
   )
 }
 
-/** The "this is a test, not a real call" banner — never let a sim look real. */
-export function SimulatedBanner({ label = "Test call" }: { label?: string }) {
+/**
+ * The "this is a test, not a real call" banner — never let a sim look real.
+ *
+ * `mode` decides what the banner is allowed to deny (14, 2026-09-17). An audio
+ * run DOES bill agent minutes: the button that opened this sheet quoted the
+ * price, and a banner denying it on the same screen made one of the two a lie.
+ * No minutes is a claim only a text run can make.
+ */
+export function SimulatedBanner({ label = "Test call", mode }: { label?: string; mode?: RunMode }) {
+  const billed = mode === "audio"
   return (
     <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/[0.06] px-3 py-2 text-xs">
       <FlaskConical className="h-3.5 w-3.5 shrink-0 text-warning" />
       <span className="font-medium">{label}</span>
-      <span className="text-muted-foreground">· no minutes billed, no real number dialed</span>
+      <span className="text-muted-foreground">
+        {billed ? "· no real number dialed" : "· no minutes billed, no real number dialed"}
+      </span>
     </div>
   )
 }

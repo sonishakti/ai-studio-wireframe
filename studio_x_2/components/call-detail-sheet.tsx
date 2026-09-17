@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Copy, PhoneIncoming, PhoneOutgoing, Play, Pause, Wrench, ShieldCheck, RefreshCw,
+  Copy, PhoneIncoming, PhoneOutgoing, Play, Pause, Wrench, ShieldCheck, RefreshCw, FlaskConical,
 } from "lucide-react"
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -30,6 +30,10 @@ import { deriveReplayTimeline, timelineToTxt, timelineToJson } from "@/lib/trans
 import {
   track, Events, remediationKey, recordRemediation, listRemediations, clearRemediation,
 } from "@/lib/analytics"
+import { AddCaseSheet } from "@/components/eval-tests"
+import { callTurnsToEvalTurns } from "@/lib/scorecard"
+import { readSuiteState, writeSuiteState } from "@/lib/eval-runs"
+import { EVAL_SUITE } from "@/lib/campaign-data"
 
 export interface CallTranscriptTurn {
   speaker: "Agent" | "Customer"
@@ -45,17 +49,14 @@ export interface CallDetail {
   agent: string
   timestamp: string
   durationSec: number
-  outcome: "Successful" | "Failed" | "Cannot Predict"
+  /** What the product WOULD judge this call to be if it kept the words. It
+   *  does not, so this decides what the diagnosis reads and never prints
+   *  itself as a verdict (14, 2026-09-17). */
+  outcome: "Successful" | "Failed"
   transcript: CallTranscriptTurn[]
   /** Deployment + agent this call ran on — lets the Diagnosis tab build fix links. */
   deploymentId?: string
   agentId?: string
-}
-
-const OUTCOME_BADGE: Record<CallDetail["outcome"], "default" | "destructive" | "secondary"> = {
-  Successful: "default",
-  Failed: "destructive",
-  "Cannot Predict": "secondary",
 }
 
 // ─── deterministic mock derivation (seeded by call id) ───────────────────────
@@ -209,6 +210,11 @@ function CallDetailBody({ call }: { call: CallDetail }) {
   const failed = call.outcome === "Failed"
   const diagnosisCount = issues.length + (failed && sipTrace.failure ? 1 : 0)
   const [tab, setTab] = React.useState("diagnosis")
+  const [saveOpen, setSaveOpen] = React.useState(false)
+  // The suite this agent's tests live in. A case saved here shows up in the
+  // builder's Test section and in the docked rail, because all three read one
+  // per-agent store.
+  const suiteAgent = call.agentId ?? "agt_default"
   React.useEffect(() => {
     track(Events.call_diagnosis_viewed, { call_id: call.id, criticals: health.criticals, warnings: health.warnings })
     const drift = issues.find((i) => i.ruleId === "config_drift")
@@ -279,6 +285,12 @@ function CallDetailBody({ call }: { call: CallDetail }) {
     <SheetHeader className="flex-row items-center justify-between gap-3 border-b border-border px-5 py-3 pr-12">
       <SheetTitle>Call Details</SheetTitle>
       <div className="flex items-center gap-2" data-design-focus="call-actions">
+        {/* The one door that turns a real call into a regression test. It was
+            fully built and unreachable: the single mount passed no prefill, so
+            every branch behind it was dead. */}
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSaveOpen(true)}>
+          <FlaskConical className="h-3.5 w-3.5" aria-hidden /> Save as test
+        </Button>
         <CopyLinkButton path={`/calls?call=${encodeURIComponent(call.id)}`} />
         <DownloadMenu items={downloads} />
       </div>
@@ -302,7 +314,20 @@ function CallDetailBody({ call }: { call: CallDetail }) {
         <Field label="Agent" value={call.agent} />
         <Field label="Timestamp" value={call.timestamp} />
         <Field label="Call Duration" value={`${call.durationSec} seconds`} />
-        <Field label="Call Outcome" custom={<Badge variant={OUTCOME_BADGE[call.outcome]}>{call.outcome}</Badge>} />
+        {/* The column has printed a verdict nothing computed. Agora keeps no
+            transcript for a finished call, so there is no scorecard run to
+            report: the field states that, with its reason. */}
+        <Field
+          label="Call Outcome"
+          custom={
+            <span className="text-right">
+              <span className="block text-sm">Not scored</span>
+              <span className="block text-xs text-muted-foreground">
+                Grading this call needs its stored transcript. Requires Engine
+              </span>
+            </span>
+          }
+        />
         {/* The summary states the same attribution the SIP verdict does. */}
         {failed && (
           <Field
@@ -536,6 +561,27 @@ function CallDetailBody({ call }: { call: CallDetail }) {
         </TabsContent>
       </Tabs>
     </div>
+
+    {/* The same author sheet the Test section uses, pre-filled with the turns
+        this call actually had. The persona a real call cannot know is left
+        empty: the sheet already refuses to save without it. */}
+    <AddCaseSheet
+      open={saveOpen}
+      onOpenChange={setSaveOpen}
+      agentId={suiteAgent}
+      prefill={{
+        identity: `The caller on ${call.id}`,
+        goal: "",
+        personality: "",
+        transcript: callTurnsToEvalTurns(call.transcript),
+        callId: call.id,
+      }}
+      onSave={(c) => {
+        const suite = readSuiteState(suiteAgent, EVAL_SUITE.cases)
+        writeSuiteState(suiteAgent, { ...suite, cases: [...suite.cases, c] })
+        toast.success(`"${c.name}" saved to this agent's tests`, { description: "It runs with the next Run all." })
+      }}
+    />
     </>
   )
 }

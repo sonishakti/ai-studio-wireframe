@@ -44,6 +44,7 @@ import {
   type AgentDraft, type DeployChannel,
 } from "@/lib/wizard-draft"
 import { hostingSummary, isPinned } from "@/lib/hosting-regions"
+import { RUN_EVENT, latestRun, type StoredRun } from "@/lib/eval-runs"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -158,6 +159,17 @@ export function AgentWizard({
 
   // The Test strip's verdict line — fed by the sims panel's "Run all".
   const [simSummary, setSimSummary] = React.useState<{ passed: number; failed: number; total: number; mode?: RunMode } | null>(null)
+  // The run the browser kept (14, 2026-09-17). The strip's verdict dies with
+  // the tab, so a folded Test section used to read "Not tested yet" for an
+  // agent that had been tested. Read after mount so the server and the client
+  // agree on the first paint.
+  const [storedRun, setStoredRun] = React.useState<StoredRun | undefined>(undefined)
+  React.useEffect(() => {
+    const reread = () => setStoredRun(latestRun(draft.agentId ?? "draft"))
+    reread()
+    window.addEventListener(RUN_EVENT, reread)
+    return () => window.removeEventListener(RUN_EVENT, reread)
+  }, [draft.agentId])
 
   // The docked Test panel — the RIGHT RAIL (Figma 2861-52041). It opens by
   // default at lg+ so the rail is part of the layout rather than a surface you
@@ -524,6 +536,9 @@ export function AgentWizard({
       // lives in the Advanced panel. All three are doors, handled below.
       recognition: 1, delivery: 1, "call-rules": 1,
       deployment: 2, test: 4, golive: 5,
+      // The criteria editor lives in Go Live's Structured outputs row, so the
+      // review link has to expand section 5 before the ring can find it.
+      scorecard: 5,
     }
     const n = owner[focus] ?? 3
     // Controls that live in a dialog or sheet are not in the DOM until their
@@ -986,10 +1001,17 @@ export function AgentWizard({
       if (tools) parts.push(`${tools} tool${tools > 1 ? "s" : ""}`)
       return parts.join(" · ") + edited
     }
-    if (n === 4)
-      return simSummary
-        ? `${simSummary.passed}/${simSummary.total} scenarios passed · simulated`
-        : "Not tested yet"
+    if (n === 4) {
+      if (simSummary) return `${simSummary.passed} of ${simSummary.total} scenarios passed`
+      if (storedRun && storedRun.results.length) {
+        const passed = storedRun.results.filter((r) => r.result.verdict === "pass").length
+        const how = storedRun.mode === "audio"
+          ? "with audio"
+          : storedRun.repeats > 1 ? `over ${storedRun.repeats} text runs each` : "as text"
+        return `${passed} of ${storedRun.results.length} scenarios passed ${how}`
+      }
+      return "Not tested yet"
+    }
     return isLive
       ? anyEdited ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live` : "Live"
       : codeDeployed ? "Deployed" : blockReason ?? "Ready to deploy"

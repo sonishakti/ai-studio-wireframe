@@ -52,7 +52,10 @@ export function CallCaptureSheet() {
           <SheetDescription>Applies to Aria.</SheetDescription>
         </SheetHeader>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-          <StepAnalysis value={cfg} onChange={onChange} />
+          {/* The same scorecard the builder edits: this sheet already keys its
+              own slot to agt_default and says "Applies to Aria", so passing the
+              id keeps Monitor and the builder on one record. */}
+          <StepAnalysis value={cfg} onChange={onChange} agentId="agt_default" />
         </div>
       </SheetContent>
     </Sheet>

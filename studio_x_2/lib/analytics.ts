@@ -115,6 +115,7 @@ export const Events = {
   suite_run_all:              "suite_run_all",               // {} — batch run
   assertion_failed_viewed:    "assertion_failed_viewed",     // {} — inspected a failing check
   save_call_as_test:          "save_call_as_test",           // {} ★ whitespace — a real call → regression case
+  criterion_authored:         "criterion_authored",          // { agent_id, criteria_count } — a named check was written
 
   // ── Defector — radical paste-to-live experiment (/defect, 2026-06-22) ───────
   defect_paste_submitted:     "defect_paste_submitted",      // { source } — a switcher pasted a rival config on the standalone surface
@@ -259,6 +260,7 @@ export type EventPayloads = {
   suite_run_all:               Record<string, never>
   assertion_failed_viewed:     Record<string, never>
   save_call_as_test:           Record<string, never>
+  criterion_authored:          { agent_id: string; criteria_count: number }
   call_diagnosis_viewed:       { call_id: string; criticals: number; warnings: number }
   session_detail_viewed:       { session_id: string; channel: string; turns: number; p95_ms: number }
   session_transcript_seek:     { session_id: string; turn: number }

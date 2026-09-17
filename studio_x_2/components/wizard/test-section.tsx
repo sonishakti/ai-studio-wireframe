@@ -6,7 +6,9 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { SectionRow, SectionRows } from "@/components/wizard/section-row"
 import { TestsSection } from "@/components/eval-tests"
-import { extractVars, type EvalCase, type EvalCaseResult, type EvalTurn, type RunMode } from "@/lib/campaign-data"
+import { ScorecardSummary } from "@/components/scorecard-block"
+import { seedScore, synthTranscript } from "@/lib/eval-runs"
+import { extractVars, type EvalCase, type EvalCaseResult, type RunMode } from "@/lib/campaign-data"
 import {
   hasChannel, DEFAULT_CALL_BEHAVIOR, type AgentDraft,
 } from "@/lib/wizard-draft"
@@ -158,24 +160,9 @@ const SCENARIO_SEEDS: {
   },
 ]
 
-/** Deterministic tiny hash — the wireframe's stand-in for model variance. */
-function seedScore(text: string): number {
-  let h = 0
-  for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) % 977
-  return h
-}
-
-function synthTranscript(d: AgentDraft, goal: string, fail?: string | null): EvalTurn[] {
-  const greeting = d.greeting.trim() || "Hi, thanks for calling. How can I help you today?"
-  return [
-    { role: "agent" as const, text: greeting },
-    { role: "caller", text: `I want to ${goal}.` },
-    fail
-      ? { role: "agent", text: "…", note: fail }
-      : { role: "agent", text: `The agent handles it the way the prompt directs, staying in persona.` },
-    { role: "caller", text: "Okay. That works. Thanks." },
-  ]
-}
+// `seedScore` and `synthTranscript` now live in lib/eval-runs: the Tests table,
+// the docked panel, the pre-flight and the call sheet all need them, and a
+// wizard component cannot be the store for four other surfaces.
 
 /** Generate ~12 contextual cases + synthesized judge results from the draft. */
 export function generateContextualCases(d: AgentDraft): { case: EvalCase; result: EvalCaseResult }[] {
@@ -216,13 +203,11 @@ export function TestSection({
 }) {
   const [generated, setGenerated] = React.useState<{ case: EvalCase; result: EvalCaseResult }[]>([])
   const [generating, setGenerating] = React.useState(false)
-  const [generation, setGeneration] = React.useState(0)
   const generate = () => {
     setGenerating(true)
     window.setTimeout(() => {
       const cases = generateContextualCases(draft)
       setGenerated(cases)
-      setGeneration((g) => g + 1)
       setGenerating(false)
       toast(`${cases.length} scenarios generated from your context`, {
         description: "Built from the prompt, greeting, channel, and call behavior. Run them to score.",
@@ -232,15 +217,27 @@ export function TestSection({
 
   return (
     <SectionRows>
+      {/* The named checks lead: every scenario below is graded on them, and a
+          verdict whose criteria are off screen is a number without a claim. */}
+      <SectionRow
+        id="wz-4-scorecard"
+        label="Scorecard"
+        hint="The named checks. Every run below is graded on these."
+      >
+        <ScorecardSummary agentId={draft.agentId ?? "draft"} />
+      </SectionRow>
       <SectionRow
         id="wz-4-sims"
         label="Scenarios"
         hint="Generated from your agent's own prompt, channel and call behavior. Run them to score."
       >
+        {/* No key={generation}: remounting threw away every authored case on
+            Regenerate. Stale verdicts are cleared for the regenerated ids
+            inside the table instead. */}
         <TestsSection
-          key={generation}
           variant="section"
           agentName={agentName}
+          agentId={draft.agentId ?? "draft"}
           extra={generated}
           onRunSummary={onRunSummary}
           leadingActions={

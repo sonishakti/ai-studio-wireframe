@@ -30,7 +30,11 @@ import { toast } from "sonner"
 // ─── synthesize cross-campaign call history ─────────────────────────────────
 
 type CallStatus = "Not Connected" | "Answered" | "Not Transferred" | "Voicemail" | "Transferred"
-type Outcome = "Successful" | "Failed" | "Cannot Predict"
+/** What the product would judge a finished call to be, IF it could. It cannot:
+ *  nothing stores the words of a call, so no scorecard can be run against one
+ *  (14, 2026-09-17). The field still decides which rows are issues and what the
+ *  SIP trace explains; what it no longer does is print itself as a verdict. */
+type Outcome = "Successful" | "Failed"
 
 interface CallRow {
   id: string
@@ -48,7 +52,6 @@ interface CallRow {
 
 const CONTACTS = ["+1 (555) 234-5678", "+1 (555) 857-2958", "+1 (555) 485-2957", "+1 (555) 284-9284", "+1 (555) 804-1903", "+44 7700 900123"]
 const STATUSES: CallStatus[] = ["Answered", "Voicemail", "Not Connected", "Transferred", "Not Transferred"]
-const OUTCOMES: Outcome[] = ["Successful", "Failed", "Cannot Predict"]
 
 function generate(): CallRow[] {
   const rows: CallRow[] = []
@@ -62,7 +65,10 @@ function generate(): CallRow[] {
     const size = c.metrics.calls === 0 ? 1 : Math.min(6, Math.max(2, Math.round(c.metrics.calls / 400)))
     for (let i = 0; i < size; i++) {
       const status = STATUSES[(n + i) % STATUSES.length]
-      const outcome = status === "Answered" || status === "Transferred" ? "Successful" : status === "Voicemail" || status === "Not Connected" ? "Failed" : OUTCOMES[(n + i) % 3]
+      // Derived from the status and nothing else. It used to take a third of
+      // its rows from a rotating list, which is how "Cannot Predict" got onto
+      // named calls that nothing had ever judged.
+      const outcome: Outcome = status === "Answered" || status === "Transferred" ? "Successful" : "Failed"
       rows.push({
         id: `CALL${(1000 + n).toString(36).toUpperCase()}`,
         direction: c.kind === "inbound" ? "in" : "out",
@@ -87,10 +93,6 @@ const CALLS = generate()
 const STATUS_VARIANT: Record<CallStatus, "default" | "secondary" | "outline"> = {
   Answered: "default", Transferred: "default", Voicemail: "secondary", "Not Connected": "outline", "Not Transferred": "outline",
 }
-const OUTCOME_VARIANT: Record<Outcome, "default" | "destructive" | "secondary"> = {
-  Successful: "default", Failed: "destructive", "Cannot Predict": "secondary",
-}
-
 function transcriptFor(c: CallRow): CallDetail["transcript"] {
   return [
     { speaker: "Agent", text: `Hi, this is ${c.agent} calling on behalf of ACME Corp regarding ${c.campaignName}. Am I speaking with the account holder?` },
@@ -153,7 +155,6 @@ function blameOf(c: CallRow): BlameKey | undefined {
 export default function CallHistoryPage() {
   const [query, setQuery] = React.useState("")
   const [direction, setDirection] = React.useState<"all" | "in" | "out">("all")
-  const [outcomes, setOutcomes] = React.useState<Set<Outcome>>(new Set())
   const [statuses, setStatuses] = React.useState<Set<CallStatus>>(new Set())
   const [pageSize, setPageSize] = React.useState(25)
   const [selected, setSelected] = React.useState<CallDetail | null>(null)
@@ -174,12 +175,11 @@ export default function CallHistoryPage() {
     return CALLS.filter((c) => {
       if (direction !== "all" && c.direction !== direction) return false
       if (issuesView && !hasIssue(c)) return false
-      if (outcomes.size > 0 && !outcomes.has(c.outcome)) return false
       if (statuses.size > 0 && !statuses.has(c.status)) return false
       if (q && !c.campaignName.toLowerCase().includes(q) && !c.from.toLowerCase().includes(q) && !c.to.toLowerCase().includes(q) && !c.agent.toLowerCase().includes(q)) return false
       return true
     })
-  }, [query, direction, issuesView, outcomes, statuses])
+  }, [query, direction, issuesView, statuses])
 
   const blameCounts = React.useMemo(() => {
     const counts = new Map<BlameKey, number>()
@@ -197,7 +197,7 @@ export default function CallHistoryPage() {
   )
 
   const visible = rows.slice(0, pageSize)
-  const hasFilters = direction !== "all" || outcomes.size > 0 || statuses.size > 0 || (issuesView && blames.size > 0)
+  const hasFilters = direction !== "all" || statuses.size > 0 || (issuesView && blames.size > 0)
   const colCount = BASE_COLUMNS.length + cols.size + (issuesView ? 1 : 0)
 
   const toggle = <T,>(set: Set<T>, setter: (s: Set<T>) => void, v: T) => {
@@ -302,13 +302,6 @@ export default function CallHistoryPage() {
               <Button variant="outline" size="sm" className="gap-1.5"><Filter className="h-3.5 w-3.5" /> Filter</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Call Outcome</DropdownMenuLabel>
-              {OUTCOMES.map((o) => (
-                <DropdownMenuCheckboxItem key={o} checked={outcomes.has(o)} onCheckedChange={() => toggle(outcomes, setOutcomes, o)} onSelect={(e) => e.preventDefault()}>
-                  {o}
-                </DropdownMenuCheckboxItem>
-              ))}
-              <DropdownMenuSeparator />
               <DropdownMenuLabel>Call Status</DropdownMenuLabel>
               {STATUSES.map((s) => (
                 <DropdownMenuCheckboxItem key={s} checked={statuses.has(s)} onCheckedChange={() => toggle(statuses, setStatuses, s)} onSelect={(e) => e.preventDefault()}>
@@ -339,10 +332,9 @@ export default function CallHistoryPage() {
         {hasFilters && (
           <div className="flex items-center gap-2 flex-wrap">
             {direction !== "all" && <FilterChip onClear={() => setDirection("all")}>{direction === "in" ? "Inbound" : "Outbound"}</FilterChip>}
-            {[...outcomes].map((o) => <FilterChip key={o} onClear={() => toggle(outcomes, setOutcomes, o)}>Outcome: {o}</FilterChip>)}
             {[...statuses].map((s) => <FilterChip key={s} onClear={() => toggle(statuses, setStatuses, s)}>Status: {s}</FilterChip>)}
             {issuesView && [...blames].map((b) => <FilterChip key={b} onClear={() => toggle(blames, setBlames, b)}>Attributed to: {BLAME_CHIP[b]}</FilterChip>)}
-            <button onClick={() => { setDirection("all"); setOutcomes(new Set()); setStatuses(new Set()); setBlames(new Set()) }} className="text-xs text-muted-foreground hover:text-foreground underline">
+            <button onClick={() => { setDirection("all"); setStatuses(new Set()); setBlames(new Set()) }} className="text-xs text-muted-foreground hover:text-foreground underline">
               Reset
             </button>
           </div>
@@ -427,10 +419,11 @@ export default function CallHistoryPage() {
                     <TableCell className="font-mono text-xs">{c.from}</TableCell>
                     <TableCell className="font-mono text-xs">{c.to}</TableCell>
                     <TableCell className="text-right tabular-nums text-sm">{formatDuration(c.durationSec)}</TableCell>
-                    <TableCell><Badge variant={STATUS_VARIANT[c.status]}>{c.status}</Badge></TableCell>
                     <TableCell>
+                      {/* The diagnose door moved here from Call Outcome: this
+                          is the cell that states the failure now. */}
                       <div className="flex items-center gap-2">
-                        <Badge variant={OUTCOME_VARIANT[c.outcome]}>{c.outcome}</Badge>
+                        <Badge variant={STATUS_VARIANT[c.status]}>{c.status}</Badge>
                         {c.outcome === "Failed" && (
                           <Button
                             variant="ghost"
@@ -444,6 +437,9 @@ export default function CallHistoryPage() {
                         )}
                       </div>
                     </TableCell>
+                    {/* The one honest state. Nothing stores a finished call's
+                        words, so no scorecard has ever been run against one. */}
+                    <TableCell className="text-sm text-muted-foreground">Not scored</TableCell>
                     {issuesView && (
                       <TableCell>
                         {(() => {
@@ -468,6 +464,12 @@ export default function CallHistoryPage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* The reason the column above is empty, said once, under the table it
+            belongs to rather than on 28 rows. */}
+        <p className="text-xs text-muted-foreground">
+          Calls are graded against the agent&apos;s scorecard once their transcripts are stored. Requires Engine
+        </p>
 
         {/* Pagination */}
         <div className="flex items-center justify-end gap-3 text-sm text-muted-foreground">

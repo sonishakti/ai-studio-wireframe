@@ -10,6 +10,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { TestsSection } from "@/components/eval-tests"
+import { ScorecardSummary } from "@/components/scorecard-block"
 import { AgentSphere } from "@/components/agent-test-panel"
 import { SimTranscript, SimulatedBanner, AgentStateChips, type SimState } from "@/components/sim-transcript"
 import { WidgetPreviewCard } from "@/components/widget-studio"
@@ -139,12 +140,12 @@ export function TestPanel({
     e.currentTarget.releasePointerCapture(e.pointerId)
   }
 
-  // Simulations — generated from the draft's own context; the generation
-  // counter keys TestsSection so run state RESETS per generation (old
-  // verdicts must not dress up fresh, un-run results — review 2026-07-28).
+  // Simulations — generated from the draft's own context. Old verdicts must
+  // not dress up fresh, un-run results (review 2026-07-28), and that is now
+  // done by clearing run state for the regenerated ids inside the table: a
+  // remount answered it by deleting the user's authored cases with it.
   const [generated, setGenerated] = React.useState<{ case: EvalCase; result: EvalCaseResult }[]>([])
   const [generating, setGenerating] = React.useState(false)
-  const [generation, setGeneration] = React.useState(0)
   // Figma 2974-91538: after a run, the Simulations tab's footer swaps from
   // SESSION STATISTICS to SIMULATION RESULTS (passed/failed counts).
   const [lastRun, setLastRun] = React.useState<{ passed: number; failed: number; total: number } | null>(null)
@@ -153,7 +154,6 @@ export function TestPanel({
     window.setTimeout(() => {
       const cases = generateContextualCases(draft)
       setGenerated(cases)
-      setGeneration((g) => g + 1)
       setGenerating(false)
       toast(`${cases.length} scenarios generated from your context`, {
         description: "Built from the prompt, greeting, channel, and call behavior. Run them to score.",
@@ -197,9 +197,13 @@ export function TestPanel({
               <Sparkles className="h-3.5 w-3.5" aria-hidden /> {generating ? "Generating…" : generated.length ? "Regenerate" : "Generate scenarios"}
             </Button>
           </div>
+          {/* The rail runs the same suite as the Test section, so it shows the
+              same criteria: verdicts graded against checks this surface never
+              names are a number without a claim. */}
+          <ScorecardSummary agentId={draft.agentId ?? "draft"} />
           <TestsSection
-            key={generation}
             agentName={agentName}
+            agentId={draft.agentId ?? "draft"}
             extra={generated}
             onRunSummary={(s) => { setLastRun(s); onRunSummary?.(s) }}
           />

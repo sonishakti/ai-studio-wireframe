@@ -123,6 +123,7 @@ export function DeploySection({
             value={draft.analysis}
             onChange={(analysis) => update({ analysis })}
             channel={session ? "session" : "call"}
+            agentId={draft.agentId ?? "draft"}
             hideIntro
           />
         </SectionRow>

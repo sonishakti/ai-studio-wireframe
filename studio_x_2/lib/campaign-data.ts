@@ -170,6 +170,13 @@ export interface EvalAssertion {
   /** Plain-language for rubric ("PASS if it offers the discount before ending"),
    *  a tool name for tool-call, a data-point key for data-point. */
   text: string
+  /** What this check is CALLED (14 · Evals & scorecards, 2026-09-17). A named
+   *  assertion is a criterion: the scorecard the builder edits and the checks a
+   *  run is graded on are one record, so the two cannot drift apart. */
+  name?: string
+  /** Set when this assertion grades a criterion on the agent's scorecard, so a
+   *  result row can print the criterion's name rather than its sentence. */
+  criterionId?: string
 }
 
 export interface EvalCase {
@@ -203,11 +210,15 @@ export const canRunWithAudio = (c: EvalCase) => caseType(c) === "conversation"
 /** What an audio run of these cases costs, in the two currencies the user
  *  actually spends. Agora bills $0.10 per agent-minute and a simulated call is
  *  agent minutes like any other. Text runs bill nothing. */
-export const runEstimate = (cases: EvalCase[], mode: RunMode) => {
+export const runEstimate = (cases: EvalCase[], mode: RunMode, repeats = 1) => {
   const eligible = mode === "audio" ? cases.filter(canRunWithAudio) : cases
-  const seconds = mode === "audio" ? eligible.length * 74 : Math.max(2, eligible.length * 3)
+  const times = Math.max(1, Math.floor(repeats) || 1)
+  const once = mode === "audio" ? eligible.length * 74 : Math.max(2, eligible.length * 3)
+  const seconds = once * times
   return {
     count: eligible.length,
+    /** How many times each case is run: a rate needs more than one roll. */
+    repeats: times,
     seconds,
     /** Only an audio run spends agent minutes. */
     cost: mode === "audio" ? (seconds / 60) * AGORA_RATE_PER_MIN : 0,
@@ -260,8 +271,9 @@ export const EVAL_SUITE: EvalSuite = {
       persona: { identity: "", goal: "", personality: "" },
       tools: "mock-all",
       assertions: [
-        { id: "a1", kind: "rubric", text: "PASS if the agent takes the request and never promises a refund itself." },
-        { id: "a2", kind: "tool-call", text: "open_ticket" },
+        // Graded under the seeded scorecard: same record, one name.
+        { id: "a1", kind: "rubric", name: "Never promises a refund", criterionId: "cr_refund", text: "PASS if the agent takes the request and never promises a refund itself." },
+        { id: "a2", kind: "tool-call", name: "Opens a ticket", criterionId: "cr_ticket", text: "open_ticket" },
       ],
     },
     {

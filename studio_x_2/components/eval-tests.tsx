@@ -14,6 +14,9 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose,
 } from "@/components/ui/sheet"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
@@ -25,9 +28,16 @@ import { StateBanner } from "@/components/usage-spend-card"
 import { SimTranscript, AgentStateChips, SimulatedBanner, type SimState } from "@/components/sim-transcript"
 import {
   EVAL_SUITE, EVAL_RUN, caseType, canRunWithAudio, runEstimate, AGORA_RATE_PER_MIN,
-  type EvalCase, type EvalCaseResult, type AssertionKind, type EvalTurn,
+  type EvalAssertion, type EvalCase, type EvalCaseResult, type AssertionKind, type EvalTurn,
   type EvalCaseType, type RunMode, type ToolMocking,
 } from "@/lib/campaign-data"
+import {
+  readSuiteState, writeSuiteState, recordRun, listRuns, latestRun, synthResult, seedScore,
+  RUN_EVENT, type RunResult,
+} from "@/lib/eval-runs"
+import {
+  DEFAULT_SCORECARD, SCORECARD_EVENT, readScorecard, type Scorecard,
+} from "@/lib/scorecard"
 
 /**
  * TestsSection + EvalResults — evals/simulation (F-Eval, judge winner V1
@@ -78,8 +88,14 @@ function flaggedTurnIndex(result: EvalCaseResult): number | undefined {
   return i >= 0 ? i : undefined
 }
 
+/** How many times a text run repeats each case. A pass proves the agent CAN
+ *  succeed; a rate is what an 85% floor is actually argued from. Audio runs
+ *  once, because every audio minute is billed. */
+const TEXT_REPEATS = 3
+
 export function TestsSection({
   agentName: _agentName = "your agent",
+  agentId = "draft",
   extra = [],
   headerNote,
   onRunSummary,
@@ -87,6 +103,9 @@ export function TestsSection({
   leadingActions,
 }: {
   agentName?: string
+  /** Whose suite, whose runs, whose scorecard. The stores are keyed per agent,
+   *  so the rail and the Test section show one suite instead of two. */
+  agentId?: string
   /** Contextual auto-generated cases + their synthesized judge results (v5
    *  Test section, 2026-07-28) — rendered ABOVE the starter suite; results
    *  still hide until the case is run. */
@@ -101,66 +120,143 @@ export function TestsSection({
   /** Rendered before Run all — the section slots Autogenerate here. */
   leadingActions?: React.ReactNode
 }) {
-  const run = EVAL_RUN
   // The suite is STATE so authored cases actually land in the table —
-  // "Add case" silently discarding work was the round-6 #1 trust break.
+  // "Add case" silently discarding work was the round-6 #1 trust break — and
+  // it is PERSISTED (14, 2026-09-17), because work that dies with the tab is
+  // the same trust break one reload later.
   const [authored, setAuthored] = React.useState<EvalCase[]>(EVAL_SUITE.cases)
   // Deleted rows (owner 2026-09-16). One set covers both sources: a generated
-  // case belongs to the parent, so it can only be hidden here — and Regenerate
-  // remounts this component, which is the right moment for the suite to come
-  // back whole.
+  // case belongs to the parent, so it can only be hidden here.
   const [removed, setRemoved] = React.useState<Set<string>>(new Set())
+  // The named checks a run is graded on. Read after mount so the server and the
+  // client agree, and re-read when the builder's editor writes.
+  const [sc, setSc] = React.useState<Scorecard>(() => ({
+    ...DEFAULT_SCORECARD, agentId, criteria: DEFAULT_SCORECARD.criteria.map((c) => ({ ...c })),
+  }))
+  React.useEffect(() => {
+    const reread = () => setSc(readScorecard(agentId))
+    reread()
+    window.addEventListener(SCORECARD_EVENT, reread)
+    return () => window.removeEventListener(SCORECARD_EVENT, reread)
+  }, [agentId])
   // Generated (contextual) cases lead; the starter suite + authored follow.
   const cases = React.useMemo(
     () => [...extra.map((e) => e.case), ...authored].filter((c) => !removed.has(c.id)),
     [extra, authored, removed],
   )
-  const setCases = (fn: (prev: EvalCase[]) => EvalCase[]) => setAuthored(fn)
+  const commitSuite = (nextCases: EvalCase[], nextRemoved: Set<string>) => {
+    setAuthored(nextCases)
+    setRemoved(nextRemoved)
+    writeSuiteState(agentId, { cases: nextCases, removed: [...nextRemoved] })
+  }
+  const setCases = (fn: (prev: EvalCase[]) => EvalCase[]) => commitSuite(fn(authored), removed)
   // Deleting a scenario can throw away authored work, so it undoes — the same
   // bargain every other destructive switch in the builder makes.
   const removeCase = (c: EvalCase) => {
-    setRemoved((prev) => new Set([...prev, c.id]))
+    const gone = new Set([...removed, c.id])
+    commitSuite(authored, gone)
     toast(`"${c.name}" deleted`, {
       action: {
         label: "Undo",
-        onClick: () =>
-          setRemoved((prev) => {
-            const next = new Set(prev)
-            next.delete(c.id)
-            return next
-          }),
+        onClick: () => {
+          const back = new Set(gone)
+          back.delete(c.id)
+          commitSuite(authored, back)
+        },
       },
     })
   }
+  /** Every case this browser has a verdict for, newest run wins. Hydrated from
+   *  the store, so a reload no longer returns a tested agent to "Not Run". */
+  const [ran, setRan] = React.useState<Map<string, RunResult>>(new Map())
+
+  React.useEffect(() => {
+    const suite = readSuiteState(agentId, EVAL_SUITE.cases)
+    setAuthored(suite.cases)
+    setRemoved(new Set(suite.removed))
+    const seen = new Map<string, RunResult>()
+    // Oldest first, so the newest run's verdict is the one that stands.
+    for (const r of [...listRuns(agentId)].reverse()) {
+      for (const res of r.results ?? []) if (res?.result?.caseId) seen.set(res.result.caseId, res)
+    }
+    setRan(seen)
+  }, [agentId])
+
+  // The Test section and the docked rail run the SAME suite. When one of them
+  // finishes a run, the other takes that run's verdicts rather than keeping the
+  // ones it was showing: two surfaces, one store, one story. Only the run that
+  // just happened is merged, so a regenerated scenario stays cleared.
+  React.useEffect(() => {
+    const onRun = () => {
+      const last = latestRun(agentId)
+      if (!last?.results?.length) return
+      setRan((prev) => {
+        const next = new Map(prev)
+        last.results.forEach((r) => { if (r?.result?.caseId) next.set(r.result.caseId, r) })
+        return next
+      })
+    }
+    window.addEventListener(RUN_EVENT, onRun)
+    return () => window.removeEventListener(RUN_EVENT, onRun)
+  }, [agentId])
+
+  // Regenerate hands down a new set of scenarios. Those rows go back to Not Run
+  // — a verdict from the scenario that used to hold this id would be a lie —
+  // while every authored case keeps the result it earned. This is what the
+  // component-wide remount used to do, minus throwing the user's work away.
+  const extraIds = extra.map((e) => e.case.id).join(",")
+  React.useEffect(() => {
+    if (!extraIds) return
+    const ids = extraIds.split(",")
+    setRan((prev) => {
+      if (!ids.some((id) => prev.has(id))) return prev
+      const next = new Map(prev)
+      ids.forEach((id) => next.delete(id))
+      return next
+    })
+  }, [extraIds])
+
   const [addOpen, setAddOpen] = React.useState(false)
   const [running, setRunning] = React.useState<{ case: EvalCase; mode: RunMode } | null>(null)
   const [openResult, setOpenResult] = React.useState<EvalCaseResult | null>(null)
   // "Run all" runs the SUITE (round-6: opening one case's sheet read as the
   // other two vanishing) — brief running state, then a summary line.
   const [runningAll, setRunningAll] = React.useState<RunMode | false>(false)
-  // What mode each case last ran in — the seed results carry their own, and a
-  // run in this session overrides it. A result never displays a mode it did
-  // not run in.
-  const [ranMode, setRanMode] = React.useState<Map<string, RunMode>>(new Map())
-  // Design set 22–23 Jul (AgentBuilder/DEFAULT): sample scenarios ship
-  // UN-RUN — status "–" until the user runs them. No fake failures on first
-  // paint (2026-07-24 P0). Verdicts exist only for cases the user ran.
-  const [ranIds, setRanIds] = React.useState<Set<string>>(new Set())
-  /** What a result row is allowed to claim: the mode this session ran it in,
-   *  else the mode the seed result carries, else text. */
+  /** What a result row is allowed to claim: the mode it actually ran in. */
   const modeFor = (c: EvalCase, res: EvalCaseResult): RunMode =>
-    !canRunWithAudio(c) ? "text" : ranMode.get(c.id) ?? res.mode ?? "text"
+    !canRunWithAudio(c) ? "text" : res.mode ?? "text"
 
-  const resultFor = (id: string) =>
-    ranIds.has(id)
-      ? extra.find((e) => e.case.id === id)?.result ?? run.results.find((r) => r.caseId === id)
-      : undefined
-  const allResults = [...extra.map((e) => e.result), ...run.results]
-  const ranResults = allResults.filter((r) => ranIds.has(r.caseId))
-  const stats = { passed: ranResults.filter((r) => r.verdict === "pass").length, total: ranResults.length }
-  const textRun = runEstimate(cases, "text")
-  const audioRun = runEstimate(cases, "audio")
-  const decisionCount = cases.filter((c) => caseType(c) === "decision").length
+  // Design set 22–23 Jul (AgentBuilder/DEFAULT): sample scenarios ship UN-RUN.
+  // No fake failures on first paint (2026-07-24 P0): a row has a verdict only
+  // because a run produced one.
+  const resultFor = (id: string) => ran.get(id)?.result
+  const rateFor = (id: string) => ran.get(id)
+  const ranResults = [...ran.values()]
+  const stats = {
+    passed: ranResults.filter((r) => r.result.verdict === "pass").length,
+    total: ranResults.length,
+  }
+  const textRun = runEstimate(cases, "text", TEXT_REPEATS)
+  const audioRun = runEstimate(cases, "audio", 1)
+
+  /**
+   * One run of one case. The hand-written seed results are kept where they
+   * exist — they are the designed transcripts — and given the rate their own
+   * verdict implies; everything else, which is every case the user writes, is
+   * synthesised deterministically so an authored case returns a real sheet
+   * instead of an empty one.
+   */
+  const runResultFor = (c: EvalCase, mode: RunMode, repeats: number): RunResult => {
+    const seeded = extra.find((e) => e.case.id === c.id)?.result ?? EVAL_RUN.results.find((r) => r.caseId === c.id)
+    if (!seeded) return synthResult(c, sc, mode, repeats)
+    const n = Math.max(1, repeats)
+    const passes = seeded.verdict === "pass" ? n : Math.floor((n - 1) / 2)
+    const { seconds: _was, ...rest } = seeded
+    const result: EvalCaseResult = mode === "audio"
+      ? { ...rest, mode, seconds: seeded.seconds ?? 62 + (seedScore(c.id) % 25) }
+      : { ...rest, mode }
+    return { result, passes, repeats: n }
+  }
 
   // 2026-07-21 (owner): the Test section IS this feature — test scenarios from
   // the cn2meet roadmap (F-Eval), no longer future-scope-gated and no longer a
@@ -170,27 +266,43 @@ export function TestsSection({
   // A run has a MODE, and the mode is chosen at the moment of spending, not
   // stored as a setting (research 2026-09-16: Vapi and LiveKit both put it on
   // the run). An audio run skips decision checks, which have no audio to run.
+  const keep = (results: RunResult[], mode: RunMode, repeats: number) => {
+    // MERGE, never replace: an audio run skips the decision checks, and a
+    // skipped check must not lose the result it already has.
+    setRan((prev) => {
+      const next = new Map(prev)
+      results.forEach((r) => next.set(r.result.caseId, r))
+      return next
+    })
+    recordRun({
+      id: `run_${Date.now().toString(36)}`,
+      suiteId: EVAL_SUITE.id,
+      agentId,
+      scorecardVersion: sc.version,
+      mode,
+      repeats,
+      at: new Date().toISOString(),
+      results,
+    })
+  }
+
   const runAll = (mode: RunMode) => {
     track(Events.suite_run_all, {})
     setRunningAll(mode)
     window.setTimeout(() => {
       setRunningAll(false)
+      const repeats = mode === "audio" ? 1 : TEXT_REPEATS
       const eligible = mode === "audio" ? cases.filter(canRunWithAudio) : cases
-      const results = allResults.filter((r) => eligible.some((c) => c.id === r.caseId))
-      // MERGE, never replace: an audio run skips the decision checks, and a
-      // skipped check must not lose the result it already has.
-      setRanIds((prev) => new Set([...prev, ...results.map((r) => r.caseId)]))
-      setRanMode((m) => {
-        const next = new Map(m)
-        results.forEach((r) => next.set(r.caseId, mode))
-        return next
-      })
-      const passed = results.filter((r) => r.verdict === "pass").length
+      const results = eligible.map((c) => runResultFor(c, mode, repeats))
+      keep(results, mode, repeats)
+      const passed = results.filter((r) => r.result.verdict === "pass").length
       onRunSummary?.({ passed, failed: results.length - passed, total: results.length, mode })
       const skipped = mode === "audio" ? cases.length - eligible.length : 0
       toast(`${results.length} test${results.length === 1 ? "" : "s"} ran with ${modeLabel(mode)}`, {
         description: [
-          `${passed} passed · ${results.length - passed} failed.`,
+          repeats > 1
+            ? `${passed} passed · ${results.length - passed} failed, over ${repeats} runs each.`
+            : `${passed} passed · ${results.length - passed} failed.`,
           skipped > 0 && `${skipped} decision check${skipped === 1 ? "" : "s"} skipped: they have no audio to run.`,
           "Open a row for the transcript.",
         ].filter(Boolean).join(" "),
@@ -199,9 +311,9 @@ export function TestsSection({
   }
   // A single-row run reveals THAT case's verdict when its sheet closes.
   const runOne = (c: EvalCase, mode: RunMode = "text") => {
+    const repeats = mode === "audio" ? 1 : TEXT_REPEATS
     setRunning({ case: c, mode })
-    setRanIds((s) => new Set([...s, c.id]))
-    setRanMode((m) => new Map(m).set(c.id, mode))
+    keep([runResultFor(c, mode, repeats)], mode, repeats)
   }
 
   return (
@@ -223,7 +335,9 @@ export function TestsSection({
             onClick={() => runAll("text")}
           >
             <Play className="h-3.5 w-3.5" aria-hidden />{" "}
-            {runningAll === "text" ? "Running…" : `Run all as text · ${spell(textRun.seconds)}`}
+            {runningAll === "text"
+              ? "Running…"
+              : `Run all as text · ${textRun.repeats} runs each · ${spell(textRun.seconds)}`}
           </Button>
           <Button
             size="sm"
@@ -242,12 +356,14 @@ export function TestsSection({
           </Button>
         </div>
       </div>
-      {/* Two currencies, said once. A text run costs nothing and proves the
-          words; an audio run spends real agent minutes and proves the call. */}
+      {/* Two currencies, said once. "Text runs are free" was a claim about the
+          runner printed as a claim about the bill: what is true is that a text
+          run starts no agent, and an agent minute is the only thing Agora
+          charges for here. */}
       <p className="text-xs text-muted-foreground">
-        Text runs are free. An audio run places {audioRun.count === 1 ? "a simulated call" : `${audioRun.count} simulated calls`} through
-        the real speech pipeline and bills agent minutes at ${AGORA_RATE_PER_MIN.toFixed(2)}/min.
-        {decisionCount > 0 && ` ${decisionCount} decision check${decisionCount === 1 ? "" : "s"} stay${decisionCount === 1 ? "s" : ""} text either way.`}
+        A text run starts no agent, so it bills no agent minutes. An audio run
+        places {audioRun.count === 1 ? "1 test call" : `${audioRun.count} test calls`} through
+        the speech pipeline at ${AGORA_RATE_PER_MIN.toFixed(2)} a minute.
       </p>
       {headerNote ? <div className="text-xs text-muted-foreground">{headerNote}</div> : null}
 
@@ -324,6 +440,14 @@ export function TestsSection({
                           className={cn("gap-1 text-xs", res.verdict === "pass" && "bg-success/15 text-success")}
                         >
                           {res.verdict === "pass" ? "Pass" : "Fail"}
+                          {/* A rate, not a coin flip — but only where there IS
+                              a rate: an audio run runs once, and 1/1 read as a
+                              probability would be the same lie in reverse. */}
+                          {(rateFor(c.id)?.repeats ?? 1) > 1 && (
+                            <span className="tabular-nums">
+                              {rateFor(c.id)!.passes}/{rateFor(c.id)!.repeats}
+                            </span>
+                          )}
                         </Badge>
                         {/* A text pass is not evidence the call sounds right.
                             The row says which one it is, every time. */}
@@ -380,6 +504,7 @@ export function TestsSection({
       <AddCaseSheet
         open={addOpen}
         onOpenChange={setAddOpen}
+        agentId={agentId}
         onSave={(c) => {
           setCases((prev) => [...prev, c])
           toast.success(`"${c.name}" added to the suite`, { description: "It runs with the next Run all." })
@@ -437,7 +562,7 @@ function RunSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
-          <SimulatedBanner />
+          <SimulatedBanner mode={mode} />
           {mode === "text" && (
             <p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
               A text run proves the words, not the call. Speech recognition, the voice and
@@ -523,11 +648,16 @@ function ResultSheet({
 export function AddCaseSheet({
   open,
   onOpenChange,
+  agentId = "draft",
   prefill,
   onSave,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
+  /** Whose scorecard the check may be taken from. A criterion picked here sets
+   *  the assertion's name and criterionId, which is what makes the scorecard
+   *  and the suite one record rather than two lists of sentences. */
+  agentId?: string
   /** Save-a-real-call-as-a-test: pre-fill persona + transcript, ask only for
    *  the assertion (R5 — the whitespace). */
   prefill?: { identity: string; goal: string; personality: string; transcript: EvalTurn[]; callId: string }
@@ -542,8 +672,16 @@ export function AddCaseSheet({
   const [tools, setTools] = React.useState<ToolMocking>("mock-all")
   const [kind, setKind] = React.useState<AssertionKind>("rubric")
   const [assertion, setAssertion] = React.useState("")
+  /** "" = write my own. */
+  const [critId, setCritId] = React.useState("")
+  const [criteria, setCriteria] = React.useState<EvalAssertion[]>([])
 
   React.useEffect(() => {
+    if (open) setCriteria(readScorecard(agentId).criteria)
+  }, [open, agentId])
+
+  React.useEffect(() => {
+    if (open) { setCritId(""); setAssertion("") }
     if (open && prefill) {
       setName("Saved from a real call")
       setPersona({ identity: prefill.identity, goal: prefill.goal, personality: prefill.personality })
@@ -564,8 +702,17 @@ export function AddCaseSheet({
     name.trim() && assertion.trim() && (type === "decision" ? said.trim() : persona.goal.trim()),
   )
 
+  /** Taking a check from the scorecard fills the sentence and its kind, so the
+   *  author edits one record rather than retyping a second copy of it. */
+  const pickCriterion = (id: string) => {
+    setCritId(id)
+    const crit = criteria.find((c) => c.id === id)
+    if (crit) { setKind(crit.kind); setAssertion(crit.text) }
+  }
+
   function save() {
     track(prefill ? Events.save_call_as_test : Events.test_authored, {})
+    const crit = criteria.find((c) => c.id === critId)
     onSave?.({
       id: `ec_${Date.now().toString(36)}`,
       name: name.trim(),
@@ -573,7 +720,12 @@ export function AddCaseSheet({
       persona: type === "decision" ? { identity: "", goal: "", personality: "" } : { ...persona },
       ...(type === "decision" ? { history: [{ role: "caller" as const, text: said.trim() }] } : {}),
       tools,
-      assertions: [{ id: "a1", kind, text: assertion.trim() }],
+      assertions: [{
+        id: "a1",
+        kind,
+        text: assertion.trim(),
+        ...(crit ? { name: crit.name ?? crit.text, criterionId: crit.id } : {}),
+      }],
       ...(prefill ? { fromCallId: prefill.callId } : {}),
     })
     onOpenChange(false)
@@ -683,7 +835,23 @@ export function AddCaseSheet({
 
           <div className="space-y-2">
             <Label>What should always be true?</Label>
-            <ToggleGroup type="single" value={kind} onValueChange={(v) => v && setKind(v as AssertionKind)} variant="outline" size="sm" className="w-full">
+            {criteria.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">From the scorecard</p>
+              <Select value={critId || "own"} onValueChange={(v) => pickCriterion(v === "own" ? "" : v)}>
+                <SelectTrigger className="text-sm" aria-label="From the scorecard">
+                  <SelectValue placeholder="From the scorecard" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="own">Write my own</SelectItem>
+                  {criteria.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name?.trim() || c.text}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              </div>
+            )}
+            <ToggleGroup type="single" value={kind} onValueChange={(v) => { setCritId(""); if (v) setKind(v as AssertionKind) }} variant="outline" size="sm" className="w-full">
               {(["rubric", "tool-call", "data-point"] as AssertionKind[]).map((k) => (
                 <ToggleGroupItem key={k} value={k} className="flex-1 text-xs">{KIND_META[k].label}</ToggleGroupItem>
               ))}

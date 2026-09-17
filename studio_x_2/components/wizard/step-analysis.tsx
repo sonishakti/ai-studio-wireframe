@@ -15,6 +15,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet"
 import { DEFAULT_ANALYSIS, type AnalysisConfig, type DataPoint, type DataPointType } from "@/lib/wizard-draft"
+import { ScorecardBlock } from "@/components/scorecard-block"
 
 /**
  * Analysis section (Figma "Call Analysis") — the structured outputs the agent
@@ -27,6 +28,7 @@ export function StepAnalysis({
   onChange,
   channel = "call",
   hideIntro,
+  agentId = "draft",
 }: {
   value: AnalysisConfig | undefined
   onChange: (next: AnalysisConfig) => void
@@ -36,11 +38,15 @@ export function StepAnalysis({
   channel?: "call" | "session"
   /** [label | content] hosting (2026-07-21): the row hint carries the intro. */
   hideIntro?: boolean
+  /** Which agent's scorecard this block edits. The store is keyed per agent, so
+   *  a brand-new draft writes under "draft" and Monitor's call-capture sheet
+   *  passes the agent it already names. */
+  agentId?: string
 }) {
   const noun = channel
   const home = channel === "session" ? "Sessions" : "Call History"
-  // Merge over defaults so drafts saved before record/successEval existed
-  // gain the new fields instead of rendering undefined switches.
+  // Merge over defaults so drafts saved before `record` existed gain the new
+  // fields instead of rendering undefined switches.
   const cfg = { ...DEFAULT_ANALYSIS, ...value }
   const patch = (p: Partial<AnalysisConfig>) => onChange({ ...cfg, ...p })
   // null = closed; "new" = add; a DataPoint = edit that one.
@@ -75,33 +81,12 @@ export function StepAnalysis({
         </div>
       </div>
 
-      {/* Success evaluation (Figma "Post Call Analysis") — judge each call
-          against plain-language criteria; verdicts land in Call History. */}
-      <div className="space-y-3 border-b border-border pb-4">
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">Success Evaluation</p>
-            <p className="text-xs text-muted-foreground">Evaluate whether the call with a user was “Successful” or “Failed”</p>
-          </div>
-          <Switch checked={cfg.successEval} onCheckedChange={(successEval) => patch({ successEval })} aria-label="Success Evaluation" />
-        </div>
-        {cfg.successEval && (
-          <div className="space-y-1.5">
-            <div className="flex items-baseline justify-between gap-3">
-              <Label htmlFor="an-eval" className="text-sm font-medium">Evaluation Criteria</Label>
-              {/* Live counter (proposal 2639-102124: "120/2000"). */}
-              <span className="font-mono text-xs tabular-nums text-muted-foreground">{cfg.evalCriteria.length}/2000</span>
-            </div>
-            <Textarea
-              id="an-eval"
-              value={cfg.evalCriteria}
-              onChange={(e) => patch({ evalCriteria: e.target.value })}
-              placeholder="Evaluate whether the agent's call with the user was successful. Consider whether the issue was resolved, communication clarity, professionalism, and adherence to company policies…"
-              className="min-h-[96px] text-sm"
-            />
-          </div>
-        )}
-      </div>
+      {/* The scorecard — the ONE editor for what an agent is graded on
+          (14 · Evals & scorecards, 2026-09-17). It replaces a switch over a
+          2000-character textarea that nothing read: named criteria ARE the
+          assertions a test run is graded on, so the two halves cannot drift.
+          It sits above the data points so both lists read as one fold. */}
+      <ScorecardBlock agentId={agentId} transcribe={cfg.transcribe} />
 
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">

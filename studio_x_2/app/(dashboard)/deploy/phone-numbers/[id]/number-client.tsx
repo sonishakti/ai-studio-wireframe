@@ -4,7 +4,7 @@ import * as React from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import {
-  ArrowLeft, AlertTriangle, Phone, PhoneForwarded, Megaphone, ClipboardCheck, Bot, Unlink,
+  ArrowLeft, AlertTriangle, Phone, PhoneForwarded, Megaphone, Bot, Unlink,
 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
@@ -45,9 +45,6 @@ export function PhoneNumberClient({ id }: { id: string }) {
   const [maxDuration, setMaxDuration] = React.useState(300)
   const [silenceHangup, setSilenceHangup] = React.useState(true)
   const [silenceTimeout, setSilenceTimeout] = React.useState(120)
-  // Post-call analysis
-  const [successEval, setSuccessEval] = React.useState(true)
-  const [evalCriteria, setEvalCriteria] = React.useState("")
   // SIP transport
   const [transport, setTransport] = React.useState("TCP")
 
@@ -202,21 +199,10 @@ export function PhoneNumberClient({ id }: { id: string }) {
             )}
           </Section>
 
-          {/* Post Call Analysis */}
-          <Section icon={ClipboardCheck} title="Post Call Analysis">
-            <Toggle label="Success Evaluation" desc='Evaluate whether the call with a user was "Successful" or "Failed".' checked={successEval} onChange={setSuccessEval} />
-            {successEval && (
-              <div className="space-y-1.5">
-                <Label>Evaluation Criteria</Label>
-                <Textarea
-                  placeholder="Evaluate whether the agent's call with the user was successful. Consider whether the issue was resolved, communication clarity, professionalism, and adherence to policy…"
-                  value={evalCriteria}
-                  onChange={(e) => setEvalCriteria(e.target.value)}
-                  rows={4}
-                />
-              </div>
-            )}
-          </Section>
+          {/* Post Call Analysis lived here as a SECOND grading sentence, with
+              its own store and the opposite default, and nothing read either
+              copy. The agent's scorecard is the one record now: it is edited in
+              the builder's Structured outputs row (14, 2026-09-17). */}
 
           {/* Assigned campaigns list (when in use) */}
           {usedByCampaigns && (

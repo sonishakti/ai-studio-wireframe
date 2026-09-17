@@ -16,6 +16,8 @@ import { hostingSummary, isPinned } from "@/lib/hosting-regions"
 import { ladderLine, ruleIssues } from "@/lib/call-rules"
 import { openAdvanced } from "@/components/wizard/advanced-settings-sheet"
 import { stackLine, stackEstimateFor, extractVars, PHONE_NUMBERS, type RunMode } from "@/lib/campaign-data"
+import { latestRun } from "@/lib/eval-runs"
+import { hasCriteria, readScorecard } from "@/lib/scorecard"
 
 /**
  * DeployPreflight — the validation moment (owner 2026-07-24: "when user
@@ -147,18 +149,38 @@ function buildRows(
   // never said is WHICH MACHINE produced it. A suite that passed in text has
   // proved the words and nothing about how the call sounds — going live on
   // that is a decision, so the pre-flight makes it one instead of a silent tick.
-  if (simSummary) {
-    const textOnly = simSummary.mode !== "audio"
+  // The stored run is preferred over the strip's in-memory verdict (14, 2026-09-17):
+  // the strip forgets its run when the tab closes, and the gate then reported no
+  // test at all. A run records HOW MANY times each case ran, so the row can state
+  // the sample size a rate is worth reading against.
+  const stored = latestRun(draft.agentId ?? "draft")
+  const summary = stored
+    ? {
+        passed: stored.results.filter((r) => r.result.verdict === "pass").length,
+        failed: stored.results.filter((r) => r.result.verdict !== "pass").length,
+        total: stored.results.length,
+        mode: stored.mode,
+        repeats: stored.repeats,
+      }
+    : simSummary
+      ? { ...simSummary, repeats: 1 }
+      : null
+
+  if (summary && summary.total > 0) {
+    const textOnly = summary.mode !== "audio"
+    const how = textOnly
+      ? summary.repeats > 1 ? `over ${summary.repeats} text runs each` : "as text"
+      : "with audio"
     rows.push({
       id: "tests", icon: FlaskConical, label: "Tests",
-      value: simSummary.failed > 0
-        ? `${simSummary.failed} of ${simSummary.total} failing${textOnly ? " · text only" : " · with audio"}`
+      value: summary.failed > 0
+        ? `${summary.failed} of ${summary.total} failing ${how}`
         : textOnly
-          ? `${simSummary.passed}/${simSummary.total} passed as text. Not yet heard with audio`
-          : `${simSummary.passed}/${simSummary.total} passed with audio`,
-      state: simSummary.failed > 0 || textOnly ? "warn" : "ok",
-      fixStep: simSummary.failed > 0 || textOnly ? 4 : undefined,
-      fixLabel: simSummary.failed > 0 ? "Open tests" : "Run with audio",
+          ? `${summary.passed} of ${summary.total} passed ${how}. Not yet heard with audio`
+          : `${summary.passed} of ${summary.total} passed with audio`,
+      state: summary.failed > 0 || textOnly ? "warn" : "ok",
+      fixStep: summary.failed > 0 || textOnly ? 4 : undefined,
+      fixLabel: summary.failed > 0 ? "Open tests" : "Run with audio",
     })
   } else {
     rows.push({
@@ -184,12 +206,17 @@ function buildRows(
 
   // Structured outputs
   const an = { ...DEFAULT_ANALYSIS, ...draft.analysis }
+  // The scorecard's criteria ARE the attach state (14): a switch could be on
+  // over an empty box, so the row now names what grades this agent and counts it.
+  const sc = readScorecard(draft.agentId ?? "draft")
+  const scored = hasCriteria(sc)
   rows.push({
     id: "capture", icon: ClipboardCheck, label: "Outputs",
     value: [
       an.transcribe ? "transcripts" : null,
       an.record ? "recording" : null,
-      an.successEval ? "success eval" : null,
+      scored ? sc.name : null,
+      scored ? `${sc.criteria.length} criteri${sc.criteria.length === 1 ? "on" : "a"}` : null,
       an.dataPoints.length ? `${an.dataPoints.length} data point${an.dataPoints.length > 1 ? "s" : ""}` : null,
     ].filter(Boolean).join(" · ") || "off",
     state: "ok",
