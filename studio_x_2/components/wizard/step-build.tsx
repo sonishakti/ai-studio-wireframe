@@ -168,7 +168,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
             title="Add Knowledge Base"
             description="Ground answers in your docs."
             emptyTitle="No knowledge base added"
-            emptyDesc="Upload a file or crawl a site."
+            emptyDesc="A knowledge base is the files and pages this agent reads from: add one so it answers callers in your own words."
             items={kbs.map((k) => ({
               id: k.id,
               name: k.name,
@@ -188,7 +188,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
             }))}
             selectedIds={draft.knowledge}
             onChange={(knowledge) => update({ knowledge })}
-            manageLabel="Add Knowledge base"
+            manageLabel="Add knowledge base"
             create={{
               label: "Create New Knowledge Base",
               render: (onCreated) => <KnowledgeCreateForm onCreated={onCreated} />,
@@ -219,7 +219,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
             title="Add MCP Servers"
             description="Give it tools: CRM, calendar, APIs."
             emptyTitle="No MCP servers added"
-            emptyDesc="Create new or add an existing one"
+            emptyDesc="An MCP server is one address that hands the agent a set of tools: add one to reach the systems it already speaks to."
             items={mcps.map((m) => ({
               id: m.id,
               name: m.name,
@@ -268,7 +268,7 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
               title="Add tools"
               description="Let the agent act on your systems."
               emptyTitle="No tools added"
-              emptyDesc="Create new or add an existing one"
+              emptyDesc="A tool is one request the agent can make mid-call, like looking up an order: add one so it can do something, not only say something."
               manageLabel="Add tool"
               items={toolItems}
               selectedIds={draft.tools}
@@ -444,8 +444,10 @@ function ResourceField({
   /** [label | content] hosting (2026-07-21): the row label carries the
    *  title/description — skip the in-card header. */
   hideHeader?: boolean
-  /** Figma empty-state card copy ("No knowledge base added" / "Create new or
-   *  add an existing one"). */
+  /** The house empty-state row: the surface's name, then ONE sentence saying
+   *  what the thing IS, for someone who arrived a minute ago. The three
+   *  descriptions used to name the two doors beside them, which is a caption
+   *  for the widget and not an answer to "what is this row for?". */
   emptyTitle?: string
   emptyDesc?: string
   items: AttachItem[]

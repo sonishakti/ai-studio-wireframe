@@ -174,10 +174,11 @@ export interface AnalysisConfig {
 export const DEFAULT_ANALYSIS: AnalysisConfig = {
   transcribe: true,
   record: true,
-  // Figma 2867-111374 seeds one extraction: "Call Outcome · Boolean".
-  dataPoints: [
-    { id: "dp_call_outcome", name: "Call Outcome", type: "boolean", description: "Whether the call achieved its purpose." },
-  ],
+  // A data point is a sentence somebody wrote about what to pull out of a
+  // call, so a new agent holds none (owner 2026-09-17). Figma 2867-111374
+  // draws one, "Call Outcome · Boolean", and it is the shape of a row the user
+  // adds, not a row the agent arrives with.
+  dataPoints: [],
 }
 
 /** How the agent's calls end + when they hand off to a person (Figma "Call

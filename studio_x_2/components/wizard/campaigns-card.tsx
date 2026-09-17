@@ -30,7 +30,7 @@ import {
   type AgentDraft, type CampaignDraft, type CampaignStatus,
 } from "@/lib/wizard-draft"
 import {
-  MAX_ROWS, REQUIRED_COLUMN, parseContactCsv, sampleContactList, saveList,
+  MAX_ROWS, REQUIRED_COLUMN, parseContactCsv, saveList,
   type ParsedContactList,
 } from "@/lib/contact-list"
 import { useContactList } from "@/hooks/use-contact-list"
@@ -536,8 +536,7 @@ export function CampaignContacts({
     prevCovered.current = varsCovered
   }, [varsCovered])
 
-  /** One place a list becomes a run's contacts, whether it was chosen from
-   *  disk or taken from the sample. */
+  /** One place a list becomes a run's contacts: the file the builder chose. */
   const adopt = (list: ParsedContactList) => {
     saveList(agentId, campaign.id, list)
     onChange({
@@ -578,39 +577,24 @@ export function CampaignContacts({
   )
 
   if (!hasCsv) {
+    // The house empty-state row (Knowledge base · MCP server · tests): the
+    // name, one sentence saying what the thing is, and the ONE door that ends
+    // the emptiness. The two links beside it are gone (owner 2026-09-17): a
+    // ready-made list is two dozen people this run never chose to call, and the
+    // template link downloaded nothing.
     return (
-      <div className="space-y-1.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
         {picker}
-        <div className="flex flex-wrap items-center gap-3">
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => fileRef.current?.click()}>
-            <Upload className="h-3.5 w-3.5" aria-hidden /> Upload contacts CSV
-          </Button>
-          <button
-            type="button"
-            onClick={() => adopt(sampleContactList())}
-            className="rounded text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Use the sample list
-          </button>
-          <button
-            type="button"
-            onClick={() => toast("Template downloaded", { description: `Columns: ${sampleContactList().columns.join(", ")}` })}
-            className="rounded text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Download the template
-          </button>
+        <div className="min-w-0">
+          <p className="text-sm font-medium">No contact list yet</p>
+          <p className="text-xs text-muted-foreground">
+            A contact list is one row per person this run calls: upload a CSV with a phone_number
+            column, plus a column for every {"{{variable}}"} your prompt reads.
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          One row per contact. A phone_number column is required.{" "}
-          <a
-            href="https://docs.agora.io/en/ai/studio/deploy/campaign"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-foreground"
-          >
-            Contact list format
-          </a>
-        </p>
+        <Button size="sm" variant="outline" className="shrink-0 gap-1.5" onClick={() => fileRef.current?.click()}>
+          <Upload className="h-3.5 w-3.5" aria-hidden /> Upload contacts CSV
+        </Button>
       </div>
     )
   }

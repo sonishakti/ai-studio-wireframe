@@ -96,9 +96,13 @@ export function StepAnalysis({
               Automatically extract structured outputs from calls according to business needs.
             </p>
           </div>
-          <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={!cfg.transcribe} onClick={() => setEditing("new")}>
-            <Plus className="h-3.5 w-3.5" aria-hidden /> Add
-          </Button>
+          {/* The door lives once: on the empty-state row while there is nothing
+              to extract, up here once there is a list to add to. */}
+          {cfg.dataPoints.length > 0 && (
+            <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled={!cfg.transcribe} onClick={() => setEditing("new")}>
+              <Plus className="h-3.5 w-3.5" aria-hidden /> Add
+            </Button>
+          )}
         </div>
 
         {!cfg.transcribe ? (
@@ -107,9 +111,21 @@ export function StepAnalysis({
             {cfg.dataPoints.length > 0 && ` Your ${cfg.dataPoints.length} saved data point${cfg.dataPoints.length === 1 ? "" : "s"} ${cfg.dataPoints.length === 1 ? "is" : "are"} kept, but nothing is extracted while this is off.`}
           </p>
         ) : cfg.dataPoints.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border px-3 py-4 text-center text-xs text-muted-foreground">
-            No data points yet. Add one to start extracting structured output.
-          </p>
+          /* The house empty-state row (Knowledge base · MCP server · tests):
+             the name, one sentence saying what the thing is, and the door that
+             ends the emptiness. */
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">No data points yet</p>
+              <p className="text-xs text-muted-foreground">
+                A data point is one field you want read off every call, like the outcome or the
+                amount agreed: add one and it lands on each call in {home}.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={() => setEditing("new")}>
+              <Plus className="h-3.5 w-3.5" aria-hidden /> Add data point
+            </Button>
+          </div>
         ) : (
           <div className="space-y-2">
             <div className="flex items-baseline justify-between font-mono text-xs uppercase tracking-wider text-muted-foreground">

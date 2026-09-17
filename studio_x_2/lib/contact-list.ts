@@ -122,8 +122,7 @@ function parseGrid(text: string): string[][] {
   return grid
 }
 
-/** The counts the panel states. Shared by `parseContactCsv` and
- *  `sampleContactList` so the sample is checked the same way an upload is. */
+/** The counts the panel states, over the rows `parseContactCsv` read. */
 function checkRows(columns: string[], rows: Record<string, string>[]): ListChecks {
   const hasKey = columns.includes(REQUIRED_COLUMN)
   const seen = new Map<string, number>()
@@ -250,38 +249,6 @@ export function resolveText(text: string, row: Record<string, string> | null): R
   if (parts.length === 0) parts.push({ kind: "text", value: "" })
 
   return { text: out, parts, gaps }
-}
-
-// ─── The sample list ─────────────────────────────────────────────────────────
-
-/** The 24 deterministic contacts the panel used to draw from nothing (they
- *  lived in campaigns-card.tsx), now a list the builder can choose: the same
- *  people, rekeyed to the documented columns and written in E.164 so the
- *  sample passes the checks it is previewed by. */
-const SAMPLE_NAMES = [
-  "Ava Chen", "Liam Patel", "Maya Ortiz", "Noah Kim", "Zoe Ahmed", "Eli Novak",
-  "Ivy Santos", "Owen Brooks", "Lea Fischer", "Max Rivera", "Nia Kowalski", "Theo Lang",
-  "Ana Costa", "Ben Haddad", "Mia Johansson", "Raj Mehta", "Sara Lind", "Tom Baker",
-  "Uma Rao", "Vik Sharma", "Wes Cole", "Ines Duarte", "Yara Aziz", "Zack Moore",
-]
-
-const SAMPLE_COLUMNS = [REQUIRED_COLUMN, "first_name", "account", "balance", "due_date"]
-
-export function sampleContactList(): ParsedContactList {
-  const rows = SAMPLE_NAMES.map((name, i) => ({
-    [REQUIRED_COLUMN]: `+1415555${String(1204 + i * 7).slice(-4)}`,
-    first_name: name.split(" ")[0],
-    account: `AC-${2400 + i * 13}`,
-    balance: `$${(140 + i * 37) % 900}.${String(20 + ((i * 7) % 80)).padStart(2, "0")}`,
-    due_date: `2026-08-${String(1 + (i % 28)).padStart(2, "0")}`,
-  }))
-  return {
-    fileName: "sample-contacts.csv",
-    columns: SAMPLE_COLUMNS,
-    rowCount: rows.length,
-    rows,
-    checks: checkRows(SAMPLE_COLUMNS, rows),
-  }
 }
 
 // ─── Storage — one list per agent per run ────────────────────────────────────
