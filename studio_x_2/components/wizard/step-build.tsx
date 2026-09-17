@@ -36,6 +36,16 @@ import {
 } from "@/lib/agent-tools"
 import { ToolCreateForm, ToolCheckResult, ToolStateChip } from "@/components/wizard/tool-create-form"
 import { ExternalRetrievalForm } from "@/components/external-retrieval-form"
+import { CrawlSourceForm } from "@/components/knowledge-crawl-form"
+import { KnowledgeSourceSheet } from "@/components/knowledge-source-sheet"
+import { ENGINE_TOOLTIP } from "@/components/wizard/engine-row"
+import {
+  baseSourceLine, baseIsProcessing, retrievalOf,
+  type CrawlLedger, type RetrievalSettings,
+} from "@/lib/knowledge-sources"
+import { Slider } from "@/components/ui/slider"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { StepProps } from "@/components/wizard/types"
 import { SectionRow } from "@/components/wizard/section-row"
 import {
@@ -81,6 +91,8 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
   React.useEffect(() => { refresh(); setMounted(true) }, [refresh])
   // Which user MCP server's tools are being configured (F3).
   const [configMcp, setConfigMcp] = React.useState<string | null>(null)
+  // Which knowledge base's sources are open (20) — same shape, same mount.
+  const [configKb, setConfigKb] = React.useState<string | null>(null)
 
   // One test the user ran, against the record the row already holds.
   const testTool = (id: string) => {
@@ -140,19 +152,39 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
     // [label | content] rows (owner 2026-07-21): each resource names itself on
     // the LHS; the host's <SectionRows> owns the container.
     <>
-        <SectionRow id="wz-5-kb" label="Knowledge base">
+        <SectionRow
+          id="wz-5-kb"
+          focusId="knowledge-sources"
+          label="Knowledge base"
+          hint={
+            draft.knowledge.length > 1
+              ? "One base answers each call. Requires Engine to read a second."
+              : undefined
+          }
+        >
           <ResourceField
             hideHeader
             icon={BookOpen}
             title="Add Knowledge Base"
             description="Ground answers in your docs."
             emptyTitle="No knowledge base added"
-            emptyDesc="Create new or add an existing one"
+            emptyDesc="Upload a file or crawl a site."
             items={kbs.map((k) => ({
               id: k.id,
               name: k.name,
-              meta: k.size ?? (k.status === "ready" ? `${k.chunks} chunks` : "Indexing…"),
+              // The base's own sources when it has any, and the record's own
+              // numbers when it has none: the five seeds carry no crawl, so a
+              // freshness line on them would be a date nothing can compute.
+              meta:
+                (mounted ? baseSourceLine(k.id) : undefined) ??
+                k.size ??
+                (k.status === "ready" ? `${k.chunks} chunks` : "Indexing…"),
               status: k.status === "ready" ? ("active" as const) : ("processing" as const),
+              // Every base can be opened; only a base made here can be deleted,
+              // and that door lives once, inside the sheet.
+              config: true,
+              // The consequence the badge beside it cannot state.
+              note: mounted && baseIsProcessing(k.id) ? "Attach when it finishes" : undefined,
             }))}
             selectedIds={draft.knowledge}
             onChange={(knowledge) => update({ knowledge })}
@@ -162,7 +194,22 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
               render: (onCreated) => <KnowledgeCreateForm onCreated={onCreated} />,
               onCreated: refresh,
             }}
+            onConfigure={(id) => setConfigKb(id)}
+            configureLabel="Open sources"
+            primaryId={draft.knowledge[0]}
+            onMakePrimary={(id) =>
+              update({ knowledge: [id, ...draft.knowledge.filter((x) => x !== id)] })
+            }
           />
+          {/* The two dials describe how THIS agent reads a shared base, so they
+              live beside the row rather than in the create form they were
+              thrown away from. Nothing renders until a base is attached. */}
+          {draft.knowledge.length > 0 && (
+            <RetrievalAdvanced
+              value={retrievalOf(draft)}
+              onChange={(retrieval) => update({ retrieval })}
+            />
+          )}
         </SectionRow>
 
         <SectionRow id="wz-5-mcp" label="MCP servers">
@@ -243,10 +290,73 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
 
       {/* Configure-tools sheet for a created MCP server (F3). */}
       <McpToolsSheet id={configMcp} onClose={() => setConfigMcp(null)} onSaved={refresh} />
+      {/* What one base holds, and the two doors that put something in it (20). */}
+      <KnowledgeSourceSheet kbId={configKb} onClose={() => setConfigKb(null)} onSaved={refresh} />
     </>
   )
 }
 
+
+/**
+ * How this agent reads the base it is attached to (20). Both vendors in the
+ * set that expose tuning put these two dials on the AGENT, after a base is
+ * attached, because a threshold describes how one agent reads a base several
+ * agents share. They used to sit in the create form as local React state that
+ * the submit threw away.
+ *
+ * The same "Advanced" Collapsible they sat behind travels with them, so a
+ * first-timer who skips knowledge never sees a dial, and the caption carries
+ * the Engine mark: neither number has a field to persist into yet.
+ */
+function RetrievalAdvanced({
+  value,
+  onChange,
+}: {
+  value: RetrievalSettings
+  onChange: (next: RetrievalSettings) => void
+}) {
+  return (
+    <Collapsible>
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" size="sm" className="-ml-2 h-7 text-xs text-muted-foreground">
+          Advanced
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-4 pt-3">
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Chunks to retrieve · {value.topK}</Label>
+          <Slider
+            value={[value.topK]} min={1} max={10} step={1}
+            onValueChange={([v]) => onChange({ ...value, topK: v })}
+            aria-label="Chunks to retrieve"
+          />
+          <p className="text-xs text-muted-foreground">More context, slower turns.</p>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">
+            Similarity threshold · {value.threshold.toFixed(2)}
+          </Label>
+          <Slider
+            value={[value.threshold * 100]} min={0} max={100} step={5}
+            onValueChange={([v]) => onChange({ ...value, threshold: v / 100 })}
+            aria-label="Similarity threshold"
+          />
+          <p className="text-xs text-muted-foreground">
+            Higher is stricter: fewer but more relevant chunks.
+          </p>
+        </div>
+        {/* The caption carries the tooltip rather than the slider group: a
+            Radix trigger wrapped around a Slider fights the drag. */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <p className="w-fit cursor-help text-xs text-muted-foreground">Requires Engine · planned</p>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-72" side="top">{ENGINE_TOOLTIP}</TooltipContent>
+        </Tooltip>
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
 
 /** The host, without throwing on a URL that carries a placeholder in its path. */
 function hostOf(url: string): string {
@@ -322,6 +432,9 @@ function ResourceField({
   onConfigure,
   onDelete,
   onTest,
+  primaryId,
+  onMakePrimary,
+  configureLabel,
   footer,
   hideHeader,
 }: {
@@ -345,6 +458,17 @@ function ResourceField({
   /** Run this row's test. Looked up by id at the call site, so ResourceField
    *  never has to know what a tool or an MCP server is (19). */
   onTest?: (id: string) => void
+  /** The one attached id that is actually READ at runtime (20). Set only by a
+   *  family where attaching several and using one is the truth: the engine
+   *  payload carries a single `llm.rag_config.search_config.kb_id` while
+   *  attach posts a list. Unset for MCP and tools, whose rows are unchanged. */
+  primaryId?: string
+  /** Move an attached row to the front of the list, which is what makes it the
+   *  one that answers. */
+  onMakePrimary?: (id: string) => void
+  /** The per-row menu's first verb. "Configure tools" is the MCP wording and
+   *  was the literal text here, so every family read it. */
+  configureLabel?: string
   footer?: React.ReactNode
 }) {
   const [open, setOpen] = React.useState(false)
@@ -412,6 +536,19 @@ function ResourceField({
             >
               {(i.disabled || (i.check && !i.check.ok)) && <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />}
               {i.testable ? `${i.name} · ${checkLabel(i.check)}` : i.name}
+              {/* Which attached row is the one that gets read. Two identical
+                  chips where only the first is ever queried is the defect this
+                  closes; the row's hint says why the limit exists (20). */}
+              {primaryId && (
+                <span
+                  className={cn(
+                    "shrink-0 rounded px-1 py-px text-[10px] font-medium leading-4",
+                    i.id === primaryId ? "bg-primary/15 text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  {i.id === primaryId ? "Answering" : "Attached, not read"}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => onChange(selectedIds.filter((x) => x !== i.id))}
@@ -533,17 +670,33 @@ function ResourceField({
                               aria-label={`Attach ${i.name}`}
                             />
                           )}
-                          {i.config && (onConfigure || onDelete) && (
+                          {i.config && (onConfigure || onDelete || onMakePrimary) && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" aria-label={`${i.name} options`}>
                                   <MoreVertical className="h-4 w-4" aria-hidden />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              {/* min-w: the menu sized itself to "Delete" and
+                                  wrapped the longer verbs onto three lines. */}
+                              <DropdownMenuContent align="end" className="min-w-48">
+                                {/* Only offered on a row that is attached and is
+                                    not already the one being read. It stages the
+                                    same reorder it applies, so the sheet's own
+                                    Save cannot put the old order back. */}
+                                {onMakePrimary && selectedIds.includes(i.id) && i.id !== primaryId && (
+                                  <DropdownMenuItem
+                                    onSelect={() => {
+                                      onMakePrimary(i.id)
+                                      setPending((p) => [i.id, ...p.filter((x) => x !== i.id)])
+                                    }}
+                                  >
+                                    <Check className="h-4 w-4" aria-hidden /> Answer from this one
+                                  </DropdownMenuItem>
+                                )}
                                 {onConfigure && (
                                   <DropdownMenuItem onSelect={() => { onConfigure(i.id); setSheet(false) }}>
-                                    <Settings2 className="h-4 w-4" aria-hidden /> Configure tools
+                                    <Settings2 className="h-4 w-4" aria-hidden /> {configureLabel ?? "Configure tools"}
                                   </DropdownMenuItem>
                                 )}
                                 {onDelete && (
@@ -629,6 +782,9 @@ export function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => 
   const [name, setName] = React.useState("")
   const [ingest, setIngest] = React.useState<KbIngest>("pdf")
   const [fileName, setFileName] = React.useState("")
+  // What the crawl reported, so the base is created with the page count its
+  // ledger produced rather than a number minted at create time.
+  const [crawl, setCrawl] = React.useState<{ address: string; ledger: CrawlLedger } | null>(null)
 
   // "Connect an existing vector index" is a different job with a different
   // shape (credentials → resource path → test retrieval), so it swaps the body
@@ -655,24 +811,45 @@ export function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => 
         <Input id="kb-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Product docs" />
       </div>
       <IngestPicker ingest={ingest} setIngest={setIngest} />
-      {/* Mock file drop — no real upload (wireframe). Typing a name stands in. */}
-      <div className="space-y-1.5">
-        <Label htmlFor="kb-file" className="text-sm font-medium">File or URL</Label>
-        <div className="flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
-          <Upload className="h-4 w-4 shrink-0" aria-hidden />
-          <Input
-            id="kb-file"
-            value={fileName}
-            onChange={(e) => setFileName(e.target.value)}
-            placeholder={ingest === "website" ? "https://docs.example.com" : "docs.pdf"}
-            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-          />
+      {/* Two bodies, one picker above both: a site has an address, a ledger and
+          a crawler to name, and a file has a size limit and a count. They used
+          to share one "File or URL" string, so a crawl had no field of its own
+          and nothing to report. */}
+      {ingest === "website" ? (
+        <CrawlSourceForm onCrawled={(address, ledger) => setCrawl({ address, ledger })} />
+      ) : (
+        /* Mock file drop — no real upload (wireframe). Typing a name stands in. */
+        <div className="space-y-1.5">
+          <Label htmlFor="kb-file" className="text-sm font-medium">File</Label>
+          <div className="flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
+            <Upload className="h-4 w-4 shrink-0" aria-hidden />
+            <Input
+              id="kb-file"
+              value={fileName}
+              onChange={(e) => setFileName(e.target.value)}
+              placeholder="docs.pdf"
+              className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            PDF and DOCX, up to 20 MB each. Ten files per base.
+          </p>
         </div>
-      </div>
+      )}
       <Button
         className="w-full"
-        disabled={!name.trim()}
-        onClick={() => onCreated(createKnowledgeBase({ name, ingest, fileName }).id)}
+        disabled={!name.trim() || (ingest === "website" && !crawl)}
+        onClick={() =>
+          onCreated(
+            createKnowledgeBase({
+              name,
+              ingest,
+              ...(ingest === "website" && crawl
+                ? { address: crawl.address, sourcePages: crawl.ledger.kept }
+                : { fileName }),
+            }).id,
+          )
+        }
       >
         Create knowledge base
       </Button>

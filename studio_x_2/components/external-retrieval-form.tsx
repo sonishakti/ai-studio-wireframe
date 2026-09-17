@@ -12,12 +12,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
 import {
   RETRIEVAL_PROVIDERS, MOCK_RESOURCES, EGRESS_IP, mockRetrieval,
   type RetrievalProvider, type RetrievedChunk,
 } from "@/lib/agent-resources"
+import { DEFAULT_RETRIEVAL } from "@/lib/knowledge-sources"
 
 /**
  * Connect an existing vector index as agent knowledge.
@@ -50,8 +50,14 @@ type ConnState =
 
 export function ExternalRetrievalForm({
   onCreated,
+  threshold = DEFAULT_RETRIEVAL.threshold,
 }: {
   onCreated: (input: { name: string; externalSource: string }) => void
+  /** What the agent's own Similarity threshold is set to, when an agent is in
+   *  scope. This form is also mounted from Resources, where no agent exists,
+   *  so it defaults rather than reading a store that would answer with some
+   *  other agent's number (20). */
+  threshold?: number
 }) {
   const [providerId, setProviderId] = React.useState<RetrievalProvider>("couchbase")
   const provider = RETRIEVAL_PROVIDERS.find((p) => p.id === providerId)!
@@ -66,10 +72,11 @@ export function ExternalRetrievalForm({
   const [levels, setLevels] = React.useState<Record<string, string>>({})
 
   // Advanced — the two field names that silently break retrieval when wrong.
+  // They describe the CUSTOMER'S index, so they belong to the base and stay
+  // here; Chunks to retrieve and Similarity threshold describe how one agent
+  // reads it, and now live on the agent's knowledge row (20).
   const [textKey, setTextKey] = React.useState("text")
   const [embeddingKey, setEmbeddingKey] = React.useState("embedding")
-  const [topK, setTopK] = React.useState(3)
-  const [threshold, setThreshold] = React.useState(0.6)
 
   const [query, setQuery] = React.useState("")
   const [retrieval, setRetrieval] = React.useState<{ chunks: RetrievedChunk[]; ms: number } | null>(null)
@@ -327,7 +334,7 @@ export function ExternalRetrievalForm({
               ) : (
                 <div className="rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm">
                   Connected, but nothing came back. Usually the text or embedding field name under
-                  Advanced doesn&apos;t match your documents, or the similarity threshold is too high.
+                  Advanced does not match your documents.
                 </div>
               )
             )}
@@ -354,19 +361,6 @@ export function ExternalRetrievalForm({
               <Input id="ext-embkey" value={embeddingKey} onChange={(e) => setEmbeddingKey(e.target.value)} className="font-mono text-sm" />
               <p className="text-xs text-muted-foreground">Which field holds the vector.</p>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Chunks to retrieve · {topK}</Label>
-            <Slider value={[topK]} min={1} max={10} step={1} onValueChange={([v]) => setTopK(v)} aria-label="Chunks to retrieve" />
-            <p className="text-xs text-muted-foreground">More context, slower turns.</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Similarity threshold · {threshold.toFixed(2)}</Label>
-            <Slider
-              value={[threshold * 100]} min={0} max={100} step={5}
-              onValueChange={([v]) => setThreshold(v / 100)} aria-label="Similarity threshold"
-            />
-            <p className="text-xs text-muted-foreground">Higher is stricter: fewer but more relevant chunks.</p>
           </div>
         </CollapsibleContent>
       </Collapsible>

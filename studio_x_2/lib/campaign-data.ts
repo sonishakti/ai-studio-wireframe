@@ -233,7 +233,17 @@ export interface EvalSuite {
 
 export type AssertionVerdict = "pass" | "fail"
 
-export interface EvalTurn { role: "caller" | "agent"; text: string; note?: string }
+export interface EvalTurn {
+  role: "caller" | "agent"
+  text: string
+  note?: string
+  /** What the agent read before it answered (design 20). The same
+   *  evidence-on-the-turn rule `note` follows, with a disclosure because a
+   *  chunk is longer than a line. Written inline rather than importing
+   *  `RetrievedChunk`: this file has no imports, and `lib/agent-resources.ts`
+   *  imports it, so a named import here would cycle. */
+  retrieval?: { chunks: { score: number; text: string; source: string }[]; ms: number }
+}
 
 export interface EvalCaseResult {
   caseId: string
@@ -1758,7 +1768,9 @@ export const KNOWLEDGE_BASES: KnowledgeBase[] = [
   { id: "kb_01", name: "Compliance Laws v2", source: "Upload", chunks: 1240, status: "ready", size: "11.4 Mb" },
   { id: "kb_02", name: "Data Protection Guidelines", source: "Upload", chunks: 320, status: "ready", size: "5.2 Mb" },
   { id: "kb_03", name: "User Privacy Policies", source: "Upload", chunks: 210, status: "ready", size: "3.8 Mb" },
-  { id: "kb_04", name: "GDPR Laws", source: "URL Crawl", chunks: 0, status: "indexing", size: "5.2 Mb" },
+  // No size: a crawl that has never finished holds nothing, and "5.2 Mb"
+  // beside a Processing badge was five megabytes of a crawl that never ran.
+  { id: "kb_04", name: "GDPR Laws", source: "URL Crawl", chunks: 0, status: "indexing" },
   { id: "kb_05", name: "User Survey2", source: "Upload", chunks: 0, status: "indexing", size: "8 Kb" },
 ]
 

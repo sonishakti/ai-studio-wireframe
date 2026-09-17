@@ -10,6 +10,9 @@ import {
   KNOWLEDGE_BASES, MCP_SERVERS, CONNECTORS, VENDOR_CREDENTIALS,
   type KnowledgeBase, type McpServer, type Connector, type VendorCredential,
 } from "@/lib/campaign-data"
+// The catalog writes the first source of a base it creates. One-way:
+// `lib/knowledge-sources.ts` reads campaign-data and never imports back here.
+import { addSource } from "@/lib/knowledge-sources"
 
 // ─── ids ──────────────────────────────────────────────────────────────────────
 
@@ -46,11 +49,16 @@ const KB_KEY = "sx:knowledge_bases"
  *  make me re-upload 40k docs into your black box"); a fourth vendor-named
  *  connect-an-external-thing surface would deepen the existing KB / MCP /
  *  Connectors IA tension; and Couchbase is one of five answers users named. */
-export type KbIngest = "pdf" | "website" | "segmented" | "external"
+export type KbIngest = "pdf" | "website" | "external"
 export const KB_INGEST_LABEL: Record<KbIngest, string> = {
-  pdf: "PDF · raw text",
-  website: "Website · markdown",
-  segmented: "Segmented",
+  // The two labels name what the user DOES, in the one vocabulary the picker,
+  // the empty state, the base sheet's two doors and the two create bodies all
+  // now share (20). "PDF · raw text" and "Website · markdown" described an
+  // internal representation nobody asked about. `segmented` is gone from the
+  // union with its label: it rendered the upload body and took the same
+  // defaults, so it was a third name promising a fourth thing.
+  pdf: "Upload a file",
+  website: "Crawl a site",
   external: "Connect an existing vector index",
 }
 
@@ -154,21 +162,71 @@ export function createKnowledgeBase(input: {
   name: string
   ingest: KbIngest
   fileName?: string
+  /** The address a crawl read, when the site body made this base (20). */
+  address?: string
+  /** Pages the crawl kept, straight off its ledger. Never invented: absent
+   *  when no crawl has reported. */
+  sourcePages?: number
   /** External-provider label, e.g. "Couchbase · support-vectors". */
   externalSource?: string
 }): KnowledgeBase {
+  const address = input.address?.trim()
   const kb: KnowledgeBase = {
     id: mintId("kb"),
     name: input.name.trim() || "New knowledge base",
-    source: input.externalSource?.trim() || input.fileName?.trim() || KB_INGEST_LABEL[input.ingest],
-    // Mock: a fresh base starts indexing, then reports chunks. Wireframe fakes
-    // a plausible chunk count so the picker meta isn't "0 chunks" forever.
-    // An external index is already built — we don't index it, we query it.
-    chunks: input.ingest === "external" ? 4182 : input.ingest === "website" ? 210 : 480,
+    // The seeds' own two words for what is inside a base ("Upload" / "URL
+    // Crawl", campaign-data.ts), rather than a third wording minted here. The
+    // ingest LABEL is deliberately not read: relabelling a tile must not leak
+    // into a record's source string.
+    source:
+      input.externalSource?.trim() ||
+      input.fileName?.trim() ||
+      address ||
+      (input.ingest === "website" ? "URL Crawl" : "Upload"),
+    // A new base holds nothing until something reads it. This line used to
+    // mint 4,182 chunks for an index we never index, 210 for a website and 480
+    // for a file, so a crawl that fetched nothing still reported a healthy
+    // number (Before defect 8).
+    chunks: 0,
     status: "ready",
   }
   writeList(KB_KEY, [...listUserKnowledgeBases(), kb])
+  // A base is a container: what was just uploaded or crawled is a SOURCE
+  // inside it, and it is the source that carries the address, the page count
+  // and the read date. An external index has neither, so it gets no row.
+  if (input.ingest !== "external") {
+    if (address) {
+      addSource({
+        kbId: kb.id,
+        kind: "site",
+        // Blank: addSource names a site by the host in its address.
+        label: "",
+        address,
+        ...(input.sourcePages === undefined ? {} : { pages: input.sourcePages }),
+        state: input.sourcePages ? "active" : "empty",
+        addedAt: Date.now(),
+        lastReadAt: Date.now(),
+      })
+    } else if (input.fileName?.trim()) {
+      addSource({
+        kbId: kb.id,
+        kind: "file",
+        label: input.fileName.trim(),
+        state: "active",
+        addedAt: Date.now(),
+      })
+    }
+  }
   return kb
+}
+
+/** Delete a base this browser made. The seeds are a module constant, so this
+ *  can only remove what localStorage holds — which is why the only Delete door
+ *  in the product is the one the base sheet shows for a user-made base. Sits
+ *  beside `deleteMcpServer` because it acts on the CATALOG, not on what is
+ *  inside one base. */
+export function deleteKnowledgeBase(id: string) {
+  writeList(KB_KEY, listUserKnowledgeBases().filter((k) => k.id !== id))
 }
 
 // ─── MCP servers ──────────────────────────────────────────────────────────────

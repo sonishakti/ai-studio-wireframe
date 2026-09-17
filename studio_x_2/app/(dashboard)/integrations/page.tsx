@@ -21,6 +21,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 // Reuse the builder's create/config surfaces so Resources and the agent's Prompt
 // & tools step create the SAME persisted resources — no mock/real drift.
 import { KnowledgeCreateForm, McpCreateForm, McpToolsSheet } from "@/components/wizard/step-build"
+import { KnowledgeSourceSheet } from "@/components/knowledge-source-sheet"
 // The builder's own tool form and its two display parts, so a tool made here
 // and a tool made in an agent are one record with one state.
 import { ToolCreateForm, ToolCheckResult, ToolStateChip } from "@/components/wizard/tool-create-form"
@@ -114,6 +115,12 @@ function ResourcesInner() {
   const kbs: KnowledgeBase[] = mounted ? allKnowledgeBases() : KNOWLEDGE_BASES
   const mcps: McpServer[] = mounted ? allMcpServers() : MCP_SERVERS
   const [kbCreateOpen, setKbCreateOpen] = React.useState(false)
+  // The search had no value and no handler, so typing into it did not move the
+  // grid (Before defect 13). The Console's equivalent search is wired.
+  const [kbQuery, setKbQuery] = React.useState("")
+  const visibleKbs = kbs.filter((k) => k.name.toLowerCase().includes(kbQuery.trim().toLowerCase()))
+  /** Which base's sources are open (20). */
+  const [sourcesKbId, setSourcesKbId] = React.useState<string | null>(null)
   const [mcpCreateOpen, setMcpCreateOpen] = React.useState(false)
   const [configMcpId, setConfigMcpId] = React.useState<string | null>(null)
   const bump = () => setRev((r) => r + 1)
@@ -168,17 +175,30 @@ function ResourcesInner() {
         {/* Knowledge Base tab */}
         <TabsContent value="knowledge" className="space-y-4">
           {/* Reciprocity with the builder: attaching happens in an agent's
-              Prompt & knowledge section — say so HERE, where users land hunting for
-              it (heuristic-eval walkthrough T3 / re-eval #8). */}
+              Knowledge base row — say so HERE, where users land hunting for it
+              (heuristic-eval walkthrough T3 / re-eval #8). The link used to
+              point at /agents?step=3, which is the agents LIST and ignores
+              `step`; the builder is /agents/[id]/edit?step=N, as the list's own
+              Deploy link shows. */}
           <p className="text-sm text-muted-foreground">
             Attach these to an agent from its{" "}
-            <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Prompt &amp; knowledge section
+            <Link
+              href="/agents/agt_default/edit?step=3&focus=knowledge-sources"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Knowledge base row
             </Link>
+            .
           </p>
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search knowledge bases…" className="pl-9" />
+            <Input
+              value={kbQuery}
+              onChange={(e) => setKbQuery(e.target.value)}
+              placeholder="Search knowledge bases…"
+              aria-label="Search knowledge bases"
+              className="pl-9"
+            />
           </div>
           {kbs.length === 0 ? (
             <div className="rounded-lg border bg-card">
@@ -195,8 +215,19 @@ function ResourcesInner() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {kbs.map((kb) => (
-                <Card key={kb.id} className="p-4">
+              {/* The card is the base's own home, so the crawl, the ledger, the
+                  refresh switch and the delete guard are reachable here and not
+                  only through a kebab inside the builder's attach sheet. Its
+                  own three lines are unchanged. */}
+              {visibleKbs.map((kb) => (
+                <Card
+                  key={kb.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSourcesKbId(kb.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSourcesKbId(kb.id) } }}
+                  className="cursor-pointer p-4 text-left transition-colors hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   <p className="text-sm font-semibold">{kb.name}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Source: {kb.source}</p>
                   <div className="flex items-center justify-between mt-3">
@@ -220,6 +251,9 @@ function ResourcesInner() {
               </button>
             </div>
           )}
+          {kbs.length > 0 && visibleKbs.length === 0 && (
+            <p className="text-sm text-muted-foreground">No matches.</p>
+          )}
 
           {/* Create — the same form the builder uses, so both write one store. */}
           <Sheet open={kbCreateOpen} onOpenChange={setKbCreateOpen}>
@@ -234,6 +268,12 @@ function ResourcesInner() {
               </div>
             </SheetContent>
           </Sheet>
+          {/* One door per action: the same sheet the builder's row opens. */}
+          <KnowledgeSourceSheet
+            kbId={sourcesKbId}
+            onClose={() => setSourcesKbId(null)}
+            onSaved={bump}
+          />
         </TabsContent>
 
         {/* MCP tab */}

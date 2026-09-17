@@ -553,6 +553,11 @@ export function AgentWizard({
       // section bodies are hidden rather than unmounted, so without these the
       // doors from the prompt chips land on a display:none node.
       "contact-list": 2, "caller-context": 2,
+      // The knowledge row (20). The fallback already answers 3, but naming it
+      // is what stops a later section move from silently breaking the review
+      // link, which is exactly what happened to wz-5-kb when this row moved
+      // from section 5 to section 3 and its id stayed behind.
+      "knowledge-sources": 3,
     }
     const n = owner[focus] ?? 3
     // Controls that live in a dialog or sheet are not in the DOM until their
@@ -587,11 +592,24 @@ export function AgentWizard({
       if (tries === 2) openDoor()
       const el = document.querySelector<HTMLElement>(`[data-design-focus="${focus}"]`) ?? document.getElementById(`wz-${n}-${focus}`)
       if (!el) { if (tries++ < 40) window.setTimeout(attempt, 200); return }
-      muteSpy(2000)
+      muteSpy(3000)
       el.scrollIntoView({ block: "center", behavior: "smooth" })
+      // Guarantee arrival, the way scrollToStep already does below: the rows
+      // under this one finish rendering after the smooth scroll has started,
+      // which moves the target out from under it, and the link then stops
+      // short of the row it was written to open (20, 2026-09-17).
+      const settle = (delay: number) =>
+        window.setTimeout(() => {
+          const box = el.getBoundingClientRect()
+          if (Math.abs(box.top + box.height / 2 - window.innerHeight / 2) > 140) {
+            el.scrollIntoView({ block: "center" })
+          }
+        }, delay)
+      settle(600)
+      settle(1400)
       const prev = el.style.outline
       el.style.outline = "3px solid #e11d48"; el.style.outlineOffset = "8px"; el.style.transition = "outline-color 600ms ease"
-      window.setTimeout(() => { el.style.outline = prev; el.style.outlineOffset = "" }, 2600)
+      window.setTimeout(() => { el.style.outline = prev; el.style.outlineOffset = "" }, 3000)
     }
     window.setTimeout(attempt, 350)
     // eslint-disable-next-line react-hooks/exhaustive-deps

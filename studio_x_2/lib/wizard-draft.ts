@@ -21,6 +21,7 @@ import { DEFAULT_HOSTING, normalizeHosting, type HostingConfig } from "@/lib/hos
 import type { BackupConfig } from "@/lib/backup-providers"
 import type { RecognitionConfig } from "@/lib/asr-vocabulary"
 import type { DeliveryConfig } from "@/lib/tts-expression"
+import type { RetrievalSettings } from "@/lib/knowledge-sources"
 
 /** Legacy single-channel type — still the vocabulary of the published
  *  `Agent.channel` mock and `publishDeployment`'s mode. */
@@ -450,6 +451,10 @@ export interface AgentDraft {
   recognition?: RecognitionConfig
   /** Voice & Models › Configure TTS (design 06) — absent until touched. */
   delivery?: DeliveryConfig
+  /** Knowledge base › Advanced (design 20) — how THIS agent reads the base it
+   *  is attached to. A per-agent setting, so it rides the draft the host
+   *  already autosaves rather than a third localStorage key beside it. */
+  retrieval?: RetrievalSettings
   /** What the agent says when it can't answer (proposal 2026-07-22). */
   failureMessage: string
   /** The starter template applied — shown as the header chip next to the name. */

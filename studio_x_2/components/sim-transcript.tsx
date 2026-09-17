@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Ear, Brain, AudioLines, CheckCircle2, XCircle, FlaskConical, Wrench } from "lucide-react"
+import { Ear, Brain, AudioLines, CheckCircle2, XCircle, FlaskConical, Wrench, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import type { EvalTurn, RunMode } from "@/lib/campaign-data"
@@ -151,6 +151,7 @@ export function SimTranscript({
                     {t.note}
                   </p>
                 )}
+                {isAgent && t.retrieval && <RetrievalReceipt retrieval={t.retrieval} />}
               </div>
             </div>
           </div>
@@ -166,6 +167,66 @@ export function SimTranscript({
             </span>
           </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * What the agent read before it answered (design 20). The two retrieval dials
+ * on the knowledge row are dead controls without this: a threshold is only
+ * teachable when the chunks it let through are on the turn they produced.
+ *
+ * Nothing here is invented. The chunks come from `mockRetrieval`, so a chunk
+ * carries its source, its score and its text and no age: a mock source is not
+ * a source record and cannot be dated. It appears only in the Test rail, under
+ * the banner that already reads no minutes billed, no real number dialed.
+ */
+function RetrievalReceipt({
+  retrieval,
+}: {
+  retrieval: NonNullable<EvalTurn["retrieval"]>
+}) {
+  const [open, setOpen] = React.useState(false)
+  const n = retrieval.chunks.length
+  return (
+    <div className="mt-1.5 border-t border-border/60 pt-1.5">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="inline-flex items-center gap-1 rounded text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform", open && "rotate-90")} aria-hidden />
+        What it read · {n} {n === 1 ? "chunk" : "chunks"}
+      </button>
+      {open && (
+        n === 0 ? (
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Nothing matched. Lower the threshold or raise the chunk count.
+          </p>
+        ) : (
+          <div className="mt-1.5 space-y-1.5">
+            {retrieval.chunks.map((c, i) => (
+              <div key={i} className="rounded-lg border border-border bg-background/60 p-2">
+                <div className="mb-0.5 flex items-center justify-between gap-2">
+                  <span className="truncate font-mono text-[11px] text-muted-foreground">{c.source}</span>
+                  <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                    {c.score.toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-xs leading-relaxed">{c.text}</p>
+              </div>
+            ))}
+            {/* The wording already shipped on the external index's own test:
+                latency is the honest per-turn price of retrieval, and the
+                Agora bill is flat whatever the index holds. */}
+            <p className="text-[11px] text-muted-foreground">
+              {n} {n === 1 ? "chunk" : "chunks"} in {retrieval.ms} ms · retrieval adds this to every
+              turn&apos;s latency
+            </p>
+          </div>
+        )
       )}
     </div>
   )

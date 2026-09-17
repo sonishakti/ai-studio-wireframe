@@ -19,6 +19,8 @@ import { DEFAULT_ADVANCED, hasWebWidget, type AdvancedConfig, type AgentDraft } 
 import {
   stackEstimateFor, stackLatencyDetail, type EvalCase, type EvalCaseResult, type EvalTurn, type RunMode } from "@/lib/campaign-data"
 import { interruptVerdict } from "@/lib/turn-taking"
+import { retrievalOf, type RetrievalSettings } from "@/lib/knowledge-sources"
+import { mockRetrieval } from "@/lib/agent-resources"
 
 /** Below lg (1024) the docked column doesn't exist — the panel falls back to
  *  a Sheet. Must match the grid's `lg:` breakpoint, NOT useIsMobile's 768. */
@@ -73,6 +75,11 @@ const RAIL_TALK: EvalTurn[] = [
   { role: "agent", text: "Happy to help. What's the order number?" },
   { role: "caller", text: "It's 4471." },
   { role: "agent", text: "Got it: order 4471 ships tomorrow and arrives Friday.", note: "lookup_order called" },
+  // The second question is the one the docs do NOT answer, so the receipt has
+  // an empty state a reviewer reaches by watching rather than by breaking
+  // something (20).
+  { role: "caller", text: "And what does it cost me to send it back?" },
+  { role: "agent", text: "I am not sure about that one." },
 ]
 
 export function TestPanel({
@@ -214,6 +221,7 @@ export function TestPanel({
             agentName={agentName}
             greeting={draft.greeting.trim() || undefined}
             advanced={draft.advanced ?? DEFAULT_ADVANCED}
+            retrieval={draft.knowledge.length > 0 ? retrievalOf(draft) : undefined}
             talking={!!talking}
             onToggleTalk={onToggleTalk}
             disabled={talkDisabled}
@@ -309,12 +317,16 @@ export function TestPanel({
 // ─── Test agent — the orb + Talk (Figma's right-rail default state) ───────────
 
 function TalkTab({
-  agentName, greeting, advanced, talking, onToggleTalk, disabled, onScenarios, onAgentSpoke,
+  agentName, greeting, advanced, retrieval, talking, onToggleTalk, disabled, onScenarios, onAgentSpoke,
 }: {
   agentName: string
   greeting?: string
   /** The speech settings the "Try interrupting" verdict quotes. */
   advanced: AdvancedConfig
+  /** How this agent reads its knowledge base, when it has one attached (20).
+   *  Absent means no base: the turns then carry no receipt at all, which is
+   *  the honest state rather than an empty one. */
+  retrieval?: RetrievalSettings
   talking: boolean
   onToggleTalk?: () => void
   disabled?: boolean
@@ -327,10 +339,20 @@ function TalkTab({
   const [state, setState] = React.useState<SimState>("listening")
   const spoke = React.useRef(false)
   React.useEffect(() => { if (!talking) spoke.current = false }, [talking])
-  const turns = React.useMemo<EvalTurn[]>(
-    () => (greeting ? [{ role: "agent" as const, text: greeting }, ...RAIL_TALK.slice(1)] : RAIL_TALK),
-    [greeting],
-  )
+  const turns = React.useMemo<EvalTurn[]>(() => {
+    const base = greeting ? [{ role: "agent" as const, text: greeting }, ...RAIL_TALK.slice(1)] : RAIL_TALK
+    if (!retrieval) return base
+    // What the dials let through, on the turn they produced. The order-status
+    // answer reads what cleared the threshold; the returns question reads
+    // nothing, because nothing in the mock index answers it.
+    const { chunks, ms } = mockRetrieval("order status")
+    const kept = chunks.filter((c) => c.score >= retrieval.threshold).slice(0, retrieval.topK)
+    return base.map((t, i) => {
+      if (i === 4) return { ...t, retrieval: { chunks: kept, ms } }
+      if (i === 6) return { ...t, retrieval: { chunks: [], ms } }
+      return t
+    })
+  }, [greeting, retrieval])
 
   return (
     <div className="space-y-4">
