@@ -372,14 +372,14 @@ function TalkTab({
       ) : (
         <p className="text-center text-xs leading-relaxed text-muted-foreground">
           A one-off call in full persona. For awkward callers: interruptions, jailbreaks,
-          silence , {" "}
+          silence.{" "}
           <button
             type="button"
             onClick={onScenarios}
             className="rounded font-medium text-foreground underline underline-offset-2 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            run the scenarios
-          </button>.
+            Run the scenarios
+          </button>
         </p>
       )}
     </div>

@@ -111,9 +111,9 @@ export type CallDisposition =
 
 export interface BatchRuntime {
   pacing: BatchPacing
-  /** Live concurrency: how many of the deployment's lines are dialing now. */
+  /** Live concurrency: how many lines this run is dialing on right now. The
+   *  ACCOUNT's ceiling is not a per-run field — it lives in lib/billing-state. */
   linesInUse: number
-  linesTotal: number
   /** Calls waiting for a free line right now. */
   queued: number
   /** Rolling disposition tallies (sum ≈ progress.completed + in-flight). */
@@ -1206,43 +1206,11 @@ export const PAYG_RATE = AGORA_RATE_PER_MIN
 // ─── Concurrent lines (A6) ───────────────────────────────────────────────────
 //
 // Lines govern how many calls run AT ONCE; the spend cap governs per-minute
-// usage $. They are deliberately separate: line fees are a subscription
-// ($/line/mo, prorated on add, credited on reduce), NEVER counted against the
-// usage cap — and the UI must say so (judge round 2026-07-09, fix #1).
+// usage $. They are deliberately separate, and nothing in the console sets the
+// line count: the only ceiling anyone can name is the one Agora publishes.
 // At the wall, batch calls QUEUE (D1 semantics) — nothing drops or fails.
-
-export interface ConcurrencyState {
-  /** Free lines every project starts with (wireframe value — no public
-   *  ceiling is documented; docs sweep F8). */
-  included: number
-  /** Self-serve purchased add-on lines — never merged with included. */
-  purchased: number
-  /** Lines carrying live calls right now (mock gauge). */
-  inUse: number
-  /** Calls waiting for a free line (batch queue depth, mock). */
-  queued: number
-  /** $/line/month — wireframe placeholder (competitive w/ Retell's $8). */
-  pricePerLineMo: number
-}
-
-export const CONCURRENCY: ConcurrencyState = {
-  included: 10,
-  purchased: 0,
-  inUse: 2,
-  queued: 0,
-  pricePerLineMo: 8,
-}
-
-export function concurrencyStats(c: ConcurrencyState = CONCURRENCY) {
-  const totalLines = c.included + c.purchased
-  return {
-    ...c,
-    totalLines,
-    atWall: c.inUse >= totalLines,
-    pctInUse: totalLines > 0 ? Math.min(100, Math.round((c.inUse / totalLines) * 100)) : 0,
-    monthlyLineFeeUsd: c.purchased * c.pricePerLineMo,
-  }
-}
+// The account's position against that ceiling is DERIVED, in lib/billing-state
+// (readCapacity), from the live calls and the batch runs that hold the lines.
 
 /** Free-minutes summary from the single source of truth (PLAN_USAGE). Pure — lives
  *  in the lib (not a "use client" component) so server pages can call it too.
@@ -1439,16 +1407,17 @@ Lead with the 20% win-back discount. If not interested, thank and end within 15 
     metrics: { calls: 3421, answered: 1471, successRate: 24, avgHandleTimeSec: 162 },
     progress: { completed: 3421, total: 5000 },
     startDate: "May 20, 2026",
-    // PACED — 10/10 lines busy, a queue building. The demo's headline case:
+    // PACED — every line this run holds is busy, a queue building. The demo's
+    // headline case:
     // slow but working, and it must never read as failed.
     batchRuntime: {
       pacing: "paced",
-      linesInUse: 10, linesTotal: 10, queued: 214,
+      linesInUse: 15, queued: 214,
       dispositions: { completed: 2610, "no-answer": 402, busy: 188, voicemail: 176, "wrong-number": 31, "carrier-failed": 14, retrying: 34 },
       retry: { max: 3, retrying: 34 },
       cps: { target: 3, actual: 1.9 },
       maxQueueSec: 92,
-      reason: "All 10 lines are dialing. New calls are queuing, not dropping. Add lines to clear the queue faster.",
+      reason: "Every line is dialing. New calls are queuing, not dropping.",
     },
   },
   {
@@ -1477,7 +1446,7 @@ Customer: {{name}}, current plan {{plan}}, account owner {{owner_email}}.`,
     // SCHEDULED — zero progress, but for a KNOWN reason (honesty req #8).
     batchRuntime: {
       pacing: "scheduled",
-      linesInUse: 0, linesTotal: 10, queued: 0,
+      linesInUse: 0, queued: 0,
       dispositions: {},
       retry: { max: 3, retrying: 0 },
       cps: { target: 3, actual: 0 },
@@ -1512,7 +1481,7 @@ Remind customers their Acme subscription renews soon and confirm payment details
     // call succeeded, and the summary says so rather than implying all-good.
     batchRuntime: {
       pacing: "done",
-      linesInUse: 0, linesTotal: 10, queued: 0,
+      linesInUse: 0, queued: 0,
       dispositions: { completed: 2210, "no-answer": 341, busy: 92, voicemail: 98, disconnected: 41, "wrong-number": 18 },
       retry: { max: 3, retrying: 0 },
       cps: { target: 3, actual: 0 },
@@ -1551,7 +1520,7 @@ Identify the company immediately. Never threaten. Offer the hardship line if ask
     // Monitor HealthDot red; a plain USER pause would be "paused" (warning).
     batchRuntime: {
       pacing: "degraded",
-      linesInUse: 0, linesTotal: 10, queued: 396,
+      linesInUse: 0, queued: 396,
       dispositions: { completed: 468, "no-answer": 121, busy: 58, "carrier-failed": 214, retrying: 0, "max-retries": 79 },
       retry: { max: 3, retrying: 0 },
       cps: { target: 3, actual: 0 },
@@ -1842,7 +1811,7 @@ export const MANAGED_PROVIDERS: Record<string, number> = {
 
 export const VENDOR_CREDENTIALS: VendorCredential[] = [
   { id: "vc_01", vendor: "OpenAI",     category: "LLM",       name: "Production API Key",       keyHint: "sk-proj-••••••••••••xK3a", status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "byo" },
-  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Managed by Agora",         keyHint: ", ",                        status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "managed", managedRatePerMin: 0.046 },
+  { id: "vc_02", vendor: "ElevenLabs", category: "TTS",       name: "Managed by Agora",         keyHint: "No key of yours",           status: "valid",    usedBy: 3, added: "Feb 2, 2026", mode: "managed", managedRatePerMin: 0.046 },
   { id: "vc_03", vendor: "Deepgram",   category: "STT",       name: "STT API Key",              keyHint: "dg_••••••••••••c91e",      status: "valid",    usedBy: 2, added: "Mar 8, 2026", mode: "byo" },
   { id: "vc_04", vendor: "Twilio",     category: "Telephony", name: "Account SID + Auth Token", keyHint: "AC••••••••••••7d4f",       status: "valid",    usedBy: 0, added: "Jan 15, 2026", mode: "byo" },
   { id: "vc_05", vendor: "Anthropic",  category: "LLM",       name: "Claude API Key",           keyHint: "sk-ant-••••••••••••f812",  status: "expiring", usedBy: 1, added: "Apr 10, 2026", expiresOn: "Aug 14, 2026", mode: "byo" },

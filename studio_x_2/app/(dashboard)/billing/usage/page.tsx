@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { PageHeader } from "@/components/page-header"
 import { freeMinutesStats } from "@/lib/campaign-data"
+import { readCapacity } from "@/lib/billing-state"
+import { UsageByAgent, agentMinutesTotal } from "@/components/usage-by-agent"
 
 // ─── metrics ────────────────────────────────────────────────────────────────
 // Migrated from the former /usage page. Lives under Billing now because it's
@@ -51,7 +53,20 @@ const METRICS: (Metric & { workload: Workload })[] = [
     series: [0.02, 0.04, 0.08, 0.12, 0.22, 0.35, 0.5, 0.7, 0.92, 1.12, 1.3, 1.42] },
 ]
 
-const MONTHS = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May"]
+// The last point of every series is the current month, so the axis has to end
+// there: rotated, the twelve labels run Oct through Sep.
+const MONTHS = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
+
+// Tailwind only emits a class it can SEE, and `bg-sky-500`.replace() builds one
+// at runtime — which is why every line and dot on this chart was invisible.
+const STROKE_BY_METRIC: Record<string, string> = {
+  "agent": "stroke-sky-500", "video-sd": "stroke-violet-500", "video-hd": "stroke-pink-500",
+  "video-fhd": "stroke-amber-500", "audio": "stroke-emerald-500", "recording": "stroke-fuchsia-500",
+}
+const FILL_BY_METRIC: Record<string, string> = {
+  "agent": "fill-sky-500", "video-sd": "fill-violet-500", "video-hd": "fill-pink-500",
+  "video-fhd": "fill-amber-500", "audio": "fill-emerald-500", "recording": "fill-fuchsia-500",
+}
 
 function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<string, boolean> }) {
   const padding = { top: 20, right: 24, bottom: 32, left: 56 }
@@ -124,7 +139,7 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
           const points = metric.series
             .map((v, i) => `${xScale(i)},${yScale(v)}`)
             .join(" ")
-          const colorClass = metric.color.replace("bg-", "stroke-")
+          const colorClass = STROKE_BY_METRIC[metric.id]
           return (
             <g key={metric.id}>
               <polyline
@@ -139,7 +154,7 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
                 cx={xScale(metric.series.length - 1)}
                 cy={yScale(metric.series[metric.series.length - 1])}
                 r={4}
-                className={`${metric.color.replace("bg-", "fill-")} stroke-card`}
+                className={`${FILL_BY_METRIC[metric.id]} stroke-card`}
                 strokeWidth={2}
               />
             </g>
@@ -172,7 +187,13 @@ function UsageChart({ metrics, visible }: { metrics: Metric[]; visible: Record<s
 // docs.agora.io/en/conversational-ai/overview/pricing); the 10,000-min Voice
 // row is the separate core-RTC free tier, a different product's allowance.
 const convoFree = freeMinutesStats()
-const QUOTA_METERS = [
+const agentCapacity = readCapacity()
+const QUOTA_METERS: {
+  label: string; used: number; limit: number; unit: string; href?: string
+}[] = [
+  // The ceiling belongs on the same page as the meter, and it links to the one
+  // surface that owns capacity rather than to a plan that does not sell it.
+  { label: "Agent concurrent lines", used: agentCapacity.inUse, limit: agentCapacity.limit, unit: "lines", href: "/billing?focus=concurrent-lines" },
   { label: "Conversational AI free minutes", used: convoFree.used, limit: convoFree.included, unit: "min" },
   { label: "Voice minutes (RTC)",       used: 4218,  limit: 10000, unit: "min" },
   { label: "Cloud Recording",           used: 1.42,  limit: 5,     unit: "GB-hrs" },
@@ -188,18 +209,22 @@ const QUOTA_METERS = [
 ]
 
 const TOP_SERVICES = [
-  { service: "Conversational AI Engine", usage: "18,420 min", share: 32.4, cost: "$0.00" },
-  { service: "Video HD",                 usage: "90,112 min", share: 26.1, cost: "$0.00" },
-  { service: "Video SD",                 usage: "72,215 min", share: 17.8, cost: "$0.00" },
-  { service: "Video Full HD",            usage: "60,018 min", share: 12.2, cost: "$0.00" },
-  { service: "Audio",                    usage: "42,190 min", share:  7.4, cost: "$0.00" },
-  { service: "Cloud Recording",          usage: "1.42 GB-hr", share:  4.1, cost: "$0.00" },
+  { service: "Conversational AI Engine", usage: "18,420 min", share: 32.4 },
+  { service: "Video HD",                 usage: "90,112 min", share: 26.1 },
+  { service: "Video SD",                 usage: "72,215 min", share: 17.8 },
+  { service: "Video Full HD",            usage: "60,018 min", share: 12.2 },
+  { service: "Audio",                    usage: "42,190 min", share:  7.4 },
+  { service: "Cloud Recording",          usage: "1.42 GB-hr", share:  4.1 },
 ]
 
 type Perspective = "all" | "agent" | "rte"
 
 export default function BillingUsagePage() {
   const [perspective, setPerspective] = React.useState<Perspective>("all")
+
+  React.useEffect(() => {
+    track(Events.usage_viewed)
+  }, [])
 
   const [visible, setVisible] = React.useState<Record<string, boolean>>(
     Object.fromEntries(METRICS.map((m) => [m.id, true])),
@@ -221,8 +246,9 @@ export default function BillingUsagePage() {
     [perspective],
   )
 
-  const { used } = freeMinutesStats()
-  const hasUsage = used > 0
+  // "Has this project anything to show?" now reads a number that is ON this
+  // page's own table, instead of a meter that lives somewhere else.
+  const hasUsage = agentMinutesTotal() > 0
 
   return (
     <>
@@ -236,7 +262,11 @@ export default function BillingUsagePage() {
         <ToggleGroup
           type="single"
           value={perspective}
-          onValueChange={(v) => v && setPerspective(v as Perspective)}
+          onValueChange={(v) => {
+            if (!v) return
+            setPerspective(v as Perspective)
+            track(Events.usage_grain_changed, { grain: v as Perspective })
+          }}
           aria-label="Usage perspective"
         >
           {([
@@ -335,7 +365,9 @@ export default function BillingUsagePage() {
       <Tabs defaultValue="quotas">
         <TabsList>
           <TabsTrigger value="quotas">Quotas</TabsTrigger>
-          <TabsTrigger value="by-service">By Service</TabsTrigger>
+          <TabsTrigger value="by-service">
+            {perspective === "agent" ? "By agent" : "By Service"}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="quotas" className="pt-4 space-y-4">
@@ -367,11 +399,11 @@ export default function BillingUsagePage() {
                       </p>
                       {isNearLimit && (
                         <Link
-                          href="/billing/plans"
+                          href={m.href ?? "/billing/plans"}
                           onClick={() => track(Events.quota_warning_clicked, { meter: m.label, pct_used: pct })}
                           className="text-xs text-primary hover:underline inline-flex items-center gap-0.5"
                         >
-                          View plans
+                          {m.href ? "See your concurrent lines" : "View plans"}
                           <ArrowRight className="h-3 w-3" />
                         </Link>
                       )}
@@ -388,28 +420,39 @@ export default function BillingUsagePage() {
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium">Need more capacity?</p>
+                <p className="text-sm font-medium tabular-nums">
+                  {agentCapacity.limit} calls at once and {convoFree.included} free minutes a
+                  month come with this App ID.
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  Higher tiers unlock 50× minutes, unlimited agents, and priority routing.
+                  Agora publishes both limits. Ask support about either one.
                 </p>
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link href="/billing/plans">View plans</Link>
+                <Link href="/billing?focus=concurrent-lines">See your concurrent lines</Link>
               </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="by-service" className="pt-4">
+          {perspective === "agent" ? (
+            <UsageByAgent />
+          ) : (
           <Card>
             <CardContent className="p-0">
+              <div className="px-6 pt-5 pb-4">
+                {/* The chart above is a twelve-month window and the money model
+                    is a billing period: two windows, said plainly rather than
+                    forced into one number. */}
+                <p className="text-xs text-muted-foreground">Last 12 months</p>
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Service</TableHead>
                     <TableHead>Usage</TableHead>
                     <TableHead>Share</TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -425,13 +468,17 @@ export default function BillingUsagePage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-muted-foreground">{s.cost}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              <p className="border-t px-6 py-4 text-xs text-muted-foreground">
+                This estimates charges so far this period. The bill is generated at the
+                start of next month.
+              </p>
             </CardContent>
           </Card>
+          )}
         </TabsContent>
       </Tabs>
       </>

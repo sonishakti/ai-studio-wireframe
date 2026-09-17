@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
   CheckCircle2,
+  LifeBuoy,
   Phone,
   PhoneForwarded,
   SlidersHorizontal,
@@ -16,71 +18,70 @@ import {
 } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import {
-  CONCURRENCY, PAYG_RATE, PLAN_USAGE, concurrencyStats, spendStats,
+  AGORA_RATE_PER_MIN, DEPLOYMENTS, batchEta, type Deployment,
 } from "@/lib/campaign-data"
+import {
+  BILLING_STATE_EVENT, PUBLISHED_PCU_CEILING, capacityBudget, readCapacity,
+  type CapacityBudget,
+} from "@/lib/billing-state"
 import { StateBanner } from "@/components/usage-spend-card"
 
 /**
- * ConcurrencyCard — self-serve concurrent lines (A6, judge winner A + grafts;
- * LEARNINGS §20 2026-07-09).
+ * ConcurrencyCard — concurrent lines on Billing (A6; rebuilt for feature 22,
+ * 2026-09-17). This card is the start of the review journey, which is why the
+ * root carries the `concurrent-lines` design-focus anchor.
  * ──────────────────────────────────────────────────────────────────────────
- * Lines govern how many calls run AT ONCE; the spend cap governs usage $.
  * Rules this card must never break:
- *  • included vs purchased are SEPARATE numbers, never merged
- *  • purchases apply instantly ("live now"), prorated for the days left in
- *    the cycle — from PLAN_USAGE.periodDays*, never hardcoded cycle math
- *  • the wall is INFORMATION, not alarm: at capacity, batch calls queue;
+ *  • Every number on it is derived in lib/billing-state from things that
+ *    exist: the published App ID ceiling, the live calls, the batch runs.
+ *    No seeded ceiling, no per-line price, no purchase, no pending request.
+ *  • Lines govern how many calls run AT ONCE; the spend cap governs usage $.
+ *  • The wall is INFORMATION, not alarm: at capacity, batch calls queue;
  *    nothing drops. "Keep queuing" is a first-class choice.
- *  • line fees bill separately from usage — the spend cap is untouched by
- *    buying lines, and the copy says so plainly
- *  • every estimate shows its inputs (queue × avg-call ÷ lines) and wears
- *    the Estimate label; commit buttons carry EXACT amounts
+ *  • Every estimate shows its inputs and wears the Estimate label, and the
+ *    queue's clock is the batch run's own observed pace, never an assumed
+ *    average call length.
  */
 
-/** Average call length assumed by queue math — shown in the formula footnote
- *  wherever a time-saved estimate appears (never a hidden tuning constant). */
-const AVG_CALL_MIN = 2
+/** The run a queue is actually building on: the one whose calls are waiting.
+ *  Nothing is invented when there is none, the estimate simply does not draw. */
+function queueingRun(): Deployment | null {
+  for (const d of DEPLOYMENTS) {
+    const rt = d.batchRuntime
+    if (!rt || (rt.pacing !== "paced" && rt.pacing !== "dialing")) continue
+    if (rt.queued > 0) return d
+  }
+  return null
+}
 
 export function ConcurrencyCard() {
-  const [purchased, setPurchased] = React.useState(CONCURRENCY.purchased)
-  const [confirm, setConfirm] = React.useState<{ qty: number; charge: number } | null>(null)
   const [keptQueuing, setKeptQueuing] = React.useState(false)
   const [sheetOpen, setSheetOpen] = React.useState(false)
+  // Re-read when the spend card writes: the budget box two clicks away is
+  // built from the cap that card owns.
+  const [, bump] = React.useReducer((n: number) => n + 1, 0)
+  React.useEffect(() => {
+    window.addEventListener(BILLING_STATE_EVENT, bump)
+    return () => window.removeEventListener(BILLING_STATE_EVENT, bump)
+  }, [])
 
-  const stats = concurrencyStats({ ...CONCURRENCY, purchased })
-  const spend = spendStats({ ...PLAN_USAGE })
+  const cap = readCapacity()
+  const run = queueingRun()
+  const eta = run ? batchEta(run) : null
+  const cps = run?.batchRuntime?.cps.actual ?? 0
+  const remaining = run ? (run.progress?.total ?? 0) - (run.progress?.completed ?? 0) : 0
   const meterId = React.useId()
 
   React.useEffect(() => {
-    if (stats.atWall) track(Events.concurrency_wall_viewed, { lines: stats.totalLines, queued: stats.queued })
+    if (cap.atWall) track(Events.concurrency_wall_viewed, { lines: cap.limit, queued: cap.queued })
     // once per mount is enough for a wireframe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function onPurchased(qty: number, charge: number) {
-    setPurchased((p) => Math.max(0, p + qty))
-    setConfirm({ qty, charge })
-    setSheetOpen(false)
-    setKeptQueuing(false)
-  }
-
-  // Time-saved model, shown with its inputs (grafts: C's show-your-work,
-  // B's live recompute). Only meaningful while calls are queued.
-  const minSaved = (addQty: number) =>
-    stats.queued > 0 && addQty > 0
-      ? Math.round(
-          (stats.queued * AVG_CALL_MIN) / stats.totalLines -
-          (stats.queued * AVG_CALL_MIN) / (stats.totalLines + addQty),
-        )
-      : 0
-
   return (
-    <Card>
+    <Card data-design-focus="concurrent-lines">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -90,44 +91,29 @@ export function ConcurrencyCard() {
             </CardDescription>
           </div>
           <Badge variant="secondary" className="text-xs tabular-nums">
-            {stats.totalLines} lines
+            {cap.limit} lines
           </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* ── Banner first (X1 idiom) ─────────────────────────────────── */}
-        {confirm && (
-          <StateBanner tone="success" icon={CheckCircle2}>
-            <p className="text-sm font-medium">
-              {confirm.qty > 0
-                ? `${confirm.qty} added line${confirm.qty > 1 ? "s" : ""} live now · ${stats.totalLines} total (${stats.included} included + ${stats.purchased} purchased).`
-                : `${-confirm.qty} line${confirm.qty < -1 ? "s" : ""} removed · ${stats.totalLines} total (${stats.included} included + ${stats.purchased} purchased).`}
-            </p>
-            <p className="text-xs text-muted-foreground tabular-nums">
-              {confirm.qty > 0
-                ? `$${confirm.charge.toFixed(2)} today, prorated for the ${PLAN_USAGE.periodDaysTotal - PLAN_USAGE.periodDaysElapsed} days left this cycle. Then $${(stats.purchased * stats.pricePerLineMo).toFixed(0)}/mo. Reduce anytime for a prorated credit.`
-                : `$${confirm.charge.toFixed(2)} credited on your next invoice. Add lines back anytime.`}
-            </p>
-          </StateBanner>
-        )}
-
-        {stats.atWall && !confirm && (
+        {cap.atWall && (
           // The wall is designed behavior — primary tone, zero alarm.
           <StateBanner tone="primary" icon={PhoneForwarded}>
             <p className="text-sm font-medium">
-              All {stats.totalLines} lines are in use. New batch calls queue. Nothing drops
+              All {cap.limit} lines are in use. New batch calls queue. Nothing drops
               or fails.
             </p>
-            {stats.queued > 0 && (
+            {cap.queued > 0 && eta && cps > 0 && (
               <p className="text-xs text-muted-foreground tabular-nums">
-                +5 lines ≈ your queue clears ~{minSaved(5)} min sooner{" "}
                 <Badge variant="secondary" className="text-xs align-middle">Estimate</Badge>{" "}
-                · {stats.queued} queued calls × ~{AVG_CALL_MIN} min ÷ lines.
+                {cap.queued.toLocaleString()} calls are waiting for a line. At {cps.toFixed(1)}{" "}
+                calls a second the run has about {eta.minutes} minutes left:{" "}
+                {remaining.toLocaleString()} calls left ÷ {cps.toFixed(1)} a second.
               </p>
             )}
             <div className="mt-2 flex items-center gap-2">
-              <Button size="sm" onClick={() => setSheetOpen(true)}>Add lines</Button>
+              <Button size="sm" onClick={() => setSheetOpen(true)}>Ask for more lines</Button>
               {keptQueuing ? (
                 <span className="inline-flex items-center text-xs text-muted-foreground">
                   <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-success" />
@@ -137,7 +123,7 @@ export function ConcurrencyCard() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => { setKeptQueuing(true); track(Events.keep_queuing_clicked, { lines: stats.totalLines }) }}
+                  onClick={() => { setKeptQueuing(true); track(Events.keep_queuing_clicked, { lines: cap.limit }) }}
                 >
                   Keep queuing
                 </Button>
@@ -146,50 +132,39 @@ export function ConcurrencyCard() {
           </StateBanner>
         )}
 
-        {/* ── Gauge — live utilization beside the buy control ─────────── */}
+        {/* ── Gauge — where the account sits against the published ceiling ── */}
         <div>
           <p id={meterId} className="text-xs text-muted-foreground mb-1.5 tabular-nums">
-            {stats.inUse} of {stats.totalLines} lines in use right now
+            {cap.inUse} of {cap.limit} lines in use right now: {cap.liveInUse} live calls and{" "}
+            {cap.batchInUse} on batch runs.
           </p>
           <div
             role="meter"
             aria-valuemin={0}
-            aria-valuemax={stats.totalLines}
-            aria-valuenow={Math.min(stats.inUse, stats.totalLines)}
+            aria-valuemax={cap.limit}
+            aria-valuenow={Math.min(cap.inUse, cap.limit)}
             aria-labelledby={meterId}
             className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
           >
             <div
               className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${stats.pctInUse}%` }}
+              style={{ width: `${cap.pctInUse}%` }}
             />
-            {/* Included/purchased seam — the split stays visible in the bar */}
-            {stats.purchased > 0 && (
-              <div
-                aria-hidden="true"
-                className="absolute inset-y-0 w-px bg-foreground/40"
-                style={{ left: `${(stats.included / stats.totalLines) * 100}%` }}
-              />
-            )}
           </div>
           <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground tabular-nums">
             <span className="inline-flex items-center gap-1">
               <Phone className="h-3 w-3" aria-hidden />
-              {stats.included} included free
+              {cap.limit} lines on this App ID
             </span>
-            <span>
-              {stats.purchased > 0
-                ? `${stats.purchased} purchased · $${stats.pricePerLineMo}/line/mo`
-                : `add more at $${stats.pricePerLineMo}/line/mo`}
-            </span>
+            <span>{cap.queued.toLocaleString()} calls queued</span>
           </div>
         </div>
 
-        {/* ── Disclosures + write path (X1 idiom) ─────────────────────── */}
+        {/* ── Disclosures + the one door onto capacity ─────────────────── */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
           <p className="text-xs text-muted-foreground">
-            At capacity, batch calls queue. Nothing drops. Line fees bill separately from
-            usage: your spend cap governs per-minute spend only.
+            At capacity, batch calls queue. Nothing drops. Your spend cap governs
+            per-minute spend.
           </p>
           <Button
             variant="ghost"
@@ -198,155 +173,84 @@ export function ConcurrencyCard() {
             onClick={() => setSheetOpen(true)}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
-            {stats.purchased > 0 ? "Add or reduce lines" : "Add lines"}
+            Lines and your budget
           </Button>
         </div>
       </CardContent>
 
-      <AddLinesSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        purchased={purchased}
-        queued={stats.queued}
-        totalLines={stats.totalLines}
-        capHeadroomUsd={spend.capUsd != null ? Math.max(0, spend.capUsd - spend.spentUsd) : null}
-        onCommit={onPurchased}
-      />
+      <CapacitySheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </Card>
   )
 }
 
-// ─── Add/reduce sheet — the considered write path ─────────────────────────────
+// ─── The capacity sheet — what the limit is, and what it costs you in time ───
 
-export function AddLinesSheet({
+/**
+ * One mount, one prop contract, and no number it cannot stand behind. The
+ * ceiling is the published one and the console cannot raise it, so the only
+ * write path is the support form this app already ships. What the sheet keeps
+ * is the idea no competitor shows: what a line count does to a budget.
+ */
+export function CapacitySheet({
   open,
   onOpenChange,
-  purchased,
-  queued,
-  totalLines,
-  capHeadroomUsd,
-  onCommit,
 }: {
   open: boolean
   onOpenChange: (o: boolean) => void
-  purchased: number
-  queued: number
-  totalLines: number
-  capHeadroomUsd: number | null
-  onCommit: (qty: number, chargeOrCredit: number) => void
 }) {
-  const price = CONCURRENCY.pricePerLineMo
-  const daysLeft = PLAN_USAGE.periodDaysTotal - PLAN_USAGE.periodDaysElapsed
-  const [qty, setQty] = React.useState(5)
-
+  const cap = readCapacity()
+  // The cap lives in storage, so it is read when the sheet opens rather than
+  // during render: the first paint must match the one the server drew.
+  const [budget, setBudget] = React.useState<CapacityBudget | null>(null)
   React.useEffect(() => {
-    if (open) setQty(5)
-  }, [open])
-
-  // Negative qty = reduce purchased lines (min: remove all purchased).
-  const clamped = Math.max(-purchased, Math.min(40, qty))
-  const adding = clamped > 0
-  // Proration derives from the period position — never hardcoded cycle days.
-  const prorated = Math.round(Math.abs(clamped) * price * (daysLeft / PLAN_USAGE.periodDaysTotal) * 100) / 100
-  const newTotal = totalLines + clamped
-  const monthlyAfter = (purchased + Math.max(0, clamped)) * price
-
-  const saved =
-    queued > 0 && adding
-      ? Math.round((queued * AVG_CALL_MIN) / totalLines - (queued * AVG_CALL_MIN) / newTotal)
-      : 0
-  // Full-burn time-to-cap on the NEW line count — the cap can bite before a
-  // speed-up pays off; when it would, pair the purchase with a cap review.
-  const burnPerMin = newTotal * PAYG_RATE
-  const capMinutes =
-    capHeadroomUsd != null && burnPerMin > 0 ? Math.round(capHeadroomUsd / burnPerMin) : null
-
-  function commit() {
-    if (clamped === 0) return
-    track(Events.lines_added, { qty: clamped, prorated_charge_usd: adding ? prorated : -prorated })
-    onCommit(clamped, prorated)
-  }
+    if (open) setBudget(capacityBudget(cap.limit))
+  }, [open, cap.limit])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Concurrent lines</SheetTitle>
-          <SheetDescription>
-            {totalLines} today · {CONCURRENCY.included} included free
-            {purchased > 0 ? ` + ${purchased} purchased` : ""}. Changes apply instantly.
+          <SheetDescription className="tabular-nums">
+            {cap.limit} lines · {cap.inUse} in use · {cap.queued.toLocaleString()} queued
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-5 px-6">
-          <div className="space-y-2">
-            <Label htmlFor="line-qty">Change line count</Label>
-            <div className="flex items-center gap-2">
-              {[5, 10].map((q) => (
-                <Button
-                  key={q}
-                  type="button"
-                  variant={clamped === q ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 text-xs tabular-nums"
-                  onClick={() => setQty(q)}
-                >
-                  +{q}
-                </Button>
-              ))}
-              {purchased > 0 && (
-                <Button
-                  type="button"
-                  variant={clamped < 0 ? "default" : "outline"}
-                  size="sm"
-                  className="h-7 text-xs tabular-nums"
-                  onClick={() => setQty(-purchased)}
-                >
-                  Remove all {purchased}
-                </Button>
-              )}
-              <Input
-                id="line-qty"
-                inputMode="numeric"
-                className="h-7 w-20 text-xs"
-                value={String(qty)}
-                onChange={(e) => setQty(Number(e.target.value.replace(/[^\d-]/g, "")) || 0)}
-                aria-label="Custom line change (negative reduces)"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground tabular-nums">
-              {adding
-                ? `${clamped} × $${price}/mo = $${(clamped * price).toFixed(0)}/mo · $${prorated.toFixed(2)} prorated for the ${daysLeft} days left this cycle · then $${monthlyAfter.toFixed(0)}/mo total`
-                : clamped < 0
-                  ? `$${prorated.toFixed(2)} prorated credit on your next invoice. No fees, add lines back anytime`
-                  : "Pick a change"}
-              {" "}· wireframe pricing
-            </p>
-            {saved > 0 && (
-              <p className="text-xs text-muted-foreground tabular-nums">
-                Your queue clears ~{saved} min sooner{" "}
-                <Badge variant="secondary" className="text-xs align-middle">Estimate</Badge> , {" "}
-                {queued} queued × ~{AVG_CALL_MIN} min ÷ lines.
-              </p>
-            )}
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Agora publishes one limit: {PUBLISHED_PCU_CEILING} calls at once on a single
+            App ID. Nothing in the console can raise it.
+          </p>
 
-          <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground space-y-1">
-            <p className="font-medium text-foreground">Lines and your spend cap:</p>
+          <div className="space-y-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">Lines and your budget</p>
             <p>
-              · More lines never raise your cap: line fees bill separately; the cap governs
-              per-minute usage.
+              Lines change how fast you spend, not how much. Agora charges $
+              {AGORA_RATE_PER_MIN.toFixed(2)} a minute whichever line carries the call.
             </p>
-            {capHeadroomUsd != null && capMinutes != null && adding && (
+            {budget == null ? null : budget.unit === "minutes" ? (
               <p className="tabular-nums">
-                · At full use, {newTotal} lines spend ${burnPerMin.toFixed(2)}/min. Your $
-                {capHeadroomUsd.toFixed(2)} headroom lasts ≈{capMinutes} min (estimate).
-                {saved > 0 && capMinutes < saved && (
-                  <> The cap would pause calls before the speed-up pays off: review it in
-                  Usage &amp; spend above.</>
-                )}
+                You have {budget.minutesLeft.toLocaleString()} free minutes left. With all{" "}
+                {cap.limit} lines dialing they last about {budget.wallClockMinutes} minutes
+                of wall clock: {budget.minutesLeft.toLocaleString()} minutes ÷ {cap.limit} lines.
               </p>
-            )}
+            ) : budget.capUsd != null ? (
+              <p className="tabular-nums">
+                Your ${Math.round(budget.capUsd).toLocaleString()} cap buys{" "}
+                {budget.minutesLeft.toLocaleString()} minutes at ${AGORA_RATE_PER_MIN.toFixed(2)} a
+                minute. With all {cap.limit} lines dialing they last about{" "}
+                {budget.wallClockMinutes} minutes of wall clock:{" "}
+                {budget.minutesLeft.toLocaleString()} minutes ÷ {cap.limit} lines.
+              </p>
+            ) : null}
+            <SheetClose asChild>
+              <button
+                type="button"
+                className="rounded text-left font-medium text-foreground underline underline-offset-2 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Set your cap in Usage and spend, above.
+              </button>
+            </SheetClose>
           </div>
         </div>
 
@@ -354,10 +258,14 @@ export function AddLinesSheet({
           <SheetClose asChild>
             <Button variant="outline">Cancel</Button>
           </SheetClose>
-          <Button disabled={clamped === 0} onClick={commit} className="tabular-nums">
-            {adding
-              ? `Add ${clamped} line${clamped > 1 ? "s" : ""} · $${prorated.toFixed(2)} today`
-              : `Remove ${-clamped} line${clamped < -1 ? "s" : ""} · $${prorated.toFixed(2)} credit`}
+          <Button
+            asChild
+            className="gap-1.5"
+            onClick={() => track(Events.capacity_support_opened, { lines: cap.limit, queued: cap.queued })}
+          >
+            <Link href="/help/contact">
+              <LifeBuoy className="h-3.5 w-3.5" /> Open a support request
+            </Link>
           </Button>
         </SheetFooter>
       </SheetContent>

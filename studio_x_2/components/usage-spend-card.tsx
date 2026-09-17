@@ -27,8 +27,12 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import {
-  PLAN_USAGE, type PlanUsage, freeMinutesStats, spendStats,
+  PLAN_USAGE, freeMinutesStats, spendStats,
 } from "@/lib/campaign-data"
+import {
+  BILLING_STATE_EVENT, DEFAULT_MONEY, effectivePlanUsage, readMoney, writeMoney,
+  type MoneyOverlay,
+} from "@/lib/billing-state"
 import { AddCardSheet } from "@/components/free-minutes-nudge"
 
 /**
@@ -60,24 +64,26 @@ function usd(n: number, cents = true) {
 }
 
 export function UsageSpendCard() {
-  // Mock-local overlay: the wireframe's stand-in for cap/card mutations.
-  const [cardOnFile, setCardOnFile] = React.useState(PLAN_USAGE.cardOnFile)
-  const [capUsd, setCapUsd] = React.useState<number | null>(PLAN_USAGE.spendCapUsd)
-  const [alertPct, setAlertPct] = React.useState(PLAN_USAGE.spendAlertPct)
-  // A cautious user may set a cap BEFORE adding a card; it arms at capture.
-  const [preCardCap, setPreCardCap] = React.useState<number | null>(null)
+  // The card / cap / alert overlay is SHARED, not private: the concurrency card
+  // two cards below reads the same cap, and a card added here has to be visible
+  // there. First paint uses the fixture's own position so the server's HTML and
+  // the client's agree; storage arrives in the effect.
+  const [money, setMoney] = React.useState<MoneyOverlay>(DEFAULT_MONEY)
+  React.useEffect(() => {
+    const sync = () => setMoney(readMoney())
+    sync()
+    window.addEventListener(BILLING_STATE_EVENT, sync)
+    return () => window.removeEventListener(BILLING_STATE_EVENT, sync)
+  }, [])
+  const { cardOnFile, capUsd, alertPct, preCardCap } = money
+
   // Transient confirmations — moments, not states (judge fix: no permanent
   // "cap raised" banner derived from cap ≠ default).
   const [confirm, setConfirm] = React.useState<"card" | "cap-set" | "cap-raised" | null>(null)
   const [keptPaused, setKeptPaused] = React.useState(false)
   const [sheetOpen, setSheetOpen] = React.useState(false)
 
-  const effective: PlanUsage = {
-    ...PLAN_USAGE,
-    cardOnFile,
-    spendCapUsd: cardOnFile ? (capUsd ?? PLAN_USAGE.defaultSpendCapUsd) : null,
-    spendAlertPct: alertPct,
-  }
+  const effective = effectivePlanUsage(money)
   const free = freeMinutesStats(effective)
   const spend = spendStats(effective)
 
@@ -106,20 +112,31 @@ export function UsageSpendCard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // The bill-shock counter-metric: an alert MUST precede a cap hit for the same
+  // cap. Both were declared and fired nowhere, so the pair could not be read.
+  // They fire when their branch is entered, which is when the user sees it.
+  React.useEffect(() => {
+    if (spend.state === "cap_warning") {
+      track(Events.spend_alert_fired, { pct_of_cap: spend.pctOfCap, cap_usd: cap ?? 0 })
+    }
+    if (spend.state === "cap_hit") {
+      track(Events.spend_cap_hit, { cap_usd: cap ?? 0, projected_usd: projectedShown })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spend.state])
+
   function onCardAdded() {
-    setCardOnFile(true)
-    setCapUsd(preCardCap ?? PLAN_USAGE.defaultSpendCapUsd)
+    writeMoney({ cardOnFile: true, capUsd: preCardCap ?? PLAN_USAGE.defaultSpendCapUsd })
     setConfirm("card")
   }
 
   function saveControls(nextCap: number, nextAlertPct: number) {
     const prevCap = cardOnFile ? (capUsd ?? PLAN_USAGE.defaultSpendCapUsd) : null
-    if (cardOnFile) {
-      setCapUsd(nextCap)
-    } else {
-      setPreCardCap(nextCap)
-    }
-    setAlertPct(nextAlertPct)
+    writeMoney(
+      cardOnFile
+        ? { capUsd: nextCap, alertPct: nextAlertPct }
+        : { preCardCap: nextCap, alertPct: nextAlertPct },
+    )
     if (prevCap != null && nextCap > prevCap && spend.state === "cap_hit") {
       track(Events.spend_cap_raised, {
         from_usd: prevCap, to_usd: nextCap, at_spend_usd: spend.spentUsd,
@@ -223,8 +240,8 @@ export function UsageSpendCard() {
         {spend.state === "cap_warning" && (
           <StateBanner tone="warning" icon={BellRing}>
             <p className="text-sm font-medium">
-              {spend.pctOfCap}% of your {usd(cap ?? 0, false)}/mo cap used , {" "}
-              {usd(headroomUsd ?? 0)} left (≈{(headroomMin ?? 0).toLocaleString()} min).
+              {spend.pctOfCap}% of your {usd(cap ?? 0, false)}/mo cap used.{" "}
+              {usd(headroomUsd ?? 0)} left, about {(headroomMin ?? 0).toLocaleString()} min.
             </p>
             <p className="text-xs text-muted-foreground">
               At the cap, new calls pause; live calls finish. Raise it for more headroom,
@@ -376,7 +393,7 @@ export function UsageSpendCard() {
               <span>{effective.freeMinutesUngated} min. No card needed</span>
               <span className="inline-flex items-center gap-1">
                 {!cardOnFile && <Gift className="h-3 w-3" />}
-                {free.included - effective.freeMinutesUngated} min , {" "}
+                {free.included - effective.freeMinutesUngated} min{" "}
                 {cardOnFile ? "unlocked" : "free with a card"}
               </span>
             </div>

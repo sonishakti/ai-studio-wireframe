@@ -78,6 +78,12 @@ export const Events = {
 
   // ── Concurrent lines (A6, 2026-07-09) — the wall is a conversion moment.
   concurrency_wall_viewed:    "concurrency_wall_viewed",     // { lines, queued } — user saw the at-capacity state
+  // The console cannot set the limit — the Engine contract exposes no
+  // concurrency field, only ConcurrencyLimitExceeded on a 422 — so the support
+  // route IS the write path, and this is the only capacity action we can measure.
+  capacity_support_opened:    "capacity_support_opened",     // { lines, queued } — asked support about the limit
+  // Declared and deliberately unfired: it comes back the day owner question 1
+  // is answered "capacity is sold", and not before.
   lines_added:                "lines_added",                 // { qty, prorated_charge_usd } — negative qty = reduction
   keep_queuing_clicked:       "keep_queuing_clicked",        // { lines } — declined the upsell; queueing as designed
 
@@ -99,7 +105,7 @@ export const Events = {
   batch_banner_shown:         "batch_banner_shown",          // { tone } — the one-sentence verdict
   batch_fix_trunk_clicked:    "batch_fix_trunk_clicked",     // {} — degraded → fix the trunk
   batch_resume_anyway_clicked:"batch_resume_anyway_clicked", // {} — informed resume of a degraded batch
-  batch_add_lines_clicked:    "batch_add_lines_clicked",     // { cap_headroom_usd } — the A6 unlock at the wall
+  batch_add_lines_clicked:    "batch_add_lines_clicked",     // {} — the capacity door at the batch wall
   disposition_breakdown_expanded: "disposition_breakdown_expanded", // {}
 
   // ── Evals / simulation (F-Eval, 2026-07-09) — prove it works before it ships.
@@ -134,6 +140,7 @@ export const Events = {
   session_span_fix_clicked:   "session_span_fix_clicked",  // ★ { session_id, span }
   session_jump_to_slowest:    "session_jump_to_slowest",   // { session_id, turn }
   usage_viewed:               "usage_viewed",
+  usage_grain_changed:        "usage_grain_changed",       // { grain } — which workload the usage page is read at
   insights_cross_link_clicked:"insights_cross_link_clicked",  // Monitor → Usage etc.
 
   // ── Diagnostics (Observe → remediation loop) ───────────────────────────────
@@ -225,6 +232,8 @@ export type EventPayloads = {
   spend_alert_fired:           { pct_of_cap: number; cap_usd: number }
   projected_bill_viewed:       { projected_usd: number; spend_state: string }
   concurrency_wall_viewed:     { lines: number; queued: number }
+  capacity_support_opened:     { lines: number; queued: number }
+  usage_grain_changed:         { grain: "all" | "agent" | "rte" }
   lines_added:                 { qty: number; prorated_charge_usd: number }
   keep_queuing_clicked:        { lines: number }
   sip_quick_connect_started:   { provider: string; credential: "token" | "scoped_key" }
@@ -240,7 +249,9 @@ export type EventPayloads = {
   batch_banner_shown:          { tone: string }
   batch_fix_trunk_clicked:     Record<string, never>
   batch_resume_anyway_clicked: Record<string, never>
-  batch_add_lines_clicked:     { cap_headroom_usd: number | null }
+  // cap_headroom_usd is gone: it read a spendCapUsd that is null, so the
+  // field carried no measurement on any of the doors that sent it.
+  batch_add_lines_clicked:     Record<string, never>
   disposition_breakdown_expanded: Record<string, never>
   test_authored:               Record<string, never>
   test_run_started:            Record<string, never>

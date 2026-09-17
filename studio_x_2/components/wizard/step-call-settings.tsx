@@ -13,8 +13,8 @@ import {
 import { RadioCard, RadioCardGroup } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
 import { InfoHint } from "@/components/wizard/info-hint"
-import { AddLinesSheet } from "@/components/concurrency-card"
-import { CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
+import Link from "next/link"
+import { PUBLISHED_PCU_CEILING, readCapacity } from "@/lib/billing-state"
 import {
   DEFAULT_CALL_BEHAVIOR,
   type CallBehaviorConfig,
@@ -232,7 +232,7 @@ export function CampaignDialingFields({
             type="number"
             min={1}
             disabled={disabled}
-            value={campaign.maxConcurrent ?? 10}
+            value={campaign.maxConcurrent ?? PUBLISHED_PCU_CEILING}
             onChange={(e) => onChange({ maxConcurrent: Math.max(1, Number(e.target.value) || 1) })}
             className="text-sm font-mono"
           />
@@ -454,36 +454,23 @@ function BehaviorToggle({
  *  line-capacity/queueing note always rides beside the free-entry input —
  *  a typed 40 must never queue silently. */
 function CampaignCapacityNote({ maxConcurrent }: { maxConcurrent: number }) {
-  const [purchasedBoost, setPurchasedBoost] = React.useState(0)
-  const [linesOpen, setLinesOpen] = React.useState(false)
-  const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchasedBoost })
-  const overBy = Math.max(0, maxConcurrent - stats.totalLines)
+  // One number everywhere: the ceiling is the account's published limit, not a
+  // wizard default of its own. A campaign's own max stays a per-campaign
+  // choice, which is a different thing from the App ID's ceiling.
+  const cap = readCapacity()
+  if (maxConcurrent <= cap.limit) return null
 
   return (
-    <>
-      {overBy > 0 ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.04] px-3 py-2.5">
-          <p className="flex-1 min-w-0 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {maxConcurrent} at once is above your {stats.totalLines} concurrent lines.
-            </span>{" "}
-            Calls beyond {stats.totalLines} queue until a line frees. Nothing drops. +{overBy}{" "}
-            lines (${overBy * stats.pricePerLineMo}/mo, prorated today) removes the queue.
-          </p>
-          <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => setLinesOpen(true)}>
-            Add lines
-          </Button>
-        </div>
-      ) : null}
-      <AddLinesSheet
-        open={linesOpen}
-        onOpenChange={setLinesOpen}
-        purchased={CONCURRENCY.purchased + purchasedBoost}
-        queued={0}
-        totalLines={stats.totalLines}
-        capHeadroomUsd={null}
-        onCommit={(qty) => { setPurchasedBoost((b) => Math.max(0, b + qty)); setLinesOpen(false) }}
-      />
-    </>
+    <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.04] px-3 py-2.5">
+      <p className="flex-1 min-w-0 text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">
+          {maxConcurrent} at once is above the {cap.limit} lines this App ID allows.
+        </span>{" "}
+        Calls beyond {cap.limit} queue until a line frees. Nothing drops.
+      </p>
+      <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" asChild>
+        <Link href="/billing?focus=concurrent-lines">See your concurrent lines</Link>
+      </Button>
+    </div>
   )
 }

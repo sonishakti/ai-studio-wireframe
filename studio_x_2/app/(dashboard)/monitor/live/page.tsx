@@ -7,9 +7,8 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { MonitorNav } from "@/components/monitor-nav"
 import { LiveCallDrawer, StateBadge } from "@/components/live-call-drawer"
-import { AddLinesSheet } from "@/components/concurrency-card"
 import { Button } from "@/components/ui/button"
-import { CONCURRENCY, concurrencyStats } from "@/lib/campaign-data"
+import { readCapacity } from "@/lib/billing-state"
 import { liveCalls, mmss, queuedCallers, riskLine, verb, type LiveCall, type VerbId } from "@/lib/live-calls"
 
 /**
@@ -31,8 +30,6 @@ export default function LiveCallsPage() {
   const [live, setLive] = React.useState(true)
   const [age, setAge] = React.useState(0)
   const [openId, setOpenId] = React.useState<string | null>(null)
-  const [linesOpen, setLinesOpen] = React.useState(false)
-  const [purchased, setPurchased] = React.useState(0)
 
   // One second of wall clock per second of call, and an age counter that keeps
   // the page honest about how stale it is. Paused means paused: the rows stop
@@ -52,8 +49,10 @@ export default function LiveCallsPage() {
     return () => window.clearInterval(t)
   }, [live])
 
-  const stats = concurrencyStats({ ...CONCURRENCY, purchased: CONCURRENCY.purchased + purchased })
-  const queued = queuedCallers(calls.length, stats.totalLines)
+  // The account's position, not this page's own count: 5 rows on screen is not
+  // the same question as how many of the App ID's lines are held right now.
+  const cap = readCapacity()
+  const queued = queuedCallers(cap.inUse, cap.limit)
 
   // Issues first. Within each group, the longest-running call is the one most
   // likely to need someone.
@@ -103,10 +102,13 @@ export default function LiveCallsPage() {
               <span className="text-muted-foreground">live now</span>
             </p>
             <p className="text-sm text-muted-foreground">
-              {stats.totalLines - calls.length > 0
-                ? `${stats.totalLines - calls.length} of ${stats.totalLines} lines free`
-                : `All ${stats.totalLines} lines busy`}
+              {cap.limit - cap.inUse > 0
+                ? `${cap.limit - cap.inUse} of ${cap.limit} lines free`
+                : `All ${cap.limit} lines busy`}
             </p>
+            <Button variant="link" size="sm" className="h-auto p-0 text-sm" asChild>
+              <Link href="/billing?focus=concurrent-lines">See your concurrent lines</Link>
+            </Button>
             {needing > 0 && (
               <p className="flex items-center gap-1.5 text-sm text-warning">
                 <ShieldAlert className="size-4" aria-hidden />
@@ -130,8 +132,8 @@ export default function LiveCallsPage() {
               <span className="font-medium">{queued} caller{queued === 1 ? " is" : "s are"} holding for a line.</span>{" "}
               <span className="text-muted-foreground">Nothing is dropped, and they are waiting.</span>
             </p>
-            <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => setLinesOpen(true)}>
-              Add lines
+            <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" asChild>
+              <Link href="/billing?focus=concurrent-lines">See your concurrent lines</Link>
             </Button>
           </div>
         )}
@@ -203,16 +205,6 @@ export default function LiveCallsPage() {
         open={!!open}
         onOpenChange={(o) => !o && setOpenId(null)}
         onAct={act}
-      />
-
-      <AddLinesSheet
-        open={linesOpen}
-        onOpenChange={setLinesOpen}
-        purchased={CONCURRENCY.purchased + purchased}
-        queued={queued}
-        totalLines={stats.totalLines}
-        capHeadroomUsd={null}
-        onCommit={(qty) => { setPurchased((p) => Math.max(0, p + qty)); setLinesOpen(false) }}
       />
     </div>
   )

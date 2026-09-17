@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { UsageSpendCard } from "@/components/usage-spend-card"
 import { ConcurrencyCard } from "@/components/concurrency-card"
+import { DesignFocus } from "@/components/design-focus"
 import { freeMinutesStats } from "@/lib/campaign-data"
 
 /**
@@ -18,6 +19,10 @@ import { freeMinutesStats } from "@/lib/campaign-data"
 export function BillingFutureCards() {
   return (
     <>
+      {/* The review link opens AT the card it is about. Mounted HERE, by the
+          surface that owns the anchor, not in the dashboard layout: that layout
+          also wraps the agent builder, whose own focusOn reads ?focus= there. */}
+      <DesignFocus />
       <UsageSpendCard />
       <ConcurrencyCard />
     </>

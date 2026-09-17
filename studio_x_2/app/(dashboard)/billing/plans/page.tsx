@@ -45,8 +45,7 @@ const PLANS: Plan[] = [
   // AI pricing and matching PLAN_USAGE.freeMinutesIncluded. The two surfaces
   // disagreed on the same account, which is the cheapest possible way to lose a
   // developer's trust in every other number on the page.
-  { product: "agent-studio", name: "Free",      price: "$0",   period: "/ month", description: "For individuals exploring voice AI.",                badge: "Current",  cta: "Current plan",     ctaDisabled: true,  features: ["5 agents", "300 min / month", "1 phone number", "Basic metrics", "Email support"] },
-  { product: "agent-studio", name: "Pro",       price: "$99",  period: "/ month", description: "For teams building production agents.",              badge: "Popular",  cta: "Upgrade to Pro",   ctaDisabled: false, highlighted: true, features: ["Unlimited agents", "10,000 min / month", "10 phone numbers", "Advanced metrics + monitor", "Telephony campaigns", "Priority support", "Audit logs"] },
+  { product: "agent-studio", name: "Free",      price: "$0",   period: "/ month", description: "For individuals exploring voice AI.",                badge: "Current",  cta: "Current plan",     ctaDisabled: true,  features: ["5 agents", "300 min / month, then $0.10 / min", "Basic metrics", "Email support"] },
   { product: "agent-studio", name: "Enterprise",price: "Custom",period: "",        description: "Large deployments with SLA requirements.",          badge: null,        cta: "Contact Sales",    ctaDisabled: false, features: ["Unlimited everything", "Custom minute pool", "Dedicated support", "SLA guarantee", "SSO / SAML", "On-premise option"] },
 
   // ── RTC Pre-paid (pay-as-you-go voice/video minutes) ──────────────────────

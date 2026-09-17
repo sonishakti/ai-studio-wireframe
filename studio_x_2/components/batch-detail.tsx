@@ -16,10 +16,10 @@ import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { HealthDot } from "@/components/health-dot"
 import { StateBanner } from "@/components/usage-spend-card"
-import { AddLinesSheet } from "@/components/concurrency-card"
+import { readCapacity } from "@/lib/billing-state"
 import { deploymentHealth } from "@/lib/diagnostics"
 import {
-  PACING_META, DISPOSITION_META, batchEta, spendStats, PLAN_USAGE,
+  PACING_META, DISPOSITION_META, batchEta,
   type Deployment, type BatchPacing, type CallDisposition,
 } from "@/lib/campaign-data"
 
@@ -51,8 +51,9 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
   const completed = d.progress?.completed ?? 0
   const total = d.progress?.total ?? 0
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0
-  const spend = spendStats(PLAN_USAGE)
-  const capHeadroom = spend.capUsd != null ? Math.max(0, spend.capUsd - spend.spentUsd) : null
+  // The ceiling is the account's, not this run's: a run holds lines, it does
+  // not own a total. One denominator, so the batch page and Billing agree.
+  const cap = readCapacity()
 
   // Verdict tone — data-driven from PACING_META (paused = warning, degraded =
   // destructive, paced/dialing = primary). No hardcoded cause.
@@ -75,7 +76,7 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
     pacing === "paced"
       ? `Working: dialing at capacity. ${rt!.queued.toLocaleString()} queued, none dropped.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
       : pacing === "dialing"
-        ? `Working · ${rt?.linesInUse ?? 0} of ${rt?.linesTotal ?? 0} lines dialing.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
+        ? `Working · ${rt?.linesInUse ?? 0} of ${cap.limit} lines dialing.${eta ? ` ~${eta.minutes} min to finish.` : ""}`
         : pacing === "scheduled"
           ? "Scheduled. Nothing dials yet."
           : pacing === "degraded"
@@ -129,7 +130,7 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
             )}
             {isPaced && rt && rt.queued > 0 && (
               <div className="mt-2">
-                <AddLinesSheetLauncher capHeadroom={capHeadroom} />
+                <CapacityLink />
               </div>
             )}
           </StateBanner>
@@ -166,7 +167,7 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
                     <Tile icon={PhoneForwarded} label="Queued" value={rt.queued.toLocaleString()} sub={rt.maxQueueSec > 0 ? `${rt.maxQueueSec}s longest wait` : undefined} />
                     <Tile icon={Repeat} label="Retrying" value={rt.retry.retrying.toLocaleString()} sub={`up to ${rt.retry.max} attempts`} />
                     <Tile icon={Gauge} label="Dial rate" value={`${rt.cps.actual.toFixed(1)}/s`} sub={`target ${rt.cps.target}/s`} />
-                    <Tile icon={Users} label="Lines" value={`${rt.linesInUse}/${rt.linesTotal}`} sub={rt.linesInUse >= rt.linesTotal ? "at capacity" : "with headroom"} />
+                    <Tile icon={Users} label="Lines" value={`${rt.linesInUse}/${cap.limit}`} sub={cap.atWall ? "at capacity" : "with headroom"} />
                   </div>
                 )}
 
@@ -174,19 +175,19 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
                 {rt && (
                   <div className="mt-4">
                     <p className="mb-1.5 text-xs text-muted-foreground">
-                      Concurrency · {rt.linesInUse} of {rt.linesTotal} lines dialing
+                      Concurrency · {rt.linesInUse} of {cap.limit} lines dialing on this run
                     </p>
                     <div
                       role="meter"
                       aria-valuemin={0}
-                      aria-valuemax={rt.linesTotal}
+                      aria-valuemax={cap.limit}
                       aria-valuenow={rt.linesInUse}
                       aria-label="Concurrent lines in use"
                       className="h-2 w-full overflow-hidden rounded-full bg-muted"
                     >
                       <div
-                        className={cn("h-full rounded-full", rt.linesInUse >= rt.linesTotal ? "bg-primary" : "bg-success")}
-                        style={{ width: `${rt.linesTotal > 0 ? Math.min(100, (rt.linesInUse / rt.linesTotal) * 100) : 0}%` }}
+                        className={cn("h-full rounded-full", cap.atWall ? "bg-primary" : "bg-success")}
+                        style={{ width: `${cap.limit > 0 ? Math.min(100, (rt.linesInUse / cap.limit) * 100) : 0}%` }}
                       />
                     </div>
                   </div>
@@ -224,27 +225,17 @@ function Tile({ icon: Icon, label, value, sub }: { icon: React.ComponentType<{ c
   )
 }
 
-/** The A6 unlock at the batch wall — headroom threaded from the X1 spend cap. */
-function AddLinesSheetLauncher({ capHeadroom }: { capHeadroom: number | null }) {
-  const [open, setOpen] = React.useState(false)
+/** The capacity door at the batch wall. It is a LINK, not a second sheet:
+ *  capacity has one home now, and this run is not where the ceiling lives. */
+function CapacityLink() {
   return (
-    <>
-      <Button
-        size="sm"
-        onClick={() => { setOpen(true); track(Events.batch_add_lines_clicked, { cap_headroom_usd: capHeadroom }) }}
-      >
-        Add lines to clear the queue faster
-      </Button>
-      <AddLinesSheet
-        open={open}
-        onOpenChange={setOpen}
-        purchased={0}
-        queued={0}
-        totalLines={10}
-        capHeadroomUsd={capHeadroom}
-        onCommit={() => setOpen(false)}
-      />
-    </>
+    <Button
+      size="sm"
+      asChild
+      onClick={() => track(Events.batch_add_lines_clicked, {})}
+    >
+      <Link href="/billing?focus=concurrent-lines">See your concurrent lines</Link>
+    </Button>
   )
 }
 
