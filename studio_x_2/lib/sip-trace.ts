@@ -14,6 +14,12 @@
  * Seeded off the call id so a call always renders the same ladder.
  */
 
+import { GATEWAYS, numberIdForE164, trunkHref } from "@/lib/sip-trunk"
+
+/** The gateway a call was carried by, drawn from the three addresses Agora
+ *  publishes rather than from invented SBC names (17, 2026-09-17). */
+const GATEWAY_HOSTS = Object.values(GATEWAYS).map((g) => g.host)
+
 export type SipParty = "caller" | "carrier" | "agora" | "agent"
 
 export const SIP_PARTY_LABEL: Record<SipParty, string> = {
@@ -190,9 +196,11 @@ const CPS_FAILURE: SipFailure = {
   reason: "Call rate limit exceeded",
   blame: "your-config",
   explain: "14 calls were placed in one second against a limit of 10/s. The carrier refused the extra ones.",
-  fix: "Slow the campaign pacing or raise the CPS limit; the carrier asked for a 12 s Retry-After.",
+  // The ceiling is the carrier's and no Agora surface raises it, so the second
+  // door is gone rather than repointed: pacing is changed on Batch Calls, and
+  // that is the one place this can honestly send anyone (17, 2026-09-17).
+  fix: "Slow the campaign pacing. The carrier asked for a 12 s Retry-After.",
   fixHref: "/deploy/batch-calls",
-  fixSecondary: { label: "Raise the CPS limit", href: "/deploy/telephony" },
 }
 const CPS_RETRY_AFTER_S = 12
 
@@ -225,8 +233,14 @@ export function buildSipTrace(input: {
   to: string
 }): SipTrace {
   const { callId, direction, failed, from, to } = input
+  // Our own number on this call: the one an Agora trunk is configured on.
+  const ourE164 = direction === "Inbound" ? to : from
   const rnd = seeded(callId + "sip")
-  const sipCallId = `${hex(rnd, 12)}@sbc-${["us-west", "us-east", "eu-central"][Math.floor(rnd() * 3)]}.agora.io`
+  // The three gateways Agora actually publishes. The invented agora.io SBC names
+  // that were here read as one vocabulary on the ladder and another on the row
+  // the fix link opens.
+  const gatewayHost = GATEWAY_HOSTS[Math.floor(rnd() * GATEWAY_HOSTS.length)]
+  const sipCallId = `${hex(rnd, 12)}@${gatewayHost}`
   const branch = `z9hG4bK${hex(rnd, 10)}`
   const tagA = hex(rnd, 8)
   const tagB = hex(rnd, 8)
@@ -340,7 +354,12 @@ export function buildSipTrace(input: {
     return {
       callId, sipCallId, parties, messages, pddMs,
       outcome: code === 486 ? "busy" : code === 480 || code === 408 ? "no-answer" : code === 487 ? "cancelled" : "failed",
-      failure: { code, ...meta },
+      // Only the 403 is rewired: its fix is our trunk's credential, and the row
+      // that holds it is on the number that carries the trunk. 404's fix is
+      // about the number that was DIALLED, which is not ours to open.
+      failure: code === 403
+        ? { code, ...meta, fixHref: trunkHref(numberIdForE164(ourE164), "trunk-credential") }
+        : { code, ...meta },
       retained: true,
       legs: computeLegs(messages),
       decidingIndex,

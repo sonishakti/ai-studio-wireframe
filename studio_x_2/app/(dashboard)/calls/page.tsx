@@ -76,8 +76,11 @@ function generate(): CallRow[] {
         agent: c.agentName ?? "Dynamic Agent",
         campaignId: c.id,
         campaignName: c.name,
-        from: c.kind === "inbound" ? CONTACTS[(n + i) % CONTACTS.length] : "+1 (555) 555-0240",
-        to: c.kind === "inbound" ? "+1 (555) 555-0101" : CONTACTS[(n + i) % CONTACTS.length],
+        // Our own side of the call is a number that EXISTS in the inventory
+        // (pn_05 Outbound Pool, pn_01 Support Line), so the ladder's trunk fix
+        // link resolves to the number it was dialled on instead of the list.
+        from: c.kind === "inbound" ? CONTACTS[(n + i) % CONTACTS.length] : "+1 (415) 555-0240",
+        to: c.kind === "inbound" ? "+1 (415) 555-0101" : CONTACTS[(n + i) % CONTACTS.length],
         durationSec: status === "Not Connected" ? 0 : 30 + ((n * 37 + i * 53) % 280),
         status,
         outcome,

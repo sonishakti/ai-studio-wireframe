@@ -27,19 +27,24 @@ import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { PageHeader } from "@/components/page-header"
 import { DeployContextBar } from "@/components/deploy-context-bar"
 import { PHONE_NUMBERS, DEPLOYMENTS, deploymentHref, type PhoneNumber } from "@/lib/campaign-data"
+import { CARRIERS, trunkOf } from "@/lib/sip-trunk"
+import { TrunkStateChip } from "@/components/trunk-section"
+import { DesignFocus } from "@/components/design-focus"
 import { readSessionNumbers, removeSessionNumber, subscribeNumberStore } from "@/lib/number-store"
 import { toast } from "sonner"
 
 /** A seed row has a detail page; a row this session produced does not. */
 const isSeed = (n: PhoneNumber) => PHONE_NUMBERS.some((p) => p.id === n.id)
 
-/** What the From cell prints: where the number came from, which `vendor` cannot
- *  answer on its own (Bandwidth is both a carrier customers bring and the one
- *  Agora resells through). */
+/** What the From cell prints: where the number came from, which `carrier`
+ *  cannot answer on its own (Bandwidth is both a carrier customers bring and the
+ *  one Agora resells through). A number the customer brought prints the carrier
+ *  that carries it, which on a bring-your-own-SIP platform is the one fact the
+ *  inventory exists to hold. */
 function fromLabel(n: PhoneNumber): string {
   if (n.origin === "agora") return "Agora"
   if (n.origin === "sandbox") return "Agora sandbox"
-  return n.vendor
+  return n.carrierName?.trim() || CARRIERS[n.carrier].label
 }
 
 export default function PhoneNumbersPage() {
@@ -97,7 +102,7 @@ export default function PhoneNumbersPage() {
             </p>
           </div>
           <AddPhoneNumberSheet>
-            <Button size="sm" className="gap-1.5">
+            <Button size="sm" className="gap-1.5" data-design-focus="connect-carrier" data-design-focus-open>
               <Plus className="h-4 w-4" /> Add phone number
             </Button>
           </AddPhoneNumberSheet>
@@ -113,12 +118,15 @@ export default function PhoneNumbersPage() {
         title="Phone numbers"
         actions={
           <AddPhoneNumberSheet>
-            <Button size="sm" className="gap-1.5">
+            {/* Where the review link lands: ?focus=connect-carrier opens the
+                sheet at the carrier step, which is where setup starts. */}
+            <Button size="sm" className="gap-1.5" data-design-focus="connect-carrier" data-design-focus-open>
               <Plus className="h-4 w-4" /> Add phone number
             </Button>
           </AddPhoneNumberSheet>
         }
       />
+      <DesignFocus />
 
       <main className="flex-1 p-6 pt-4">
         <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -163,6 +171,7 @@ export default function PhoneNumbersPage() {
                   <TableHead>Number</TableHead>
                   <TableHead>Label</TableHead>
                   <TableHead>From</TableHead>
+                  <TableHead data-design-focus="trunk-column">Trunk</TableHead>
                   <TableHead>Assigned to</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[48px]" />
@@ -190,6 +199,12 @@ export default function PhoneNumbersPage() {
                           <Badge variant="outline" className="text-xs">Requires Engine</Badge>
                         )}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {/* Whether a call has ever got through, which no column in
+                          this product said. A number this session produced has
+                          no trunk record yet, so it reads Trunk not set up. */}
+                      <TrunkStateChip trunk={trunkOf(n.id)} />
                     </TableCell>
                     <TableCell>
                       {n.assignedTo.length === 0 ? (
@@ -280,7 +295,7 @@ export default function PhoneNumbersPage() {
                 ))}
                 {rows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
                       No phone numbers match your search.
                     </TableCell>
                   </TableRow>

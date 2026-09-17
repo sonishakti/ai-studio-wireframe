@@ -15,6 +15,10 @@ import * as React from "react"
  * reach for. It is self-contained on purpose, so any surface can mount its own
  * copy and a later design-kit commit can lift it into the layout once.
  *
+ * An anchor that also carries `data-design-focus-open` is pressed once it has
+ * been found (17, 2026-09-17): some journeys start inside a sheet, and a link
+ * that lands on the button that opens it has landed one click short.
+ *
  * The only other implementation, `focusOn` in components/wizard/agent-wizard.tsx,
  * is a callback closed over wizard step state and runs on the wizard page. The
  * two never meet, so there is no owner flag and nothing to coordinate.
@@ -31,6 +35,7 @@ export function DesignFocus(): null {
     let tries = 0
     let pending = 0
     let ringing = 0
+    let opening = 0
     let target: HTMLElement | null = null
     let previousOutline = ""
 
@@ -57,12 +62,16 @@ export function DesignFocus(): null {
       el.style.outlineOffset = "8px"
       el.style.transition = "outline-color 600ms ease"
       ringing = window.setTimeout(clear, 2600)
+      // The ring lands on the trigger first, then the surface it opens: the
+      // reviewer sees which door was taken before the door is open.
+      if (el.hasAttribute("data-design-focus-open")) opening = window.setTimeout(() => el.click(), 500)
     }
 
     pending = window.setTimeout(attempt, 350)
     return () => {
       window.clearTimeout(pending)
       window.clearTimeout(ringing)
+      window.clearTimeout(opening)
       clear()
     }
   }, [])

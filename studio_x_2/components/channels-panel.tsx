@@ -17,6 +17,15 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { TEST_INBOUND_NUMBER } from "@/lib/campaign-data"
+import { numberIdForE164 } from "@/lib/sip-trunk"
+
+/** A phone row opens the number it names, not the list it lives in. An
+ *  identifier the inventory does not carry degrades to the list rather than
+ *  opening a stranger. */
+const numberHref = (e164: string) => {
+  const id = numberIdForE164(e164)
+  return id ? `/deploy/phone-numbers/${id}` : "/deploy/phone-numbers"
+}
 
 /**
  * ChannelsPanel — the Channels overview (2026-06-23: "Deployment" renamed to
@@ -47,15 +56,15 @@ type ChannelRow = {
 }
 
 const CHANNELS: ChannelRow[] = [
-  { id: "ch_01", type: "phone",    label: "Support Line",    identifier: "+1 (415) 555-0101", backs: "Support Bot v2",      status: "active",     href: "/deploy/phone-numbers" },
+  { id: "ch_01", type: "phone",    label: "Support Line",    identifier: "+1 (415) 555-0101", backs: "Support Bot v2",      status: "active",     href: numberHref("+1 (415) 555-0101") },
   // Aria answers the sandbox line, and this row says the same digits the
   // inventory, the agents landing and the banner say (16, 2026-09-17).
-  { id: "ch_02", type: "phone",    label: "Aria sandbox line", identifier: TEST_INBOUND_NUMBER, backs: "Aria",             status: "active",     href: "/deploy/phone-numbers" },
+  { id: "ch_02", type: "phone",    label: "Aria sandbox line", identifier: TEST_INBOUND_NUMBER, backs: "Aria",             status: "active",     href: numberHref(TEST_INBOUND_NUMBER) },
   { id: "ch_03", type: "whatsapp", label: "Acme WhatsApp",   identifier: "+1 (415) 555-0142", backs: "Survey Bot",         status: "active",     href: "/deploy/whatsapp" },
   { id: "ch_04", type: "web",      label: "Help widget",     identifier: "acme.com/help",     backs: "Support Bot v2",     status: "active",     href: "/deploy/web-widget" },
   { id: "ch_05", type: "batch",    label: "Q2 Collections",  identifier: "4,210 contacts",    backs: "Collections Outreach", status: "scheduled", href: "/deploy/batch-calls" },
   { id: "ch_06", type: "code",     label: "SDK embed",       identifier: "token auth",        backs: "Aria",               status: "active",     href: "/deploy/code" },
-  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: "Available",           status: "unassigned", href: "/deploy/phone-numbers" },
+  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: "Available",           status: "unassigned", href: numberHref("+1 (800) 555-0199") },
 ]
 
 const FILTERS: { id: "all" | ChannelType; label: string }[] = [

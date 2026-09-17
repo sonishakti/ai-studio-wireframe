@@ -15,11 +15,14 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { PHONE_NUMBERS, DEPLOYMENTS, AGENTS, deploymentHref } from "@/lib/campaign-data"
+import { PHONE_NUMBERS, DEPLOYMENTS, AGENTS, deploymentHref, type CarrierId } from "@/lib/campaign-data"
+import { NumberIdentityRows, TrunkRow, TrunkSection } from "@/components/trunk-section"
+import { TrunkTestCall } from "@/components/trunk-test-call"
+import { DesignFocus } from "@/components/design-focus"
+import { readTrunks, trunkOf, writeTrunk, type SipTrunk } from "@/lib/sip-trunk"
 import { toast } from "sonner"
 
 export function PhoneNumberClient({ id }: { id: string }) {
@@ -45,8 +48,26 @@ export function PhoneNumberClient({ id }: { id: string }) {
   const [maxDuration, setMaxDuration] = React.useState(300)
   const [silenceHangup, setSilenceHangup] = React.useState(true)
   const [silenceTimeout, setSilenceTimeout] = React.useState(120)
-  // SIP transport
-  const [transport, setTransport] = React.useState("TCP")
+
+  // ── The trunk ──────────────────────────────────────────────────────────────
+  // The rows are the same component the sheet sets the number up with, so the
+  // setup half and the manage half are one surface. Edits made in this browser
+  // are read in an effect, never at module scope.
+  const [identity, setIdentity] = React.useState({ number: number?.number ?? "", label: number?.label ?? "" })
+  const [carrier, setCarrier] = React.useState<CarrierId>(number?.carrier ?? "twilio")
+  const [carrierName, setCarrierName] = React.useState(number?.carrierName)
+  const [trunk, setTrunk] = React.useState<SipTrunk>(() => trunkOf(id))
+  // Nothing about the trunk has changed in this session, so a carrier that
+  // rejected the last call rejects the test call too.
+  const [touched, setTouched] = React.useState(false)
+  const [testing, setTesting] = React.useState(false)
+
+  React.useEffect(() => {
+    const stored = readTrunks()[id]
+    if (stored) setTrunk(stored)
+  }, [id])
+
+  const editTrunk = (t: SipTrunk) => { setTouched(true); setTrunk(t) }
 
   // Lock state: numbers used by campaigns are hard-locked (cancel the campaigns
   // to edit); numbers bound directly to an agent can be unlocked in place by
@@ -70,10 +91,19 @@ export function PhoneNumberClient({ id }: { id: string }) {
             <Button variant="ghost" size="sm" asChild className="gap-1.5">
               <Link href="/deploy/phone-numbers"><ArrowLeft className="h-3.5 w-3.5" /> Phone Numbers</Link>
             </Button>
-            <Button size="sm" onClick={() => toast.success("Phone number saved (mock)")}>Save</Button>
+            <Button
+              size="sm"
+              onClick={() => { writeTrunk({ ...trunk, numberId: id }); toast.success(`${identity.number || "Number"} saved`) }}
+            >
+              Save
+            </Button>
           </div>
         }
       />
+
+      {/* The ladder's 403 and the degraded batch both open a ROW on this page,
+          not the top of it. */}
+      <DesignFocus />
 
       <main className="flex-1 p-6">
         <div className="mx-auto w-full max-w-3xl space-y-5">
@@ -109,38 +139,31 @@ export function PhoneNumberClient({ id }: { id: string }) {
 
           {/* Phone Number Details (SIP) */}
           <Section icon={Phone} title="Phone Number Details">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FieldInput label="Phone Number" value={number?.number ?? ""} placeholder={isNew ? "+1 (555) 123-4567" : undefined} disabled={!isNew} mono />
-              <FieldSelect label="Vendor" value={number?.vendor ?? "Twilio"} options={["Twilio", "Vonage", "Bandwidth", "Telnyx"]} disabled={locked} />
-              <FieldInput label="Display Name" value={number?.label ?? ""} placeholder={isNew ? "Friendly name for your team" : undefined} disabled={locked} />
-              <FieldInput label="SIP Trunk Address" placeholder="agora-us-swym-us.pstn…" disabled={locked} mono />
-              <FieldInput label="SIP Trunk Username" value={isNew ? "" : "user123"} placeholder={isNew ? "user123" : undefined} disabled={locked} mono />
-              <FieldInput label="SIP Trunk Password" value={isNew ? "" : "••••••••••••••••"} placeholder={isNew ? "••••••••••••" : undefined} type="password" disabled={locked} mono />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Transport Protocol</Label>
-              <ToggleGroup
-                type="single"
-                value={transport}
-                onValueChange={(v) => { if (v) setTransport(v) }}
-                spacing={0}
-                variant="outline"
-                disabled={locked}
-                aria-label="Transport protocol"
-              >
-                {["TCP", "UDP", "TLS"].map((t) => (
-                  <ToggleGroupItem
-                    key={t}
-                    value={t}
-                    aria-label={t}
-                    className="h-7 px-3 text-xs font-medium data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
-                  >
-                    {t}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-              <p className="text-xs text-muted-foreground">Choose the protocol for SIP communication.</p>
-            </div>
+            <NumberIdentityRows
+              number={identity.number}
+              label={identity.label}
+              onChange={setIdentity}
+              numberLocked={!isNew}
+            />
+            <TrunkSection
+              numberId={id}
+              trunk={trunk}
+              carrier={carrier}
+              carrierName={carrierName}
+              onChange={editTrunk}
+              onCarrierChange={(c, name) => { setTouched(true); setCarrier(c); setCarrierName(name) }}
+              locked={locked}
+              showConnection
+              showGateway
+              onTestCall={locked ? undefined : () => setTesting(true)}
+            />
+            {testing && (
+              <TrunkTestCall
+                e164={identity.number}
+                outcome={!touched && trunk.lastFailureCode != null ? "rejected" : "connects"}
+                onConnected={() => editTrunk({ ...trunk, lastConnectedAt: "just now", lastFailureCode: null })}
+              />
+            )}
           </Section>
 
           {/* Inbound Settings */}
@@ -173,6 +196,35 @@ export function PhoneNumberClient({ id }: { id: string }) {
                   <Input placeholder="5550001234, or E.164 +15550001234, or SIP address" value={transferDest} onChange={(e) => setTransferDest(e.target.value)} className="font-mono text-sm" />
                   <p className="text-xs text-muted-foreground">Detects automatically between Phone, E.164, and SIP.</p>
                 </div>
+                <TrunkRow
+                  label="Transfer method"
+                  caption="Requires Engine. Your carrier must allow transfers on this trunk."
+                >
+                  <Select
+                    value={trunk.transferMethod ?? "refer"}
+                    onValueChange={(v) => editTrunk({ ...trunk, transferMethod: v as SipTrunk["transferMethod"] })}
+                    disabled={locked}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="refer">Blind, over SIP REFER</SelectItem>
+                      <SelectItem value="conference">Stay on the line, as a conference</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TrunkRow>
+                <TrunkRow label="If nobody answers">
+                  <Select
+                    value={trunk.transferFallback}
+                    onValueChange={(v) => editTrunk({ ...trunk, transferFallback: v as SipTrunk["transferFallback"] })}
+                    disabled={locked}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="return">Bring the caller back to the agent</SelectItem>
+                      <SelectItem value="hangup">Hang up</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TrunkRow>
                 <div className="space-y-1.5">
                   <Label>Transfer Criteria</Label>
                   <Textarea placeholder="Describe when calls should be transferred to a human…" value={transferCriteria} onChange={(e) => setTransferCriteria(e.target.value)} rows={2} />
@@ -255,25 +307,3 @@ function Toggle({ label, desc, checked, onChange }: { label: string; desc?: stri
   )
 }
 
-function FieldInput({ label, value, placeholder, disabled, mono, type }: { label: string; value?: string; placeholder?: string; disabled?: boolean; mono?: boolean; type?: string }) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <Input defaultValue={value} placeholder={placeholder} disabled={disabled} type={type} className={mono ? "font-mono text-sm" : "text-sm"} />
-    </div>
-  )
-}
-
-function FieldSelect({ label, value, options, disabled }: { label: string; value: string; options: string[]; disabled?: boolean }) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <Select defaultValue={value} disabled={disabled}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
-        <SelectContent>
-          {options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-        </SelectContent>
-      </Select>
-    </div>
-  )
-}

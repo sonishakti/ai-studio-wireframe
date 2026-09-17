@@ -404,19 +404,36 @@ export function batchEta(d: Deployment): { minutes: number } | null {
   return { minutes: Math.round(remaining / perMin) }
 }
 
+/**
+ * Who carries the number. Declared here, beside the record it belongs to, and
+ * re-exported by lib/sip-trunk.ts so callers read one vocabulary from one
+ * module and this file keeps its zero imports.
+ *
+ * The wire enum is `byo | twilio`, so Telnyx, Exotel and a regional ITSP all
+ * send `byo` and the carrier's own name survives as `carrierName` (17,
+ * 2026-09-17). Four lists of carriers lived in this product, none of them the
+ * contract; this is the list.
+ */
+export type CarrierId = "twilio" | "telnyx" | "exotel" | "other"
+
 export interface PhoneNumber {
   id: string
   number: string
   label: string
-  vendor: string
+  /** The carrier that carries this number. One field per thing: the trunk in
+   *  lib/sip-trunk.ts holds the address and the credential and no carrier, so
+   *  the fact is stored once. */
+  carrier: CarrierId
+  /** The name on the bill, when the carrier is one the enum cannot name. */
+  carrierName?: string
   /** Deployment IDs currently using this number. Empty array = available. */
   assignedTo: string[]
   /** Set when the number is routed directly to an agent (inbound), not via a deployment. */
   assignedAgent?: { id: string; name: string }
-  /** Where the number came from. `vendor` cannot answer this: Bandwidth is both
-   *  a carrier a customer brings and the carrier Agora resells through, so the
-   *  word would mean two opposite things in one column. Three values because a
-   *  sandbox line and a line Agora sold are different provenances. */
+  /** Where the number came from. `carrier` cannot answer this: Bandwidth is
+   *  both a carrier a customer brings and the carrier Agora resells through, so
+   *  the word would mean two opposite things in one column. Three values because
+   *  a sandbox line and a line Agora sold are different provenances. */
   origin: "agora" | "byo" | "sandbox"
   /** `turning-up` is owned and not yet able to take a call: the state between
    *  the commit and the first ring, which the row has had no word for. */
@@ -1603,7 +1620,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_01",
     number: "+1 (415) 555-0101",
     label: "Support Line",
-    vendor: "Twilio",
+    carrier: "twilio",
     assignedTo: ["dp_ib_01"],
     origin: "byo",
     status: "active",
@@ -1612,7 +1629,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_02",
     number: "+1 (628) 555-0188",
     label: "Sales Inbound",
-    vendor: "Twilio",
+    carrier: "twilio",
     assignedTo: ["dp_ib_02"],
     origin: "byo",
     status: "active",
@@ -1621,7 +1638,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_03",
     number: "+44 20 7946 0958",
     label: "UK Support",
-    vendor: "Vonage",
+    carrier: "telnyx",
     assignedTo: ["dp_ib_03"],
     origin: "byo",
     status: "active",
@@ -1630,7 +1647,8 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_04",
     number: "+1 (800) 555-0199",
     label: "Toll-Free",
-    vendor: "Bandwidth",
+    carrier: "other",
+    carrierName: "Bandwidth",
     assignedTo: ["dp_ib_04"],
     origin: "byo",
     status: "active",
@@ -1639,7 +1657,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_05",
     number: "+1 (415) 555-0240",
     label: "Outbound Pool",
-    vendor: "Twilio",
+    carrier: "twilio",
     assignedTo: ["dp_ob_01", "dp_ob_02", "dp_ob_03", "dp_ob_04", "dp_ob_06"],
     origin: "byo",
     status: "active",
@@ -1650,7 +1668,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     // Provenance matters on a BYO-SIP platform: this one is the sandbox test
     // line (same canon as TEST_INBOUND_NUMBER), not a number Agora "sold".
     label: "Sandbox test number",
-    vendor: "Twilio",
+    carrier: "twilio",
     assignedTo: [],
     assignedAgent: { id: "agt_default", name: "Aria" },
     origin: "sandbox",
@@ -1660,7 +1678,8 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_07",
     number: "+1 (628) 555-0220",
     label: "WhatsApp",
-    vendor: "Meta",
+    carrier: "other",
+    carrierName: "Meta",
     assignedTo: ["dp_ib_06"],
     origin: "byo",
     status: "active",
@@ -1669,7 +1688,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_08",
     number: "+1 (415) 555-0300",
     label: "Reserved",
-    vendor: "Twilio",
+    carrier: "twilio",
     assignedTo: [],
     origin: "byo",
     status: "unassigned",
@@ -1678,7 +1697,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     id: "pn_09",
     number: "+1 (628) 555-0111",
     label: "Sales Direct Line",
-    vendor: "Twilio",
+    carrier: "twilio",
     assignedTo: [],
     assignedAgent: { id: "agt_sales_qualifier", name: "Sales Qualifier" },
     origin: "byo",

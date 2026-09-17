@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
+import { numberIdForE164, trunkHref } from "@/lib/sip-trunk"
 import { HealthDot } from "@/components/health-dot"
 import { StateBanner } from "@/components/usage-spend-card"
 import { readCapacity } from "@/lib/billing-state"
@@ -66,6 +67,14 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
     track(Events.batch_banner_shown, { tone })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // A degraded batch opens the trunk it is DIALLING on, at its Connection row.
+  // A run with no number we can resolve degrades to the inventory rather than
+  // to a stranger's number.
+  const trunkTarget = trunkHref(
+    d.channel.kind === "telephony" ? numberIdForE164(d.channel.numbers[0] ?? "") : null,
+    "trunk-connection",
+  )
 
   const isZeroProgress = completed === 0
   const isPaced = pacing === "paced" || pacing === "dialing"
@@ -121,7 +130,7 @@ export function BatchDetail({ deployment: d }: { deployment: Deployment }) {
             {needsAttention && (
               <div className="mt-2 flex flex-wrap gap-2">
                 <Button size="sm" className="gap-1.5" asChild onClick={() => track(Events.batch_fix_trunk_clicked, {})}>
-                  <Link href="/integrations?tab=channels"><Wrench className="h-3.5 w-3.5" /> Check the trunk</Link>
+                  <Link href={trunkTarget}><Wrench className="h-3.5 w-3.5" /> Check the trunk</Link>
                 </Button>
                 <Button size="sm" variant="outline" className="gap-1.5" onClick={() => track(Events.batch_resume_anyway_clicked, {})}>
                   <RefreshCw className="h-3.5 w-3.5" /> Resume anyway

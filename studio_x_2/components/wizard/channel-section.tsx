@@ -377,7 +377,7 @@ function PhoneNumberSelect({
           // A number connected over SIP joins the same ledger, ready to take a
           // call: it ended on one.
           const row = addSessionNumber({
-            e164: n.number, label: n.label, vendor: n.vendor,
+            e164: n.number, label: n.label, carrier: n.carrier, carrierName: n.carrierName,
             origin: "byo", status: "unassigned",
           })
           onChange(row.id)

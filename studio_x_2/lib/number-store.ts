@@ -144,10 +144,12 @@ export function addSessionNumber(n: {
   capability?: NumberCapability
   /** Default: a number Agora sold. */
   origin?: PhoneNumber["origin"]
-  /** The carrier's own name, for a number the user brought. The From cell
-   *  reads `origin` for an Agora row, so naming a third-party carrier on one
-   *  would be the fabrication. */
-  vendor?: string
+  /** The carrier the user brought this number from. The From cell reads
+   *  `origin` for an Agora row, so naming a third-party carrier on one would be
+   *  the fabrication: an Agora row keeps the default and prints "Agora". */
+  carrier?: PhoneNumber["carrier"]
+  /** The name on the bill, when the carrier is one the enum cannot name. */
+  carrierName?: string
   /** Default: `turning-up`, the state between the commit and the first ring. */
   status?: PhoneNumber["status"]
 }): PhoneNumber {
@@ -155,7 +157,8 @@ export function addSessionNumber(n: {
     id: `pn_s_${Date.now().toString(36)}`,
     number: n.e164,
     label: n.label,
-    vendor: n.vendor ?? "Agora",
+    carrier: n.carrier ?? "other",
+    carrierName: n.carrierName,
     assignedTo: [],
     origin: n.origin ?? "agora",
     status: n.status ?? "turning-up",

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation"
 
-// Channel-specific deployment now lives in the channels inventory.
+// The fallback for any trunk link that lost its number: the inventory, at the
+// Trunk column, which is where a trunk is read. It used to land on the channels
+// table, which carries no trunk address, no credential and no allowlist.
 export default function DeployTelephonyLegacyRedirect() {
-  redirect("/integrations?tab=channels")
+  redirect("/deploy/phone-numbers?focus=trunk-column")
 }

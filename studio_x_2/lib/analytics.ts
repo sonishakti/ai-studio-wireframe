@@ -87,17 +87,23 @@ export const Events = {
   lines_added:                "lines_added",                 // { qty, prorated_charge_usd } — negative qty = reduction
   keep_queuing_clicked:       "keep_queuing_clicked",        // { lines } — declined the upsell; queueing as designed
 
-  // ── ITSP quick-connect (A3, 2026-07-09) — key → auto-configured SIP trunk.
+  // ── SIP trunk setup (A3 2026-07-09; rebuilt as a handover 17, 2026-09-17).
   // The whole point is a REAL test call closes it: test_call_connected is the
-  // success line, not "trunk_created" (provisioning success ≠ call success).
-  sip_quick_connect_started:  "sip_quick_connect_started",   // { provider, credential: token|scoped_key }
-  credentials_validated:      "credentials_validated",       // { provider }
-  numbers_enumerated:         "numbers_enumerated",          // { count }
-  number_picked:              "number_picked",               // { mode: auto|manual }
-  trunk_created:              "trunk_created",               // { provider }
-  test_call_placed:           "test_call_placed",            // {} — user pressed Place test call
+  // success line, and there is no second name for it.
+  //
+  // credentials_validated, numbers_enumerated, number_picked and trunk_created
+  // are gone with the automation that fired them: no vendor provisions a trunk
+  // from a carrier API key, so there was no validation, no enumeration and no
+  // creation to measure.
+  sip_quick_connect_started:  "sip_quick_connect_started",   // { carrier }
+  trunk_gateway_recorded:     "trunk_gateway_recorded",      // { gateway } — which address they pasted
+  trunk_value_copied:         "trunk_value_copied",          // { field } — the Origination URI left for the carrier
+  trunk_guide_opened:         "trunk_guide_opened",          // { carrier } — the per-country ACL lives there
+  trunk_allowlist_edited:     "trunk_allowlist_edited",      // { ranges }
+  trunk_setup_blocked:        "trunk_setup_blocked",         // { step, code } — where setup stops
+  test_call_placed:           "test_call_placed",            // {} — user pressed Call this number
   test_call_connected:        "test_call_connected",         // {} ★ the real success line
-  trunk_disconnected:         "trunk_disconnected",          // { provider } — Agora stops using the credential
+  trunk_disconnected:         "trunk_disconnected",          // { carrier } — Agora stops using the credential
   manual_fallback_opened:     "manual_fallback_opened",      // {} — escaped to the manual SIP form
 
   // ── Batch pacing / throttling (D1, 2026-07-09) — "paced ≠ failed".
@@ -122,7 +128,7 @@ export const Events = {
   defect_cloned_live:         "defect_cloned_live",          // { source, agent_id } — their agent is cloned + talking on Agora
 
   // ── Telephony deployment ───────────────────────────────────────────────────
-  phone_number_imported:      "phone_number_imported",
+  phone_number_imported:      "phone_number_imported",    // { carrier, transport }
   phone_number_assigned:      "phone_number_assigned",
   // Getting a number from Agora (16, 2026-09-17). No amount is measured
   // anywhere in this chain: what a number costs is an open question, and a
@@ -243,14 +249,15 @@ export type EventPayloads = {
   usage_grain_changed:         { grain: "all" | "agent" | "rte" }
   lines_added:                 { qty: number; prorated_charge_usd: number }
   keep_queuing_clicked:        { lines: number }
-  sip_quick_connect_started:   { provider: string; credential: "token" | "scoped_key" }
-  credentials_validated:       { provider: string }
-  numbers_enumerated:          { count: number }
-  number_picked:               { mode: "auto" | "manual" }
-  trunk_created:               { provider: string }
+  sip_quick_connect_started:   { carrier: string }
+  trunk_gateway_recorded:      { gateway: string }
+  trunk_value_copied:          { field: string }
+  trunk_guide_opened:          { carrier: string }
+  trunk_allowlist_edited:      { ranges: number }
+  trunk_setup_blocked:         { step: string; code: number }
   test_call_placed:            Record<string, never>
   test_call_connected:         Record<string, never>
-  trunk_disconnected:          { provider: string }
+  trunk_disconnected:          { carrier: string }
   manual_fallback_opened:      Record<string, never>
   number_purchase_completed:   { agent_id?: string; country: "US"; number_type: "local" | "toll_free"; area_code: string; search_to_commit_ms: number; result_rank: number; is_first_number: boolean }
   number_purchase_blocked:     { step: "search" | "provisioning"; code: NumberPurchaseBlockedCode; recoverable: boolean }
