@@ -3,18 +3,19 @@
 import * as React from "react"
 import {
   CheckCircle2, Loader2, PhoneCall, ShieldCheck, Eye, EyeOff,
-  ChevronDown, PlugZap, AlertTriangle, Radio,
+  ChevronDown, PlugZap, Radio,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { track, Events } from "@/lib/analytics"
 import { StateBanner } from "@/components/usage-spend-card"
+import { FactLog, pushLine, type LogLine } from "@/components/fact-log"
+import { NumberPickRow, CAPABILITY_LABEL, type NumberCapability } from "@/components/number-pick-row"
 
 /**
  * SipQuickConnect — paste a carrier credential, we configure the SIP trunk
@@ -29,8 +30,8 @@ import { StateBanner } from "@/components/usage-spend-card"
  *  • a single viable number auto-picks with an undo; the pick is a named step
  *  • the flow ENDS on a user-placed test call that rings→connects, never a
  *    "configuration saved" checkmark (provisioning success ≠ call success)
- *  • Agora sells no numbers — you bring one you already own (fine print AFTER
- *    the action, never a gate)
+ *  • this branch is for a number you already own; getting one from Agora is
+ *    the sibling branch of the same sheet (16, 2026-09-17)
  * Mock only: timers stand in for the real validate→enumerate→create→attach.
  */
 
@@ -41,17 +42,15 @@ const PROVIDERS: Record<Provider, { label: string; routing: string; keyHelp: str
   telnyx: { label: "Telnyx", routing: "FQDN connection", keyHelp: "API Keys" },
 }
 
-// Numbers the mock enumeration returns (capability per research: purchased =
-// inbound+outbound, verified caller ID = outbound-only).
-const MOCK_NUMBERS = [
-  { e164: "+1 (415) 555-0132", capability: "inbound+outbound" as const, label: "Purchased" },
-  { e164: "+1 (628) 555-0177", capability: "inbound+outbound" as const, label: "Purchased" },
-  { e164: "+44 20 7946 0958", capability: "outbound-only" as const, label: "Verified caller ID" },
+// Numbers the mock enumeration returns (capability per research: a number on
+// the account is inbound+outbound, a verified caller ID is outbound-only).
+const MOCK_NUMBERS: { e164: string; capability: NumberCapability; label: string }[] = [
+  { e164: "+1 (415) 555-0132", capability: "inbound+outbound", label: "On your account" },
+  { e164: "+1 (628) 555-0177", capability: "inbound+outbound", label: "On your account" },
+  { e164: "+44 20 7946 0958", capability: "outbound-only", label: "Verified caller ID" },
 ]
 
 type Stage = "connect" | "validating" | "pick" | "provisioning" | "verify" | "done"
-
-interface LogLine { t: string; text: string; ok?: boolean }
 
 export function SipQuickConnect({
   onConnected,
@@ -87,8 +86,7 @@ export function SipQuickConnect({
       : cred.sid.trim().length > 0 && cred.secret.trim().length > 0
 
   function push(text: string, ok = true) {
-    // Deterministic mock timestamp — no clock read in render.
-    setLog((l) => [...l, { t: `${String(9 + Math.floor(l.length / 6)).padStart(2, "0")}:${String((l.length * 7) % 60).padStart(2, "0")}`, text, ok }])
+    setLog((l) => pushLine(l, text, ok))
   }
 
   function connect() {
@@ -204,7 +202,7 @@ export function SipQuickConnect({
         </Button>
         <p className="text-xs text-muted-foreground">
           Find your key under {PROVIDERS[provider].label} {PROVIDERS[provider].keyHelp}. You bring a
-          number you already own. Agora doesn&apos;t sell or port numbers.{" "}
+          number you already own.{" "}
           <button type="button" onClick={onFallback} className="underline underline-offset-2 hover:text-foreground">
             Prefer the manual SIP form?
           </button>
@@ -218,54 +216,24 @@ export function SipQuickConnect({
   // ── Stages 2–5: the fact-log + the moments that need a human ─────────────
   return (
     <div className="space-y-4">
-      {/* Append-only fact-log (V3 graft) — real work, not a spinner */}
-      <div role="log" aria-live="polite" className="space-y-1.5 rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs">
-        {log.map((l, i) => (
-          <p key={i} className="flex items-start gap-2">
-            <span className="shrink-0 text-muted-foreground tabular-nums">{l.t}</span>
-            {l.ok ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" /> : <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />}
-            <span className="min-w-0 flex-1">{l.text}</span>
-          </p>
-        ))}
-        {(stage === "validating" || stage === "provisioning") && (
-          <p className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin" /> working…
-          </p>
-        )}
-      </div>
+      {/* Append-only fact-log (V3 graft) — real work, not a spinner. Shared with
+          the buy branch of this same sheet. */}
+      <FactLog lines={log} working={stage === "validating" || stage === "provisioning"} />
 
       {/* Named "Pick a number" step (V2 graft) — capability badges before choice */}
       {stage === "pick" && (
         <div className="space-y-2">
           <p className="text-sm font-medium">Pick a number to route</p>
-          {MOCK_NUMBERS.map((n, i) => {
-            const outboundOnly = n.capability === "outbound-only"
-            return (
-              <button
-                key={n.e164}
-                type="button"
-                disabled={outboundOnly}
-                onClick={() => pick(i)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
-                  outboundOnly ? "cursor-not-allowed border-dashed border-border opacity-60" : "border-border hover:border-primary/40 hover:bg-accent/30",
-                )}
-              >
-                <PhoneCall className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="min-w-0 flex-1">
-                  <span className="block font-mono text-sm">{n.e164}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {n.label} · {outboundOnly ? "can’t receive calls (verified caller ID)" : "inbound + outbound"}
-                  </span>
-                </span>
-                {outboundOnly ? (
-                  <Badge variant="outline" className="shrink-0 text-xs">outbound only</Badge>
-                ) : (
-                  <Badge variant="secondary" className="shrink-0 text-xs">inbound + outbound</Badge>
-                )}
-              </button>
-            )
-          })}
+          {MOCK_NUMBERS.map((n, i) => (
+            <NumberPickRow
+              key={n.e164}
+              e164={n.e164}
+              meta={`${n.label} · ${CAPABILITY_LABEL[n.capability]}`}
+              capability={n.capability}
+              disabled={n.capability === "outbound-only"}
+              onSelect={() => pick(i)}
+            />
+          ))}
         </div>
       )}
 

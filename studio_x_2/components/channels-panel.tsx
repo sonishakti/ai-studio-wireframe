@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
+import { TEST_INBOUND_NUMBER } from "@/lib/campaign-data"
 
 /**
  * ChannelsPanel — the Channels overview (2026-06-23: "Deployment" renamed to
  * "Channels"; lives as a tab in the Integrations modules hub). Every channel an
- * agent can run on — phone numbers (BYO via SIP), WhatsApp, web widget, batch
+ * agent can run on — phone numbers, WhatsApp, web widget, batch
  * (outbound), code/SDK — in one filterable list. One channel backs one agent
  * (1 agent ↔ 1 channel); duplicate an agent to put it on another channel.
  */
@@ -47,12 +48,14 @@ type ChannelRow = {
 
 const CHANNELS: ChannelRow[] = [
   { id: "ch_01", type: "phone",    label: "Support Line",    identifier: "+1 (415) 555-0101", backs: "Support Bot v2",      status: "active",     href: "/deploy/phone-numbers" },
-  { id: "ch_02", type: "phone",    label: "Sales Inbound",   identifier: "+1 (628) 555-0188", backs: "Aria",               status: "active",     href: "/deploy/phone-numbers" },
+  // Aria answers the sandbox line, and this row says the same digits the
+  // inventory, the agents landing and the banner say (16, 2026-09-17).
+  { id: "ch_02", type: "phone",    label: "Aria sandbox line", identifier: TEST_INBOUND_NUMBER, backs: "Aria",             status: "active",     href: "/deploy/phone-numbers" },
   { id: "ch_03", type: "whatsapp", label: "Acme WhatsApp",   identifier: "+1 (415) 555-0142", backs: "Survey Bot",         status: "active",     href: "/deploy/whatsapp" },
   { id: "ch_04", type: "web",      label: "Help widget",     identifier: "acme.com/help",     backs: "Support Bot v2",     status: "active",     href: "/deploy/web-widget" },
   { id: "ch_05", type: "batch",    label: "Q2 Collections",  identifier: "4,210 contacts",    backs: "Collections Outreach", status: "scheduled", href: "/deploy/batch-calls" },
   { id: "ch_06", type: "code",     label: "SDK embed",       identifier: "token auth",        backs: "Aria",               status: "active",     href: "/deploy/code" },
-  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: ", ",                  status: "unassigned", href: "/deploy/phone-numbers" },
+  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: "Available",           status: "unassigned", href: "/deploy/phone-numbers" },
 ]
 
 const FILTERS: { id: "all" | ChannelType; label: string }[] = [
@@ -79,7 +82,7 @@ export function ChannelsPanel() {
         </div>
         <AddPhoneNumberSheet>
           <Button size="sm" className="gap-1.5">
-            <Phone className="h-4 w-4" /> Connect a number (SIP)
+            <Phone className="h-4 w-4" /> Add phone number
           </Button>
         </AddPhoneNumberSheet>
       </div>

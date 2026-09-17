@@ -50,7 +50,7 @@ import { ProvisioningCeremony } from "@/components/provisioning-ceremony"
 import { isProvisioned, markProvisioned, resetProvisioned } from "@/lib/journey-progress"
 import { cn } from "@/lib/utils"
 import { track, Events, markBuildStart } from "@/lib/analytics"
-import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, stackLine, stackFor, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
+import { STACK_PRESETS, STACK_ESTIMATE, AGENT_TEMPLATES, getAgent, stackLine, stackFor, TEST_INBOUND_NUMBER, type StackPreset, type ImportedAgentConfig } from "@/lib/campaign-data"
 import { importedConfigToArtifact, importedAgentToDraft, stashImportNotice } from "@/lib/import-agent"
 import { restoreDraft, saveDraft, templateToDraft, EMPTY_DRAFT } from "@/lib/wizard-draft"
 import {
@@ -81,7 +81,7 @@ type AgentRow = {
 }
 
 const AGENTS: AgentRow[] = [
-  { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default · live and ready", status: "live",   channelType: "phone",    channelLabel: "+1 (628) 555-0188", stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
+  { id: "agt_default", name: "Aria",            description: "Your auto-provisioned default · live and ready", status: "live",   channelType: "phone",    channelLabel: TEST_INBOUND_NUMBER, stack: "balanced", calls: 42,    lastModified: "Provisioned for you" },
   { id: "agt_support_v2", name: "Support Bot v2",       description: "Handles tier-1 support queries via phone",       status: "live",   channelType: "phone",    channelLabel: "+1 (415) 555-0101", stack: "fastest",  calls: 12430, lastModified: "2 hours ago" },
   { id: "agt_appointment_setter", name: "Appointment Setter",   description: "Schedules appointments and sends confirmations", status: "live",   channelType: "web",      channelLabel: "acme.com/booking",  stack: "balanced", calls: 3270,  lastModified: "5 min ago" },
   { id: "agt_survey", name: "Survey Bot",           description: "Post-interaction CSAT surveys",                  status: "live",   channelType: "web",      channelLabel: "acme.com/help",     stack: "cheapest", calls: 5601,  lastModified: "1 day ago" },
@@ -381,8 +381,7 @@ function ListView({ onBrowseTemplates }: { onBrowseTemplates: () => void }) {
                           <InfoHint label="sandbox line">
                             Auto-provisioned sample agent, live on an Agora sandbox line: its call
                             history is sample data, and it costs nothing until it takes real traffic.
-                            Shared sandbox number for testing: production telephony is
-                            bring-your-own SIP.
+                            Shared sandbox number for testing.
                           </InfoHint>
                         )}
                       </span>
@@ -863,12 +862,11 @@ function StartView({
             <span className="size-1.5 rounded-full bg-success" aria-hidden />
             {/* "42 sample calls" marks the data as seeded at a glance
                 (user-test 2026-07-29); the InfoHint keeps the full story. */}
-            Aria, your sample agent, is live on +1 (628) 555-0188 · 42 sample calls
+            Aria, your sample agent, is live on {TEST_INBOUND_NUMBER} · 42 sample calls
           </span>
           <InfoHint label="sandbox line">
             Auto-provisioned for you on an Agora sandbox line: its call history is sample data,
             and it costs nothing until it takes real traffic. Shared sandbox number for testing.
-            Production telephony is bring-your-own SIP.
           </InfoHint>
           {/* The promised live agent is ONE click, not an Edit-link detour
               behind the template-preview mic (user-test 2026-07-29 P0). */}

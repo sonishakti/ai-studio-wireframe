@@ -413,7 +413,14 @@ export interface PhoneNumber {
   assignedTo: string[]
   /** Set when the number is routed directly to an agent (inbound), not via a deployment. */
   assignedAgent?: { id: string; name: string }
-  status: "active" | "unassigned"
+  /** Where the number came from. `vendor` cannot answer this: Bandwidth is both
+   *  a carrier a customer brings and the carrier Agora resells through, so the
+   *  word would mean two opposite things in one column. Three values because a
+   *  sandbox line and a line Agora sold are different provenances. */
+  origin: "agora" | "byo" | "sandbox"
+  /** `turning-up` is owned and not yet able to take a call: the state between
+   *  the commit and the first ring, which the row has had no word for. */
+  status: "active" | "unassigned" | "turning-up"
 }
 
 // ─── Agent = Stack + Persona (reusable, duplicable) ──────────────────────────
@@ -664,7 +671,7 @@ export const AGENTS: Agent[] = [
     isDefault: true,
     // Live on the provisioned number from minute one — the list view's
     // Channel column and the builder checklist read this same record.
-    channel: { type: "inbound", mode: "phone", numberId: "pn_02" },
+    channel: { type: "inbound", mode: "phone", numberId: "pn_06" },
     persona: {
       personality: "Helpful, friendly, and clear. Answers questions and gets things done.",
       tone: "Friendly",
@@ -1153,7 +1160,7 @@ export function stackLatencyBreakdown(a: Agent): StackLatencyBreakdown {
 /** Sandbox DID for the in-product "call in to test" flow — a free test line
  *  routed straight to the agent during evaluation (no real number consumed).
  *  Wireframe value. */
-export const TEST_INBOUND_NUMBER = "+1 (415) 555-0100"
+export const TEST_INBOUND_NUMBER = "+1 (628) 555-0260"
 
 // ─── Plan usage (free-tier meter) ────────────────────────────────────────────
 //
@@ -1170,8 +1177,7 @@ export interface PlanUsage {
   /** First slice of free minutes usable with NO card. At this mark we nudge for a
    *  card, which unlocks the remaining free minutes — so a card is on file BEFORE
    *  the tier runs out and usage rolls into pay-as-you-go instead of a suspension.
-   *  Agora bills per minute, so the card sits on usage, not on a phone number
-   *  (Agora doesn't sell or port numbers — telephony is bring-your-own via SIP). */
+   *  Agora bills per minute, so the card sits on usage, not on a phone number. */
   freeMinutesUngated: number
   /** True once a card is on file — unlocks the gated free minutes and lets usage
    *  roll into PAYG past the free tier (kills the suspend→reactivate CAC loop). */
@@ -1599,6 +1605,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "Support Line",
     vendor: "Twilio",
     assignedTo: ["dp_ib_01"],
+    origin: "byo",
     status: "active",
   },
   {
@@ -1607,6 +1614,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "Sales Inbound",
     vendor: "Twilio",
     assignedTo: ["dp_ib_02"],
+    origin: "byo",
     status: "active",
   },
   {
@@ -1615,6 +1623,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "UK Support",
     vendor: "Vonage",
     assignedTo: ["dp_ib_03"],
+    origin: "byo",
     status: "active",
   },
   {
@@ -1623,6 +1632,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "Toll-Free",
     vendor: "Bandwidth",
     assignedTo: ["dp_ib_04"],
+    origin: "byo",
     status: "active",
   },
   {
@@ -1631,17 +1641,20 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "Outbound Pool",
     vendor: "Twilio",
     assignedTo: ["dp_ob_01", "dp_ob_02", "dp_ob_03", "dp_ob_04", "dp_ob_06"],
+    origin: "byo",
     status: "active",
   },
   {
     id: "pn_06",
-    number: "+1 (628) 555-0260",
+    number: TEST_INBOUND_NUMBER,
     // Provenance matters on a BYO-SIP platform: this one is the sandbox test
     // line (same canon as TEST_INBOUND_NUMBER), not a number Agora "sold".
     label: "Sandbox test number",
     vendor: "Twilio",
     assignedTo: [],
-    status: "unassigned",
+    assignedAgent: { id: "agt_default", name: "Aria" },
+    origin: "sandbox",
+    status: "active",
   },
   {
     id: "pn_07",
@@ -1649,6 +1662,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "WhatsApp",
     vendor: "Meta",
     assignedTo: ["dp_ib_06"],
+    origin: "byo",
     status: "active",
   },
   {
@@ -1657,6 +1671,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     label: "Reserved",
     vendor: "Twilio",
     assignedTo: [],
+    origin: "byo",
     status: "unassigned",
   },
   {
@@ -1666,6 +1681,7 @@ export const PHONE_NUMBERS: PhoneNumber[] = [
     vendor: "Twilio",
     assignedTo: [],
     assignedAgent: { id: "agt_sales_qualifier", name: "Sales Qualifier" },
+    origin: "byo",
     status: "active",
   },
 ]

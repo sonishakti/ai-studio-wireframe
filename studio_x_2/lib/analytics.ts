@@ -124,6 +124,12 @@ export const Events = {
   // ── Telephony deployment ───────────────────────────────────────────────────
   phone_number_imported:      "phone_number_imported",
   phone_number_assigned:      "phone_number_assigned",
+  // Getting a number from Agora (16, 2026-09-17). No amount is measured
+  // anywhere in this chain: what a number costs is an open question, and a
+  // property nothing can fill is a property that lies.
+  number_purchase_completed:  "number_purchase_completed",   // ★ a number is on the account
+  number_purchase_blocked:    "number_purchase_blocked",     // { step, code, recoverable }
+  number_purchase_declined:   "number_purchase_declined",    // { step } — left for a number they own
   campaign_created:           "campaign_created",
   campaign_launched:          "campaign_launched",
 
@@ -246,6 +252,9 @@ export type EventPayloads = {
   test_call_connected:         Record<string, never>
   trunk_disconnected:          { provider: string }
   manual_fallback_opened:      Record<string, never>
+  number_purchase_completed:   { agent_id?: string; country: "US"; number_type: "local" | "toll_free"; area_code: string; search_to_commit_ms: number; result_rank: number; is_first_number: boolean }
+  number_purchase_blocked:     { step: "search" | "provisioning"; code: NumberPurchaseBlockedCode; recoverable: boolean }
+  number_purchase_declined:    { step: "search" | "results" }
   batch_detail_viewed:         { pacing: string }
   batch_banner_shown:          { tone: string }
   batch_fix_trunk_clicked:     Record<string, never>
@@ -438,6 +447,10 @@ export type DeployBlockedCode =
   | "no_voice" | "no_channel" | "no_surface" | "no_number" | "no_prompt"
   | "batch_no_run" | "batch_no_number" | "batch_no_csv" | "batch_no_schedule"
   | "batch_uncovered_vars" | "other"
+
+/** Closed list. `TelephonyErrorResponse` is free text, so a provider's own
+ *  words may never reach an analytics property — only a code. */
+export type NumberPurchaseBlockedCode = "no_results" | "number_taken" | "other"
 
 interface ActiveClock { active: number; since: number | null }
 const ttfaClocks = new Map<string, ActiveClock>()

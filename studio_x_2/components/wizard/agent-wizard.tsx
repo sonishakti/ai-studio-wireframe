@@ -536,6 +536,9 @@ export function AgentWizard({
       // lives in the Advanced panel. All three are doors, handled below.
       recognition: 1, delivery: 1, "call-rules": 1,
       deployment: 2, test: 4, golive: 5,
+      // Getting a number happens in the Deployment section's phone-number row,
+      // behind the Inbound card (16, 2026-09-17).
+      "get-a-number": 2,
       // The criteria editor lives in Go Live's Structured outputs row, so the
       // review link has to expand section 5 before the ring can find it.
       scorecard: 5,
@@ -547,6 +550,14 @@ export function AgentWizard({
       if (focus.startsWith("voice-")) document.querySelector<HTMLButtonElement>('button[aria-label="Browse voices"]')?.click()
       if (focus === "turn-taking" || focus === "listening") [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) => /advanced speech settings/i.test(b.textContent ?? ""))?.click()
       if (focus === "call-rules") openAdvanced("call")
+      // The phone-number row only exists once Inbound is the chosen channel.
+      // Matched on the card's own text, not on a value attribute: Radix
+      // destructures `value` out before the props reach the trigger, so
+      // button[value="inbound"] can never match anything.
+      if (focus === "get-a-number") {
+        [...document.querySelectorAll<HTMLButtonElement>('button[data-slot="radio-card"]')]
+          .find((b) => /^inbound/i.test(b.textContent ?? ""))?.click()
+      }
       if (focus === "recognition" || focus === "delivery" || focus === "backup-providers") {
         // Backup lives inside the vendor's own Configure sheet (owner IA 2026-09-12).
         // Case-insensitive on purpose: the label went to sentence case in a

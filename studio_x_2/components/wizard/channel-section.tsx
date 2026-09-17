@@ -16,7 +16,8 @@ import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
 import { WidgetStyleConfig } from "@/components/widget-studio"
 import { cn } from "@/lib/utils"
 import { CampaignContacts } from "@/components/wizard/campaigns-card"
-import { PHONE_NUMBERS } from "@/lib/campaign-data"
+import { PHONE_NUMBERS, type PhoneNumber } from "@/lib/campaign-data"
+import { readSessionNumbers, addSessionNumber, subscribeNumberStore } from "@/lib/number-store"
 import {
   channelLabel, inboundSurfaces, firstRun, patchFirstRun,
   type AgentDraft, type CampaignDraft, type DeployChannel, type InboundSurface,
@@ -144,9 +145,9 @@ export function ChannelSection({
           ))}
         </RadioCardGroup>
 
-        <InfoHint label="Phone channels are bring-your-own number">
-          Agora doesn&apos;t sell numbers. Connect your carrier&apos;s over SIP from any phone-number
-          field below, or manage them in{" "}
+        <InfoHint label="Phone channels">
+          Connect your carrier&apos;s number over SIP from any phone-number field below, or manage
+          them in{" "}
           <a href="/integrations?tab=channels" className="underline underline-offset-2">
             Resources › Deployment Channels
           </a>
@@ -294,6 +295,7 @@ function BatchContactsBlock({
 // ─── Phone-number dropdown (Figma 2994-93628: empty state + Add New inside) ───
 
 const ADD_SENTINEL = "__add_number__"
+const BUY_SENTINEL = "__buy_number__"
 
 function PhoneNumberSelect({
   value, onChange, placeholder, exclude = [], ariaLabel,
@@ -306,11 +308,23 @@ function PhoneNumberSelect({
   ariaLabel?: string
 }) {
   const [addOpen, setAddOpen] = React.useState(false)
-  const [session, setSession] = React.useState<{ id: string; number: string; label: string }[]>([])
-  const all = [
-    ...PHONE_NUMBERS.filter((n) => n.status === "unassigned").map((n) => ({ id: n.id, number: n.number, label: n.label })),
-    ...session,
-  ]
+  // Which branch of the one door this field asked for.
+  const [pendingMode, setPendingMode] = React.useState<"buy" | "quick">("quick")
+  // Numbers this session produced live in ONE ledger, read here and on the
+  // inventory page. Read in an effect, never in render: sessionStorage is not
+  // there on the server.
+  const [session, setSession] = React.useState<PhoneNumber[]>([])
+  React.useEffect(() => {
+    const sync = () => setSession(readSessionNumbers())
+    sync()
+    return subscribeNumberStore(sync)
+  }, [])
+
+  // A number still turning up is offered and not selectable: it is owned, and
+  // it cannot take a call yet. Neither of the two old words could say that.
+  const all = [...session, ...PHONE_NUMBERS].filter(
+    (n) => n.status === "unassigned" || n.status === "turning-up",
+  )
   const options = all.filter((n) => !exclude.includes(n.id) || n.id === value)
 
   return (
@@ -318,7 +332,8 @@ function PhoneNumberSelect({
       <Select
         value={value ?? ""}
         onValueChange={(v) => {
-          if (v === ADD_SENTINEL) setAddOpen(true)
+          if (v === BUY_SENTINEL) { setPendingMode("buy"); setAddOpen(true) }
+          else if (v === ADD_SENTINEL) { setPendingMode("quick"); setAddOpen(true) }
           else if (v) onChange(v)
         }}
       >
@@ -333,12 +348,19 @@ function PhoneNumberSelect({
             </div>
           )}
           {options.map((n) => (
-            <SelectItem key={n.id} value={n.id}>{n.number} – {n.label}</SelectItem>
+            <SelectItem key={n.id} value={n.id} disabled={n.status === "turning-up"}>
+              {n.number} · {n.label}{n.status === "turning-up" ? " · Turning up" : ""}
+            </SelectItem>
           ))}
           <SelectSeparator />
+          <SelectItem value={BUY_SENTINEL}>
+            <span className="flex items-center gap-1.5">
+              <Plus className="h-3.5 w-3.5" aria-hidden /> Get a number
+            </span>
+          </SelectItem>
           <SelectItem value={ADD_SENTINEL}>
             <span className="flex items-center gap-1.5">
-              <Plus className="h-3.5 w-3.5" aria-hidden /> Add phone number
+              <Phone className="h-3.5 w-3.5" aria-hidden /> Connect a number you own
             </span>
           </SelectItem>
         </SelectContent>
@@ -346,10 +368,19 @@ function PhoneNumberSelect({
       <AddPhoneNumberSheet
         open={addOpen}
         onOpenChange={setAddOpen}
+        defaultMode={pendingMode}
         onAdded={(n) => {
-          const id = `pn_new_${Date.now().toString(36)}`
-          setSession((s) => [...s, { id, ...n }])
-          onChange(id)
+          // A number from Agora is already in the ledger, written the moment it
+          // was acquired: resolve it rather than mint a second id for it.
+          const bought = readSessionNumbers().find((r) => r.number === n.number)
+          if (bought) { onChange(bought.id); return }
+          // A number connected over SIP joins the same ledger, ready to take a
+          // call: it ended on one.
+          const row = addSessionNumber({
+            e164: n.number, label: n.label, vendor: n.vendor,
+            origin: "byo", status: "unassigned",
+          })
+          onChange(row.id)
         }}
       />
     </>
@@ -381,6 +412,7 @@ function InboundNumbersBlock({
   return (
     <SectionRow
       id="wz-2-inbound"
+      focusId="get-a-number"
       label="Phone numbers"
       hint="Link one or several. The agent answers them all."
     >
@@ -438,7 +470,7 @@ function InboundNumbersBlock({
       {/* One line, one destination — the call-rules pointer lives in Go Live
           itself (copy discipline 2026-08-10). */}
       <p className="text-xs text-muted-foreground">
-        Numbers route via SIP. Manage them in{" "}
+        Manage them in{" "}
         <a href="/integrations?tab=channels" className="underline underline-offset-2">
           Resources › Deployment Channels
         </a>

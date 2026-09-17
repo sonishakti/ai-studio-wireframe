@@ -18,10 +18,13 @@ import {
 import { track, Events } from "@/lib/analytics"
 import { toast } from "sonner"
 import { SipQuickConnect } from "@/components/sip-quick-connect"
+import { BuyNumberPanel } from "@/components/buy-number-panel"
 
 type Phase = "form" | "success"
 type Transport = "TCP" | "UDP" | "TLS"
-type Mode = "quick" | "manual"
+// Three ways to end up with a number, one door (16, 2026-09-17): get one from
+// Agora, connect one you own the fast way, or wire the SIP yourself.
+type Mode = "buy" | "quick" | "manual"
 
 export function AddPhoneNumberSheet({
   children,
@@ -37,7 +40,7 @@ export function AddPhoneNumberSheet({
    *  phase offers "Link to this agent" instead of the route cards (which
    *  navigate to a NEW draft — a dead end mid-edit), and the added number is
    *  handed back so the caller can list + link it. */
-  onAdded?: (n: { number: string; label: string }) => void
+  onAdded?: (n: { number: string; label: string; vendor: string }) => void
   /** Resources › Channels and the wizard SIP hints open the fast path by
    *  default; the manual form stays one toggle away (A3, 2026-07-09). */
   defaultMode?: Mode
@@ -55,6 +58,10 @@ export function AddPhoneNumberSheet({
   }
   // A3 Quick connect is the default path (Future-scope switch removed 2026-09-11).
   const [mode, setMode] = React.useState<Mode>(defaultMode)
+  // The sheet is mounted persistently by its callers, so `defaultMode` as a
+  // useState initializer only ever ran once: a door that asks for the buy
+  // branch would have opened Quick connect. Re-apply it on every open.
+  React.useEffect(() => { if (open) setMode(defaultMode) }, [open, defaultMode])
   const [phase, setPhase] = React.useState<Phase>("form")
   const [showPw, setShowPw] = React.useState(false)
   const [transport, setTransport] = React.useState<Transport>("TCP")
@@ -89,11 +96,10 @@ export function AddPhoneNumberSheet({
       {children ? <SheetTrigger asChild>{children}</SheetTrigger> : null}
       <SheetContent className="w-full overflow-y-auto p-0 flex flex-col data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="px-5 py-4 border-b border-border">
-          <SheetTitle>Add a phone number</SheetTitle>
-          {phase === "form" && (
+          <SheetTitle>Add phone number</SheetTitle>
+          {phase === "form" && mode !== "buy" && (
             <SheetDescription>
-              Bring a number you already own. Agora routes it, and doesn&apos;t sell or port
-              numbers.
+              Bring a number you already own. Agora routes it.
             </SheetDescription>
           )}
         </SheetHeader>
@@ -107,8 +113,11 @@ export function AddPhoneNumberSheet({
               variant="outline"
               size="sm"
               className="w-full"
-              aria-label="Connection method"
+              aria-label="How you get this number"
             >
+              <ToggleGroupItem value="buy" className="flex-1 text-xs data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
+                Get a number
+              </ToggleGroupItem>
               <ToggleGroupItem value="quick" className="flex-1 text-xs data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
                 Quick connect
               </ToggleGroupItem>
@@ -119,7 +128,14 @@ export function AddPhoneNumberSheet({
           </div>
         )}
 
-        {phase === "form" && mode === "quick" ? (
+        {phase === "form" && mode === "buy" ? (
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <BuyNumberPanel
+              onConnected={(e164) => { setForm((f) => ({ ...f, number: e164 })); setPhase("success") }}
+              onFallback={() => setMode("quick")}
+            />
+          </div>
+        ) : phase === "form" && mode === "quick" ? (
           <div className="flex-1 overflow-y-auto px-5 py-4">
             <SipQuickConnect
               onConnected={(e164) => { setForm((f) => ({ ...f, number: e164, vendor: f.vendor || "Twilio" })); setPhase("success") }}
@@ -198,7 +214,7 @@ export function AddPhoneNumberSheet({
             </div>
 
             <div className="border-t border-border px-5 py-3">
-              <Button className="w-full" onClick={handleAdd} disabled={!canAdd}>Add Phone Number</Button>
+              <Button className="w-full" onClick={handleAdd} disabled={!canAdd}>Add phone number</Button>
             </div>
           </>
         ) : (
@@ -210,10 +226,22 @@ export function AddPhoneNumberSheet({
               </div>
 
               <div className="space-y-2 text-sm">
-                <Summary label="Phone Number" value={form.number || "+1 (555) 789-4734"} />
-                <Summary label="Display Name" value={form.displayName || "New number"} />
-                <Summary label="SIP Domain" value={form.sipDomain || "sip.domain.com"} />
-                <Summary label="Vendor" value={form.vendor || "Twilio"} />
+                {/* A number from Agora has no SIP domain and no vendor, so it
+                    says the two things it knows rather than four, two of them
+                    invented. */}
+                {mode === "buy" ? (
+                  <>
+                    <Summary label="Phone number" value={form.number} />
+                    <Summary label="From" value="Agora" />
+                  </>
+                ) : (
+                  <>
+                    <Summary label="Phone Number" value={form.number || "+1 (555) 789-4734"} />
+                    <Summary label="Display Name" value={form.displayName || "New number"} />
+                    <Summary label="SIP Domain" value={form.sipDomain || "sip.domain.com"} />
+                    <Summary label="Vendor" value={form.vendor || "Twilio"} />
+                  </>
+                )}
               </div>
 
               {!onAdded && (
@@ -248,7 +276,13 @@ export function AddPhoneNumberSheet({
                   <Button
                     className="w-full"
                     onClick={() => {
-                      onAdded({ number: form.number || "+1 (555) 789-4734", label: form.displayName || "New number" })
+                      onAdded({
+                        number: form.number || "+1 (555) 789-4734",
+                        label: form.displayName || "New number",
+                        // The caller writes one ledger row for whatever this
+                        // sheet produced, so it needs the carrier's name.
+                        vendor: mode === "buy" ? "Agora" : form.vendor || "Twilio",
+                      })
                       setOpen(false)
                       reset()
                     }}

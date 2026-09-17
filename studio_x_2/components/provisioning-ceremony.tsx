@@ -129,7 +129,7 @@ export function ProvisioningCeremony({
                   </h1>
                   <p className="text-sm text-muted-foreground max-w-sm">
                     The moment this finishes, {aria.name} can take a real call: in your
-                    browser, mic on, no number to buy, nothing to configure.
+                    browser, mic on, nothing to configure.
                   </p>
                 </>
               )}
