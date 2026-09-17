@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import {
-  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft, Search,
+  BookOpen, Plug, Boxes, Plus, X, Check, ChevronLeft, Search, Wrench,
   Upload, Settings2, MoreVertical, Trash2, ArrowUpRight, AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -27,9 +26,15 @@ import {
 import {
   allKnowledgeBases, createKnowledgeBase, KB_INGEST_LABEL, type KbIngest,
   allMcpServers, createMcpServer, getUserMcpServer, saveMcpTools, deleteMcpServer,
-  MCP_TRANSPORT_LABEL, type McpTransport, type McpTool,
+  type McpTool,
   effectiveConnectorStatus,
 } from "@/lib/agent-resources"
+import {
+  allTools, getTool, getToolCheck, saveToolCheck, runCheck, deleteTool, checkLabel,
+  toolCount, usedByAgents, hasConnectorAttached, TOOL_CEILING, TOOL_SEEDS,
+  type AgentTool, type ToolCheck,
+} from "@/lib/agent-tools"
+import { ToolCreateForm, ToolCheckResult, ToolStateChip } from "@/components/wizard/tool-create-form"
 import { ExternalRetrievalForm } from "@/components/external-retrieval-form"
 import type { StepProps } from "@/components/wizard/types"
 import { SectionRow } from "@/components/wizard/section-row"
@@ -46,20 +51,90 @@ import {
  * vendor-credentials cross-link (Execution Runtime reduced to one row).
  */
 export function SectionKnowledgeTools({ draft, update }: StepProps) {
-  const router = useRouter()
-
-  // Created KBs / MCP servers live in localStorage — seed with the canonical
-  // catalog (matches SSR), then load the user's customs after mount. `refresh`
-  // reloads both after a create/delete. Same idiom as step-voice's allVoices().
+  // Created KBs / MCP servers / tools live in localStorage — seed with the
+  // canonical catalog (matches SSR), then load the user's customs after mount.
+  // `refresh` reloads all of them after a create/delete/test. Same idiom as
+  // step-voice's allVoices().
   const [kbs, setKbs] = React.useState<KnowledgeBase[]>(KNOWLEDGE_BASES)
   const [mcps, setMcps] = React.useState<McpServer[]>(MCP_SERVERS)
+  const [tools, setTools] = React.useState<AgentTool[]>(TOOL_SEEDS)
+  // Test results, read once after mount rather than per row in render: a
+  // localStorage read during render answers differently on the server and on
+  // the first client pass, which is a hydration mismatch.
+  const [checks, setChecks] = React.useState<Record<string, ToolCheck>>({})
   const refresh = React.useCallback(() => {
+    const mcpList = allMcpServers()
+    const toolList = allTools()
     setKbs(allKnowledgeBases())
-    setMcps(allMcpServers())
+    setMcps(mcpList)
+    setTools(toolList)
+    const next: Record<string, ToolCheck> = {}
+    for (const id of [...toolList.map((t) => t.id), ...mcpList.map((m) => m.id)]) {
+      const c = getToolCheck(id)
+      if (c) next[id] = c
+    }
+    setChecks(next)
   }, [])
-  React.useEffect(() => { refresh() }, [refresh])
+  // Connected-connector state is localStorage too, so it is read after mount
+  // for the same reason the checks are.
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { refresh(); setMounted(true) }, [refresh])
   // Which user MCP server's tools are being configured (F3).
   const [configMcp, setConfigMcp] = React.useState<string | null>(null)
+
+  // One test the user ran, against the record the row already holds.
+  const testTool = (id: string) => {
+    const t = getTool(id)
+    if (!t) return
+    saveToolCheck(id, runCheck({ url: t.url, method: t.method, body: t.bodyTemplate }))
+    refresh()
+  }
+  const testMcp = (id: string) => {
+    const s = mcps.find((x) => x.id === id)
+    if (!s) return
+    saveToolCheck(id, runCheck({ url: s.url }))
+    refresh()
+  }
+
+  // A realtime agent runs a single multimodal model: the Engine gives it MCP
+  // servers and neither custom tools nor connectors, so the row says so rather
+  // than offering a door that ships nothing (ng-console agent-detail-page).
+  const realtime = draft.stack.pipeline === "mllm"
+
+  // Three kinds in one roster, each carrying only fields its record holds: an
+  // HTTP tool shows its method and host, a connector its category and whether
+  // the project connected it, and hosted code its refusal.
+  const toolItems: AttachItem[] = [
+    ...tools.map((t) => ({
+      id: t.id,
+      name: t.fn.name || t.name,
+      meta: [
+        `${t.method} ${hostOf(t.url)}`,
+        usedByAgents(t.id) > 1 ? `Used by ${usedByAgents(t.id)} agents` : null,
+      ].filter(Boolean).join(" · "),
+      disabled: t.status === "unavailable",
+      note: t.status === "unavailable" ? "Unavailable" : undefined,
+      // Seeds belong to the catalog; only what this browser made can be deleted.
+      config: !TOOL_SEEDS.some((s) => s.id === t.id),
+      check: checks[t.id],
+      testable: true,
+    })),
+    ...CONNECTORS.map((c) => {
+      const s = mounted ? effectiveConnectorStatus(c) : "available"
+      return {
+        id: c.id,
+        name: c.name,
+        meta: c.category,
+        status: s === "connected" ? ("active" as const) : undefined,
+        disabled: s !== "connected",
+        note: s === "connected" ? undefined : "Connect in Resources",
+      }
+    }),
+    // A real state with a real reason: `function.execution.mode` has the single
+    // value "sync" with `server` required, so there is nothing to run customer
+    // code on yet.
+    { id: "tool_code", name: "Hosted code", meta: "JavaScript we run for you", disabled: true, note: "Not available yet" },
+  ]
 
   return (
     // [label | content] rows (owner 2026-07-21): each resource names itself on
@@ -98,7 +173,18 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
             description="Give it tools: CRM, calendar, APIs."
             emptyTitle="No MCP servers added"
             emptyDesc="Create new or add an existing one"
-            items={mcps.map((m) => ({ id: m.id, name: m.name, meta: `${m.tools} tools`, config: !!getUserMcpServer(m.id) }))}
+            items={mcps.map((m) => ({
+              id: m.id,
+              name: m.name,
+              meta: `${m.tools} tools`,
+              config: mounted && !!getUserMcpServer(m.id),
+              // The MCP row is the one that keeps a last-checked line:
+              // GET /mcp/{id}/status returns lastDetectedAt, and the
+              // custom-tool envelope has no equivalent.
+              check: checks[m.id],
+              checkedAt: checks[m.id]?.at,
+              testable: true,
+            }))}
             selectedIds={draft.mcp}
             onChange={(mcp) => update({ mcp })}
             manageLabel="Add MCP server"
@@ -107,59 +193,52 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
               render: (onCreated) => <McpCreateForm onCreated={onCreated} />,
               onCreated: refresh,
             }}
+            onTest={testMcp}
             onConfigure={(id) => setConfigMcp(id)}
             onDelete={(id) => { deleteMcpServer(id); update({ mcp: draft.mcp.filter((x) => x !== id) }); refresh() }}
           />
         </SectionRow>
 
-        {/* Tools & Connectors (Figma 2867-53592): count header · Name/Status
-            table with per-row toggles · + Add Connector. */}
-        <SectionRow id="wz-5-connectors" label="Tools & connectors">
-          <div className="space-y-2 rounded-lg border border-border p-3.5">
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-                {String(draft.connectors.length).padStart(2, "0")} connectors added
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => router.push("/integrations?tab=connectors")}
-              >
-                <Plus className="h-3.5 w-3.5" /> Add Connector
+        {/* Tools — the fourth ResourceField (19). Chips, a sheet with search,
+            a staged switch per row and a Save footer, exactly like the two rows
+            above it, holding HTTP tools, the connectors the project connected
+            and a hosted-code row that states why it is not available. */}
+        <SectionRow id="wz-5-tools" focusId="tools" label="Tools">
+          {realtime ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Realtime agents can use MCP servers only.</p>
+                <p className="text-xs text-muted-foreground">Add one in the row above.</p>
+              </div>
+              <Button variant="outline" size="sm" className="shrink-0 gap-1.5" disabled>
+                <Plus className="h-3.5 w-3.5" /> Add tool
               </Button>
             </div>
-            <div className="flex items-baseline justify-between border-b border-border pb-1.5 text-xs text-muted-foreground">
-              <span>Name</span>
-              <span className="pr-12">Status</span>
-            </div>
-            <ul className="divide-y divide-border">
-              {CONNECTORS.map((c) => {
-                const s = effectiveConnectorStatus(c)
-                const attached = draft.connectors.includes(c.id)
-                return (
-                  <li key={c.id} className="flex items-center gap-3 py-2.5">
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">{c.name}</span>
-                    {s === "connected" ? (
-                      <Badge variant="secondary" className="shrink-0 bg-success/15 text-xs text-success">Active</Badge>
-                    ) : (
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {s === "coming-soon" ? "Coming soon" : "Connect in Resources"}
-                      </span>
-                    )}
-                    <Switch
-                      checked={attached}
-                      disabled={s !== "connected"}
-                      onCheckedChange={(on) =>
-                        update({ connectors: on ? [...draft.connectors, c.id] : draft.connectors.filter((x) => x !== c.id) })
-                      }
-                      aria-label={`Use ${c.name} on this agent`}
-                    />
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+          ) : (
+            <ResourceField
+              hideHeader
+              icon={Wrench}
+              title="Add tools"
+              description="Let the agent act on your systems."
+              emptyTitle="No tools added"
+              emptyDesc="Create new or add an existing one"
+              manageLabel="Add tool"
+              items={toolItems}
+              selectedIds={draft.tools}
+              onChange={(tools) => update({ tools })}
+              onTest={testTool}
+              onDelete={(id) => { deleteTool(id); update({ tools: draft.tools.filter((x) => x !== id) }); refresh() }}
+              create={{
+                label: "Create new tool",
+                render: (onCreated) => <ToolCreateForm onCreated={onCreated} />,
+                onCreated: refresh,
+                // The raw body IS the diagnosis: swapping back to the roster on
+                // create would throw away the only thing that says why.
+                stayAfterCreate: true,
+              }}
+              footer={<ToolCeiling draft={draft} servers={mcps} />}
+            />
+          )}
         </SectionRow>
 
       {/* Configure-tools sheet for a created MCP server (F3). */}
@@ -168,6 +247,33 @@ export function SectionKnowledgeTools({ draft, update }: StepProps) {
   )
 }
 
+
+/** The host, without throwing on a URL that carries a placeholder in its path. */
+function hostOf(url: string): string {
+  try { return new URL(url).host } catch { return url }
+}
+
+/**
+ * What the agent can call, against what the Engine accepts. An HTTP tool is
+ * one; an MCP server is however many it exposes. A connector adds nothing to
+ * the number, because no connector record holds a tool count, and the second
+ * sentence says so rather than letting the reader assume the number is whole.
+ */
+function ToolCeiling({ draft, servers }: { draft: { tools: string[]; mcp: string[] }; servers: McpServer[] }) {
+  const n = toolCount(draft, servers)
+  if (n > TOOL_CEILING) {
+    return (
+      <p className="text-xs text-destructive">
+        The agent can use {TOOL_CEILING} tools. Remove {n - TOOL_CEILING}.
+      </p>
+    )
+  }
+  return (
+    <p className="text-xs text-muted-foreground">
+      {n} of {TOOL_CEILING} tools attached{hasConnectorAttached(draft) ? ". Connector tools are not counted yet." : ""}
+    </p>
+  )
+}
 
 // ─── Resource field — chips + a Sheet that ATTACHES existing and CREATES new ───
 
@@ -183,12 +289,23 @@ interface AttachItem {
   config?: boolean
   /** Figma 2932-86261: Active vs Processing badge in the attach sheet. */
   status?: "active" | "processing"
+  /** The last test the user ran on this row, if any (19). */
+  check?: ToolCheck
+  /** Rendered as "Checked 2 days ago" — only where the contract carries a
+   *  last-checked time, which today is the MCP status endpoint alone. */
+  checkedAt?: number
+  /** This row can be probed, so it carries a state and a Test door. Keeps both
+   *  off connectors and off the code row, where nothing probes. */
+  testable?: boolean
 }
 
 interface CreateSlot {
   label: string
   render: (onCreated: (id: string) => void) => React.ReactNode
   onCreated?: () => void
+  /** Hold the create body open after the first create, so the result the form
+   *  just produced is still on screen (19). */
+  stayAfterCreate?: boolean
 }
 
 function ResourceField({
@@ -204,6 +321,7 @@ function ResourceField({
   create,
   onConfigure,
   onDelete,
+  onTest,
   footer,
   hideHeader,
 }: {
@@ -224,6 +342,9 @@ function ResourceField({
   create?: CreateSlot
   onConfigure?: (id: string) => void
   onDelete?: (id: string) => void
+  /** Run this row's test. Looked up by id at the call site, so ResourceField
+   *  never has to know what a tool or an MCP server is (19). */
+  onTest?: (id: string) => void
   footer?: React.ReactNode
 }) {
   const [open, setOpen] = React.useState(false)
@@ -250,7 +371,7 @@ function ResourceField({
     if (!selectedIds.includes(id)) onChange([...selectedIds, id])
     setPending((p) => [...new Set([...p, id])])
     create?.onCreated?.()
-    setView("list")
+    if (!create?.stayAfterCreate) setView("list")
     toast.success("Added and attached", { description: `Created and attached.` })
   }
 
@@ -278,12 +399,19 @@ function ResourceField({
             // can't silently ship in the deployed config (audit 2026-07-07).
             <Badge
               key={i.id}
-              variant={i.disabled ? "outline" : "secondary"}
-              className={cn("gap-1 pr-1 font-normal", i.disabled && "border-destructive/40 text-destructive")}
+              variant={i.disabled || (i.check && !i.check.ok) ? "outline" : "secondary"}
+              className={cn(
+                "gap-1 pr-1 font-normal",
+                i.disabled && "border-destructive/40 text-destructive",
+                // An attached tool that has never answered must not look
+                // identical to one that has (19).
+                !i.disabled && i.check && !i.check.ok && "border-destructive/40 text-destructive",
+                !i.disabled && i.testable && !i.check && "bg-warning/15 text-warning",
+              )}
               title={i.disabled ? "No longer connected · reconnect in Resources or remove it" : undefined}
             >
-              {i.disabled && <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />}
-              {i.name}
+              {(i.disabled || (i.check && !i.check.ok)) && <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />}
+              {i.testable ? `${i.name} · ${checkLabel(i.check)}` : i.name}
               <button
                 type="button"
                 onClick={() => onChange(selectedIds.filter((x) => x !== i.id))}
@@ -382,6 +510,19 @@ function ResourceField({
                             >
                               {i.status === "active" ? "Active" : "Processing"}
                             </Badge>
+                          )}
+                          {/* The state the user produced, on the row it belongs
+                              to rather than behind an overflow menu (19). */}
+                          {(i.check || i.testable) && <ToolStateChip check={i.check} checkedAt={i.checkedAt} />}
+                          {onTest && i.testable && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="shrink-0"
+                              onClick={() => onTest(i.id)}
+                            >
+                              {i.check ? "Test again" : "Run test"}
+                            </Button>
                           )}
                           {i.note && <span className="shrink-0 text-xs text-muted-foreground">{i.note}</span>}
                           {!i.disabled && (
@@ -542,11 +683,26 @@ export function KnowledgeCreateForm({ onCreated }: { onCreated: (id: string) => 
 export function McpCreateForm({ onCreated }: { onCreated: (id: string) => void }) {
   const [name, setName] = React.useState("")
   const [url, setUrl] = React.useState("")
-  const [transport, setTransport] = React.useState<McpTransport>("sse")
   const [headers, setHeaders] = React.useState<{ key: string; value: string }[]>([{ key: "", value: "" }])
   const setHeader = (idx: number, patch: Partial<{ key: string; value: string }>) =>
     setHeaders((hs) => hs.map((h, i) => (i === idx ? { ...h, ...patch } : h)))
-  const validUrl = /^https?:\/\/.+/.test(url.trim())
+  // Enforces the rule the error line beneath it has always stated.
+  const validUrl = /^https:\/\/.+/.test(url.trim())
+  const [createdId, setCreatedId] = React.useState<string | null>(null)
+  const [check, setCheck] = React.useState<ToolCheck | undefined>(undefined)
+  const createAndTest = () => {
+    // `llm.mcp_servers[].transport` takes streamable_http only, so there is
+    // nothing here for the user to pick: a single-option picker would be a
+    // control for what Agora does by default.
+    const id = createdId ?? createMcpServer({ name, url, transport: "http", headers }).id
+    const result = runCheck({ url })
+    saveToolCheck(id, result)
+    setCheck(result)
+    if (!createdId) {
+      setCreatedId(id)
+      onCreated(id)
+    }
+  }
   return (
     <div className="space-y-5">
       <div className="space-y-1.5">
@@ -557,22 +713,6 @@ export function McpCreateForm({ onCreated }: { onCreated: (id: string) => void }
         <Label htmlFor="mcp-url" className="text-sm font-medium">Server URL</Label>
         <Input id="mcp-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://mcp.example.com" />
         {url.trim() && !validUrl && <p className="text-xs text-destructive">Enter a valid https URL.</p>}
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Transport</Label>
-        <ToggleGroup
-          type="single"
-          value={transport}
-          onValueChange={(v) => v && setTransport(v as McpTransport)}
-          variant="outline"
-          size="sm"
-          className="grid grid-cols-2"
-          aria-label="Transport protocol"
-        >
-          {(Object.keys(MCP_TRANSPORT_LABEL) as McpTransport[]).map((t) => (
-            <ToggleGroupItem key={t} value={t} className="text-xs">{MCP_TRANSPORT_LABEL[t]}</ToggleGroupItem>
-          ))}
-        </ToggleGroup>
       </div>
       <div className="space-y-1.5">
         <Label className="text-sm font-medium">HTTP headers</Label>
@@ -596,13 +736,10 @@ export function McpCreateForm({ onCreated }: { onCreated: (id: string) => void }
           </Button>
         </div>
       </div>
-      <Button
-        className="w-full"
-        disabled={!name.trim() || !validUrl}
-        onClick={() => onCreated(createMcpServer({ name, url, transport }).id)}
-      >
-        Create and discover tools
+      <Button className="w-full" disabled={!name.trim() || !validUrl} onClick={createAndTest}>
+        {createdId ? "Test again" : "Create and test"}
       </Button>
+      <ToolCheckResult check={check} />
     </div>
   )
 }

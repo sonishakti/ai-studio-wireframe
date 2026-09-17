@@ -105,6 +105,10 @@ export interface AdvancedConfig {
  *  (Agora Conversational AI `properties`; Figma 2919-56980). */
 export const CUSTOM_CONFIG_SECTIONS = [
   "asr", "llm", "tts", "avatar", "turn_detection", "interruption", "conversation", "sal",
+  // `advanced_features.enable_tools` defaults to false, and a tool is then
+  // validated and never invoked. Without this entry the drawer reported the
+  // flag as overriding nothing (19).
+  "advanced_features",
 ] as const
 
 export const CUSTOM_CONFIG_SKELETON = `{
@@ -115,7 +119,8 @@ export const CUSTOM_CONFIG_SKELETON = `{
   "turn_detection": {},
   "interruption": {},
   "conversation": {},
-  "sal": {}
+  "sal": {},
+  "advanced_features": {}
 }`
 
 /** Section names whose object carries ≥1 property — the overriding ones.
@@ -451,8 +456,10 @@ export interface AgentDraft {
   templateName?: string
   knowledge: string[]
   mcp: string[]
-  /** Context › Actions — attached third-party Connector ids (F6). */
-  connectors: string[]
+  /** Context › Tools — attached HTTP tool ids and connected Connector ids. One
+   *  list, migrated from `connectors` (19): a second field beside it would be
+   *  two names for one attachment. */
+  tools: string[]
   /** Optional depth — absent until the user opens the section (F1 / F8). */
   advanced?: AdvancedConfig
   analysis?: AnalysisConfig
@@ -524,7 +531,7 @@ export const EMPTY_DRAFT: AgentDraft = {
   failureMessage: "",
   knowledge: [],
   mcp: [],
-  connectors: [],
+  tools: [],
   campaigns: [],
   config: {},
 }
@@ -534,6 +541,9 @@ export const EMPTY_DRAFT: AgentDraft = {
 /** Fields the pre-2026-07-28 draft shape carried. */
 interface LegacyDraftFields {
   type?: AgentType | null
+  /** Pre-19: attached Connector ids, before HTTP tools and connectors became
+   *  one `tools` list. Folded in by migrateDraft, never dropped. */
+  connectors?: string[]
   config?: {
     inbound?: { mode?: "phone" | "web"; numberId?: string; numberIds?: string[]; surfaces?: unknown[] }
     outbound?: {
@@ -615,8 +625,16 @@ export function migrateDraft(raw: Partial<AgentDraft> & LegacyDraftFields): Agen
     ...(raw.config?.code ? { code: raw.config.code } : {}),
   }
 
-  const next = { ...EMPTY_DRAFT, ...raw, channels, campaigns, config } as AgentDraft & LegacyDraftFields
+  // Tools: every draft already in localStorage holds `connectors`. Fold it into
+  // the one list rather than leaving it behind, or the attachment disappears on
+  // the next open (19).
+  const tools = [...(raw.tools ?? []), ...(raw.connectors ?? [])].filter(
+    (id, i, all) => all.indexOf(id) === i,
+  )
+
+  const next = { ...EMPTY_DRAFT, ...raw, channels, campaigns, config, tools } as AgentDraft & LegacyDraftFields
   delete next.type
+  delete next.connectors
   // An exclusion is only legal under GLOBAL — a stored draft that predates that
   // rule (or was hand-edited in the JSON drawer) must not ship an invalid pair.
   if (next.hosting) next.hosting = normalizeHosting(next.hosting)
@@ -734,7 +752,7 @@ export function agentToDraft(agent: Agent): AgentDraft {
     templateName: agent.role,
     knowledge: [...agent.knowledge],
     mcp: [...agent.actions],
-    connectors: [...(agent.connectors ?? [])],
+    tools: [...(agent.tools ?? [])],
     campaigns,
     config: {
       ...(ch?.type === "inbound"

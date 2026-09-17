@@ -71,8 +71,8 @@ export function HostingRegionRow({ draft, update }: StepProps) {
         <InfoHint label="What pinning changes">
           Pin a region when a contract or regulation says conversation data must stay inside it
           (GDPR, DPDP, APPI). Automatic runs the agent nearest your model endpoint with failover;
-          pinning turns failover off. This pins Agora&apos;s engine only. LLM, TTS and ASR vendors
-          process data at their own endpoints; set regional URLs in{" "}
+          pinning turns failover off. This pins Agora&apos;s engine only. LLM, TTS and ASR vendors,
+          and any tool you attach, process data at their own endpoints; set regional URLs in{" "}
           <a href="/project/vendor-credentials" className="underline underline-offset-2">Vendor Credentials</a>.{" "}
           <a href={HOSTING_DOCS_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
             Agora region docs

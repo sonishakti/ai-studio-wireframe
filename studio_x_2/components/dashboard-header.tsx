@@ -97,6 +97,7 @@ function labelOf(seg: string) {
 const RESOURCE_TAB_LABELS: Record<string, string> = {
   knowledge: "Knowledge Base",
   mcp: "MCP",
+  tools: "Tools",
   connectors: "Connectors",
   credentials: "Vendor Credentials",
   channels: "Deployment Channels",

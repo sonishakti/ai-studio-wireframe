@@ -28,7 +28,10 @@ export const AGENT_SECTIONS: { id: AgentSection; label: string }[] = [
   { id: "stack", label: "Stack" },
   { id: "knowledge", label: "Knowledge Base" },
   { id: "mcp", label: "MCP" },
-  { id: "connectors", label: "Connectors" },
+  // Label "Tools" but keep the internal id "connectors", for the same reason
+  // "deployment" keeps its id below: the hash map, jump() and the completion
+  // Record all key off it (19).
+  { id: "connectors", label: "Tools" },
   // Label "Deploy" but keep the internal id "deployment" — #deployment deep-links,
   // jump("deployment") and <TabsContent value="deployment"> + diagnostics anchors
   // all key off the id; renaming it would need every call site moved in lockstep.

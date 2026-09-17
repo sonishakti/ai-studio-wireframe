@@ -31,7 +31,9 @@ import { SURFACE_OF, ROW_KIND_LABEL } from "@/lib/channels"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events, builderOpened, agentAudioHeard } from "@/lib/analytics"
 import { AdvancedSettingsSheet, openAdvanced, type AdvancedAnchor } from "@/components/wizard/advanced-settings-sheet"
-import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, type ImportedAgentConfig, type RunMode } from "@/lib/campaign-data"
+import { getAgent, stackLine, stackEstimateFor, stackLatencyDetail, AGENT_TEMPLATES, STACK_PRESETS, PHONE_NUMBERS, MCP_SERVERS, type ImportedAgentConfig, type McpServer, type RunMode } from "@/lib/campaign-data"
+import { allMcpServers } from "@/lib/agent-resources"
+import { toolCount } from "@/lib/agent-tools"
 import {
   getVoiceArtifact, defaultPromptFor, type VoiceArtifact,
 } from "@/lib/voice-artifacts"
@@ -531,7 +533,7 @@ export function AgentWizard({
   // (design-ops rule 2026-09-11; mirrors ng-console's design-kit focus).
   const focusOn = React.useCallback((focus: string) => {
     const owner: Record<string, number> = {
-      opening: 3, greeting: 3, prompt: 3,
+      opening: 3, greeting: 3, prompt: 3, tools: 3,
       voice: 1, "voice-recommended": 1, "voice-compare": 1, "backup-providers": 1, "turn-taking": 1, listening: 1,
       // Designs 03 and 06 live inside a vendor's Configure sheet; design 05
       // lives in the Advanced panel. All three are doors, handled below.
@@ -664,7 +666,7 @@ export function AgentWizard({
   const stepSlice = (d: AgentDraft, n: number): Partial<AgentDraft> =>
     n === 1 ? { voice: d.voice, stack: d.stack, advanced: d.advanced }
     : n === 2 ? { channels: d.channels, config: d.config, hosting: d.hosting }
-    : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, failureMessage: d.failureMessage, knowledge: d.knowledge, mcp: d.mcp, connectors: d.connectors }
+    : n === 3 ? { systemPrompt: d.systemPrompt, greeting: d.greeting, failureMessage: d.failureMessage, knowledge: d.knowledge, mcp: d.mcp, tools: d.tools }
     : n === 5 ? { campaigns: d.campaigns, analysis: d.analysis, callBehavior: d.callBehavior }
     : {}
   const stepDirty = (n: number) => {
@@ -932,6 +934,13 @@ export function AgentWizard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // The rail's tool count needs each attached server's OWN tool count, and
+  // allMcpServers() answers seeds-only during prerender and seeds plus
+  // localStorage on the first client render — reading it inside the summary
+  // would desync hydration, so it is held in state (19).
+  const [mcpList, setMcpList] = React.useState<McpServer[]>(MCP_SERVERS)
+  React.useEffect(() => { setMcpList(allMcpServers()) }, [])
+
   // One advanced-settings panel for the whole builder. Sections ask for a
   // group; the panel decides nothing else (owner 2026-09-15).
   const [advOpen, setAdvOpen] = React.useState(false)
@@ -1029,7 +1038,9 @@ export function AgentWizard({
       if (!draft.systemPrompt.trim()) return "No prompt yet"
       const parts = ["Prompt set"]
       if (draft.knowledge.length) parts.push(`${draft.knowledge.length} knowledge`)
-      const tools = draft.mcp.length + draft.connectors.length
+      // What the agent can CALL, not how many things are attached: a server
+      // exposing twelve tools used to count as one (19).
+      const tools = toolCount(draft, mcpList)
       if (tools) parts.push(`${tools} tool${tools > 1 ? "s" : ""}`)
       return parts.join(" · ") + edited
     }

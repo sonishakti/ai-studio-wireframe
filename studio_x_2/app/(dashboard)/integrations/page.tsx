@@ -21,6 +21,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 // Reuse the builder's create/config surfaces so Resources and the agent's Prompt
 // & tools step create the SAME persisted resources — no mock/real drift.
 import { KnowledgeCreateForm, McpCreateForm, McpToolsSheet } from "@/components/wizard/step-build"
+// The builder's own tool form and its two display parts, so a tool made here
+// and a tool made in an agent are one record with one state.
+import { ToolCreateForm, ToolCheckResult, ToolStateChip } from "@/components/wizard/tool-create-form"
 // Canonical catalogs — shared with the agent builder's Actions hub so the two
 // never drift (2026-07-07 canonicalization).
 import { CONNECTORS, KNOWLEDGE_BASES, MCP_SERVERS, type Connector, type KnowledgeBase, type McpServer } from "@/lib/campaign-data"
@@ -28,10 +31,14 @@ import {
   effectiveConnectorStatus, setConnectorConnected,
   allKnowledgeBases, allMcpServers, getUserMcpServer,
 } from "@/lib/agent-resources"
+import {
+  allTools, getTool, getToolCheck, saveToolCheck, runCheck,
+  TOOL_SEEDS, type AgentTool, type ToolCheck,
+} from "@/lib/agent-tools"
 
 // Resources is tab-routed (?tab=…), so deep links and the header breadcrumb stay
 // in sync. Order matches the tab list left-to-right.
-const TABS = ["knowledge", "mcp", "connectors", "credentials", "channels"] as const
+const TABS = ["knowledge", "mcp", "tools", "connectors", "credentials", "channels"] as const
 type ResourceTab = (typeof TABS)[number]
 const DEFAULT_TAB: ResourceTab = "connectors"
 
@@ -93,7 +100,7 @@ function ResourcesInner() {
     setConnectorConnected(c.id, true)
     setConnecting(null)
     setRev((r) => r + 1)
-    toast.success(`${c.name} connected`, { description: "Attach it to an agent from Prompt & tools." })
+    toast.success(`${c.name} connected`, { description: "Attach it to an agent from its Tools row." })
   }
   const disconnect = (c: Connector) => {
     setConnectorConnected(c.id, false)
@@ -112,6 +119,30 @@ function ResourcesInner() {
   const bump = () => setRev((r) => r + 1)
   void rev
 
+  // Tools live in the same store the builder writes to (19), so a tool made in
+  // an agent is the same record here, carrying the same test result.
+  const tools: AgentTool[] = mounted ? allTools() : TOOL_SEEDS
+  const [toolCreateOpen, setToolCreateOpen] = React.useState(false)
+  const checks: Record<string, ToolCheck> = {}
+  if (mounted) {
+    for (const id of [...tools.map((t) => t.id), ...mcps.map((m) => m.id)]) {
+      const c = getToolCheck(id)
+      if (c) checks[id] = c
+    }
+  }
+  const testTool = (id: string) => {
+    const t = getTool(id)
+    if (!t) return
+    saveToolCheck(id, runCheck({ url: t.url, method: t.method, body: t.bodyTemplate }))
+    bump()
+  }
+  const testMcp = (id: string) => {
+    const server = mcps.find((x) => x.id === id)
+    if (!server) return
+    saveToolCheck(id, runCheck({ url: server.url }))
+    bump()
+  }
+
   return (
     <ResourcesShell>
       <Tabs value={tab} onValueChange={setTab}>
@@ -120,6 +151,7 @@ function ResourcesInner() {
           <TabsList>
             <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
             <TabsTrigger value="mcp">MCP</TabsTrigger>
+            <TabsTrigger value="tools">Tools</TabsTrigger>
             <TabsTrigger value="connectors">Connectors</TabsTrigger>
             <TabsTrigger value="credentials">Vendor Credentials</TabsTrigger>
             <TabsTrigger value="channels">Deployment Channels</TabsTrigger>
@@ -136,12 +168,12 @@ function ResourcesInner() {
         {/* Knowledge Base tab */}
         <TabsContent value="knowledge" className="space-y-4">
           {/* Reciprocity with the builder: attaching happens in an agent's
-              Prompt & tools step — say so HERE, where users land hunting for
+              Prompt & knowledge section — say so HERE, where users land hunting for
               it (heuristic-eval walkthrough T3 / re-eval #8). */}
           <p className="text-sm text-muted-foreground">
             Attach these to an agent from its{" "}
             <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Knowledge &amp; Tools section →
+              Prompt &amp; knowledge section
             </Link>
           </p>
           <div className="relative max-w-md">
@@ -207,12 +239,12 @@ function ResourcesInner() {
         {/* MCP tab */}
         <TabsContent value="mcp" className="space-y-4">
           {/* Reciprocity with the builder: attaching happens in an agent's
-              Prompt & tools step — say so HERE, where users land hunting for
+              Prompt & knowledge section — say so HERE, where users land hunting for
               it (heuristic-eval walkthrough T3 / re-eval #8). */}
           <p className="text-sm text-muted-foreground">
             Attach these to an agent from its{" "}
             <Link href="/agents?step=3" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Knowledge &amp; Tools section →
+              Prompt &amp; knowledge section
             </Link>
           </p>
           <div className="relative max-w-md">
@@ -248,15 +280,18 @@ function ResourcesInner() {
                       <p className="text-xs text-muted-foreground font-mono truncate">{s.url}</p>
                     </div>
                     <Badge variant="secondary" className="text-xs">{s.tools} tools</Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={!editable}
-                      title={editable ? undefined : "Sample server · create your own to configure its tools"}
-                      onClick={() => setConfigMcpId(s.id)}
-                    >
-                      Configure tools
+                    <ToolStateChip check={checks[s.id]} checkedAt={checks[s.id]?.at} />
+                    <Button variant="outline" size="sm" onClick={() => testMcp(s.id)}>
+                      {checks[s.id] ? "Test again" : "Run test"}
                     </Button>
+                    {/* Only a server whose tool list exists can have one shown.
+                        The seed rows used to print a count beside a button that
+                        refused to open, on one line (19). */}
+                    {editable && (
+                      <Button variant="outline" size="sm" onClick={() => setConfigMcpId(s.id)}>
+                        Configure tools
+                      </Button>
+                    )}
                   </div>
                 )
               })}
@@ -266,61 +301,116 @@ function ResourcesInner() {
             </div>
           )}
 
-          {/* Create + configure — the builder's own surfaces, one shared store. */}
-          <Sheet open={mcpCreateOpen} onOpenChange={setMcpCreateOpen}>
-            <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
-              <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
-                <SheetTitle>Create MCP server</SheetTitle>
-              </SheetHeader>
-              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                <McpCreateForm
-                  onCreated={() => { setMcpCreateOpen(false); bump(); toast.success("MCP server created") }}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
           <McpToolsSheet id={configMcpId} onClose={() => setConfigMcpId(null)} onSaved={bump} />
         </TabsContent>
 
-        {/* Connectors tab (Figma default) */}
-        <TabsContent value="connectors" className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search" className="pl-9" />
-            </div>
-          </div>
-
-          {CONNECTORS.length === 0 ? (
+        {/* Tools tab — an HTTP tool belongs to the workspace, not to one agent,
+            so it has a home outside the builder (19). Same shape as the three
+            tabs beside it: a reciprocity line, the roster, one create door. */}
+        <TabsContent value="tools" className="space-y-4">
+          <p className="text-sm text-muted-foreground">Attach these to an agent from its Tools row.</p>
+          {tools.length === 0 ? (
             <div className="rounded-lg border bg-card">
               <EmptyState
                 icon={Plug}
-                title="No connectors yet"
-                subtitle="Connect a tool so your agent can take real actions: look up an order, file a ticket, or take a payment."
+                title="No tools yet"
+                subtitle="Create a tool so your agent can act on your systems: look up an order, start a refund, file a ticket."
               />
+              <div className="flex justify-center pb-8">
+                <Button size="sm" className="gap-1.5" onClick={() => setToolCreateOpen(true)}>
+                  <Plus className="h-4 w-4" /> Create new tool
+                </Button>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {CONNECTORS.map((c) => {
-                const status = statusOf(c)
-                return (
-                  <CatalogCard
-                    key={c.id}
-                    name={c.name}
-                    description={c.description}
-                    initials={c.initials}
-                    status={status}
-                    actionLabel={status === "connected" ? "Disconnect" : "Connect"}
-                    onAction={
-                      status === "connected" ? () => disconnect(c)
-                      : status === "available" ? () => setConnecting(c)
-                      : undefined
-                    }
-                  />
-                )
-              })}
+            <div className="space-y-2">
+              {tools.map((t) => (
+                <div key={t.id} className="rounded-md border bg-card">
+                  <div className="flex items-center gap-3 p-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+                      <Plug className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">{t.fn.name || t.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono truncate">{t.method} {t.url}</p>
+                    </div>
+                    {t.status === "unavailable" && (
+                      <span className="shrink-0 text-xs text-muted-foreground">Unavailable</span>
+                    )}
+                    <ToolStateChip check={checks[t.id]} />
+                    <Button variant="outline" size="sm" onClick={() => testTool(t.id)}>
+                      {checks[t.id] ? "Test again" : "Run test"}
+                    </Button>
+                  </div>
+                  {/* The raw body IS the diagnosis, so it stays under the row
+                      the test was run from rather than in a dialog. */}
+                  {checks[t.id] && (
+                    <div className="border-t px-3 py-3">
+                      <ToolCheckResult check={checks[t.id]} />
+                    </div>
+                  )}
+                </div>
+              ))}
+              <Button variant="outline" className="w-full gap-1.5" onClick={() => setToolCreateOpen(true)}>
+                <Plus className="h-4 w-4" /> Create new tool
+              </Button>
             </div>
           )}
+
+        </TabsContent>
+
+        {/* Connectors tab (Figma default) */}
+        <TabsContent value="connectors" className="space-y-6">
+          {/* The catalog is one row long, because the Studio server accepts one
+              provider. What a customer reaches for instead leads the fold (19). */}
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-sm font-semibold">Add your own</h2>
+              <p className="text-xs text-muted-foreground">Point the agent at any endpoint you already run.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:max-w-2xl">
+              <Button variant="outline" className="w-full gap-1.5" onClick={() => setToolCreateOpen(true)}>
+                <Plus className="h-4 w-4" /> HTTP tool
+              </Button>
+              <Button variant="outline" className="w-full gap-1.5" onClick={() => setMcpCreateOpen(true)}>
+                <Plus className="h-4 w-4" /> MCP server
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold">Ready to connect</h2>
+            {CONNECTORS.length === 0 ? (
+              <div className="rounded-lg border bg-card">
+                <EmptyState
+                  icon={Plug}
+                  title="No connectors yet"
+                  subtitle="Connect a tool so your agent can take real actions: look up an order, file a ticket, or take a payment."
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {CONNECTORS.map((c) => {
+                  const status = statusOf(c)
+                  return (
+                    <CatalogCard
+                      key={c.id}
+                      name={c.name}
+                      description={c.description}
+                      initials={c.initials}
+                      status={status}
+                      actionLabel={status === "connected" ? "Disconnect" : "Connect"}
+                      onAction={
+                        status === "connected" ? () => disconnect(c)
+                        : status === "available" ? () => setConnecting(c)
+                        : undefined
+                      }
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Mock OAuth — no real sign-in (wireframe). */}
           <Dialog open={!!connecting} onOpenChange={(o) => !o && setConnecting(null)}>
@@ -351,6 +441,31 @@ function ResourcesInner() {
           <ChannelsPanel />
         </TabsContent>
       </Tabs>
+
+      {/* One door per create, mounted OUTSIDE the tabs: the Connectors fold and
+          the Tools tab both open these, and an inactive TabsContent unmounts. */}
+      <Sheet open={toolCreateOpen} onOpenChange={setToolCreateOpen}>
+        <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
+          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+            <SheetTitle>Create new tool</SheetTitle>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+            <ToolCreateForm onCreated={bump} />
+          </div>
+        </SheetContent>
+      </Sheet>
+      <Sheet open={mcpCreateOpen} onOpenChange={setMcpCreateOpen}>
+        <SheetContent className="flex w-full flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
+          <SheetHeader className="shrink-0 border-b border-border px-5 py-4 text-left">
+            <SheetTitle>Create MCP server</SheetTitle>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+            <McpCreateForm
+              onCreated={() => { setMcpCreateOpen(false); bump(); toast.success("MCP server created") }}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </ResourcesShell>
   )
 }

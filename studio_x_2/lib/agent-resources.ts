@@ -16,7 +16,11 @@ import {
 /** Runtime-only (browser) id minting — Date.now() is fine here. */
 const mintId = (prefix: string) => `${prefix}_c_${Date.now().toString(36)}`
 
-function readList<T>(key: string): T[] {
+/** Exported so `lib/agent-tools.ts` writes its tool and check stores through
+ *  the SAME guarded read/write as every other resource, rather than forking a
+ *  second localStorage idiom (19). Import them by value; anything importing
+ *  back from agent-tools must use `import type`, or the two modules cycle. */
+export function readList<T>(key: string): T[] {
   if (typeof window === "undefined") return []
   try {
     const raw = window.localStorage.getItem(key)
@@ -25,7 +29,7 @@ function readList<T>(key: string): T[] {
     return []
   }
 }
-function writeList<T>(key: string, list: T[]) {
+export function writeList<T>(key: string, list: T[]) {
   if (typeof window === "undefined") return
   try { window.localStorage.setItem(key, JSON.stringify(list)) } catch { /* wireframe only */ }
 }
@@ -182,6 +186,9 @@ export interface McpTool { id: string; name: string; description: string; enable
 export interface UserMcpServer extends McpServer {
   transport: McpTransport
   toolList: McpTool[]
+  /** What the create form collected. Persisted from 19 onwards: before that the
+   *  rows were typed, dropped, and the user was told the server was created. */
+  headers?: { key: string; value: string }[]
 }
 
 export function listUserMcpServers(): UserMcpServer[] {
@@ -193,22 +200,52 @@ export function allMcpServers(): McpServer[] {
 export function getUserMcpServer(id: string): UserMcpServer | undefined {
   return listUserMcpServers().find((s) => s.id === id)
 }
-/** Mock tool discovery — a created server "exposes" a plausible tool set. */
-export function discoverTools(): McpTool[] {
-  return [
-    { id: "search", name: "search", description: "Search records by query.", enabled: true },
-    { id: "create_record", name: "create_record", description: "Create a new record.", enabled: true },
-    { id: "update_record", name: "update_record", description: "Update an existing record.", enabled: false },
-  ]
+/** The pool a discovered tool set is drawn from. */
+const DISCOVERABLE: McpTool[] = [
+  { id: "search", name: "search", description: "Search records by query.", enabled: true },
+  { id: "get_record", name: "get_record", description: "Read one record by id.", enabled: true },
+  { id: "create_record", name: "create_record", description: "Create a new record.", enabled: true },
+  { id: "update_record", name: "update_record", description: "Update an existing record.", enabled: false },
+  { id: "list_collections", name: "list_collections", description: "List the collections this server exposes.", enabled: true },
+  { id: "delete_record", name: "delete_record", description: "Delete a record by id.", enabled: false },
+]
+
+/**
+ * What a created server exposes, derived from its host so two different servers
+ * never report the same tool set (19). Before this, the function took no
+ * arguments and answered `search · create_record · update_record` for every URL
+ * typed, so the product claimed to have read a server it had never called.
+ */
+export function discoverTools(url: string): McpTool[] {
+  const host = (() => {
+    try { return new URL(url.trim()).host } catch { return url.trim() }
+  })()
+  // FNV-1a, the sandbox's seeded-randomness idiom (lib/diagnostics.ts :96): one
+  // host always answers with the same set, across renders and reloads.
+  let h = 2166136261
+  for (let i = 0; i < host.length; i++) { h ^= host.charCodeAt(i); h = Math.imul(h, 16777619) }
+  const seed = h >>> 0
+  const picked = DISCOVERABLE.filter((_, i) => ((seed >>> i) & 1) === 1)
+  return picked.length > 0 ? picked : DISCOVERABLE.slice(0, 2)
 }
-export function createMcpServer(input: { name: string; url: string; transport: McpTransport; toolList?: McpTool[] }): UserMcpServer {
-  const toolList = input.toolList ?? discoverTools()
+
+export function createMcpServer(input: {
+  name: string
+  url: string
+  transport: McpTransport
+  toolList?: McpTool[]
+  headers?: { key: string; value: string }[]
+}): UserMcpServer {
+  const toolList = input.toolList ?? discoverTools(input.url)
+  // Half-typed rows are dropped rather than persisted as empty pairs.
+  const headers = (input.headers ?? []).filter((x) => x.key.trim())
   const server: UserMcpServer = {
     id: mintId("mcp"),
     name: input.name.trim() || "New MCP server",
     url: input.url.trim(),
     transport: input.transport,
     toolList,
+    ...(headers.length ? { headers } : {}),
     tools: toolList.filter((t) => t.enabled).length,
   }
   writeList(MCP_KEY, [...listUserMcpServers(), server])

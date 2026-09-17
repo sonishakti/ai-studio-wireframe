@@ -560,8 +560,10 @@ export interface Agent {
   knowledge: string[]
   /** Attached MCP/tool server ids (Integrations › MCP). */
   actions: string[]
-  /** Attached third-party Connector ids (Integrations › Connectors). */
-  connectors?: string[]
+  /** Attached tool ids — HTTP tools (Resources › Tools) and connected
+   *  Connector ids, both held by the builder's Tools row. One field, because a
+   *  second list beside it would be two names for one attachment (19). */
+  tools?: string[]
   /** One-line role descriptor shown on the Go Live home. */
   role?: string
   /** Auto-provisioned default agent — exists & live for every new account so the
@@ -707,6 +709,7 @@ export const AGENTS: Agent[] = [
     stack: stackFor("fastest"),
     knowledge: ["kb_01", "kb_02"],
     actions: ["mcp_01"],
+    tools: ["tool_refund_order"],
   },
   {
     id: "agt_sales_qualifier",
@@ -716,6 +719,7 @@ export const AGENTS: Agent[] = [
     stack: stackFor("balanced"),
     knowledge: ["kb_02"],
     actions: ["mcp_01", "mcp_02"],
+    tools: ["tool_refund_order"],
   },
   {
     id: "agt_appointment_setter",
@@ -1787,13 +1791,13 @@ export interface Connector {
   status: "connected" | "available" | "coming-soon"
 }
 
+// One row, because the Studio server answers every provider but `hubspot` with
+// INVALID_BODY "provider must be hubspot" (19, 2026-09-17). The five rows that
+// completed an authorize dialog nothing was sent to are gone; a customer who
+// needs Salesforce reaches it through an HTTP tool or an MCP server, both of
+// which the Tools row now creates.
 export const CONNECTORS: Connector[] = [
   { id: "conn_hubspot", name: "HubSpot", category: "CRM", description: "Sync contacts and log deals in your CRM.", initials: "HS", status: "connected" },
-  { id: "conn_salesforce", name: "Salesforce", category: "CRM", description: "Read and update leads and opportunities.", initials: "SF", status: "available" },
-  { id: "conn_gcal", name: "Google Calendar", category: "Scheduling", description: "Check availability and book meetings.", initials: "GC", status: "available" },
-  { id: "conn_zendesk", name: "Zendesk", category: "Support", description: "Open and track support tickets automatically.", initials: "ZD", status: "available" },
-  { id: "conn_slack", name: "Slack", category: "Messaging", description: "Post updates and alerts to a channel.", initials: "SL", status: "connected" },
-  { id: "conn_stripe", name: "Stripe", category: "Payments", description: "Take payments and check order status.", initials: "ST", status: "coming-soon" },
 ]
 
 export function formatDuration(seconds: number): string {
