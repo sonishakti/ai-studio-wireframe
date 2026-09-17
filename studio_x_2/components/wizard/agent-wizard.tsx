@@ -208,36 +208,9 @@ export function AgentWizard({
   // The identity card's "Talk to it" toggle (mock test, mirrors the home).
   const [testing, setTesting] = React.useState(false)
 
-  // Scroll crumb (owner 2026-08-10): which section + [label|content] row the
-  // viewport is inside, so the stuck section header can say "› Row". rAF-
-  // throttled scroll read; offset ≈ topbar (48) + stuck header (44).
-  const [scrollCrumb, setScrollCrumb] = React.useState<{ section: number; label: string } | null>(null)
-  React.useEffect(() => {
-    let raf = 0
-    const OFFSET = 100
-    const read = () => {
-      raf = 0
-      let next: { section: number; label: string } | null = null
-      for (const n of [1, 2, 3, 4, 5]) {
-        const sec = document.getElementById(`wizard-step-${n}`)
-        if (!sec) continue
-        const r = sec.getBoundingClientRect()
-        if (r.top >= OFFSET || r.bottom <= OFFSET) continue
-        let label = ""
-        for (const el of sec.querySelectorAll<HTMLElement>("[data-wz-row-label]")) {
-          if (el.getBoundingClientRect().top < OFFSET + 40) label = el.textContent?.trim() ?? ""
-        }
-        // Only once the header is actually stuck (section top scrolled past).
-        next = r.top < 0 && label ? { section: n, label } : null
-        break
-      }
-      setScrollCrumb((prev) =>
-        prev?.section === next?.section && prev?.label === next?.label ? prev : next)
-    }
-    const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(read) }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => { window.removeEventListener("scroll", onScroll); if (raf) window.cancelAnimationFrame(raf) }
-  }, [])
+  // The scroll crumb came off with the rest of the heading-row furniture
+  // (owner 2026-09-17: nothing in the title but the name). Its rAF scroll
+  // listener went with it, so the builder no longer reads layout on scroll.
   // Visible autosave status (heuristic-eval #6). idle → saving → saved.
   const [saveState, setSaveState] = React.useState<"idle" | "saving" | "saved">("idle")
   const dirty = React.useRef(false)
@@ -278,12 +251,18 @@ export function AgentWizard({
   }, [isEdit, existing])
   const effectiveStatus = statusOverride ?? (isEdit ? existing!.status : null)
 
-  // ── Hedonic layer: ticks pop only for IN-SESSION completions. ──────────────
+  // ── The tick says "you configured this", and nothing stronger (owner
+  //    2026-09-17). It is grey, never green: a green tick reads as a check
+  //    the agent passed, and a half-built agent was wearing five of them.
+  //    Every section earns it the same way, by the user having touched it.
+  //    Section 4 used to be hardcoded true, so Test wore a tick before a
+  //    single case had run; it now waits for a real run.
   const initialDones = React.useRef<Set<number> | null>(null)
   const [savePulse, setSavePulse] = React.useState(0)
   const [launchBurst, setLaunchBurst] = React.useState(false)
+  const testRun = simSummary !== null || (storedRun?.results.length ?? 0) > 0
   const isDone = (n: number) =>
-    n === 1 ? voiceDone : n === 2 ? channelsDone : n === 3 ? promptDone : n === 4 ? true : isLive
+    n === 1 ? voiceDone : n === 2 ? channelsDone : n === 3 ? promptDone : n === 4 ? testRun : isLive
   if (initialDones.current === null) initialDones.current = new Set([1, 2, 3, 4, 5].filter(isDone))
 
   // ── One-primary discipline: while Go Live's CTA is on screen, the header
@@ -1032,51 +1011,8 @@ export function AgentWizard({
     : codeDeployed ? "Deployed" : "Draft"
   const { copied: idCopied, copy: copyId } = useCopyFeedback()
 
-  /** One-line value recap a COLLAPSED section shows in its heading row —
-   *  recognition over recall while folded (Concertina graft). Live agents
-   *  append "· edited" so dirtiness never hides inside a closed section. */
-  const sectionRecap = (n: number): string => {
-    const edited = isLive && stepDirty(n) ? " · edited" : ""
-    if (n === 1)
-      return draft.voice
-        ? `${cardVoice?.name ?? "Custom voice"} · ${draft.stack.pipeline === "mllm" ? "Realtime" : STACK_PRESETS[draft.stack.preset].label} · ${draft.stack.language ?? "English"}${edited}`
-        : "No voice yet"
-    // "No deployment TYPE picked yet", never "No deployment yet" — on this
-    // screen bare "deployment" describes LIVE state (the header chip), not a
-    // config gap (user-test 2026-07-29; vocabulary sweep 2026-07-30).
-    if (n === 2) {
-      // A pinned region is a compliance decision — it must stay visible when
-      // the section is folded. Automatic is the default, so it stays quiet.
-      const region = isPinned(draftHosting(draft)) ? ` · ${hostingSummary(draftHosting(draft))}` : ""
-      return draft.channels.length
-        ? `${channelTarget(draft)}${region}${edited}`
-        : `No deployment type picked yet${region}`
-    }
-    if (n === 3) {
-      if (!draft.systemPrompt.trim()) return "No prompt yet"
-      const parts = ["Prompt set"]
-      if (draft.knowledge.length) parts.push(`${draft.knowledge.length} knowledge`)
-      // What the agent can CALL, not how many things are attached: a server
-      // exposing twelve tools used to count as one (19).
-      const tools = toolCount(draft, mcpList)
-      if (tools) parts.push(`${tools} tool${tools > 1 ? "s" : ""}`)
-      return parts.join(" · ") + edited
-    }
-    if (n === 4) {
-      if (simSummary) return `${simSummary.passed} of ${simSummary.total} scenarios passed`
-      if (storedRun && storedRun.results.length) {
-        const passed = storedRun.results.filter((r) => r.result.verdict === "pass").length
-        const how = storedRun.mode === "audio"
-          ? "with audio"
-          : storedRun.repeats > 1 ? `over ${storedRun.repeats} text runs each` : "as text"
-        return `${passed} of ${storedRun.results.length} scenarios passed ${how}`
-      }
-      return "Not tested yet"
-    }
-    return isLive
-      ? anyEdited ? `${dirtyCount} section${dirtyCount > 1 ? "s" : ""} edited · not live` : "Live"
-      : codeDeployed ? "Deployed" : blockReason ?? "Ready to deploy"
-  }
+  // The folded-section value recap was deleted with the heading-row
+  // furniture (owner 2026-09-17). A folded section shows its name only.
 
   return (
     // Full-bleed shell — data-fluid removes the layout cap; the wizard owns
@@ -1194,10 +1130,10 @@ export function AgentWizard({
               key={n}
               type="button"
               onClick={() => openRow(n)}
-              aria-label={`Step ${n}: ${stepTitle(n, draft)}${isDone(n) ? ", done" : ""}`}
+              aria-label={`Step ${n}: ${stepTitle(n, draft)}${isDone(n) ? ", configured" : ""}`}
               className={cn(
                 "flex h-6 w-6 items-center justify-center rounded-full border text-xs font-medium transition-colors",
-                isDone(n) ? "border-success/40 bg-success/10 text-success" : "border-border text-muted-foreground",
+                isDone(n) ? "border-stroke bg-muted text-foreground" : "border-border text-muted-foreground",
                 n === selected && "ring-1 ring-ring",
               )}
             >
@@ -1226,7 +1162,7 @@ export function AgentWizard({
               h-14 and a bottom hairline, so the rule reads as one line. */}
           <div id="wz-rail-head" className="flex h-14 items-center justify-between gap-2 border-b border-border px-5">
             <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground" aria-live="polite">
-              {SECTION_GROUPS.flatMap((g) => g.steps).filter((n) => isDone(n)).length} of {SECTION_GROUPS.flatMap((g) => g.steps).length} done
+              {SECTION_GROUPS.flatMap((g) => g.steps).filter((n) => isDone(n)).length} of {SECTION_GROUPS.flatMap((g) => g.steps).length} configured
             </p>
             {/* Fold control — "Expand all" whenever anything is folded. A real
                 ghost button, not a footnote link: it's load-bearing now that
@@ -1268,12 +1204,12 @@ export function AgentWizard({
                         <span className="min-w-0 flex-1 truncate text-sm font-medium">{stepTitle(n, draft)}</span>
                         <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
                           {isDone(n) ? (
-                            <Check className={cn("h-3.5 w-3.5 text-success/80", !initialDones.current?.has(n) && "sx-tick-pop")} />
+                            <Check className="h-3.5 w-3.5 text-muted-foreground" />
                           ) : (
                             <span className="size-1.5 rounded-full bg-muted-foreground/40" />
                           )}
                         </span>
-                        {isDone(n) && <span className="sr-only">(done)</span>}
+                        {isDone(n) && <span className="sr-only">(configured)</span>}
                         </button>
                         {/* Batch dials a list, so the list gets its own door —
                             and only while Batch is chosen (owner 2026-09-15). */}
@@ -1360,21 +1296,13 @@ export function AgentWizard({
                         className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", !folded && "rotate-90")}
                         aria-hidden
                       />
+                      {/* The heading row carries the section name and nothing
+                          else (owner 2026-09-17). The folded value recap and
+                          the scroll crumb both came off: a title that answers
+                          questions nobody asked yet is scan noise, and a
+                          half-built agent read as an audited one. */}
                       <span className="shrink-0 text-sm font-semibold">{stepTitle(n, draft)}</span>
-                      {isDone(n) && <Check className="h-3.5 w-3.5 shrink-0 text-success/80" aria-hidden />}
-                      {/* Scroll crumb (owner 2026-08-10): while deep in a
-                          section, the stuck header names the row you're in —
-                          "Voice & Models › Model Architecture". */}
-                      {!folded && scrollCrumb?.section === n && scrollCrumb.label && (
-                        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                          › {scrollCrumb.label}
-                        </span>
-                      )}
-                      {folded && (
-                        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                          {sectionRecap(n)}
-                        </span>
-                      )}
+                      {isDone(n) && <Check className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />}
                     </button>
                   </h3>
                   {/* LIVE agents: the one way back to the deployed config. */}
