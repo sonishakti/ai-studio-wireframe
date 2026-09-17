@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-17-carrier-picked",
+    "url": "https://ai-studio-console-redesign.vercel.app/deploy/phone-numbers?focus=connect-carrier",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=ms=>new Promise(r=>setTimeout(r,ms));await wait(3000);for(let i=0;i<24;i++){if(document.querySelector('[role=dialog] [data-slot=radio-card-group]'))break;const b=document.querySelector('[data-design-focus=connect-carrier]');if(b&&b.getBoundingClientRect().width>0)b.click();await wait(400);}await wait(900);})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=dialog] [data-slot=radio-card-group]",
+        "up": 0,
+        "maxH": 420,
+        "name": "Carrier, said once and stored",
+        "why": "The product carried four different carrier lists and none of them was the contract, so connecting Telnyx still printed Vendor · Twilio on the summary. One list now, ending in Another carrier with a name you type, because a regional ITSP has to be sayable even though the wire value stays byo."
+      }
+    ]
+  },
+  {
+    "name": "after-17-carrier-handover",
+    "url": "https://ai-studio-console-redesign.vercel.app/deploy/phone-numbers?focus=connect-carrier",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=ms=>new Promise(r=>setTimeout(r,ms));await wait(3000);for(let i=0;i<24;i++){if(document.querySelector('[role=dialog] [data-slot=radio-card-group]'))break;const b=document.querySelector('[data-design-focus=connect-carrier]');if(b&&b.getBoundingClientRect().width>0)b.click();await wait(400);}for(let i=0;i<24;i++){const c=document.querySelectorAll('[role=dialog] [data-slot=radio-card]')[1];if(c&&c.getBoundingClientRect().width>0){c.click();await wait(300);if(c.getAttribute('aria-checked')==='true')break;}await wait(300);}for(let i=0;i<24;i++){const b=[...document.querySelectorAll('[role=dialog] button')].find(x=>x.textContent.trim()==='Continue');if(b&&!b.disabled){b.click();break;}await wait(300);}await wait(1600);})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=dialog] .overflow-y-auto > div.space-y-4 > div.space-y-4",
+        "up": 0,
+        "maxH": 380,
+        "name": "Setup is a handover, not a provisioning call",
+        "why": "Quick connect used to claim Agora configures the trunk, and the work behind the claim was four timers and a hostname Telnyx does not own. No vendor provisions a trunk from a carrier key, so the steps are written in Telnyx's own nouns and the gateway is the one you pasted there, recorded rather than invented."
+      }
+    ]
+  },
+  {
+    "name": "after-17-trunk-connection",
+    "url": "https://ai-studio-console-redesign.vercel.app/deploy/phone-numbers/pn_03",
+    "wait": 11000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=ms=>new Promise(r=>setTimeout(r,ms));for(let i=0;i<30;i++){const e=document.querySelector('[data-design-focus=trunk-connection]');if(e&&e.getBoundingClientRect().height>0)break;await wait(500);}await wait(700);window.scrollTo(0,380);await wait(800);})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-design-focus=trunk-connection]",
+        "up": 0,
+        "maxH": 120,
+        "name": "Whether a call has ever got through",
+        "why": "Status used to mean an agent is bound to the number, so the product had no word for connected but never called, or for a credential the carrier now rejects. The trunk says which it is on the number itself, and feature 11's 403 verdict opens this row instead of a table with nothing on it to fix."
+      }
+    ]
+  }
+]

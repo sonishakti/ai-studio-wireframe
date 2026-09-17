@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-21-variables-and-their-source",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=variables",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const s=document.createElement('style');s.textContent='[data-sonner-toaster]{display:none!important}';document.head.appendChild(s);const set=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;const type=(q,v)=>{const e=document.querySelector(q);if(e){set.call(e,v);e.dispatchEvent(new Event('input',{bubbles:true}));}};const ch=document.querySelector('[role=radio][value=inbound]');if(ch){for(let i=0;i<40&&ch.getBoundingClientRect().width===0;i++)await new Promise(r=>setTimeout(r,50));if(ch.getAttribute('aria-checked')!=='true')ch.click();}await new Promise(r=>setTimeout(r,400));type('#wz-prompt','You are a collections agent for Acme. Confirm you are speaking to {{first_name}}, then discuss the balance of {{balance}} on their account. Offer to take a payment or set a date.');type('#wz-greeting','Hi {{first_name}}, I can see your balance is {{balance}}.');await new Promise(r=>setTimeout(r,800));const a=document.querySelector('[data-design-focus=\"variables\"]');if(a)a.scrollIntoView({block:'center'});return document.querySelectorAll('#wz-3-prompt .font-mono').length+' chips';})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "#wz-3-prompt .font-mono",
+        "up": 2,
+        "maxH": 520,
+        "name": "Variables the prompt declares \u00b7 one line names their source",
+        "why": "One definition of a variable now reads the system prompt, the greeting and the failure message together, so a token typed in any of the three is counted here rather than spoken to the caller as raw braces. The line under the chips points at the single row that owns the values, Caller context on inbound and Contact list on batch, replacing a caption that promised every token was filled from a campaign CSV."
+      }
+    ]
+  },
+  {
+    "name": "after-21-caller-context-inbound",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=caller-context",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const s=document.createElement('style');s.textContent='[data-sonner-toaster]{display:none!important}';document.head.appendChild(s);const set=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;const type=(q,v)=>{const e=document.querySelector(q);if(e){set.call(e,v);e.dispatchEvent(new Event('input',{bubbles:true}));}};const ch=document.querySelector('[role=radio][value=inbound]');if(ch){for(let i=0;i<40&&ch.getBoundingClientRect().width===0;i++)await new Promise(r=>setTimeout(r,50));if(ch.getAttribute('aria-checked')!=='true')ch.click();}await new Promise(r=>setTimeout(r,400));type('#wz-prompt','You are a collections agent for Acme. Confirm you are speaking to {{first_name}}, then discuss the balance of {{balance}} on their account. Offer to take a payment or set a date.');type('#wz-greeting','Hi {{first_name}}, I can see your balance is {{balance}}.');await new Promise(r=>setTimeout(r,800));const a=document.querySelector('[data-design-focus=\"caller-context\"]');if(a)a.scrollIntoView({block:'center'});return document.querySelectorAll('#wz-3-prompt .font-mono').length+' chips';})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "#wz-2-caller-context",
+        "up": 0,
+        "maxH": 520,
+        "name": "Caller context, the inbound sibling of the contact list",
+        "why": "Batch answers what the agent will know with the file it dials, so inbound answers the same question in the same place and the same row grammar, instead of a sentence in another section telling the builder that per-call variables are coming soon. It names the tokens it cannot fill, why no value arrives when Agora starts the call, and the two ways out, rather than inventing a status table or a CRM lookup the Engine does not expose."
+      }
+    ]
+  },
+  {
+    "name": "after-21-contact-list-coverage",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=contact-list",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const s=document.createElement('style');s.textContent='[data-sonner-toaster]{display:none!important}';document.head.appendChild(s);const set=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;const type=(q,v)=>{const e=document.querySelector(q);if(e){set.call(e,v);e.dispatchEvent(new Event('input',{bubbles:true}));}};type('#wz-prompt','You are a collections agent for Acme. Confirm you are speaking to {{first_name}}, then discuss the balance of {{balance}} on their account. Offer to take a payment or set a date.');type('#wz-greeting','Hi {{first_name}}, I can see your balance is {{balance}}.');const ch=document.querySelector('[role=radio][value=batch]');for(let i=0;i<40&&ch.getBoundingClientRect().width===0;i++)await new Promise(r=>setTimeout(r,50));if(ch.getAttribute('aria-checked')!=='true')ch.click();await new Promise(r=>setTimeout(r,900));const csv=['phone_number,first_name,due_date','+19168888860,John,2026-08-14','+14155550142,Ava,2026-08-21','+19168888860,John,2026-08-28','5550199,Liam,','+16285550143,Maya,','+13105550188,Noor,2026-09-02','+14085550117,Sam,2026-09-09'].join('\\n');const input=document.querySelector('#wz-2-contacts input[type=file]');const dt=new DataTransfer();dt.items.add(new File([csv],'collections-sep.csv',{type:'text/csv'}));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1400));const a=document.querySelector('#wz-2-contacts');if(a)a.scrollIntoView({block:'center'});return ch.getAttribute('aria-checked')+' batch \u00b7 '+(document.querySelector('#wz-2-contacts .border-destructive\\\\/40')?'coverage panel up':'NO PANEL');})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "#wz-2-contacts .border-destructive\\/40",
+        "up": 0,
+        "maxH": 520,
+        "name": "Coverage measured against the file's own header",
+        "why": "The chosen CSV is parsed in the browser, so the block can name the one column that is missing and the count above it is read off the file: the old line compared the prompt to itself and could print nothing but three of three covered, against a constant that spelled the required column phone rather than phone_number. It states the two edits that end the block where the list is chosen, so the fix is made next to the thing that is wrong."
+      }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-20-answering-mark",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=3&focus=knowledge-sources",
+    "wait": 9000,
+    "pre": "(async () => { const d=document.documentElement; d.classList.remove('dark'); d.style.colorScheme='light'; try{localStorage.removeItem('sx:kb_sources')}catch(e){} const sleep=(ms)=>new Promise(r=>setTimeout(r,ms)); const row=document.querySelector('[data-design-focus=\"knowledge-sources\"]'); [...row.querySelectorAll('button')].find(b=>b.innerText.trim()==='Add knowledge base').click(); await sleep(900); const dlg=[...document.querySelectorAll('[data-slot=\"sheet-content\"][data-state=\"open\"]')].pop(); for(const sw of dlg.querySelectorAll('button[role=\"switch\"]')){ if(sw.getAttribute('aria-checked')==='true'){ sw.click(); await sleep(250); } } for(const lb of ['Attach Compliance Laws v2','Attach Data Protection Guidelines']){ const sw=dlg.querySelector('button[role=\"switch\"][aria-label=\"'+lb+'\"]'); if(sw&&sw.getAttribute('aria-checked')!=='true'){ sw.click(); await sleep(300); } } [...dlg.querySelectorAll('button')].find(b=>b.innerText.trim()==='Save').click(); await sleep(1200); const r2=document.querySelector('[data-design-focus=\"knowledge-sources\"]'); r2.scrollIntoView({block:'center'}); await sleep(400); document.querySelectorAll('#wz-5-kb').forEach(e=>{ if(e.getBoundingClientRect().height===0) e.remove() }); return document.querySelector('#wz-5-kb').innerText.replace(/\\n+/g,' | '); })()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "#wz-5-kb",
+        "up": 0,
+        "maxH": 520,
+        "name": "Answering · Attached, not read",
+        "why": "Attach takes a list of bases and the engine payload carries one kb_id, so a second base rendered identically and was never read. The row names the inert one rather than letting it pass as live."
+      }
+    ]
+  },
+  {
+    "name": "after-20-sources-in-a-base",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=3&focus=knowledge-sources",
+    "wait": 9000,
+    "pre": "(async () => { const d=document.documentElement; d.classList.remove('dark'); d.style.colorScheme='light'; const day=86400000, now=Date.now(); try{localStorage.setItem('sx:kb_sources', JSON.stringify([{id:'src_seed_site',kbId:'kb_01',kind:'site',label:'docs.example.com',address:'https://docs.example.com',pages:211,state:'active',addedAt:now-30*day,lastReadAt:now-4*day,autoRefresh:true}]))}catch(e){} const sleep=(ms)=>new Promise(r=>setTimeout(r,ms)); const pd=(el)=>{const o={bubbles:true,cancelable:true,button:0,pointerId:1,pointerType:'mouse',isPrimary:true};el.dispatchEvent(new PointerEvent('pointerdown',o));el.dispatchEvent(new PointerEvent('pointerup',o));el.click()}; const row=document.querySelector('[data-design-focus=\"knowledge-sources\"]'); [...row.querySelectorAll('button')].find(b=>b.innerText.trim()==='Add knowledge base').click(); await sleep(900); pd(document.querySelector('button[aria-label=\"Compliance Laws v2 options\"]')); await sleep(700); pd([...document.querySelectorAll('[role=\"menuitem\"]')].find(x=>x.innerText.trim()==='Open sources')); await sleep(1400); const sh=document.querySelector('[data-slot=\"sheet-content\"][data-state=\"open\"]'); return sh?sh.innerText.replace(/\\n+/g,' | '):'NO SHEET'; })()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-slot=\"sheet-content\"][data-state=\"open\"] ul.divide-y",
+        "up": 1,
+        "maxH": 520,
+        "name": "Sources inside one base",
+        "why": "A base is a container, not a fifth kind of connector: an upload and a crawled site sit in the same base, and the read date rides the source because freshness is a property of a source and never of the base."
+      }
+    ]
+  },
+  {
+    "name": "after-20-crawl-ledger",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=3&focus=knowledge-sources",
+    "wait": 9000,
+    "pre": "(async () => { const d=document.documentElement; d.classList.remove('dark'); d.style.colorScheme='light'; const day=86400000, now=Date.now(); try{localStorage.setItem('sx:kb_sources', JSON.stringify([{id:'src_seed_site',kbId:'kb_01',kind:'site',label:'docs.example.com',address:'https://docs.example.com',pages:211,state:'active',addedAt:now-30*day,lastReadAt:now-4*day,autoRefresh:true}]))}catch(e){} const sleep=(ms)=>new Promise(r=>setTimeout(r,ms)); const pd=(el)=>{const o={bubbles:true,cancelable:true,button:0,pointerId:1,pointerType:'mouse',isPrimary:true};el.dispatchEvent(new PointerEvent('pointerdown',o));el.dispatchEvent(new PointerEvent('pointerup',o));el.click()}; const row=document.querySelector('[data-design-focus=\"knowledge-sources\"]'); [...row.querySelectorAll('button')].find(b=>b.innerText.trim()==='Add knowledge base').click(); await sleep(900); pd(document.querySelector('button[aria-label=\"Compliance Laws v2 options\"]')); await sleep(700); pd([...document.querySelectorAll('[role=\"menuitem\"]')].find(x=>x.innerText.trim()==='Open sources')); await sleep(1200); const sh=document.querySelector('[data-slot=\"sheet-content\"][data-state=\"open\"]'); [...sh.querySelectorAll('button')].find(b=>b.innerText.trim()==='Crawl a site').click(); await sleep(700); const inp=document.getElementById('crawl-address-kb_01'); Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set.call(inp,'https://docs.acme.com'); inp.dispatchEvent(new Event('input',{bubbles:true})); await sleep(500); [...sh.querySelectorAll('button')].find(b=>b.innerText.trim()==='Start crawl').click(); await sleep(3000); const led=[...sh.querySelectorAll('div')].find(e=>/^Pages found/.test(e.innerText||'')); if(led) led.scrollIntoView({block:'center'}); await sleep(400); return sh.innerText.replace(/\\n+/g,' | '); })()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-slot=\"sheet-content\"][data-state=\"open\"] div.space-y-3.rounded-lg.border.p-3",
+        "up": 0,
+        "maxH": 520,
+        "name": "The page ledger a crawl owes back",
+        "why": "A crawl used to mint 210 chunks whether or not it read anything. Kept, skipped and failed are counted with a reason per page, so the pages that did not make it are named where the crawl ran."
+      }
+    ]
+  }
+]

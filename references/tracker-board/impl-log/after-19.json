@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-19-tools-row-empty",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=tools",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.removeItem('sx:tools');localStorage.removeItem('sx:tool_checks');localStorage.removeItem('sx:agent_draft:agt_default')}catch(e){};(async()=>{const s=ms=>new Promise(r=>setTimeout(r,ms));const strip=async()=>{const row=document.querySelector('#wz-5-tools');if(!row)return;for(let i=0;i<12;i++){const x=row.querySelector('button[aria-label^=\"Remove \"]');if(!x)break;x.click();await s(200)}};let el=null;for(let i=0;i<60;i++){el=document.querySelector('[data-design-focus=\"tools\"]');if(el&&el.getBoundingClientRect().height>0)break;await s(100)}if(!el)return 'MISSING anchor';await strip();await s(300);el.scrollIntoView({block:'center'});await s(800);const r=el.getBoundingClientRect();return (el.innerText.includes('No tools added')?'empty row ':'ROW NOT EMPTY ')+Math.round(r.y)+' h'+Math.round(r.height)})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-design-focus=\"tools\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "The Tools row, empty",
+        "why": "Before, this row was called Tools and connectors, held six connector switches and no tool, and was the one row in its section not built from the shared attach pattern. It now holds the object it names and reads like the two rows above it, and the empty state is the row itself rather than a page the user was never on."
+      }
+    ]
+  },
+  {
+    "name": "after-19-tool-roster-states",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=tools",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.removeItem('sx:tools');localStorage.removeItem('sx:tool_checks');localStorage.removeItem('sx:agent_draft:agt_default')}catch(e){};(async()=>{const s=ms=>new Promise(r=>setTimeout(r,ms));const strip=async()=>{const row=document.querySelector('#wz-5-tools');if(!row)return;for(let i=0;i<12;i++){const x=row.querySelector('button[aria-label^=\"Remove \"]');if(!x)break;x.click();await s(200)}};await strip();const t=document.querySelector('#wz-5-tools [data-slot=\"sheet-trigger\"]');if(!t)return 'MISSING trigger';for(let i=0;i<40&&t.getBoundingClientRect().width===0;i++)await s(100);t.click();let ul=null;for(let i=0;i<60;i++){ul=document.querySelector('[data-slot=\"sheet-content\"] ul.divide-y');if(ul)break;await s(100)}if(!ul)return 'MISSING roster';const row=[...ul.children].find(li=>li.innerText.includes('refund_order'));if(!row)return 'MISSING refund row';const b=[...row.querySelectorAll('button')].find(x=>/^(Run test|Test again)$/.test(x.textContent.trim()));if(!b)return 'MISSING test button';b.click();for(let i=0;i<60;i++){if(row.innerText.includes('Test failed'))break;await s(100)}await s(500);return 'roster '+(row.innerText.includes('Test failed')?'failed-state':'NO STATE')})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-slot=\"sheet-content\"] ul.divide-y",
+        "up": 0,
+        "maxH": 520,
+        "name": "The tool roster, one state per row",
+        "why": "Nothing on this feature could say whether a tool worked, so a token that died in June read exactly like a tool made a minute ago. Every row now carries what the test actually knows, and the two kinds we cannot run keep their row and state the reason rather than being hidden."
+      }
+    ]
+  },
+  {
+    "name": "after-19-create-tool-test-result",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?focus=tools",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.removeItem('sx:tools');localStorage.removeItem('sx:tool_checks');localStorage.removeItem('sx:agent_draft:agt_default')}catch(e){};(async()=>{const s=ms=>new Promise(r=>setTimeout(r,ms));const strip=async()=>{const row=document.querySelector('#wz-5-tools');if(!row)return;for(let i=0;i<12;i++){const x=row.querySelector('button[aria-label^=\"Remove \"]');if(!x)break;x.click();await s(200)}};const set=(el,v)=>{const p=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(p,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}))};await strip();const t=document.querySelector('#wz-5-tools [data-slot=\"sheet-trigger\"]');if(!t)return 'MISSING trigger';for(let i=0;i<40&&t.getBoundingClientRect().width===0;i++)await s(100);t.click();let sheet=null;for(let i=0;i<60;i++){sheet=document.querySelector('[data-slot=\"sheet-content\"]');if(sheet&&/Create new tool/.test(sheet.innerText))break;await s(100)}if(!sheet)return 'MISSING sheet';const create=[...sheet.querySelectorAll('button')].find(b=>b.textContent.trim()==='Create new tool');if(!create)return 'MISSING create door';create.click();for(let i=0;i<60;i++){if(document.getElementById('tool-url'))break;await s(100)}const q=id=>document.getElementById(id);if(!q('tool-url'))return 'MISSING form';set(q('tool-name'),'lookup_order');set(q('tool-desc'),'Reads one order from the orders API');set(q('tool-url'),'https://api.acme.com/orders/{{order_id}}');set(q('tool-fn'),'lookup_order');set(q('tool-params'),'{\"type\":\"object\",\"properties\":{\"order_id\":{\"type\":\"string\"}},\"required\":[\"order_id\"]}');set(q('tool-fn-desc'),\"Look up an order's status. Call this when the caller asks where their order is.\");set(q('tool-fn-input'),'{\"order_id\":\"4471\"}');await s(400);const run=[...document.querySelectorAll('[data-slot=\"sheet-content\"] button')].find(b=>b.textContent.trim()==='Create and test');if(!run)return 'MISSING run button';run.click();let res=null;for(let i=0;i<80;i++){res=document.querySelector('[data-slot=\"sheet-content\"] div.overflow-hidden.rounded-lg.border.border-border');if(res)break;await s(100)}if(!res)return 'MISSING result';res.scrollIntoView({block:'center'});await s(500);const sc=res.closest('.overflow-y-auto');if(sc)sc.scrollTop=sc.scrollHeight;await s(600);try{localStorage.removeItem('sx:tools');localStorage.removeItem('sx:tool_checks');localStorage.removeItem('sx:agent_draft:agt_default')}catch(e){};return 'result '+Math.round(res.getBoundingClientRect().y)})()",
+    "preWait": 2500,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-slot=\"sheet-content\"] div.overflow-hidden.rounded-lg.border.border-border",
+        "up": 0,
+        "maxH": 520,
+        "name": "The create form ends in its own test",
+        "why": "One button creates the tool and runs it, so the form finishes where the job finishes: the endpoint's own answer, echoing the value the placeholder bound. None of the four vendors lets you prove a no-code HTTP tool works, and our server already answers this call."
+      }
+    ]
+  }
+]

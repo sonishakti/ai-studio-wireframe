@@ -1,0 +1,54 @@
+[
+  {
+    "name": "after-16-get-a-number",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_sales_qualifier/edit?step=2&focus=get-a-number",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{sessionStorage.removeItem('sx:session_numbers')}catch(e){}window.dispatchEvent(new CustomEvent('sx:numbers-store'));const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const until=async(fn,ms)=>{const t=Date.now();while(Date.now()-t<(ms||10000)){let v=null;try{v=fn()}catch(e){}if(v)return v;await wait(150)}return null};await wait(3500);const trg=await until(()=>{const e=document.querySelector('[data-design-focus=\"get-a-number\"] [data-slot=\"select-trigger\"]');return e&&e.getBoundingClientRect().width>0?e:null},12000);if(!trg)return 'MISS trigger';trg.scrollIntoView({block:'center'});await wait(600);trg.click();const c=await until(()=>{const e=document.querySelector('[data-slot=\"select-content\"]');return e&&e.querySelectorAll('[data-slot=\"select-item\"]').length>=3?e:null},6000);if(!c)return 'MISS content';return 'open · '+[...c.querySelectorAll('[data-slot=\"select-item\"]')].map(i=>i.textContent.trim()).join(' | ')})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-slot=\"select-content\"]",
+        "up": 0,
+        "maxH": 240,
+        "name": "Get a number, in the field that asked the question",
+        "why": "A buy page would answer this two navigations away from the deployment being configured. Renting is the first item in the number field's own footer and it opens the same sheet every other entry point opens, so a rented number and a number you already own stay one object behind one door."
+      }
+    ]
+  },
+  {
+    "name": "after-16-prove-it-connects",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_sales_qualifier/edit?step=2&focus=get-a-number",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{sessionStorage.removeItem('sx:session_numbers')}catch(e){}window.dispatchEvent(new CustomEvent('sx:numbers-store'));const wait=(ms)=>new Promise(r=>setTimeout(r,ms));const until=async(fn,ms)=>{const t=Date.now();while(Date.now()-t<(ms||10000)){let v=null;try{v=fn()}catch(e){}if(v)return v;await wait(150)}return null};const btn=(t)=>[...document.querySelectorAll('[data-slot=\"sheet-content\"] button')].find(b=>b.textContent.trim()===t&&!b.disabled);await wait(3500);const trg=await until(()=>{const e=document.querySelector('[data-design-focus=\"get-a-number\"] [data-slot=\"select-trigger\"]');return e&&e.getBoundingClientRect().width>0?e:null},12000);if(!trg)return 'MISS trigger';trg.click();const item=await until(()=>[...document.querySelectorAll('[data-slot=\"select-content\"] [data-slot=\"select-item\"]')].find(i=>i.textContent.trim()==='Get a number'),6000);if(!item)return 'MISS buy item';item.click();const sheet=await until(()=>document.querySelector('[data-slot=\"sheet-content\"]'),6000);if(!sheet)return 'MISS sheet';const inp=await until(()=>sheet.querySelector('#buy-area-code'),6000);if(!inp)return 'MISS field';const set=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;set.call(inp,'415');inp.dispatchEvent(new Event('input',{bubbles:true}));await wait(400);const search=await until(()=>btn('Search numbers'),6000);if(!search)return 'MISS search';search.click();const row=await until(()=>[...document.querySelectorAll('[data-slot=\"sheet-content\"] button')].find(b=>b.textContent.trim().indexOf('+1 (415) 555-0142')===0),8000);if(!row)return 'MISS results';row.click();await wait(600);const go=await until(()=>btn('Get this number'),6000);if(!go)return 'MISS commit';const orig=window.setTimeout;window.setTimeout=function(fn,ms){if(typeof ms==='number'&&ms>=900&&ms<=2000){const mc=new MessageChannel();mc.port1.onmessage=()=>{try{fn()}catch(e){}};mc.port2.postMessage(0);return 987654;}return orig.apply(window,arguments)};go.click();await wait(500);window.setTimeout=orig;const ok=await until(()=>[...document.querySelectorAll('[data-slot=\"sheet-content\"] p')].some(p=>p.textContent.indexOf('Now prove it connects')>=0),20000);return ok?'verify stage reached':'STALLED in turning-up'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "text": "Now prove it connects",
+        "tags": "p",
+        "up": 3,
+        "maxH": 120,
+        "name": "The flow ends on a call the user places",
+        "why": "Every vendor ends a purchase on a receipt, and a line that just provisioned still cannot take a call. This refuses the checkmark: the wait is a timestamped fact log instead of a spinner, and the last step is a real test call, because the thing this feature is judged on is the first ring, not the order clearing."
+      }
+    ]
+  },
+  {
+    "name": "after-16-turning-up-row",
+    "url": "https://ai-studio-console-redesign.vercel.app/deploy/phone-numbers",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const wait=(ms)=>new Promise(r=>setTimeout(r,ms));try{sessionStorage.setItem('sx:session_numbers',JSON.stringify([{id:'pn_s_demo',number:'+1 (415) 555-0142',label:'San Francisco',carrier:'other',assignedTo:[],origin:'agora',status:'turning-up'}]))}catch(e){}window.dispatchEvent(new CustomEvent('sx:numbers-store'));await wait(1200);window.dispatchEvent(new CustomEvent('sx:numbers-store'));await wait(800);const r=document.querySelector('tbody tr');window.scrollTo(0,0);return r?('row · '+r.textContent.slice(0,80)):'MISS row'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "tbody tr:first-child",
+        "up": 0,
+        "maxH": 120,
+        "name": "Where the number came from · Turning up",
+        "why": "Vendor could not tell a number rented from Agora apart from a customer's own Bandwidth trunk, and Status and Assigned to both said unassigned while neither said whether the line worked. From answers provenance on the row rather than on a second page, it carries Requires Engine where a rate is not knowable yet, and Turning up is the state the model never had: owned, and not yet able to answer."
+      }
+    ]
+  }
+]

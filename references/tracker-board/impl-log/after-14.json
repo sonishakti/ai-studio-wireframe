@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-14-scorecard-empty",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=5&focus=scorecard",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';localStorage.removeItem('sx:scorecard:agt_default');window.dispatchEvent(new CustomEvent('sx:scorecard',{detail:{agentId:'agt_default'}}));'light + scorecard cleared'",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-design-focus=\"scorecard\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "The scorecard, empty on a new agent",
+        "why": "One named list replaces the same grading sentence written in two places with opposite defaults. It opens empty because only the owner can write a check."
+      }
+    ]
+  },
+  {
+    "name": "after-14-criterion-record",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=5&focus=scorecard",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';localStorage.removeItem('sx:scorecard:agt_default');window.dispatchEvent(new CustomEvent('sx:scorecard',{detail:{agentId:'agt_default'}}));const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));const findBtn=()=>[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Add criterion'&&b.getBoundingClientRect().width>0);let b=null;for(let i=0;i<40&&!(b=findBtn());i++)await sleep(150);if(!b)return 'no add button';b.click();let d=null;for(let i=0;i<40&&!(d=document.querySelector('[role=\"dialog\"]'));i++)await sleep(150);if(!d)return 'no sheet';await sleep(400);const set=(el,v)=>{const p=el.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(p,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}))};const nameEl=d.querySelector('#cr-name');if(nameEl)set(nameEl,'Never promises a refund');const ta=d.querySelector('textarea');if(ta)set(ta,'PASS if the agent takes the request and never promises one itself.');return 'criterion sheet open: '+(nameEl?nameEl.value:'?')})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=\"dialog\"] div[class=\"space-y-4 px-6\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "A criterion is written as an assertion",
+        "why": "Same three kinds and the same PASS if grammar a test case uses, so the sentence a run is graded on and the one a call is graded on are one record."
+      }
+    ]
+  },
+  {
+    "name": "after-14-call-not-scored",
+    "url": "https://ai-studio-console-redesign.vercel.app/calls?call=CALLRV",
+    "wait": 9000,
+    "pre": "document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';'light'",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=\"dialog\"] div[class=\"space-y-2.5\"] > div:last-child",
+        "up": 0,
+        "maxH": 520,
+        "name": "Call Outcome, with its reason",
+        "why": "The column invented a third of its verdicts. Agora stores no transcript for a finished call, so it now says what is missing instead of printing a grade."
+      }
+    ]
+  }
+]

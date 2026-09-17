@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-13-watch-on-the-tile",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor?range=7d&focus=watch-answered-calls",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const s=(ms)=>new Promise(r=>setTimeout(r,ms));try{localStorage.setItem('theme','light');localStorage.removeItem('sx:monitor_watches')}catch(e){}document.querySelector('button[title=\"Refresh\"]')?.click();await s(900);let e=document.querySelector('[data-design-focus=\"watch-answered-calls\"]');if(!e)return 'MISSING anchor';for(let i=0;i<20&&e.getBoundingClientRect().width===0;i++)await s(100);for(let i=0;i<3;i++)e=e.parentElement;const r=e.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)e.scrollIntoView({block:'center'});await s(300);return 'tile :: '+e.innerText.replace(/\\n+/g,' | ')})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-design-focus=\"watch-answered-calls\"]",
+        "up": 3,
+        "maxH": 520,
+        "name": "Answered calls · the tile carries its own watch",
+        "why": "A threshold is a property of the number it watches, so it is set where the number is read, not in a rules page. A metric picker would have to list numbers Agora cannot compute."
+      }
+    ]
+  },
+  {
+    "name": "after-13-watch-sheet-condition",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor?range=7d&focus=watch-answered-calls",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const s=(ms)=>new Promise(r=>setTimeout(r,ms));try{localStorage.setItem('theme','light');localStorage.removeItem('sx:monitor_watches')}catch(e){}document.querySelector('button[title=\"Refresh\"]')?.click();await s(700);const b=document.querySelector('[data-design-focus=\"watch-answered-calls\"]');if(!b)return 'MISSING anchor';for(let i=0;i<20&&b.getBoundingClientRect().width===0;i++)await s(100);b.click();await s(1000);const row=document.querySelector('[role=\"dialog\"] div.divide-y > div:first-child');return row?('row :: '+row.innerText.replace(/\\n+/g,' | ')):'MISSING condition row'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=\"dialog\"] div.divide-y > div:first-child",
+        "up": 0,
+        "maxH": 520,
+        "name": "Condition · the first row of the watch sheet",
+        "why": "Silence is a condition: on a count the list holds No calls at all, so a trunk that has refused every call since Friday fires an alert instead of reading as a quiet Sunday."
+      }
+    ]
+  },
+  {
+    "name": "after-13-breach-borrows-the-fix",
+    "url": "https://ai-studio-console-redesign.vercel.app/monitor?range=7d",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';const s=(ms)=>new Promise(r=>setTimeout(r,ms));try{localStorage.setItem('theme','light');localStorage.setItem('sx:monitor_watches',JSON.stringify([{id:'w_review_answered',metricKey:'answered_calls',deploymentId:'dp_ib_01',comparison:'below',basis:'value',threshold:120,frequency:'1d_7d'}]))}catch(e){}document.querySelector('button[title=\"Refresh\"]')?.click();await s(1200);window.scrollTo(0,0);await s(400);const c=document.querySelector('div[class*=\"border-destructive/30\"]');return c?('card :: '+c.innerText.replace(/\\n+/g,' | ')):'MISSING needs attention card'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "div[class*=\"border-destructive/30\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "The breach, on the Needs attention card",
+        "why": "A watch knows a number crossed a line, not why. The card borrows the diagnosis already running on that deployment, so Fix opens the setting that caused it instead of another dashboard."
+      }
+    ]
+  }
+]

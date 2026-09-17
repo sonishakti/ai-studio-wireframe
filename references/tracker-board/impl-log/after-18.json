@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-18-inbound-surfaces",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=2&focus=inbound-surfaces",
+    "wait": 9000,
+    "pre": "(async()=>{const d=document.documentElement;d.classList.remove('dark');d.style.colorScheme='light';const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;const nap=(ms)=>new Promise(r=>setTimeout(r,ms));\nlet el=null;for(let i=0;i<60;i++){el=vis('[data-design-focus=\"inbound-surfaces\"]');if(el)break;await nap(200)}\nif(!el)return 'MISS: inbound-surfaces never rendered';\nconst on=[...document.querySelectorAll('[role=switch]')].filter(s=>['WhatsApp','SMS'].includes(s.getAttribute('aria-label'))&&s.getBoundingClientRect().height>0&&s.getAttribute('aria-checked')==='true');\non.forEach(s=>{s.click();s.blur()});\ntry{localStorage.setItem('sx:channel_demand','[]')}catch(e){}\nawait nap(400);\nel.scrollIntoView({block:'center'});\nawait nap(500);\nel.style.outline='';el.style.outlineOffset='';\nel.setAttribute('data-shot18','surfaces');\nconst b=el.getBoundingClientRect();\nreturn 'surfaces '+[b.x|0,b.y|0,b.width|0,b.height|0].join(',');})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-shot18='surfaces']",
+        "up": 0,
+        "maxH": 620,
+        "name": "Inbound channels · the fold the review link opens",
+        "why": "One agent answers on one channel, so the pick stays two cards. What changed: the two channels Agora cannot serve are named on live rows in the same fold, replacing a grey caption that promised them soon with no date and no door."
+      }
+    ]
+  },
+  {
+    "name": "after-18-channel-sheet-whatsapp",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=2&focus=inbound-surfaces",
+    "wait": 9000,
+    "pre": "(async()=>{const d=document.documentElement;d.classList.remove('dark');d.style.colorScheme='light';const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;const nap=(ms)=>new Promise(r=>setTimeout(r,ms));\nlet sw=null;for(let i=0;i<60;i++){sw=[...document.querySelectorAll('[role=switch]')].find(s=>s.getAttribute('aria-label')==='WhatsApp'&&s.getBoundingClientRect().height>0);if(sw)break;await nap(200)}\nif(!sw)return 'MISS: WhatsApp switch never rendered';\nif(sw.getAttribute('aria-checked')==='false'){sw.click();sw.blur()}\nawait nap(500);\nconst door=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='See what each channel needs'&&b.getBoundingClientRect().height>0);\nif(!door)return 'MISS: sheet door';\ndoor.click();\nlet row=null;for(let i=0;i<60;i++){row=vis('#ch-whatsapp');if(row)break;await nap(150)}\nif(!row)return 'MISS: sheet row';\nrow.setAttribute('data-shot18','wa-sheet');\nawait nap(400);\nconst b=row.getBoundingClientRect();\nreturn 'sheet row '+[b.x|0,b.y|0,b.width|0,b.height|0].join(',')+' asked='+row.querySelector('[role=switch]').getAttribute('aria-checked');})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-shot18='wa-sheet']",
+        "up": 0,
+        "maxH": 220,
+        "name": "What WhatsApp needs, stated in a sheet",
+        "why": "A channel with no API gets a sheet, not a page, because a page for it could only redirect back here. The row states the dependency and the switch records the ask, so demand is counted at the moment the user asks for it."
+      }
+    ]
+  },
+  {
+    "name": "after-18-inventory-whatsapp-row",
+    "url": "https://ai-studio-console-redesign.vercel.app/integrations?tab=channels",
+    "wait": 8000,
+    "pre": "(async()=>{const d=document.documentElement;d.classList.remove('dark');d.style.colorScheme='light';const vis=(s)=>[...document.querySelectorAll(s)].find(e=>e.getBoundingClientRect().height>0)||null;const nap=(ms)=>new Promise(r=>setTimeout(r,ms));\nlet row=null;\nfor(let i=0;i<60;i++){row=[...document.querySelectorAll('tbody tr')].find(r=>{const c=r.querySelector('td');return c&&/^WhatsApp/.test(c.innerText.trim())&&r.getBoundingClientRect().height>0});if(row)break;await nap(200)}\nif(!row)return 'MISS: WhatsApp inventory row';\nrow.setAttribute('data-shot18','wa-row');\nrow.scrollIntoView({block:'center'});\nawait nap(500);\nconst b=row.getBoundingClientRect();\nreturn 'row '+[b.x|0,b.y|0,b.width|0,b.height|0].join(',')+' · '+row.innerText.replace(/[\\s]+/g,' ').slice(0,60);})()",
+    "preWait": 1600,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-shot18='wa-row']",
+        "up": 0,
+        "maxH": 160,
+        "name": "WhatsApp in the channel inventory",
+        "why": "Every row derives from the records that exist, so the invented WhatsApp line with its own number, agent and call count cannot reach this page. A channel Agora cannot serve is a readiness state on the surface where you pick it, which no vendor states anywhere."
+      }
+    ]
+  }
+]

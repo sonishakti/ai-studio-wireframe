@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-15-typed-suite-table",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=4",
+    "wait": 9000,
+    "pre": "(async()=>{const S=m=>new Promise(r=>setTimeout(r,m));document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';let g;for(let i=0;i<40;i++){g=[...document.querySelectorAll('main #wz-4-sims button')].find(b=>/Generate scenarios/.test(b.textContent));if(g&&g.getBoundingClientRect().width>0)break;await S(150)}if(!g)return 'no generate button';g.click();for(let i=0;i<60&&document.querySelectorAll('main #wz-4-sims tbody tr').length===0;i++)await S(150);await S(600);document.querySelectorAll('[data-sonner-toaster]').forEach(e=>e.remove());const t=document.querySelector('main #wz-4-sims table');t.scrollIntoView({block:'center'});await S(400);return 'rows='+document.querySelectorAll('main #wz-4-sims tbody tr').length})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "main #wz-4-sims table",
+        "up": 0,
+        "maxH": 700,
+        "name": "One table is the suite · Type on every row",
+        "why": "A decision check and a whole conversation are two runners, so the seam rides the row as a type rather than splitting the builder into two test sections."
+      }
+    ]
+  },
+  {
+    "name": "after-15-case-type-question",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=4",
+    "wait": 9000,
+    "pre": "(async()=>{const S=m=>new Promise(r=>setTimeout(r,m));document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';document.querySelector('main #wz-4-sims').scrollIntoView({block:'center'});let a;for(let i=0;i<40;i++){a=[...document.querySelectorAll('main #wz-4-sims button')].find(b=>/Add case/.test(b.textContent));if(a&&a.getBoundingClientRect().width>0)break;await S(150)}if(!a)return 'no add case button';a.click();let g;for(let i=0;i<40;i++){g=document.querySelector('[role=dialog] [data-slot=toggle-group]');if(g&&g.getBoundingClientRect().width>0)break;await S(150)}if(!g)return 'no type picker';await S(400);g.children[0].click();await S(700);const n=document.querySelector('[role=dialog] [data-slot=toggle-group]');return 'decision='+n.children[0].getAttribute('data-state')})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=dialog] [data-slot=toggle-group]",
+        "up": 1,
+        "maxH": 200,
+        "name": "The type is the first question the author answers",
+        "why": "The two runners are offered as the two questions a run can answer, so the author picks by what they want to know, and the form under it changes with the pick."
+      }
+    ]
+  },
+  {
+    "name": "after-15-run-mode-price",
+    "url": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=4",
+    "wait": 9000,
+    "pre": "(async()=>{const S=m=>new Promise(r=>setTimeout(r,m));document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';let g;for(let i=0;i<40;i++){g=[...document.querySelectorAll('main #wz-4-sims button')].find(b=>/Generate scenarios/.test(b.textContent));if(g&&g.getBoundingClientRect().width>0)break;await S(150)}if(!g)return 'no generate button';g.click();for(let i=0;i<60&&document.querySelectorAll('main #wz-4-sims tbody tr').length===0;i++)await S(150);await S(500);const t=[...document.querySelectorAll('main #wz-4-sims button')].find(b=>/Run all as text/.test(b.textContent));if(!t)return 'no text run button';t.click();for(let i=0;i<60&&!document.querySelector('main #wz-4-sims .font-mono');i++)await S(150);await S(900);document.querySelectorAll('[data-sonner-toaster]').forEach(e=>e.remove());const a=[...document.querySelectorAll('main #wz-4-sims button')].find(b=>/Run with audio/.test(b.textContent));a.scrollIntoView({block:'center'});window.scrollBy(0,180);await S(400);return 'bar='+document.querySelector('main #wz-4-sims .font-mono').textContent.trim()})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "main #wz-4-sims section > div > div > button:nth-of-type(3)",
+        "up": 0,
+        "maxH": 120,
+        "name": "Run with audio · minutes and money on the control",
+        "why": "Text and audio are one suite run two ways, so the mode is chosen at the moment of spending, priced on the button, and stamped on every verdict in the rows below."
+      }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "name": "after-22-concurrent-lines-wall",
+    "url": "https://ai-studio-console-redesign.vercel.app/billing?focus=concurrent-lines",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.removeItem('sx:billing_money')}catch(e){}window.dispatchEvent(new CustomEvent('sx:billing-state'));const el=document.querySelector('[data-design-focus=\"concurrent-lines\"]');if(el)el.scrollIntoView({block:'center'});await new Promise(r=>setTimeout(r,600));return el?'anchor ok':'anchor MISSING'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[data-design-focus=\"concurrent-lines\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "Concurrent lines, at the wall",
+        "why": "The denominator is the one concurrency ceiling Agora publishes and in use is composed from the calls that exist, five live plus fifteen on batch runs, so the wall is the state the account is actually in rather than a seeded ten nobody reaches."
+      }
+    ]
+  },
+  {
+    "name": "after-22-lines-and-budget",
+    "url": "https://ai-studio-console-redesign.vercel.app/billing?focus=concurrent-lines",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.removeItem('sx:billing_money')}catch(e){}window.dispatchEvent(new CustomEvent('sx:billing-state'));const card=document.querySelector('[data-design-focus=\"concurrent-lines\"]');const btn=[...card.querySelectorAll('button')].find(b=>b.textContent.trim().indexOf('Lines and your budget')===0);for(let i=0;i<40&&btn.getBoundingClientRect().width===0;i++)await new Promise(r=>setTimeout(r,100));btn.click();for(let i=0;i<40&&!document.querySelector('[role=\"dialog\"] [class~=\"rounded-lg\"][class~=\"border\"]');i++)await new Promise(r=>setTimeout(r,100));return document.querySelector('[role=\"dialog\"]')?'sheet open':'sheet MISSING'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[role=\"dialog\"] [class~=\"rounded-lg\"][class~=\"border\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "Lines and your budget",
+        "why": "Capacity is not sold here, so the sheet drops the invented per line price and keeps the one thing no competitor connects: lines change how fast you spend, not how much, and the free minutes decide when the calls pause."
+      }
+    ]
+  },
+  {
+    "name": "after-22-usage-grant-row",
+    "url": "https://ai-studio-console-redesign.vercel.app/billing/usage",
+    "wait": 9000,
+    "pre": "(async()=>{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';try{localStorage.removeItem('sx:billing_money')}catch(e){}window.dispatchEvent(new CustomEvent('sx:billing-state'));const el=document.querySelector('[class~=\"border-dashed\"]');if(el)el.scrollIntoView({block:'center'});await new Promise(r=>setTimeout(r,600));return el?'grant row ok':'grant row MISSING'})()",
+    "preWait": 2000,
+    "full": false,
+    "marks": [
+      {
+        "sel": "[class~=\"border-dashed\"]",
+        "up": 0,
+        "maxH": 520,
+        "name": "What comes with this App ID",
+        "why": "This row used to promise 50x minutes, unlimited agents and priority routing, none of which Agora sells, so it now names only the two grants that are real and sends the ask for more to the one surface that owns capacity."
+      }
+    ]
+  }
+]
