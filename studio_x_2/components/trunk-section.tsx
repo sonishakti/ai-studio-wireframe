@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Eye, EyeOff, PhoneCall } from "lucide-react"
+import { Eye, EyeOff, PhoneCall, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,6 +38,12 @@ import {
  *
  * Every row carries a `data-design-focus` id, so the ladder's fix links and the
  * prototype's journey-start link land on the row they name.
+ *
+ * A trunk is the user's own work, so the manage half opens on nothing until
+ * they have done it (owner 2026-09-17): a number with no trunk gets the house
+ * empty-state row — the name, one sentence, and the one door that ends the
+ * emptiness — instead of seven blank fields that read as a form somebody
+ * started. The setup branches skip it: the door there has already been opened.
  */
 
 // ─── The row ─────────────────────────────────────────────────────────────────
@@ -174,6 +180,8 @@ export function TrunkSection({
   // which mirrors `existingPassword` in phone-number-contracts.ts:83-84.
   const [password, setPassword] = React.useState("")
   const [allowText, setAllowText] = React.useState(trunk.allowedCidrs.join("\n"))
+  /** The fields are open because this user asked for them, never by default. */
+  const [connecting, setConnecting] = React.useState(false)
 
   // Re-seed the allowlist box when the row moves to another number; typing is
   // never clobbered by a re-render of the same one.
@@ -181,6 +189,7 @@ export function TrunkSection({
     setAllowText(trunk.allowedCidrs.join("\n"))
     setReplacing(false)
     setPassword("")
+    setConnecting(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numberId])
 
@@ -195,6 +204,36 @@ export function TrunkSection({
   const editPassword = (value: string) => {
     setPassword(value)
     onChange({ ...trunk, hasPassword: trunk.hasPassword || value.trim().length > 0 })
+  }
+
+  // Nobody has set a trunk up on this number. The Connection row would only
+  // say so a second time, so the empty state replaces the whole section. A
+  // number in use carries no door: the banner above it names what to do first.
+  if (showConnection && trunkState(trunk) === "not-set" && !connecting) {
+    return (
+      <div
+        data-design-focus="trunk-connection"
+        className="flex scroll-mt-28 flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3.5 py-3"
+      >
+        <div className="min-w-0">
+          <p className="text-sm font-medium">No SIP trunk yet</p>
+          <p className="text-xs text-muted-foreground">
+            A SIP trunk is the line your carrier hands calls over on: connect one and this
+            number can reach an agent.
+          </p>
+        </div>
+        {!locked && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 gap-1.5"
+            onClick={() => setConnecting(true)}
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Connect a trunk
+          </Button>
+        )}
+      </div>
+    )
   }
 
   return (

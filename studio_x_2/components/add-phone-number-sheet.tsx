@@ -37,7 +37,7 @@ export function AddPhoneNumberSheet({
    *  phase offers "Link to this agent" instead of the route cards (which
    *  navigate to a NEW draft — a dead end mid-edit), and the added number is
    *  handed back so the caller can list + link it. */
-  onAdded?: (n: { number: string; label: string; carrier: CarrierId; carrierName?: string }) => void
+  onAdded?: (n: { number: string; label: string; carrier?: CarrierId; carrierName?: string }) => void
   /** Resources › Channels and the wizard SIP hints open the fast path by
    *  default; the manual form stays one toggle away (A3, 2026-07-09). */
   defaultMode?: Mode
@@ -62,31 +62,35 @@ export function AddPhoneNumberSheet({
   const [phase, setPhase] = React.useState<Phase>("form")
   // One record for what this sheet produced, whichever branch produced it: the
   // number, its name, who carries it and the trunk it rides on.
+  // `carrier` starts unset, the way the guided branch's first question does:
+  // pre-picking Twilio put a name on somebody's bill that they never gave us,
+  // and the summary then printed it back to them as a fact (owner 2026-09-17).
   const [form, setForm] = React.useState<{
     number: string
     displayName: string
-    carrier: CarrierId
+    carrier?: CarrierId
     carrierName?: string
-  }>({ number: "", displayName: "", carrier: "twilio" })
+  }>({ number: "", displayName: "" })
   const [trunk, setTrunk] = React.useState<SipTrunk>({ ...DEFAULT_TRUNK, setupPath: "manual" })
 
   const reset = () => {
     setMode(defaultMode)
     setPhase("form")
-    setForm({ number: "", displayName: "", carrier: "twilio" })
+    setForm({ number: "", displayName: "" })
     setTrunk({ ...DEFAULT_TRUNK, setupPath: "manual" })
   }
 
   // Learning 3's either-or: a trunk is authenticated by digest credentials or
   // by allowed addresses, and the carriers accept either.
   const canAdd =
-    form.number.trim() && form.displayName.trim() && trunk.address.trim() &&
+    !!form.carrier && form.number.trim() && form.displayName.trim() && trunk.address.trim() &&
     (trunk.username.trim() || trunk.allowedCidrs.length > 0)
 
   // Manual SIP used to reach "added successfully" off six filled fields having
   // proved nothing, while the branch next door earned the same screen with a
   // real call. There is one ending now, and the call is it.
-  const carrierLabel = form.carrierName?.trim() || CARRIERS[form.carrier].label
+  const carrierLabel =
+    form.carrierName?.trim() || (form.carrier ? CARRIERS[form.carrier].label : "")
 
   return (
     <Sheet

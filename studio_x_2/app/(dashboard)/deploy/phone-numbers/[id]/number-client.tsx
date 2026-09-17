@@ -54,7 +54,9 @@ export function PhoneNumberClient({ id }: { id: string }) {
   // setup half and the manage half are one surface. Edits made in this browser
   // are read in an effect, never at module scope.
   const [identity, setIdentity] = React.useState({ number: number?.number ?? "", label: number?.label ?? "" })
-  const [carrier, setCarrier] = React.useState<CarrierId>(number?.carrier ?? "twilio")
+  // Unset on a number nobody has told us about yet: a carrier is a fact about
+  // this line, and defaulting it to Twilio put a name on the bill for them.
+  const [carrier, setCarrier] = React.useState<CarrierId | undefined>(number?.carrier)
   const [carrierName, setCarrierName] = React.useState(number?.carrierName)
   const [trunk, setTrunk] = React.useState<SipTrunk>(() => trunkOf(id))
   // Nothing about the trunk has changed in this session, so a carrier that
@@ -153,7 +155,10 @@ export function PhoneNumberClient({ id }: { id: string }) {
               onChange={editTrunk}
               onCarrierChange={(c, name) => { setTouched(true); setCarrier(c); setCarrierName(name) }}
               locked={locked}
-              showConnection
+              // A number being added IS the trunk form, so it opens on the
+              // fields; the empty-state row belongs to a number that already
+              // exists without a trunk.
+              showConnection={!isNew}
               showGateway
               onTestCall={locked ? undefined : () => setTesting(true)}
             />
