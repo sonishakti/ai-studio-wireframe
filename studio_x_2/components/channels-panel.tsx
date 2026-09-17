@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  Phone, MessageCircle, Globe, PhoneOutgoing, Code2, MoreHorizontal, ArrowUpRight,
+  Phone, MessageCircle, MessageSquare, Globe, PhoneOutgoing, Code2, MoreHorizontal, ArrowUpRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,16 +16,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
-import { TEST_INBOUND_NUMBER } from "@/lib/campaign-data"
-import { numberIdForE164 } from "@/lib/sip-trunk"
-
-/** A phone row opens the number it names, not the list it lives in. An
- *  identifier the inventory does not carry degrades to the list rather than
- *  opening a stranger. */
-const numberHref = (e164: string) => {
-  const id = numberIdForE164(e164)
-  return id ? `/deploy/phone-numbers/${id}` : "/deploy/phone-numbers"
-}
+import { ChannelSheet } from "@/components/channel-sheet"
+import {
+  channelBindings, ROW_KIND_LABEL, READINESS_LABEL, READINESS_TONE,
+  type ChannelRowKind,
+} from "@/lib/channels"
+import { cn } from "@/lib/utils"
 
 /**
  * ChannelsPanel — the Channels overview (2026-06-23: "Deployment" renamed to
@@ -33,52 +29,43 @@ const numberHref = (e164: string) => {
  * agent can run on — phone numbers, WhatsApp, web widget, batch
  * (outbound), code/SDK — in one filterable list. One channel backs one agent
  * (1 agent ↔ 1 channel); duplicate an agent to put it on another channel.
+ *
+ * The rows are DERIVED (18, 2026-09-17). The hand-written array they replace
+ * was a second record of data PHONE_NUMBERS and DEPLOYMENTS already hold,
+ * which is what put a live-looking WhatsApp channel, disagreeing with its own
+ * deployment record, and a bare comma in the Agent column on this page. The
+ * status enum they replace had three words and no word for any state this
+ * page is made of: `lib/channels.ts` owns the four that have a producer.
  */
 
-type ChannelType = "phone" | "whatsapp" | "web" | "batch" | "code"
-
-const TYPE_META: Record<ChannelType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-  phone:    { label: "Phone number", icon: Phone },
-  whatsapp: { label: "WhatsApp",     icon: MessageCircle },
-  web:      { label: "Web widget",   icon: Globe },
-  batch:    { label: "Batch calls",  icon: PhoneOutgoing },
-  code:     { label: "Code / SDK",   icon: Code2 },
+const TYPE_ICON: Record<ChannelRowKind, React.ComponentType<{ className?: string }>> = {
+  telephony: Phone,
+  whatsapp: MessageCircle,
+  sms: MessageSquare,
+  web: Globe,
+  batch: PhoneOutgoing,
+  code: Code2,
 }
 
-type ChannelRow = {
-  id: string
-  type: ChannelType
-  label: string
-  identifier: string
-  backs: string
-  status: "active" | "scheduled" | "unassigned"
-  href: string
+/** The filter chips, in the order the rows arrive. Labels come from the one
+ *  map, so a chip can never say a different word than the badge beside it. */
+const FILTER_KINDS: ChannelRowKind[] = ["telephony", "whatsapp", "web", "sms", "batch", "code"]
+
+const TONE_DOT: Record<"success" | "warning" | "muted", string> = {
+  success: "bg-success",
+  warning: "bg-warning",
+  muted: "bg-muted-foreground/50",
 }
-
-const CHANNELS: ChannelRow[] = [
-  { id: "ch_01", type: "phone",    label: "Support Line",    identifier: "+1 (415) 555-0101", backs: "Support Bot v2",      status: "active",     href: numberHref("+1 (415) 555-0101") },
-  // Aria answers the sandbox line, and this row says the same digits the
-  // inventory, the agents landing and the banner say (16, 2026-09-17).
-  { id: "ch_02", type: "phone",    label: "Aria sandbox line", identifier: TEST_INBOUND_NUMBER, backs: "Aria",             status: "active",     href: numberHref(TEST_INBOUND_NUMBER) },
-  { id: "ch_03", type: "whatsapp", label: "Acme WhatsApp",   identifier: "+1 (415) 555-0142", backs: "Survey Bot",         status: "active",     href: "/deploy/whatsapp" },
-  { id: "ch_04", type: "web",      label: "Help widget",     identifier: "acme.com/help",     backs: "Support Bot v2",     status: "active",     href: "/deploy/web-widget" },
-  { id: "ch_05", type: "batch",    label: "Q2 Collections",  identifier: "4,210 contacts",    backs: "Collections Outreach", status: "scheduled", href: "/deploy/batch-calls" },
-  { id: "ch_06", type: "code",     label: "SDK embed",       identifier: "token auth",        backs: "Aria",               status: "active",     href: "/deploy/code" },
-  { id: "ch_07", type: "phone",    label: "Toll-Free",       identifier: "+1 (800) 555-0199", backs: "Available",           status: "unassigned", href: numberHref("+1 (800) 555-0199") },
-]
-
-const FILTERS: { id: "all" | ChannelType; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "phone", label: "Phone numbers" },
-  { id: "whatsapp", label: "WhatsApp" },
-  { id: "web", label: "Web" },
-  { id: "batch", label: "Batch" },
-  { id: "code", label: "Code" },
-]
 
 export function ChannelsPanel() {
-  const [filter, setFilter] = React.useState<"all" | ChannelType>("all")
-  const rows = filter === "all" ? CHANNELS : CHANNELS.filter((c) => c.type === filter)
+  const [filter, setFilter] = React.useState<"all" | ChannelRowKind>("all")
+  // Reads PHONE_NUMBERS, DEPLOYMENTS and AGENTS once: module data, so the rows
+  // are stable for the life of the panel.
+  const channels = React.useMemo(() => channelBindings(), [])
+  const rows = filter === "all" ? channels : channels.filter((c) => c.kind === filter)
+
+  // The door for a row that has no page and never should have one.
+  const [sheetFor, setSheetFor] = React.useState<ChannelRowKind | null>(null)
 
   return (
     <div className="space-y-4">
@@ -100,20 +87,23 @@ export function ChannelsPanel() {
       <ToggleGroup
         type="single"
         value={filter}
-        onValueChange={(v) => { if (v) setFilter(v as "all" | ChannelType) }}
+        onValueChange={(v) => { if (v) setFilter(v as "all" | ChannelRowKind) }}
         variant="outline"
         size="sm"
         className="flex-wrap"
         aria-label="Filter channels by type"
       >
-        {FILTERS.map((f) => {
-          const count = f.id === "all" ? CHANNELS.length : CHANNELS.filter((c) => c.type === f.id).length
-          return (
-            <ToggleGroupItem key={f.id} value={f.id} className="rounded-full text-xs">
-              {f.label} <span className="tabular-nums opacity-60">{count}</span>
-            </ToggleGroupItem>
-          )
-        })}
+        <ToggleGroupItem value="all" className="rounded-full text-xs">
+          All <span className="tabular-nums opacity-60">{channels.length}</span>
+        </ToggleGroupItem>
+        {FILTER_KINDS.map((kind) => (
+          <ToggleGroupItem key={kind} value={kind} className="rounded-full text-xs">
+            {ROW_KIND_LABEL[kind]}{" "}
+            <span className="tabular-nums opacity-60">
+              {channels.filter((c) => c.kind === kind).length}
+            </span>
+          </ToggleGroupItem>
+        ))}
       </ToggleGroup>
 
       <Card>
@@ -135,7 +125,7 @@ export function ChannelsPanel() {
                     <p className="text-sm font-medium">
                       {filter === "all"
                         ? "No channels yet"
-                        : `No ${TYPE_META[filter].label.toLowerCase()} channels yet`}
+                        : `No ${ROW_KIND_LABEL[filter].toLowerCase()} channels yet`}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Connect one to put an agent on this channel.
@@ -144,32 +134,44 @@ export function ChannelsPanel() {
                 </TableRow>
               )}
               {rows.map((c) => {
-                const meta = TYPE_META[c.type]
+                const Icon = TYPE_ICON[c.kind]
                 return (
                   <TableRow key={c.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0">
-                          <meta.icon className="h-4 w-4" />
+                          <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <Link href={c.href} className="text-sm font-medium hover:underline">
-                            {c.label}
-                          </Link>
-                          <div className="font-mono text-xs text-muted-foreground">{c.identifier}</div>
+                          {/* Plain text: Manage is the row's one door, and a
+                              name that linked to a redirect was half the loop. */}
+                          <p className="text-sm font-medium">{c.label}</p>
+                          {c.identifier ? (
+                            <div className="font-mono text-xs text-muted-foreground">{c.identifier}</div>
+                          ) : null}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-xs">{meta.label}</Badge>
+                      <Badge variant="outline" className="text-xs">{ROW_KIND_LABEL[c.kind]}</Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{c.backs}</TableCell>
+                    {/* A cell with no value renders nothing. "No agent yet" is
+                        for a channel you could still bind: on a row Agora
+                        cannot serve, the word "yet" would be said twice and
+                        one of them would be a promise. */}
+                    <TableCell className="text-sm">
+                      {c.agent ?? (c.readiness === "not_supported" ? "" : "No agent yet")}
+                    </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={c.status === "active" ? "default" : c.status === "scheduled" ? "secondary" : "outline"}
-                        className="text-xs capitalize"
-                      >
-                        {c.status}
+                      {/* The heaviest ink in a table belongs to the action, not
+                          to a state: every readiness word is an outline pill
+                          with a tone dot, and none of the four is an error. */}
+                      <Badge variant="outline" className="gap-1.5 text-xs">
+                        <span
+                          className={cn("h-1.5 w-1.5 rounded-full", TONE_DOT[READINESS_TONE[c.readiness]])}
+                          aria-hidden
+                        />
+                        {READINESS_LABEL[c.readiness]}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -180,9 +182,15 @@ export function ChannelsPanel() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={c.href}>Manage <ArrowUpRight className="ml-auto h-3.5 w-3.5" /></Link>
-                          </DropdownMenuItem>
+                          {c.href ? (
+                            <DropdownMenuItem asChild>
+                              <Link href={c.href}>Manage <ArrowUpRight className="ml-auto h-3.5 w-3.5" /></Link>
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem onSelect={() => setSheetFor(c.kind)}>
+                              See what {ROW_KIND_LABEL[c.kind]} needs
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -193,6 +201,12 @@ export function ChannelsPanel() {
           </Table>
         </CardContent>
       </Card>
+
+      <ChannelSheet
+        open={sheetFor !== null}
+        onOpenChange={(o) => { if (!o) setSheetFor(null) }}
+        focus={sheetFor ?? undefined}
+      />
     </div>
   )
 }

@@ -1804,7 +1804,9 @@ export function formatDuration(seconds: number): string {
 }
 
 export const CHANNEL_LABEL: Record<ChannelKind, string> = {
-  telephony: "Telephony",
+  // One label per thing (18, 2026-09-17): the builder's surface card, the
+  // inventory row and the publish toast all name this the same way.
+  telephony: "Phone number",
   whatsapp: "WhatsApp",
   sms: "SMS",
   web: "Web widget",

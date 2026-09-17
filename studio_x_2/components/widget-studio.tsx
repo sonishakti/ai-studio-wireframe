@@ -90,13 +90,12 @@ function useWidgetState(agentId: string) {
   }
   const set: SetCfg = (k, v) => commit({ ...state, cfg: { ...state.cfg, [k]: v } })
 
-  // Embed-state truth (user-test #5 P0): the studio styles a snippet the user
-  // may have ALREADY pasted somewhere — so track what the last-copied embed
-  // contained and say plainly whether current edits are in it. Styling here
-  // never changes an embedded widget until the snippet is re-copied.
+  // Embed-state truth (user-test #5 P0): "is my edit live?" deserves an answer
+  // here. Two states, both computable (18, 2026-09-17): the snippet carries the
+  // agent and the channel, so a styling edit can never make a clipboard stale,
+  // and nothing on this page can tell whether anything was ever embedded.
   const current = widgetSnapshot(agentId, state.cfg)
-  const embedState: "never" | "stale" | "current" =
-    state.copiedSnapshot == null ? "never" : state.copiedSnapshot === current ? "current" : "stale"
+  const embedState: "never" | "current" = state.copiedSnapshot == null ? "never" : "current"
 
   const snippet = widgetSnippet(agentId, state.cfg)
   /** Record that the current config is what's on the user's clipboard. */
@@ -105,7 +104,7 @@ function useWidgetState(agentId: string) {
     void navigator.clipboard?.writeText(snippet).catch(() => {})
     markCopied()
     toast("Embed snippet copied", {
-      description: "Paste it before </body> on any page.",
+      description: "Install the toolkit and subscribe from your page.",
     })
   }
 
@@ -113,27 +112,19 @@ function useWidgetState(agentId: string) {
 }
 
 /** "Is my edit live?" must have an answer here, the way the builder answers it
- *  with its deploy line. */
+ *  with its deploy line. It answers for the CLIPBOARD, which is the fact this
+ *  page holds: with no origin, no token exchange and no server side, whether a
+ *  snippet was ever pasted is not knowable here. */
 function EmbedTruthLine({
   state,
   className,
 }: {
-  state: "never" | "stale" | "current"
+  state: "never" | "current"
   className?: string
 }) {
   return (
-    <span
-      className={cn(
-        "text-xs",
-        state === "stale" ? "text-warning" : "text-muted-foreground",
-        className,
-      )}
-    >
-      {state === "never"
-        ? "Not embedded yet · copy the snippet to put it on your site"
-        : state === "stale"
-          ? "Edits aren't in your embed yet. Re-copy the snippet"
-          : "Embed up to date"}
+    <span className={cn("text-xs text-muted-foreground", className)}>
+      {state === "never" ? "Not copied yet" : "The snippet you copied is up to date"}
     </span>
   )
 }
@@ -170,9 +161,11 @@ export function WidgetStudio() {
         </div>
         <div className="flex items-center gap-2">
           <EmbedTruthLine state={studio.embedState} className="hidden sm:inline" />
-          <Button variant="ghost" size="sm" onClick={studio.copySnippet}>Get Code</Button>
+          {/* One door per action: the ghost button beside this one called the
+              same copySnippet, and the fill sat on the vaguer verb — the
+              button that promised to embed only copied (18, 2026-09-17). */}
           <Button size="sm" className="gap-1.5" onClick={studio.copySnippet}>
-            <Code2 className="h-4 w-4" /> Embed
+            <Code2 className="h-4 w-4" /> Copy embed code
           </Button>
         </div>
       </div>
@@ -344,19 +337,21 @@ export function WidgetStyleConfig({
           <Code2 className="h-4 w-4" /> Copy embed code
         </Button>
       </div>
-      {/* See-it hint — the preview is the right panel now, not crammed here. */}
+      {/* See-it hint — the preview is the right panel now, not crammed here.
+          The second sentence used to promise that re-copying carried a style
+          change to a site. There is no hosted bundle to read one (18). */}
       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3.5 py-2.5 text-xs text-muted-foreground">
         <Palette className="h-4 w-4 shrink-0" aria-hidden />
-        Styling updates live in the <span className="font-medium text-foreground">Widget</span> preview on the right. Re-copy the embed after changes to update your site.
+        Styling shows in the preview on the right. The snippet carries the agent and the channel, not the look.
       </div>
       <div className="overflow-hidden rounded-lg border border-border bg-card [&>*:last-child]:border-b-0">
         <ConfigSections cfg={studio.cfg} set={studio.set} lean={lean} />
         <Section title="Embed on your site" defaultOpen>
           <p className="text-sm text-muted-foreground">
-            Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
-            any page. The widget appears, wired to this agent.
+            Install the toolkit and subscribe from your page. Your server starts the agent
+            on the same channel.
           </p>
-          <CodeBlock language="html" filename="index.html" onCopy={studio.markCopied}>
+          <CodeBlock language="typescript" filename="widget.ts" onCopy={studio.markCopied}>
             {studio.snippet}
           </CodeBlock>
         </Section>
@@ -428,6 +423,11 @@ function ConfigSections({ cfg, set, lean }: { cfg: WidgetConfig; set: SetCfg; le
               <SelectItem value="chat">Chat only</SelectItem>
             </SelectContent>
           </Select>
+          {/* Typed chat ships; removing the audio leg does not. Marking the
+              mode we ship, rather than disabling a capability that works. */}
+          <p className="text-xs text-muted-foreground">
+            Chat only still opens a voice session, and it bills the same as voice.
+          </p>
         </FieldRow>
       </Section>
 

@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/select"
 import { CodeBlock } from "@/components/code-block"
 import { PHONE_NUMBERS } from "@/lib/campaign-data"
+import { widgetSnippet, WIDGET_DEFAULTS } from "@/lib/widget-config"
 import { track, Events, timeToLiveMs } from "@/lib/analytics"
+import type { ChannelSurface } from "@/lib/channels"
 import { toast } from "sonner"
 
 /**
@@ -66,6 +68,7 @@ export function publishDeployment({
   agentId,
   agentName,
   channel,
+  surfaces,
   name,
   mode,
   stay,
@@ -74,6 +77,10 @@ export function publishDeployment({
   agentId: string
   agentName: string
   channel: string
+  /** The surfaces behind that string. Optional: a caller with none to state
+   *  omits the key rather than sending a word it cannot stand behind, and the
+   *  north star can still tell a widget deploy from a phone deploy (18). */
+  surfaces?: ChannelSurface[]
   name: string
   /** Deployment type — drives the success-toast verb: an outbound campaign
    *  CALLS people, it doesn't "answer" (user-test P0 #4). */
@@ -84,7 +91,7 @@ export function publishDeployment({
    *  merged Deploy step must keep that promise (user-test #7, D3 S2). */
   stay?: boolean
 }) {
-  track(Events.deployment_went_live, { agent_id: agentId, channel })
+  track(Events.deployment_went_live, { agent_id: agentId, channel, ...(surfaces ? { surfaces } : {}) })
   const ms = timeToLiveMs()
   if (ms != null) track(Events.time_to_live_ms, { ms, agent_id: agentId })
   const who = agentName || "Your agent"
@@ -301,23 +308,25 @@ export function BatchConfig({
 }
 
 export function EmbedConfig({ agentId }: { agentId: string }) {
-  // Same vocabulary truth as the wizard's Code step (user-test #6, D3): App ID
-  // from Project Settings — there is no "API key" surface in the product.
-  const snippet = `npm install @agora/agent-sdk
+  // The package that exists and is documented (18, 2026-09-17): the name this
+  // printed before, @agora/agent-sdk, 404s from the npm registry. Second copy
+  // of the builder's Code / SDK snippet, corrected in the same commit.
+  const snippet = `// npm install agora-agent-client-toolkit
 
-import { AgentClient } from "@agora/agent-sdk"
+import { ConversationalAIAPI } from "agora-agent-client-toolkit"
 
-const client = new AgentClient({
-  agentId: "${agentId}",
-  appId: process.env.AGORA_APP_ID,
-})
+const AGENT_ID = "${agentId}"
+const CHANNEL = "support-room"
 
-await client.connect()`
+// Both clients are yours: an IAgoraRTCClient joined to CHANNEL, and an
+// RTMClient signed in with the same uid.
+ConversationalAIAPI.init({ rtcEngine, rtmEngine })
+ConversationalAIAPI.getInstance().subscribeMessage(CHANNEL)`
 
   return (
     <ConfigCard title="Embed in your app">
       <p className="text-sm text-muted-foreground">
-        Install the SDK and connect to this agent. No phone number needed. It runs
+        Install the toolkit and subscribe from your app. No phone number needed. It runs
         wherever your app does.
       </p>
       <CodeBlock language="typescript" filename="agent.ts">
@@ -332,42 +341,20 @@ await client.connect()`
 }
 
 export function WebWidgetConfig({ agentId }: { agentId: string }) {
-  const [title, setTitle] = React.useState("Chat with us")
-  const [greeting, setGreeting] = React.useState("Hi! How can I help?")
-
-  const snippet = `<script
-  src="https://cdn.agora.io/agent-widget.js"
-  data-agent-id="${agentId}"
-  data-title="${title}"
-  data-greeting="${greeting}"
-  async
-></script>`
+  // ONE source for the bytes (18, 2026-09-17): the same snippet the studio
+  // copies, which carries the agent and the channel and nothing else. The
+  // title and greeting fields went with the script tag — they fed data-
+  // attributes on a bundle that does not exist, and both words already have
+  // one home in the Widget studio's own store.
+  const snippet = widgetSnippet(agentId, WIDGET_DEFAULTS)
 
   return (
     <ConfigCard title="Web widget">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="ww-title" className="text-sm font-medium">Widget title</Label>
-          <Input
-            id="ww-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="ww-greeting" className="text-sm font-medium">Greeting</Label>
-          <Input
-            id="ww-greeting"
-            value={greeting}
-            onChange={(e) => setGreeting(e.target.value)}
-          />
-        </div>
-      </div>
       <p className="text-sm text-muted-foreground">
-        Paste this before <code className="font-mono text-xs">&lt;/body&gt;</code> on
-        any page. The floating widget appears, wired to this agent.
+        Install the toolkit and subscribe from your page. Your server starts the agent on
+        the same channel.
       </p>
-      <CodeBlock language="html" filename="index.html">
+      <CodeBlock language="typescript" filename="widget.ts">
         {snippet}
       </CodeBlock>
       {/* LEGACY PANEL ONLY (the builder embeds WidgetStudioEmbedded inline).

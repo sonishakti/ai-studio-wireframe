@@ -28,7 +28,7 @@ export type AgentType = "inbound" | "outbound" | "code"
 
 /** The agent's ONE deployment channel (owner 2026-07-29: NOT multi-select —
  *  Inbound OR Batch calls OR Code/SDK). Multi-select lives INSIDE Inbound as
- *  surfaces (phone · web widget · WhatsApp/Telegram soon). "web" survives in
+ *  surfaces (phone · web widget · WhatsApp soon). "web" survives in
  *  the union only so old stored drafts migrate — it is never produced. */
 export type DeployChannel = "inbound" | "batch" | "web" | "code"
 

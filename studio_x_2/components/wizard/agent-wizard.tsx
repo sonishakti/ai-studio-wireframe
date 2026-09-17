@@ -27,6 +27,7 @@ import { SectionRows } from "@/components/wizard/section-row"
 import { DeployPreflight } from "@/components/wizard/deploy-preflight"
 import { STEP_TITLES, SECTION_COUNT, SECTION_GROUPS, STEP_ICONS, stepTitle, resolveStepParam } from "@/components/wizard/types"
 import { publishDeployment } from "@/components/wizard/channel-configs"
+import { SURFACE_OF, ROW_KIND_LABEL } from "@/lib/channels"
 import { useDebouncedEffect } from "@/hooks/use-debounced-effect"
 import { markBuildStart, track, Events, builderOpened, agentAudioHeard } from "@/lib/analytics"
 import { AdvancedSettingsSheet, openAdvanced, type AdvancedAnchor } from "@/components/wizard/advanced-settings-sheet"
@@ -539,6 +540,9 @@ export function AgentWizard({
       // Getting a number happens in the Deployment section's phone-number row,
       // behind the Inbound card (16, 2026-09-17).
       "get-a-number": 2,
+      // The surface multi-select, and the two channels that state what they
+      // need beneath it (18, 2026-09-17). Also behind the Inbound card.
+      "inbound-surfaces": 2,
       // The criteria editor lives in Go Live's Structured outputs row, so the
       // review link has to expand section 5 before the ring can find it.
       scorecard: 5,
@@ -554,7 +558,7 @@ export function AgentWizard({
       // Matched on the card's own text, not on a value attribute: Radix
       // destructures `value` out before the props reach the trigger, so
       // button[value="inbound"] can never match anything.
-      if (focus === "get-a-number") {
+      if (focus === "get-a-number" || focus === "inbound-surfaces") {
         [...document.querySelectorAll<HTMLButtonElement>('button[data-slot="radio-card"]')]
           .find((b) => /^inbound/i.test(b.textContent ?? ""))?.click()
       }
@@ -859,9 +863,21 @@ export function AgentWizard({
       // must EXIST in All agents — record it in the shared session store,
       // runs and all, so it lands at the top of the list.
       if (!isEdit) upsertSessionAgent(draftToSessionAgent(d, agentId))
+      // One surface, one name. The old fallback was the literal ", ", so a
+      // missing binding put a comma in the toast, in Monitor's query string
+      // and in the north-star event (18, 2026-09-17). The surfaces ride the
+      // event too, so a widget deploy and a phone deploy are told apart.
+      const surfaces = inboundSurfaces(d).map((sf) => SURFACE_OF[sf])
+      const channel =
+        primary === "inbound" && surfaces.length
+          ? surfaces.map((sf) => ROW_KIND_LABEL[sf]).join(" · ")
+          : primary
+            ? channelLabel(primary)
+            : "No channel yet"
       publishDeployment({
         router, agentId, agentName: draft.name || "Your agent",
-        channel: d.channels.map(channelLabel).join(" · ") || ", ",
+        channel,
+        surfaces,
         name: draft.name || "Deployment",
         mode: primary === "batch" ? "outbound" : primary === "code" ? "code" : "inbound",
         stay,

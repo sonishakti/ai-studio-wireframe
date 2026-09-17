@@ -16,6 +16,10 @@
  *   These are session-hygiene metrics, not product success metrics.
  */
 
+// Type-only: `lib/channels.ts` imports `track` from here at runtime, so a value
+// import in this direction would be a cycle. `import type` is erased.
+import type { ChannelAsk, ChannelSurface } from "@/lib/channels"
+
 // ─── Event names — single source of truth ────────────────────────────────────
 
 export const Events = {
@@ -56,6 +60,7 @@ export const Events = {
   agent_audio_heard:          "agent_audio_heard",           // ★ TTFA stop — the agent spoke
   test_refused:               "test_refused",                // { agent_id, code } — a refusal is not an error
   deploy_blocked:             "deploy_blocked",              // { agent_id, code, block_count } — CODES ONLY, never the reason text
+  channel_blocked:            "channel_blocked",             // { ask, code, engine_ticket } — CODES ONLY, never the reason text
 
   // ── Half-tier card nudge (2026-06-22) ──────────────────────────────────────
   // Agora bills per minute and doesn't sell/port numbers, so the card sits on
@@ -293,6 +298,8 @@ export type EventPayloads = {
   agent_audio_heard:           { agent_id: string; trigger: TestTrigger; turn_count: number; configured_by_user: boolean; counts_toward_ttfa: boolean; ttfa_active_ms?: number; over_ceiling: boolean }
   test_refused:                { agent_id: string; code: TestRefusedCode }
   deploy_blocked:              { agent_id: string; code: DeployBlockedCode; block_count: number }
+  channel_blocked:             { ask: ChannelAsk; code: ChannelBlockedCode; engine_ticket?: string; agent_id?: string }
+  deployment_went_live:        { agent_id: string; channel: string; surfaces?: ChannelSurface[] }
   config_drift_detected:       { level: "agent" | "deployment" | "credential"; id: string; ran_version: number; current_version: number }
   command_executed:            { command: string; surface: "palette" | "shortcut" }
   destructive_action_confirmed:{ resource: string; resource_id: string }
@@ -454,6 +461,10 @@ export type DeployBlockedCode =
   | "no_voice" | "no_channel" | "no_surface" | "no_number" | "no_prompt"
   | "batch_no_run" | "batch_no_number" | "batch_no_csv" | "batch_no_schedule"
   | "batch_uncovered_vars" | "other"
+
+/** Closed list. Why a channel could not be picked: the prose a user reads
+ *  states the dependency on the surface, and never rides the event. */
+export type ChannelBlockedCode = "not_supported" | "voice_leg_required" | "origin_missing"
 
 /** Closed list. `TelephonyErrorResponse` is free text, so a provider's own
  *  words may never reach an analytics property — only a code. */

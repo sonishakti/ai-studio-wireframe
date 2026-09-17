@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select"
 import { RadioCard, RadioCardGroup, ToggleCard } from "@/components/wizard/radio-cards"
 import { SectionRow } from "@/components/wizard/section-row"
+import { EngineRow } from "@/components/wizard/engine-row"
+import { ChannelSheet } from "@/components/channel-sheet"
 import { InfoHint } from "@/components/wizard/info-hint"
 import { CodeBlock } from "@/components/code-block"
 import { AddPhoneNumberSheet } from "@/components/add-phone-number-sheet"
@@ -18,6 +20,7 @@ import { cn } from "@/lib/utils"
 import { CampaignContacts } from "@/components/wizard/campaigns-card"
 import { PHONE_NUMBERS, type PhoneNumber } from "@/lib/campaign-data"
 import { readSessionNumbers, addSessionNumber, subscribeNumberStore } from "@/lib/number-store"
+import { readDemand, setDemand, type ChannelAsk } from "@/lib/channels"
 import {
   channelLabel, inboundSurfaces, firstRun, patchFirstRun,
   type AgentDraft, type CampaignDraft, type DeployChannel, type InboundSurface,
@@ -159,6 +162,7 @@ export function ChannelSection({
       {current === "inbound" && (
         <SectionRow
           id="wz-2-surfaces"
+          focusId="inbound-surfaces"
           label="Inbound channels"
           hint="Pick every way callers reach this agent. It can serve several at once."
         >
@@ -173,7 +177,7 @@ export function ChannelSection({
               />
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">WhatsApp · Telegram · soon</p>
+          <UnsupportedSurfaces />
         </SectionRow>
       )}
 
@@ -480,26 +484,69 @@ function InboundNumbersBlock({
   )
 }
 
+/**
+ * The two surfaces Agora cannot serve yet, named at a LIVE control instead of
+ * a dead card (18, 2026-09-17). A disabled ToggleCard is pointer-events-none
+ * and opacity-50 (radio-cards.tsx), so it could not be clicked, focused or
+ * hovered, and its own explanation would sit inside a control nobody can
+ * reach. EngineRow is the shipped idiom in this folder: the switch stays live
+ * and records the ask, the caption states the dependency.
+ *
+ * Same `sx:channel_demand` store the sheet writes, so one ask is one state.
+ */
+function UnsupportedSurfaces() {
+  const [asks, setAsks] = React.useState<ChannelAsk[]>(() => readDemand())
+  const [sheetOpen, setSheetOpen] = React.useState(false)
+  const toggle = (ask: ChannelAsk) => (on: boolean) => {
+    setDemand(ask, on)
+    setAsks(readDemand())
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">WhatsApp and SMS do not run on Agora yet.</p>
+      <div className="divide-y divide-border rounded-lg border border-border px-3.5 py-1">
+        <EngineRow
+          title="WhatsApp"
+          description="Messages and calls on one Business number."
+          checked={asks.includes("whatsapp")}
+          onCheckedChange={toggle("whatsapp")}
+        />
+        <EngineRow
+          title="SMS"
+          description="Text conversations on a number a carrier approves."
+          checked={asks.includes("sms")}
+          onCheckedChange={toggle("sms")}
+        />
+      </div>
+      <Button variant="outline" size="sm" onClick={() => setSheetOpen(true)}>
+        See what each channel needs
+      </Button>
+      <ChannelSheet open={sheetOpen} onOpenChange={setSheetOpen} />
+    </div>
+  )
+}
+
 // ─── Code — SDK/API snippets + Docs Center (unchanged from the v3 builder) ────
 
 export function CodeConfigure({ agentId }: { agentId: string }) {
   // Snippet-truth (user-test #6, D3): before deploy the agent id is a
   // placeholder — say so where the Copy button is.
   const unpublished = agentId === "new"
-  const connect = `import { AgentClient } from "@agora/agent-sdk"
+  const connect = `import { ConversationalAIAPI } from "agora-agent-client-toolkit"
 
-const client = new AgentClient({
-  agentId: "${agentId}",${unpublished ? " // placeholder: deploy to mint the real ID" : ""}
-  appId: process.env.AGORA_APP_ID, // Project Settings › App ID
-})
+const AGENT_ID = "${agentId}"${unpublished ? " // placeholder: deploy to mint the real ID" : ""}
+const CHANNEL = "support-room"
 
-// Add the agent to a live Agora RTC channel
-// token minted from your App Certificate on join — clients keep their own
-await client.joinChannel({ channel: "support-room" })`
+// Both clients are yours: an IAgoraRTCClient joined to CHANNEL, and an
+// RTMClient signed in with the same uid.
+ConversationalAIAPI.init({ rtcEngine, rtmEngine })
+ConversationalAIAPI.getInstance().subscribeMessage(CHANNEL)`
 
-  const stop = `// Stop the agent: releases the channel and stops billing
-await client.leaveChannel()
-await client.stop()`
+  const stop = `// Stop listening and release the toolkit's clients
+const api = ConversationalAIAPI.getInstance()
+api.unsubscribe()
+api.destroy()`
 
   return (
     <div className="space-y-4">
@@ -520,15 +567,15 @@ await client.stop()`
       <div className="space-y-1">
         <p className="text-sm font-medium">Add to your app</p>
         <p className="text-xs text-muted-foreground">
-          Install the SDK, then drop the agent into any Agora channel. No phone number
-          needed. It runs wherever your app does.
+          Install the toolkit, then drop the agent into any Agora channel. No phone
+          number needed. It runs wherever your app does.
         </p>
       </div>
-      <CodeBlock language="bash" filename="install">npm install @agora/agent-sdk</CodeBlock>
+      <CodeBlock language="bash" filename="install">npm install agora-agent-client-toolkit</CodeBlock>
       <CodeBlock language="typescript" filename="join.ts">{connect}</CodeBlock>
       <InfoHint label="Secured-mode channels & tokens">
-        The platform mints the agent&apos;s token from your App Certificate on join. Your
-        clients keep bringing their own tokens, and the agent needs nothing extra from you.
+        Your client brings its own token. Include both RTC and RTM privileges in it: the
+        toolkit needs an RTM client as well as an RTC client.
       </InfoHint>
 
       <div className="space-y-1 pt-2">

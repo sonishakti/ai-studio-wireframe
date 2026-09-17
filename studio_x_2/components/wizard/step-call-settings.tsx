@@ -237,38 +237,12 @@ export function CampaignDialingFields({
             className="text-sm font-mono"
           />
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Retry unanswered</Label>
-          <Select
-            disabled={disabled}
-            value={String(campaign.retries ?? 1)}
-            onValueChange={(v) => onChange({ retries: Number(v) })}
-          >
-            <SelectTrigger className="w-full text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">Don&apos;t retry</SelectItem>
-              <SelectItem value="1">Once</SelectItem>
-              <SelectItem value="2">Twice</SelectItem>
-            </SelectContent>
-          </Select>
-          {/* One composite decision — "Once, after 30 min". */}
-          {(campaign.retries ?? 1) > 0 && (
-            <Select
-              disabled={disabled}
-              value={String(campaign.retryIntervalMin ?? 30)}
-              onValueChange={(v) => onChange({ retryIntervalMin: Number(v) })}
-            >
-              <SelectTrigger className="w-full text-sm" aria-label="Retry interval"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="15">after 15 min</SelectItem>
-                <SelectItem value="30">after 30 min</SelectItem>
-                <SelectItem value="60">after 1 hour</SelectItem>
-                <SelectItem value="240">after 4 hours</SelectItem>
-                <SelectItem value="1440">next day</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+        {/* "Retry unanswered" and its interval came out (18, 2026-09-17):
+            neither field exists in the Console campaign contract or in the
+            published docs, and no vendor ships the control. The real answer
+            is a redial export, a file you take away. `retries` and
+            `retryIntervalMin` stay on CampaignDraft so migration and
+            rehydration are untouched. */}
       </div>
       <CampaignCapacityNote maxConcurrent={campaign.maxConcurrent ?? 10} />
     </div>

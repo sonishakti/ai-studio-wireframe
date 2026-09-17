@@ -3,11 +3,10 @@
  * INLINE studio (Step 4 · web mode) and the standalone Deploy › Web Widget page.
  *
  * Persisted PER AGENT (`sx:widget_cfg:<id>`, "new" while a draft is unpublished),
- * deliberately NOT on the AgentDraft: widget styling ships via the embed snippet
- * the user re-copies, not via redeploy — on the draft it would feed the builder's
- * "Edits are not live yet. Redeploy to apply." line, which is false for the
- * widget. One store also means the builder and the standalone studio can never
- * show the same agent two different widgets.
+ * deliberately NOT on the AgentDraft: the look is not part of a deploy — on the
+ * draft it would feed the builder's "Edits are not live yet. Redeploy to apply."
+ * line, which is false for the widget. One store also means the builder and the
+ * standalone studio can never show the same agent two different widgets.
  */
 
 export interface WidgetConfig {
@@ -65,24 +64,34 @@ export const WIDGET_DEFAULTS: WidgetConfig = {
   poweredBy: true,
 }
 
-/** The `<script>` embed snippet for an agent + config. ONE source: the studio's
- *  copy actions and the visible code block must always copy the same bytes. */
-export function widgetSnippet(agentId: string, cfg: WidgetConfig): string {
-  return `<script
-  src="https://cdn.agora.io/agent-widget.js"
-  data-agent-id="${agentId}"
-  data-mode="${cfg.interactionMode}"
-  data-theme="${cfg.theme}"
-  data-blob="${cfg.blobStyle}"
-  data-label="${cfg.buttonLabel}"
-  data-brand-color="${cfg.brandColor}"
-  async
-></script>`
+/** The snippet for an agent. ONE source: the studio's copy actions and the
+ *  visible code block must always copy the same bytes.
+ *
+ *  It carries the agent and the channel and nothing else, because there is no
+ *  embeddable widget bundle: `https://cdn.agora.io/agent-widget.js` 404s and no
+ *  Agora page, bundle or script tag documents one (18, 2026-09-17). The
+ *  documented package is `agora-agent-client-toolkit`, so that is what we
+ *  print. `_cfg` is kept so both call sites stay unchanged: styling reaches no
+ *  snippet, and the studio says so where the styling happens. */
+export function widgetSnippet(agentId: string, _cfg: WidgetConfig): string {
+  return `// npm install agora-agent-client-toolkit
+
+import { ConversationalAIAPI } from "agora-agent-client-toolkit"
+
+const AGENT_ID = "${agentId}"
+const CHANNEL = "support-room"
+
+// Both clients are yours: an IAgoraRTCClient joined to CHANNEL, and an
+// RTMClient signed in with the same uid.
+ConversationalAIAPI.init({ rtcEngine, rtmEngine })
+ConversationalAIAPI.getInstance().subscribeMessage(CHANNEL)`
 }
 
-/** Snapshot for embed-state truth — what the last-copied snippet contained. */
+/** Snapshot for embed-state truth — the BYTES the user last copied. It used to
+ *  snapshot the whole config, which is why a styling edit could make a
+ *  clipboard "stale" that no style ever reached. */
 export function widgetSnapshot(agentId: string, cfg: WidgetConfig): string {
-  return JSON.stringify({ agentId, cfg })
+  return widgetSnippet(agentId, cfg)
 }
 
 export interface WidgetState {
