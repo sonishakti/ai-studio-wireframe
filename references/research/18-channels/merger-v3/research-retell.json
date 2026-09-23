@@ -1,0 +1,22 @@
+[
+  {
+    "vendor": "Retell",
+    "label": "Batch Call dashboard — blocked, no session on research profile",
+    "kind": "product",
+    "href": "https://dashboard.retellai.com/batchCall",
+    "shot": "references/competitors/product/retell/retell-18m-batchcall-login-blocked.png",
+    "scenario": "rainy",
+    "marks": [],
+    "note": "Retell keeps batch call as its own top-level object bound to one agent via From Number, and pays for it with a dashboard the research profile has no session for, so the run list, create dialog, detail view and validation states could not be captured live."
+  },
+  {
+    "vendor": "Retell",
+    "label": "Docs — Create and schedule batch calls, agent bound via From Number",
+    "kind": "docs",
+    "href": "https://docs.retellai.com/deploy/make-batch-call",
+    "shot": "references/competitors/public-docs/retell-18m-batchcall-agent-fromnumber.png",
+    "scenario": "happy",
+    "marks": ["AGENT BOUND VIA FROM NUMBER"],
+    "note": "Retell picks the agent for a batch call indirectly, by choosing the From Number that agent is already bound to in Settings, so the run inherits the agent without a second agent-picker on the form, and pays for it with an extra hop (bind agent to number first, then pick the number) before a batch can be created."
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "vendor": "elevenlabs",
+    "label": "Batch Calling list — empty state, no agent visible on the list row",
+    "kind": "product",
+    "href": "https://elevenlabs.io/app/agents/batch-calling",
+    "shot": "references/competitors/product/elevenlabs/elevenlabs-18m-batch-list-empty.png",
+    "scenario": "rainy",
+    "marks": ["EMPTY: NO LINK BACK TO AGENT LIST"],
+    "note": "ElevenLabs gives outbound its own top-level nav item (Outbound > Batch Calling) separate from the Agents list, and pays for it with an empty batch-call list that names no agent and offers no path back to the agent that would run it."
+  },
+  {
+    "vendor": "elevenlabs",
+    "label": "Batch Calling docs — agent, phone number and recipient list explained",
+    "kind": "docs",
+    "href": "https://elevenlabs.io/docs/eleven-agents/phone-numbers/batch-calls",
+    "shot": "references/competitors/public-docs/elevenlabs-18m-batch-calling-docs.png",
+    "scenario": "happy",
+    "marks": [],
+    "note": "ElevenLabs documents batch calling as three explicit inputs (agent_id, agent_phone_number_id, recipients with phone_number and per-call dynamic variables) so the agent-to-run relationship is a flat foreign key, and pays for it with docs that describe the API shape rather than showing what the run screen itself surfaces about the agent."
+  }
+]

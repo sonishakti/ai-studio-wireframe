@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>18 · merger v3 · directions</title>
+<style>body{font:15px/1.5 system-ui;max-width:900px;margin:40px auto;padding:0 20px;color:#1a1a1a}h1{font-size:24px}h2{font-size:18px;margin-top:28px}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #ddd;padding:8px;vertical-align:top;text-align:left}.v{background:#eef7ef}.k{font-family:ui-monospace,monospace;font-size:12px;color:#555}</style></head><body>
+<p class="k">Design Tracker · 18 Channels · merger · v3 · 2026-09-23</p>
+<h1>Five directions for "a campaign is a run of the agent" inside the existing Console</h1>
+<p>All five are v3: no new capability, no token or primitive the live Console lacks. The audit of 2026-09-21 fixed the model (campaign = run of the agent) and the IA (keep Outbound Campaigns as the runs index). The question left is how the two sides point at each other.</p>
+
+<h2>A · Links only</h2>
+<p>Make every agent name that appears on a run a link to the agent, and nothing else. Runs index cell, detail banner, detail configuration, form label. Zero new surfaces, one helper that maps telephony uuid to Studio id through the deployed-agents index. Weakness: the link lands on the agent's Test tab, where nothing about runs is visible, so the door opens onto the wrong room.</p>
+
+<h2>B · Links plus a rail door (chosen)</h2>
+<p>A, plus <code>?rail=deploy</code> so the link opens the Deploy rail where the agent's campaigns already sit (b695f33c), plus a Campaigns count on the agents list that opens the runs index filtered to that agent. Every door is an existing control extended; both directions read the same two indexes. Weakness: the count is computed on the client from a 100-row campaign page, so a project with more than 100 campaigns undercounts until the API grows an aggregate.</p>
+
+<h2>C · Campaigns tab on the agent</h2>
+<p>Add a fifth top tab, Campaigns, next to Prompt · Models · Advanced · Actions, holding the full runs table filtered to the agent. Strong for the operator who lives in one agent. Weakness: a second inventory of runs, the exact defect the audit scored sev 4 on Studio X 2; two tables that must agree on columns, filters and row menus forever.</p>
+
+<h2>D · Agent header on the campaign form</h2>
+<p>Replace the AI agent select with a card: avatar, name, status chip, version, Change. Reads well when arriving from the agent. Weakness: a new component for a field that already has a labelled option row with meta (agtid · project · AppID); the card duplicates the option label and the Change button is a second door to the same select. Version is not in the deployed-agents record, so the card would print a value the contract cannot produce.</p>
+
+<h2>E · Fold campaigns under Agents in the sidebar</h2>
+<p>Move Outbound Campaigns from Launch to a child of Agents, or into the agent page only. Weakness: this is Studio X 2's IA, rejected on 2026-09-21; every competitor keeps a top-level campaign list; legacy routes and bookmarks point at /telephony/campaigns.</p>
+
+<h2>Audit</h2>
+<table><tr><th>Direction</th><th>JTBD happy 1–5</th><th>Rainy: lookup fails</th><th>Learning 2 (never a run without a door)</th><th>Reuse, not redesign</th><th>Verdict</th></tr>
+<tr><td>A</td><td>2 4 partly, 1 3 5 no</td><td>degrades to text</td><td>met on the run, not on the agent</td><td>yes</td><td>too little</td></tr>
+<tr class="v"><td>B</td><td>all five</td><td>degrades to text, count hides</td><td>met both ways</td><td>yes, three existing controls extended</td><td><b>chosen</b></td></tr>
+<tr><td>C</td><td>1 strongly, 2 no</td><td>n/a</td><td>met one way</td><td>no, second inventory</td><td>rejected</td></tr>
+<tr><td>D</td><td>4 only</td><td>card shows stale data</td><td>no</td><td>no, new component, invented version</td><td>rejected</td></tr>
+<tr><td>E</td><td>1, breaks 2 5</td><td>n/a</td><td>no</td><td>no, IA change</td><td>rejected (lock)</td></tr></table>
+
+<h2>Verdict</h2>
+<p>B. It is the only direction that closes the loop in both directions with controls that already exist: a cell becomes a link, a tab becomes URL-addressable, a list gains a count that opens a filter the list already supports. It adds one helper file and one search param. The one thing it cannot do, count past 100 campaigns, is an API gap to log, not a reason to draw a card the contract cannot fill.</p>
+</body></html>

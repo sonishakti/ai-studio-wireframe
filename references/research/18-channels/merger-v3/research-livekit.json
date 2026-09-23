@@ -1,0 +1,32 @@
+[
+  {
+    "vendor": "LiveKit",
+    "label": "Cloud project console — blocked, no session on research profile",
+    "kind": "product",
+    "href": "https://cloud.livekit.io/login",
+    "shot": "references/competitors/product/livekit/livekit-18m-cloud-login-blocked.png",
+    "scenario": "rainy",
+    "marks": [],
+    "note": "LiveKit has no batch-calling product at all, only SIP trunks and agent dispatch, and pays for it with a Cloud console the research profile could not sign into (Google OAuth account-chooser, not a resumable session), so the Agents page and Telephony/SIP trunk screens could not be captured live."
+  },
+  {
+    "vendor": "LiveKit",
+    "label": "Docs — Make outbound calls, agent initiated outbound calls via CreateSIPParticipant",
+    "kind": "docs",
+    "href": "https://docs.livekit.io/telephony/making-calls/outbound-calls/",
+    "shot": "references/competitors/public-docs/livekit-18m-outbound-calls-agent-dispatch.png",
+    "scenario": "happy",
+    "marks": ["AGENT DISPATCHED VIA CreateSIPParticipant"],
+    "note": "LiveKit lets a running agent place its own outbound call by requesting a SIP participant on its own room, so the call is just another leg of the same job the agent is already in, and pays for it with no run object at all: nothing lists, groups, or tracks the calls an agent has placed, only a per-call outcome."
+  },
+  {
+    "vendor": "LiveKit",
+    "label": "Docs — Agent dispatch, explicit Dispatch via API",
+    "kind": "docs",
+    "href": "https://docs.livekit.io/agents/server/agent-dispatch/",
+    "shot": "references/competitors/public-docs/livekit-18m-agent-dispatch-explicit.png",
+    "scenario": "rainy",
+    "marks": ["EXPLICIT DISPATCH = YOUR OWN LOOP"],
+    "note": "LiveKit makes dispatch an explicit, addressable act (one API call creates one job for one agent, with metadata you control), which is a clean primitive to build on, and pays for it by pushing all campaign concepts (a list of recipients, concurrency, pacing, stop/cancel, progress) onto the caller's own loop, since LiveKit ships no equivalent of a batch/campaign object."
+  }
+]

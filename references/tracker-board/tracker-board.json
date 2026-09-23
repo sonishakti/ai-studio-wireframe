@@ -1,5 +1,5 @@
 {
- "updated": "2026-09-17",
+ "updated": "2026-09-23",
  "source": {
   "label": "ClickUp · Convo AI › Design Tracker (901114875662)",
   "url": "https://app.clickup.com/8556478/v/l/li/901114875662"
@@ -4926,6 +4926,30 @@
    "status": "Pending review",
    "open": [
     {
+     "label": "v3 · merged UX in the live Console",
+     "href": "https://ng-console-9ckem4eph-agoraio.vercel.app/telephony/campaigns?designFocus=run-agent"
+    },
+    {
+     "label": "v3 · Figma rows 05–09",
+     "href": "https://www.figma.com/design/OIKZExT265nOJotBlmv2Ah/?node-id=18-2"
+    },
+    {
+     "label": "v3 · PRD",
+     "href": "https://claude.ai/artifact/GPJfQWLVgzaqfJ5RJ6UHiQ"
+    },
+    {
+     "label": "Merger audit",
+     "href": "https://claude.ai/artifact/AXsVwv7VsfyXL8tMaoPKPE"
+    },
+    {
+     "label": "v3 · JTBD",
+     "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/18-channels/merger-v3/01-jtbd.md"
+    },
+    {
+     "label": "v3 · Directions",
+     "href": "https://github.com/AgoraIO-Community/ai-studio-console-redesign/blob/main/references/research/18-channels/merger-v3/05-directions.html"
+    },
+    {
      "label": "Prototype",
      "href": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=2&focus=inbound-surfaces"
     },
@@ -4947,7 +4971,7 @@
     "alt": "Inbound channels, the fold the review link opens: Phone number and Web widget stay the only two cards, and WhatsApp and SMS sit below them as live rows reading Requires Engine, with See what each channel needs as the door, marked in red"
    },
    "rationale": "The lock holds: one agent answers on one channel, so the pick stays two surface cards and the two channels Agora cannot serve arrive as live rows underneath, each stating what it needs and recording the ask at the control instead of promising itself soon. The design refuses a fourth surface card for a channel with no API, and refuses to give that channel a page, because a page for something Agora cannot serve can only redirect back to the page it was opened from, which is the defect this feature starts from. It also refuses to draw the carrier review queue, the origin allowlist and any word that claims traffic, because no contract produces a submission, a reviewer, an origin check or a call count, and a state nothing can compute is the bare comma in better clothes. One readiness vocabulary derives from the types that already exist rather than minting a seventh, so inventory rows come from the numbers and deployments on record and the invented WhatsApp line with its own sender, agent and call count stops reaching the page. The part worth arguing about is whether naming WhatsApp and SMS at a live control is honesty or an advertisement, and the answer here is that the ask is the count that argues the Engine tickets into existence.",
-   "next": "OWNER DECISION: who owns the embeddable widget bundle, and which taxonomy wins. On the bundle, three answers change one string on the web surface: Agora hosts it and the action stays Copy embed code; we ship a React component on agora-agent-client-toolkit-react and the action becomes an install; or neither, and the action becomes the Embed Agent REST snippet Studio already documents. The correction ships either way, because the fake package name and the 404 CDN URL come out in the first slice whatever the answer is. On taxonomy, this build derives from ChannelKind and migrates one label rather than declaring a seventh type, and deliberately leaves session-trace's CHANNEL_LABEL alone, so Monitor can still say Chat where a deployment row says WhatsApp; collapsing that costs a rename across Sessions and Monitor and belongs to whoever owns those surfaces. Not built, and named so nothing reads as finished: WhatsApp messages and calls, SMS, removing the voice leg for a text-only agent, origin enforcement and the hosted widget bundle are all Requires Engine, with no field at any version, so they ship as rows that state the dependency and count the ask. Also not built, cut on the honesty floor: the in review and rejected states with their dates and reasons, the allowed sites list, and No traffic yet, which waits on a server anchored first_live_call_received that is still unowned. The retry select and its interval come out in the same pass, because neither exists in the Console contract or in any vendor.",
+   "next": "v3 merger slice shipped 2026-09-23 (67fd373b, 8ab54dad): runs index rows, banner and form open the agent; ?rail=deploy; Campaigns column on Agents. Next v3: fix the Concurrency default (15 vs a 1 to 10 validator) on Create campaign; single-column form on lg; Sessions surface. Research gap: Vapi, Retell and LiveKit product sessions expired on the research profile; re-sign-in and rerun for populated batch lists. OWNER DECISION: who owns the embeddable widget bundle, and which taxonomy wins. On the bundle, three answers change one string on the web surface: Agora hosts it and the action stays Copy embed code; we ship a React component on agora-agent-client-toolkit-react and the action becomes an install; or neither, and the action becomes the Embed Agent REST snippet Studio already documents. The correction ships either way, because the fake package name and the 404 CDN URL come out in the first slice whatever the answer is. On taxonomy, this build derives from ChannelKind and migrates one label rather than declaring a seventh type, and deliberately leaves session-trace's CHANNEL_LABEL alone, so Monitor can still say Chat where a deployment row says WhatsApp; collapsing that costs a rename across Sessions and Monitor and belongs to whoever owns those surfaces. Not built, and named so nothing reads as finished: WhatsApp messages and calls, SMS, removing the voice leg for a text-only agent, origin enforcement and the hosted widget bundle are all Requires Engine, with no field at any version, so they ship as rows that state the dependency and count the ask. Also not built, cut on the honesty floor: the in review and rejected states with their dates and reasons, the allowed sites list, and No traffic yet, which waits on a server anchored first_live_call_received that is still unowned. The retry select and its interval come out in the same pass, because neither exists in the Console contract or in any vendor.",
    "secondary": [
     {
      "vendor": "ElevenLabs",
@@ -5079,6 +5103,26 @@
    },
    "afterShots": [
     {
+     "file": "references/research/_after-merger-2026-09-23/after-m1-runs-index.png",
+     "alt": "v3 · Outbound Campaigns: the Agent column is a door into the agent's Deploy rail, marked in red"
+    },
+    {
+     "file": "references/research/_after-merger-2026-09-23/after-m2-agent-deploy.png",
+     "alt": "v3 · Agent page opened by ?rail=deploy: the agent's campaigns listed on the Deploy rail, marked in red"
+    },
+    {
+     "file": "references/research/_after-merger-2026-09-23/after-m3-agents-list.png",
+     "alt": "v3 · Agents list with a Campaigns column reading 3 campaigns · 1 running, marked in red"
+    },
+    {
+     "file": "references/research/_after-merger-2026-09-23/after-m4-campaign-detail.png",
+     "alt": "v3 · Campaign banner facts start with the agent as a link, marked in red"
+    },
+    {
+     "file": "references/research/_after-merger-2026-09-23/after-m5-campaign-form.png",
+     "alt": "v3 · Create campaign with Open agent beside the AI agent label, marked in red"
+    },
+    {
      "file": "references/research/_after13-2026-09-17/after-18-channel-sheet-whatsapp.png",
      "alt": "What WhatsApp needs, stated in a sheet rather than a page: one number carries two runtimes, messages take text behaviour and calls take voice behaviour, and the row's switch records the ask, marked in red"
     },
@@ -5088,6 +5132,18 @@
     }
    ],
    "before": [
+    {
+     "file": "references/research/_before-merger-2026-09-23/before-m1-runs-index.png",
+     "source": "Live Console design mode, design/sandbox c94f9221 (deploy 22w8ftqlp) · Outbound Campaigns",
+     "alt": "Outbound Campaigns with the Agent cell as plain text, marked in red",
+     "wrong": [
+      "A run names its agent but the name goes nowhere.",
+      "The Deploy rail cannot be opened by URL, so no link could land on the agent's campaigns.",
+      "The agents list gives no sign of which agent has runs.",
+      "Configuration prints a bare Agent UUID; the banner's agent name is inert.",
+      "The form picks the agent from a select and offers no way back to it."
+     ]
+    },
     {
      "file": "references/research/_before10-2026-09-17/before-17-18-channels.png",
      "source": "Studio X 2 live, design/sandbox 2026-09-17 · Resources › Deployment Channels · components/channels-panel.tsx",
@@ -5113,7 +5169,14 @@
       "The builder never gets the lighter setup the owner asked for: the lean branch is unreachable, so the whole styling stack renders inside the Deployment section."
      ]
     }
-   ]
+   ],
+   "v3": {
+    "status": "SHIPPED · v3",
+    "live": "https://ng-console-9ckem4eph-agoraio.vercel.app",
+    "figma": "https://www.figma.com/design/OIKZExT265nOJotBlmv2Ah/?node-id=18-2",
+    "prd": "https://claude.ai/artifact/GPJfQWLVgzaqfJ5RJ6UHiQ",
+    "studioX2": "https://ai-studio-console-redesign.vercel.app/agents/agt_default/edit?step=2"
+   }
   },
   {
    "n": "19",

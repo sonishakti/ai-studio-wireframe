@@ -1,0 +1,9 @@
+# 18 · Agent × Campaign merger · v3 · Learnings (2026-09-23)
+
+1. **Every vendor keeps a campaign list that picks an agent; none makes the agent visible on the run.** Retell binds the agent through the From Number (docs shot `retell-18m-batchcall-agent-fromnumber.png`), ElevenLabs takes `agent_id` as a foreign key (docs shot `elevenlabs-18m-batch-calling-docs.png`), Vapi's Campaigns pick an assistant (audit 2026-09-21). The market convention is the index, so the Console keeps Outbound Campaigns; the whitespace is the two-way link.
+2. **ElevenLabs puts Outbound in its own nav item and the empty batch list names no agent** (`elevenlabs-18m-batch-list-empty.png`). A runs index with no way back to the agent is the failure the merger audit scored sev 4 on Studio X 2. The Console must never have a run that cannot name and open its agent.
+3. **LiveKit has no campaign object at all**: an outbound call is `CreateSIPParticipant` inside a dispatched job (`livekit-18m-outbound-calls-agent-dispatch.png`, `livekit-18m-agent-dispatch-explicit.png`). A campaign there is the developer's own loop. That is the Marcus persona's mental model: the run is the agent's, not a peer of it. The design follows it in copy (facts line starts with the agent) without inventing a runtime.
+4. **Retell prices the run in the header and asks concurrency as a reservation** (product shot 2026-09-17, `retell-18-batch-call-form.png`). Both are v3.1; neither changes where the agent sits on the form.
+5. **Nobody pauses or resumes a run; nobody pins a version to it.** Stop on the run row (shipped 5fdbdcb0) is already ahead of the field; version pinning stays v3.1.
+
+Research gap to close: the signed-in research profile has expired on Vapi, Retell and LiveKit (2026-09-23), so this round's product shots are ElevenLabs only plus docs. Re-sign-in on `~/.agora-design/chrome-competitors`, then rerun `scripts/drive.mjs` for populated lists, create forms and detail pages.
