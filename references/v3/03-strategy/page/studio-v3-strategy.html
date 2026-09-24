@@ -1,0 +1,324 @@
+<title>Studio v3 Strategy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#f2f4f6; --paper-2:#ffffff; --ink:#121a1f; --ink-2:#48545e; --ink-3:#77838d;
+  --line:#d5dce2; --line-2:#e6ebef; --accent:#0a5d7c; --accent-soft:#dbecf3;
+  --build:#0a5d7c; --operate:#6a4bc4; --observe:#0f7a5c; --connect:#9a5b12;
+  --p0:#0a5d7c; --p1:#6a4bc4; --p2:#0f7a5c; --p3:#9a5b12; --fut:#77838d;
+  --red:#b3312d; --amber:#9a6a12; --green:#2b6e48;
+  --radius:6px; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --display:"Archivo","IBM Plex Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e1417; --paper-2:#151c21; --ink:#e7ecef; --ink-2:#acb7bf; --ink-3:#7b8892;
+  --line:#29333a; --line-2:#202930; --accent:#5ab4d6; --accent-soft:#12303c;
+  --build:#5ab4d6; --operate:#ad9bff; --observe:#5ccfa9; --connect:#e2ab5c;
+  --p0:#5ab4d6; --p1:#ad9bff; --p2:#5ccfa9; --p3:#e2ab5c; --fut:#7b8892;
+  --red:#ef7f7a; --amber:#e2b05b; --green:#6fc494;
+}}
+:root[data-theme="dark"]{
+  --paper:#0e1417; --paper-2:#151c21; --ink:#e7ecef; --ink-2:#acb7bf; --ink-3:#7b8892;
+  --line:#29333a; --line-2:#202930; --accent:#5ab4d6; --accent-soft:#12303c;
+  --build:#5ab4d6; --operate:#ad9bff; --observe:#5ccfa9; --connect:#e2ab5c;
+  --p0:#5ab4d6; --p1:#ad9bff; --p2:#5ccfa9; --p3:#e2ab5c; --fut:#7b8892;
+  --red:#ef7f7a; --amber:#e2b05b; --green:#6fc494;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--sans);padding-block:0 72px;padding-inline:16px}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;letter-spacing:-.01em;margin:0}
+h1{font-size:clamp(32px,4.6vw,48px);line-height:1.04;font-weight:800}
+h2{font-size:clamp(22px,3vw,28px);font-weight:700;margin-top:60px;padding-top:24px;border-top:1px solid var(--line)}
+h3{font-size:18px;font-weight:700;margin-top:26px}
+p{max-width:72ch;margin:12px 0}
+.lede{font-size:18px;color:var(--ink-2);max-width:66ch}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+header{padding-block:44px 6px;display:grid;gap:14px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font:13px/1.4 var(--mono);color:var(--ink-3)}
+.box{margin-top:22px;border:1px solid var(--line);background:var(--paper-2);border-radius:var(--radius);padding:20px 22px}
+.big{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:700;line-height:1.2;text-wrap:balance}
+ul.tight{margin:10px 0 0;padding-left:18px} ul.tight li{margin:5px 0;max-width:80ch}
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+@media (max-width:900px){.pillars{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.pillars{grid-template-columns:1fr}}
+.pillar{border:1px solid var(--line);background:var(--paper-2);border-radius:var(--radius);padding:16px;border-top:4px solid var(--c)}
+.pillar .k{font:500 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.pillar h4{margin:8px 0 6px;font-family:var(--display);font-size:17px}
+.pillar p{font-size:14px;color:var(--ink-2);margin:4px 0}
+.pillar .q{font-style:italic}
+pre.ia{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;overflow-x:auto;font:13px/1.55 var(--mono);color:var(--ink)}
+.tablewrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper-2)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line-2)}
+th{font:500 11.5px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--paper);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink-3)}
+td.api{white-space:nowrap} td.note{color:var(--ink-2);font-size:13px}
+code{font-family:var(--mono);font-size:.9em}
+.pill{display:inline-block;font:500 11.5px/1 var(--mono);padding:4px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.p0{color:var(--p0)} .pill.p1{color:var(--p1)} .pill.p2{color:var(--p2)} .pill.p3{color:var(--p3)} .pill.fut{color:var(--fut)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.filters button{font:500 13px/1 var(--sans);padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink-2);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.filters button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font:13px var(--mono);color:var(--ink-3);margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);background:var(--paper-2);border-radius:var(--radius);padding:16px}
+.card h4{margin:0 0 6px;font-family:var(--display);font-size:16px}
+.card p,.card li{font-size:14px;color:var(--ink-2)}
+.card ul{margin:6px 0 0;padding-left:18px}
+.stream{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:baseline}
+.timeline{display:grid;gap:10px;margin-top:14px}
+.tl{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start;border:1px solid var(--line);background:var(--paper-2);border-radius:var(--radius);padding:12px 14px;border-left:4px solid var(--c)}
+.tl .d{font:500 13px/1.4 var(--mono);color:var(--ink-3)}
+.tl b{font-family:var(--display)}
+@media (max-width:560px){.tl{grid-template-columns:1fr}}
+ol.dec{padding-left:22px} ol.dec li{margin:10px 0;max-width:80ch}
+.note-box{font-size:13.5px;color:var(--ink-2);border:1px dashed var(--line);border-radius:var(--radius);padding:10px 14px;max-width:82ch;margin-top:14px}
+a{color:var(--accent)} a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.kb code{font-size:12.5px}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Studio v3 · strategy, research, plan · 24 Sep 2026</div>
+  <h1>Studio v3 Strategy</h1>
+  <p class="lede">The Console becomes the same shape as the v3 API: Secret, Agent, Session, with every deployment in the session's transport. This page is the plan for the four workstreams you set (P0 agent flow, P1 agent page, P2 session history, P3 v3 mapping), grounded in both 24 Sep calls, the evening spec, and four research passes.</p>
+  <div class="meta"><span>Launch: mid-October · new Studio + v3 API + SuperNode · US East</span><span>Built inside the existing Console design system</span><span>Branch <code>design/v3</code></span></div>
+</header>
+
+<section class="box">
+  <div class="eyebrow">The short version</div>
+  <div class="big" style="margin-top:8px">Close the loop the Console breaks today: build, go live, watch, find the bad call, change, prove it helped.</div>
+  <ul class="tight">
+    <li><b>Aggregate on the agent, drill down in history.</b> Vineet was explicit: session history is for finding one call; totals live only on the agent.</li>
+    <li><b>Optimise the hot path, keep the depth.</b> Two presets plus Custom, one Advanced panel that restores every setting Concept A dropped, then a delight pass with vendor logos.</li>
+    <li><b>UI equals API.</b> Same entities, same words, field-for-field for Create an agent and Start a session.</li>
+    <li><b>The research found open squares.</b> No competitor unifies sessions across modalities, renders zero-retention rows, has an ephemeral-session state, or shows which agents use a secret before you delete it.</li>
+    <li><b>The biggest risk is data, not design.</b> The v3 spec defers session analytics, transcripts and events past launch, and the P1 and P2 designs depend on them. Deciding the day-one data source is the first call to make.</li>
+  </ul>
+</section>
+
+<h2>Four pillars, one object graph</h2>
+<div class="pillars">
+  <div class="pillar" style="--c:var(--build)"><div class="k">Build</div><h4>Customise the agent</h4><p class="q">"Make an agent that answers the way I want."</p><p>Agent › Configure. Presets, prompt, context, analysis, deploy and go live.</p></div>
+  <div class="pillar" style="--c:var(--operate)"><div class="k">Operate</div><h4>The agent in the real world</h4><p class="q">"Is my agent working right now?"</p><p>Agent › Overview. Analytics, logs and diagnostics, live sessions, talk to agent.</p></div>
+  <div class="pillar" style="--c:var(--observe)"><div class="k">Observe</div><h4>Sessions and runs</h4><p class="q">"What happened on this call, and why?"</p><p>Session history. Every session, every transport, deep-linked.</p></div>
+  <div class="pillar" style="--c:var(--connect)"><div class="k">Connect</div><h4>Transports, secrets, data</h4><p class="q">"What does it talk through, with which keys, keeping what?"</p><p>Transports, Secrets, data policy at Go live.</p></div>
+</div>
+
+<h3>Information architecture</h3>
+<pre class="ia">Agents ─────────────── list (+ sessions 7 d, error dot, last call)
+  └ Agent
+     ├ Overview      live now · Analytics · Logs &amp; diagnostics · Talk to agent · runs (batch)
+     ├ Configure     Voice &amp; models · Prompt &amp; context · Test · Deploy &amp; go live (tabs per type) · Analysis
+     └ Sessions      = session history filtered to this agent
+Session history ────── every session · query + facets + time · agent column backlinks
+  ├ Run (batch)      its sessions, progress, pause / resume / cancel
+  └ Session          modality card · full screen · share · download
+Transports ─────────── phone numbers (inbound agent + call policy) · future WhatsApp   [label TBD]
+Secrets ────────────── sets · write-only keys · used by</pre>
+
+<h3>Direction × modality</h3>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>RTC</th><th>Telephony</th><th>WhatsApp (later)</th></tr></thead>
+<tbody>
+<tr><td><b>Inbound</b></td><td>Web widget or app joins</td><td>Number rings the agent</td><td>Message or call to the business number</td></tr>
+<tr><td><b>Outbound</b></td><td>—</td><td>Batch run, one contact per session</td><td>Template-initiated</td></tr>
+<tr><td><b>Code</b></td><td><code>POST /sessions</code> rtc</td><td><code>POST /sessions</code> telephony</td><td>Via transport when added</td></tr>
+</tbody></table></div>
+<p>Each filled cell is a session-detail variant. Every variant shares the timeline, transcript, analysis, events, logs and latency blocks, then adds one block for its modality. RTC adds channel, uid, subscribers and audio scenario. Telephony adds from and to, SIP legs, ring and call duration, voicemail and transfer. WhatsApp is intent only.</p>
+
+<h2>The four workstreams</h2>
+<div class="timeline">
+  <div class="tl" style="--c:var(--p0)"><div class="d">P0 · 3 days<br>ready Tue 29 Sep</div><div><b>Agent builder, Concept A productised.</b> Create with type. Lowest latency (default), Balanced and Custom, with a logo strip per preset and a voice dropdown with preview. One Advanced panel restores every pipeline setting; A's current sheet has four switches. Prompt first, one context list. Deploy and Go live as tabs per type, carrying runs, the contact list, calling windows, pacing, inbound call policy, end-call, transfer and data policy. Inline secrets and Analysis naming, then a delight pass.</div></div>
+  <div class="tl" style="--c:var(--p1)"><div class="d">P1 · 3 days<br>ready Fri 2 Oct</div><div><b>Agent page.</b> Header badge ("2 errors · 3 warnings"), live sessions and a Talk to agent bubble. An Analytics tab where one time range and filter set drives every tile, and every tile opens its sessions. A Logs &amp; diagnostics tab with errors grouped by cause, count and affected sessions. Runs for batch agents and cues on the agents list.</div></div>
+  <div class="tl" style="--c:var(--p2)"><div class="d">P2 · 4 days<br>ready Thu 8 Oct</div><div><b>Session history.</b> One list for every session. <code>field:value</code> search with a facet panel that mirrors it, saved views, and the agent column with a backlink. A run page. Session detail as a drawer, then full screen, with a share link. Modality cards for RTC, telephony and WhatsApp (intent). Zero-retention and ephemeral rows, and the first-run state.</div></div>
+  <div class="tl" style="--c:var(--p3)"><div class="d">P3 · 3 days<br>ready Tue 13 Oct</div><div><b>v3 mapping.</b> A Secrets page with sets, write-only keys, "used by" and created-by-agent sets. A Transports page with numbers now and room for more. Inbound routing and call policy on Numbers. Parity fixes from the API diff and a terminology sweep.</div></div>
+</div>
+<p class="note-box"><b>Compressed option</b> for Vineet's "v1 of all frames by end of month": P0 as above, and P1, P2, P3 as grey first-pass frames by Fri 2 Oct. P2 and P3 are then refined in the two polish weeks. Cost: one extra review per stream, and the modality cards stay at intent until the log stream is confirmed. Totals: 13 working days with 9 review calls, or 7 days to first frames with the compressed plan.</p>
+
+<h2>Requirements register</h2>
+<p>All 52 requirements, never renumbered: 1–18 from the builder review, 19–36 from the monitoring and platform call, 37–52 new from the raw transcripts and your brief. API: ✅ the spec feeds it at launch, ◐ partly, ✗ Studio-only or deferred.</p>
+<div class="filters" role="group" aria-label="Filter by priority">
+  <button type="button" data-f="all" aria-pressed="true">All</button>
+  <button type="button" data-f="p0" aria-pressed="false">P0 agent flow</button>
+  <button type="button" data-f="p1" aria-pressed="false">P1 agent page</button>
+  <button type="button" data-f="p2" aria-pressed="false">P2 session history</button>
+  <button type="button" data-f="p3" aria-pressed="false">P3 v3 mapping</button>
+  <button type="button" data-f="fut" aria-pressed="false">Future</button>
+</div>
+<div class="count" id="regcount">52 requirements</div>
+<div class="tablewrap" style="max-height:640px"><table id="reg">
+<thead><tr><th>#</th><th>Requirement</th><th>Pillar</th><th>Surface</th><th>P</th><th>API</th><th>Notes</th></tr></thead>
+<tbody>
+<tr data-p="p0" data-pillar="build"><td class="num">1</td><td>Fewer voice/model/pipeline controls</td><td>Build</td><td>Builder › Voice &amp; models</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">3–4 lines: presets + voice</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">2</td><td>Model control shows choices and consequences, scales past 3</td><td>Build</td><td>Builder › presets</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">Consequence = latency + intelligence, cost shown not traded</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">3</td><td>Deployment type as an early decision</td><td>Build</td><td>Create agent</td><td><span class="pill p0">P0</span></td><td class="api">✗</td><td class="note">Stored in <code>labels</code> (ask)</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">4</td><td>Several concepts for creation + deployment</td><td>Build</td><td>—</td><td><span class="pill p0">P0</span></td><td class="api">—</td><td class="note">Done: concepts A–E; A chosen</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">5</td><td>Stable content (prompt, knowledge) split from deployment-specific</td><td>Build</td><td>Builder order</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">See 40</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">6</td><td>Deployment + Go live as one area</td><td>Build</td><td>Builder › Deploy</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">Tabs per type</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">7</td><td>Contact list out of config, into launch / rerun</td><td>Build</td><td>Go live › New run</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note"><code>Campaign.contacts</code></td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">8</td><td>Keep grouping › run › session distinct</td><td>Observe</td><td>Runs, sessions</td><td><span class="pill p2">P2</span></td><td class="api">◐</td><td class="note">No API entity above Campaign; see 47</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">9</td><td>System prompt primary; greeting and failure secondary</td><td>Build</td><td>Builder › Prompt</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">failure_message lives on <code>llm</code></td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">10</td><td>Knowledge + MCP + tools as one compact list</td><td>Build</td><td>Builder › Context</td><td><span class="pill p0">P0</span></td><td class="api">◐</td><td class="note">KB not in spec</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">11</td><td>Progressive disclosure, less inline explanation</td><td>Build</td><td>Builder</td><td><span class="pill p0">P0</span></td><td class="api">—</td><td class="note">Tooltips over helper text</td></tr>
+<tr data-p="p0" data-pillar="connect"><td class="num">12</td><td>Credentials without secret-set mechanics</td><td>Connect</td><td>Builder key fields</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">Auto-create set (45)</td></tr>
+<tr data-p="p3" data-pillar="all"><td class="num">13</td><td>Terminology audit against v3</td><td>All</td><td>Everywhere</td><td><span class="pill p3">P3</span></td><td class="api">✅</td><td class="note"><code>object-model.md</code> §5</td></tr>
+<tr data-p="p3" data-pillar="observe"><td class="num">14</td><td>Batch call vs campaign naming</td><td>Observe</td><td>Runs, docs</td><td><span class="pill p3">P3</span></td><td class="api">◐</td><td class="note">Decide with API team</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">15</td><td>Home for Analysis, including code/SDK agents</td><td>Operate</td><td>Agent › Analysis definition</td><td><span class="pill p1">P1</span></td><td class="api">✅</td><td class="note"><code>structured_output</code> is agent config, all types</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">16</td><td>Agent performance view separate from editing</td><td>Operate</td><td>Agent page</td><td><span class="pill p1">P1</span></td><td class="api">✗</td><td class="note">Needs session analytics source</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">17</td><td>Agent-level vs session-level monitoring boundary</td><td>Operate/Observe</td><td>IA</td><td><span class="pill p1">P1</span></td><td class="api">—</td><td class="note">Rule: aggregate on agent, drill down in history</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">18</td><td>Monitoring cues on the agents list</td><td>Operate</td><td>Agents list</td><td><span class="pill p1">P1</span></td><td class="api">✗</td><td class="note">Sessions 7d, errors badge</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">19</td><td>Talk to agent bubble in the real-time panel</td><td>Operate</td><td>Agent page</td><td><span class="pill p1">P1</span></td><td class="api">✅</td><td class="note">RTC session with saved agent</td></tr>
+<tr data-p="fut" data-pillar="operate"><td class="num">20</td><td>A/B testing at deployment level</td><td>Operate</td><td>—</td><td><span class="pill fut"><i>future</i></span></td><td class="api">✗</td><td class="note">Design so variant can become a filter</td></tr>
+<tr data-p="fut" data-pillar="operate"><td class="num">21</td><td>Override-aware metrics</td><td>Operate</td><td>Agent page filters</td><td><span class="pill fut"><i>future shape</i></span></td><td class="api">◐</td><td class="note">Spec now: variables + ephemeral + mid-session PATCH overrides</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">22</td><td>One session history (sessions + calls)</td><td>Observe</td><td>Session history</td><td><span class="pill p2">P2</span></td><td class="api">◐</td><td class="note">List fields thin at launch</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">23</td><td>Backlinks session ↔ agent</td><td>Observe</td><td>History, agent page</td><td><span class="pill p2">P2</span></td><td class="api">✅</td><td class="note">agent_id on session</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">24</td><td>Modality-aware session cards (RTC, telephony, WhatsApp TBD)</td><td>Observe</td><td>Session detail</td><td><span class="pill p2">P2</span></td><td class="api">◐</td><td class="note">Common + per-modality blocks</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">25</td><td>Axes: direction × modality</td><td>Observe</td><td>History filters, badges</td><td><span class="pill p2">P2</span></td><td class="api">◐</td><td class="note">Direction derived (number inbound / campaign / API)</td></tr>
+<tr data-p="fut" data-pillar="observe"><td class="num">26</td><td>Configurable outcome columns</td><td>Observe</td><td>History</td><td><span class="pill fut"><i>later</i></span></td><td class="api">✗</td><td class="note">Core now: agent column</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">27</td><td>Agent page tabs: Analytics · Logs &amp; diagnostics</td><td>Operate</td><td>Agent page</td><td><span class="pill p1">P1</span></td><td class="api">◐</td><td class="note"></td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">28</td><td>Error logs wired from RTM</td><td>Operate</td><td>Agent › Logs</td><td><span class="pill p1">P1</span></td><td class="api">◐</td><td class="note">Vineet confirms the stream; the one hard requirement</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">29</td><td>&quot;2 errors, 3 warnings&quot; badge</td><td>Operate</td><td>Agent header, list</td><td><span class="pill p1">P1</span></td><td class="api">◐</td><td class="note">From 28</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">30</td><td>One time range drives list and metrics</td><td>Operate/Observe</td><td>Agent, history</td><td><span class="pill p1">P1/P2</span></td><td class="api">—</td><td class="note">Datadog pattern</td></tr>
+<tr data-p="p2" data-pillar="—"><td class="num">31</td><td>Datadog / Refero references</td><td>—</td><td>Research</td><td><span class="pill p2">P2</span></td><td class="api">—</td><td class="note"><code>02-research/observability-patterns.md</code></td></tr>
+<tr data-p="p2" data-pillar="connect"><td class="num">32</td><td>Retention: 30 days or none, both states designed</td><td>Connect/Observe</td><td>Go live + history rows</td><td><span class="pill p2">P2</span></td><td class="api">◐</td><td class="note">Inbound/batch gap, see 46</td></tr>
+<tr data-p="p3" data-pillar="connect"><td class="num">33</td><td>Resources → Transports, scalable</td><td>Connect</td><td>Transports page</td><td><span class="pill p3">P3</span></td><td class="api">✅</td><td class="note">Numbers now; WhatsApp later</td></tr>
+<tr data-p="p3" data-pillar="connect"><td class="num">34</td><td>Secrets replace credentials</td><td>Connect</td><td>Secrets page + builder</td><td><span class="pill p3">P3</span></td><td class="api">✅</td><td class="note"></td></tr>
+<tr data-p="p3" data-pillar="connect"><td class="num">35</td><td>Pricing: 5¢/min managed, lower with BYOK</td><td>Connect</td><td>Preset copy, usage</td><td><span class="pill p3">P3</span></td><td class="api">—</td><td class="note"><b>Not public.</b> No price copy until cleared</td></tr>
+<tr data-p="p3" data-pillar="all"><td class="num">36</td><td>UI↔API parity for Start a session and Create an agent</td><td>All</td><td>Builder, Go live</td><td><span class="pill p3">P3</span></td><td class="api">✅</td><td class="note"><code>api-parity.md</code></td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">37</td><td>Third option = Custom (reveals full config)</td><td>Build</td><td>Voice &amp; models</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">Presets write <code>pipeline</code>; Custom exposes it</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">38</td><td>One settings page for voice + pipeline + speech; restore every advanced setting lost in A</td><td>Build</td><td>Builder › Advanced</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">Gap: A&#x27;s sheet has 4 switches only</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">39</td><td>Vendor logos + delightful pass</td><td>Build</td><td>Presets, Custom, voice</td><td><span class="pill p0">P0</span></td><td class="api">—</td><td class="note">Copy Vapi&#x27;s reasoning, not its look</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">40</td><td>Builder order: model → prompt → test → deploy + go live</td><td>Build</td><td>Builder</td><td><span class="pill p0">P0</span></td><td class="api">—</td><td class="note"></td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">41</td><td>Ephemeral sessions listed, agent &quot;Ephemeral&quot;, no backlink, CSV for aggregates</td><td>Observe</td><td>History</td><td><span class="pill p2">P2</span></td><td class="api">✅</td><td class="note">New endpoint</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">42</td><td>Deep links for sessions and runs, shareable</td><td>Observe</td><td>History, runs</td><td><span class="pill p2">P2</span></td><td class="api">✅</td><td class="note">ids exist</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">43</td><td>Full-screen session detail, beside Download</td><td>Observe</td><td>Session detail</td><td><span class="pill p2">P2</span></td><td class="api">—</td><td class="note"></td></tr>
+<tr data-p="p0" data-pillar="all"><td class="num">44</td><td>Rename structured output to Analysis (or Monitoring)</td><td>All</td><td>Builder, agent page, history</td><td><span class="pill p0">P0</span></td><td class="api">◐</td><td class="note">API field stays <code>structured_output</code> unless renamed</td></tr>
+<tr data-p="p0" data-pillar="connect"><td class="num">45</td><td>Secret set auto-created per agent, &quot;created by agent X&quot;, write-only, delete + recreate</td><td>Connect</td><td>Builder, Secrets</td><td><span class="pill p0">P0/P3</span></td><td class="api">✅</td><td class="note">Delete rule conflict: owner recap says never; transcript says delete allowed; spec: delete when unreferenced</td></tr>
+<tr data-p="p0" data-pillar="connect"><td class="num">46</td><td>Data policy collected at Go live for inbound + batch</td><td>Connect</td><td>Go live</td><td><span class="pill p0">P0</span></td><td class="api">✗</td><td class="note">API gap on Number and Campaign</td></tr>
+<tr data-p="p2" data-pillar="observe"><td class="num">47</td><td>Hierarchy campaign › run › session; monitor at agent, campaign, run, session</td><td>Observe/Operate</td><td>Runs, agent page</td><td><span class="pill p2">P2</span></td><td class="api">◐</td><td class="note">Campaign grouping UI-only today</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">48</td><td>Calling windows, dial rate, inbound call policy, end-call, transfer</td><td>Build/Connect</td><td>Go live</td><td><span class="pill p0">P0</span></td><td class="api">✅</td><td class="note">New in spec</td></tr>
+<tr data-p="p1" data-pillar="operate"><td class="num">49</td><td>Live view: sessions running now</td><td>Operate</td><td>Agent page</td><td><span class="pill p1">P1</span></td><td class="api">◐</td><td class="note">List defaults to running + last 2 h</td></tr>
+<tr data-p="fut" data-pillar="operate"><td class="num">50</td><td>Benchmarks shift to task success</td><td>Operate</td><td>Agent analytics</td><td><span class="pill fut"><i>future</i></span></td><td class="api">✗</td><td class="note">Informs KPI choice (Analysis first, latency second)</td></tr>
+<tr data-p="p3" data-pillar="connect"><td class="num">51</td><td>US East only at launch; SuperNode in the preset</td><td>Connect</td><td>Presets, region display</td><td><span class="pill p3">P3</span></td><td class="api">—</td><td class="note">No region picker</td></tr>
+<tr data-p="p0" data-pillar="build"><td class="num">52</td><td>Test / simulations section stays</td><td>Build</td><td>Builder › Test</td><td><span class="pill p0">P0</span></td><td class="api">◐</td><td class="note">&quot;For test we are good&quot;</td></tr>
+</tbody></table></div>
+
+<h2>What the research says</h2>
+<div class="grid2">
+  <div class="card"><h4>Open squares Agora can own</h4><ul>
+    <li>One session list across every modality. No competitor documents one.</li>
+    <li>A defined zero-retention row. Competitors document retention mechanics, never what the row shows.</li>
+    <li>An ephemeral, no-agent session state. Every vendor ties sessions to a saved agent.</li>
+    <li>"Used by" before deleting a secret. None of the six secret stores show it.</li>
+    <li>Rerunning the same batch. Every competitor treats a batch as single-level.</li>
+  </ul></div>
+  <div class="card"><h4>Patterns to adopt</h4><ul>
+    <li>One filter and time state drives tiles and list, and every tile drills to rows (Datadog, Amplitude, PostHog).</li>
+    <li><code>field:value</code> search plus a facet panel that mirrors it (Datadog Log Explorer).</li>
+    <li>Errors grouped into issues with counts and affected sessions (Datadog Error Tracking, Sentry).</li>
+    <li>A turn timeline with ASR, LLM and TTS legs beside transcript and scores (Langfuse, Hume session detail on Refero).</li>
+    <li>Preset cards with a logo strip, and Custom opening pre-filled from the default (Vapi's reasoning, ElevenLabs' grouping).</li>
+    <li>Write-only secrets: key immutable, rotate by overwrite (Vercel), environment on the set (Doppler).</li>
+  </ul></div>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Concept</th><th>Vapi</th><th>Retell</th><th>ElevenLabs</th><th>LiveKit</th></tr></thead>
+<tbody>
+<tr><td>Post-call extraction</td><td>Call Analysis · Structured Outputs</td><td>Post-Call Analysis · Custom Analysis</td><td>Success evaluation + Data collection</td><td>—</td></tr>
+<tr><td>Batch</td><td>Campaign</td><td>Batch Call</td><td>Batch calling (jobs)</td><td>—</td></tr>
+<tr><td>Unit of work</td><td>Call</td><td>Call</td><td>Conversation</td><td>Session</td></tr>
+<tr><td>Retention</td><td>HIPAA mode</td><td>1 day to 2 years per agent</td><td>Zero Retention Mode (not on batch)</td><td>30-day ceiling</td></tr>
+</tbody></table></div>
+<p>"Session" is the right umbrella word for a modality-agnostic product, and "call" is best kept for telephony. "Analysis" matches the Console's existing Call Analysis and the market's direction.</p>
+
+<h2>API parity and the spec</h2>
+<p>A field-level diff of the evening spec against the live Console builder and Concept A, covering Create an agent, Start a session, and the Go live fields on Number and Campaign.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Spec fields audited</td><td class="num">144</td></tr>
+<tr><td>Covered by the live Console</td><td class="num">96 (67 %)</td></tr>
+<tr><td>Covered by Concept A</td><td class="num">46 (32 %)</td></tr>
+<tr><td>Shown in a UI with no API field</td><td class="num">25</td></tr>
+</tbody></table></div>
+<ul class="tight">
+<li><b>Concept A dropped two thirds of the pipeline.</b> Its Advanced sheet has four switches. The live Console's turn-taking, silence and filler-word controls match the spec almost 1:1, defaults included, so they are the reference for the one Advanced panel.</li>
+<li><b>Analysis sits at the wrong level in the live Console.</b> It is configured per number and per campaign, never on the agent, so one agent cannot share one analysis definition. v3 puts <code>structured_output</code> on the agent.</li>
+<li><b>No Start a session surface exists.</b> Neither UI has one, so session lifecycle, data retention and RTC transport settings appear nowhere in the Console. For inbound and batch, Go live has to carry them.</li>
+<li><b>Legacy names still ship.</b> The live Console writes v2 names (<code>system_messages</code>, <code>greeting_message</code>, <code>endpointing</code>) where v3 says <code>instructions</code>, <code>greeting.text</code> and <code>turn_detection</code>.</li>
+<li><b>The UI does things the API cannot.</b> Knowledge base, recording and transcript toggles, SIP transfer headers, provider fallback and selective attention locking have no v3 field. Each needs an API home or a removal decision.</li>
+<li><b>Units differ.</b> Ring and silence limits are seconds in the UI and milliseconds in the spec.</li>
+<li><b>Avatar is modelled in the Console's data layer but never rendered.</b> It is a ready-to-wire gap.</li>
+</ul>
+<div class="tablewrap"><table>
+<thead><tr><th>Spec change on 24 Sep evening</th><th>What it means for the UI</th></tr></thead>
+<tbody>
+<tr><td><code>POST /sessions/ephemeral</code> with an inline agent; session create now takes <code>agent_id</code> + <code>variables</code>, no overrides</td><td>"Ephemeral" state in session history. Ask 21 (override-aware metrics) needs re-scoping: overrides now exist only mid-session.</td></tr>
+<tr><td>Campaign <code>transport {telephony, from, call_policy}</code>; schedule with timezone, calling days and time ranges; <code>max_calls_per_second</code></td><td>The Console's call-window editor has an API home. Dial rate replaces "call delay ms".</td></tr>
+<tr><td><code>Number.inbound.call_policy</code>, <code>EndCallPolicy</code>, <code>TransferPolicy</code></td><td>Inbound call settings, four end-call switches, and transfer (number + when) in Go live.</td></tr>
+<tr><td><code>data_policy</code> only on session create</td><td>Gap: inbound and batch have no field. Studio collects retention at Go live; the API needs a home for it.</td></tr>
+</tbody></table></div>
+
+<h2>KPIs</h2>
+<p>The north star stays <b>Fast-Proven Rate</b>: agents that answer within 15 active minutes and hold a real conversation within 14 days, target 45 %. v3 reports <b>Retained Production Agents</b> beside it, because the per-minute business earns on agents that keep taking calls.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Pillar</th><th>Input</th><th>Target to validate</th><th>Counter-metric</th></tr></thead>
+<tbody>
+<tr><td>Build</td><td>Time to first answer, median / p75</td><td>≤ 3 / ≤ 6 min</td><td>Verified test rate must not fall</td></tr>
+<tr><td>Build</td><td>Preset keep rate</td><td>≥ 70 %</td><td>Custom abandoned unsaved ≤ 10 %</td></tr>
+<tr><td>Operate</td><td>Agent page return rate (3 days in 14)</td><td>≥ 40 %</td><td>Dwell without an action</td></tr>
+<tr><td>Operate</td><td>Analysis coverage on live agents</td><td>≥ 60 %</td><td>Fields defined, never viewed</td></tr>
+<tr><td>Operate</td><td>Error acknowledgement time</td><td>≤ 24 h</td><td>Errors open at 7 days</td></tr>
+<tr><td>Observe</td><td>Time to the call</td><td>≤ 60 s</td><td>Sessions opened and closed in &lt; 5 s</td></tr>
+<tr><td>Observe</td><td>Filter-to-metric use</td><td>≥ 30 % of agent-page visits</td><td>Filters reset within 10 s</td></tr>
+<tr><td>Fix loop</td><td>Change after diagnosis, and the next 7 days' analysis score</td><td>tracked, then target</td><td>Edits reverted within 24 h</td></tr>
+</tbody></table></div>
+<p class="note-box">Nothing is instrumented yet. Four things must exist first: a session list with an agent filter and more than 2 hours of history, a session summary with analysis results, the RTM error stream exposed to the Console, and browser events for page opens, filters, shares and talk-to-agent.</p>
+
+<h2>Decisions needed from the team</h2>
+<ol class="dec">
+  <li><b>Day-one session data.</b> The spec defers latency, analysis results, transcripts and events. Which source feeds the agent page and session detail at launch: the v2 analytics pipeline, the RTM stream, or an honest empty state?</li>
+  <li><b>Error logs.</b> Which RTM log types exist per session, and in what shape (Vineet took this).</li>
+  <li><b>Data policy for inbound and batch.</b> Add <code>data_policy</code> to Number.inbound and Campaign, or a project or agent default. Also decide whether zero retention is allowed on batch; ElevenLabs forbids it.</li>
+  <li><b>Run or campaign.</b> The API campaign is one run with nothing above it. The recommendation is to call it Campaign in the UI for launch, show several as runs only in the comparison view, and add a grouping entity later.</li>
+  <li><b>Secret deletion.</b> Your recap says never; the call says delete and recreate; the spec says only when unreferenced. The proposal is no reveal, with delete allowed only when no agent uses the set, and the using agents listed.</li>
+  <li><b>Pricing copy.</b> The call said 5¢ managed, lower with BYOK, not public. Presets show latency and intelligence only until pricing clears.</li>
+  <li><b>Knowledge base.</b> Not in the v3 spec. Is it in v3?</li>
+  <li><b>Variant pointer.</b> Put agent version, override and ephemeral on every session record before launch, so future A/B and override analytics are a join, not a migration.</li>
+</ol>
+
+<h2>Knowledge base</h2>
+<div class="kb card">
+<p>All sources live in the design office repo under <code>references/v3/</code>.</p>
+<ul>
+<li><code>00-sources/meetings/</code>: digest of both calls with the deciding quotes, plus the full Granola notes.</li>
+<li><code>01-product/</code>: object model, requirements register, API parity diff.</li>
+<li><code>02-research/</code>: observability patterns, competitor monitoring, builder and secrets, batch, retention and experiments.</li>
+<li><code>03-strategy/</code>: product strategy, research synthesis, KPIs, scope of work.</li>
+<li><code>../api/v3/</code>: the morning and evening spec snapshots.</li>
+</ul>
+</div>
+</div>
+<script>
+(function(){
+  var btns=[].slice.call(document.querySelectorAll('.filters button'));
+  var rows=[].slice.call(document.querySelectorAll('#reg tbody tr'));
+  var count=document.getElementById('regcount');
+  function apply(f){
+    var n=0;
+    rows.forEach(function(r){var show=f==='all'||r.getAttribute('data-p')===f; r.hidden=!show; if(show)n++;});
+    btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-f')===f));});
+    count.textContent=n+(n===1?' requirement':' requirements');
+    try{localStorage.setItem('v3reg',f);}catch(e){}
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){apply(b.getAttribute('data-f'));});});
+  var saved='all'; try{saved=localStorage.getItem('v3reg')||'all';}catch(e){}
+  apply(saved);
+})();
+</script>
