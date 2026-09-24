@@ -97,6 +97,8 @@ window.__annot = function (specs) {
     if (spec.up) for (let i = 0; i < spec.up && el.parentElement; i++) el = el.parentElement;
     n++;
     const r = el.getBoundingClientRect();
+    const col = spec.color || "#e11d48";
+    const hx = col.replace("#",""); const rgb = [0,2,4].map(i=>parseInt(hx.slice(i,i+2),16)).join(",");
 
     const box = document.createElement('div');
     box.className = '__annot';
@@ -104,9 +106,9 @@ window.__annot = function (specs) {
       position: 'absolute',
       left: (r.left + scrollX - 5) + 'px', top: (r.top + scrollY - 5) + 'px',
       width: (r.width + 10) + 'px', height: (r.height + 10) + 'px',
-      border: '3px solid #e11d48', borderRadius: '7px',
+      border: '3px solid ' + col, borderRadius: '7px',
       zIndex: 2147483646, pointerEvents: 'none',
-      boxShadow: '0 0 0 3px rgba(225,29,72,.15)',
+      boxShadow: '0 0 0 3px rgba(' + rgb + ',.15)',
     });
 
     const tag = document.createElement('div');
@@ -148,7 +150,7 @@ window.__annot = function (specs) {
       position: 'absolute',
       left: left + 'px', top: top + 'px',
       width: estW + 'px',
-      background: '#e11d48', color: '#fff',
+      background: col, color: '#fff',
       padding: '5px 10px', borderRadius: '6px',
       zIndex: 2147483647, pointerEvents: 'none',
       boxShadow: '0 2px 8px rgba(0,0,0,.3)',
