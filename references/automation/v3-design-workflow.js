@@ -20,7 +20,7 @@ const WT = '/Users/shaktisoni/Documents/Agora Design & FE/ng-console/.worktrees/
 const PRD = ROOT + '/references/v3/03-strategy/prd-v3.json'
 const STATE = ROOT + '/references/automation/state.json'
 const SHEET = 'https://claude.ai/artifact/6YZCRsJvpoBthj4fnm9XAb'
-const LIST = '901115448379'
+const LIST = '901115453665' // Product › Design Tracker › 1. V3 (board columns: To-do · In progress · Pending Review · Delivered)
 const SLACK = 'C0C0D403FNF'
 const OWNER = 'U03A67AMB5M'
 const FIGMA = 'OIKZExT265nOJotBlmv2Ah'
@@ -31,9 +31,10 @@ const PAGE = p => ({ P0: 'v3 · P0 Agent config', P1: 'v3 · P1 Monitoring · Ag
 
 phase('Plan')
 const plan = await agent(`${RULES}\n\nRun ${RUN} on ${A.date || 'today'}. Load ClickUp, Slack and ArtifactData tools via ToolSearch. Read ${STATE} (create {"last_run_ts":null,"last_id":null,"running":null,"picked":[]} if missing).
-1. VERDICTS. (a) ClickUp list ${LIST}: for every task whose status changed since state.last_run_ts (all tasks on a first run): completed → ArtifactData "get" then "update" features/<id> on ${SHEET} with {"status":"Done","locked_at":"${A.date || ''}","commit":"<short SHA from the task's latest review comment, else keep>"} and add ONE task comment "Locked ${A.date || ''} · <commit>" if none exists; in review → status Review; in progress → WIP; Open or on hold → Planned. Never overwrite web, figma, design_eta, lock_eta. (b) Slack channel ${SLACK}: messages and thread replies since state.last_run_ts from user ${OWNER} only: "approve <id>" → task completed (then as above); "change <id>: <notes>" → task in progress + comment "change: <notes>"; "park <id>" → on hold; a bare feature id → that task in progress. Ignore everything else.
-2. PICK ONE feature: ${A.only ? `args.only = ${A.only}: take it (move to in progress if needed).` : 'first a task in "in progress" with a "change:" comment newer than its last move to "in review"; else the lowest-id task in "in progress" that is not in review (ids order P0.1 < P0.2 < … < P0.15 < P1.1 …); else the next "Open" task in phase order whose PRD row has d > 0 (skip proposed rows), moved to "in progress". If nothing qualifies, return picked=null.'} Read its PRD row in ${PRD} (features[] by id) and its change notes. Compute n = 1-based position of the id in the features[] order, of ${'42'}.
-3. LOCKED: tasks in "completed", each with id and the routes or components its latest comment names.
+COLUMNS: list ${LIST} has four board columns. Resolve their exact ClickUp status names once with clickup_get_task expand_statuses on any task in the list: TODO = the status of type open (named To-do, or Open until renamed), INPROGRESS = "In progress" (or "in progress"), REVIEW = "Pending Review" (or "in review" until renamed), DELIVERED = the status of type closed (named Delivered, or Closed until renamed). Use those names everywhere below; never create or use any other status.
+1. VERDICTS. (a) ClickUp list ${LIST}: for every task whose status changed since state.last_run_ts (all tasks on a first run): DELIVERED → ArtifactData "get" then "update" features/<id> on ${SHEET} with {"status":"Done","locked_at":"${A.date || ''}","commit":"<short SHA from the task's latest review comment, else keep>"} and add ONE task comment "Locked ${A.date || ''} · <commit>" if none exists; REVIEW → status Review; INPROGRESS → WIP; TODO → Planned. Never overwrite web, figma, design_eta, lock_eta. (b) Slack channel ${SLACK}: messages and thread replies since state.last_run_ts from user ${OWNER} only: "approve <id>" → task DELIVERED (then as above); "change <id>: <notes>" → task INPROGRESS + comment "change: <notes>"; "park <id>" → task TODO + comment "parked"; a bare feature id → that task INPROGRESS. Ignore everything else.
+2. PICK ONE feature: ${A.only ? `args.only = ${A.only}: take it (move to in progress if needed).` : 'first a task in INPROGRESS with a "change:" comment newer than its last move to REVIEW; else the lowest-id task in INPROGRESS (ids order P0.1 < P0.2 < … < P0.15 < P1.1 …); else the lowest-id TODO task whose PRD row has d > 0 (skip proposed rows), moved to INPROGRESS. Tasks in REVIEW or DELIVERED are never picked. If nothing qualifies, return picked=null.'} Read its PRD row in ${PRD} (features[] by id) and its change notes. Compute n = 1-based position of the id in the features[] order, of ${'42'}.
+3. LOCKED: tasks in DELIVERED, each with id and the routes or components its latest comment names.
 Write state.running = the picked id and state.last_run_ts = now (ISO) to ${STATE}. Return the pick.`, {
   label: 'plan', phase: 'Plan',
   schema: { type: 'object', properties: {
@@ -70,7 +71,7 @@ const f = await agent(`${RULES}\n\nLoad skill figma:figma-use before any use_fig
   { label: `figma:${q.id}`, phase: 'Figma', schema: { type: 'object', properties: { figma: { type: 'string' }, drift: { type: 'string' }, problems: { type: 'string' } }, required: ['figma', 'drift', 'problems'] } })
 
 phase('Track')
-const t = await agent(`${RULES}\n\n1. ClickUp task ${q.task_id}: add a comment "Review ready · run ${RUN} ${A.date || ''}" with prototype ${b.web}, Figma ${f.figma}, commit ${b.commit}, rationale ${JSON.stringify(d.why)}, rainy states covered ${JSON.stringify(b.shots.filter(s => s.rainy).map(s => s.caption))}, drift ${f.drift}; set status "in review".
+const t = await agent(`${RULES}\n\n1. ClickUp task ${q.task_id}: add a comment "Review ready · run ${RUN} ${A.date || ''}" with prototype ${b.web}, Figma ${f.figma}, commit ${b.commit}, rationale ${JSON.stringify(d.why)}, rainy states covered ${JSON.stringify(b.shots.filter(s => s.rainy).map(s => s.caption))}, drift ${f.drift}; set status REVIEW ("Pending Review", or "in review" until renamed).
 2. ArtifactData on ${SHEET}: "get" features/${q.id}, then "update" with {"id":"${q.id}","status":"Review","web":"${b.web}","figma":"${f.figma}","commit":"${b.commit}","research":{<vendor>:<status> for ${JSON.stringify(research.filter(Boolean).map(r => ({ vendor: r.vendor, status: r.status })))}},"updated":"${A.date || ''}"}; keep design_eta and lock_eta. Never write Done or locked_at.
 3. Update ${STATE}: last_id "${q.id}", picked += "${q.id}". Return one line.`,
   { label: `track:${q.id}`, phase: 'Track', model: 'sonnet' })
@@ -86,8 +87,8 @@ Rainy states covered: ${b.shots.filter(s => s.rainy).map(s => s.caption).join(',
 Touches locked: ${(b.touches_locked || []).join(', ') || 'none'}
 Open questions: ${(d.questions || []).slice(0, 3).join(' · ') || 'none'}
 ${b.problems || f.problems ? 'Unfinished: ' + [b.problems, f.problems].filter(Boolean).join('; ') : ''}
-Approve: move the task to completed or reply \\"approve ${q.id}\\". Changes: reply \\"change ${q.id}: …\\" or comment on the task and move it to in progress.
-Next run ${NEXT} takes the next in progress or Open id unless you pick another."
+Approve: drag the card to Delivered or reply \\"approve ${q.id}\\". Changes: reply \\"change ${q.id}: …\\" or comment on the card and drag it back to In progress.
+Next run ${NEXT} takes the next In progress or To-do card unless you pick another."
 Then write ${ROOT}/references/automation/runs/${A.date || 'latest'}-${RUN.replace(':', '')}.md with the pick, links, rationale, problems and verdicts applied (${plan.verdicts}). Set state.running = null in ${STATE}. Remove /tmp/v3-run.lock. If run is 20:00 and ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}' is ≥ 900, run pmset sleepnow; never shut down.`,
   { label: 'report', phase: 'Report', model: 'sonnet' })
 return { run: RUN, id: q.id, n: q.n, web: b.web, figma: f.figma, commit: b.commit, track: t }

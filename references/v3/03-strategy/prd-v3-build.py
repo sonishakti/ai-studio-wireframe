@@ -23,10 +23,14 @@ D = json.load(open(os.path.join(HERE, 'prd-v3.json')))
 TODAY = datetime.date.today().isoformat()
 SHEET = 'https://claude.ai/artifact/6YZCRsJvpoBthj4fnm9XAb'
 FIGMA_FILE = 'https://www.figma.com/design/OIKZExT265nOJotBlmv2Ah/'
-LIST_HOME = '901115448379'
-LIST_TRACKER = '901114875662'
+LIST_HOME = '901115453665'  # Product › Design Tracker › 1. V3
+LIST_TRACKER = '901115453666'  # Product › Design Tracker › 2. Future Sprints
 SLACK = '#design-agent-reviews'
 RUNS = ['08:00', '11:59', '16:00', '20:00']
+# ClickUp status name -> board column label (the folder keeps the space names until the owner renames them)
+COLUMN = {'open': 'To-do', 'to-do': 'To-do', 'todo': 'To-do', 'added': 'To-do', 'clarified': 'To-do', 'planning': 'To-do', 'pending': 'To-do',
+          'in progress': 'In progress', 'in review': 'Pending Review', 'pending review': 'Pending Review',
+          'completed': 'Delivered', 'closed': 'Delivered', 'delivered': 'Delivered', 'in version': 'Delivered'}
 
 # NN/g job map stage per job step (Ulwick: define, locate, prepare, confirm, execute, monitor, modify, conclude)
 JOBMAP = {
@@ -145,7 +149,7 @@ if V31 and os.path.exists(V31):
         num = (re.match(r'^(\d\d)', t['name']) or [None, ''])[1]
         rl = re.search(r'\*\*Research:\*\*\s*(.*?)\s*·\s*\*\*UI:\*\*\s*(.*?)\s*·\s*\*\*Final:\*\*\s*(.*)', md)
         v31.append({
-            'num': num, 'id': t['id'], 'name': t['name'], 'url': t.get('url', ''), 'status': t.get('status', ''), 'priority': t.get('priority') if isinstance(t.get('priority'), str) else (t.get('priority') or {}).get('priority', '') if t.get('priority') else '',
+            'num': num, 'id': t['id'], 'name': t['name'], 'url': t.get('url', ''), 'status': COLUMN.get(str(t.get('status', '')).lower(), 'To-do'), 'priority': t.get('priority') if isinstance(t.get('priority'), str) else (t.get('priority') or {}).get('priority', '') if t.get('priority') else '',
             'due': datetime.datetime.utcfromtimestamp(int(t['due_date']) / 1000).date().isoformat() if t.get('due_date') else '',
             'tags': g('Tags'), 'jtbd': g('JTBD'), 'what': g('What it does'), 'locks': g('Locks'), 'folder': g('Research folder'),
             'research': rl.group(1) if rl else '', 'ui': rl.group(2) if rl else '', 'final': rl.group(3) if rl else '',
@@ -226,7 +230,7 @@ def desc(f):
     L.append(f"API: {f['more'].get('api','')} Register: {f['more'].get('req','')} Journeys: {' · '.join(f['more'].get('journeys', []))}. Days: {f['d'] or 'none, proposed'}.")
     L.append(f"Rule 0, data first. This flow shows: {', '.join(f['data']) or 'no stored data'}. New account: {r0.get('new','')} Outside our accounts: {r0.get('external','')} Create in our account: {r0.get('create','')}")
     L.append(f"Files: references/v3/features/{f['id']}/ (jtbd, directions, build spec, flow/ screenshots, shots/ research).")
-    L.append('Status: Open = planned · in progress = taken at the next run (08:00, 11:59, 16:00, 20:00) · in review = pending Shakti · completed = locked (Figma frozen, commit) · on hold = parked. Changes: back to in progress + comment `change: …`.')
+    L.append('Columns: To-do = planned, in the order it gets done · In progress = taken at a run (08:00, 11:59, 16:00, 20:00) · Pending Review = delivered, pending Shakti · Delivered = approved and locked (Figma frozen, commit). Changes: drag back to In progress + comment `change: …`.')
     L.append('Rules: existing Console design system only (docs/design/DESIGN.md, design/v3); reuse, do not redesign; empty first, quiet chrome; sentence case, no arrows or em dashes; locked words; Sam only in job text; never change a locked feature unless in scope, then say so. One run delivers: prototype for the happy path and every rainy state, one screenshot per step, the Figma flow with "Sam does …" captions and rationale, this task in review with a comment, the sheet row, one Slack post.')
     return '\n'.join(L)
 
@@ -239,9 +243,6 @@ for f in D['features']:
 
 V31_BADGE = '🏷 **NEW FEATURES · v3.1** · after the 16 Oct v3 launch · sheet: ' + SHEET + '\n\n'
 open(os.path.join(OUT, 'clickup', 'v31-badge.md'), 'w', encoding='utf-8').write(V31_BADGE)
-open(os.path.join(OUT, 'clickup', 'list.md'), 'w', encoding='utf-8').write(
- 'One table for design, product and FE. Tag v3: the 42 job steps for Sam (P0.1 to P3.6), launch Fri 16 Oct 2026, mirrored from Studio v3 · P0–P3 feature board. Tag new features: the 28 v3.1 roadmap rows (01 to 28). '
- 'Each task: job to be done · goal · telemetry · research · deliverables (prototype, Figma flow, commit). Start date = design ETA, due date = lock ETA. '
- 'Live sheet with links: ' + SHEET)
+open(os.path.join(OUT, 'clickup', 'list.md'), 'w', encoding='utf-8').write('Folder Design Tracker: 1. V3 (42 job steps, P0.1 to P3.6, in the order they get done) and 2. Future Sprints (28 roadmap features, 01 to 28). Four columns each: To-do, In progress, Pending Review, Delivered. Live sheet: ' + SHEET)
 json.dump(manifest, open(os.path.join(OUT, 'build-manifest.json'), 'w'), indent=1)
 print('built', os.path.join(OUT, 'prd-v3.html'), len(html), 'bytes;', len(manifest), 'v3 descriptions;', len(v31), 'v3.1 rows; live rows', len(live))

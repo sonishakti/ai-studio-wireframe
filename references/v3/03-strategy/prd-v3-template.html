@@ -122,8 +122,7 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
 .stat.Planned{background:var(--chip);color:var(--mut)}.stat.WIP{background:color-mix(in srgb,var(--p0) 18%,transparent);color:var(--p0)}
 .stat.Review{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}.stat.Done{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .stat.Redo{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}.stat.Proposed{border:1px dashed var(--line);color:var(--mut)}.stat.Parked{background:var(--chip);color:var(--mut);text-decoration:line-through}
-.stat.added{background:var(--chip);color:var(--mut)}.stat.clarified{background:var(--chip);color:var(--ink)}.stat.planning{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
-.stat.inversion{background:color-mix(in srgb,var(--p0) 18%,transparent);color:var(--p0)}.stat.delivered{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.stat.To-do{background:var(--chip);color:var(--mut)}.stat.Inprogress{background:color-mix(in srgb,var(--p0) 18%,transparent);color:var(--p0)}.stat.PendingReview{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}.stat.Delivered{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .eta{display:grid;gap:1px;font-size:12px}.eta .lbl{color:var(--mut);font-size:11px}.eta.late b{color:var(--bad)}
 .life{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.life .fs{flex:1 1 150px}.life .arr{color:var(--mut)}
 .post{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:12px;white-space:pre-wrap}
@@ -169,13 +168,13 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
   <div class="x"><table id="gates"></table></div>
  </div></details>
  <details class="dd"><summary><span class="chev">›</span>How tracking works</summary><div class="in">
-  <div class="life"><div class="fs"><b>Planned</b><span>In the sheet with two ETAs</span><span class="d">ClickUp: Open</span></div><span class="arr">›</span><div class="fs"><b>WIP</b><span>The agent took it at a run</span><span class="d">ClickUp: in progress</span></div><span class="arr">›</span><div class="fs"><b>Review</b><span>Prototype and Figma flow delivered; you approve or ask for a redo</span><span class="d">ClickUp: in review</span></div><span class="arr">›</span><div class="fs"><b>Done</b><span>Approved and locked: Figma section frozen, commit recorded, FE pulls it</span><span class="d">ClickUp: completed</span></div></div>
+  <div class="life"><div class="fs"><b>Planned</b><span>In the sheet with two ETAs</span><span class="d">Board: To-do</span></div><span class="arr">›</span><div class="fs"><b>WIP</b><span>The agent took it at a run</span><span class="d">Board: In progress</span></div><span class="arr">›</span><div class="fs"><b>Review</b><span>Prototype and Figma flow delivered; you approve or ask for a redo</span><span class="d">Board: Pending Review</span></div><span class="arr">›</span><div class="fs"><b>Done</b><span>Approved and locked: Figma section frozen, commit recorded, FE pulls it</span><span class="d">Board: Delivered</span></div></div>
   <ul class="plain">
    <li><b>Two dates per row.</b> Design ETA is when the agent delivers for review. Lock ETA is when the row should be Done, two days later on a working day. Every lock lands before Fri 16 Oct.</li>
    <li><b>Humans follow the ETAs; the agent follows the queue.</b> The agent runs four times a day and takes the next row that is not done, so it runs ahead of the ETAs. An ETA only turns red when a lock is late.</li>
    <li><b>Done locks the design.</b> The Figma section is frozen and the commit is the lock. Later rows never change a locked design unless the change is in their own scope or improves it; then the agent names the locked ids in the review post and you decide.</li>
    <li><b>One row, one lock.</b> Each feature ships with its own commit on design/v3 and its own Figma section, so review, FE pull and rollback stay per feature.</li>
-   <li><b>Redo jumps the queue.</b> Move the task back to in progress and comment <span class="m">change: …</span>; the next run takes it first.</li>
+   <li><b>Redo jumps the queue.</b> Drag the card back to In progress and comment <span class="m">change: …</span>; the next run takes it first.</li><li><b>Two boards, one folder.</b> ClickUp › Product › Design Tracker: <b>1. V3</b> holds the 42 cards in the order they get done; <b>2. Future Sprints</b> holds the 28 roadmap cards for after the launch. Same four columns on both: To-do, In progress, Pending Review, Delivered.</li>
    <li><b>Proposed rows</b> (P0.14, P0.15, P1.11) have no dates until you sign them off in ClickUp.</li>
   </ul>
  </div></details>
@@ -184,11 +183,11 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
   <div class="x"><table>
    <tr><th>When</th><th>What the run does</th><th>Output</th></tr>
    <tr><td class="num">08:00</td><td rowspan="4"><ol class="plain" style="margin:0">
-    <li><b>Verdicts first.</b> ClickUp completed = approve and lock; in progress + <span class="m">change:</span> comment = redo; on hold = park. Slack replies from you count the same way.</li>
-    <li><b>Pick.</b> Redo first, then in progress by id, else the next Open in phase order (moved to in progress).</li>
+    <li><b>Verdicts first.</b> Card dragged to Delivered = approve and lock; back to In progress + <span class="m">change:</span> comment = redo; back to To-do = park. Slack replies from you count the same way.</li>
+    <li><b>Pick.</b> Redo first, then the lowest In progress card, else the top To-do card (moved to In progress).</li>
     <li><b>Build the job.</b> Reuse the research on the row; prototype on design/v3 so the link opens at the start of Sam's journey; one screenshot per step and per rainy state.</li>
     <li><b>Figma.</b> Section <span class="m">id · title</span>: frames in step order, each captioned "Sam does …", the rationale under it, research shots marked in red. Native frames, kit components, never detached.</li>
-    <li><b>Track.</b> ClickUp comment (prototype, Figma, commit, rationale) and status in review; the sheet row updated.</li>
+    <li><b>Track.</b> ClickUp comment (prototype, Figma, commit, rationale) and the card moved to Pending Review; the sheet row updated.</li>
     <li><b>Post.</b> One Slack message and a push, then stop. A run must finish before the next one starts.</li>
    </ol></td><td>Run 1 of the day</td></tr>
    <tr><td class="num">11:59</td><td>Run 2</td></tr>
@@ -196,7 +195,7 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
    <tr><td class="num">20:00</td><td>Run 4, then the Mac may sleep</td></tr>
   </table></div>
   <div class="post" id="postfmt"></div>
-  <p class="dim">Nothing left to take: the run posts nothing and stops. You review in ClickUp (move to completed or comment) or reply in Slack: <span class="m">approve P0.3</span> · <span class="m">change P0.3: …</span> · <span class="m">park P0.3</span>.</p>
+  <p class="dim">Nothing left to take: the run posts nothing and stops. You review on the board (drag to Delivered, or back to In progress with a comment) or reply in Slack: <span class="m">approve P0.3</span> · <span class="m">change P0.3: …</span> · <span class="m">park P0.3</span>.</p>
  </div></details>
  <details class="dd"><summary><span class="chev">›</span>Research rules for every agent</summary><div class="in">
   <div class="card"><b>Rule 0, data first.</b><span>Before researching or designing a flow, answer three questions and write them on the row: does a new logged-in account have the data this flow shows? If not, where outside our accounts does it exist (signed-in competitor accounts, vendor docs, Refero, the shots already captured)? And what must be created in our own account (agents, test sessions, forced failures, a run, a number) so the screenshots show real data? Our accounts hold few agents, sessions or failures, so monitoring and session rows always need this.</span><div class="x" style="margin-top:6px"><table id="rule0"></table></div></div>
@@ -330,7 +329,7 @@ draw();
 (async()=>{try{if(!window.claude||!window.claude.use)return;const db=await window.claude.use("db");if(!db)return;
  db.collection("features").onSnapshot(s=>{s.docs.forEach(d=>{if(d.exists)LIVE[d.id]=d.data()});const n=Object.keys(LIVE).length;$("live").textContent=n?`Live: ${n} rows updated by the agent runs`:"";draw()},()=>{})}catch(e){}})();
 /* new features, v3.1 */
-(function(){const V=D.v31||[];$("nflive").textContent=V.length?`${V.length} roadmap features from ClickUp Design Tracker, after the v3 launch`:"ClickUp rows not loaded";
+(function(){const V=D.v31||[];$("nflive").textContent=V.length?`${V.length} roadmap cards on the board 2. Future Sprints, after the v3 launch`:"ClickUp rows not loaded";
  const open=openState();const sc=s=>String(s||"").replace(/\s+/g,"");
  $("nftree").innerHTML=V.map(t=>`<details class="feat" id="NF${esc(t.num)}" data-k="nf:${esc(t.num)}"${open.has("nf:"+t.num)?" open":""}><summary class="row" role="treeitem">${CHEV}<span class="id NF">${esc(t.num)}</span><span class="step"><b>${esc(t.name.replace(/^\d\d\s*·\s*/,""))}</b><span class="chips">${(t.tags||"").split("·").map(x=>x.trim()).filter(Boolean).map(x=>`<span class="chip">${esc(x)}</span>`).join("")}${t.priority?`<span class="chip">${esc(t.priority)}</span>`:""}${/lock/i.test(t.name)?'<span class="chip rain">lock</span>':""}</span></span><span class="kpi">${esc(t.jtbd)}</span><span class="status"><span class="stat ${esc(sc(t.status))}">${esc(t.status)}</span></span><span class="eta">${t.due?`<span><span class="lbl">Due </span><b>${fmt(t.due)}</b></span>`:'<span class="dim">no date</span>'}</span><span class="dl">${ico("c",t.url,"Open in ClickUp")}</span></summary>
  <div class="body">
@@ -345,7 +344,7 @@ const GATES=[["G0 Clarified","Team agrees the row is in v3 and the API can save 
 $("gates").innerHTML="<tr><th>Gate</th><th>Passes when</th><th>When</th><th>Who</th></tr>"+GATES.map(g=>`<tr><td><b>${esc(g[0])}</b></td><td>${esc(g[1])}</td><td>${esc(g[2])}</td><td>${esc(g[3])}</td></tr>`).join("");
 $("runsrt").textContent=RUNS.join(" · ");
 (function(){const R=D.rule0||{};$("rule0").innerHTML="<tr><th>Phase</th><th>A new account has</th><th>Outside our accounts</th><th>Create in ours</th></tr>"+Object.keys(R).map(p=>`<tr><td><span class="id ${p}">${p}</span></td><td>${esc(R[p].new)}</td><td>${esc(R[p].external)}</td><td>${esc(R[p].create)}</td></tr>`).join("")})();
-$("postfmt").textContent=`JTBD 14 of 42 · P1.8 Confirm people reach the agent is done and pending your review\nPrototype (opens where Sam starts): https://…\nFigma flow with screenshots: https://…\nRationale: 1 … 2 … 3 …\nRainy states covered: b, c, d, e, f, g, h\nOpen questions: …\nApprove: move the ClickUp task to completed or reply "approve P1.8". Changes: reply "change P1.8: …".`;
+$("postfmt").textContent=`JTBD 14 of 42 · P1.8 Confirm people reach the agent is done and pending your review\nPrototype (opens where Sam starts): https://…\nFigma flow with screenshots: https://…\nRationale: 1 … 2 … 3 …\nRainy states covered: b, c, d, e, f, g, h\nOpen questions: …\nApprove: drag the card to Delivered or reply "approve P1.8". Changes: reply "change P1.8: …".`;
 /* practices borrowed */
 (function(){const P=D.practices||[];$("pracrt").textContent=P.length?`${P.length} from Anthropic, Vercel, Linear and others`:"research in progress";
  $("prac").innerHTML=P.length?`<div class="x"><table><tr><th>Practice</th><th>From</th><th>How we use it</th></tr>${P.map(p=>`<tr><td><b>${esc(p.practice)}</b></td><td>${p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.from)}</a>`:esc(p.from)}</td><td>${esc(p.how)}</td></tr>`).join("")}</table></div>`:'<p class="dim">The research agent is reading how product teams at Anthropic, Vercel, Linear, Stripe and Figma run their loops. This table fills when it returns.</p>'})();
