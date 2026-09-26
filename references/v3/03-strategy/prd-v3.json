@@ -1477,11 +1477,11 @@
    "id": "P0.1",
    "p": "P0",
    "d": 0.125,
-   "title": "Choose how people reach it",
-   "step": "Sam decides how people will reach the agent: they dial its number, it dials a list of people, or the team's own software starts the conversation.",
+   "title": "Choose how people reach the agent",
+   "step": "Sam decides how people will reach the agent: they dial the agent's number, the agent dials a list of people, or the team's own software starts the conversation.",
    "happy": {
     "id": "P0.1.a",
-    "story": "Sam wants to create a new agent that fits how people will reach it, so no setup time goes on things that do not apply.",
+    "story": "Sam wants to create a new agent that fits how people will reach the agent, so no setup time goes on things that do not apply.",
     "steps": [
      "Sam opens Create agent from the Agents list.",
      "Sam types a name and picks one of three type cards: inbound, batch or code. Each card has one line of copy.",
@@ -1770,7 +1770,7 @@
    "p": "P0",
    "d": 0.25,
    "title": "Make the conversation feel natural",
-   "step": "When the agent is close but not right, Sam makes the conversation feel natural: it stops talking over people, waits the right time through a silence, and still says something useful when a part fails.",
+   "step": "When the agent is close but not right, Sam makes the conversation feel natural: the agent stops talking over people, waits the right time through a silence, and still says something useful when a part fails.",
    "happy": {
     "id": "P0.3.a",
     "story": "Sam wants the agent to stop talking over callers, so conversations sound natural and callers stay on the line.",
@@ -1906,7 +1906,7 @@
    "p": "P0",
    "d": 0.125,
    "title": "Tell the agent its job",
-   "step": "Sam tells the agent who it is and what to do, what it says first, and what it says when something fails.",
+   "step": "Sam tells the agent its role and job, the first thing to say, and what to say when something fails.",
    "happy": {
     "id": "P0.4.a",
     "story": "Sam wants the agent to handle a real task, so callers get the job done in one session.",
@@ -2023,7 +2023,7 @@
    "id": "P0.5",
    "p": "P0",
    "d": 0.375,
-   "title": "Connect other systems",
+   "title": "Connect other systems to the agent",
    "step": "When the agent needs facts or actions from another system, Sam connects that system so the agent can look things up and act during a session.",
    "happy": {
     "id": "P0.5.a",
@@ -2178,7 +2178,7 @@
    "id": "P0.6",
    "p": "P0",
    "d": 0.125,
-   "title": "Run on the team's own accounts",
+   "title": "Run the agent on the team's own accounts",
    "step": "Sam runs this agent on the team's own provider accounts, so usage lands on contracts the team already has.",
    "happy": {
     "id": "P0.6.a",
@@ -2314,11 +2314,11 @@
    "id": "P0.7",
    "p": "P0",
    "d": 0.125,
-   "title": "Check it answers as intended",
-   "step": "Sam checks that the agent answers the way Sam intended before anyone else can reach it.",
+   "title": "Check the agent answers as intended",
+   "step": "Sam checks that the agent answers the way Sam intended before anyone else can reach the agent.",
    "happy": {
     "id": "P0.7.a",
-    "story": "Sam wants proof the agent works before anyone else hears it, so Sam can go live without guessing.",
+    "story": "Sam wants proof the agent works before anyone else hears the agent, so Sam can go live without guessing.",
     "steps": [
      "Sam presses Save and test, and the test panel opens on Talk.",
      "Studio saves, starts a test session from agent_id, stores its id and tags client_reference studio_test:.",
@@ -2463,7 +2463,7 @@
    "id": "P0.8",
    "p": "P0",
    "d": 0.125,
-   "title": "Confirm it is ready",
+   "title": "Confirm the agent is ready",
    "step": "Before people outside the team reach the agent, Sam confirms nothing the agent needs is missing.",
    "happy": {
     "id": "P0.8.a",
@@ -2596,8 +2596,8 @@
    "id": "P0.9",
    "p": "P0",
    "d": 0.25,
-   "title": "Let callers reach it",
-   "step": "If people will dial the agent, Sam gives them a number that reaches it, and makes sure a session ends cleanly or passes to a person when the agent should stop.",
+   "title": "Let callers reach the agent",
+   "step": "If people will dial the agent, Sam gives them a number that reaches the agent, and makes sure a session ends cleanly or passes to a person when the agent should stop.",
    "happy": {
     "id": "P0.9.a",
     "story": "Sam wants support callers to reach the agent, so no caller waits for a person.",
@@ -2742,8 +2742,8 @@
    "id": "P0.10",
    "p": "P0",
    "d": 0.25,
-   "title": "Reach a list of people",
-   "step": "If the agent will dial a list of people, Sam has it reach them only at acceptable times and without overloading the team or the phone lines.",
+   "title": "Have the agent dial a list of people",
+   "step": "If the agent will dial a list of people, Sam has the agent reach them only at acceptable times and without overloading the team or the phone lines.",
    "happy": {
     "id": "P0.10.a",
     "story": "Sam wants the agent to remind 500 patients about their appointments, so every patient hears the reminder at a reasonable hour.",
@@ -2893,11 +2893,11 @@
    "id": "P0.11",
    "p": "P0",
    "d": 0.125,
-   "title": "Connect the team's software",
-   "step": "If the team's own software will start sessions, Sam connects it to the agent and knows the first session worked.",
+   "title": "Connect the team's software to the agent",
+   "step": "If the team's own software will start sessions, Sam connects that software to the agent and knows the first session worked.",
    "happy": {
     "id": "P0.11.a",
-    "story": "Sam wants the team's app to talk to the agent, so its users get answers inside the app.",
+    "story": "Sam wants the team's app to talk to the agent, so the app's users get answers inside the app.",
     "steps": [
      "In Deployment, on the code tab, Sam picks rtc or telephony, and curl or one SDK.",
      "The POST /sessions snippet arrives filled with agent_id, transport, lifecycle and data_policy. The App ID, the RESTful API key link and a token note sit beside it.",
@@ -3036,10 +3036,10 @@
    "p": "P0",
    "d": 0.125,
    "title": "Feel sure before Go live",
-   "step": "Sam feels sure enough of the agent to put it in front of people outside the team. Quality row across P0, not a job step.",
+   "step": "Sam feels sure enough of the agent to put the agent in front of people outside the team. Quality row across P0, not a job step.",
    "happy": {
     "id": "P0.12.a",
-    "story": "Sam wants to trust the agent before callers hear it, so going live is a decision, not a gamble.",
+    "story": "Sam wants to trust the agent before callers hear the agent, so going live is a decision, not a gamble.",
     "steps": [
      "Vendor logos show on presets, Custom and voice.",
      "A preset switch and the first answer each get a short motion, 150 to 250 ms.",
@@ -3141,7 +3141,7 @@
    "id": "P0.13",
    "p": "P0",
    "d": 0.25,
-   "title": "Try it without counting",
+   "title": "Try the agent without counting the tries",
    "step": "Sam tries the agent as often as needed without those tries counting as production sessions or in the agent's numbers.",
    "happy": {
     "id": "P0.13.a",
@@ -3290,7 +3290,7 @@
    "p": "P0",
    "d": 0,
    "title": "Change an agent people reach",
-   "step": "Sam changes an agent that people already reach without surprising the people talking to it. Proposed Modify step, for owner sign-off.",
+   "step": "Sam changes an agent that people already reach without surprising the people talking to that agent. Proposed Modify step, for owner sign-off.",
    "happy": {
     "id": "P0.14.a",
     "story": "Sam wants to improve a live agent's greeting, so callers hear the better version without a broken session in between.",
@@ -3652,11 +3652,11 @@
    "id": "P1.2",
    "p": "P1",
    "d": 0.25,
-   "title": "Reproduce a surprise",
+   "title": "Reproduce a surprising session",
    "step": "Sam reproduces a surprising session to confirm the problem before changing anything.",
    "happy": {
     "id": "P1.2.a",
-    "story": "Sam wants to hear the odd reply a customer reported, so Sam can confirm it before changing anything.",
+    "story": "Sam wants to hear the odd reply a customer reported, so Sam can confirm the reply before changing anything.",
     "steps": [
      "Overview lists Running now (start time, ticking duration), then Recent sessions (production), 20 rows, with 'All sessions' and 'Your tests (n)'.",
      "A row opens the session panel over Overview; the list stays underneath.",
@@ -3808,11 +3808,11 @@
    "id": "P1.3",
    "p": "P1",
    "d": 0.25,
-   "title": "Tell whether a change helped",
+   "title": "Tell whether an agent change helped",
    "step": "Sam finds out whether a recent change made the agent's sessions better or worse overall.",
    "happy": {
     "id": "P1.3.a",
-    "story": "Sam changed the greeting on Tuesday and wants to know whether sessions got better, so Sam can keep the change or undo it.",
+    "story": "Sam wants to know whether Tuesday's greeting change made sessions better, so Sam can keep the change or undo the change.",
     "steps": [
      "Sam opens Analytics; one range (P1.10) and filters (run, status) drive count tiles (sessions, minutes, status mix) and a sessions-per-bucket chart.",
      "The last change is marked on the chart.",
@@ -3961,11 +3961,11 @@
    "id": "P1.4",
    "p": "P1",
    "d": 0.5,
-   "title": "Find what is failing and why",
+   "title": "Find what fails in an agent and why",
    "step": "Sam finds out what is failing and why, so each cause is fixed once, not session by session.",
    "happy": {
     "id": "P1.4.a",
-    "story": "Sam sees '2 error groups' on the agent and wants the cause, so Sam can fix it once instead of chasing six sessions.",
+    "story": "Sam wants the cause behind '2 error groups' on the agent, so Sam can fix the cause once instead of chasing six sessions.",
     "steps": [
      "Logs and diagnostics (agent tab /agents/:id/logs, project view /logs) lists groups '<module> · <event type>' with severity, sessions, first and last seen, a sparkline and tags New, Quiet, Returned, New since change; every cell is a link.",
      "Sam opens a group; the panel shows count over time with the last-change marker and 'Since your change: N occurrences'.",
@@ -4274,11 +4274,11 @@
    "id": "P1.6",
    "p": "P1",
    "d": 0.25,
-   "title": "Remove the cause",
+   "title": "Remove the cause of a failure",
    "step": "Sam removes the cause of a failure and confirms the failure has stopped.",
    "happy": {
     "id": "P1.6.a",
-    "story": "A log line says speech recognition timed out, and Sam wants to change that setting without hunting through the builder, then check the error stops.",
+    "story": "Sam wants to change the setting a log line points at without hunting through the builder, so the error stops and Sam can see that the error stopped.",
     "steps": [
      "On a log line, slow turn or error group, Sam clicks 'Open the setting'.",
      "The builder opens on the mapped section with the field focused: turn detection, ASR, LLM and TTS to Voice & models (Advanced, that module); a tool to its integration row; telephony to the number or run; greeting or instructions to Prompt; a rejected key to the secret set Studio recorded.",
@@ -4432,7 +4432,7 @@
    "step": "Sam keeps the team's agents answering without a billing stop.",
    "happy": {
     "id": "P1.7.a",
-    "story": "Sam's pilot is using free minutes faster than planned, and Sam wants a warning early enough to add a card before anyone meets silence.",
+    "story": "Sam wants a warning early enough to add a card before the pilot's free minutes run out, so no caller meets silence.",
     "steps": [
      "At 80 % used, the minutes banner appears on the agents list and agent pages with minutes left and Add card.",
      "Sam clicks Add card; the Billing flow opens in place.",
@@ -4591,10 +4591,10 @@
    "p": "P1",
    "d": 0.25,
    "title": "Confirm people reach the agent",
-   "step": "Once the agent is open to people outside the team, Sam confirms they are reaching it and getting answers. This step proves the P0 outcome.",
+   "step": "Once the agent is open to people outside the team, Sam confirms they are reaching the agent and getting answers. This step proves the P0 outcome.",
    "happy": {
     "id": "P1.8.a",
-    "story": "Sam pointed a number at the agent yesterday and wants proof that outside contacts get answers, so Sam can tell the team it works.",
+    "story": "Sam wants proof that outside contacts get answers from the number pointed at the agent yesterday, so Sam can tell the team the agent works.",
     "steps": [
      "The deployment strip on Overview shows items per type: inbound number chips (every number pointing here), the latest batch run, or the first code session; each is a door.",
      "Three steps follow: deployment on (dated when Studio recorded Go live), first production answer, first proven session.",
@@ -5023,7 +5023,7 @@
    "step": "Sam learns an agent is failing without having to check. Proposed Monitor step, for owner sign-off; blocked while the v3 spec has no events or webhooks.",
    "happy": {
     "id": "P1.11.a",
-    "story": "Sam wants to know about a failing agent as soon as it starts, so customers are not the first to notice.",
+    "story": "Sam wants to know about a failing agent as soon as the failure starts, so customers are not the first to notice.",
     "steps": [
      "On the agent, Sam turns on a notice for error groups that are new or returned.",
      "When one fires, the project's email list gets the agent, the error group, its count and a link.",
@@ -5313,10 +5313,10 @@
    "p": "P2",
    "d": 0.375,
    "title": "Get from a clue to the session",
-   "step": "With a clue in hand, such as a ticket, a customer or a time, Sam gets to the one session it points to.",
+   "step": "With a clue in hand, such as a ticket, a customer or a time, Sam gets to the one session the clue points to.",
    "happy": {
     "id": "P2.2.a",
-    "story": "Sam has a session id from a support ticket, so Sam wants to paste it and land on that session.",
+    "story": "Sam wants to paste the session id from a support ticket and land on that session, so the ticket gets an answer in minutes.",
     "steps": [
      "Sam pastes a session id into search and the session opens directly.",
      "Or Sam types an RTC channel name and the list filters to its sessions.",
@@ -5461,7 +5461,7 @@
    "id": "P2.3",
    "p": "P2",
    "d": 0.75,
-   "title": "Reconstruct how it went",
+   "title": "Reconstruct how a session went",
    "step": "Sam reconstructs how the session went, from the first word to how it ended.",
    "happy": {
     "id": "P2.3.a",
@@ -5630,7 +5630,7 @@
    "id": "P2.4",
    "p": "P2",
    "d": 0.125,
-   "title": "Keep and share proof",
+   "title": "Keep and share proof of a session",
    "step": "Sam keeps or hands on the exact session or view, so support or a teammate sees what Sam sees.",
    "happy": {
     "id": "P2.4.a",
@@ -5780,10 +5780,10 @@
    "p": "P2",
    "d": 0.375,
    "title": "Follow and stop a run",
-   "step": "While the agent dials a list, Sam sees whether it is going well and stops it before more people get a bad session.",
+   "step": "While the agent dials a list, Sam sees whether the run is going well and stops the run before more people get a bad session.",
    "happy": {
     "id": "P2.5.a",
-    "story": "Sam started a run and wants to know how it is going, so Sam can stop it early if contacts are failing.",
+    "story": "Sam wants to know how a run just started is going, so Sam can stop the run early if contacts are failing.",
     "steps": [
      "Sam opens the agent's Runs tab (/agents/:id/runs) and sees each run with status and a counts bar.",
      "The run page (/runs/:runId) shows calling windows, the agent chip, from-number chips and counts.",
@@ -6074,7 +6074,7 @@
    "id": "P2.7",
    "p": "P2",
    "d": 0.25,
-   "title": "Know why nothing shows yet",
+   "title": "Know why no session shows yet",
    "step": "When there is nothing to review, Sam finds out whether that is expected or a problem. Proposed to fold into P1.8 and P2.1.k.",
    "happy": {
     "id": "P2.7.a",
@@ -6211,7 +6211,7 @@
    "id": "P2.8",
    "p": "P2",
    "d": 0.375,
-   "title": "Pinpoint the slow moment",
+   "title": "Pinpoint the slow moment in a session",
    "step": "Sam finds the moment a session slowed down or broke, and what held it up.",
    "happy": {
     "id": "P2.8.a",
@@ -6357,7 +6357,7 @@
    "step": "Sam sees what the agent was doing at the moment something went wrong.",
    "happy": {
     "id": "P2.9.a",
-    "story": "Sam wants to read what the agent recorded at the moment it failed, so Sam can go from that line to the fix and back.",
+    "story": "Sam wants to read what the agent recorded at the moment the session failed, so Sam can go from that line to the fix and back.",
     "steps": [
      "The Logs tab lists lines with severity (derived), module, time from start and event type; Sam filters and searches.",
      "Sam expands a line (?log=<key>): message, raw JSON and View in context.",
@@ -6637,8 +6637,8 @@
    "id": "P3.1",
    "p": "P3",
    "d": 0.5,
-   "title": "Replace keys without breakage",
-   "step": "Across the team's agents, Sam replaces or retires a provider key without breaking any agent that uses it.",
+   "title": "Replace a provider key without breaking agents",
+   "step": "Across the team's agents, Sam replaces or retires a provider key without breaking any agent that uses that key.",
    "happy": {
     "id": "P3.1.a",
     "story": "Sam wants to rotate a leaked LLM key, so every agent keeps answering with the new one.",
@@ -7218,8 +7218,8 @@
    "id": "P3.5",
    "p": "P3",
    "d": 0.75,
-   "title": "Switch between code and hand edits",
-   "step": "Sam sets up an agent from code and adjusts it by hand, or the reverse, without losing a setting.",
+   "title": "Switch an agent between code and hand edits",
+   "step": "Sam sets up an agent from code and adjusts the agent by hand, or the reverse, without losing a setting.",
    "happy": {
     "id": "P3.5.a",
     "story": "Sam wants to create agents from a script and tune them in the Console, so neither side resets the other's work.",
@@ -7741,6 +7741,7 @@
   }
  ],
  "changelog": [
+  "26 Sep, evening: every row reads Job, Situation, Sam wants to, So that, phase rows and Future Sprints included. Titles and situations name the noun instead of 'it' (the agent, the session, the run, the key). Figma flow frames tell the story with Sam's photo and one 'Sam clicks on …' line per step.",
   "26 Sep, later: the sheet is the deliverable. Persona block removed (Sam stays only in the job steps). KPIs rewritten as goals. Funnel and Days columns replaced by Status (Planned, WIP, Review, Done) and two ETAs per row (design, lock) toward Fri 16 Oct. Done locks the design: Figma frozen, commit as the lock.",
   "26 Sep: every feature is now a job step for Sam, a developer: persona-first, solution-agnostic statements (NN/g), happy path .a, rainy paths .b+, KPI in plain words first, a research status per competitor, and a Deliverable column. Three steps proposed at 0 days: P0.14 change an agent people reach, P0.15 retire an agent, P1.11 learn of failures unprompted.",
   "Step statements are persona-first and solution-agnostic. UI details moved into the happy paths, and each story now names the outcome after 'so'. New titles: P0.3, P0.6, P0.7, P0.10, P0.11, P0.12, P0.13, P1.1, P1.2, P1.6, P1.7, P1.10, P2.1 to P2.3, P2.6, P2.9, P2.10, P3.3 and P3.5. Existing ids, days and rainy letters are unchanged. Added P2.1.k (no sessions yet). Where a P0 row and a P3 row share a subject, scope lines now separate them.",
@@ -9363,7 +9364,11 @@
    "job": "Sam wants to create a new agent that people outside the team can talk to.",
    "outcome": "An agent Sam heard answer in a test is answering people outside the team, set up in one sitting, and Sam feels sure enough of it to put it in front of them. P1.8 is the step that proves this.",
    "kpi_simple": "Median time to first heard answer under 3 minutes.",
-   "kpi_detail": "North star, Fast-Proven Rate (FPR): at least 18 % of console-created saved agents per weekly cohort, read 14 d after the cohort week. Formula: builder_opened to agent_tested_configured in 15 active min or less, AND agent_proven (derived) within 14 d of agent_created, as a share of agent_created {source console}. The target multiplies out as fast test 0.60 × Go live within 7 d 0.60 × answered within 3 d 0.80 × proven by day 14 0.65 = 0.19. Reported per deployment type. Batch is excluded until turn count ships. Provisional while G2 is open: stages 10 and 11 need session_ended; interim proxy in P1.8. TTFA: median 3 min or less, p75 6 min or less (first builder_opened for the agent to agent_tested_configured, activeMs summed across builder_opened and builder_resumed, idle over 120 s removed, winsorised at 900 s, source console). Counter: VTR at least 70 %. TTFDA: active part median 6 min or less (2× TTFA), p75 12 min or less. Wall-clock median by deployment type: inbound 10 min or less, batch 15 min or less, code snippet to first session 30 min or less (wall clock needs G2; code needs G1). Guard: Test before Go live at least 85 %, version-aware. Emotional criterion: Go live confidence 4.0 / 5 or higher on average (P0.12). No P0 KPI is reported until the P0.13 data-quality checks have been green for 7 days. Validate against a 2-week W0 baseline."
+   "kpi_detail": "North star, Fast-Proven Rate (FPR): at least 18 % of console-created saved agents per weekly cohort, read 14 d after the cohort week. Formula: builder_opened to agent_tested_configured in 15 active min or less, AND agent_proven (derived) within 14 d of agent_created, as a share of agent_created {source console}. The target multiplies out as fast test 0.60 × Go live within 7 d 0.60 × answered within 3 d 0.80 × proven by day 14 0.65 = 0.19. Reported per deployment type. Batch is excluded until turn count ships. Provisional while G2 is open: stages 10 and 11 need session_ended; interim proxy in P1.8. TTFA: median 3 min or less, p75 6 min or less (first builder_opened for the agent to agent_tested_configured, activeMs summed across builder_opened and builder_resumed, idle over 120 s removed, winsorised at 900 s, source console). Counter: VTR at least 70 %. TTFDA: active part median 6 min or less (2× TTFA), p75 12 min or less. Wall-clock median by deployment type: inbound 10 min or less, batch 15 min or less, code snippet to first session 30 min or less (wall clock needs G2; code needs G1). Guard: Test before Go live at least 85 %, version-aware. Emotional criterion: Go live confidence 4.0 / 5 or higher on average (P0.12). No P0 KPI is reported until the P0.13 data-quality checks have been green for 7 days. Validate against a 2-week W0 baseline.",
+   "job_short": "Create an agent people outside the team can talk to",
+   "situation": "The team needs a voice agent for a real use case; Sam has an Agora project and no agent yet.",
+   "want": "create an agent that people outside the team can talk to, in one sitting",
+   "so": "the agent answers outside people and Sam feels sure enough to put the agent in front of them"
   },
   {
    "id": "P1",
@@ -9371,7 +9376,11 @@
    "job": "Sam wants to know how each agent is doing with people outside the team, and fix what fails before customers notice.",
    "outcome": "Sam spots the agent in trouble, reaches the cause in under a minute, removes it and sees the error stop, without losing place.",
    "kpi_simple": "Median path from a new error to its cause is at most 4 steps and under a minute.",
-   "kpi_detail": "Error to root cause: median ≤ 4 steps and ≤ 60 s, p75 ≤ 6 steps and ≤ 120 s. Per visit (visitId, 30 min inactivity): first error_badge_clicked or error_group_opened to first log_line_opened {severity: error} in that group's session; steps = monitoring_pivot count; baseline from a timed 5-owner task on the current Console. Error acknowledgement: median ≤ 24 h (first session_ended {status failed} or new error group to error_group_opened or logs_opened for that agent). Blocked on the RTM stream (G11) and session_ended (G2); interim: v2 debugging has_error. Proven after production answer: ≥ 65 % by day 14 (inbound, code; interim proxy until G2, see P1.8). Retained Production Agents: ≥ 25 % within 60 d (to validate). Dead-end rate: ≤ 10 % of level views in the first release, ≤ 5 % once G4, G11 and G12 ship. Held here while P1.7 waits for re-homing (G9): card before exhaustion ≥ 50 %, suspension recovery ≥ 60 % within 24 h, free to paid ≥ 25 % (to validate). Second-agent rate removed: no P1 step moves it. Counters: oscillation ≥ 3 times between two levels ≤ 15 %; errors unopened at 7 d ≤ 10 %; production sessions under 45 s ≤ 15 %; unexplained blanks = 0 (UI audit each release)."
+   "kpi_detail": "Error to root cause: median ≤ 4 steps and ≤ 60 s, p75 ≤ 6 steps and ≤ 120 s. Per visit (visitId, 30 min inactivity): first error_badge_clicked or error_group_opened to first log_line_opened {severity: error} in that group's session; steps = monitoring_pivot count; baseline from a timed 5-owner task on the current Console. Error acknowledgement: median ≤ 24 h (first session_ended {status failed} or new error group to error_group_opened or logs_opened for that agent). Blocked on the RTM stream (G11) and session_ended (G2); interim: v2 debugging has_error. Proven after production answer: ≥ 65 % by day 14 (inbound, code; interim proxy until G2, see P1.8). Retained Production Agents: ≥ 25 % within 60 d (to validate). Dead-end rate: ≤ 10 % of level views in the first release, ≤ 5 % once G4, G11 and G12 ship. Held here while P1.7 waits for re-homing (G9): card before exhaustion ≥ 50 %, suspension recovery ≥ 60 % within 24 h, free to paid ≥ 25 % (to validate). Second-agent rate removed: no P1 step moves it. Counters: oscillation ≥ 3 times between two levels ≤ 15 %; errors unopened at 7 d ≤ 10 %; production sessions under 45 s ≤ 15 %; unexplained blanks = 0 (UI audit each release).",
+   "job_short": "Keep every agent working for people outside the team",
+   "situation": "Agents are live and people outside the team talk to them every day.",
+   "want": "know how each agent is doing and fix what fails",
+   "so": "customers never notice a failure first"
   },
   {
    "id": "P2",
@@ -9379,7 +9388,11 @@
    "job": "Sam wants to find out what happened in a session, or in a set of sessions, and why.",
    "outcome": "Sam gets from any clue to the right session or run, explains what happened, and knows what to change.",
    "kpi_simple": "Median time to the right session under 60 seconds.",
-   "kpi_detail": "Time to the session: history_opened to session_opened, then link_copied, session_downloaded, talk_to_agent_started or agent_updated within 2 min, median ≤ 60 s (P2.1). Error to root cause: first error_badge_clicked or error_group_opened to the first log_line_opened {severity: error} in that group's session, median ≤ 4 steps and ≤ 60 s, p75 ≤ 6 steps and ≤ 120 s (monitoring KPI; blocked on G11 and G2). Sets of sessions: bad runs stopped early ≥ 60 % (P2.5); session minutes match invoiced minutes ± 1 % monthly (P2.6, blocked on G4 and G9). Counters: misses (session left in < 5 s) ≤ 20 %; dead-end rate ≤ 10 % of level views in the first release, ≤ 5 % once G4, G11 and G12 ship. Funnel stage 12 session_reviewed. Assumption: the average Sam arrives with one clue (a session id, an RTC channel, a number or an error) and today spends several minutes across two history pages; baseline from a timed 5-owner task on the current Console."
+   "kpi_detail": "Time to the session: history_opened to session_opened, then link_copied, session_downloaded, talk_to_agent_started or agent_updated within 2 min, median ≤ 60 s (P2.1). Error to root cause: first error_badge_clicked or error_group_opened to the first log_line_opened {severity: error} in that group's session, median ≤ 4 steps and ≤ 60 s, p75 ≤ 6 steps and ≤ 120 s (monitoring KPI; blocked on G11 and G2). Sets of sessions: bad runs stopped early ≥ 60 % (P2.5); session minutes match invoiced minutes ± 1 % monthly (P2.6, blocked on G4 and G9). Counters: misses (session left in < 5 s) ≤ 20 %; dead-end rate ≤ 10 % of level views in the first release, ≤ 5 % once G4, G11 and G12 ship. Funnel stage 12 session_reviewed. Assumption: the average Sam arrives with one clue (a session id, an RTC channel, a number or an error) and today spends several minutes across two history pages; baseline from a timed 5-owner task on the current Console.",
+   "job_short": "Find out what happened in a session and why",
+   "situation": "A ticket, a number, a time or a hunch points at one session or a set of sessions.",
+   "want": "get to the right session and see what happened and why",
+   "so": "the cause is fixed once and the proof can be shared"
   },
   {
    "id": "P3",
@@ -9387,7 +9400,11 @@
    "job": "Sam wants to look after everything the team's agents share, by hand or from code, and get the same result either way.",
    "outcome": "Every agent, number, secret and integration Sam makes by API opens, changes and saves the same in the Console, under the same names.",
    "kpi_simple": "All 201 API settings have a Console home or a reason, and 20 of 20 agents save unchanged.",
-   "kpi_detail": "API parity: 100 % of 201 spec leaf fields settable in the Console or on the approved API-only list with a reason; 20 of 20 fixture agents return an identical GET body after a Console save (P3.5). Guards: agents broken by a secret replace = 0 (P3.1, blocked on G2 for production sessions); numbers without an agent for > 7 d = 0 (P3.2, first read on day 8 of stored snapshots); cut-off inbound sessions ≤ 5 % (P3.3, blocked on G2, G14 and G10); integration reuse ≥ 30 %, and the page's share of reuse ≥ 15 % or the page is retired (P3.4); banned words in UI = 0 and old-route 404s = 0 (P3.6). Budget 2.5 d plus 0.5 d review fixes."
+   "kpi_detail": "API parity: 100 % of 201 spec leaf fields settable in the Console or on the approved API-only list with a reason; 20 of 20 fixture agents return an identical GET body after a Console save (P3.5). Guards: agents broken by a secret replace = 0 (P3.1, blocked on G2 for production sessions); numbers without an agent for > 7 d = 0 (P3.2, first read on day 8 of stored snapshots); cut-off inbound sessions ≤ 5 % (P3.3, blocked on G2, G14 and G10); integration reuse ≥ 30 %, and the page's share of reuse ≥ 15 % or the page is retired (P3.4); banned words in UI = 0 and old-route 404s = 0 (P3.6). Budget 2.5 d plus 0.5 d review fixes.",
+   "job_short": "Look after what all the team's agents share",
+   "situation": "Several agents share provider keys, numbers and integrations, set up by hand or from code.",
+   "want": "manage what the agents share, by hand or from code",
+   "so": "a change lands the same way everywhere and nothing breaks silently"
   }
  ],
  "umbrella_deliverables": {

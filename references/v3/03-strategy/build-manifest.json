@@ -2,7 +2,7 @@
  "P0.1": {
   "task": "868m9wg1c",
   "custom": "APP-9358",
-  "name": "P0.1 \u00b7 Choose how people reach it",
+  "name": "P0.1 \u00b7 Choose how people reach the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.1.md",
   "start": "2026-09-27",
   "due": "2026-09-29"
@@ -34,7 +34,7 @@
  "P0.5": {
   "task": "868m9wg37",
   "custom": "APP-9362",
-  "name": "P0.5 \u00b7 Connect other systems",
+  "name": "P0.5 \u00b7 Connect other systems to the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.5.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
@@ -42,7 +42,7 @@
  "P0.6": {
   "task": "868m9wg3x",
   "custom": "APP-9363",
-  "name": "P0.6 \u00b7 Run on the team's own accounts",
+  "name": "P0.6 \u00b7 Run the agent on the team's own accounts",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.6.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
@@ -50,7 +50,7 @@
  "P0.7": {
   "task": "868m9wg4c",
   "custom": "APP-9364",
-  "name": "P0.7 \u00b7 Check it answers as intended",
+  "name": "P0.7 \u00b7 Check the agent answers as intended",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.7.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
@@ -58,7 +58,7 @@
  "P0.8": {
   "task": "868m9wg4y",
   "custom": "APP-9365",
-  "name": "P0.8 \u00b7 Confirm it is ready",
+  "name": "P0.8 \u00b7 Confirm the agent is ready",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.8.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
@@ -66,7 +66,7 @@
  "P0.9": {
   "task": "868m9wg59",
   "custom": "APP-9366",
-  "name": "P0.9 \u00b7 Let callers reach it",
+  "name": "P0.9 \u00b7 Let callers reach the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.9.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
@@ -74,7 +74,7 @@
  "P0.10": {
   "task": "868m9wg5q",
   "custom": "APP-9367",
-  "name": "P0.10 \u00b7 Reach a list of people",
+  "name": "P0.10 \u00b7 Have the agent dial a list of people",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.10.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
@@ -82,7 +82,7 @@
  "P0.11": {
   "task": "868m9wg61",
   "custom": "APP-9368",
-  "name": "P0.11 \u00b7 Connect the team's software",
+  "name": "P0.11 \u00b7 Connect the team's software to the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.11.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
@@ -98,7 +98,7 @@
  "P0.13": {
   "task": "868m9x4cc",
   "custom": "APP-9386",
-  "name": "P0.13 \u00b7 Try it without counting",
+  "name": "P0.13 \u00b7 Try the agent without counting the tries",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.13.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
@@ -130,7 +130,7 @@
  "P1.2": {
   "task": "868m9wg7e",
   "custom": "APP-9370",
-  "name": "P1.2 \u00b7 Reproduce a surprise",
+  "name": "P1.2 \u00b7 Reproduce a surprising session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.2.md",
   "start": "2026-09-30",
   "due": "2026-10-02"
@@ -138,7 +138,7 @@
  "P1.3": {
   "task": "868m9wg8u",
   "custom": "APP-9371",
-  "name": "P1.3 \u00b7 Tell whether a change helped",
+  "name": "P1.3 \u00b7 Tell whether an agent change helped",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.3.md",
   "start": "2026-09-30",
   "due": "2026-10-02"
@@ -146,7 +146,7 @@
  "P1.4": {
   "task": "868m9wga0",
   "custom": "APP-9372",
-  "name": "P1.4 \u00b7 Find what is failing and why",
+  "name": "P1.4 \u00b7 Find what fails in an agent and why",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.4.md",
   "start": "2026-09-30",
   "due": "2026-10-02"
@@ -162,7 +162,7 @@
  "P1.6": {
   "task": "868m9wgcj",
   "custom": "APP-9374",
-  "name": "P1.6 \u00b7 Remove the cause",
+  "name": "P1.6 \u00b7 Remove the cause of a failure",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.6.md",
   "start": "2026-10-01",
   "due": "2026-10-05"
@@ -226,7 +226,7 @@
  "P2.3": {
   "task": "868m9wgj8",
   "custom": "APP-9378",
-  "name": "P2.3 \u00b7 Reconstruct how it went",
+  "name": "P2.3 \u00b7 Reconstruct how a session went",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.3.md",
   "start": "2026-10-04",
   "due": "2026-10-06"
@@ -234,7 +234,7 @@
  "P2.4": {
   "task": "868m9wgkf",
   "custom": "APP-9379",
-  "name": "P2.4 \u00b7 Keep and share proof",
+  "name": "P2.4 \u00b7 Keep and share proof of a session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.4.md",
   "start": "2026-10-04",
   "due": "2026-10-06"
@@ -258,7 +258,7 @@
  "P2.7": {
   "task": "868m9x4fq",
   "custom": "APP-9390",
-  "name": "P2.7 \u00b7 Know why nothing shows yet",
+  "name": "P2.7 \u00b7 Know why no session shows yet",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.7.md",
   "start": "2026-10-05",
   "due": "2026-10-07"
@@ -266,7 +266,7 @@
  "P2.8": {
   "task": "868ma8evd",
   "custom": "APP-9394",
-  "name": "P2.8 \u00b7 Pinpoint the slow moment",
+  "name": "P2.8 \u00b7 Pinpoint the slow moment in a session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.8.md",
   "start": "2026-10-05",
   "due": "2026-10-07"
@@ -290,7 +290,7 @@
  "P3.1": {
   "task": "868m9wgne",
   "custom": "APP-9381",
-  "name": "P3.1 \u00b7 Replace keys without breakage",
+  "name": "P3.1 \u00b7 Replace a provider key without breaking agents",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.1.md",
   "start": "2026-10-06",
   "due": "2026-10-08"
@@ -322,7 +322,7 @@
  "P3.5": {
   "task": "868m9x4gm",
   "custom": "APP-9391",
-  "name": "P3.5 \u00b7 Switch between code and hand edits",
+  "name": "P3.5 \u00b7 Switch an agent between code and hand edits",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.5.md",
   "start": "2026-10-08",
   "due": "2026-10-12"

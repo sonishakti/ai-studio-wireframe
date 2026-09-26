@@ -1,0 +1,142 @@
+{
+ "01": {
+  "task": "868m0medx",
+  "name": "01 \u00b7 Voice picker & recommendations",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-01.md"
+ },
+ "02": {
+  "task": "868m0mef4",
+  "name": "02 \u00b7 Turn-taking & listening",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-02.md"
+ },
+ "03": {
+  "task": "868m0megc",
+  "name": "03 \u00b7 Recognition & failover",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-03.md"
+ },
+ "04": {
+  "task": "868m0mejc",
+  "name": "04 \u00b7 Greeting, filler & disclaimer",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-04.md"
+ },
+ "05": {
+  "task": "868m0mejx",
+  "name": "05 \u00b7 Call behavior rules",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-05.md"
+ },
+ "06": {
+  "task": "868m0mekq",
+  "name": "06 \u00b7 TTS expression & personality",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-06.md"
+ },
+ "07": {
+  "task": "868m0men7",
+  "name": "07 \u00b7 Vendors & provider fallback",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-07.md"
+ },
+ "08": {
+  "task": "868m0menv",
+  "name": "08 \u00b7 Versioning & release \u26a0 lock",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-08.md"
+ },
+ "09": {
+  "task": "868m0meqf",
+  "name": "09 \u00b7 First run, templates & import",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-09.md"
+ },
+ "10": {
+  "task": "868m0meta",
+  "name": "10 \u00b7 Session & call logs",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-10.md"
+ },
+ "11": {
+  "task": "868m0mety",
+  "name": "11 \u00b7 SIP & latency diagnostics",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-11.md"
+ },
+ "12": {
+  "task": "868m0mevm",
+  "name": "12 \u00b7 Live monitoring & operator controls \u26a0 lock",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-12.md"
+ },
+ "13": {
+  "task": "868m0mewr",
+  "name": "13 \u00b7 Dashboards & alerts",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-13.md"
+ },
+ "14": {
+  "task": "868m0mexd",
+  "name": "14 \u00b7 Evals & scorecards",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-14.md"
+ },
+ "15": {
+  "task": "868m0meyb",
+  "name": "15 \u00b7 Simulations",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-15.md"
+ },
+ "16": {
+  "task": "868m0mf09",
+  "name": "16 \u00b7 Phone number purchase \u26a0 lock",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-16.md"
+ },
+ "17": {
+  "task": "868m0mf18",
+  "name": "17 \u00b7 SIP trunk setup",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-17.md"
+ },
+ "18": {
+  "task": "868m0mf2u",
+  "name": "18 \u00b7 Channels \u26a0 lock",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-18.md"
+ },
+ "19": {
+  "task": "868m0mf40",
+  "name": "19 \u00b7 Tools & connectors",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-19.md"
+ },
+ "20": {
+  "task": "868m0mf4k",
+  "name": "20 \u00b7 Knowledge sources",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-20.md"
+ },
+ "21": {
+  "task": "868m0mf5e",
+  "name": "21 \u00b7 CRM & contacts",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-21.md"
+ },
+ "22": {
+  "task": "868m0mf7b",
+  "name": "22 \u00b7 Usage, credits & concurrency",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-22.md"
+ },
+ "23": {
+  "task": "868m0mf8y",
+  "name": "23 \u00b7 Handoffs & routing",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-23.md"
+ },
+ "24": {
+  "task": "868m0mfae",
+  "name": "24 \u00b7 Retention, PII & compliance",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-24.md"
+ },
+ "25": {
+  "task": "868m0mfbx",
+  "name": "25 \u00b7 Developer platform",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-25.md"
+ },
+ "26": {
+  "task": "868m0mfcy",
+  "name": "26 \u00b7 Unified login",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-26.md"
+ },
+ "27": {
+  "task": "868m0mfdn",
+  "name": "27 \u00b7 Responsiveness audit",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-27.md"
+ },
+ "28": {
+  "task": "868m0mfea",
+  "name": "28 \u00b7 DevX & docs",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/v31-28.md"
+ }
+}

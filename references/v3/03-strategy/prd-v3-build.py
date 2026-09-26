@@ -153,8 +153,10 @@ if V31 and os.path.exists(V31):
             'due': datetime.datetime.utcfromtimestamp(int(t['due_date']) / 1000).date().isoformat() if t.get('due_date') else '',
             'tags': g('Tags'), 'jtbd': g('JTBD'), 'what': g('What it does'), 'locks': g('Locks'), 'folder': g('Research folder'),
             'research': rl.group(1) if rl else '', 'ui': rl.group(2) if rl else '', 'final': rl.group(3) if rl else '',
-            'roadmap': re.findall(r'\*\s+\[(.*?)\]\((https://app\.clickup\.com/t/\w+)\)', md),
+            'roadmap': re.findall(r'\*\s+\[(.*?)\]\((https://app\.clickup\.com/t/\w+)\)', md), 'md': md,
         })
+    JOBS = json.load(open(os.path.join(HERE, 'v31-jobs.json'))) if os.path.exists(os.path.join(HERE, 'v31-jobs.json')) else {}
+    for t in v31: t.update(JOBS.get(t['num'], {}))
     v31.sort(key=lambda x: x['num'])
 D['v31'] = v31
 
@@ -182,13 +184,13 @@ def desc(f):
     L.append('')
     L.append('## Job to be done (Sam, a developer)')
     L.append(f"**Job:** {f['title']} · job map: {f['jobmap']}")
-    L.append(f"**Umbrella job ({f['p']}):** {u['job']}")
     L.append(f"**Situation:** {f['step']}")
     if f['story']['want']:
         L.append(f"**Sam wants to:** {f['story']['want']}")
         L.append(f"**So that:** {f['story']['so']}")
     else:
         L.append(f"**Story:** {f['happy']['story']}")
+    L.append(f"**Part of {f['p']} {u['name']}:** {u.get('job_short') or u['job']}")
     L.append('')
     L.append(f"### {f['happy']['id']} Happy path: what Sam does")
     for i, stp in enumerate(f['happy']['steps'], 1): L.append(f"{i}. {stp}")
@@ -243,6 +245,14 @@ for f in D['features']:
 
 V31_BADGE = '🏷 **NEW FEATURES · v3.1** · after the 16 Oct v3 launch · sheet: ' + SHEET + '\n\n'
 open(os.path.join(OUT, 'clickup', 'v31-badge.md'), 'w', encoding='utf-8').write(V31_BADGE)
+manifest31 = {}
+for t in v31:
+    body = re.sub(r'^🏷[^\n]*\n+', '', t.get('md', ''))
+    jt = f"**Job:** {t.get('job', '')}\n**Situation:** {t.get('situation', '')}\n**Sam wants to:** {t.get('want', '')}\n**So that:** {t.get('so', '')}\n\n" if t.get('job') else ''
+    p = os.path.join(OUT, 'clickup', f"v31-{t['num']}.md")
+    open(p, 'w', encoding='utf-8').write(V31_BADGE + jt + body)
+    manifest31[t['num']] = {'task': t['id'], 'name': t['name'], 'desc': p}
+json.dump(manifest31, open(os.path.join(OUT, 'build-manifest-v31.json'), 'w'), indent=1)
 open(os.path.join(OUT, 'clickup', 'list.md'), 'w', encoding='utf-8').write('Folder Design Tracker: 1. V3 (42 job steps, P0.1 to P3.6, in the order they get done) and 2. Future Sprints (28 roadmap features, 01 to 28). Four columns each: To-do, In progress, Pending Review, Delivered. Live sheet: ' + SHEET)
 json.dump(manifest, open(os.path.join(OUT, 'build-manifest.json'), 'w'), indent=1)
 print('built', os.path.join(OUT, 'prd-v3.html'), len(html), 'bytes;', len(manifest), 'v3 descriptions;', len(v31), 'v3.1 rows; live rows', len(live))
