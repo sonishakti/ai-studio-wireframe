@@ -111,6 +111,10 @@ FEATURES = [
  ('F14', 'One vocabulary in Console and docs', ['P3.6'], 'Every endpoint name and field label', 'Two UI names differ by choice: Analysis, run'),
 ]
 
+def tc(x):
+    """ClickUp tables break on a literal | inside a cell, even in backticks."""
+    return str(x).replace('|', '\\|')
+
 def fmt(s):
     if not s: return ''
     try:
@@ -240,14 +244,14 @@ def desc_body(f):
     L.append('## Telemetry')
     L.append('| Event | Fired by | Status |')
     L.append('| --- | --- | --- |')
-    for e in k['events']: L.append(f"| `{e['name']}` | {fired(e['status'])} | {e['status']} |")
+    for e in k['events']: L.append(f"| `{tc(e['name'])}` | {fired(e['status'])} | {e['status']} |")
     if f['more'].get('funnel'): L.append(f"\nFunnel stages this moves: {' · '.join(f['more']['funnel'])}")
     if f['gaps']: L.append(f"Server gaps that block the read: {', '.join(f['gaps'])}")
     L.append('')
     L.append('## Research')
     L.append('| Competitor | Status | Note |')
     L.append('| --- | --- | --- |')
-    for r in f['research']: L.append(f"| {r['vendor']} | {r['status']} | {r['note']} |")
+    for r in f['research']: L.append(f"| {r['vendor']} | {r['status']} | {tc(r['note'])} |")
     if f['more'].get('research_brief'): L.append(f"\nStill owed: {f['more']['research_brief']}")
     L.append('')
     L.append('## Deliverables')
@@ -322,7 +326,7 @@ ov = ['# Studio v3 PRD', '', f"Launch **Fri 16 Oct 2026**. Sam is a developer. E
       '## Features, for tech and backend', '', 'What each feature builds, the API it touches, and when its design is ready (the last lock ETA of its job steps).', '',
       '| Feature | Builds | API surface | Blocked by, asks | Design ready |', '| --- | --- | --- | --- | --- |']
 for x in hl:
-    ov.append(f"| **{x['id']} · {x['name']}** | {' · '.join(x['steps'])} | {x['api']} | {x['blocked'] or '—'} | **{fmt(x['design_ready']) or 'after sign-off'}** |")
+    ov.append(f"| **{x['id']} · {x['name']}** | {' · '.join(x['steps'])} | {tc(x['api'])} | {tc(x['blocked']) or '—'} | **{fmt(x['design_ready']) or 'after sign-off'}** |")
 ov += ['', '## The four jobs', '']
 for u in D['umbrellas']:
     ov += [f"### {u['id']} {u['name']}", jobblock(u), f"**Done looks like:** {u['outcome']}", f"**Goal:** {u['kpi_simple']}", '']
@@ -341,19 +345,19 @@ for t in v31:
     FS += [f"## {t['name']}", f"**Job:** {t.get('job','')}\n**Situation:** {t.get('situation','')}\n**Sam wants to:** {t.get('want','')}\n**So that:** {t.get('so','')}", f"**What it does:** {t.get('what','')}", f"ClickUp card: {t.get('url','')}", '']
 open(os.path.join(DOC, 'future-sprints.md'), 'w', encoding='utf-8').write('\n'.join(FS))
 FK = ['# Funnel and KPIs', '', '## v3 funnel', '', '| # | Event | Stage | Group | Fired by | Definition |', '| --- | --- | --- | --- | --- | --- |']
-for st in D['funnel']['stages']: FK.append(f"| {st['n']} | `{st['event']}` | {st['stage']} | {st['group']} | {st['fired_by']} | {st['definition']} |")
+for st in D['funnel']['stages']: FK.append(f"| {st['n']} | `{tc(st['event'])}` | {st['stage']} | {st['group']} | {st['fired_by']} | {tc(st['definition'])} |")
 FK += ['', '## KPIs', '', '| KPI | Target | How we measure | Counter-metric | Phase |', '| --- | --- | --- | --- | --- |']
-for k in D['funnel']['kpis']: FK.append(f"| **{k['name']}** | {k['target']} | {k['formula']} | {k['counter']} | {k['owner_phase']} |")
+for k in D['funnel']['kpis']: FK.append(f"| **{tc(k['name'])}** | {tc(k['target'])} | {tc(k['formula'])} | {tc(k['counter'])} | {k['owner_phase']} |")
 open(os.path.join(DOC, 'funnel-kpis.md'), 'w', encoding='utf-8').write('\n'.join(FK))
 DG = ['# Decisions and server gaps', '', '## Decisions that block dates', '', '| # | Decision | Blocks | Owner | By |', '| --- | --- | --- | --- | --- |']
-for i, dc in enumerate(D['decisions'], 1): DG.append(f"| {i} | {dc['q']} | {dc['blocks']} | {dc['owner']} | {dc['by']} |")
+for i, dc in enumerate(D['decisions'], 1): DG.append(f"| {i} | {tc(dc['q'])} | {tc(dc['blocks'])} | {dc['owner']} | {dc['by']} |")
 DG += ['', '## Server gaps', '', '| Gap | What is missing and what it blocks |', '| --- | --- |']
 for c in D['funnel']['conflicts']:
     m = re.match(r'^Gap (G\d+):\s*(.*)$', c)
-    if m: DG.append(f"| **{m.group(1)}** | {m.group(2)} |")
+    if m: DG.append(f"| **{m.group(1)}** | {tc(m.group(2))} |")
 open(os.path.join(DOC, 'decisions-gaps.md'), 'w', encoding='utf-8').write('\n'.join(DG))
 VO = ['# Vocabulary', '', 'One word per concept, in the Console and the docs.', '', '| Use | Never | Means |', '| --- | --- | --- |']
-for v in D['funnel']['vocabulary']: VO.append(f"| **{v['use']}** | {v['never']} | {v['means']} |")
+for v in D['funnel']['vocabulary']: VO.append(f"| **{tc(v['use'])}** | {tc(v['never'])} | {tc(v['means'])} |")
 open(os.path.join(DOC, 'vocabulary.md'), 'w', encoding='utf-8').write('\n'.join(VO))
 LOOP = ['# How the design loop runs', '', 'Process notes for whoever runs or reviews the design pipeline. Nothing here is product scope.', '',
  '## The loop, from Sam to a KPI read', '', '| # | Stop | What | Where |', '| --- | --- | --- | --- |']
@@ -367,7 +371,7 @@ LOOP += ['', '## The four runs', '', 'The design agent runs at 08:00, 11:59, 16:
  '## Research rules', '', '0. Rule 0, data first: does a new logged-in account have the data this flow shows? If not, where does it exist outside our accounts, and what must be created in ours?',
  '1. Existing research first (the row, references/ screenshots, the Figma research sections).', '2. Then MCP tools: Refero screens and flows, vendor docs, our Figma boards.', '3. Then the built-in browser for public pages.', '4. Claude in Chrome last, only when context is missing or a vendor shipped something new.', '5. Always 3 direct (Vapi, Retell, ElevenLabs) + 1 indirect competitor (LiveKit, Datadog or Sentry, Twilio, Bland by topic).', '6. Research runs on Sonnet or Opus; Fable only for the design pick and the build.', '',
  '| Phase | A new account has | Outside our accounts | Create in ours |', '| --- | --- | --- | --- |']
-for pk, r0 in RULE0.items(): LOOP.append(f"| {pk} | {r0['new']} | {r0['external']} | {r0['create']} |")
+for pk, r0 in RULE0.items(): LOOP.append(f"| {pk} | {tc(r0['new'])} | {tc(r0['external'])} | {tc(r0['create'])} |")
 LOOP += ['', '## Drift control', '', '| Drift | Caught by | When |', '| --- | --- | --- |',
  '| Figma vs code: a frame uses a component the console does not have | Figma Code Connect (get_code_connect_map, add_code_connect_map); a frame using an unmapped component fails the Figma gate | every run |',
  '| Tokens: a colour, radius or spacing in Figma differs from DESIGN.md and the CSS variables | Token diff: get_variable_defs vs src/styles.css, fails on any mismatch (Tokens Studio or Style Dictionary if the Figma side should be generated from code) | before every Figma publish and in the build gate |',
@@ -377,7 +381,7 @@ LOOP += ['', '## Drift control', '', '| Drift | Caught by | When |', '| --- | --
  '| Figma hygiene: detached instances, unbound colours | Design Lint on hero frames before lock; a named Figma version at lock | before lock |', '',
  '## Design system: change once, update every committed design', '', '- Tokens live in one place: DESIGN.md maps the live design system; the CSS variables in src/styles.css are the source; Figma variables mirror them. A token change re-renders every prototype route and every native frame bound to the variable.', '- Frames are built from the kit, never detached; a component change in the kit updates every locked section on publish without a re-approval.', '- Token and component changes propagate silently; a structural change to a locked flow goes through the loop again as its own row.', '- A design-system change is one commit on design/v3 plus one kit publish, named in the change log, so FE can pull it separately.', '',
  '## Practices borrowed', '', '| Practice | From | How we use it |', '| --- | --- | --- |']
-for pr in D.get('practices', []): LOOP.append(f"| {pr['practice']} | [{pr['from']}]({pr['url']}) | {pr['how']} |")
+for pr in D.get('practices', []): LOOP.append(f"| {tc(pr['practice'])} | [{tc(pr['from'])}]({pr['url']}) | {tc(pr['how'])} |")
 open(os.path.join(DOC, 'loop.md'), 'w', encoding='utf-8').write('\n'.join(LOOP))
 
 print('built', os.path.join(OUT, 'prd-v3.html'), len(html), 'bytes;', len(manifest), 'v3 descriptions;', len(v31), 'v3.1 rows; live rows', len(live))
