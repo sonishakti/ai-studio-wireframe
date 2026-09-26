@@ -2,12 +2,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-:root{--bg:#f4f5f8;--card:#ffffff;--card2:#f8f9fb;--ink:#141820;--mut:#5b6472;--line:#e0e3ea;--acc:#0a6fd1;--chip:#edf0f5;
+:root{--av-l:block;--av-d:none;--bg:#f4f5f8;--card:#ffffff;--card2:#f8f9fb;--ink:#141820;--mut:#5b6472;--line:#e0e3ea;--acc:#0a6fd1;--chip:#edf0f5;
 --p0:#0a6fd1;--p1:#6d45d0;--p2:#0c7f62;--p3:#a86200;--nf:#5b6472;--ok:#0c7f62;--warn:#a86200;--bad:#c23b3b;
 --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1116;--card:#161a21;--card2:#1b2029;--ink:#e6e9ee;--mut:#98a1ae;--line:#2a303b;--acc:#58b4ff;--chip:#232934;
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--av-l:none;--av-d:block;--bg:#0e1116;--card:#161a21;--card2:#1b2029;--ink:#e6e9ee;--mut:#98a1ae;--line:#2a303b;--acc:#58b4ff;--chip:#232934;
 --p0:#58b4ff;--p1:#a88cff;--p2:#3fd0a0;--p3:#f2ab4c;--nf:#98a1ae;--ok:#3fd0a0;--warn:#f2ab4c;--bad:#ff7d7d;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0e1116;--card:#161a21;--card2:#1b2029;--ink:#e6e9ee;--mut:#98a1ae;--line:#2a303b;--acc:#58b4ff;--chip:#232934;
+:root[data-theme="dark"]{--av-l:none;--av-d:block;--bg:#0e1116;--card:#161a21;--card2:#1b2029;--ink:#e6e9ee;--mut:#98a1ae;--line:#2a303b;--acc:#58b4ff;--chip:#232934;
 --p0:#58b4ff;--p1:#a88cff;--p2:#3fd0a0;--p3:#f2ab4c;--nf:#98a1ae;--ok:#3fd0a0;--warn:#f2ab4c;--bad:#ff7d7d;color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);padding-block:28px 64px;padding-inline:16px}
 .w{max-width:1240px;margin:0 auto;display:grid;gap:28px}
@@ -80,7 +80,9 @@ tr:last-child td{border-bottom:0}
 .pill.Not{background:var(--chip);color:var(--mut)}
 /* Sam */
 .jt{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--chip);display:block}
+.av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--chip);display:block}.av.l{display:var(--av-l)}.av.d{display:var(--av-d)}
+.avs{width:22px;height:22px;border-radius:50%;object-fit:cover;background:var(--chip);flex:none}.avs.l{display:var(--av-l)}.avs.d{display:var(--av-d)}
+.story{margin:0;padding:0;list-style:none;display:grid;gap:8px;counter-reset:s}.story li{display:flex;gap:10px;align-items:flex-start;counter-increment:s}.story li .n{font:500 11px/22px var(--mono);color:var(--mut);min-width:16px;text-align:right}.story li .t{flex:1}.story li .t b{font-weight:600}.story li.rain .t{color:inherit}
 .who{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
 .stepper{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:s}
 .stepper li{position:relative;padding-left:30px;counter-increment:s}
@@ -186,7 +188,7 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
     <li><b>Verdicts first.</b> Card dragged to Delivered = approve and lock; back to In progress + <span class="m">change:</span> comment = redo; back to To-do = park. Slack replies from you count the same way.</li>
     <li><b>Pick.</b> Redo first, then the lowest In progress card, else the top To-do card (moved to In progress).</li>
     <li><b>Build the job.</b> Reuse the research on the row; prototype on design/v3 so the link opens at the start of Sam's journey; one screenshot per step and per rainy state.</li>
-    <li><b>Figma.</b> Section <span class="m">id · title</span>: frames in step order, each captioned "Sam does …", the rationale under it, research shots marked in red. Native frames, kit components, never detached.</li>
+    <li><b>Figma.</b> Section <span class="m">id · title</span>, dark and text-light: the JTBD lines, research shots with one finding each, the story (one frame per step: Sam's photo, "Sam clicks on …", the screenshot; rainy paths after), native hero frames from the kit, 3 to 5 rationale lines and the links. Scope and process stay in ClickUp.</li>
     <li><b>Track.</b> ClickUp comment (prototype, Figma, commit, rationale) and the card moved to Pending Review; the sheet row updated.</li>
     <li><b>Post.</b> One Slack message and a push, then stop. A run must finish before the next one starts.</li>
    </ol></td><td>Run 1 of the day</td></tr>
@@ -257,7 +259,8 @@ const D=__DATA__;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const CHEV='<span class="chev" aria-hidden="true">›</span>';
-const SAM='<img class="av" src="sam.webp" alt="Sam, a developer" loading="lazy" onerror="this.hidden=true">';
+const SAM='<img class="av l" src="sam.webp" alt="Sam, a developer" loading="lazy" onerror="this.hidden=true"><img class="av d" src="sam-dark.webp" alt="" loading="lazy" onerror="this.hidden=true">';
+const SAMS='<img class="avs l" src="sam.webp" alt="" loading="lazy" onerror="this.hidden=true"><img class="avs d" src="sam-dark.webp" alt="" loading="lazy" onerror="this.hidden=true">';
 /* theme */
 (function(){const r=document.documentElement,bs=[...document.querySelectorAll(".theme button")];
  function set(t,save){if(t==="system")r.removeAttribute("data-theme");else r.setAttribute("data-theme",t);bs.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===t)));if(save){try{localStorage.setItem("prd-theme",t)}catch(e){}}}
@@ -286,8 +289,8 @@ function jtbd(f,k){
  return `<details class="sub" ${k("jtbd")}><summary>${CHEV}<span class="tag">1 JTBD</span>Job to be done<span class="rt">${esc(f.jobmap)} · happy + ${f.rainy.length} rainy</span></summary><div class="in">
   <div class="jt">${SAM}<div><div class="who"><b>Sam</b><span class="dim">developer</span><span class="chip jm" title="${esc(f.jobmap_why)}">Job map · ${esc(f.jobmap)}</span></div>
    <dl class="kv"><dt>Job</dt><dd><b>${esc(f.title)}</b></dd><dt>Situation</dt><dd>${esc(f.step)}</dd>${want?`<dt>Sam wants to</dt><dd>${esc(want)}</dd><dt>So that</dt><dd>${esc(f.story.so)}</dd>`:`<dt>Story</dt><dd>${esc(f.happy.story)}</dd>`}</dl></div></div>
-  <details class="sub" ${k("a")}><summary>${CHEV}<span class="tag">${esc(f.happy.id)}</span>Happy path: what Sam does<span class="rt">${f.happy.steps.length} steps</span></summary><div class="in"><ol class="stepper">${f.happy.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div></details>
-  <details class="sub" ${k("rainy")}><summary>${CHEV}<span class="tag">${esc(f.id)}.b+</span>Rainy paths: when it goes wrong<span class="rt">${f.rainy.length}</span></summary><div class="in">${f.rainy.map(r=>`<details class="sub" ${k(r.id)}><summary>${CHEV}<span class="tag">${esc(r.id)}</span>${esc(r.title)}</summary><div class="in"><p><span class="dim">Recovery </span>${esc(r.recovery)}</p></div></details>`).join("")}</div></details>
+  <details class="sub" ${k("a")}><summary>${CHEV}<span class="tag">${esc(f.happy.id)}</span>Happy path: what Sam does<span class="rt">${f.happy.steps.length} steps</span></summary><div class="in"><ol class="story">${f.happy.steps.map((s,i)=>`<li><span class="n">${i+1}</span>${SAMS}<span class="t">${esc(s)}</span></li>`).join("")}</ol></div></details>
+  <details class="sub" ${k("rainy")}><summary>${CHEV}<span class="tag">${esc(f.id)}.b+</span>Rainy paths: when it goes wrong<span class="rt">${f.rainy.length}</span></summary><div class="in">${f.rainy.map(r=>`<details class="sub" ${k(r.id)}><summary>${CHEV}<span class="tag">${esc(r.id)}</span>${esc(r.title)}</summary><div class="in"><ul class="story"><li>${SAMS}<span class="t"><b>What happens</b> ${esc(r.title)}</span></li><li>${SAMS}<span class="t"><b>What Sam sees</b> ${esc(r.recovery)}</span></li></ul></div></details>`).join("")}</div></details>
  </div></details>`}
 function feat(f,open){
  const R=research(f),done=R.filter(r=>r.status==="Done").length,E=evs(f);
@@ -338,7 +341,7 @@ draw();
   <details class="sub" data-k="nf:${esc(t.num)}:rm"${open.has("nf:"+t.num+":rm")?" open":""}><summary>${CHEV}<span class="tag">3 Roadmap</span>Roadmap tasks it covers<span class="rt">${(t.roadmap||[]).length}</span></summary><div class="in"><ul class="plain">${(t.roadmap||[]).map(r=>`<li><a href="${esc(r[1])}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join("")||'<li class="dim">none linked</li>'}</ul></div></details>
  </div></details>`).join("")})();
 /* the loop */
-const PIPE=[["Job","JTBD for Sam: job statement, situation, want, outcome; happy path and every rainy path","this sheet · ClickUp"],["Goal","One KPI per row with target, formula, counter-metric and the assumption it tests","this sheet"],["Telemetry","Events named and typed before design; a tracking plan FE can implement","event-spec.json · PostHog"],["Blueprint","Journey and API map: what the spec can and cannot save","journeys · v3 spec"],["Research","3 direct + 1 indirect competitors, existing shots first","references/ · Refero · Figma"],["Design","Before → after, 3 to 5 directions, one pick with rationale","references/v3/features/id/"],["Prototype","design/v3, link opens at the journey start, every rainy state by URL","Vercel preview"],["Figma flow","Frames in step order, 'Sam does …' captions, rationale, red-marked research","Figma section id · title"],["Review","You approve, ask for changes, or park","ClickUp · Slack"],["Lock","Figma section frozen, commit recorded, row Done","design/v3 commit"],["FE build","FE pulls the commit and the Figma section; Code Connect maps components","ng-console"],["Ship + verify","Events fire in production; the P0.13 data checks stay green for 7 days","PostHog"],["KPI read","Cohort read 14 days after the week; the assumption is kept or killed","this sheet, KPIs"]];
+const PIPE=[["Job","JTBD for Sam: job statement, situation, want, outcome; happy path and every rainy path","this sheet · ClickUp"],["Goal","One KPI per row with target, formula, counter-metric and the assumption it tests","this sheet"],["Telemetry","Events named and typed before design; a tracking plan FE can implement","event-spec.json · PostHog"],["Blueprint","Journey and API map: what the spec can and cannot save","journeys · v3 spec"],["Research","3 direct + 1 indirect competitors, existing shots first","references/ · Refero · Figma"],["Design","Before → after, 3 to 5 directions, one pick with rationale","references/v3/features/id/"],["Prototype","design/v3, link opens at the journey start, every rainy state by URL","Vercel preview"],["Figma flow","Dark, text-light: one story frame per step with Sam's photo and 'Sam clicks on …', research findings, rationale","Figma section id · title"],["Review","You approve, ask for changes, or park","ClickUp · Slack"],["Lock","Figma section frozen, commit recorded, row Done","design/v3 commit"],["FE build","FE pulls the commit and the Figma section; Code Connect maps components","ng-console"],["Ship + verify","Events fire in production; the P0.13 data checks stay green for 7 days","PostHog"],["KPI read","Cohort read 14 days after the week; the assumption is kept or killed","this sheet, KPIs"]];
 $("pipe").innerHTML=PIPE.map((s,i)=>`<div class="fs"><b><i>${i+1}</i>${esc(s[0])}</b><span>${esc(s[1])}</span><span class="d">${esc(s[2])}</span></div>`).join("");
 const GATES=[["G0 Clarified","Team agrees the row is in v3 and the API can save it","before Planned","Vineet, Samyak"],["G1 Job written","Job, happy and rainy paths, goal and events on the row","before the agent takes it","Shakti"],["G2 Telemetry plan","Every event on the row has an owner (client FE, server emitter) and a status","before Review","FE, API team"],["G3 Build gate","typecheck, tests, biome, a11y pass, copy rules, locked words, no locked route changed","every run","agent"],["G4 Drift gate","Code Connect coverage, token diff, screenshot baselines on locked routes","every run","agent"],["G5 Review","Prototype opens at the journey start; every rainy state reachable; rationale traces to research","after each run","Shakti"],["G6 Lock","Figma frozen, commit on design/v3, row Done","on approve","Shakti"],["G7 FE parity","Built screens match the Figma section; events fire as specified","before ship","FE"],["G8 KPI live","The KPI reads from real events, data checks green","7 days after ship","Shakti, Vineet"]];
 $("gates").innerHTML="<tr><th>Gate</th><th>Passes when</th><th>When</th><th>Who</th></tr>"+GATES.map(g=>`<tr><td><b>${esc(g[0])}</b></td><td>${esc(g[1])}</td><td>${esc(g[2])}</td><td>${esc(g[3])}</td></tr>`).join("");
