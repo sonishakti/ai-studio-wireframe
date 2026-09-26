@@ -93,6 +93,24 @@ RULE0 = {
         'create': '2 secret sets (one referenced by an agent), 3 numbers (one unassigned for 7 days), 2 MCP servers shared by 2 agents, 1 API-created agent to test code and hand edits.'},
 }
 
+# High-level features for tech and backend: which job steps each one builds, the API it touches, what blocks it
+FEATURES = [
+ ('F1', 'Create an agent and choose the deployment type', ['P0.1', 'P0.14', 'P0.15'], 'POST, PATCH, DELETE /agents; labels studio_deployment, studio_preset, studio_source', 'Agent versions are missing (P0.14); whether DELETE is refused while a number or run references the agent is unconfirmed (P0.15)'),
+ ('F2', 'Presets, voice and models', ['P0.2', 'P0.3'], 'Agent asr, llm, tts, mllm, avatar; turn_detection, silence_config, filler_words, failure_message', 'Region, price and model lists come from Studio, not from the spec'),
+ ('F3', 'Prompt, greeting and failure messages', ['P0.4'], 'Agent instructions, greeting {mode, on, delay_ms, text}, llm.failure_message, variables', ''),
+ ('F4', 'Integrations: MCP servers, tools, knowledge base', ['P0.5', 'P3.4'], 'llm.mcp_servers[], llm.tools[], mllm.mcp_servers[]; headers write-only', 'Knowledge base not in the spec (decision 3); no project-level integration object'),
+ ('F5', 'BYOK and secrets', ['P0.6', 'P3.1'], 'POST, GET, PUT, DELETE /secrets; credential.mode byok or managed; $secrets.<set>.<key>', 'PUT replaces the whole set; no used_by (decision 12); no key check'),
+ ('F6', 'Test panel, readiness and telemetry hygiene', ['P0.7', 'P0.8', 'P0.12', 'P0.13'], 'POST /sessions (rtc test) with client_reference; data_policy on SessionCreate', 'purpose field (decision 4); client_reference never returned; data_policy missing on Number and Campaign (decision 6); gateway emitter G1'),
+ ('F7', 'Go live: inbound numbers', ['P0.9', 'P3.2', 'P3.3'], 'POST, GET, PATCH, DELETE /numbers; inbound {agent, call_policy, transfer}; sip_trunk', 'No number purchase, status or trunk health; data_policy missing on inbound'),
+ ('F8', 'Go live: batch runs', ['P0.10', 'P2.5'], 'POST, GET /campaigns; :pause, :resume, :cancel; contacts, schedule.days, pacing, voicemail', 'Sessions by run (G4, G12); contacts endpoint; pause reason (decision 16)'),
+ ('F9', 'Go live: code sessions and API parity', ['P0.11', 'P3.5'], 'POST /sessions {agent_id, transport rtc or telephony, lifecycle, data_policy}; /sessions/ephemeral; 201 leaf fields', 'purpose field; 25 UI-only items to cut or raise (decision 27)'),
+ ('F10', 'Agent monitoring: agent page, errors and logs', ['P1.1', 'P1.2', 'P1.3', 'P1.4', 'P1.5', 'P1.6', 'P1.8', 'P1.10', 'P1.11'], 'GET /agents, /agents/{id}; GET /sessions with a saved agent id and filter; error stream; turns and logs', 'G1 gateway emitter, G2 session_ended, G4 and G12 saved agent id and filter, G11 error stream, G13 turns and logs'),
+ ('F11', 'Analysis: what a good session is', ['P1.9'], 'Agent structured_output', 'Results deferred (G13)'),
+ ('F12', 'Billing, free minutes and honest rows', ['P1.7', 'P2.6'], 'Billing service outside the v3 API; billable_seconds, cost and data_policy on session rows', 'G9 billing emitter; G5 origin and retention on list rows'),
+ ('F13', 'Session history and detail', ['P2.1', 'P2.2', 'P2.3', 'P2.4', 'P2.7', 'P2.8', 'P2.9', 'P2.10'], 'GET /sessions with filters, GET /sessions/{id}; turns, logs, recording', 'G4, G5, G12 list fields and filters; G13 turns and logs; G14 contact'),
+ ('F14', 'One vocabulary in Console and docs', ['P3.6'], 'Every endpoint name and field label', 'Two UI names differ by choice: Analysis, run'),
+]
+
 def fmt(s):
     if not s: return ''
     try:
@@ -134,6 +152,19 @@ for f in D['features']:
     f['rule0'] = RULE0.get(f['p'], {})
     gaps = sorted(set(re.findall(r'\bG\d{1,2}\b', ' '.join([f['kpi'].get('formula', ''), f['kpi'].get('counter', ''), f['more'].get('api', ''), ' '.join(f['kpi'].get('events') and [e['name'] for e in f['kpi']['events']] or [])]))), key=lambda g: int(g[1:]))
     f['gaps'] = gaps
+
+FID = {f['id']: f for f in D['features']}
+hl = []
+for fid, name, steps, api, blocked in FEATURES:
+    rows = [FID[i] for i in steps if i in FID]
+    sch = [D['schedule'].get(i, {}) for i in steps]
+    locks = sorted(x['lock_eta'] for x in sch if x.get('lock_eta'))
+    designs = sorted(x['design_eta'] for x in sch if x.get('design_eta'))
+    gaps = sorted(set(g for r in rows for g in r.get('gaps', [])), key=lambda g: int(g[1:]))
+    hl.append({'id': fid, 'name': name, 'steps': steps, 'titles': {r['id']: r['title'] for r in rows}, 'phases': sorted(set(r['p'] for r in rows)),
+               'api': api, 'blocked': blocked, 'gaps': gaps, 'design_first': designs[0] if designs else '', 'design_ready': locks[-1] if locks else '',
+               'proposed': [i for i in steps if not FID.get(i, {}).get('d')], 'clickup': {i: FID[i]['clickup'] for i in steps if i in FID}})
+D['features_hl'] = hl
 
 # umbrellas: split the KPI detail into scannable lines
 for u in D['umbrellas']:
@@ -177,7 +208,7 @@ UMB = {u['id']: u for u in D['umbrellas']}
 def fired(s):
     return 'server' if s == 'server' else 'derived' if s == 'derived' else 'client (PostHog)'
 
-def desc(f):
+def desc_body(f):
     u = UMB[f['p']]; s = D['schedule'].get(f['id'], {}); k = f['kpi']; r0 = f['rule0']
     L = []
     L.append(f"🏷 **V3 · launch Fri 16 Oct 2026** · {f['p']} {u['name']} · design ETA **{fmt(s.get('design_eta')) or 'after sign-off'}** · lock ETA **{fmt(s.get('lock_eta')) or 'after sign-off'}**")
@@ -224,7 +255,11 @@ def desc(f):
     L.append(f"*   Figma flow: {s.get('figma') or 'not yet'} (page v3 · {f['p']} {u['name']}, section {f['id']} · {f['title']})")
     L.append(f"*   Commit: {('`' + s['commit'] + '` on design/v3, locked ' + fmt(s.get('locked_at'))) if s.get('commit') else 'not yet'}")
     L.append(f"*   Sheet row: {SHEET}#{f['id']}")
-    L.append('')
+    return '\n'.join(L)
+
+def desc_foot(f):
+    u = UMB[f['p']]; s = D['schedule'].get(f['id'], {}); k = f['kpi']; r0 = f['rule0']
+    L = []
     L.append('---')
     L.append('')
     L.append('###### Footnote for the design agent')
@@ -235,6 +270,9 @@ def desc(f):
     L.append('Columns: To-do = planned, in the order it gets done · In progress = taken at a run (08:00, 11:59, 16:00, 20:00) · Pending Review = delivered, pending Shakti · Delivered = approved and locked (Figma frozen, commit). Changes: drag back to In progress + comment `change: …`.')
     L.append('Rules: existing Console design system only (docs/design/DESIGN.md, design/v3); reuse, do not redesign; empty first, quiet chrome; sentence case, no arrows or em dashes; locked words; Sam only in job text; never change a locked feature unless in scope, then say so. One run delivers: prototype for the happy path and every rainy state, one screenshot per step, the Figma flow with "Sam does …" captions and rationale, this card in Pending Review with a comment, the sheet row, one Slack post.')
     return '\n'.join(L)
+
+def desc(f):
+    return desc_body(f) + '\n\n' + desc_foot(f)
 
 manifest = {}
 for f in D['features']:
@@ -255,4 +293,91 @@ for t in v31:
 json.dump(manifest31, open(os.path.join(OUT, 'build-manifest-v31.json'), 'w'), indent=1)
 open(os.path.join(OUT, 'clickup', 'list.md'), 'w', encoding='utf-8').write('Folder Design Tracker: 1. V3 (42 job steps, P0.1 to P3.6, in the order they get done) and 2. Future Sprints (28 roadmap features, 01 to 28). Four columns each: To-do, In progress, Pending Review, Delivered. Live sheet: ' + SHEET)
 json.dump(manifest, open(os.path.join(OUT, 'build-manifest.json'), 'w'), indent=1)
+
+# ---------- feature cards for tech (list 0. Features) ----------
+os.makedirs(os.path.join(OUT, 'clickup', 'features'), exist_ok=True)
+fman = {}
+for x in hl:
+    L = [f"🏷 **V3 · feature** · design ready **{fmt(x['design_ready']) or 'after sign-off'}** (the last lock ETA of its job steps) · first design {fmt(x['design_first']) or 'after sign-off'}", '']
+    L.append('**Builds these job steps** (each card holds the job, goal, telemetry, research and deliverables):')
+    for i in x['steps']:
+        cu = x['clickup'].get(i, {}); L.append(f"*   [{i} · {x['titles'].get(i, '')}]({cu.get('url', '')})" + (' (proposed, not budgeted)' if i in x['proposed'] else ''))
+    L.append('')
+    L.append(f"**API surface:** {x['api']}")
+    if x['blocked']: L.append(f"**Blocked by, asks:** {x['blocked']}")
+    if x['gaps']: L.append(f"**Server gaps:** {', '.join(x['gaps'])}")
+    L.append(f"**Phase:** {', '.join(x['phases'])} · **Sheet:** {SHEET}#features")
+    L.append('')
+    L.append('Status here follows the job steps: In progress once the first step is being designed, Pending Review when every step is delivered, Delivered when every step is locked.')
+    p = os.path.join(OUT, 'clickup', 'features', f"{x['id']}.md")
+    open(p, 'w', encoding='utf-8').write('\n'.join(L))
+    fman[x['id']] = {'name': f"{x['id']} · {x['name']}", 'desc': p, 'start': x['design_first'], 'due': x['design_ready'], 'steps': [x['clickup'][i]['task'] for i in x['steps'] if i in x['clickup']]}
+json.dump(fman, open(os.path.join(OUT, 'build-manifest-features.json'), 'w'), indent=1)
+
+# ---------- ClickUp doc pages: the PRD for the whole team ----------
+DOC = os.path.join(OUT, 'clickup', 'doc'); os.makedirs(DOC, exist_ok=True)
+def jobblock(u):
+    return f"**Job:** {u.get('job_short') or u.get('job','')}\n**Situation:** {u.get('situation','')}\n**Sam wants to:** {u.get('want','')}\n**So that:** {u.get('so','')}"
+ov = ['# Studio v3 PRD', '', f"Launch **Fri 16 Oct 2026**. Sam is a developer. Every row is a job Sam does; the goal is the number that proves it. Boards: [1. V3](https://app.clickup.com/8556478/v/l/li/{LIST_HOME}) · [2. Future Sprints](https://app.clickup.com/8556478/v/l/li/{LIST_TRACKER}) · live sheet: {SHEET}", '',
+      '## Features, for tech and backend', '', 'What each feature builds, the API it touches, and when its design is ready (the last lock ETA of its job steps).', '',
+      '| Feature | Builds | API surface | Blocked by, asks | Design ready |', '| --- | --- | --- | --- | --- |']
+for x in hl:
+    ov.append(f"| **{x['id']} · {x['name']}** | {' · '.join(x['steps'])} | {x['api']} | {x['blocked'] or '—'} | **{fmt(x['design_ready']) or 'after sign-off'}** |")
+ov += ['', '## The four jobs', '']
+for u in D['umbrellas']:
+    ov += [f"### {u['id']} {u['name']}", jobblock(u), f"**Done looks like:** {u['outcome']}", f"**Goal:** {u['kpi_simple']}", '']
+ov += ['## How to read the rows', '', 'Each job step page lists: job, situation, what Sam wants and why; the happy path (what Sam does) and the rainy paths (what happens when it goes wrong); the goal and how it is measured; the telemetry to configure; the research; the deliverables. Status on the board: To-do, In progress, Pending Review, Delivered (locked: Figma frozen, commit recorded). Start date = design ETA, due date = lock ETA.']
+open(os.path.join(DOC, '00-overview.md'), 'w', encoding='utf-8').write('\n'.join(ov))
+for u in D['umbrellas']:
+    P = [f"# {u['id']} {u['name']}", '', jobblock(u), '', f"**Done looks like:** {u['outcome']}", '', f"**Goal:** {u['kpi_simple']}", '']
+    for f in D['features']:
+        if f['p'] != u['id']: continue
+        body = desc_body(f)
+        body = re.sub(r'^🏷[^\n]*\n\n', '', body)
+        P += [f"## {f['id']} · {f['title']}", f"ClickUp card: {f['clickup']['url']} · design ETA {fmt(D['schedule'].get(f['id'], {}).get('design_eta')) or 'after sign-off'} · lock ETA {fmt(D['schedule'].get(f['id'], {}).get('lock_eta')) or 'after sign-off'}", '', body.replace('## ', '### '), '']
+    open(os.path.join(DOC, f"{u['id']}.md"), 'w', encoding='utf-8').write('\n'.join(P))
+FS = ['# Future Sprints', '', 'The 28 roadmap features for after the v3 launch, each as a job for Sam. Board: 2. Future Sprints.', '']
+for t in v31:
+    FS += [f"## {t['name']}", f"**Job:** {t.get('job','')}\n**Situation:** {t.get('situation','')}\n**Sam wants to:** {t.get('want','')}\n**So that:** {t.get('so','')}", f"**What it does:** {t.get('what','')}", f"ClickUp card: {t.get('url','')}", '']
+open(os.path.join(DOC, 'future-sprints.md'), 'w', encoding='utf-8').write('\n'.join(FS))
+FK = ['# Funnel and KPIs', '', '## v3 funnel', '', '| # | Event | Stage | Group | Fired by | Definition |', '| --- | --- | --- | --- | --- | --- |']
+for st in D['funnel']['stages']: FK.append(f"| {st['n']} | `{st['event']}` | {st['stage']} | {st['group']} | {st['fired_by']} | {st['definition']} |")
+FK += ['', '## KPIs', '', '| KPI | Target | How we measure | Counter-metric | Phase |', '| --- | --- | --- | --- | --- |']
+for k in D['funnel']['kpis']: FK.append(f"| **{k['name']}** | {k['target']} | {k['formula']} | {k['counter']} | {k['owner_phase']} |")
+open(os.path.join(DOC, 'funnel-kpis.md'), 'w', encoding='utf-8').write('\n'.join(FK))
+DG = ['# Decisions and server gaps', '', '## Decisions that block dates', '', '| # | Decision | Blocks | Owner | By |', '| --- | --- | --- | --- | --- |']
+for i, dc in enumerate(D['decisions'], 1): DG.append(f"| {i} | {dc['q']} | {dc['blocks']} | {dc['owner']} | {dc['by']} |")
+DG += ['', '## Server gaps', '', '| Gap | What is missing and what it blocks |', '| --- | --- |']
+for c in D['funnel']['conflicts']:
+    m = re.match(r'^Gap (G\d+):\s*(.*)$', c)
+    if m: DG.append(f"| **{m.group(1)}** | {m.group(2)} |")
+open(os.path.join(DOC, 'decisions-gaps.md'), 'w', encoding='utf-8').write('\n'.join(DG))
+VO = ['# Vocabulary', '', 'One word per concept, in the Console and the docs.', '', '| Use | Never | Means |', '| --- | --- | --- |']
+for v in D['funnel']['vocabulary']: VO.append(f"| **{v['use']}** | {v['never']} | {v['means']} |")
+open(os.path.join(DOC, 'vocabulary.md'), 'w', encoding='utf-8').write('\n'.join(VO))
+LOOP = ['# How the design loop runs', '', 'Process notes for whoever runs or reviews the design pipeline. Nothing here is product scope.', '',
+ '## The loop, from Sam to a KPI read', '', '| # | Stop | What | Where |', '| --- | --- | --- | --- |']
+PIPE = [("Job","JTBD for Sam: job, situation, want, outcome; happy path and every rainy path","sheet, ClickUp"),("Goal","One KPI per row with target, formula, counter-metric and the assumption it tests","sheet"),("Telemetry","Events named and typed before design; a tracking plan FE can implement","event-spec.json, PostHog"),("Blueprint","Journey and API map: what the spec can and cannot save","journeys, v3 spec"),("Research","3 direct + 1 indirect competitors, existing shots first","references, Refero, Figma"),("Design","Before and after, 3 to 5 directions, one pick with rationale","references/v3/features/id"),("Prototype","design/v3, link opens at the journey start, every rainy state by URL","Vercel preview"),("Figma flow","Dark, text-light: one story frame per step with Sam's photo and 'Sam clicks on …', research findings, rationale","Figma section id · title"),("Review","The owner approves, asks for changes, or parks","ClickUp, Slack"),("Lock","Figma section frozen, commit recorded, card Delivered","design/v3 commit"),("FE build","FE pulls the commit and the Figma section; Code Connect maps components","ng-console"),("Ship and verify","Events fire in production; data checks stay green for 7 days","PostHog"),("KPI read","Cohort read 14 days after the week; the assumption is kept or killed","sheet, KPIs")]
+for i, (a, b, c) in enumerate(PIPE, 1): LOOP.append(f"| {i} | {a} | {b} | {c} |")
+LOOP += ['', '## Gates', '', '| Gate | Passes when | When | Who |', '| --- | --- | --- | --- | --- |'.replace(' --- |', ' --- |', 3)]
+GATES = [("G0 Clarified","Team agrees the row is in v3 and the API can save it","before To-do","Vineet, Samyak"),("G1 Job written","Job, happy and rainy paths, goal and events on the row","before the agent takes it","Shakti"),("G2 Telemetry plan","Every event on the row has an owner and a status","before Pending Review","FE, API team"),("G3 Build gate","typecheck, tests, biome, a11y, copy rules, locked words, no locked route changed","every run","agent"),("G4 Drift gate","Code Connect coverage, token diff, screenshot baselines on locked routes","every run","agent"),("G5 Review","Prototype opens at the journey start; every rainy state reachable; rationale traces to research","after each run","Shakti"),("G6 Lock","Figma frozen, commit on design/v3, card Delivered","on approve","Shakti"),("G7 FE parity","Built screens match the Figma section; events fire as specified","before ship","FE"),("G8 KPI live","The KPI reads from real events, data checks green","7 days after ship","Shakti, Vineet")]
+LOOP[-1] = '| --- | --- | --- | --- |'
+for g in GATES: LOOP.append(f"| **{g[0]}** | {g[1]} | {g[2]} | {g[3]} |")
+LOOP += ['', '## The four runs', '', 'The design agent runs at 08:00, 11:59, 16:00 and 20:00. Each run applies verdicts from the board and Slack, takes the next card that is not done, builds only its JTBD (prototype, story flow in Figma, rationale), moves the card to Pending Review and posts once: "JTBD n of 42 · id title is done and pending your review". Contract: references/automation/v3-design-agent.md.', '',
+ '## Research rules', '', '0. Rule 0, data first: does a new logged-in account have the data this flow shows? If not, where does it exist outside our accounts, and what must be created in ours?',
+ '1. Existing research first (the row, references/ screenshots, the Figma research sections).', '2. Then MCP tools: Refero screens and flows, vendor docs, our Figma boards.', '3. Then the built-in browser for public pages.', '4. Claude in Chrome last, only when context is missing or a vendor shipped something new.', '5. Always 3 direct (Vapi, Retell, ElevenLabs) + 1 indirect competitor (LiveKit, Datadog or Sentry, Twilio, Bland by topic).', '6. Research runs on Sonnet or Opus; Fable only for the design pick and the build.', '',
+ '| Phase | A new account has | Outside our accounts | Create in ours |', '| --- | --- | --- | --- |']
+for pk, r0 in RULE0.items(): LOOP.append(f"| {pk} | {r0['new']} | {r0['external']} | {r0['create']} |")
+LOOP += ['', '## Drift control', '', '| Drift | Caught by | When |', '| --- | --- | --- |',
+ '| Figma vs code: a frame uses a component the console does not have | Figma Code Connect (get_code_connect_map, add_code_connect_map); a frame using an unmapped component fails the Figma gate | every run |',
+ '| Tokens: a colour, radius or spacing in Figma differs from DESIGN.md and the CSS variables | Token diff: get_variable_defs vs src/styles.css, fails on any mismatch (Tokens Studio or Style Dictionary if the Figma side should be generated from code) | before every Figma publish and in the build gate |',
+ '| Prototype vs locked design: a later feature changed a locked route | Playwright screenshot baselines per locked route, stored at lock time | build gate of every run |',
+ '| Copy and words: a banned word or an old term ships | The vocabulary as a lint list; grep on changed files | build gate |',
+ '| Spec vs console: an API field with no home, or a control the API cannot save | The parity script (P3.5) | every spec bump |',
+ '| Figma hygiene: detached instances, unbound colours | Design Lint on hero frames before lock; a named Figma version at lock | before lock |', '',
+ '## Design system: change once, update every committed design', '', '- Tokens live in one place: DESIGN.md maps the live design system; the CSS variables in src/styles.css are the source; Figma variables mirror them. A token change re-renders every prototype route and every native frame bound to the variable.', '- Frames are built from the kit, never detached; a component change in the kit updates every locked section on publish without a re-approval.', '- Token and component changes propagate silently; a structural change to a locked flow goes through the loop again as its own row.', '- A design-system change is one commit on design/v3 plus one kit publish, named in the change log, so FE can pull it separately.', '',
+ '## Practices borrowed', '', '| Practice | From | How we use it |', '| --- | --- | --- |']
+for pr in D.get('practices', []): LOOP.append(f"| {pr['practice']} | [{pr['from']}]({pr['url']}) | {pr['how']} |")
+open(os.path.join(DOC, 'loop.md'), 'w', encoding='utf-8').write('\n'.join(LOOP))
+
 print('built', os.path.join(OUT, 'prd-v3.html'), len(html), 'bytes;', len(manifest), 'v3 descriptions;', len(v31), 'v3.1 rows; live rows', len(live))

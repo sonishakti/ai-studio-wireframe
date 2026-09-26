@@ -139,14 +139,18 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
 
 <div class="w">
 <header class="top">
- <div><h1>Studio v3 PRD</h1><p class="sub">One table for design, product and FE. Every row is a job for Sam with a goal, the telemetry that proves it, research, and the deliverables the design agent adds four times a day. Launch Fri 16 Oct 2026.</p></div>
+ <div><h1>Studio v3 PRD</h1><p class="sub">Launch Fri 16 Oct 2026</p></div>
  <div class="theme" role="group" aria-label="Theme"><button data-t="system">Auto</button><button data-t="light">Light</button><button data-t="dark">Dark</button></div>
 </header>
 
-<section class="strip" id="strip"></section>
 
-<section id="features">
- <div class="fh"><h2>V3 · launch Fri 16 Oct</h2><span class="live" id="live"></span></div>
+<section id="hl"><a id="features"></a>
+ <div class="fh"><h2>Features</h2><span class="live">For tech and backend: what each feature builds, the API it touches, when its design is ready</span></div>
+ <div class="x"><table id="ftab"></table></div>
+</section>
+
+<section id="steps">
+ <div class="fh"><h2>Job steps · v3</h2><span class="live" id="live"></span></div>
  <div class="tabs" id="tabs"></div>
  <div class="tree" role="tree">
   <div class="row hd" aria-hidden="true"><span></span><span>ID</span><span>Job step</span><span>Goal</span><span>Status</span><span>ETA</span><span>Deliverable</span></div>
@@ -163,76 +167,17 @@ ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
 </section>
 
 <section class="more">
- <h2>How the loop runs</h2>
- <details class="dd" open><summary><span class="chev">›</span>The loop, from Sam to a KPI read<span class="rt">13 stops · 8 gates</span></summary><div class="in">
-  <p class="dim">Every feature walks the same loop. The sheet is the record; ClickUp is the queue and the team view; Figma is the design of record; the commit is the lock FE pulls.</p>
-  <div class="pipe" id="pipe"></div>
-  <div class="x"><table id="gates"></table></div>
- </div></details>
- <details class="dd"><summary><span class="chev">›</span>How tracking works</summary><div class="in">
-  <div class="life"><div class="fs"><b>Planned</b><span>In the sheet with two ETAs</span><span class="d">Board: To-do</span></div><span class="arr">›</span><div class="fs"><b>WIP</b><span>The agent took it at a run</span><span class="d">Board: In progress</span></div><span class="arr">›</span><div class="fs"><b>Review</b><span>Prototype and Figma flow delivered; you approve or ask for a redo</span><span class="d">Board: Pending Review</span></div><span class="arr">›</span><div class="fs"><b>Done</b><span>Approved and locked: Figma section frozen, commit recorded, FE pulls it</span><span class="d">Board: Delivered</span></div></div>
+ <h2>Deep dive</h2>
+ <details class="dd"><summary><span class="chev">›</span>Status and dates</summary><div class="in">
+  <div class="life"><div class="fs"><b>Planned</b><span>In the sheet with two dates</span><span class="d">Board: To-do</span></div><span class="arr">›</span><div class="fs"><b>WIP</b><span>Being designed</span><span class="d">Board: In progress</span></div><span class="arr">›</span><div class="fs"><b>Review</b><span>Prototype and Figma flow delivered, pending review</span><span class="d">Board: Pending Review</span></div><span class="arr">›</span><div class="fs"><b>Done</b><span>Approved and locked: Figma section frozen, commit recorded, FE pulls it</span><span class="d">Board: Delivered</span></div></div>
   <ul class="plain">
-   <li><b>Two dates per row.</b> Design ETA is when the agent delivers for review. Lock ETA is when the row should be Done, two days later on a working day. Every lock lands before Fri 16 Oct.</li>
-   <li><b>Humans follow the ETAs; the agent follows the queue.</b> The agent runs four times a day and takes the next row that is not done, so it runs ahead of the ETAs. An ETA only turns red when a lock is late.</li>
-   <li><b>Done locks the design.</b> The Figma section is frozen and the commit is the lock. Later rows never change a locked design unless the change is in their own scope or improves it; then the agent names the locked ids in the review post and you decide.</li>
-   <li><b>One row, one lock.</b> Each feature ships with its own commit on design/v3 and its own Figma section, so review, FE pull and rollback stay per feature.</li>
-   <li><b>Redo jumps the queue.</b> Drag the card back to In progress and comment <span class="m">change: …</span>; the next run takes it first.</li><li><b>Two boards, one folder.</b> ClickUp › Product › Design Tracker: <b>1. V3</b> holds the 42 cards in the order they get done; <b>2. Future Sprints</b> holds the 28 roadmap cards for after the launch. Same four columns on both: To-do, In progress, Pending Review, Delivered.</li>
-   <li><b>Proposed rows</b> (P0.14, P0.15, P1.11) have no dates until you sign them off in ClickUp.</li>
+   <li><b>Two dates per row.</b> Design ETA is when the design is delivered for review. Lock ETA is when the row should be Done, two days later on a working day. Every lock lands before Fri 16 Oct. A feature's design is ready on the last lock ETA of its job steps.</li>
+   <li><b>Done locks the design.</b> The Figma section is frozen and the commit is the lock. Later rows never change a locked design unless the change is in their own scope or improves it.</li>
+   <li><b>One row, one lock.</b> Each job step ships with its own commit on design/v3 and its own Figma section, so review, FE pull and rollback stay per row.</li>
+   <li><b>Proposed rows</b> (P0.14, P0.15, P1.11) have no dates until they are signed off.</li>
+   <li><b>Two boards, one folder.</b> ClickUp › Product › Design Tracker: 1. V3 (the 42 job steps in the order they get done) and 2. Future Sprints (the 28 roadmap rows). Same four columns on both.</li>
   </ul>
  </div></details>
- <details class="dd"><summary><span class="chev">›</span>The agent's day: four runs<span class="rt" id="runsrt"></span></summary><div class="in">
-  <p class="dim">One contract, one schedule. At each run the agent applies your verdicts, takes the next job step that is not done, builds only that job (what Sam does, happy path and every rainy state), puts the flow in Figma with screenshots and the rationale, and posts one message. It never marks a row Done.</p>
-  <div class="x"><table>
-   <tr><th>When</th><th>What the run does</th><th>Output</th></tr>
-   <tr><td class="num">08:00</td><td rowspan="4"><ol class="plain" style="margin:0">
-    <li><b>Verdicts first.</b> Card dragged to Delivered = approve and lock; back to In progress + <span class="m">change:</span> comment = redo; back to To-do = park. Slack replies from you count the same way.</li>
-    <li><b>Pick.</b> Redo first, then the lowest In progress card, else the top To-do card (moved to In progress).</li>
-    <li><b>Build the job.</b> Reuse the research on the row; prototype on design/v3 so the link opens at the start of Sam's journey; one screenshot per step and per rainy state.</li>
-    <li><b>Figma.</b> Section <span class="m">id · title</span>, dark and text-light: the JTBD lines, research shots with one finding each, the story (one frame per step: Sam's photo, "Sam clicks on …", the screenshot; rainy paths after), native hero frames from the kit, 3 to 5 rationale lines and the links. Scope and process stay in ClickUp.</li>
-    <li><b>Track.</b> ClickUp comment (prototype, Figma, commit, rationale) and the card moved to Pending Review; the sheet row updated.</li>
-    <li><b>Post.</b> One Slack message and a push, then stop. A run must finish before the next one starts.</li>
-   </ol></td><td>Run 1 of the day</td></tr>
-   <tr><td class="num">11:59</td><td>Run 2</td></tr>
-   <tr><td class="num">16:00</td><td>Run 3</td></tr>
-   <tr><td class="num">20:00</td><td>Run 4, then the Mac may sleep</td></tr>
-  </table></div>
-  <div class="post" id="postfmt"></div>
-  <p class="dim">Nothing left to take: the run posts nothing and stops. You review on the board (drag to Delivered, or back to In progress with a comment) or reply in Slack: <span class="m">approve P0.3</span> · <span class="m">change P0.3: …</span> · <span class="m">park P0.3</span>.</p>
- </div></details>
- <details class="dd"><summary><span class="chev">›</span>Research rules for every agent</summary><div class="in">
-  <div class="card"><b>Rule 0, data first.</b><span>Before researching or designing a flow, answer three questions and write them on the row: does a new logged-in account have the data this flow shows? If not, where outside our accounts does it exist (signed-in competitor accounts, vendor docs, Refero, the shots already captured)? And what must be created in our own account (agents, test sessions, forced failures, a run, a number) so the screenshots show real data? Our accounts hold few agents, sessions or failures, so monitoring and session rows always need this.</span><div class="x" style="margin-top:6px"><table id="rule0"></table></div></div>
-  <ol class="plain">
-   <li><b>Existing research first.</b> The row's research table, <span class="m">references/v3/</span> and <span class="m">references/research/</span> screenshots, and the Figma research sections. Reuse; never re-capture what exists.</li>
-   <li><b>Then MCP tools:</b> Refero screens and flows, vendor docs through fetch and search, our own Figma boards through the Figma connector.</li>
-   <li><b>Then the built-in browser</b> for public pages and docs.</li>
-   <li><b>Claude in Chrome last</b>, on the signed-in competitor profile, only when context is still missing or a changelog says the vendor shipped something new since the existing shots.</li>
-   <li><b>Always 3 direct and 1 indirect competitor.</b> Direct: Vapi, Retell, ElevenLabs. Indirect by topic: LiveKit for infrastructure, Datadog or Sentry for monitoring, Twilio for telephony, Bland for batch.</li>
-   <li><b>Research runs on Sonnet or Opus.</b> Fable only for the design verdict and the build.</li>
-   <li><b>Empty states are rainy scenarios, not research.</b> Act in the environment to reach the populated state before capturing.</li>
-  </ol>
- </div></details>
- <details class="dd"><summary><span class="chev">›</span>Drift control: what drifts and what catches it</summary><div class="in">
-  <div class="x"><table>
-   <tr><th>Drift</th><th>Caught by</th><th>When</th></tr>
-   <tr><td><b>Figma ↔ code</b>: a hero frame uses a component the console does not have, or a code component has no Figma twin</td><td><b>Figma Code Connect</b> (Figma MCP: get_code_connect_map, add_code_connect_map). Every kit component maps to its console component; the run fails the Figma gate when a frame uses an unmapped component</td><td>Figma step of every run; coverage number on the row</td></tr>
-   <tr><td><b>Tokens</b>: a colour, radius or spacing in Figma differs from DESIGN.md and the CSS variables</td><td><b>Token diff</b>: get_variable_defs on the kit vs <span class="m">src/styles.css</span> tokens, one script, fails on any value mismatch. Tokens Studio or Style Dictionary if the team wants the Figma side generated from code</td><td>Before every Figma publish and in the prototype gate</td></tr>
-   <tr><td><b>Prototype ↔ locked design</b>: a later feature changed a locked route</td><td><b>Playwright screenshot baselines</b> per locked route (<span class="m">toHaveScreenshot</span>), stored at lock time; a diff on a locked route fails the build gate unless the row declares it in scope</td><td>Build gate of every run</td></tr>
-   <tr><td><b>Copy and words</b>: a banned word or an old term ships</td><td>The vocabulary table below as a lint list; grep on the changed files in the gate</td><td>Build gate</td></tr>
-   <tr><td><b>Spec ↔ console</b>: an API field with no home in the console, or a control the API cannot save</td><td>The parity script (P3.5): spec leaf fields to console controls or the approved API-only list</td><td>Every spec version bump</td></tr>
-   <tr><td><b>Figma hygiene</b>: detached instances, unbound colours, hidden layers</td><td>Design Lint (Figma plugin) on the hero frames before lock; Figma version history named at lock</td><td>Before lock</td></tr>
-  </table></div>
-  <p class="dim">One plugin to add today: Figma Code Connect. It is already reachable from this Figma connector and it is the only check that ties a frame to the component FE will use.</p>
- </div></details>
- <details class="dd"><summary><span class="chev">›</span>Design system: change once, update every committed design</summary><div class="in">
-  <ul class="plain">
-   <li><b>Tokens live in one place.</b> <span class="m">docs/design/DESIGN.md</span> maps the live design system; the CSS variables in <span class="m">src/styles.css</span> are the source; Figma variables mirror them. A token change re-renders every prototype route on design/v3 and, once the kit is published, every native frame bound to that variable.</li>
-   <li><b>Frames are built from the kit, never detached.</b> Hero screens use the kit components on page 31:2 with variables bound; a component change in the kit updates every locked section on publish without a re-approval.</li>
-   <li><b>What needs a re-approval.</b> Token and component changes propagate silently. A structural change to a locked flow goes through the loop again as its own row.</li>
-   <li><b>One shot, one commit.</b> A design-system change is one commit on design/v3 plus one kit publish, named in the sheet's change log, so FE can pull the token change separately from feature commits.</li>
-  </ul>
- </div></details>
- <details class="dd" id="practices"><summary><span class="chev">›</span>Practices borrowed<span class="rt" id="pracrt"></span></summary><div class="in" id="prac"></div></details>
- <h2 style="margin-top:12px">Deep dive</h2>
  <details class="dd"><summary><span class="chev">›</span>v3 funnel<span class="rt" id="funrt"></span></summary><div class="in"><div class="lg"><span><span class="ev server">server</span> fired by the API</span><span><span class="ev">client</span> PostHog UI</span><span><span class="ev new">derived</span> computed</span></div><div class="x"><table id="funnel"></table></div></div></details>
  <details class="dd"><summary><span class="chev">›</span>KPIs<span class="rt" id="kpirt"></span></summary><div class="in"><div class="x"><table id="kpis"></table></div></div></details>
  <details class="dd"><summary><span class="chev">›</span>Journeys, hero and rainy<span class="rt" id="jrt"></span></summary><div class="in"><div class="grid2" id="jr"></div></div></details>
@@ -313,9 +258,10 @@ function feat(f,open){
   <details class="sub" ${k("del")}><summary>${CHEV}<span class="tag">5 Deliverables</span>Prototype · Figma flow · lock<span class="rt">${S.web||S.figma?"delivered":"after the run"}</span></summary><div class="in"><dl class="kv"><dt>Prototype</dt><dd>${S.web?`<a href="${esc(S.web)}" target="_blank" rel="noopener">${esc(S.web)}</a>`:'<span class="dim">opens at the start of Sam\'s journey, after the run</span>'}</dd><dt>Figma</dt><dd>${S.figma?`<a href="${esc(S.figma)}" target="_blank" rel="noopener">section ${esc(f.id)} · ${esc(f.title)}</a>`:`<span class="dim">page v3 · ${esc(f.p)} ${esc((UM.find(u=>u.id===f.p)||{}).name)}, section ${esc(f.id)} · ${esc(f.title)}</span>`}</dd><dt>Lock</dt><dd>${S.commit?`commit <span class="m">${esc(S.commit)}</span> on design/v3, locked ${esc(fmt(S.locked_at))}`:'<span class="dim">commit on design/v3 once you approve</span>'}</dd><dt>ClickUp</dt><dd>${cu.url?`<a href="${esc(cu.url)}" target="_blank" rel="noopener">${esc(cu.custom||cu.task)}</a>`:'<span class="dim">no task</span>'}</dd><dt>Files</dt><dd class="m">references/v3/features/${esc(f.id)}/</dd></dl></div></details>
   <details class="sub" ${k("brief")}><summary>${CHEV}<span class="tag">6 Agent brief</span>Scope, API, journeys, rules</summary><div class="in"><b>Scope</b><ol>${f.more.subtasks.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><dl class="kv"><dt>API</dt><dd>${esc(f.more.api)}</dd><dt>Register</dt><dd>${esc(f.more.req)}</dd><dt>Journeys</dt><dd class="m">${(f.more.journeys||[]).map(esc).join(" · ")}</dd><dt>Design days</dt><dd>${f.d||"proposed, not budgeted"}</dd><dt>Data, rule 0</dt><dd>This flow shows <b>${(f.data||[]).map(esc).join(", ")||"no stored data"}</b>. ${esc((f.rule0||{}).new||"")} <span class="dim">Outside our accounts: ${esc((f.rule0||{}).external||"")}</span> <span class="dim">Create in ours: ${esc((f.rule0||{}).create||"")}</span></dd><dt>Rules</dt><dd>Existing Console design system only; reuse, do not redesign; empty first, quiet chrome; sentence case, no arrows or em dashes; locked words; Sam only in job text; never change a locked feature unless in scope, then say so in the post.</dd><dt>One run delivers</dt><dd>Prototype for the happy path and every rainy state, one screenshot per step, the Figma flow with "Sam does …" captions and rationale, the ClickUp comment and in review, the sheet row, the Slack post.</dd></dl></div></details>
  </div></details>`}
-function strip(){const st=D.features.filter(f=>f.d).map(rowState),c=k=>st.filter(s=>s.status===k).length,days=Math.max(0,Math.ceil((LAUNCH-new Date())/864e5));
- $("strip").innerHTML=[["Launch","Fri 16 Oct"],["Days left",days],["Next run",nextRun()],["Planned",c("Planned")],["WIP",c("WIP")],["Review",c("Review")],["Done",c("Done")+" / "+st.length],["v3.1 rows",(D.v31||[]).length]].map(x=>`<div class="k"><span class="l">${x[0]}</span><span class="n">${x[1]}</span></div>`).join("")}
-function draw(){strip();
+function drawFeatures(){const F=D.features_hl||[],byId=Object.fromEntries(D.features.map(f=>[f.id,f]));
+ $("ftab").innerHTML="<tr><th>Feature</th><th>Builds</th><th>API surface</th><th>Blocked by, asks</th><th>Design ready</th><th>Status</th></tr>"+F.map(x=>{const st=x.steps.map(id=>byId[id]).filter(Boolean).map(rowState),dated=st.filter(s=>s.lock),ready=dated.length?dated.map(s=>s.lock).sort().slice(-1)[0]:"",done=st.filter(s=>s.status==="Done").length,rev=st.filter(s=>s.status==="Review").length,wip=st.filter(s=>s.status==="WIP").length,pill=st.length&&done===st.length?"Done":(rev&&rev+done===st.length)?"Review":(wip||rev||done)?"WIP":"Planned";
+  return `<tr><td><b>${esc(x.id)} · ${esc(x.name)}</b></td><td><span class="chips">${x.steps.map(id=>`<a class="chip" href="#${id}" style="text-decoration:none" title="${esc((x.titles||{})[id]||"")}">${id}</a>`).join("")}</span></td><td class="m">${esc(x.api)}</td><td class="dim">${esc(x.blocked||"")}${(x.gaps||[]).length?` <span class="m">${x.gaps.map(esc).join(", ")}</span>`:""}</td><td class="num"><b>${ready?fmt(ready):"after sign-off"}</b></td><td><span class="stat ${pill}">${done} / ${st.length} locked</span></td></tr>`}).join("")}
+function draw(){drawFeatures();
  const open=openState(),first=!document.querySelector("#tree details");
  $("tabs").innerHTML=["All",...UM.map(u=>u.id)].map(p=>{const u=UM.find(x=>x.id===p);return `<button aria-pressed="${p===cur}" data-p="${p}">${p==="All"?"All":esc(p+" "+u.name)}</button>`}).join("");
  const hash=(location.hash||"").slice(1),want=/^P\d\.\d+$/.test(hash)?hash:"";
@@ -340,17 +286,6 @@ draw();
   <details class="sub" data-k="nf:${esc(t.num)}:st"${open.has("nf:"+t.num+":st")?" open":""}><summary>${CHEV}<span class="tag">2 State</span>Research · UI · Final<span class="rt">${esc(t.research)} · ${esc(t.ui)} · ${esc(t.final)}</span></summary><div class="in"><dl class="kv"><dt>Research</dt><dd>${esc(t.research)}</dd><dt>UI today</dt><dd>${esc(t.ui)}</dd><dt>Final</dt><dd>${esc(t.final)}</dd><dt>Locks</dt><dd>${esc(t.locks||"none")}</dd><dt>Folder</dt><dd class="m">${esc(t.folder)}</dd></dl></div></details>
   <details class="sub" data-k="nf:${esc(t.num)}:rm"${open.has("nf:"+t.num+":rm")?" open":""}><summary>${CHEV}<span class="tag">3 Roadmap</span>Roadmap tasks it covers<span class="rt">${(t.roadmap||[]).length}</span></summary><div class="in"><ul class="plain">${(t.roadmap||[]).map(r=>`<li><a href="${esc(r[1])}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join("")||'<li class="dim">none linked</li>'}</ul></div></details>
  </div></details>`).join("")})();
-/* the loop */
-const PIPE=[["Job","JTBD for Sam: job statement, situation, want, outcome; happy path and every rainy path","this sheet · ClickUp"],["Goal","One KPI per row with target, formula, counter-metric and the assumption it tests","this sheet"],["Telemetry","Events named and typed before design; a tracking plan FE can implement","event-spec.json · PostHog"],["Blueprint","Journey and API map: what the spec can and cannot save","journeys · v3 spec"],["Research","3 direct + 1 indirect competitors, existing shots first","references/ · Refero · Figma"],["Design","Before → after, 3 to 5 directions, one pick with rationale","references/v3/features/id/"],["Prototype","design/v3, link opens at the journey start, every rainy state by URL","Vercel preview"],["Figma flow","Dark, text-light: one story frame per step with Sam's photo and 'Sam clicks on …', research findings, rationale","Figma section id · title"],["Review","You approve, ask for changes, or park","ClickUp · Slack"],["Lock","Figma section frozen, commit recorded, row Done","design/v3 commit"],["FE build","FE pulls the commit and the Figma section; Code Connect maps components","ng-console"],["Ship + verify","Events fire in production; the P0.13 data checks stay green for 7 days","PostHog"],["KPI read","Cohort read 14 days after the week; the assumption is kept or killed","this sheet, KPIs"]];
-$("pipe").innerHTML=PIPE.map((s,i)=>`<div class="fs"><b><i>${i+1}</i>${esc(s[0])}</b><span>${esc(s[1])}</span><span class="d">${esc(s[2])}</span></div>`).join("");
-const GATES=[["G0 Clarified","Team agrees the row is in v3 and the API can save it","before Planned","Vineet, Samyak"],["G1 Job written","Job, happy and rainy paths, goal and events on the row","before the agent takes it","Shakti"],["G2 Telemetry plan","Every event on the row has an owner (client FE, server emitter) and a status","before Review","FE, API team"],["G3 Build gate","typecheck, tests, biome, a11y pass, copy rules, locked words, no locked route changed","every run","agent"],["G4 Drift gate","Code Connect coverage, token diff, screenshot baselines on locked routes","every run","agent"],["G5 Review","Prototype opens at the journey start; every rainy state reachable; rationale traces to research","after each run","Shakti"],["G6 Lock","Figma frozen, commit on design/v3, row Done","on approve","Shakti"],["G7 FE parity","Built screens match the Figma section; events fire as specified","before ship","FE"],["G8 KPI live","The KPI reads from real events, data checks green","7 days after ship","Shakti, Vineet"]];
-$("gates").innerHTML="<tr><th>Gate</th><th>Passes when</th><th>When</th><th>Who</th></tr>"+GATES.map(g=>`<tr><td><b>${esc(g[0])}</b></td><td>${esc(g[1])}</td><td>${esc(g[2])}</td><td>${esc(g[3])}</td></tr>`).join("");
-$("runsrt").textContent=RUNS.join(" · ");
-(function(){const R=D.rule0||{};$("rule0").innerHTML="<tr><th>Phase</th><th>A new account has</th><th>Outside our accounts</th><th>Create in ours</th></tr>"+Object.keys(R).map(p=>`<tr><td><span class="id ${p}">${p}</span></td><td>${esc(R[p].new)}</td><td>${esc(R[p].external)}</td><td>${esc(R[p].create)}</td></tr>`).join("")})();
-$("postfmt").textContent=`JTBD 14 of 42 · P1.8 Confirm people reach the agent is done and pending your review\nPrototype (opens where Sam starts): https://…\nFigma flow with screenshots: https://…\nRationale: 1 … 2 … 3 …\nRainy states covered: b, c, d, e, f, g, h\nOpen questions: …\nApprove: drag the card to Delivered or reply "approve P1.8". Changes: reply "change P1.8: …".`;
-/* practices borrowed */
-(function(){const P=D.practices||[];$("pracrt").textContent=P.length?`${P.length} from Anthropic, Vercel, Linear and others`:"research in progress";
- $("prac").innerHTML=P.length?`<div class="x"><table><tr><th>Practice</th><th>From</th><th>How we use it</th></tr>${P.map(p=>`<tr><td><b>${esc(p.practice)}</b></td><td>${p.url?`<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.from)}</a>`:esc(p.from)}</td><td>${esc(p.how)}</td></tr>`).join("")}</table></div>`:'<p class="dim">The research agent is reading how product teams at Anthropic, Vercel, Linear, Stripe and Figma run their loops. This table fills when it returns.</p>'})();
 /* funnel */
 const byStage={};D.features.forEach(f=>(f.more.funnel||[]).forEach(n=>{const k=sn(n);if(k)(byStage[k]=byStage[k]||new Set()).add(f)}));
 $("funrt").textContent=D.funnel.stages.length+" stages";
