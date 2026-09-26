@@ -1,0 +1,288 @@
+<title>Studio v3 PRD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#f4f5f8;--card:#ffffff;--card2:#f8f9fb;--ink:#141820;--mut:#5b6472;--line:#e0e3ea;--acc:#0a6fd1;--chip:#edf0f5;
+--p0:#0a6fd1;--p1:#6d45d0;--p2:#0c7f62;--p3:#a86200;--ok:#0c7f62;--warn:#a86200;--bad:#c23b3b;
+--sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1116;--card:#161a21;--card2:#1b2029;--ink:#e6e9ee;--mut:#98a1ae;--line:#2a303b;--acc:#58b4ff;--chip:#232934;
+--p0:#58b4ff;--p1:#a88cff;--p2:#3fd0a0;--p3:#f2ab4c;--ok:#3fd0a0;--warn:#f2ab4c;--bad:#ff7d7d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1116;--card:#161a21;--card2:#1b2029;--ink:#e6e9ee;--mut:#98a1ae;--line:#2a303b;--acc:#58b4ff;--chip:#232934;
+--p0:#58b4ff;--p1:#a88cff;--p2:#3fd0a0;--p3:#f2ab4c;--ok:#3fd0a0;--warn:#f2ab4c;--bad:#ff7d7d;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);padding-block:28px 64px;padding-inline:16px}
+.w{max-width:1240px;margin:0 auto;display:grid;gap:28px}
+h1{font-size:26px;font-weight:600;margin:0;text-wrap:balance}h2{font-size:17px;font-weight:600;margin:0}
+.sub{color:var(--mut);margin:4px 0 0}.dim{color:var(--mut)}.m{font-family:var(--mono);font-size:12px}
+a{color:var(--acc)}button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:4px}
+.top{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.theme{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
+.theme button{border:0;background:none;padding:5px 12px;cursor:pointer;color:var(--mut)}
+.theme button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+/* persona */
+.persona{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:22px;color:#fff;background:linear-gradient(135deg,var(--p0),var(--p1))}
+.persona b{font-size:16px}.persona details{margin-top:4px}
+.persona ul{margin:4px 0 0;padding-left:18px}
+/* tabs */
+.fh{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.live{font-size:12px;color:var(--mut)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 12px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* tree */
+.tree{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:18px 70px minmax(0,2.2fr) minmax(0,1.4fr) 88px 118px 100px;gap:12px;align-items:start;padding:10px 14px}
+.hd{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);font-weight:500;border-bottom:1px solid var(--line);background:var(--card2)}
+details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-marker{display:none}
+.chev{width:18px;height:18px;display:grid;place-items:center;color:var(--mut);transition:transform .15s}
+details[open]>summary .chev{transform:rotate(90deg)}
+@media (prefers-reduced-motion:reduce){.chev{transition:none}}
+.umb{border-bottom:1px solid var(--line)}.umb:last-child{border-bottom:0}
+.umb>summary{background:var(--card2)}
+.umb>summary .t{font-weight:600;font-size:15px}
+.feat{border-top:1px solid var(--line)}
+.feat>summary:hover,.umb>summary:hover{background:color-mix(in srgb,var(--acc) 5%,transparent)}
+.id{font-family:var(--mono);font-weight:500;font-size:12px;padding:2px 6px;border-radius:5px;color:#fff;white-space:nowrap;justify-self:start}
+.P0{background:var(--p0)}.P1{background:var(--p1)}.P2{background:var(--p2)}.P3{background:var(--p3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .id{color:#0e1116}}
+:root[data-theme="dark"] .id{color:#0e1116}
+.step{display:grid;gap:2px}.step b{font-weight:600}.step span{color:var(--mut);font-size:13px}
+.kpi{font-size:13px}.num{font-variant-numeric:tabular-nums;font-size:13px}
+.dl{display:flex;gap:6px;align-items:center}
+.ic{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;background:var(--card);color:var(--ink);text-decoration:none}
+a.ic:hover{border-color:var(--acc)}
+.ic.off{opacity:.35;filter:grayscale(1);cursor:not-allowed}
+.st{display:inline-block;font-size:11px;font-family:var(--mono);border-radius:999px;padding:0 7px;background:var(--chip);color:var(--mut);margin-top:3px;justify-self:start}
+.body{padding:2px 14px 14px 48px;display:grid;gap:6px;position:relative}
+.body::before{content:"";position:absolute;left:32px;top:0;bottom:14px;border-left:1px dashed var(--line)}
+.sub{border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.sub>summary{display:flex;gap:10px;align-items:center;padding:8px 10px;font-weight:500}
+.sub>summary .tag{font-family:var(--mono);font-size:11.5px;color:var(--mut);font-weight:400}
+.sub>summary .rt{margin-left:auto;color:var(--mut);font-weight:400;font-size:12.5px}
+.sub>.in{padding:2px 12px 12px 38px;display:grid;gap:6px}
+.sub .sub{background:var(--card2)}
+.sub ol,.sub ul{margin:0;padding-left:18px}.sub li{margin:2px 0}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font-size:13px}.kv dt{color:var(--mut)}.kv dd{margin:0}
+.ev{display:inline-block;border-radius:5px;padding:1px 6px;font-family:var(--mono);font-size:11.5px;margin:1px 3px 1px 0;border:1px solid var(--line)}
+.ev.server{background:var(--chip)}.ev.new{border-style:dashed}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:500;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.x{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;white-space:nowrap}
+.pill.Done{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.pill.Partial{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.pill.Not{background:var(--chip);color:var(--mut)}
+/* deep dive */
+.more{display:grid;gap:8px}
+.dd{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.dd>summary{display:flex;gap:10px;align-items:center;padding:12px 14px;font-weight:600;font-size:15px}
+.dd>summary .rt{margin-left:auto;font-weight:400;color:var(--mut);font-size:13px}
+.dd>.in{padding:0 14px 14px;display:grid;gap:10px}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+.gate{font-size:11px;font-family:var(--mono);color:var(--mut)}
+.grid2{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:5px;align-content:start}
+.card.rainy{border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+.tagu{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.u{font-family:var(--mono);font-size:11px;color:var(--mut);word-break:break-all}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:6px 0}
+.s-live{background:var(--ok)}.s-partial{background:var(--warn)}.s-disabled{background:var(--bad)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px}
+table.mx td,table.mx th{padding:4px;text-align:center;border:1px solid var(--line)}
+table.mx th.r{text-align:right;white-space:nowrap;text-transform:none;letter-spacing:0;font-size:11.5px}
+table.mx th.c{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;height:120px;text-transform:none;letter-spacing:0}
+.shots{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:grid;align-content:start;color:inherit;text-decoration:none}
+.shot img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block;border-bottom:1px solid var(--line)}
+.shot div{padding:6px 8px;font-size:12px;display:grid;gap:2px}
+.flow{display:flex;flex-wrap:wrap;gap:6px}
+.fs{flex:1 1 130px;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:2px}
+.fs .d{font-family:var(--mono);font-size:11px;color:var(--mut)}
+ul.plain{margin:0;padding-left:18px}ul.r li::marker{color:var(--bad)}
+.mini{display:none}
+.stat{display:inline-block;font-size:11.5px;font-family:var(--mono);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.stat.Planned{background:var(--chip);color:var(--mut)}.stat.WIP{background:color-mix(in srgb,var(--p0) 18%,transparent);color:var(--p0)}
+.stat.Review{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}.stat.Done{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.stat.Redo{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}.stat.Proposed{border:1px dashed var(--line);color:var(--mut)}
+.eta{display:grid;gap:1px;font-size:12px}.eta .lbl{color:var(--mut);font-size:11px}.eta.late b{color:var(--bad)}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.strip .k{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.strip .k .n{font-family:var(--mono);font-size:20px;font-weight:500}.strip .k .l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.life{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.life .fs{flex:1 1 150px}.life .arr{color:var(--mut)}
+@media (max-width:820px){
+ .row{grid-template-columns:18px 64px minmax(0,1fr);row-gap:4px}
+ .row>.kpi,.row>.status,.row>.eta,.row>.dl{grid-column:3}
+ .hd{display:none}.mini{display:inline}
+
+ .body{padding-left:14px}.body::before{display:none}
+}
+</style>
+
+<div class="w">
+<header class="top">
+ <div><h1>Studio v3 PRD</h1><p class="sub">Launch Fri 16 Oct 2026. The sheet is the deliverable: one row per job step, status and ETA per row, Figma and prototype links, a commit lock when the design is done.</p></div>
+ <div class="theme" role="group" aria-label="Theme"><button data-t="system">Auto</button><button data-t="light">Light</button><button data-t="dark">Dark</button></div>
+</header>
+
+<section class="strip" id="strip"></section>
+
+<section id="features">
+ <div class="fh"><h2>Features</h2><span class="live" id="live"></span></div>
+ <div class="tabs" id="tabs"></div>
+ <div class="tree" role="tree">
+  <div class="row hd" aria-hidden="true"><span></span><span>ID</span><span>Job step</span><span>Goal</span><span>Status</span><span>ETA</span><span>Deliverable</span></div>
+  <div id="tree"></div>
+ </div>
+</section>
+
+<section class="more">
+ <h2>Deep dive</h2>
+ <details class="dd"><summary><span class="chev">›</span>v3 funnel<span class="rt" id="funrt"></span></summary><div class="in"><div class="lg"><span><span class="ev server">server</span> fired by the API</span><span><span class="ev">client</span> PostHog UI</span><span><span class="ev new">derived</span> computed</span></div><div class="x"><table id="funnel"></table></div></div></details>
+ <details class="dd"><summary><span class="chev">›</span>KPIs<span class="rt" id="kpirt"></span></summary><div class="in"><div class="x"><table id="kpis"></table></div></div></details>
+ <details class="dd"><summary><span class="chev">›</span>Journeys, hero and rainy<span class="rt" id="jrt"></span></summary><div class="in"><div class="grid2" id="jr"></div></div></details>
+ <details class="dd" id="monitoring"><summary><span class="chev">›</span>Monitoring map<span class="rt" id="mrt"></span></summary><div class="in">
+  <p class="dim" id="mthesis"></p>
+  <div class="card"><b>Launch readiness of the pivots</b><div class="bar" id="mbar"></div><span id="mbarlbl" class="m"></span><span class="dim">Agent to session to log needs three API asks: a saved agent id on sessions (G4, G12), a per-session error stream (G11), turns and logs (G13).</span></div>
+  <details class="sub"><summary><span class="chev">›</span>Levels</summary><div class="in" id="mlevels"></div></details>
+  <details class="sub"><summary><span class="chev">›</span>Chains: down, up, across</summary><div class="in"><div class="grid2" id="mchains"></div></div></details>
+  <details class="sub"><summary><span class="chev">›</span>Pivot matrix</summary><div class="in"><div class="lg"><span><span class="dot s-live"></span> live at launch</span><span><span class="dot s-partial"></span> partial</span><span><span class="dot s-disabled"></span> disabled until a gap ships</span><span>row = from, column = to; hover a cell</span></div><div class="x"><table class="mx" id="mx"></table></div></div></details>
+  <details class="sub"><summary><span class="chev">›</span>All pivots with trigger, context and way back</summary><div class="in"><div class="x"><table id="mpv"></table></div></div></details>
+  <details class="sub"><summary><span class="chev">›</span>Context rules and principles</summary><div class="in"><ul class="plain" id="mctx"></ul><ul class="plain dim" id="mpr"></ul></div></details>
+  <details class="sub"><summary><span class="chev">›</span>Navigation KPIs</summary><div class="in"><div class="x"><table id="mkpi"></table></div></div></details>
+  <details class="sub"><summary><span class="chev">›</span>Secondary research with screenshots</summary><div class="in" id="mvend"></div></details>
+ </div></details>
+ <details class="dd" open><summary><span class="chev">›</span>How tracking works</summary><div class="in">
+  <div class="life"><div class="fs"><b>Planned</b><span>In the sheet with an ETA</span></div><span class="arr">›</span><div class="fs"><b>WIP</b><span>The agent picked it and is designing</span><span class="d">ClickUp: in progress</span></div><span class="arr">›</span><div class="fs"><b>Review</b><span>Figma and prototype delivered; you approve or ask for a redo</span><span class="d">ClickUp: in review</span></div><span class="arr">›</span><div class="fs"><b>Done</b><span>Approved and locked: Figma section frozen, commit recorded</span><span class="d">ClickUp: completed</span></div></div>
+  <ul class="plain">
+   <li><b>Two dates per row.</b> Design ETA is when the agent delivers for review. Lock ETA is when the row should be Done, two days later on a working day. Every lock lands before Fri 16 Oct.</li>
+   <li><b>The agent wraps as fast as quality allows</b>, then asks you to review. A redo goes back to WIP and jumps the queue that night.</li>
+   <li><b>Done locks the design.</b> The Figma section is frozen and the commit is the lock. Later rows never change a locked design unless the change is in their own scope or improves it; then the agent raises it in the review post and you decide.</li>
+   <li><b>One row, one lock.</b> Each feature ships with its own commit on design/v3 and its own Figma section, so review and rollback stay per feature.</li>
+  </ul>
+ </div></details>
+ <details class="dd"><summary><span class="chev">›</span>How each feature is made, and the night run</summary><div class="in">
+  <div class="flow" id="flow"></div>
+  <p class="dim">As fast as quality allows. You review every feature; the agent never marks one approved. Figma is the record: once you approve a flow it is frozen and the prototype and FE build read from it.</p>
+  <div class="x"><table>
+   <tr><th>When</th><th>What happens</th><th>Output</th></tr>
+   <tr><td class="num">20:00</td><td>One command starts the whole run and keeps the Mac awake. Queue from ClickUp: change requests first, then <b>in progress</b> by id</td><td>Tonight's queue</td></tr>
+   <tr><td class="num">~21:00</td><td>Check-in before you sleep: tonight's ids, the first feature's directions and the pick. It does not wait; reply any time to steer</td><td>Slack + push</td></tr>
+   <tr><td>overnight</td><td>Features flow through research, design, prototype, Figma and tracker. The next feature's research runs while the previous one builds</td><td>Prototype, Figma, ClickUp <b>in review</b>, this chart's icons</td></tr>
+   <tr><td>done</td><td>Morning post, digest first when several wait. Then the Mac sleeps if you are idle; it never shuts down</td><td>Slack + push</td></tr>
+   <tr><td>morning</td><td><b>You review</b>: approve, change, or park</td><td>completed · in progress + notes · on hold</td></tr>
+   <tr><td class="num">09:30–16:30</td><td>Hourly and silent. Nothing queued: one ask with 3 candidates; default at 20:00</td><td>Tonight's pick</td></tr>
+  </table></div>
+ </div></details>
+ <details class="dd"><summary><span class="chev">›</span>Decisions that block dates<span class="rt" id="decrt"></span></summary><div class="in"><div class="x"><table id="dec"></table></div></div></details>
+ <details class="dd"><summary><span class="chev">›</span>Server gaps<span class="rt" id="gaprt"></span></summary><div class="in"><div class="x"><table id="gaps"></table></div></div></details>
+ <details class="dd"><summary><span class="chev">›</span>Locked words<span class="rt" id="vocrt"></span></summary><div class="in"><div class="x"><table id="voc"></table></div></div></details>
+ <details class="dd"><summary><span class="chev">›</span>What changed</summary><div class="in"><ul class="plain" id="chg"></ul><ul class="plain dim" id="docfix"></ul></div></details>
+</section>
+</div>
+
+<script>
+const D=__DATA__;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const CHEV='<span class="chev" aria-hidden="true">›</span>';
+/* theme */
+(function(){const r=document.documentElement,bs=[...document.querySelectorAll(".theme button")];
+ function set(t,save){if(t==="system")r.removeAttribute("data-theme");else r.setAttribute("data-theme",t);bs.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===t)));if(save){try{localStorage.setItem("prd-theme",t)}catch(e){}}}
+ let t="system";try{t=localStorage.getItem("prd-theme")||"system"}catch(e){}set(t,false);bs.forEach(b=>b.onclick=()=>set(b.dataset.t,true));})();
+/* persona */
+/* icons */
+const FIG='<svg width="12" height="18" viewBox="0 0 38 57" aria-hidden="true"><path fill="#F24E1E" d="M19 0H9.5a9.5 9.5 0 0 0 0 19H19z"/><path fill="#FF7262" d="M19 0h9.5a9.5 9.5 0 0 1 0 19H19z"/><path fill="#A259FF" d="M19 19H9.5a9.5 9.5 0 0 0 0 19H19z"/><circle fill="#1ABCFE" cx="28.5" cy="28.5" r="9.5"/><path fill="#0ACF83" d="M9.5 38H19v9.5A9.5 9.5 0 1 1 9.5 38z"/></svg>';
+const WEB='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>';
+const ico=(kind,url,label)=>url?`<a class="ic" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${esc(label)}" title="${esc(label)}" onclick="event.stopPropagation()">${kind==="f"?FIG:WEB}</a>`:`<span class="ic off" title="${kind==="f"?"Figma":"Prototype"}: not built yet" aria-label="${kind==="f"?"Figma":"Prototype"} not built yet">${kind==="f"?FIG:WEB}</span>`;
+/* live rows from the tracker database */
+const LIVE={};const SCH=D.schedule||{};const LAUNCH=new Date(D.launch||"2026-10-16");
+const fmt=s=>{if(!s)return "";const d=new Date(s);return d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})};
+const rowState=f=>{const L=LIVE[f.id]||{},S=SCH[f.id]||{};return{status:L.status||S.status||"Planned",design:L.design_eta||S.design_eta||"",lock:L.lock_eta||S.lock_eta||"",figma:L.figma||"",web:L.web||"",commit:L.commit||"",locked_at:L.locked_at||""}};
+const LOCK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const cls=x=>x==="server"?"server":(x==="derived"||x==="new client")?"new":"";
+const sn=s=>(String(s).match(/^\d+/)||[])[0];
+const UM=D.umbrellas||[];
+let cur="All";
+function openState(){return new Set([...document.querySelectorAll("#tree details[open]")].map(d=>d.dataset.k))}
+function research(f){const L=(LIVE[f.id]&&LIVE[f.id].research)||{};return f.research.map(r=>({...r,status:L[r.vendor]||r.status}))}
+function feat(f,open){
+ const R=research(f),done=R.filter(r=>r.status==="Done").length;
+ const k=(x)=>`data-k="${f.id}:${x}"${open.has(f.id+":"+x)?" open":""}`;
+ const R2=rowState(f),late=R2.lock&&R2.status!=="Done"&&new Date(R2.lock)<new Date(new Date().toDateString());
+ return `<details class="feat" ${k("row")}><summary class="row" role="treeitem">${CHEV}<span class="id ${f.p}">${esc(f.id)}</span>
+ <span class="step"><b>${esc(f.title)}</b><span>${esc(f.step)}</span></span>
+ <span class="kpi">${esc(f.kpi_simple)}</span><span class="status"><span class="stat ${esc(R2.status)}">${esc(R2.status)}</span></span>
+ <span class="eta${late?" late":""}">${R2.design?`<span><span class="lbl">Design </span>${fmt(R2.design)}</span><span><span class="lbl">Lock </span><b>${fmt(R2.lock)}</b></span>`:'<span class="dim">—</span>'}</span>
+ <span class="dl">${ico("f",R2.figma,"Open in Figma")}${ico("w",R2.web,"Open the prototype")}${R2.commit?`<span class="ic" title="Locked ${esc(fmt(R2.locked_at))} · commit ${esc(R2.commit)}" aria-label="Locked, commit ${esc(R2.commit)}">${LOCK}</span>`:""}</span></summary>
+ <div class="body">
+  <details class="sub" ${k("a")}><summary>${CHEV}<span class="tag">${esc(f.happy.id)}</span>Happy path</summary><div class="in"><p style="margin:0">${esc(f.happy.story)}</p><ol>${f.happy.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div></details>
+  <details class="sub" ${k("rainy")}><summary>${CHEV}<span class="tag">${esc(f.id)}.b+</span>Rainy paths<span class="rt">${f.rainy.length}</span></summary><div class="in">${f.rainy.map(r=>`<details class="sub" ${k(r.id)}><summary>${CHEV}<span class="tag">${esc(r.id)}</span>${esc(r.title)}</summary><div class="in"><p style="margin:0">${esc(r.recovery)}</p></div></details>`).join("")}</div></details>
+  <details class="sub" ${k("kpi")}><summary>${CHEV}<span class="tag">Goal</span>${esc(f.kpi_simple)}</summary><div class="in"><dl class="kv"><dt>Metric</dt><dd>${esc(f.kpi.metric)}</dd><dt>Target</dt><dd><b>${esc(f.kpi.target)}</b></dd><dt>How we measure</dt><dd class="m">${esc(f.kpi.formula)}</dd><dt>Counter-metric</dt><dd>${esc(f.kpi.counter)}</dd><dt>Assumption</dt><dd>${esc(f.kpi.assumption)}</dd><dt>Events</dt><dd>${f.kpi.events.map(e=>`<span class="ev ${cls(e.status)}" title="${esc(e.status)}">${esc(e.name)}</span>`).join("")}</dd></dl></div></details>
+  <details class="sub" ${k("res")}><summary>${CHEV}<span class="tag">Research</span>Competitors<span class="rt">${done} of ${R.length} done</span></summary><div class="in"><div class="x"><table><tr><th>Competitor</th><th>Status</th><th>Note</th></tr>${R.map(r=>`<tr><td><b>${esc(r.vendor)}</b></td><td><span class="pill ${esc(String(r.status).split(" ")[0])}">${esc(r.status)}</span></td><td class="dim">${esc(r.note)}</td></tr>`).join("")}</table></div></div></details>
+  <details class="sub" ${k("more")}><summary>${CHEV}<span class="tag">More</span>Sub-tasks, API, register</summary><div class="in"><ol>${f.more.subtasks.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><dl class="kv"><dt>Design days</dt><dd>${f.d||"proposed, not budgeted"}</dd><dt>Research brief</dt><dd>${esc(f.more.research_brief)}</dd><dt>API</dt><dd>${esc(f.more.api)}</dd><dt>Register</dt><dd>${esc(f.more.req)}</dd><dt>Funnel</dt><dd>${(f.more.funnel||[]).map(esc).join(" · ")}</dd><dt>Journeys</dt><dd class="m">${(f.more.journeys||[]).map(esc).join(" · ")}</dd></dl></div></details>
+ </div></details>`}
+function strip(){const st=D.features.filter(f=>f.d).map(rowState),c=k=>st.filter(s=>s.status===k).length,days=Math.max(0,Math.ceil((LAUNCH-new Date())/864e5));
+ $("strip").innerHTML=[["Launch","Fri 16 Oct"],["Days left",days],["Planned",c("Planned")],["WIP",c("WIP")],["Review",c("Review")],["Done",c("Done")+" / "+st.length]].map(x=>`<div class="k"><span class="l">${x[0]}</span><span class="n">${x[1]}</span></div>`).join("")}
+function draw(){strip();
+ const open=openState(),first=!document.querySelector("#tree details");
+ $("tabs").innerHTML=["All",...UM.map(u=>u.id)].map(p=>{const u=UM.find(x=>x.id===p);const d=D.features.filter(f=>f.p===p).reduce((a,f)=>a+(+f.d||0),0);return `<button aria-pressed="${p===cur}" data-p="${p}">${p==="All"?"All":esc(p+" "+u.name)}</button>`}).join("");
+ $("tree").innerHTML=UM.filter(u=>cur==="All"||u.id===cur).map(u=>{
+  const fs=D.features.filter(f=>f.p===u.id),st=fs.map(rowState),done=st.filter(s=>s.status==="Done").length,pe=(D.phase_eta||{})[u.id]||{};
+  const isOpen=first?(cur!=="All"||u.id==="P0"):open.has(u.id+":umb");
+  return `<details class="umb" data-k="${u.id}:umb"${isOpen?" open":""}><summary class="row" role="treeitem">${CHEV}<span class="id ${u.id}">${esc(u.id)}</span><span class="step"><span class="t">${esc(u.name)}</span><span>${esc(u.job)}</span></span><span class="kpi">${esc(u.kpi_simple)}</span><span class="status"><span class="stat ${done===fs.filter(f=>f.d).length?"Done":st.some(s=>s.status!=="Planned"&&s.status!=="Proposed")?"WIP":"Planned"}">${done} / ${fs.filter(f=>f.d).length} done</span></span><span class="eta">${pe.lock?`<span><span class="lbl">Design </span>${fmt(pe.design)}</span><span><span class="lbl">Lock </span><b>${fmt(pe.lock)}</b></span>`:""}</span><span class="dl"></span></summary>
+  <div class="body" style="padding-left:32px;padding-right:0;padding-bottom:0"><details class="sub" data-k="${u.id}:job"${open.has(u.id+":job")?" open":""}><summary>${CHEV}<span class="tag">Job</span>What done looks like</summary><div class="in"><p style="margin:0">${esc(u.outcome)}</p><p class="dim" style="margin:0">${esc(u.kpi_detail)}</p></div></details></div>
+  ${fs.map(f=>feat(f,open)).join("")}</details>`}).join("");
+}
+$("tabs").onclick=e=>{const b=e.target.closest("button");if(b){cur=b.dataset.p;$("tree").innerHTML="";draw()}};
+draw();
+(async()=>{try{if(!window.claude||!window.claude.use)return;const db=await window.claude.use("db");if(!db)return;
+ db.collection("features").onSnapshot(s=>{s.docs.forEach(d=>{if(d.exists)LIVE[d.id]=d.data()});const n=Object.keys(LIVE).length;$("live").textContent=n?`Live: ${n} rows updated by the night run`:"";draw()},()=>{})}catch(e){}})();
+
+/* funnel */
+const byStage={};D.features.forEach(f=>(f.more.funnel||[]).forEach(n=>{const k=sn(n);if(k)(byStage[k]=byStage[k]||new Set()).add(f)}));
+$("funrt").textContent=D.funnel.stages.length+" stages";
+$("funnel").innerHTML="<tr><th>#</th><th>Event</th><th>Stage</th><th>Group</th><th>By</th><th>Gate</th><th>Moved by</th></tr>"+D.funnel.stages.map(s=>`<tr><td class="num">${esc(s.n)}</td><td><details><summary><span class="ev ${cls(s.fired_by)}">${esc(s.event)}</span>${s.aha?` <b style="color:var(--ok)">${esc(s.aha.split(":")[0])}</b>`:""}</summary><p style="margin:6px 0 0">${esc(s.definition)}</p><p class="m dim" style="margin:4px 0 0">${esc(s.source)}</p></details></td><td>${esc(s.stage)}</td><td>${esc(s.group)}</td><td>${esc(s.fired_by)}</td><td class="gate">${esc(s.gate)}</td><td>${[...(byStage[s.n]||[])].map(f=>`<span class="id ${f.p}">${f.id}</span>`).join(" ")||'<span class="dim">outside v3</span>'}</td></tr>`).join("");
+$("kpirt").textContent=D.funnel.kpis.length;
+$("kpis").innerHTML="<tr><th>KPI</th><th>Target</th><th>How we measure</th><th>Counter-metric</th><th>Phase</th></tr>"+D.funnel.kpis.map(k=>`<tr><td><b>${esc(k.name)}</b></td><td><b>${esc(k.target)}</b></td><td class="m">${esc(k.formula)}</td><td>${esc(k.counter)}</td><td>${esc(k.owner_phase)}</td></tr>`).join("");
+const fid=s=>(String(s).match(/P\d\.\d+/)||[""])[0];
+$("jrt").textContent=D.journeys.journeys.length;
+$("jr").innerHTML=D.journeys.journeys.map(j=>`<div class="card ${j.type}"><span class="tagu">${esc(j.type)} · ${esc(j.id)}</span><b>${esc(j.name)}</b><details><summary class="dim">${j.steps.length} steps</summary><ol>${j.steps.map(s=>`<li>${esc(s.step)} ${fid(s.feature)?`<span class="id ${fid(s.feature).slice(0,2)}">${fid(s.feature)}</span>`:""}</li>`).join("")}</ol></details><span class="m">KPI: ${esc(j.kpi)}</span></div>`).join("");
+/* monitoring */
+const M=D.monitoring;
+if(M){
+ const stt=s=>/✅/.test(s)?"live":/◐/.test(s)?"partial":/✗/.test(s)?"disabled":"partial";
+ $("mthesis").textContent=M.thesis;
+ const cnt={live:0,partial:0,disabled:0};M.pivots.forEach(p=>cnt[stt(p.status)]++);const N=M.pivots.length;
+ $("mrt").textContent=`${M.levels.length} levels · ${N} pivots · ${cnt.live} live at launch`;
+ $("mbar").innerHTML=["live","partial","disabled"].map(k=>`<span class="s-${k}" style="width:${cnt[k]/N*100}%"></span>`).join("");
+ $("mbarlbl").textContent=`${cnt.live} live · ${cnt.partial} partial · ${cnt.disabled} disabled of ${N}`;
+ $("mlevels").innerHTML=["Agent monitoring","Sessions","Both"].map(a=>`<span class="tagu">${a}</span><div class="grid2">${M.levels.filter(l=>l.area===a).map(l=>`<div class="card"><span class="m dim">${esc(l.id)}</span><b>${esc(l.name)}</b><span>${esc(l.question)}</span><span class="u">${esc(l.url)}</span><details><summary class="dim">Blocks, data, rainy</summary><ul class="plain">${l.blocks.map(b=>`<li>${esc(b)}</li>`).join("")}</ul><p class="dim">${esc(l.data)}</p><ul class="plain r">${l.rainy.map(r=>`<li>${esc(r)}</li>`).join("")}</ul></details></div>`).join("")}</div>`).join("");
+ $("mchains").innerHTML=M.chains.map(c=>`<div class="card"><span class="tagu">${esc(c.direction)}</span><b>${esc(c.name)}</b><details><summary class="dim">${c.steps.length} steps</summary><ol>${c.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol></details></div>`).join("");
+ const ids=M.levels.map(l=>l.id),nm=Object.fromEntries(M.levels.map(l=>[l.id,l.name]));
+ const key=s=>(String(s).match(/L-[a-z-]+/)||[String(s).split(" ")[0]])[0];
+ const cols=[...new Set([...ids,...M.pivots.map(p=>key(p.to))])];
+ const cell={};M.pivots.forEach(p=>{const k=key(p.from)+"|"+key(p.to);(cell[k]=cell[k]||[]).push(p)});
+ $("mx").innerHTML=`<tr><th></th>${cols.map(c=>`<th class="c">${esc(nm[c]||c)}</th>`).join("")}</tr>`+ids.map(r=>`<tr><th class="r">${esc(nm[r])}</th>${cols.map(c=>{const ps=cell[r+"|"+c];if(!ps)return "<td></td>";const s=ps.map(p=>stt(p.status));const w=s.includes("live")?"live":s.includes("partial")?"partial":"disabled";return `<td title="${esc(ps.map(p=>p.trigger+" · carries "+p.carries+" · back: "+p.reverse+" · "+p.status).join("\n"))}"><span class="dot s-${w}"></span></td>`}).join("")}</tr>`).join("");
+ $("mpv").innerHTML="<tr><th>From</th><th>To</th><th>Trigger</th><th>Carries</th><th>Way back</th><th>Copies</th><th>Launch</th></tr>"+M.pivots.map(p=>`<tr><td>${esc(nm[key(p.from)]||p.from)}</td><td>${esc(nm[key(p.to)]||p.to)}</td><td>${esc(p.trigger)}</td><td class="m">${esc(p.carries)}</td><td>${esc(p.reverse)}</td><td class="dim">${esc(p.evidence)}</td><td>${esc(p.status.replace(/^Launch /,""))}</td></tr>`).join("");
+ $("mctx").innerHTML=M.context_rules.map(c=>`<li>${esc(c)}</li>`).join("");
+ $("mpr").innerHTML=M.principles.map(c=>`<li>${esc(c)}</li>`).join("");
+ $("mkpi").innerHTML="<tr><th>KPI</th><th>Target</th><th>How we measure</th><th>Counter-metric</th></tr>"+M.kpis.map(k=>`<tr><td><b>${esc(k.name)}</b></td><td><b>${esc(k.target)}</b></td><td class="m">${esc(k.formula)}</td><td>${esc(k.counter)}</td></tr>`).join("");
+ const vend=[...new Set(M.shots.map(s=>s.vendor))];
+ $("mvend").innerHTML=vend.map(v=>{const L=M.learnings.filter(l=>v.toLowerCase().includes(l.vendor.toLowerCase().split(" ")[0]));const S=M.shots.filter(s=>s.vendor===v);return `<details class="sub"><summary>${CHEV}${esc(v)}<span class="rt">${S.length} screenshots</span></summary><div class="in">${L.map(l=>`<p style="margin:0"><span class="pill Done">copy</span> ${esc(l.copy)}</p><p style="margin:0" class="dim"><span class="pill Not">avoid</span> ${esc(l.avoid)}</p>`).join("")}<div class="shots">${S.map(s=>`<a class="shot" href="${esc(s.img)}" target="_blank" rel="noopener"><img loading="lazy" src="${esc(s.img)}" alt="${esc(s.what)}"><div><span>${esc(s.what)}</span>${s.look_at?`<span class="dim">Look at: ${esc(s.look_at)}</span>`:""}</div></a>`).join("")}</div></div></details>`}).join("");
+}
+/* pipeline, decisions, gaps, words, changes */
+const S=[["1 JTBD","Sam's job step, happy .a, rainy .b+","ClickUp"],["2 Research","4+ competitors, screenshots","Figma §2"],["3 Learnings","Copy, avoid","Figma §3"],["4 Before → after","Console today vs proposal","Figma §4"],["5 Directions","3–5 options, one pick","Figma §5"],["6 Prototype","Happy + every rainy state","Web link"],["7 Figma","Hero screens + rationale","Figma link"],["8 Review","You approve, change or park","ClickUp"]];
+$("flow").innerHTML=S.map(s=>`<div class="fs"><b>${s[0]}</b><span>${s[1]}</span><span class="d">${s[2]}</span></div>`).join("");
+$("decrt").textContent=D.decisions.length;
+$("dec").innerHTML="<tr><th>#</th><th>Decision</th><th>Blocks</th><th>Owner</th><th>By</th></tr>"+D.decisions.map((d,i)=>`<tr><td class="num">${i+1}</td><td>${esc(d.q)}</td><td>${esc(d.blocks)}</td><td>${esc(d.owner)}</td><td class="num">${esc(d.by)}</td></tr>`).join("");
+const C=D.funnel.conflicts,G=C.filter(c=>/^Gap G\d/.test(c));
+$("gaprt").textContent=G.length;
+$("gaps").innerHTML="<tr><th>Gap</th><th>What is missing and what it blocks</th></tr>"+G.map(c=>{const m=c.match(/^Gap (G\d+):\s*(.*)$/);return `<tr><td class="num"><b>${m[1]}</b></td><td>${esc(m[2])}</td></tr>`}).join("");
+$("vocrt").textContent=D.funnel.vocabulary.length;
+$("voc").innerHTML="<tr><th>Use</th><th>Never</th><th>Means</th></tr>"+D.funnel.vocabulary.map(v=>`<tr><td><b>${esc(v.use)}</b></td><td class="dim">${esc(v.never)}</td><td>${esc(v.means)}</td></tr>`).join("");
+$("chg").innerHTML=D.changelog.map(c=>`<li>${esc(c)}</li>`).join("");
+$("docfix").innerHTML=C.filter(c=>!/^Gap G\d/.test(c)).map(c=>`<li>${esc(c)}</li>`).join("");
+</script>

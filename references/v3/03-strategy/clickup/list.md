@@ -1,0 +1,4 @@
+One table for design, product and FE. Two sections by tag: **v3** (42 job steps for Sam, launch Fri 16 Oct 2026, ids P0.1 to P3.6, home list Studio v3 · P0–P3 feature board, mirrored here) and **new features** (28 roadmap features for v3.1, ids 01 to 28).
+Every task carries: job to be done (Sam) · goal (KPI) · telemetry to configure · research · deliverables (prototype, Figma flow, commit lock) · agent brief. Start date = design ETA, due date = lock ETA.
+v3 statuses are the queue: Open = planned · in progress = the design agent takes it at the next run (08:00, 11:59, 16:00, 20:00) · in review = pending Shakti · completed = locked (Figma frozen + commit) · on hold = parked. v3.1 keeps the roadmap statuses (added, clarified, planning, in version, delivered).
+Live sheet with links: https://claude.ai/artifact/6YZCRsJvpoBthj4fnm9XAb · Protocol: references/automation/v3-design-agent.md in ai-studio-console-redesign.

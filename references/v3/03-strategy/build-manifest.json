@@ -1,0 +1,338 @@
+{
+ "P0.1": {
+  "task": "868m9wg1c",
+  "custom": "APP-9358",
+  "name": "P0.1 \u00b7 Choose how people reach it",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.1.md",
+  "start": "2026-09-27",
+  "due": "2026-09-29"
+ },
+ "P0.2": {
+  "task": "868m9wg1x",
+  "custom": "APP-9359",
+  "name": "P0.2 \u00b7 Change the default voice",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.2.md",
+  "start": "2026-09-27",
+  "due": "2026-09-29"
+ },
+ "P0.3": {
+  "task": "868m9wg2e",
+  "custom": "APP-9360",
+  "name": "P0.3 \u00b7 Make the conversation feel natural",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.3.md",
+  "start": "2026-09-27",
+  "due": "2026-09-29"
+ },
+ "P0.4": {
+  "task": "868m9wg2w",
+  "custom": "APP-9361",
+  "name": "P0.4 \u00b7 Tell the agent its job",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.4.md",
+  "start": "2026-09-27",
+  "due": "2026-09-29"
+ },
+ "P0.5": {
+  "task": "868m9wg37",
+  "custom": "APP-9362",
+  "name": "P0.5 \u00b7 Connect other systems",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.5.md",
+  "start": "2026-09-28",
+  "due": "2026-09-30"
+ },
+ "P0.6": {
+  "task": "868m9wg3x",
+  "custom": "APP-9363",
+  "name": "P0.6 \u00b7 Run on the team's own accounts",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.6.md",
+  "start": "2026-09-28",
+  "due": "2026-09-30"
+ },
+ "P0.7": {
+  "task": "868m9wg4c",
+  "custom": "APP-9364",
+  "name": "P0.7 \u00b7 Check it answers as intended",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.7.md",
+  "start": "2026-09-28",
+  "due": "2026-09-30"
+ },
+ "P0.8": {
+  "task": "868m9wg4y",
+  "custom": "APP-9365",
+  "name": "P0.8 \u00b7 Confirm it is ready",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.8.md",
+  "start": "2026-09-28",
+  "due": "2026-09-30"
+ },
+ "P0.9": {
+  "task": "868m9wg59",
+  "custom": "APP-9366",
+  "name": "P0.9 \u00b7 Let callers reach it",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.9.md",
+  "start": "2026-09-28",
+  "due": "2026-09-30"
+ },
+ "P0.10": {
+  "task": "868m9wg5q",
+  "custom": "APP-9367",
+  "name": "P0.10 \u00b7 Reach a list of people",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.10.md",
+  "start": "2026-09-29",
+  "due": "2026-10-01"
+ },
+ "P0.11": {
+  "task": "868m9wg61",
+  "custom": "APP-9368",
+  "name": "P0.11 \u00b7 Connect the team's software",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.11.md",
+  "start": "2026-09-29",
+  "due": "2026-10-01"
+ },
+ "P0.12": {
+  "task": "868m9x4bm",
+  "custom": "APP-9385",
+  "name": "P0.12 \u00b7 Feel sure before Go live",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.12.md",
+  "start": "2026-09-29",
+  "due": "2026-10-01"
+ },
+ "P0.13": {
+  "task": "868m9x4cc",
+  "custom": "APP-9386",
+  "name": "P0.13 \u00b7 Try it without counting",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.13.md",
+  "start": "2026-09-29",
+  "due": "2026-10-01"
+ },
+ "P0.14": {
+  "task": "868ma8q59",
+  "custom": "APP-9397",
+  "name": "P0.14 \u00b7 Change an agent people reach",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.14.md",
+  "start": "",
+  "due": ""
+ },
+ "P0.15": {
+  "task": "868ma8q5n",
+  "custom": "APP-9398",
+  "name": "P0.15 \u00b7 Retire an agent",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.15.md",
+  "start": "",
+  "due": ""
+ },
+ "P1.1": {
+  "task": "868m9wg6k",
+  "custom": "APP-9369",
+  "name": "P1.1 \u00b7 Know whether an agent needs attention",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.1.md",
+  "start": "2026-09-29",
+  "due": "2026-10-01"
+ },
+ "P1.2": {
+  "task": "868m9wg7e",
+  "custom": "APP-9370",
+  "name": "P1.2 \u00b7 Reproduce a surprise",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.2.md",
+  "start": "2026-09-30",
+  "due": "2026-10-02"
+ },
+ "P1.3": {
+  "task": "868m9wg8u",
+  "custom": "APP-9371",
+  "name": "P1.3 \u00b7 Tell whether a change helped",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.3.md",
+  "start": "2026-09-30",
+  "due": "2026-10-02"
+ },
+ "P1.4": {
+  "task": "868m9wga0",
+  "custom": "APP-9372",
+  "name": "P1.4 \u00b7 Find what is failing and why",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.4.md",
+  "start": "2026-09-30",
+  "due": "2026-10-02"
+ },
+ "P1.5": {
+  "task": "868m9wgbc",
+  "custom": "APP-9373",
+  "name": "P1.5 \u00b7 Spot the agent in trouble",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.5.md",
+  "start": "2026-10-01",
+  "due": "2026-10-05"
+ },
+ "P1.6": {
+  "task": "868m9wgcj",
+  "custom": "APP-9374",
+  "name": "P1.6 \u00b7 Remove the cause",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.6.md",
+  "start": "2026-10-01",
+  "due": "2026-10-05"
+ },
+ "P1.7": {
+  "task": "868m9wge4",
+  "custom": "APP-9375",
+  "name": "P1.7 \u00b7 Keep agents answering without a billing stop",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.7.md",
+  "start": "2026-10-01",
+  "due": "2026-10-05"
+ },
+ "P1.8": {
+  "task": "868m9x4ed",
+  "custom": "APP-9387",
+  "name": "P1.8 \u00b7 Confirm people reach the agent",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.8.md",
+  "start": "2026-10-01",
+  "due": "2026-10-05"
+ },
+ "P1.9": {
+  "task": "868m9x4f1",
+  "custom": "APP-9388",
+  "name": "P1.9 \u00b7 Define a good session",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.9.md",
+  "start": "2026-10-02",
+  "due": "2026-10-05"
+ },
+ "P1.10": {
+  "task": "868ma8ev9",
+  "custom": "APP-9393",
+  "name": "P1.10 \u00b7 Follow a problem without restarting",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.10.md",
+  "start": "2026-10-02",
+  "due": "2026-10-05"
+ },
+ "P1.11": {
+  "task": "868ma8qbq",
+  "custom": "APP-9399",
+  "name": "P1.11 \u00b7 Learn of failures unprompted",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.11.md",
+  "start": "",
+  "due": ""
+ },
+ "P2.1": {
+  "task": "868m9wgfk",
+  "custom": "APP-9376",
+  "name": "P2.1 \u00b7 Spot sessions that went wrong",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.1.md",
+  "start": "2026-10-03",
+  "due": "2026-10-05"
+ },
+ "P2.2": {
+  "task": "868m9wggy",
+  "custom": "APP-9377",
+  "name": "P2.2 \u00b7 Get from a clue to the session",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.2.md",
+  "start": "2026-10-03",
+  "due": "2026-10-05"
+ },
+ "P2.3": {
+  "task": "868m9wgj8",
+  "custom": "APP-9378",
+  "name": "P2.3 \u00b7 Reconstruct how it went",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.3.md",
+  "start": "2026-10-04",
+  "due": "2026-10-06"
+ },
+ "P2.4": {
+  "task": "868m9wgkf",
+  "custom": "APP-9379",
+  "name": "P2.4 \u00b7 Keep and share proof",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.4.md",
+  "start": "2026-10-04",
+  "due": "2026-10-06"
+ },
+ "P2.5": {
+  "task": "868m9wgmk",
+  "custom": "APP-9380",
+  "name": "P2.5 \u00b7 Follow and stop a run",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.5.md",
+  "start": "2026-10-04",
+  "due": "2026-10-06"
+ },
+ "P2.6": {
+  "task": "868m9x4fe",
+  "custom": "APP-9389",
+  "name": "P2.6 \u00b7 Match the bill to sessions",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.6.md",
+  "start": "2026-10-05",
+  "due": "2026-10-07"
+ },
+ "P2.7": {
+  "task": "868m9x4fq",
+  "custom": "APP-9390",
+  "name": "P2.7 \u00b7 Know why nothing shows yet",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.7.md",
+  "start": "2026-10-05",
+  "due": "2026-10-07"
+ },
+ "P2.8": {
+  "task": "868ma8evd",
+  "custom": "APP-9394",
+  "name": "P2.8 \u00b7 Pinpoint the slow moment",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.8.md",
+  "start": "2026-10-05",
+  "due": "2026-10-07"
+ },
+ "P2.9": {
+  "task": "868ma8evh",
+  "custom": "APP-9395",
+  "name": "P2.9 \u00b7 See what the agent was doing",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.9.md",
+  "start": "2026-10-06",
+  "due": "2026-10-08"
+ },
+ "P2.10": {
+  "task": "868ma8evm",
+  "custom": "APP-9396",
+  "name": "P2.10 \u00b7 Rule out the number or caller",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.10.md",
+  "start": "2026-10-06",
+  "due": "2026-10-08"
+ },
+ "P3.1": {
+  "task": "868m9wgne",
+  "custom": "APP-9381",
+  "name": "P3.1 \u00b7 Replace keys without breakage",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.1.md",
+  "start": "2026-10-06",
+  "due": "2026-10-08"
+ },
+ "P3.2": {
+  "task": "868m9wgpc",
+  "custom": "APP-9382",
+  "name": "P3.2 \u00b7 Route every number to an agent",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.2.md",
+  "start": "2026-10-07",
+  "due": "2026-10-09"
+ },
+ "P3.3": {
+  "task": "868m9wgq5",
+  "custom": "APP-9383",
+  "name": "P3.3 \u00b7 Decide how sessions on numbers end",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.3.md",
+  "start": "2026-10-07",
+  "due": "2026-10-09"
+ },
+ "P3.4": {
+  "task": "868m9wgqx",
+  "custom": "APP-9384",
+  "name": "P3.4 \u00b7 Reuse integrations across agents",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.4.md",
+  "start": "2026-10-07",
+  "due": "2026-10-09"
+ },
+ "P3.5": {
+  "task": "868m9x4gm",
+  "custom": "APP-9391",
+  "name": "P3.5 \u00b7 Switch between code and hand edits",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.5.md",
+  "start": "2026-10-08",
+  "due": "2026-10-12"
+ },
+ "P3.6": {
+  "task": "868m9x4hy",
+  "custom": "APP-9392",
+  "name": "P3.6 \u00b7 Read one word per concept",
+  "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.6.md",
+  "start": "2026-10-08",
+  "due": "2026-10-12"
+ }
+}
