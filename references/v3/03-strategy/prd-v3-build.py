@@ -77,16 +77,16 @@ DATA_KW = [
 RULE0 = {
  'P0': {'new': 'A new account has no agent and no session; the flow creates them. Presets, voices and provider lists exist without data.',
         'external': 'Retell and ElevenLabs signed-in accounts (competitor profile) already hold configured agents; LiveKit and Vapi docs for create and test flows; Refero for create sheets and test panels.',
-        'create': 'In our account: 1 agent per deployment type (inbound, batch, code), 1 secret set with one wrong key to reach the failure state, 2 test sessions (one heard, one failed).'},
+        'create': '1 agent per deployment type (inbound, batch, code), 1 secret set with one wrong key to reach the failure state, 2 test sessions (one heard, one failed).'},
  'P1': {'new': 'A new account has no production sessions, no errors and no runs: every monitoring view opens empty. The empty state is a rainy scenario, never the research.',
         'external': 'LiveKit and Retell signed-in accounts hold sessions and call history; Datadog, Sentry and Honeycomb docs for error groups and traces (shots in v3/02-research/monitoring); Twilio docs for call logs; Bland for batch lifecycle.',
-        'create': 'In our account: 2 agents, 10 test sessions of which 3 forced failures (invalid BYOK key, unreachable number, idle timeout), 1 batch run with 5 contacts, 1 number pointed at an agent, then wait for the sessions to land in history. Note the app id and the session ids for the screenshots.'},
+        'create': '2 agents, 10 test sessions of which 3 forced failures (invalid BYOK key, unreachable number, idle timeout), 1 batch run with 5 contacts, 1 number pointed at an agent, then wait for the sessions to land in history. Note the app id and the session ids for the screenshots.'},
  'P2': {'new': 'A new account has no sessions to open and nothing to filter. Session detail, turns and logs also depend on server gaps G2, G4, G11, G13.',
         'external': 'Retell call history and LiveKit sessions (signed-in), Langfuse and LangSmith docs for trace timelines and filters, Twilio event streams; the 61 monitoring shots already captured.',
-        'create': 'In our account: the same 10 test sessions as P1 plus 1 session with zero retention and 1 with a long silence, so history shows a failed, a zero-retention and a slow session side by side.'},
+        'create': 'the same 10 test sessions as P1 plus 1 session with zero retention and 1 with a long silence, so history shows a failed, a zero-retention and a slow session side by side.'},
  'P3': {'new': 'A new account has one project, no numbers, no secrets and no integrations. Lists open empty; reuse and replace flows need at least two items.',
         'external': 'Vapi and Retell signed-in accounts for numbers and keys pages; ElevenLabs for tools and MCP; the v3 API spec for every field.',
-        'create': 'In our account: 2 secret sets (one referenced by an agent), 3 numbers (one unassigned for 7 days), 2 MCP servers shared by 2 agents, 1 API-created agent to test code and hand edits.'},
+        'create': '2 secret sets (one referenced by an agent), 3 numbers (one unassigned for 7 days), 2 MCP servers shared by 2 agents, 1 API-created agent to test code and hand edits.'},
 }
 
 def fmt(s):
