@@ -231,7 +231,7 @@ def desc(f):
     L.append(f"Rule 0, data first. This flow shows: {', '.join(f['data']) or 'no stored data'}. New account: {r0.get('new','')} Outside our accounts: {r0.get('external','')} Create in our account: {r0.get('create','')}")
     L.append(f"Files: references/v3/features/{f['id']}/ (jtbd, directions, build spec, flow/ screenshots, shots/ research).")
     L.append('Columns: To-do = planned, in the order it gets done · In progress = taken at a run (08:00, 11:59, 16:00, 20:00) · Pending Review = delivered, pending Shakti · Delivered = approved and locked (Figma frozen, commit). Changes: drag back to In progress + comment `change: …`.')
-    L.append('Rules: existing Console design system only (docs/design/DESIGN.md, design/v3); reuse, do not redesign; empty first, quiet chrome; sentence case, no arrows or em dashes; locked words; Sam only in job text; never change a locked feature unless in scope, then say so. One run delivers: prototype for the happy path and every rainy state, one screenshot per step, the Figma flow with "Sam does …" captions and rationale, this task in review with a comment, the sheet row, one Slack post.')
+    L.append('Rules: existing Console design system only (docs/design/DESIGN.md, design/v3); reuse, do not redesign; empty first, quiet chrome; sentence case, no arrows or em dashes; locked words; Sam only in job text; never change a locked feature unless in scope, then say so. One run delivers: prototype for the happy path and every rainy state, one screenshot per step, the Figma flow with "Sam does …" captions and rationale, this card in Pending Review with a comment, the sheet row, one Slack post.')
     return '\n'.join(L)
 
 manifest = {}
