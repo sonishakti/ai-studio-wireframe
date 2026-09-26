@@ -4137,7 +4137,7 @@
    "step": "Sam finds which of the team's agents needs attention first.",
    "happy": {
     "id": "P1.5.a",
-    "story": "Sam runs six agents and wants to know which one to look at this morning, so no failing agent waits.",
+    "story": "Sam wants to know which of six agents to look at this morning, so no failing agent waits.",
     "steps": [
      "The agents list shows per row: deployment type, sessions in range, errors badge, last session and a 'No deployment' chip; each cue is a link.",
      "Sam sorts by errors; the failing agent rises to the top.",
@@ -4869,7 +4869,7 @@
    "step": "Sam follows one problem from the agent down to the evidence and back without starting over. Cross-cutting requirement, not a job step.",
    "happy": {
     "id": "P1.10.a",
-    "story": "Sam is tracing an error from the agent down to one log line and wants to go back up without rebuilding filters, so the investigation keeps moving.",
+    "story": "Sam wants to go back up from a log line to the agent without rebuilding filters, so the investigation keeps moving.",
     "steps": [
      "Every level has a URL: /agents/:id, /agents/:id/logs/:groupKey, /sessions/:id, and panels for session, turn and log line.",
      "Going down adds one filter or overlay and a scope chip; going up removes only the leaf.",
@@ -6078,7 +6078,7 @@
    "step": "When there is nothing to review, Sam finds out whether that is expected or a problem. Proposed to fold into P1.8 and P2.1.k.",
    "happy": {
     "id": "P2.7.a",
-    "story": "Sam opens sessions before any exist and wants the one next step, so Sam does not wonder whether something is broken.",
+    "story": "Sam wants the one next step when sessions show nothing yet, so Sam does not wonder whether something is broken.",
     "steps": [
      "History with no sessions shows one line and two doors: Talk to agent and Go live.",
      "The same state appears inside the embedded lists on the agent, run and number.",
@@ -6215,7 +6215,7 @@
    "step": "Sam finds the moment a session slowed down or broke, and what held it up.",
    "happy": {
     "id": "P2.8.a",
-    "story": "Sam felt a slow moment in a session and wants to see where the time went, so Sam knows what to change.",
+    "story": "Sam wants to see where the time went in a session that felt slow, so Sam knows what to change.",
     "steps": [
      "First release: the Latency tab shows a table by turn index with legs end-of-turn detection, transcription delay, LLM time to first token, TTS time to first byte and end to end; unmeasured legs read 'Not measured yet'.",
      "The timeline strip shows event markers only.",
@@ -6513,7 +6513,7 @@
    "step": "Sam rules out the number, the carrier and the caller before blaming the agent.",
    "happy": {
     "id": "P2.10.a",
-    "story": "Sam suspects the number or the caller, not the agent, so Sam wants every session that number or contact carried.",
+    "story": "Sam wants every session a suspect number or contact carried, so Sam can rule out the number or the caller before blaming the agent.",
     "steps": [
      "The number page gains 'Sessions via this number' and 'Runs using this number'.",
      "In a session, the telephony card shows the number chip and 'Other sessions with this contact (3)'.",
