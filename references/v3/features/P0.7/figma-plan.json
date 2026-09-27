@@ -1,0 +1,210 @@
+{
+  "id": "p0.7",
+  "title": "Check the agent answers as intended",
+  "name": "p0.7 · Check the agent answers as intended",
+  "jtbd": {
+    "job": "",
+    "situation": "",
+    "wantsTo": "",
+    "soThat": "",
+    "happySteps": [
+      "Sam presses Save and test, and the test panel opens on Talk.",
+      "Studio saves, starts a test session from agent_id, stores its id and tags client_reference studio_test:.",
+      "Sam hears the first answer. The transcript runs beside it, with tool calls marked.",
+      "Sam ends the test and edits again. The Simulations section stays as it is."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "Sam has unsaved edits"
+      },
+      {
+        "id": ".c",
+        "title": "The browser denies the mic"
+      },
+      {
+        "id": ".d",
+        "title": "The account is suspended or free minutes are used up"
+      },
+      {
+        "id": ".e",
+        "title": "Too many sessions are running"
+      },
+      {
+        "id": ".f",
+        "title": "The session fails to start (422, 5xx)"
+      },
+      {
+        "id": ".g",
+        "title": "A tool or MCP server fails mid-test"
+      },
+      {
+        "id": ".h",
+        "title": "The session starts but Sam hears nothing"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/p0.7/shots/before-01-test-panel-closed-state.png",
+        "hash": null,
+        "label": "before-01-test-panel-closed-state"
+      },
+      {
+        "path": "references/v3/features/p0.7/shots/before-02-test-panel-live-state.png",
+        "hash": null,
+        "label": "before-02-test-panel-live-state"
+      },
+      {
+        "path": "references/v3/features/p0.7/shots/elevenlabs-10-preview-pane-call-chat-door.png",
+        "hash": null,
+        "label": "elevenlabs-10-preview-pane-call-chat-door"
+      },
+      {
+        "path": "references/v3/features/p0.7/shots/elevenlabs-11-mic-permission-denied.png",
+        "hash": null,
+        "label": "elevenlabs-11-mic-permission-denied"
+      },
+      {
+        "path": "references/v3/features/p0.7/shots/livekit-12-start-call-live-preview.png",
+        "hash": null,
+        "label": "livekit-12-start-call-live-preview"
+      },
+      {
+        "path": "references/v3/features/p0.7/shots/livekit-13-console-idle-no-agent.png",
+        "hash": null,
+        "label": "livekit-13-console-idle-no-agent"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): Rainy shots still missing at every vendor: test refused for quota or concurrency, and testing unsaved changes. Retell simulations exist as report text only."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/p0.7/flow/01-edit-save-and-test.png",
+      "hash": null,
+      "caption": "Sam presses Save and test, and the test panel opens on Talk."
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/02-starting.png",
+      "hash": null,
+      "caption": "Studio saves, starts a test session from agent_id, stores its id and tags client_reference studio_test:."
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/03-live-first-answer.png",
+      "hash": null,
+      "caption": "Sam hears the first answer. The transcript runs beside it, with tool calls marked."
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/04-ended-edit-again.png",
+      "hash": null,
+      "caption": "Sam ends the test and edits again. The Simulations section stays as it is."
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/05-simulations.png",
+      "hash": null,
+      "caption": "Sam simulations"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/06-baseline-untouched-preset.png",
+      "hash": null,
+      "caption": "Sam baseline untouched preset"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/07-rainy-b-unsaved.png",
+      "hash": null,
+      "caption": "Sam has unsaved edits",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/08-rainy-c-mic-denied.png",
+      "hash": null,
+      "caption": "The browser denies the mic",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/09-rainy-d-minutes.png",
+      "hash": null,
+      "caption": "The account is suspended or free minutes are used up",
+      "rainyId": ".d"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/10-rainy-d-suspended.png",
+      "hash": null,
+      "caption": "The account is suspended or free minutes are used up",
+      "rainyId": ".d"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/11-rainy-e-busy.png",
+      "hash": null,
+      "caption": "Too many sessions are running",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/12-rainy-f-400.png",
+      "hash": null,
+      "caption": "The session fails to start (422, 5xx)",
+      "rainyId": ".f"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/13-rainy-f-key.png",
+      "hash": null,
+      "caption": "The session fails to start (422, 5xx)",
+      "rainyId": ".f"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/14-rainy-f-503.png",
+      "hash": null,
+      "caption": "The session fails to start (422, 5xx)",
+      "rainyId": ".f"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/15-rainy-g-tool-error.png",
+      "hash": null,
+      "caption": "A tool or MCP server fails mid-test",
+      "rainyId": ".g"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/16-rainy-g-mcp-401.png",
+      "hash": null,
+      "caption": "A tool or MCP server fails mid-test",
+      "rainyId": ".g"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/17-rainy-h-silent.png",
+      "hash": null,
+      "caption": "The session starts but Sam hears nothing",
+      "rainyId": ".h"
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/18-rainy-h-retry.png",
+      "hash": null,
+      "caption": "The session starts but Sam hears nothing",
+      "rainyId": ".h"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/p0.7/flow/01-edit-save-and-test.png",
+      "hash": null,
+      "caption": "Sam presses Save and test, and the test panel opens on Talk."
+    },
+    {
+      "path": "references/v3/features/p0.7/flow/06-baseline-untouched-preset.png",
+      "hash": null,
+      "caption": "Sam baseline untouched preset"
+    }
+  ],
+  "rationale": [
+    "`POST /sessions` from `agent_id` with the `studio_test:` reference; the id stored; stop on End test, Close and leaving — .a step 2, learning 1",
+    "Non-modal sheet below xl, docked from xl (the live builder's panel) — .a step 4, DESIGN.md §6",
+    "Save and test starts the session; the header Test lands on Start test — .a step 1, KPI, learning 1",
+    "A transcript list: agent, person, tool, key, divider lines — .a step 3, .g, learning 4",
+    "The status line: Saving, Starting, Listening, Running, no sound yet, Ended · 0:42 — .h, learning 3"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-jo3z8xwz8-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_orders&tab=agent&section=prompt&test=live"
+  }
+}

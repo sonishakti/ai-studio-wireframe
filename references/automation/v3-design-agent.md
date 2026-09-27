@@ -8,6 +8,17 @@ and stops. It never marks a row Done. This file is the contract; the scheduled t
 
 Supersedes `v3-night-agent.md` (one long night run). Persona: Sam, a developer, only in job text.
 
+**Stakeholders (owner rule, 27 Sep 2026).** Sam is OUR user — the developer building the agent. The people who call or
+message Sam's finished agent are Sam's users, a.k.a. Sam's consumers / end-consumers — a distinct, indirect
+stakeholder. Never write a JTBD as if it were about "the team" or "people outside the team"; that phrasing is
+meaningless. Name the real stakeholder: Sam, or explicitly Sam's consumers when the job is really about their
+experience of the finished agent (e.g. "so that Sam's consumers get a natural-sounding call").
+
+**Rainy paths are never Sam's fault (owner rule, 27 Sep 2026).** A rainy path is caused by the situation — a gap, a
+failure, an external condition — never by something Sam did wrong. Every rainy title, trigger line and Figma
+accordion is phrased situation-first: "When <X issue> happens, Sam can resolve it by …". Never phrase a rainy path
+as Sam breaking something.
+
 ## One table, one schedule
 
 | Where | What it is | Who reads it |
@@ -25,20 +36,27 @@ agent follows the queue and runs ahead of them.
 
 ### Status is the queue (v3 rows)
 
-| Board column | Sheet | Means | Who moves it |
+| Board column (ClickUp name today → the owner's rename) | Sheet | Means | Who moves it |
 |---|---|---|---|
-| **To-do** (status type open; named `Open` until renamed) | Planned | in the sheet with two ETAs, in the order it gets done | — |
-| **In progress** | WIP | being built; worked in id order | the run's own pick, or the owner |
-| **Pending Review** (`in review` until renamed) | Review | prototype and Figma flow delivered; pending the owner | the run |
-| **Delivered** (status type closed; `Closed` until renamed) | Done | approved and **locked**: Figma section frozen, commit recorded | owner only |
+| **To-do** (`Open`) | Planned | in the sheet with two dates, in the order it gets done | — |
+| **in progress** | WIP, then Review once delivered | being designed; when the run delivers, the card **stays here** with the comment "Delivered for review · <run>" | the run moves To-do → in progress, never further; the owner moves it on |
+| **on hold** (`pending` today) | Parked | started but not finished; the comment says what is missing | the run, when a gate fails or a run ends with the card unfinished; the owner |
+| **design in review** (`in review` today) | Review | the owner is reviewing | owner only |
+| **Delivered** (`Closed` today) | Done | approved and **locked**: Figma section frozen, commit recorded | owner only |
+| `completed`, `accepted`, `rejected`, `blocked` | — | never used; the owner deletes them | — |
 
-Four columns, no other status. Each run resolves the exact names with `expand_statuses` (by type for To-do and
-Delivered) so a rename in the ClickUp UI never breaks it. Proposed rows (P0.14, P0.15, P1.11, no days budgeted) stay in
-To-do and are never picked until the owner drags them to In progress.
+The run resolves the names with `expand_statuses` (To-do = the open type, Delivered = the closed type, the others by name,
+old or renamed). **The run never moves a card past in progress and never moves a feature card.** Proposed rows (P0.14,
+P0.15, P1.11) are never picked unless the owner put them in in progress.
 
-**Verdicts.** Approve = drag the card to Delivered, or reply `approve <id>` in Slack. Changes = drag it back to In
-progress and comment `change: …` on the card, or reply `change <id>: …` in Slack. Park = drag it to To-do (`park <id>`
-does the same with a comment). A change request jumps the queue at the next run.
+**Verdicts (owner only).** Approve = drag the card to design in review, then to Delivered when locked; or reply
+`approve <id>` in Slack, which the run applies by moving the card to Delivered on the owner's behalf. Changes = comment
+`change: …` on the card (it stays in in progress, or drag it back there), or reply `change <id>: …` in Slack. Park = drag
+it to on hold, or `park <id>`. A change request jumps the queue at the next run.
+
+**Feature cards** (F1 … F14 in the same list) are the parents; every job step is a subtask of its feature, so ClickUp
+shows the feature's progress from its subtasks. The run comments on the feature card when a step is delivered and never
+moves it.
 
 **Lock rule.** A Done row is locked: its Figma section and its routes are never changed by later work unless the
 change is inside the later row's own scope or improves the locked design. Then the run leaves the locked commit
@@ -51,12 +69,12 @@ at the start and removes it at the end; a trigger that finds a lock younger than
 
 | Phase | Does |
 |---|---|
-| Plan | 1 Apply verdicts: ClickUp statuses that changed since `state.json.last_run_ts`, then Slack replies from the owner since then (approve, change, park, a feature id). Delivered → lock the sheet row (status Done, `locked_at`, `commit` from the task's latest review comment) and comment "Locked <date> · <commit>" once. 2 Pick **one**: a card with a `change:` comment newer than its last move to Pending Review, else the lowest-id card In progress, else the lowest-id To-do card (skip proposed rows), moved to In progress. Pending Review and Delivered cards are never picked. `args.only` overrides. Nothing to take → exit silently. 3 List locked ids and their routes |
+| Plan | 1 Apply verdicts: ClickUp statuses that changed since `state.json.last_run_ts`, then Slack replies from the owner since then (approve, change, park, a feature id). Delivered → lock the sheet row (status Done, `locked_at`, `commit` from the task's latest review comment) and comment "Locked <date> · <commit>" once. 2 Pick **one**: a card with a `change:` comment newer than its "Delivered for review" comment, else the lowest-id in progress card that has no "Delivered for review" comment, else the lowest-id To-do card (skip proposed rows), moved to in progress. Cards in on hold, design in review or Delivered are never picked. `args.only` overrides. Nothing to take → exit silently. 3 List locked ids and their routes |
 | Research | **Rule 0, data first:** does a new logged-in account have the data this flow shows (sessions, errors, runs, numbers, secrets)? If not, name where it exists outside our accounts (signed-in competitor accounts, vendor docs, Refero, shots already captured) and what to create in our own account (agents, test sessions, forced failures, a run, a number) so screenshots show real data; write the answer on the row's footnote before any capture. **Owner rule, source order:** (1) Refero MCP docs tools first, always — `refero_search_screens`/`refero_search_flows`/`refero_search_styles` etc.; (2) then the older research already done, which lives in Figma (the row's Figma research section) or as screenshots somewhere in the folders (`references/v3/`, `references/research/`, `competitors/`, the row's research table and `shots/`); (3) only go via the browser route — vendor docs by fetch/search, the built-in browser, or Claude in Chrome on the signed-in profile — when context is missing from (1) and (2), or when a doc/changelog says the vendor shipped something new or changed. Only for vendors still `Not started` does this run one Sonnet agent per vendor through the full order above. Always 3 direct (Vapi, Retell, ElevenLabs) + 1 indirect (LiveKit, Datadog or Sentry, Twilio, Bland by topic). Empty states are rainy scenarios: act in the environment to reach the populated state |
 | Design | Flow spec for the JTBD: for the happy path, one screen per step (route, URL state, what Sam sees, the one-line caption "Sam does …"); for every rainy path its state and recovery; 2–3 directions in a paragraph each, one pick with 3–5 rationale lines. Written to `references/v3/features/<id>/` (01-jtbd.md, 04-directions.md, 05-build-spec.md) |
 | Build | Prototype on `design/v3` in the worktree: happy path and every rainy state reachable by URL; the link opens at the start of Sam's journey. Gate: `bun run typecheck`, `bunx vitest run <affected>`, `bunx biome check --write <changed>`, locked-word grep, no locked route changed (or declared). Commit locally `design(v3/<id>): …`, never push, never `--prod`. Git-free preview deploy (`git archive HEAD \| tar -x` into a scratch folder, `vercel link --yes --project ng-console --scope agoraio`, `vercel deploy --scope agoraio --yes --build-env VITE_NG_CONSOLE_DESIGN_PREVIEW=true`). Then one screenshot per happy step and per rainy state from the preview into `references/v3/features/<id>/flow/NN-<slug>.png`, with the agent-browser skill or `scripts/drive.mjs`; never Claude in Chrome for our own prototype |
-| Figma | Load `figma:figma-use` first. **Dark theme, text-light.** Page `v3 · <phase name>`, section `<id> · <title>`, dark canvas and frames, light text, kit components only. Child sections: `1 JTBD` (four lines: Job, Situation, Sam wants to, So that; then the happy steps and the rainy titles as short lines), `2 Research` (existing and new shots, a thin red outline on the region to look at, one finding line under each), `3 Flow` (the story: one frame per step, Sam's dark photo `references/assets/sam/sam-dark.webp` at the top left, one present-tense line that says what Sam does, "Sam clicks on Create agent", then the screenshot; happy path first, every rainy path after it with the trigger line, "Sam leaves the name empty", and the recovery line), `4 Hero` (native editable frames of the 2 to 3 hero screens from kit components on page 31:2, variables bound, never detached), `5 Rationale` (3 to 5 short lines, each tracing to a research shot or the KPI, plus three links: ClickUp card, sheet row, prototype). Nothing else: no scope, sub-tasks, API notes, telemetry or process text in Figma; the ClickUp card holds those. Drift check: every component used has a Code Connect mapping; token values match `src/styles.css`. Never edit a locked section |
-| Track | ClickUp card: comment (prototype, Figma section, commit, rationale, rainy states covered) and column Pending Review. Then the feature card in **0. Features** that links to this job step: a one-line comment "<id> delivered for review"; move that feature card to In progress if it is still To-do, to Pending Review when every linked step is in Pending Review or Delivered. Sheet row `features/<id>` through ArtifactData: `status: Review`, `web`, `figma`, `commit`, `research`, `updated`; keep `design_eta` and `lock_eta`; never `Done` or `locked_at` |
+| Figma | Load `figma:figma-use` first. **Dark theme, text-light.** Page `v3 · <phase name>`, section `<id> · <title>`, dark canvas and frames, light text, kit components only. Child sections: `1 JTBD` (four lines: Job, Situation, Sam wants to, So that; then the happy steps and the rainy titles as short lines), `2 Research` (existing and new shots, a thin red outline on the region to look at, one finding line under each), `3 Flow` (the story: one frame per step, Sam's dark photo `references/assets/sam/sam-dark.webp` at the top left, one present-tense line that says what Sam does, "Sam clicks on Create agent", then the screenshot; happy path first, every rainy path after it phrased situation-first — "When the name is left empty, Sam can resolve it by …" — never "Sam leaves the name empty" as if Sam caused it), `4 Hero` (native editable frames of the 2 to 3 hero screens from kit components on page 31:2, variables bound, never detached), `5 Rationale` (3 to 5 short lines, each tracing to a research shot or the KPI, plus three links: ClickUp card, sheet row, prototype). Nothing else: no scope, sub-tasks, API notes, telemetry or process text in Figma; the ClickUp card holds those. Drift check: every component used has a Code Connect mapping; token values match `src/styles.css`. Never edit a locked section |
+| Track | ClickUp card: comment "Delivered for review · <run> <date>" with prototype, Figma section, commit, rationale and the rainy states covered; **status unchanged (in progress)**. Then one line on the parent feature card: "<id> delivered for review". If the gate failed or the run ends with the card unfinished: move it to on hold (`pending`) with a comment saying what is missing. Never in review, never completed. Sheet row `features/<id>` through ArtifactData: `status: Review`, `web`, `figma`, `commit`, `research`, `updated`; keep `design_eta` and `lock_eta`; never `Done` or `locked_at` |
 | Report | One Slack post (format below) and a PushNotification. Run log `references/automation/runs/<date>-<run>.md`. Update `state.json` (`last_run_ts`, `last_id`, `running: null`). Remove the lock. On the 20:00 run only: `pmset sleepnow` if the owner has been idle ≥ 15 min; never shut down. On failure: post one short line saying what failed and where it stopped, still remove the lock |
 
 ### The post
@@ -70,8 +88,8 @@ Rationale: 1 … 2 … 3 …
 Rainy states covered: b, c, d, e, f, g, h
 Touches locked: none
 Open questions (max 3): …
-Approve: drag the card to Delivered or reply "approve P1.8". Changes: reply "change P1.8: …" or comment on the card and drag it back to In progress.
-Next run 16:00 takes the next In progress or To-do card unless you pick another id.
+Approve: drag the card to design in review, then Delivered when locked, or reply "approve P1.8". Changes: reply "change P1.8: …" or comment on the card.
+Next run 16:00 takes the next in progress or To-do card unless you pick another id.
 ```
 
 `n` is the row's position in the sheet order (P0.1 = 1 … P3.6 = 42). Post kinds: **Review ready** (needs a verdict),

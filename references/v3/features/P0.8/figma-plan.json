@@ -1,0 +1,222 @@
+{
+  "id": "P0.8",
+  "title": "Confirm the agent is ready",
+  "name": "P0.8 · Confirm the agent is ready",
+  "jtbd": {
+    "job": "",
+    "situation": "",
+    "wantsTo": "",
+    "soThat": "",
+    "happySteps": [
+      "Sam opens Deployment, which comes after Test and is separate from Integrations. The tab for the agent's type opens first.",
+      "Readiness lists a heard test on this version, the prompt, and a number or contact list, with one fix link each.",
+      "Sam decides how long what people say to the agent is kept: 30 days or none. This may become its own step; owner to decide.",
+      "Sam presses Go live inside the same area."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "No test was heard since the last change"
+      },
+      {
+        "id": ".c",
+        "title": "Sam has no number or no contact list"
+      },
+      {
+        "id": ".d",
+        "title": "Sam wants zero retention on inbound or batch"
+      },
+      {
+        "id": ".e",
+        "title": "The agent already has a deployment"
+      },
+      {
+        "id": ".f",
+        "title": "The agent has no deployment type (made through the API)"
+      },
+      {
+        "id": ".g",
+        "title": "The account is suspended at Go live"
+      },
+      {
+        "id": ".h",
+        "title": "Sam edits an agent that already has a deployment"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/P0.8/shots/before-01-numbers-tab-frontdesk-live.png",
+        "hash": null,
+        "label": "before-01-numbers-tab-frontdesk-live"
+      },
+      {
+        "path": "references/v3/features/P0.8/shots/before-02-runs-tab-survey-draft.png",
+        "hash": null,
+        "label": "before-02-runs-tab-survey-draft"
+      },
+      {
+        "path": "references/v3/features/P0.8/shots/before-03-runs-tab-payments-live.png",
+        "hash": null,
+        "label": "before-03-runs-tab-payments-live"
+      },
+      {
+        "path": "references/v3/features/P0.8/shots/elevenlabs-01-zero-retention-privacy.png",
+        "hash": null,
+        "label": "elevenlabs-01-zero-retention-privacy"
+      },
+      {
+        "path": "references/v3/features/P0.8/shots/refero-stripe-01-activation-review.png",
+        "hash": null,
+        "label": "refero-stripe-01-activation-review"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): None of the four vendors ships a readiness check before going live. Confirm this with product shots of each vendor's go-live step. Capture the ElevenLabs Zero Retention toggle and the Vapi HIPAA setting in the product. Desk notes: v3/02-research/batch-retention-experiments.md §2."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/P0.8/flow/01-deployment-gaps.png",
+      "hash": null,
+      "caption": "Sam opens Deployment, which comes after Test and is separate from Integrations. The tab for the agent's type opens first."
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/02-test-from-readiness.png",
+      "hash": null,
+      "caption": "Readiness lists a heard test on this version, the prompt, and a number or contact list, with one fix link each."
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/03-ready-keep-30-days.png",
+      "hash": null,
+      "caption": "Sam decides how long what people say to the agent is kept: 30 days or none. This may become its own step; owner to decide."
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/04-go-live-sheet.png",
+      "hash": null,
+      "caption": "Sam presses Go live inside the same area."
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/05-live.png",
+      "hash": null,
+      "caption": "Sam live"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/06-code-zero-retention.png",
+      "hash": null,
+      "caption": "Sam code zero retention"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/21-rainy-prompt-gap.png",
+      "hash": null,
+      "caption": "Sam rainy prompt gap"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/07-rainy-b-no-test-since-change.png",
+      "hash": null,
+      "caption": "No test was heard since the last change",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/08-rainy-c-no-number.png",
+      "hash": null,
+      "caption": "Sam has no number or no contact list",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/09-rainy-c-sip-form.png",
+      "hash": null,
+      "caption": "Sam has no number or no contact list",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/10-rainy-c-batch-list-pending.png",
+      "hash": null,
+      "caption": "Sam has no number or no contact list",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/11-rainy-d-inbound-disabled.png",
+      "hash": null,
+      "caption": "Sam wants zero retention on inbound or batch",
+      "rainyId": ".d"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/12-rainy-d-batch-disabled.png",
+      "hash": null,
+      "caption": "Sam wants zero retention on inbound or batch",
+      "rainyId": ".d"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/13-rainy-e-inbound-live.png",
+      "hash": null,
+      "caption": "The agent already has a deployment",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/14-rainy-e-batch-live.png",
+      "hash": null,
+      "caption": "The agent already has a deployment",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/15-rainy-e-code-live.png",
+      "hash": null,
+      "caption": "The agent already has a deployment",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/16-rainy-f-untyped.png",
+      "hash": null,
+      "caption": "The agent has no deployment type (made through the API)",
+      "rainyId": ".f"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/17-rainy-g-suspended-banner.png",
+      "hash": null,
+      "caption": "The account is suspended at Go live",
+      "rainyId": ".g"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/18-rainy-g-run-refused.png",
+      "hash": null,
+      "caption": "The account is suspended at Go live",
+      "rainyId": ".g"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/19-rainy-h-saved-live-inbound.png",
+      "hash": null,
+      "caption": "Sam edits an agent that already has a deployment",
+      "rainyId": ".h"
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/20-rainy-h-saved-live-batch.png",
+      "hash": null,
+      "caption": "Sam edits an agent that already has a deployment",
+      "rainyId": ".h"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/P0.8/flow/01-deployment-gaps.png",
+      "hash": null,
+      "caption": "Sam opens Deployment, which comes after Test and is separate from Integrations. The tab for the agent's type opens first."
+    },
+    {
+      "path": "references/v3/features/P0.8/flow/21-rainy-prompt-gap.png",
+      "hash": null,
+      "caption": "Sam rainy prompt gap"
+    }
+  ],
+  "rationale": [
+    "A Readiness row: three items, tick or triangle, one link each; gaps named, never blocking — .a step 2, .b, .c, KPI, learning 2",
+    "A Retention row: 30 days or Zero retention; disabled with the reason on inbound and batch; written into the snippet on code — .a step 3, .d, requirement 46, learning 3",
+    "Go live in the header on a draft agent (lands on the tab); Go live in the type row's empty state; the sheet titled Go live; New run as the batch Go live; the snippet's copy as the code Go live — .a step 4, vocabulary, learning 1",
+    "Tab named Deployment for every agent; the type name on the row; P0.1.c's ask in place for an untyped agent — .a step 1, .f, requirement 6",
+    "The test item compares `agent_audio_heard.agentVersion` with `updated_at` — .b, .h, KPI"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-as1vmwze6-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_clinic&tab=deploy"
+  }
+}

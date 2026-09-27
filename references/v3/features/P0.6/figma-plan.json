@@ -1,0 +1,194 @@
+{
+  "id": "p0.6",
+  "title": "Run the agent on the team's own accounts",
+  "name": "p0.6 · Run the agent on the team's own accounts",
+  "jtbd": {
+    "job": "",
+    "situation": "",
+    "wantsTo": "",
+    "soThat": "",
+    "happySteps": [
+      "On a module (speech recognition, language model or voice), Sam switches from managed to BYOK.",
+      "Sam pastes the key. Studio writes one secret set per module key (studio-<agent_id>-<module>) and references $secrets.<set>.<key>.",
+      "The field reads Saved, hidden. The value is never shown again.",
+      "Sam tests, and the answer proves the key works."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "The secret set name is taken (409)"
+      },
+      {
+        "id": ".c",
+        "title": "Sam pasted a wrong key or pasted into the wrong module"
+      },
+      {
+        "id": ".d",
+        "title": "Sam needs to replace a key"
+      },
+      {
+        "id": ".e",
+        "title": "Sam goes back to managed and wants the key gone"
+      },
+      {
+        "id": ".f",
+        "title": "The key is revoked after the agent went live"
+      },
+      {
+        "id": ".g",
+        "title": "Sam already stored the key on the Secrets page"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/p0.6/shots/before-01-advanced-provider-keys.png",
+        "hash": null,
+        "label": "before-01-advanced-provider-keys"
+      },
+      {
+        "path": "references/v3/features/p0.6/shots/before-02-key-paste-field.png",
+        "hash": null,
+        "label": "before-02-key-paste-field"
+      },
+      {
+        "path": "references/v3/features/p0.6/shots/before-03-key-saved.png",
+        "hash": null,
+        "label": "before-03-key-saved"
+      },
+      {
+        "path": "references/v3/features/p0.6/shots/livekit-18-agent-builder-advanced-telephony.png",
+        "hash": null,
+        "label": "livekit-18-agent-builder-advanced-telephony"
+      },
+      {
+        "path": "references/v3/features/p0.6/shots/livekit-19-agent-configuration-secrets.png",
+        "hash": null,
+        "label": "livekit-19-agent-configuration-secrets"
+      },
+      {
+        "path": "references/v3/features/p0.6/shots/refero-doppler-01-validation-error.png",
+        "hash": null,
+        "label": "refero-doppler-01-validation-error"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): LiveKit shows an inline Add secret entry point in the builder, not opened. No vendor shows the paste itself, a rotation or a wrong-key error. Capture Vapi provider keys, the ElevenLabs workspace secrets, the LiveKit add-secret sheet and any wrong-key error. Desk notes: v3/02-research/builder-models-secrets.md §C. No vendor shows which agents use a secret before it is deleted."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/p0.6/flow/01-row-use-my-key.png",
+      "hash": null,
+      "caption": "On a module (speech recognition, language model or voice), Sam switches from managed to BYOK."
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/02-field-open.png",
+      "hash": null,
+      "caption": "Sam pastes the key. Studio writes one secret set per module key (studio-<agent_id>-<module>) and references $secrets.<set>.<key>."
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/03-pasted.png",
+      "hash": null,
+      "caption": "The field reads Saved, hidden. The value is never shown again."
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/04-key-saved.png",
+      "hash": null,
+      "caption": "Sam tests, and the answer proves the key works."
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/05-saved-test-answer.png",
+      "hash": null,
+      "caption": "Sam saved test answer"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/06-b-name-taken.png",
+      "hash": null,
+      "caption": "Sam b name taken"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/07-c-test-rejected.png",
+      "hash": null,
+      "caption": "Sam c test rejected"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/08-c-row-rejected.png",
+      "hash": null,
+      "caption": "Sam c row rejected"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/09-c-vendor-changed.png",
+      "hash": null,
+      "caption": "Sam c vendor changed"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/10-d-replace.png",
+      "hash": null,
+      "caption": "Sam d replace"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/11-e-remove.png",
+      "hash": null,
+      "caption": "Sam e remove"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/12-e-remove-409.png",
+      "hash": null,
+      "caption": "Sam e remove 409"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/13-f-fixed.png",
+      "hash": null,
+      "caption": "Sam f fixed"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/14-g-saved-secret.png",
+      "hash": null,
+      "caption": "Sam g saved secret"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/15-reference.png",
+      "hash": null,
+      "caption": "Sam reference"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/16-no-key-supernode.png",
+      "hash": null,
+      "caption": "Sam no key supernode"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/17-realtime.png",
+      "hash": null,
+      "caption": "Sam realtime"
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/18-leave-guard.png",
+      "hash": null,
+      "caption": "Sam leave guard"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/p0.6/flow/01-row-use-my-key.png",
+      "hash": null,
+      "caption": "On a module (speech recognition, language model or voice), Sam switches from managed to BYOK."
+    },
+    {
+      "path": "references/v3/features/p0.6/flow/18-leave-guard.png",
+      "hash": null,
+      "caption": "Sam leave guard"
+    }
+  ],
+  "rationale": [
+    "The sheet's Save writes `POST /secrets` then `credential: { mode: byok, api_key: $secrets… }` — .a step 3, learning 2",
+    "Masked value in the draft; Key saved only after Save, with the reference in the (i) — .a step 3, learning 6",
+    "One commit, the sheet's Save, like Headers — one door, learning 2",
+    "Transcript line with module and code, failure message, Replace key; row flag with the time — .c, .f, KPI, learning 3",
+    "Managed on save, then DELETE; a 409 keeps the set and names the agent — .e, learning 4"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-fwzxk15ws-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_tutor&tab=agent&section=voice-models&panel=advanced&row=llm"
+  }
+}

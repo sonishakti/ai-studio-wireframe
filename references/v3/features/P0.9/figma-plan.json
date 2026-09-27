@@ -1,0 +1,204 @@
+{
+  "id": "P0.9",
+  "title": "Let callers reach the agent",
+  "name": "P0.9 \u00b7 Let callers reach the agent",
+  "jtbd": {
+    "job": "Support callers need to reach the agent",
+    "situation": "If people will dial the agent, Sam gives them a number that reaches the agent, and makes sure a session ends cleanly or passes to a person when the agent should stop.",
+    "wantsTo": "Sam wants support callers to reach the agent",
+    "soThat": "so that no caller waits for a person",
+    "happySteps": [
+      "In Deployment, on the inbound tab, Sam picks a number or adds one by SIP trunk.",
+      "Sam sets the call policy: max duration, max silence and four end rules.",
+      "Sam adds a transfer: an E.164 number and when to hand over.",
+      "Go live sets inbound.agent. Sam dials the number to hear the agent."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "The project has no numbers"
+      },
+      {
+        "id": ".c",
+        "title": "The import fails (duplicate number 409, bad SIP host)"
+      },
+      {
+        "id": ".d",
+        "title": "The number already points at another agent"
+      },
+      {
+        "id": ".e",
+        "title": "The transfer number is not E.164"
+      },
+      {
+        "id": ".f",
+        "title": "The number saves but callers never arrive (trunk misconfigured)"
+      },
+      {
+        "id": ".g",
+        "title": "Sam wants an idle timeout on inbound"
+      },
+      {
+        "id": ".h",
+        "title": "No production answer within 3 d (ST), or only Sam by day 14 (SC)"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/P0.9/shots/before-01-inbound-deploy-tab.png",
+        "hash": "af6add0ed75a6bc7ce6372c76ae3d1f69712fb7f",
+        "label": "before-01-inbound-deploy-tab"
+      },
+      {
+        "path": "references/v3/features/P0.9/shots/before-02-connect-number-sheet.png",
+        "hash": "99c45a0cb4b42a5369cf7a4bca9e378815f71e2c",
+        "label": "before-02-connect-number-sheet"
+      },
+      {
+        "path": "references/v3/features/P0.9/shots/before-03-sip-trunk-fields.png",
+        "hash": "4bd1dd514417ff767f5a4e5a3ff8a5e647adfcae",
+        "label": "before-03-sip-trunk-fields"
+      },
+      {
+        "path": "references/v3/features/P0.9/shots/refero-zendesk-01-number-assigned.png",
+        "hash": "758a96096e01d9d27dafcae5dd110fcb6e11812d",
+        "label": "refero-zendesk-01-number-assigned"
+      },
+      {
+        "path": "references/v3/features/P0.9/shots/refero-zendesk-02-call-test-offline.png",
+        "hash": "802057d1e61d5c32d940fac956402ef06088f546",
+        "label": "refero-zendesk-02-call-test-offline"
+      },
+      {
+        "path": "references/v3/features/P0.9/shots/refero-zendesk-03-incoming-call-demo.png",
+        "hash": "591d40fa1a83b711bd4c4e3d2927118db52b602c",
+        "label": "refero-zendesk-03-incoming-call-demo"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): Well covered. Still missing: a first-session confirmation after pointing a number, which no vendor shot shows. Desk notes: research/16-phone-number-purchase and research/17-sip-trunk-setup (_docs.md)."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/P0.9/flow/01-deployment-ready.png",
+      "hash": "ad247cdfa1a839fd2d3f43d7e64da384a3138f32",
+      "caption": "In Deployment, on the inbound tab, Sam picks a number or adds one by SIP trunk."
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/02-sheet-number-picked.png",
+      "hash": "0ecfc8183db54f186ef829b9584736674fafb3f0",
+      "caption": "Sam sets the call policy: max duration, max silence and four end rules."
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/03-call-policy-set.png",
+      "hash": "e41727636a23e7eabe3bbb5f1da4090112af75a4",
+      "caption": "Sam adds a transfer: an E.164 number and when to hand over."
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/04-transfer-set.png",
+      "hash": "62deb4d8daa0f558dff0403db3021bf197021ec8",
+      "caption": "Go live sets inbound.agent. Sam dials the number to hear the agent."
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/05-live-not-reached.png",
+      "hash": "8f3cce611da340c4a6c2249c15eb088f486b4ceb",
+      "caption": "Sam live not reached"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/06-reached.png",
+      "hash": "97e95df56fb237a081390bdbef255211814274b2",
+      "caption": "Sam reached"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/17-edit-number.png",
+      "hash": "9fbec7fc02b8493cf3095788b2a6b023d0a5e114",
+      "caption": "Sam edit number"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/07-rainy-b-no-numbers-sip-form.png",
+      "hash": "64d8233e60a19509778c278445d477f6a09a6012",
+      "caption": "The project has no numbers",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/08-rainy-b-sip-filled.png",
+      "hash": "619c3a106e5a2ca9f79149bc3ca14f02624452af",
+      "caption": "The project has no numbers",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/09-rainy-c-duplicate-409.png",
+      "hash": "a54a740995b045db8d4adbc104138af255bf7a98",
+      "caption": "The import fails (duplicate number 409, bad SIP host)",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/10-rainy-c-bad-host.png",
+      "hash": "d5588ea829310b52cce5f91f413ee05ff2578232",
+      "caption": "The import fails (duplicate number 409, bad SIP host)",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/11-rainy-d-move-confirm.png",
+      "hash": "d4de579c8566e16301d1d754ca35b7e61ae4b852",
+      "caption": "The number already points at another agent",
+      "rainyId": ".d"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/12-rainy-e-transfer-e164.png",
+      "hash": "702d40c6c6fb29bf26a88aa4672b52fa4ebec0bf",
+      "caption": "The transfer number is not E.164",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/13-rainy-f-not-reached-later.png",
+      "hash": "cd0af9f55890deaa83550b9b2762059bc179e207",
+      "caption": "The number saves but callers never arrive (trunk misconfigured)",
+      "rainyId": ".f"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/14-rainy-g-max-silence-tip.png",
+      "hash": "b3e51adca6c60e89a8f0c08789fb860fede2665e",
+      "caption": "Sam wants an idle timeout on inbound",
+      "rainyId": ".g"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/15-rainy-g-advanced-session-door.png",
+      "hash": "a96ddb5d9c7893f7b184d5107a5ce195365afd8b",
+      "caption": "Sam wants an idle timeout on inbound",
+      "rainyId": ".g"
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/16-rainy-h-stalled-3-days.png",
+      "hash": "c728a6a06d9fad852c86f22ebf92ddbfe7900239",
+      "caption": "No production answer within 3 d (ST), or only Sam by day 14 (SC)",
+      "rainyId": ".h"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/P0.9/flow/01-deployment-ready.png",
+      "hash": "ad247cdfa1a839fd2d3f43d7e64da384a3138f32",
+      "caption": "In Deployment, on the inbound tab, Sam picks a number or adds one by SIP trunk."
+    },
+    {
+      "path": "references/v3/features/P0.9/flow/17-edit-number.png",
+      "hash": "9fbec7fc02b8493cf3095788b2a6b023d0a5e114",
+      "caption": "Sam edit number"
+    }
+  ],
+  "rationale": [
+    "Call policy fold: Max duration, Max silence, four end rules, all empty and off first \u2014 .a step 2, requirement 48, API truth",
+    "Transfer fold: Transfer to (E.164) and When to hand over, with a suggested line \u2014 .a step 3, .e, requirement 48",
+    "Allowed IPs, optional, \"Empty allows any address.\" \u2014 .b, learning 3",
+    "The line stays; Go live opens a confirm naming the agent that loses the number \u2014 .d, learning 4",
+    "`FieldError` on Phone number (409, E.164) and SIP host (400, pattern); P0.1's `Alert` for a 5xx \u2014 .c, learning 2"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-8x88vsrde-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_clinic&tab=deploy&dep=ready"
+  },
+  "samAssetImageHash": "a5e89771c0bcb9a25ef62cd3556521195beb53bb"
+}

@@ -1,0 +1,417 @@
+<title>Builder v3 concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #f6f6f5;
+    --surface: #ffffff;
+    --ink: #161616;
+    --ink-2: #505050;
+    --ink-3: #8a8a88;
+    --line: #e3e3e0;
+    --line-2: #d2d2ce;
+    --link: #0b63e5;
+    --good: #1f7a3a;
+    --good-bg: #e6f3ea;
+    --warn: #8a5a00;
+    --warn-bg: #fbf0d9;
+    --none: #6b6b69;
+    --none-bg: #efefed;
+    --mark: #161616;
+    --mark-ink: #ffffff;
+    --shadow: 0 1px 0 rgba(0,0,0,.03);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0b0b0b; --surface: #141414; --ink: #ededed; --ink-2: #a8a8a6; --ink-3: #74746f;
+      --line: #262626; --line-2: #333331; --link: #7cc0ff;
+      --good: #6fd08c; --good-bg: rgba(111,208,140,.12); --warn: #f2bf57; --warn-bg: rgba(242,191,87,.12);
+      --none: #9a9a97; --none-bg: rgba(255,255,255,.06); --mark: #ededed; --mark-ink: #0b0b0b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0b0b0b; --surface: #141414; --ink: #ededed; --ink-2: #a8a8a6; --ink-3: #74746f;
+    --line: #262626; --line-2: #333331; --link: #7cc0ff;
+    --good: #6fd08c; --good-bg: rgba(111,208,140,.12); --warn: #f2bf57; --warn-bg: rgba(242,191,87,.12);
+    --none: #9a9a97; --none-bg: rgba(255,255,255,.06); --mark: #ededed; --mark-ink: #0b0b0b;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: "Geist", "MiSans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 96px; display: grid; gap: 56px; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; letter-spacing: -0.015em; }
+  h1 { font-size: 30px; line-height: 1.15; }
+  h2 { font-size: 21px; }
+  h3 { font-size: 16px; font-weight: 500; }
+  p { margin: 0; max-width: 68ch; text-wrap: pretty; }
+  a { color: var(--link); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
+  code, .mono { font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .86em; }
+  code { background: var(--none-bg); padding: 1px 5px; border-radius: 4px; }
+  .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+  .muted { color: var(--ink-2); }
+  .stack { display: grid; gap: 14px; }
+
+  header.top { display: grid; gap: 16px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--ink-2); }
+  .meta span { white-space: nowrap; }
+  .review {
+    display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+  }
+  .review ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
+  .shared { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .shared div { padding: 14px 16px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: grid; gap: 4px; }
+  .shared b { font-weight: 500; }
+  .asks { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11.5px; color: var(--ink-3); }
+
+  .concept { display: grid; gap: 18px; padding-top: 28px; border-top: 1px solid var(--line-2); }
+  .concept-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; justify-content: space-between; }
+  .concept-head .name { display: flex; align-items: baseline; gap: 12px; }
+  .letter { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: var(--mark); color: var(--mark-ink); font-weight: 600; font-size: 15px; transform: translateY(4px); }
+  .open { font-size: 14px; font-weight: 500; white-space: nowrap; }
+  .shots { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+  .shots .side { display: grid; gap: 10px; align-content: start; }
+  figure { margin: 0; display: grid; gap: 6px; }
+  figure button { padding: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); cursor: zoom-in; display: block; }
+  figure img { display: block; width: 100%; height: auto; }
+  figcaption { font-size: 12.5px; color: var(--ink-2); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 28px; }
+  .facts dl { margin: 0; display: grid; grid-template-columns: 7.5rem minmax(0,1fr); gap: 6px 12px; font-size: 14px; }
+  .facts dt { color: var(--ink-3); }
+  .facts dd { margin: 0; }
+  .pros-cons { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 28px; font-size: 14px; }
+  .pros-cons ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+  .links { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13.5px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-weight: 500; color: var(--ink-3); font-size: 12.5px; background: var(--none-bg); position: sticky; top: 0; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.num { font-family: "Geist Mono", ui-monospace, monospace; color: var(--ink-3); width: 2.5rem; }
+  .cell { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .s { background: var(--good-bg); color: var(--good); }
+  .p { background: var(--warn-bg); color: var(--warn); }
+  .n { background: var(--none-bg); color: var(--none); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--ink-2); align-items: center; }
+  .matrix td:not(.num):not(:nth-child(2)) { text-align: center; }
+  .matrix th:nth-child(n+3) { text-align: center; }
+
+  .pick { background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; padding: 20px; display: grid; gap: 12px; }
+  .pick ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 76ch; }
+  .questions { margin: 0; padding-left: 20px; display: grid; gap: 10px; max-width: 80ch; }
+
+  dialog { border: 0; padding: 0; background: transparent; max-width: min(96vw, 1440px); }
+  dialog::backdrop { background: rgba(0,0,0,.72); }
+  dialog img { display: block; max-width: 100%; max-height: 92vh; border-radius: 8px; }
+  dialog form { position: absolute; top: 8px; right: 8px; }
+  dialog form button { background: rgba(0,0,0,.6); color: #fff; border: 0; border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
+
+  @media (max-width: 720px) {
+    .wrap { padding-block: 28px 64px; gap: 44px; }
+    h1 { font-size: 25px; }
+    .shots { grid-template-columns: 1fr; }
+    .facts dl { grid-template-columns: 6.5rem minmax(0,1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Agora Console · agent builder · v3</span>
+    <h1>Compare five ways to create and ship an agent</h1>
+    <p class="muted">Built on the live Console's own components from the team's 18 asks of 24 September. Every concept runs in design mode with no login. It opens at the agents list, where the journey starts.</p>
+    <div class="meta">
+      <span>Branch <code>design/v3</code></span>
+      <span>Commits <code>0c667c09</code> <code>a85a09ff</code> <code>a763d80e</code></span>
+      <span>Code <code>src/prototypes/agent-builder-v3/</code></span>
+      <span>Contract: v3 API 3.0.0</span>
+    </div>
+    <div class="review">
+      <h3>How to review</h3>
+      <ol>
+        <li>Open a concept at <a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=a">/v3?concept=a</a> and create an agent of each type.</li>
+        <li>Switch concepts with the bar at the bottom of the page. Each concept keeps its own agents.</li>
+        <li>Turn on <b>New account</b> in that bar to see an empty account. The reset button returns a concept to the demo agents.</li>
+      </ol>
+    </div>
+  </header>
+
+  <section class="stack" aria-labelledby="shared">
+    <span class="eyebrow">Same in all five</span>
+    <h2 id="shared">What the team already settled, built once</h2>
+    <p class="muted">These answers do not change between concepts, so the concepts differ only where the team is undecided: creation, page structure, where going live sits and where performance lives.</p>
+    <div class="shared">
+      <div><b>Model is a choice of tier, not a slider</b><span class="muted">Fastest, Balanced, Most capable, each scored for speed and reasoning. Price is never shown because it is flat. The stack sits in a tooltip.</span><span class="asks">Asks 1 · 2</span></div>
+      <div><b>Voice is one dropdown</b><span class="muted">Grouped by language, so the voice also sets the language. Everything else moves to Advanced settings.</span><span class="asks">Asks 1 · 11</span></div>
+      <div><b>Type is chosen once, at creation</b><span class="muted">Batch calls, Inbound calls or Code / SDK. The type shows as a badge and names the deploy area: Runs, Phone numbers or Code.</span><span class="asks">Asks 3 · 5</span></div>
+      <div><b>Going live happens in the deploy area</b><span class="muted">The first run, the first connected number or the finished code step makes the agent Live. There is no separate Go live section.</span><span class="asks">Ask 6</span></div>
+      <div><b>The contact list belongs to a run</b><span class="muted">New run holds the CSV, the numbers to call from, the window and the pacing. Prompt variables are checked against the list's columns.</span><span class="asks">Asks 7 · 8</span></div>
+      <div><b>Agent, run, session</b><span class="muted">A batch agent is the grouping. A run is one list and one window, with pause, resume, cancel and run again. A session is one call and opens in session history.</span><span class="asks">Asks 8 · 17</span></div>
+      <div><b>The system prompt leads</b><span class="muted">Greeting and failure message sit behind one door. Variables are read from the prompt, not declared.</span><span class="asks">Ask 9</span></div>
+      <div><b>Knowledge and tools in one list</b><span class="muted">Knowledge bases, MCP servers and function tools share a list and one Add menu. An icon names the kind on hover.</span><span class="asks">Asks 10 · 11</span></div>
+      <div><b>Keys are write-only</b><span class="muted">Agora runs every model by default. A pasted key becomes “Key saved” with Replace and Remove. Studio creates the secret set behind it.</span><span class="asks">Ask 12</span></div>
+      <div><b>Analysis lives with the agent</b><span class="muted">Success criteria and output fields are part of the agent, so they apply to Code / SDK agents too. Results show on performance.</span><span class="asks">Ask 15</span></div>
+      <div><b>Performance is its own view</b><span class="muted">Sessions, average duration, success rate, response time, sessions per day, response time by stage and output fields. Single sessions open in session history.</span><span class="asks">Asks 16 · 17</span></div>
+      <div><b>The agents list carries cues</b><span class="muted">Type, status, seven-day sessions with the change and a trend line, success rate and response time. A row opens the agent.</span><span class="asks">Ask 18</span></div>
+    </div>
+    <figure>
+      <button type="button" data-full="shots/00-list.jpg" aria-label="Enlarge the agents list"><img src="shots/00-list.jpg" alt="Agents list with type, status, seven-day sessions and a trend line, success and response time" loading="lazy"></button>
+      <figcaption>The agents list, the same in every concept.</figcaption>
+    </figure>
+  </section>
+
+  <section class="stack" aria-labelledby="concepts">
+    <span class="eyebrow">The five concepts</span>
+    <h2 id="concepts">Where each one draws the lines</h2>
+
+    <article class="concept" id="a">
+      <div class="concept-head">
+        <div class="name"><span class="letter">A</span><h3>Three tabs</h3></div>
+        <a class="open" href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=a">Open concept A</a>
+      </div>
+      <p>The type is picked in the create sheet. The agent page has three tabs: Overview for how it performs, Agent for everything that never changes by type, and one tab named after the type for deploying and going live.</p>
+      <div class="shots">
+        <figure><button type="button" data-full="shots/a2-agent-tab.jpg" aria-label="Enlarge"><img src="shots/a2-agent-tab.jpg" alt="Concept A Agent tab" loading="lazy"></button><figcaption>Agent tab of a new batch agent: model cards, voice, prompt, knowledge and tools, analysis.</figcaption></figure>
+        <div class="side">
+          <figure><button type="button" data-full="shots/a1-create.jpg" aria-label="Enlarge"><img src="shots/a1-create.jpg" alt="Concept A create sheet" loading="lazy"></button><figcaption>Create sheet: name and type.</figcaption></figure>
+          <figure><button type="button" data-full="shots/a3-overview.jpg" aria-label="Enlarge"><img src="shots/a3-overview.jpg" alt="Concept A Overview tab" loading="lazy"></button><figcaption>Overview of a live agent.</figcaption></figure>
+        </div>
+      </div>
+      <div class="facts">
+        <dl><dt>Create</dt><dd>Sheet with name and three type cards</dd><dt>Agent page</dt><dd>Tabs Overview · Agent · Runs (or Phone numbers, Code)</dd><dt>Model control</dt><dd>Three cards with speed and reasoning</dd></dl>
+        <dl><dt>Go live</dt><dd>The type tab, primary action in the header</dd><dt>Performance</dt><dd>Overview tab, the default once live</dd><dt>Test</dt><dd>Sheet from the header</dd></dl>
+      </div>
+      <div class="pros-cons">
+        <div><b>Works</b><ul><li>Stable, type-specific and monitoring content each get their own tab.</li><li>Uses the Console's own tab pattern (ADR 0006). A new type adds one tab name.</li></ul></div>
+        <div><b>Watch</b><ul><li>The prompt and the test call sit in different places.</li><li>The Code tab is thin for SDK agents.</li></ul></div>
+      </div>
+      <div class="links"><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=a&panel=create">Create an agent</a><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_payments&tab=deploy">Runs of a live batch agent</a><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_frontdesk&tab=deploy">Phone numbers of an inbound agent</a></div>
+    </article>
+
+    <article class="concept" id="b">
+      <div class="concept-head">
+        <div class="name"><span class="letter">B</span><h3>Split rail</h3></div>
+        <a class="open" href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=b">Open concept B</a>
+      </div>
+      <p>The shipped section rail, cut in two: an Agent group that is the same for every type, and a group named after the type. Creating is one click because the type is the menu item. Performance is a second mode of the same page.</p>
+      <div class="shots">
+        <figure><button type="button" data-full="shots/b1-build.jpg" aria-label="Enlarge"><img src="shots/b1-build.jpg" alt="Concept B build mode" loading="lazy"></button><figcaption>Build mode: Agent group, then the Inbound calls group.</figcaption></figure>
+        <div class="side">
+          <figure><button type="button" data-full="shots/b2-create-menu.jpg" aria-label="Enlarge"><img src="shots/b2-create-menu.jpg" alt="Concept B create menu" loading="lazy"></button><figcaption>Create is a type menu.</figcaption></figure>
+          <figure><button type="button" data-full="shots/b3-performance.jpg" aria-label="Enlarge"><img src="shots/b3-performance.jpg" alt="Concept B performance mode" loading="lazy"></button><figcaption>Performance mode.</figcaption></figure>
+        </div>
+      </div>
+      <div class="facts">
+        <dl><dt>Create</dt><dd>Menu of three types, name set later</dd><dt>Agent page</dt><dd>Rail groups Agent · the type, one scroll</dd><dt>Model control</dt><dd>Radio list that grows by rows</dd></dl>
+        <dl><dt>Go live</dt><dd>Last section, named after the type</dd><dt>Performance</dt><dd>Build or Performance switch in the header</dd><dt>Test</dt><dd>Docked panel from the rail</dd></dl>
+      </div>
+      <div class="pros-cons">
+        <div><b>Works</b><ul><li>Smallest change from the builder shipped on 24 September (ADR 0017).</li><li>Everything on one scroll.</li></ul></div>
+        <div><b>Watch</b><ul><li>Stable and type-specific content are split by a group label only.</li><li>The Build and Performance switch is a second way to navigate.</li></ul></div>
+      </div>
+      <div class="links"><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=b&view=agent&agent=agent_payments&tab=build">Build mode of a batch agent</a><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=b&view=agent&agent=agent_tutor&tab=build">Build mode of an SDK agent</a></div>
+    </article>
+
+    <article class="concept" id="c">
+      <div class="concept-head">
+        <div class="name"><span class="letter">C</span><h3>Guided setup</h3></div>
+        <a class="open" href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=c">Open concept C</a>
+      </div>
+      <p>Creating an agent is a page that shows what each type will ask for before you choose. A draft agent is a short checklist written for its type, one step open at a time. Once live, the page is about runs and performance, and editing is a mode.</p>
+      <div class="shots">
+        <figure><button type="button" data-full="shots/c2-setup.jpg" aria-label="Enlarge"><img src="shots/c2-setup.jpg" alt="Concept C setup checklist" loading="lazy"></button><figcaption>Setup checklist for a draft batch agent.</figcaption></figure>
+        <div class="side">
+          <figure><button type="button" data-full="shots/c1-create.jpg" aria-label="Enlarge"><img src="shots/c1-create.jpg" alt="Concept C create page" loading="lazy"></button><figcaption>Create page with what each type asks for.</figcaption></figure>
+          <figure><button type="button" data-full="shots/c3-monitor.jpg" aria-label="Enlarge"><img src="shots/c3-monitor.jpg" alt="Concept C monitoring page" loading="lazy"></button><figcaption>A live agent: runs, then performance.</figcaption></figure>
+        </div>
+      </div>
+      <div class="facts">
+        <dl><dt>Create</dt><dd>Full page, setup preview per type</dd><dt>Agent page</dt><dd>Checklist while draft, monitoring once live</dd><dt>Model control</dt><dd>Segmented control and one consequence line</dd></dl>
+        <dl><dt>Go live</dt><dd>Last checklist step</dd><dt>Performance</dt><dd>The page itself once live</dd><dt>Test</dt><dd>A checklist step</dd></dl>
+      </div>
+      <div class="pros-cons">
+        <div><b>Works</b><ul><li>The clearest first run. The type's consequences are visible before the choice.</li><li>The monitoring page leads once the agent is live.</li></ul></div>
+        <div><b>Watch</b><ul><li>The checklist and edit mode are two layouts for the same settings, which breaks the reuse rule.</li><li>Experienced users click through steps they know.</li></ul></div>
+      </div>
+      <div class="links"><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=c&view=create">Create an agent</a><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=c&view=agent&agent=agent_payments&tab=edit">Edit mode of a live agent</a></div>
+    </article>
+
+    <article class="concept" id="d">
+      <div class="concept-head">
+        <div class="name"><span class="letter">D</span><h3>Prompt canvas</h3></div>
+        <a class="open" href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=d">Open concept D</a>
+      </div>
+      <p>The page is the prompt and a live test, with model and voice as two dropdowns above it. Everything that depends on the type opens from one Go live door in a sheet. Activity is its own tab.</p>
+      <div class="shots">
+        <figure><button type="button" data-full="shots/d1-canvas.jpg" aria-label="Enlarge"><img src="shots/d1-canvas.jpg" alt="Concept D build tab" loading="lazy"></button><figcaption>Build tab: two dropdowns, the prompt, knowledge and tools as chips, test docked.</figcaption></figure>
+        <div class="side">
+          <figure><button type="button" data-full="shots/d2-create.jpg" aria-label="Enlarge"><img src="shots/d2-create.jpg" alt="Concept D create with starters" loading="lazy"></button><figcaption>Create: starters grouped by type.</figcaption></figure>
+          <figure><button type="button" data-full="shots/d3-go-live.jpg" aria-label="Enlarge"><img src="shots/d3-go-live.jpg" alt="Concept D go live sheet" loading="lazy"></button><figcaption>Go live sheet for an inbound agent.</figcaption></figure>
+        </div>
+      </div>
+      <div class="facts">
+        <dl><dt>Create</dt><dd>Two starters per type, or start blank</dd><dt>Agent page</dt><dd>Build · Activity tabs</dd><dt>Model control</dt><dd>Dropdown, each option with its consequence</dd></dl>
+        <dl><dt>Go live</dt><dd>Sheet from the header</dd><dt>Performance</dt><dd>Activity tab</dd><dt>Test</dt><dd>Always docked beside the prompt</dd></dl>
+      </div>
+      <div class="pros-cons">
+        <div><b>Works</b><ul><li>The fewest visible controls of the five. The prompt is the page.</li><li>Test is always one click from the prompt.</li></ul></div>
+        <div><b>Watch</b><ul><li>Runs in a sheet are cramped for people who run batches every day.</li><li>Deploying feels hidden behind one button.</li></ul></div>
+      </div>
+      <div class="links"><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=d&view=create">Create an agent</a><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=d&view=agent&agent=agent_payments&panel=go-live">Runs sheet of a batch agent</a></div>
+    </article>
+
+    <article class="concept" id="e">
+      <div class="concept-head">
+        <div class="name"><span class="letter">E</span><h3>Operations hub</h3></div>
+        <a class="open" href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=e">Open concept E</a>
+      </div>
+      <p>The agent page is organised around what changes: runs, numbers or code, with four numbers on top. The reusable setup lives in one Edit agent sheet. Create asks one question, the type, and opens that sheet.</p>
+      <div class="shots">
+        <figure><button type="button" data-full="shots/e1-runs.jpg" aria-label="Enlarge"><img src="shots/e1-runs.jpg" alt="Concept E runs page" loading="lazy"></button><figcaption>Runs are the page for a batch agent.</figcaption></figure>
+        <div class="side">
+          <figure><button type="button" data-full="shots/e3-create.jpg" aria-label="Enlarge"><img src="shots/e3-create.jpg" alt="Concept E create dialog" loading="lazy"></button><figcaption>Create asks only for the type.</figcaption></figure>
+          <figure><button type="button" data-full="shots/e2-edit.jpg" aria-label="Enlarge"><img src="shots/e2-edit.jpg" alt="Concept E edit sheet" loading="lazy"></button><figcaption>Edit agent sheet with the model table.</figcaption></figure>
+        </div>
+      </div>
+      <div class="facts">
+        <dl><dt>Create</dt><dd>Dialog with the three types</dd><dt>Agent page</dt><dd>Runs (or Phone numbers, Code) · Performance</dd><dt>Model control</dt><dd>Comparison table with a radio per row</dd></dl>
+        <dl><dt>Go live</dt><dd>The default tab</dd><dt>Performance</dt><dd>Numbers on top, full view in a tab</dd><dt>Test</dt><dd>From the Edit sheet</dd></dl>
+      </div>
+      <div class="pros-cons">
+        <div><b>Works</b><ul><li>Best for operators: agent, run and session are the page.</li><li>The model table has room for more tiers and their stacks.</li></ul></div>
+        <div><b>Watch</b><ul><li>Writing a long prompt in a sheet.</li><li>The agent's setup is out of sight, and the page is thin for SDK agents.</li></ul></div>
+      </div>
+      <div class="links"><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=e&panel=create">Create an agent</a><a href="https://ng-console-dcgukcxah-agoraio.vercel.app/v3?concept=e&view=agent&agent=agent_tutor">Code page of an SDK agent</a></div>
+    </article>
+  </section>
+
+  <section class="stack" aria-labelledby="details">
+    <span class="eyebrow">Shared details</span>
+    <h2 id="details">The pieces every concept reuses</h2>
+    <div class="shots" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+      <figure><button type="button" data-full="shots/a5-new-run.jpg" aria-label="Enlarge"><img src="shots/a5-new-run.jpg" alt="New run sheet" loading="lazy"></button><figcaption>New run: the list, variable check, numbers to call from, window.</figcaption></figure>
+      <figure><button type="button" data-full="shots/x2-context-add.jpg" aria-label="Enlarge"><img src="shots/x2-context-add.jpg" alt="Knowledge and tools add menu" loading="lazy"></button><figcaption>One list and one Add menu for knowledge and tools.</figcaption></figure>
+      <figure><button type="button" data-full="shots/x1-advanced.jpg" aria-label="Enlarge"><img src="shots/x1-advanced.jpg" alt="Advanced settings" loading="lazy"></button><figcaption>Advanced settings with write-only provider keys.</figcaption></figure>
+      <figure><button type="button" data-full="shots/x3-greeting.jpg" aria-label="Enlarge"><img src="shots/x3-greeting.jpg" alt="Greeting and failure message" loading="lazy"></button><figcaption>Greeting and failure message behind one door.</figcaption></figure>
+      <figure><button type="button" data-full="shots/a4-runs.jpg" aria-label="Enlarge"><img src="shots/a4-runs.jpg" alt="Runs table" loading="lazy"></button><figcaption>Runs with status, progress and success.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="stack" aria-labelledby="matrix">
+    <span class="eyebrow">Coverage</span>
+    <h2 id="matrix">How each concept answers the 18 asks</h2>
+    <div class="legend"><span class="cell s">Strong</span> answers the ask directly <span class="cell p">Partial</span> answers it with friction or an open decision</div>
+    <div class="table-wrap">
+      <table class="matrix">
+        <thead><tr><th>#</th><th>Ask</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>Fewer voice, model and pipeline controls</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">2</td><td>Model choices and consequences, room to grow</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">3</td><td>Deployment type as an early decision</td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td></tr>
+          <tr><td class="num">4</td><td>Several concepts for creation and deployment</td><td colspan="5" class="muted" style="text-align:left">This page</td></tr>
+          <tr><td class="num">5</td><td>Stable content apart from type-specific content</td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">6</td><td>Deployment and go live as one area</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">7</td><td>Contact list out of the agent, into the run</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">8</td><td>Grouping, runs and sessions kept apart</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">9</td><td>System prompt first, the rest secondary</td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td></tr>
+          <tr><td class="num">10</td><td>Knowledge, MCP and tools in one inventory</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">11</td><td>Explanations on demand</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">12</td><td>Credentials without secret-set mechanics</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">13</td><td>Labels aligned with the v3 API</td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td></tr>
+          <tr><td class="num">14</td><td>Batch call and campaign naming</td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td><td><span class="cell p">Partial</span></td></tr>
+          <tr><td class="num">15</td><td>A home for Analysis, including SDK agents</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell p">Partial</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">16</td><td>Performance view apart from editing</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">17</td><td>Agent-level and session-level monitoring apart</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+          <tr><td class="num">18</td><td>Monitoring cues on the agents list</td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td><td><span class="cell s">Strong</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Asks 13 and 14 are partial everywhere because they need a naming decision, not a layout. The term map below lists each label against its API field.</p>
+  </section>
+
+  <section class="stack" aria-labelledby="pick">
+    <span class="eyebrow">Recommendation</span>
+    <div class="pick">
+      <h2 id="pick">Take A as the base and borrow two pieces</h2>
+      <p>A is the only concept that puts stable content, type-specific content and monitoring in three separate places the Console already knows how to show. It answers asks 3, 5, 6 and 16 with tabs, a pattern the Console already uses (ADR 0006), and a new type only adds a tab name. It also keeps the reusable setup in plain sight, which E and D do not.</p>
+      <ul>
+        <li><b>From C:</b> show what each type will ask for on the create cards. It makes the consequence of the choice visible before it is made.</li>
+        <li><b>From E:</b> switch the model cards to the comparison table once there are more than three tiers.</li>
+        <li><b>Fallback:</b> B, if engineering wants the least change from the builder shipped on 24 September. Choosing A replaces ADR 0017's section rail and needs a new ADR.</li>
+        <li><b>Counter-metric:</b> in A the test call is one click away in a sheet. If time to the first test call rises, dock the test panel on the Agent tab from wide screens, as D does.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="stack" aria-labelledby="terms">
+    <span class="eyebrow">Ask 13</span>
+    <h2 id="terms">Every label against the v3 API</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Studio label</th><th>v3 API field</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Agent</td><td><code>agent</code> (<code>agent_…</code>)</td><td>Carries no deployment field.</td></tr>
+          <tr><td>Batch calls, Inbound calls, Code / SDK</td><td>None</td><td>Studio has to store the type itself. Proposal: <code>labels.deployment</code> on the agent.</td></tr>
+          <tr><td>Model: Fastest, Balanced, Most capable</td><td><code>pipeline</code> (cascaded <code>asr</code>, <code>llm</code>, <code>tts</code>)</td><td>A tier is a Studio preset that writes the full pipeline.</td></tr>
+          <tr><td>Voice</td><td><code>pipeline.tts</code>, <code>asr.language</code></td><td>The voice sets the language.</td></tr>
+          <tr><td>System prompt</td><td><code>instructions</code></td><td></td></tr>
+          <tr><td>Greeting</td><td><code>greeting</code></td><td>Text or audio, every join or first join only.</td></tr>
+          <tr><td>Failure message</td><td><code>llm.failure_message</code></td><td>Lives on the language model, not on the agent.</td></tr>
+          <tr><td>Knowledge and tools</td><td><code>llm.mcp_servers</code>, <code>llm.tools</code></td><td>Knowledge base has no field in the v3 spec.</td></tr>
+          <tr><td>Analysis: success criteria, output fields</td><td><code>structured_output</code></td><td><code>call_success_evaluation</code> and <code>custom_evaluations</code>.</td></tr>
+          <tr><td>Provider key</td><td><code>credential</code> <code>byok</code>, <code>$secrets.&lt;set&gt;.&lt;key&gt;</code></td><td>Default is <code>managed</code>. Values are never returned.</td></tr>
+          <tr><td>Run</td><td><code>campaign</code> (<code>camp_…</code>)</td><td>The docs call campaigns “Outbound batches”. Naming decision below.</td></tr>
+          <tr><td>Call from</td><td><code>campaign.from</code></td><td>Several numbers rotate.</td></tr>
+          <tr><td>Calls at once, attempts per contact</td><td><code>pacing.max_concurrent</code>, <code>max_attempts</code></td><td>API defaults 10 and 3. The live Console defaults concurrency to 15.</td></tr>
+          <tr><td>On voicemail</td><td><code>call_policy.voicemail</code></td><td>Hang up or continue.</td></tr>
+          <tr><td>Phone numbers</td><td><code>number</code> (<code>num_…</code>), <code>inbound.agent</code></td><td>Inbound routing lives on the number.</td></tr>
+          <tr><td>Session</td><td><code>session</code> (<code>agent_session_id</code>)</td><td>Transport <code>rtc</code> for the app, <code>telephony</code> for one call.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="stack" aria-labelledby="open">
+    <span class="eyebrow">Open decisions</span>
+    <h2 id="open">What the team needs to settle next</h2>
+    <ol class="questions">
+      <li><b>Naming a run.</b> The UI says Run, the API says <code>campaign</code> and the docs say batch call. Proposal: the type is “Batch calls”, each execution is a “Run”, and the docs describe a campaign as one run of a batch agent.</li>
+      <li><b>Data for the performance view.</b> Session summary, turns and transcripts are deferred past the October launch, and the session list cannot filter by agent. Launch needs a per-agent aggregate endpoint, or the view shows counts only.</li>
+      <li><b>Knowledge bases.</b> They are not in the v3 spec. Confirm whether they ship with v3 or the list shows MCP servers and tools only.</li>
+      <li><b>The Balanced tier.</b> Confirm its model, or ship two tiers. Every control shape works with two.</li>
+      <li><b>Publish and versions.</b> The v3 API has no draft, publish or version. The concepts show Draft until the first run, number or code step. Confirm whether Studio keeps a Publish step.</li>
+      <li><b>One type per agent.</b> The API lets one agent back a number and a campaign at once. Studio enforces the rule that a batch agent never takes inbound calls.</li>
+    </ol>
+  </section>
+</div>
+
+<dialog id="zoom" aria-label="Screenshot">
+  <form method="dialog"><button type="submit">Close</button></form>
+  <img id="zoom-img" alt="">
+</dialog>
+<script>
+  (function () {
+    var dialog = document.getElementById("zoom")
+    var img = document.getElementById("zoom-img")
+    document.querySelectorAll("figure button[data-full]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        img.src = button.getAttribute("data-full")
+        var inner = button.querySelector("img")
+        img.alt = inner ? inner.alt : ""
+        if (typeof dialog.showModal === "function") dialog.showModal()
+      })
+    })
+    dialog.addEventListener("click", function (event) {
+      if (event.target === dialog) dialog.close()
+    })
+  })()
+</script>

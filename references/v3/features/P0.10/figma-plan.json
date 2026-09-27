@@ -1,0 +1,171 @@
+{
+  "id": "P0.10",
+  "title": "Have the agent dial a list of people",
+  "name": "P0.10 \u00b7 Have the agent dial a list of people",
+  "jtbd": {
+    "job": "Have the agent dial a list of people",
+    "situation": "The agent is tested and its prompt names the things it must say per person; a list of 500 patients is in a spreadsheet",
+    "wantsTo": "",
+    "soThat": "",
+    "happySteps": [
+      "In Deployment, on the batch tab, Sam opens New run and uploads the contact list.",
+      "Sam maps each {{variable}} to a list column and picks the from number.",
+      "Sam sets calling windows by weekday, pacing, call policy, voicemail and lifecycle.",
+      "Sam sees the estimated minutes against free minutes left, then starts now or schedules."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "Some rows are bad (not E.164, missing variable column)"
+      },
+      {
+        "id": ".c",
+        "title": "A {{variable}} has no list column"
+      },
+      {
+        "id": ".d",
+        "title": "Sam starts now while calling windows are closed"
+      },
+      {
+        "id": ".e",
+        "title": "The run failed"
+      },
+      {
+        "id": ".f",
+        "title": "Estimated minutes exceed free minutes left"
+      },
+      {
+        "id": ".g",
+        "title": "Free minutes run out mid-run (RK)"
+      },
+      {
+        "id": ".h",
+        "title": "Sam needs to stop a run that is going wrong"
+      },
+      {
+        "id": ".i",
+        "title": "The run was created through the API"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/P0.10/shots/before-01-runs-tab-survey-draft.png",
+        "hash": "242cb72c198fe31681160b5f3aa796f490d7b1c9",
+        "label": "before-01-runs-tab-survey-draft"
+      },
+      {
+        "path": "references/v3/features/P0.10/shots/before-02-new-run-sheet-empty.png",
+        "hash": "a1ba76b36b42e3c5ed00e1017018b9329d89856f",
+        "label": "before-02-new-run-sheet-empty"
+      },
+      {
+        "path": "references/v3/features/P0.10/shots/before-03-new-run-sheet-list-mapped.png",
+        "hash": "8dc4eec64669bffc3e69b3733717788a6d90608c",
+        "label": "before-03-new-run-sheet-list-mapped"
+      },
+      {
+        "path": "references/v3/features/P0.10/shots/before-04-runs-tab-payments-live.png",
+        "hash": "ceca23ded320ff5d6696c7abf68b2640bec578b9",
+        "label": "before-04-runs-tab-payments-live"
+      },
+      {
+        "path": "references/v3/features/P0.10/shots/before-05-run-detail-running.png",
+        "hash": "a9959f5054a43f2919bf100cc45f5b522f2fb2f8",
+        "label": "before-05-run-detail-running"
+      },
+      {
+        "path": "references/v3/features/P0.10/shots/bland-01-invalid-number-faq.png",
+        "hash": "ac69b1fd3da9b18d4f4122ad8d75f314568ea79e",
+        "label": "bland-01-invalid-number-faq"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): Vapi campaigns are blocked (signed out, and the docs slugs returned 404). Capture rejected rows and a failed or partial run at Retell and ElevenLabs; their batch lists were empty on 23 Sep. Desk notes: v3/02-research/batch-retention-experiments.md \u00a71, research/18-channels/merger-v3/report.md and research/21-crm-contacts."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/P0.10/flow/01-deployment-ready.png",
+      "hash": "0175f023639983212027bf90e36885c653ccd2e1",
+      "caption": "In Deployment, on the batch tab, Sam opens New run and uploads the contact list."
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/02-new-run-empty.png",
+      "hash": "6ef6992b5724e7b500a35c4a572c3e70d6094ea6",
+      "caption": "Sam maps each {{variable}} to a list column and picks the from number."
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/03-list-mapped.png",
+      "hash": "85474b4b0559bd86e31d0210da3b1c7964b8b507",
+      "caption": "Sam sets calling windows by weekday, pacing, call policy, voicemail and lifecycle."
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/04-number-picked.png",
+      "hash": "02fc22c8243fb1878fca9e87b49b048c8ed76409",
+      "caption": "Sam sees the estimated minutes against free minutes left, then starts now or schedules."
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/05-windows-and-pacing.png",
+      "hash": "2f020d8885eee36371377d095e0e22be2657169a",
+      "caption": "Sam windows and pacing"
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/06-estimate-start.png",
+      "hash": "2f020d8885eee36371377d095e0e22be2657169a",
+      "caption": "Sam estimate start"
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/07-started-live.png",
+      "hash": "6cbf11413aec5d252abcbf865d191a8f9260d765",
+      "caption": "Sam started live"
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/08-run-first-reached.png",
+      "hash": "16f9646c2720408075e1b2f13ed14f10bf768346",
+      "caption": "Sam run first reached"
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/09-rainy-e-failed.png",
+      "hash": "83e793014e25b777df33ebac17d47de39d15d3c4",
+      "caption": "The run failed",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/10-rainy-e-run-again.png",
+      "hash": "d3dcac501876f677b7186e888b3eaa1f63835530",
+      "caption": "The run failed",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/11-rainy-h-cancel-confirm.png",
+      "hash": "b8531d7837697c03d6202ac06405aecedefadbf3",
+      "caption": "Sam needs to stop a run that is going wrong",
+      "rainyId": ".h"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/P0.10/flow/01-deployment-ready.png",
+      "hash": "0175f023639983212027bf90e36885c653ccd2e1",
+      "caption": "In Deployment, on the batch tab, Sam opens New run and uploads the contact list."
+    },
+    {
+      "path": "references/v3/features/P0.10/flow/08-run-first-reached.png",
+      "hash": "16f9646c2720408075e1b2f13ed14f10bf768346",
+      "caption": "Sam run first reached"
+    }
+  ],
+  "rationale": [
+    "The CSV read: count, rejected count, Download rejects, one line why; an error on the dropzone for a file with no phone column \u2014 .b, learning 1, requirement 7",
+    "A select per variable, pre-filled by name; the start blocked with a reason only for a variable with neither column nor default \u2014 .c, learning 2, P0.4",
+    "Calling windows by weekday with a range, time zone, Add a range, Add another window; Start on a date beside Start now \u2014 .a step 3, learning 2, requirement 48",
+    "\"Outside the calling windows now. Dialing starts Mon 09:00.\" before the press; the panel and the row repeat it after \u2014 .d, learning 3",
+    "Pacing: Sessions at once capped at 10, Dials per second, Attempts per contact, Wait between attempts \u2014 .a step 3, learning 4, API truth"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-ds3jhcn1z-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_payments&tab=deploy"
+  },
+  "samAssetImageHash": "a5e89771c0bcb9a25ef62cd3556521195beb53bb"
+}

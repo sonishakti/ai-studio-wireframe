@@ -1,0 +1,6 @@
+{
+  "fileKey": "OIKZExT265nOJotBlmv2Ah",
+  "imageHash": "a5e89771c0bcb9a25ef62cd3556521195beb53bb",
+  "sourceFile": "references/assets/sam/sam-dark.webp",
+  "note": "already present in this Figma file (used by P0.3's story frames, node 133:3176 etc.) — discovered via metadata read, not re-uploaded. If v3-figma-runner.js ever targets a different fileKey, this hash will not resolve there and sam-dark.webp must be uploaded fresh via upload_assets, with the new hash cached here."
+}

@@ -1,0 +1,246 @@
+{
+  "id": "p0.5",
+  "title": "Connect other systems to the agent",
+  "name": "p0.5 · Connect other systems to the agent",
+  "jtbd": {
+    "job": "",
+    "situation": "",
+    "wantsTo": "",
+    "soThat": "",
+    "happySteps": [
+      "In Prompt & knowledge, Sam opens Integrations and chooses Add: MCP server or tool. Each type has one icon and a tooltip, not a description.",
+      "For an MCP server, Sam sets the endpoint, headers, allowed tools and timeout. For a tool, Sam sets the name, parameters, URL and method.",
+      "Sam saves. The row reads Not checked until a test uses it.",
+      "Sam tests. The transcript marks the tool call, and the row shows the last result. Deployment never appears here."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "The MCP server returns no tool list"
+      },
+      {
+        "id": ".c",
+        "title": "A name breaks spec rules or Sam adds a 33rd tool"
+      },
+      {
+        "id": ".d",
+        "title": "A tool returns 4xx or 5xx or times out in a test"
+      },
+      {
+        "id": ".e",
+        "title": "Sam wants to see a saved header value"
+      },
+      {
+        "id": ".f",
+        "title": "The agent runs a realtime pipeline"
+      },
+      {
+        "id": ".g",
+        "title": "Sam wants a knowledge base"
+      },
+      {
+        "id": ".h",
+        "title": "Sam's current Console knowledge bases or app integrations (HubSpot) do not show"
+      },
+      {
+        "id": ".i",
+        "title": "The MCP server token expired after saving"
+      },
+      {
+        "id": ".j",
+        "title": "A tool fails in production but not in tests"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/p0.5/shots/before-01-context-row-populated.png",
+        "hash": null,
+        "label": "before-01-context-row-populated"
+      },
+      {
+        "path": "references/v3/features/p0.5/shots/before-02-add-menu.png",
+        "hash": null,
+        "label": "before-02-add-menu"
+      },
+      {
+        "path": "references/v3/features/p0.5/shots/before-03-mcp-sheet.png",
+        "hash": null,
+        "label": "before-03-mcp-sheet"
+      },
+      {
+        "path": "references/v3/features/p0.5/shots/before-04-mcp-connected-tools.png",
+        "hash": null,
+        "label": "before-04-mcp-connected-tools"
+      },
+      {
+        "path": "references/v3/features/p0.5/shots/before-05-tool-sheet.png",
+        "hash": null,
+        "label": "before-05-tool-sheet"
+      },
+      {
+        "path": "references/v3/features/p0.5/shots/before-06-knowledge-sheet.png",
+        "hash": null,
+        "label": "before-06-knowledge-sheet"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): Capture the Vapi tool and MCP forms once signed in. No vendor shot shows a failed tool, an unreachable MCP server or a knowledge base indexing failure. Shoot one rainy state per vendor. Desk notes: research/19-tools-connectors/02-research/_docs.md and research/20-knowledge-sources/02-research/_docs.md."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/p0.5/flow/01-empty-row.png",
+      "hash": null,
+      "caption": "In Prompt & knowledge, Sam opens Integrations and chooses Add: MCP server or tool. Each type has one icon and a tooltip, not a description."
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/02-add-menu.png",
+      "hash": null,
+      "caption": "For an MCP server, Sam sets the endpoint, headers, allowed tools and timeout. For a tool, Sam sets the name, parameters, URL and method."
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/03-mcp-sheet.png",
+      "hash": null,
+      "caption": "Sam saves. The row reads Not checked until a test uses it."
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/04-tools-loaded.png",
+      "hash": null,
+      "caption": "Sam tests. The transcript marks the tool call, and the row shows the last result. Deployment never appears here."
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/05-saved-not-checked.png",
+      "hash": null,
+      "caption": "Sam saved not checked"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/06-tool-sheet.png",
+      "hash": null,
+      "caption": "Sam tool sheet"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/07-tested-worked.png",
+      "hash": null,
+      "caption": "Sam tested worked"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/08-b-no-tools.png",
+      "hash": null,
+      "caption": "Sam b no tools"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/09-c-name-mcp.png",
+      "hash": null,
+      "caption": "Sam c name mcp"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/10-c-name-tool.png",
+      "hash": null,
+      "caption": "Sam c name tool"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/11-c-limit.png",
+      "hash": null,
+      "caption": "Sam c limit"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/12-d-tool-error.png",
+      "hash": null,
+      "caption": "Sam d tool error"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/13-e-header-write-only.png",
+      "hash": null,
+      "caption": "Sam e header write only"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/14-f-realtime.png",
+      "hash": null,
+      "caption": "Sam f realtime"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/15-g-flag-menu.png",
+      "hash": null,
+      "caption": "Sam g flag menu"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/16-g-sheet.png",
+      "hash": null,
+      "caption": "Sam g sheet"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/17-g-rejected.png",
+      "hash": null,
+      "caption": "Sam g rejected"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/18-g-too-large.png",
+      "hash": null,
+      "caption": "Sam g too large"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/19-g-unsupported.png",
+      "hash": null,
+      "caption": "Sam g unsupported"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/20-g-index-failed.png",
+      "hash": null,
+      "caption": "Sam g index failed"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/21-h-legacy.png",
+      "hash": null,
+      "caption": "Sam h legacy"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/22-i-mcp-401.png",
+      "hash": null,
+      "caption": "Sam i mcp 401"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/23-i-replace-header.png",
+      "hash": null,
+      "caption": "Sam i replace header"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/24-j-timeout.png",
+      "hash": null,
+      "caption": "Sam j timeout"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/25-leave-guard.png",
+      "hash": null,
+      "caption": "Sam leave guard"
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/26-remove.png",
+      "hash": null,
+      "caption": "Sam remove"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/p0.5/flow/01-empty-row.png",
+      "hash": null,
+      "caption": "In Prompt & knowledge, Sam opens Integrations and chooses Add: MCP server or tool. Each type has one icon and a tooltip, not a description."
+    },
+    {
+      "path": "references/v3/features/p0.5/flow/26-remove.png",
+      "hash": null,
+      "caption": "Sam remove"
+    }
+  ],
+  "rationale": [
+    "Load tools asks the server; none returned shows one line, a textarea, and Save stays on — .b, learning 2",
+    "Outline badge Not checked / Worked in last test / Failed in last test with the time — .a step 3 and 4, .d, .i, KPI",
+    "One line per tool used: name, code, duration; error tone on failure; the fallback answer after it — .d, .i, learning 3",
+    "Every API field with its default and range in the (i) — .a step 2, .j, learning 5",
+    "`FieldError`s naming the rule; at 32 tools the Tool item leaves Add with one line — .c"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-g3eygqjki-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_orders&tab=agent&section=integrations"
+  }
+}

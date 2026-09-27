@@ -1,0 +1,5 @@
+The test panel grew a Talk/Simulations tab bar, a session status line (Starting, Listening, Running no sound yet, Ended · m:ss) and a kept transcript with the tool and key lines, plus every refusal and failure alert (mic, minutes, suspended, busy, 400, key, 503, silent); the header Test and every row's Save and test open it non-modal from a `Sheet modal={false}`.
+New review-only URL keys: `test` (edit · starting · live · ended · sims · baseline · unsaved · mic · minutes · suspended · busy · failed-400 · failed-key · failed-503 · silent · silent-retry) and `heard` (baseline's fallback greeting), both cleared by `openAgent`/`toList`.
+Preview: https://ng-console-jo3z8xwz8-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_orders&tab=agent&section=prompt&test=live
+Commit: 5c8e1a5a
+Open problem: `startTestSession`/`stopTestSession`/`lastSave` (the real `POST /sessions` shape) are built and unit-tested in data.ts but not yet wired into the live Start test click path (it still uses the P0.3-style local timers) or into an xl two-column docked layout (the panel still only overlays as a wide non-modal sheet at every width).

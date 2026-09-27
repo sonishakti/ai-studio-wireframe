@@ -1,0 +1,183 @@
+{
+  "id": "P0.4",
+  "title": "Tell the agent its job",
+  "name": "P0.4 · Tell the agent its job",
+  "jtbd": {
+    "job": "Tell the agent its job",
+    "situation": "The agent exists on a preset with a voice. Its prompt is empty, it has no first line, and nothing is set for the moment the language model fails. Sam knows the task and wants the agent to do it in the next test",
+    "wantsTo": "write the prompt where the builder opens, see the `{{variables}}` the prompt uses and give each one a default when it makes sense, set the greeting and the failure message behind one door, and hear the result",
+    "soThat": "callers get the job done in one session, and nothing the agent says aloud is left to chance",
+    "happySteps": [
+      "Prompt & knowledge opens with the prompt editor first.",
+      "Sam writes the prompt. {{variables}} show as chips, each with an optional default.",
+      "Sam opens Greeting to set the first line, when it plays, its delay and the failure message.",
+      "Sam presses Save and test.",
+      "Optional: Sam says what a successful session looks like in Analysis (P1.9)."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "Sam clears the prompt"
+      },
+      {
+        "id": ".c",
+        "title": "A {{variable}} has no default"
+      },
+      {
+        "id": ".d",
+        "title": "No failure message is set"
+      },
+      {
+        "id": ".e",
+        "title": "The agent speaks first but the greeting is empty"
+      },
+      {
+        "id": ".f",
+        "title": "Sam tests with unsaved prompt edits"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/P0.4/shots/05-silence-recap.png",
+        "hash": null,
+        "label": "05-silence-recap"
+      },
+      {
+        "path": "references/v3/features/P0.4/shots/07-hear-disabled.png",
+        "hash": null,
+        "label": "07-hear-disabled"
+      },
+      {
+        "path": "references/v3/features/P0.4/shots/before-01-system-prompt-row.png",
+        "hash": null,
+        "label": "before-01-system-prompt-row"
+      },
+      {
+        "path": "references/v3/features/P0.4/shots/before-02-greeting-sheet-open.png",
+        "hash": null,
+        "label": "before-02-greeting-sheet-open"
+      },
+      {
+        "path": "references/v3/features/P0.4/shots/before-03-empty-greeting-no-default.png",
+        "hash": null,
+        "label": "before-03-empty-greeting-no-default"
+      },
+      {
+        "path": "references/v3/features/P0.4/shots/elevenlabs-agent-agent.png",
+        "hash": null,
+        "label": "elevenlabs-agent-agent"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): No vendor shot shows where the failure message lives. Capture it, plus an empty-prompt save and a variable with no value at test. Own before and after shots: research/04-greeting-filler/05-shots."
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/P0.4/flow/01-empty-prompt.png",
+      "hash": null,
+      "caption": "Prompt & knowledge opens with the prompt editor first."
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/02-written-chips.png",
+      "hash": null,
+      "caption": "Sam writes the prompt. {{variables}} show as chips, each with an optional default."
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/03-default-popover.png",
+      "hash": null,
+      "caption": "Sam opens Greeting to set the first line, when it plays, its delay and the failure message."
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/04-greeting-sheet.png",
+      "hash": null,
+      "caption": "Sam presses Save and test."
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/05-saved-test-heard.png",
+      "hash": null,
+      "caption": "Optional: Sam says what a successful session looks like in Analysis (P1.9)."
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/06-analysis.png",
+      "hash": null,
+      "caption": "Sam analysis"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/13-code-sheet.png",
+      "hash": null,
+      "caption": "Sam code sheet"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/14-realtime-sheet.png",
+      "hash": null,
+      "caption": "Sam realtime sheet"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/15-leave-guard.png",
+      "hash": null,
+      "caption": "Sam leave guard"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/07-rainy-b-cleared.png",
+      "hash": null,
+      "caption": "Sam clears the prompt",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/08-rainy-c-ask-values.png",
+      "hash": null,
+      "caption": "A {{variable}} has no default",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/09-rainy-c-new-run-mapping.png",
+      "hash": null,
+      "caption": "A {{variable}} has no default",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/10-rainy-d-no-failure.png",
+      "hash": null,
+      "caption": "No failure message is set",
+      "rainyId": ".d"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/11-rainy-e-agent-first-empty.png",
+      "hash": null,
+      "caption": "The agent speaks first but the greeting is empty",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/12-rainy-f-unsaved-test.png",
+      "hash": null,
+      "caption": "Sam tests with unsaved prompt edits",
+      "rainyId": ".f"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/P0.4/flow/01-empty-prompt.png",
+      "hash": null,
+      "caption": "Prompt & knowledge opens with the prompt editor first."
+    },
+    {
+      "path": "references/v3/features/P0.4/flow/15-leave-guard.png",
+      "hash": null,
+      "caption": "Sam leave guard"
+    }
+  ],
+  "rationale": [
+    "Row draft, Cancel, Save, Save and test; the header Test saves first — .b, .f, KPI (a save to measure), counter metric (heard tests)",
+    "Chip opens a Popover with one Default field; greeting variables on the same line — .a step 2, .c, API `variables`",
+    "Use the starter prompt while empty; reason line and Save off when cleared — .b, learning 5",
+    "Select The agent / The caller; caller first hides the fields with the live line — .e, learning 2",
+    "Delay (ms) with \"Default 0 ms, 0 to 5000\" in the (i) — .a step 3, API"
+  ],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": null
+  },
+  "samAssetImageHash": "a5e89771c0bcb9a25ef62cd3556521195beb53bb"
+}

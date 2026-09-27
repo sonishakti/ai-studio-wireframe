@@ -1,0 +1,160 @@
+{
+  "id": "P0.15",
+  "title": "Retire an agent",
+  "name": "P0.15 \u00b7 Retire an agent",
+  "jtbd": {
+    "job": "Sam retires an agent without leaving a number or run pointing at nothing.",
+    "situation": "The builder has no delete at all; DELETE /agents/{id} exists in the v3 API with no undo, and nothing says whether the server refuses it while a number or run references the agent.",
+    "wantsTo": "see everything that still uses it, move or stop each thing, and then delete it on purpose",
+    "soThat": "no caller reaches a dead number and no run dials with a missing agent",
+    "happySteps": [
+      "Sam chooses Delete on the agent.",
+      "A confirm lists every number and run that uses the agent, with a door to re-point or stop each.",
+      "Sam re-points the number to another agent and cancels the run.",
+      "Sam types the agent name and deletes. Its sessions and error groups stay in history, tagged Agent deleted (P1.4.g, P2.1.b)."
+    ],
+    "rainyTitles": [
+      {
+        "id": ".b",
+        "title": "A number still points at the agent"
+      },
+      {
+        "id": ".c",
+        "title": "A scheduled or running run uses the agent"
+      },
+      {
+        "id": ".d",
+        "title": "The agent's secret sets are used by no other agent"
+      },
+      {
+        "id": ".e",
+        "title": "The team's own code still starts sessions with this agent"
+      },
+      {
+        "id": ".f",
+        "title": "Sam deletes by mistake"
+      }
+    ]
+  },
+  "research": {
+    "images": [
+      {
+        "path": "references/v3/features/P0.15/shots/before-01-agent-overview.png",
+        "hash": "5c557eb01cf627898da123de3b68e7ab8da8fcf0",
+        "label": "before-01-agent-overview"
+      },
+      {
+        "path": "references/v3/features/P0.15/shots/before-02-kebab-menu.png",
+        "hash": "e0e9b3634f2a77b526dcc07ff503005096bb63ae",
+        "label": "before-02-kebab-menu"
+      },
+      {
+        "path": "references/v3/features/P0.15/shots/elevenlabs-01-agent-row-menu-delete.png",
+        "hash": "49d1dbe0219011b6b5d8c92d5261e63175e408dd",
+        "label": "elevenlabs-01-agent-row-menu-delete"
+      },
+      {
+        "path": "references/v3/features/P0.15/shots/refero-doppler-01-delete-environment-slug.png",
+        "hash": "0f97ccc22ac1ecc1b0de8be06da68482f2279732",
+        "label": "refero-doppler-01-delete-environment-slug"
+      },
+      {
+        "path": "references/v3/features/P0.15/shots/refero-enode-01-delete-client-typed-name.png",
+        "hash": "72d5bc439833fdec9c548ba098d75f226b3bb2a9",
+        "label": "refero-enode-01-delete-client-typed-name"
+      },
+      {
+        "path": "references/v3/features/P0.15/shots/refero-github-01-package-danger-zone.png",
+        "hash": "f52278063bed0c0cc70603c757a43a89d160475e",
+        "label": "refero-github-01-package-danger-zone"
+      }
+    ],
+    "finding": "Owed (only if a rainy path has no evidence at all): Shoot the delete flow at each vendor with a number attached: is it blocked, warned or silent? Question: does any vendor list what uses an agent before deleting it?"
+  },
+  "flow": [
+    {
+      "path": "references/v3/features/P0.15/flow/01-menu-delete-agent.png",
+      "hash": "d69f25957ee0082f7fecd5efeca89e7776068cde",
+      "caption": "Sam chooses Delete on the agent."
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/02-blocked-both.png",
+      "hash": "7c96926de10ef134c680948ffdb71b3567df420a",
+      "caption": "A confirm lists every number and run that uses the agent, with a door to re-point or stop each."
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/03-clear-confirm.png",
+      "hash": "66c463b7758ba95328264b4bba257ff9a29a605d",
+      "caption": "Sam re-points the number to another agent and cancels the run."
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/04-name-confirmed.png",
+      "hash": "7c3d8b694f33ff1ed10d126a2ca17a5bc37dcf1e",
+      "caption": "Sam types the agent name and deletes. Its sessions and error groups stay in history, tagged Agent deleted (P1.4.g, P2.1.b)."
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/05-list-deleted.png",
+      "hash": "3ade4c229bf5b1eabb9ed3816e0258e35616d1d2",
+      "caption": "Sam list deleted"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/11-rainy-failed.png",
+      "hash": "f6705b090dfc73094b3475def02fb792e967f791",
+      "caption": "Sam rainy failed"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/contact-sheet.png",
+      "hash": "b9c4cd5ff7707934bc888275acd7ee75deb95462",
+      "caption": "Sam contact sheet"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/06-rainy-b-number-only.png",
+      "hash": "86467e3e858fa68c709d7a6ef446e05d3ff82cf1",
+      "caption": "A number still points at the agent",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/07-rainy-b-refused.png",
+      "hash": "ff7467366b6495a4bdedbbbc69f4c03f13cf062d",
+      "caption": "A number still points at the agent",
+      "rainyId": ".b"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/08-rainy-c-run-hidden-numbers.png",
+      "hash": "ed6a5a422f39359f459ba619dc16c1dbe6eeb9a9",
+      "caption": "A scheduled or running run uses the agent",
+      "rainyId": ".c"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/09-rainy-e-clear-no-secret.png",
+      "hash": "76d344ad25fff99a68b3a896bebcdd7a0ec99c10",
+      "caption": "The team's own code still starts sessions with this agent",
+      "rainyId": ".e"
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/10-rainy-f-typo-mismatch.png",
+      "hash": "4db8ca977b9afa6fb612ecf76170129ed49d7a5d",
+      "caption": "Sam deletes by mistake",
+      "rainyId": ".f"
+    }
+  ],
+  "hero": [
+    {
+      "path": "references/v3/features/P0.15/flow/01-menu-delete-agent.png",
+      "hash": "d69f25957ee0082f7fecd5efeca89e7776068cde",
+      "caption": "Sam chooses Delete on the agent."
+    },
+    {
+      "path": "references/v3/features/P0.15/flow/contact-sheet.png",
+      "hash": "b9c4cd5ff7707934bc888275acd7ee75deb95462",
+      "caption": "Sam contact sheet"
+    }
+  ],
+  "rationale": [],
+  "links": {
+    "clickup": null,
+    "tracker": null,
+    "prototype": "https://ng-console-1ed92p2lv-agoraio.vercel.app/v3?concept=a&view=agent&agent=agent_payments"
+  },
+  "samAssetImageHash": "a5e89771c0bcb9a25ef62cd3556521195beb53bb"
+}

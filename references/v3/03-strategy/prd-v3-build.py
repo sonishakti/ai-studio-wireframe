@@ -271,7 +271,7 @@ def desc_foot(f):
     L.append(f"API: {f['more'].get('api','')} Register: {f['more'].get('req','')} Journeys: {' · '.join(f['more'].get('journeys', []))}. Days: {f['d'] or 'none, proposed'}.")
     L.append(f"Rule 0, data first. This flow shows: {', '.join(f['data']) or 'no stored data'}. New account: {r0.get('new','')} Outside our accounts: {r0.get('external','')} Create in our account: {r0.get('create','')}")
     L.append(f"Files: references/v3/features/{f['id']}/ (jtbd, directions, build spec, flow/ screenshots, shots/ research).")
-    L.append('Columns: To-do = planned, in the order it gets done · In progress = taken at a run (08:00, 11:59, 16:00, 20:00) · Pending Review = delivered, pending Shakti · Delivered = approved and locked (Figma frozen, commit). Changes: drag back to In progress + comment `change: …`.')
+    L.append('Columns: To-do = planned, in the order it gets done · in progress = being designed, and it stays here when delivered (comment "Delivered for review") until Shakti moves it · on hold = started but not finished, the comment says what is missing · design in review = Shakti is reviewing · Delivered = approved and locked (Figma frozen, commit). The agent never moves a card past in progress. Changes: comment `change: …` on the card.')
     L.append('Rules: existing Console design system only (docs/design/DESIGN.md, design/v3); reuse, do not redesign; empty first, quiet chrome; sentence case, no arrows or em dashes; locked words; Sam only in job text; never change a locked feature unless in scope, then say so. One run delivers: prototype for the happy path and every rainy state, one screenshot per step, the Figma flow with "Sam does …" captions and rationale, this card in Pending Review with a comment, the sheet row, one Slack post.')
     return '\n'.join(L)
 
@@ -312,7 +312,7 @@ for x in hl:
     if x['gaps']: L.append(f"**Server gaps:** {', '.join(x['gaps'])}")
     L.append(f"**Phase:** {', '.join(x['phases'])} · **Sheet:** {SHEET}#features")
     L.append('')
-    L.append('Status here follows the job steps: In progress once the first step is being designed, Pending Review when every step is delivered, Delivered when every step is locked.')
+    L.append('The job steps are the subtasks of this card; ClickUp shows their progress here. Only Shakti moves this card.')
     p = os.path.join(OUT, 'clickup', 'features', f"{x['id']}.md")
     open(p, 'w', encoding='utf-8').write('\n'.join(L))
     fman[x['id']] = {'name': f"{x['id']} · {x['name']}", 'desc': p, 'start': x['design_first'], 'due': x['design_ready'], 'steps': [x['clickup'][i]['task'] for i in x['steps'] if i in x['clickup']]}

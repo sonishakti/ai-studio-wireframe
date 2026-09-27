@@ -1,0 +1,49 @@
+# P0.10 Have the agent dial a list of people · Directions
+
+Track: **v3**. Constraints: extend P0.8's Deployment tab and the New run sheet P0.3 and P0.4 already grew, do not redraw; existing design system only; one door per action (Go live opens New run, Run again opens the same sheet, Pause, Resume and Cancel live in the panel and the row menu); no control for what Agora does by default (no windows means any hour, no dial rate means none, every policy limit empty means none, voicemail defaults to the API's omission); empty first, quiet chrome; locked words (run, calling window, Run again, session, number, free minutes, minutes banner, suspended; "call" only inside Call policy; never campaign for one execution, batch job, blast, bulk calling, credits, quota, paused for the account); the v3 API's `POST /campaigns` with `contacts[]`, `schedule.days`, `pacing.max_calls_per_second`, `transport.call_policy`, `Campaign.failure`, `:pause`, `:resume`, `:cancel`, no returned contacts, no next-dial field, no pause reason, billing outside the API; the KPI (7 in 10 batch agents start a run within a week, the first contact reached within 15 minutes) and its counter (cancels in the first 10 minutes); P1.7 and P1 monitoring reuse whatever panel this row makes.
+
+## Three directions
+
+### 1. One sheet, read the list, four folds (the extension)
+Keep the New run sheet as the one door and make it read what Sam gives it: the CSV is parsed as it lands, the file line carries the counts and the reject download, the mapping table gets a select per variable and blocks the start only for a variable with neither a column nor a default. When keeps Start now, gains Start on a date, and grows Calling windows by weekday (the Console's window editor, ported as chips, a range, a time zone and two add links) with one line saying when dialing starts. Four collapsed folds on P0.3's fold row follow, each with a value line and a gray tick when configured: Pacing (the API's four fields, the project cap in the (i)), Call policy (P0.9's fold plus Ring timeout and On voicemail), Transfer (P0.9's) and Session limits (P0.3's). One sentence above the footer estimates the minutes against the free minutes left and offers Add card when short; starting is never blocked by minutes. The run panel gains the failure alert, the pause line, the waiting line, Cancel run with a confirm, and Run again pre-filled from Studio's stored list (or the API line). Nothing new in the design system; P1 monitoring inherits the panel.
+Research: `shots/before-03-new-run-sheet-list-mapped.png` (the mapping table and the pacing fields already there), `shots/refero-cakeequity-01-import-validation-error.png` (the reject line next to the action), `shots/refero-reclaim-01-weekday-hours-settings.png` (the chips), `shots/vapi-01-contacts-preview-hides-columns.png` (the cap explained inline), `shots/bland-02-batch-statuses.png` (the three-way end state).
+
+### 2. Two steps: Upload and check, then Dial (the Retell lifecycle)
+Split the job into a list step and a run step, in the shape of Retell's Draft to Planned to Ongoing: Go live opens **Contact list** alone (drop, rejects, mapping, Save list), the Runs row then shows the list as a card with **Dial this list**, and a second sheet holds the number, the windows, the pacing, the policy and the estimate. Each screen is shorter, the reject moment gets a whole surface, and a list can be reused across runs without Run again. But the API has no contact object: a saved list would be Studio state with no `GET` behind it, a second source of truth every other surface would have to trust; the Runs row would carry a card for something that is not a run, against quiet chrome; two doors and two saves for a job the PRD writes as one; and the KPI's 15-minute clock starts only at the second sheet, so the active part grows by a whole screen.
+Research: `competitors/product/retell/retell-18-batch-call-form.png` and the batch desk note (`v3/02-research/batch-retention-experiments.md` §1: Retell's Draft to Planned to Ongoing to Sent), `shots/refero-cakeequity-01-import-validation-error.png` (a dedicated import screen), `elevenlabs-18-batch-channel-chooser.png` (a picker before the form, the extra step to avoid).
+
+### 3. Rows on the Deployment tab, no sheet (windows and pacing as agent config)
+Move the calling windows, the pacing and the call policy out of the sheet into rows of P0.8's tab under Retention, set once per agent like Retention, and keep New run to the list, the number and the estimate. The sheet becomes three sections and every run inherits the agent's hours, which is what a clinic wants most of the time. But the fields live on the campaign, not the agent: Studio would hold them and replay them into every `POST /campaigns`, and a run started through the API would not carry them; the tab grows three rows for every batch agent whether or not Sam ever changes a default; a second run with different hours (a Saturday catch-up) needs the sheet to override the rows, so the fields are drawn twice; and the PRD's own subtask puts "Calling windows by weekday" in New run.
+Research: `shots/before-01-runs-tab-survey-draft.png` (the tab as rows), PRD P0.8 (Retention as a row that cannot yet live on the run either), `shots/before-02-new-run-sheet-empty.png` (When as it is today, the sibling the rows would replace).
+
+## Audit
+
+Scored 1 to 5 (5 best).
+
+| Criterion | 1 One sheet, read the list | 2 Two steps | 3 Rows on the tab |
+|---|---|---|---|
+| Extend, do not redraw (P0.3's sheet, P0.4's table, P0.8's tab, P0.9's folds) | 5 | 3 | 3 |
+| One door per action (Go live, Run again, Pause, Resume, Cancel) | 5 | 2 | 4 |
+| API fit (one `POST /campaigns`, no Studio-held object, fields on the campaign) | 5 | 2 | 2 |
+| Empty first, quiet chrome | 4 | 3 | 2 |
+| Rainy .b to .i in one place | 5 | 4 | 3 |
+| KPI: first contact within 15 min, the active part not grown | 4 | 2 | 4 |
+| Room for P1.7 and P1 monitoring (the panel, the banner) | 5 | 4 | 4 |
+| Touches P0.3, P0.4, P0.8, P0.9 (in review) | 4 (P0.4's warning becomes a block, P0.8's banner clause and event timing, P0.9's fold shared) | 3 | 2 |
+| **Total / 40** | **37** | **23** | **24** |
+
+Cut: 2 invents a contact object the API does not have and adds a screen before the clock starts; 3 puts campaign fields on the agent and draws them twice.
+
+## Pick: direction 1, one sheet, read the list, four folds
+
+1. **The list is a Go live action, and the sheet reads it before anything is sent.** `POST /campaigns` takes `contacts[]` with `phone` in E.164 and rejects the first bad row with a 400; reading the file in the sheet turns that into a count, a reject download and one sentence, the way Cake Equity keeps the good rows and names the problem next to the action (`shots/refero-cakeequity-01-import-validation-error.png`), and not a log to hunt through as Bland does (`shots/bland-01-invalid-number-faq.png`). The KPI's assumption (the list as Go live, not config) is the pick.
+2. **Calling windows by weekday are the API's own shape and the Console's own control.** `schedule.days[]` of `CallingDay { weekday, ranges }` maps one to one onto the ported `CampaignCallWindowEditor` (weekdays, start and end, Add day, Add time range), drawn as Reclaim's chips (`shots/refero-reclaim-01-weekday-hours-settings.png`); the next-dial sentence covers the collision no vendor documents (.d, `02-research.md` gap 5) without inventing a status.
+3. **Pacing is named as the API names it, with the cap where the cap is.** Sessions at once stops at the project's 10 with the reason in the (i), as Vapi states its ceiling inline (`shots/vapi-01-contacts-preview-hides-columns.png`); Dials per second replaces the Console's delay ms because `max_calls_per_second` is the spec's only dial-rate control; voicemail moves to Call policy because that is where `CampaignTransport.call_policy` keeps it, and the fold is P0.9's, so a run and a number read alike.
+4. **The estimate is honest arithmetic, and it never blocks.** Contacts times this agent's own average session length, the (i) saying so; against free minutes left from billing when it can be read, dropped when it cannot (G9); over the limit, the sentence says the run pauses when they run out and offers Add card, and Start run stays on (.f), which is what the KPI's 15-minute clock and journey RK both ask for.
+5. **The panel says what the API knows, in one line each.** `Campaign.failure` becomes one alert with the code, provider, message and time (.e); a pause names its time and the in-flight count (.h); a suspension pause names the free minutes and Add card, with P0.8's banner naming the run (.g); Cancel run confirms with the pending count, since `:cancel` is for good and the counter metric watches early cancels. Bland's three-way split (`shots/bland-02-batch-statuses.png`) is kept as counts, not as new statuses.
+
+## Questions for the owner (max 3)
+
+1. **Pause reason on a suspension.** The API has no pause reason; the design infers "free minutes ran out" when a run pauses while billing reads suspended, and shows Resume, which answers `AccountSuspended` until reactivation. Is the API team adding a `pause_reason` (or a `status: paused` with `failure.code`), or does Studio keep inferring?
+2. **The estimate's inputs.** Minutes are estimated as contacts times the agent's own average session length (its test sessions until production sessions exist), rounded up; free minutes left come from billing outside the v3 API. Is that the number the team wants shown, or should the estimate count attempts (`max_attempts` times contacts) as the upper bound?
+3. **Dial from, one or many.** The PRD's step says "picks the from number"; the API takes one `num_` id or an array and P0.8's control is a checkbox list. The design keeps the list (several numbers spread the load) and pre-ticks the only number when the project has one. Keep the list, or make it a single select?
