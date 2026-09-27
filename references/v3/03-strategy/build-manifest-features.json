@@ -1,156 +1,170 @@
 {
  "F1": {
+  "task": "868ma9cp4",
   "name": "F1 \u00b7 Create an agent and choose the deployment type",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F1.md",
   "start": "2026-09-27",
   "due": "2026-09-29",
   "steps": [
-   "868m9wg1c",
-   "868ma8q59",
-   "868ma8q5n"
+   "868macpbc",
+   "868macpbt",
+   "868macpc4"
   ]
  },
  "F2": {
+  "task": "868ma9cp5",
   "name": "F2 \u00b7 Presets, voice and models",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F2.md",
   "start": "2026-09-27",
   "due": "2026-09-29",
   "steps": [
-   "868m9wg1x",
-   "868m9wg2e"
+   "868macpea",
+   "868macpej"
   ]
  },
  "F3": {
+  "task": "868ma9cp6",
   "name": "F3 \u00b7 Prompt, greeting and failure messages",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F3.md",
   "start": "2026-09-27",
   "due": "2026-09-29",
   "steps": [
-   "868m9wg2w"
+   "868macpen"
   ]
  },
  "F4": {
+  "task": "868ma9cp7",
   "name": "F4 \u00b7 Integrations: MCP servers, tools, knowledge base",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F4.md",
   "start": "2026-09-28",
   "due": "2026-10-09",
   "steps": [
-   "868m9wg37",
-   "868m9wgqx"
+   "868macpf2",
+   "868macpgp"
   ]
  },
  "F5": {
+  "task": "868ma9cp8",
   "name": "F5 \u00b7 BYOK and secrets",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F5.md",
   "start": "2026-09-28",
   "due": "2026-10-08",
   "steps": [
-   "868m9wg3x",
-   "868m9wgne"
+   "868macpgt",
+   "868macpmu"
   ]
  },
  "F6": {
+  "task": "868ma9cpa",
   "name": "F6 \u00b7 Test panel, readiness and telemetry hygiene",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F6.md",
   "start": "2026-09-28",
   "due": "2026-10-01",
   "steps": [
-   "868m9wg4c",
-   "868m9wg4y",
-   "868m9x4bm",
-   "868m9x4cc"
+   "868macpxg",
+   "868macpxp",
+   "868macpxw",
+   "868macpya"
   ]
  },
  "F7": {
+  "task": "868ma9cpb",
   "name": "F7 \u00b7 Go live: inbound numbers",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F7.md",
   "start": "2026-09-28",
   "due": "2026-10-09",
   "steps": [
-   "868m9wg59",
-   "868m9wgpc",
-   "868m9wgq5"
+   "868macpzh",
+   "868macpzv",
+   "868macq1a"
   ]
  },
  "F8": {
+  "task": "868ma9cpc",
   "name": "F8 \u00b7 Go live: batch runs",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F8.md",
   "start": "2026-09-29",
   "due": "2026-10-06",
   "steps": [
-   "868m9wg5q",
-   "868m9wgmk"
+   "868macq2x",
+   "868macq33"
   ]
  },
  "F9": {
+  "task": "868ma9cpd",
   "name": "F9 \u00b7 Go live: code sessions and API parity",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F9.md",
   "start": "2026-09-29",
   "due": "2026-10-12",
   "steps": [
-   "868m9wg61",
-   "868m9x4gm"
+   "868macq3m",
+   "868macq40"
   ]
  },
  "F10": {
+  "task": "868ma9cpf",
   "name": "F10 \u00b7 Agent monitoring: agent page, errors and logs",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F10.md",
   "start": "2026-09-29",
   "due": "2026-10-05",
   "steps": [
-   "868m9wg6k",
-   "868m9wg7e",
-   "868m9wg8u",
-   "868m9wga0",
-   "868m9wgbc",
-   "868m9wgcj",
-   "868m9x4ed",
-   "868ma8ev9",
-   "868ma8qbq"
+   "868macq5j",
+   "868macq5k",
+   "868macq6a",
+   "868macq82",
+   "868macq8c",
+   "868macq8g",
+   "868macq9r",
+   "868macqah",
+   "868macqat"
   ]
  },
  "F11": {
+  "task": "868ma9cpm",
   "name": "F11 \u00b7 Analysis: what a good session is",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F11.md",
   "start": "2026-10-02",
   "due": "2026-10-05",
   "steps": [
-   "868m9x4f1"
+   "868macqaz"
   ]
  },
  "F12": {
+  "task": "868ma9cpx",
   "name": "F12 \u00b7 Billing, free minutes and honest rows",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F12.md",
   "start": "2026-10-01",
   "due": "2026-10-07",
   "steps": [
-   "868m9wge4",
-   "868m9x4fe"
+   "868macqdc",
+   "868macqdj"
   ]
  },
  "F13": {
+  "task": "868ma9cq9",
   "name": "F13 \u00b7 Session history and detail",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F13.md",
   "start": "2026-10-03",
   "due": "2026-10-08",
   "steps": [
-   "868m9wgfk",
-   "868m9wggy",
-   "868m9wgj8",
-   "868m9wgkf",
-   "868m9x4fq",
-   "868ma8evd",
-   "868ma8evh",
-   "868ma8evm"
+   "868macqdx",
+   "868macqfg",
+   "868macqj3",
+   "868macqj7",
+   "868macqje",
+   "868macqmt",
+   "868macqnr",
+   "868macqp5"
   ]
  },
  "F14": {
+  "task": "868ma9cqk",
   "name": "F14 \u00b7 One vocabulary in Console and docs",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/features/F14.md",
   "start": "2026-10-08",
   "due": "2026-10-12",
   "steps": [
-   "868m9x4hy"
+   "868macqpg"
   ]
  }
 }

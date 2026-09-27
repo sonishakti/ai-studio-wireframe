@@ -55,20 +55,53 @@ JOBMAP_WHY = {
  'Cross-cutting': 'A requirement that every step shares, not a step of its own',
 }
 # ClickUp task per feature (home list 901115448379, mirrored in the Design Tracker list)
+# ClickUp job-step cards (subtasks in Product › Design Tracker › 1. V3, list 901115453665); custom ids no longer apply
 CLICKUP = {
- 'P0.1': ('868m9wg1c', 'APP-9358'), 'P0.2': ('868m9wg1x', 'APP-9359'), 'P0.3': ('868m9wg2e', 'APP-9360'), 'P0.4': ('868m9wg2w', 'APP-9361'),
- 'P0.5': ('868m9wg37', 'APP-9362'), 'P0.6': ('868m9wg3x', 'APP-9363'), 'P0.7': ('868m9wg4c', 'APP-9364'), 'P0.8': ('868m9wg4y', 'APP-9365'),
- 'P0.9': ('868m9wg59', 'APP-9366'), 'P0.10': ('868m9wg5q', 'APP-9367'), 'P0.11': ('868m9wg61', 'APP-9368'), 'P0.12': ('868m9x4bm', 'APP-9385'),
- 'P0.13': ('868m9x4cc', 'APP-9386'), 'P0.14': ('868ma8q59', 'APP-9397'), 'P0.15': ('868ma8q5n', 'APP-9398'),
- 'P1.1': ('868m9wg6k', 'APP-9369'), 'P1.2': ('868m9wg7e', 'APP-9370'), 'P1.3': ('868m9wg8u', 'APP-9371'), 'P1.4': ('868m9wga0', 'APP-9372'),
- 'P1.5': ('868m9wgbc', 'APP-9373'), 'P1.6': ('868m9wgcj', 'APP-9374'), 'P1.7': ('868m9wge4', 'APP-9375'), 'P1.8': ('868m9x4ed', 'APP-9387'),
- 'P1.9': ('868m9x4f1', 'APP-9388'), 'P1.10': ('868ma8ev9', 'APP-9393'), 'P1.11': ('868ma8qbq', 'APP-9399'),
- 'P2.1': ('868m9wgfk', 'APP-9376'), 'P2.2': ('868m9wggy', 'APP-9377'), 'P2.3': ('868m9wgj8', 'APP-9378'), 'P2.4': ('868m9wgkf', 'APP-9379'),
- 'P2.5': ('868m9wgmk', 'APP-9380'), 'P2.6': ('868m9x4fe', 'APP-9389'), 'P2.7': ('868m9x4fq', 'APP-9390'), 'P2.8': ('868ma8evd', 'APP-9394'),
- 'P2.9': ('868ma8evh', 'APP-9395'), 'P2.10': ('868ma8evm', 'APP-9396'),
- 'P3.1': ('868m9wgne', 'APP-9381'), 'P3.2': ('868m9wgpc', 'APP-9382'), 'P3.3': ('868m9wgq5', 'APP-9383'), 'P3.4': ('868m9wgqx', 'APP-9384'),
- 'P3.5': ('868m9x4gm', 'APP-9391'), 'P3.6': ('868m9x4hy', 'APP-9392'),
+ 'P0.1': ('868macpbc', ''),
+ 'P0.2': ('868macpea', ''),
+ 'P0.3': ('868macpej', ''),
+ 'P0.4': ('868macpen', ''),
+ 'P0.5': ('868macpf2', ''),
+ 'P0.6': ('868macpgt', ''),
+ 'P0.7': ('868macpxg', ''),
+ 'P0.8': ('868macpxp', ''),
+ 'P0.9': ('868macpzh', ''),
+ 'P0.10': ('868macq2x', ''),
+ 'P0.11': ('868macq3m', ''),
+ 'P0.12': ('868macpxw', ''),
+ 'P0.13': ('868macpya', ''),
+ 'P0.14': ('868macpbt', ''),
+ 'P0.15': ('868macpc4', ''),
+ 'P1.1': ('868macq5j', ''),
+ 'P1.2': ('868macq5k', ''),
+ 'P1.3': ('868macq6a', ''),
+ 'P1.4': ('868macq82', ''),
+ 'P1.5': ('868macq8c', ''),
+ 'P1.6': ('868macq8g', ''),
+ 'P1.7': ('868macqdc', ''),
+ 'P1.8': ('868macq9r', ''),
+ 'P1.9': ('868macqaz', ''),
+ 'P1.10': ('868macqah', ''),
+ 'P1.11': ('868macqat', ''),
+ 'P2.1': ('868macqdx', ''),
+ 'P2.2': ('868macqfg', ''),
+ 'P2.3': ('868macqj3', ''),
+ 'P2.4': ('868macqj7', ''),
+ 'P2.5': ('868macq33', ''),
+ 'P2.6': ('868macqdj', ''),
+ 'P2.7': ('868macqje', ''),
+ 'P2.8': ('868macqmt', ''),
+ 'P2.9': ('868macqnr', ''),
+ 'P2.10': ('868macqp5', ''),
+ 'P3.1': ('868macpmu', ''),
+ 'P3.2': ('868macpzv', ''),
+ 'P3.3': ('868macq1a', ''),
+ 'P3.4': ('868macpgp', ''),
+ 'P3.5': ('868macq40', ''),
+ 'P3.6': ('868macqpg', ''),
 }
+# ClickUp feature cards (parents in the same list)
+FEATURE_IDS = {'F1': '868ma9cp4', 'F2': '868ma9cp5', 'F3': '868ma9cp6', 'F4': '868ma9cp7', 'F5': '868ma9cp8', 'F6': '868ma9cpa', 'F7': '868ma9cpb', 'F8': '868ma9cpc', 'F9': '868ma9cpd', 'F10': '868ma9cpf', 'F11': '868ma9cpm', 'F12': '868ma9cpx', 'F13': '868ma9cq9', 'F14': '868ma9cqk'}
 # Rule 0 (owner, 26 Sep): before researching or designing, ask whether a new logged-in account has the data the flow shows,
 # where to get it from outside our accounts, and what to create in our own account.
 DATA_KW = [
@@ -165,7 +198,7 @@ for fid, name, steps, api, blocked in FEATURES:
     locks = sorted(x['lock_eta'] for x in sch if x.get('lock_eta'))
     designs = sorted(x['design_eta'] for x in sch if x.get('design_eta'))
     gaps = sorted(set(g for r in rows for g in r.get('gaps', [])), key=lambda g: int(g[1:]))
-    hl.append({'id': fid, 'name': name, 'steps': steps, 'titles': {r['id']: r['title'] for r in rows}, 'phases': sorted(set(r['p'] for r in rows)),
+    hl.append({'id': fid, 'name': name, 'steps': steps, 'titles': {r['id']: r['title'] for r in rows}, 'phases': sorted(set(r['p'] for r in rows)), 'url': ('https://app.clickup.com/t/' + FEATURE_IDS[fid]) if fid in FEATURE_IDS else '',
                'api': api, 'blocked': blocked, 'gaps': gaps, 'design_first': designs[0] if designs else '', 'design_ready': locks[-1] if locks else '',
                'proposed': [i for i in steps if not FID.get(i, {}).get('d')], 'clickup': {i: FID[i]['clickup'] for i in steps if i in FID}})
 D['features_hl'] = hl
@@ -303,7 +336,7 @@ os.makedirs(os.path.join(OUT, 'clickup', 'features'), exist_ok=True)
 fman = {}
 for x in hl:
     L = [f"🏷 **V3 · feature** · design ready **{fmt(x['design_ready']) or 'after sign-off'}** (the last lock ETA of its job steps) · first design {fmt(x['design_first']) or 'after sign-off'}", '']
-    L.append('**Builds these job steps** (each card holds the job, goal, telemetry, research and deliverables):')
+    L.append('**Job steps** (the subtasks of this card; each holds the job, goal, telemetry, research and deliverables):')
     for i in x['steps']:
         cu = x['clickup'].get(i, {}); L.append(f"*   [{i} · {x['titles'].get(i, '')}]({cu.get('url', '')})" + (' (proposed, not budgeted)' if i in x['proposed'] else ''))
     L.append('')
@@ -315,7 +348,7 @@ for x in hl:
     L.append('The job steps are the subtasks of this card; ClickUp shows their progress here. Only Shakti moves this card.')
     p = os.path.join(OUT, 'clickup', 'features', f"{x['id']}.md")
     open(p, 'w', encoding='utf-8').write('\n'.join(L))
-    fman[x['id']] = {'name': f"{x['id']} · {x['name']}", 'desc': p, 'start': x['design_first'], 'due': x['design_ready'], 'steps': [x['clickup'][i]['task'] for i in x['steps'] if i in x['clickup']]}
+    fman[x['id']] = {'task': FEATURE_IDS.get(x['id'], ''), 'name': f"{x['id']} · {x['name']}", 'desc': p, 'start': x['design_first'], 'due': x['design_ready'], 'steps': [x['clickup'][i]['task'] for i in x['steps'] if i in x['clickup']]}
 json.dump(fman, open(os.path.join(OUT, 'build-manifest-features.json'), 'w'), indent=1)
 
 # ---------- ClickUp doc pages: the PRD for the whole team ----------
@@ -326,7 +359,7 @@ ov = ['# Studio v3 PRD', '', f"Launch **Fri 16 Oct 2026**. Sam is a developer. E
       '## Features, for tech and backend', '', 'What each feature builds, the API it touches, and when its design is ready (the last lock ETA of its job steps).', '',
       '| Feature | Builds | API surface | Blocked by, asks | Design ready |', '| --- | --- | --- | --- | --- |']
 for x in hl:
-    ov.append(f"| **{x['id']} · {x['name']}** | {' · '.join(x['steps'])} | {tc(x['api'])} | {tc(x['blocked']) or '—'} | **{fmt(x['design_ready']) or 'after sign-off'}** |")
+    ov.append(f"| **[{x['id']} · {x['name']}]({x['url']})** | {' · '.join(x['steps'])} | {tc(x['api'])} | {tc(x['blocked']) or '—'} | **{fmt(x['design_ready']) or 'after sign-off'}** |")
 ov += ['', '## The four jobs', '']
 for u in D['umbrellas']:
     ov += [f"### {u['id']} {u['name']}", jobblock(u), f"**Done looks like:** {u['outcome']}", f"**Goal:** {u['kpi_simple']}", '']

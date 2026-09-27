@@ -1,335 +1,335 @@
 {
  "P0.1": {
-  "task": "868m9wg1c",
-  "custom": "APP-9358",
+  "task": "868macpbc",
+  "custom": "",
   "name": "P0.1 \u00b7 Choose how people reach the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.1.md",
   "start": "2026-09-27",
   "due": "2026-09-29"
  },
  "P0.2": {
-  "task": "868m9wg1x",
-  "custom": "APP-9359",
+  "task": "868macpea",
+  "custom": "",
   "name": "P0.2 \u00b7 Change the default voice",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.2.md",
   "start": "2026-09-27",
   "due": "2026-09-29"
  },
  "P0.3": {
-  "task": "868m9wg2e",
-  "custom": "APP-9360",
+  "task": "868macpej",
+  "custom": "",
   "name": "P0.3 \u00b7 Make the conversation feel natural",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.3.md",
   "start": "2026-09-27",
   "due": "2026-09-29"
  },
  "P0.4": {
-  "task": "868m9wg2w",
-  "custom": "APP-9361",
+  "task": "868macpen",
+  "custom": "",
   "name": "P0.4 \u00b7 Tell the agent its job",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.4.md",
   "start": "2026-09-27",
   "due": "2026-09-29"
  },
  "P0.5": {
-  "task": "868m9wg37",
-  "custom": "APP-9362",
+  "task": "868macpf2",
+  "custom": "",
   "name": "P0.5 \u00b7 Connect other systems to the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.5.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
  },
  "P0.6": {
-  "task": "868m9wg3x",
-  "custom": "APP-9363",
+  "task": "868macpgt",
+  "custom": "",
   "name": "P0.6 \u00b7 Run the agent on the team's own accounts",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.6.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
  },
  "P0.7": {
-  "task": "868m9wg4c",
-  "custom": "APP-9364",
+  "task": "868macpxg",
+  "custom": "",
   "name": "P0.7 \u00b7 Check the agent answers as intended",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.7.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
  },
  "P0.8": {
-  "task": "868m9wg4y",
-  "custom": "APP-9365",
+  "task": "868macpxp",
+  "custom": "",
   "name": "P0.8 \u00b7 Confirm the agent is ready",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.8.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
  },
  "P0.9": {
-  "task": "868m9wg59",
-  "custom": "APP-9366",
+  "task": "868macpzh",
+  "custom": "",
   "name": "P0.9 \u00b7 Let callers reach the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.9.md",
   "start": "2026-09-28",
   "due": "2026-09-30"
  },
  "P0.10": {
-  "task": "868m9wg5q",
-  "custom": "APP-9367",
+  "task": "868macq2x",
+  "custom": "",
   "name": "P0.10 \u00b7 Have the agent dial a list of people",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.10.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
  },
  "P0.11": {
-  "task": "868m9wg61",
-  "custom": "APP-9368",
+  "task": "868macq3m",
+  "custom": "",
   "name": "P0.11 \u00b7 Connect the team's software to the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.11.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
  },
  "P0.12": {
-  "task": "868m9x4bm",
-  "custom": "APP-9385",
+  "task": "868macpxw",
+  "custom": "",
   "name": "P0.12 \u00b7 Feel sure before Go live",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.12.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
  },
  "P0.13": {
-  "task": "868m9x4cc",
-  "custom": "APP-9386",
+  "task": "868macpya",
+  "custom": "",
   "name": "P0.13 \u00b7 Try the agent without counting the tries",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.13.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
  },
  "P0.14": {
-  "task": "868ma8q59",
-  "custom": "APP-9397",
+  "task": "868macpbt",
+  "custom": "",
   "name": "P0.14 \u00b7 Change an agent people reach",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.14.md",
   "start": "",
   "due": ""
  },
  "P0.15": {
-  "task": "868ma8q5n",
-  "custom": "APP-9398",
+  "task": "868macpc4",
+  "custom": "",
   "name": "P0.15 \u00b7 Retire an agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P0.15.md",
   "start": "",
   "due": ""
  },
  "P1.1": {
-  "task": "868m9wg6k",
-  "custom": "APP-9369",
+  "task": "868macq5j",
+  "custom": "",
   "name": "P1.1 \u00b7 Know whether an agent needs attention",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.1.md",
   "start": "2026-09-29",
   "due": "2026-10-01"
  },
  "P1.2": {
-  "task": "868m9wg7e",
-  "custom": "APP-9370",
+  "task": "868macq5k",
+  "custom": "",
   "name": "P1.2 \u00b7 Reproduce a surprising session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.2.md",
   "start": "2026-09-30",
   "due": "2026-10-02"
  },
  "P1.3": {
-  "task": "868m9wg8u",
-  "custom": "APP-9371",
+  "task": "868macq6a",
+  "custom": "",
   "name": "P1.3 \u00b7 Tell whether an agent change helped",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.3.md",
   "start": "2026-09-30",
   "due": "2026-10-02"
  },
  "P1.4": {
-  "task": "868m9wga0",
-  "custom": "APP-9372",
+  "task": "868macq82",
+  "custom": "",
   "name": "P1.4 \u00b7 Find what fails in an agent and why",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.4.md",
   "start": "2026-09-30",
   "due": "2026-10-02"
  },
  "P1.5": {
-  "task": "868m9wgbc",
-  "custom": "APP-9373",
+  "task": "868macq8c",
+  "custom": "",
   "name": "P1.5 \u00b7 Spot the agent in trouble",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.5.md",
   "start": "2026-10-01",
   "due": "2026-10-05"
  },
  "P1.6": {
-  "task": "868m9wgcj",
-  "custom": "APP-9374",
+  "task": "868macq8g",
+  "custom": "",
   "name": "P1.6 \u00b7 Remove the cause of a failure",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.6.md",
   "start": "2026-10-01",
   "due": "2026-10-05"
  },
  "P1.7": {
-  "task": "868m9wge4",
-  "custom": "APP-9375",
+  "task": "868macqdc",
+  "custom": "",
   "name": "P1.7 \u00b7 Keep agents answering without a billing stop",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.7.md",
   "start": "2026-10-01",
   "due": "2026-10-05"
  },
  "P1.8": {
-  "task": "868m9x4ed",
-  "custom": "APP-9387",
+  "task": "868macq9r",
+  "custom": "",
   "name": "P1.8 \u00b7 Confirm people reach the agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.8.md",
   "start": "2026-10-01",
   "due": "2026-10-05"
  },
  "P1.9": {
-  "task": "868m9x4f1",
-  "custom": "APP-9388",
+  "task": "868macqaz",
+  "custom": "",
   "name": "P1.9 \u00b7 Define a good session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.9.md",
   "start": "2026-10-02",
   "due": "2026-10-05"
  },
  "P1.10": {
-  "task": "868ma8ev9",
-  "custom": "APP-9393",
+  "task": "868macqah",
+  "custom": "",
   "name": "P1.10 \u00b7 Follow a problem without restarting",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.10.md",
   "start": "2026-10-02",
   "due": "2026-10-05"
  },
  "P1.11": {
-  "task": "868ma8qbq",
-  "custom": "APP-9399",
+  "task": "868macqat",
+  "custom": "",
   "name": "P1.11 \u00b7 Learn of failures unprompted",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P1.11.md",
   "start": "",
   "due": ""
  },
  "P2.1": {
-  "task": "868m9wgfk",
-  "custom": "APP-9376",
+  "task": "868macqdx",
+  "custom": "",
   "name": "P2.1 \u00b7 Spot sessions that went wrong",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.1.md",
   "start": "2026-10-03",
   "due": "2026-10-05"
  },
  "P2.2": {
-  "task": "868m9wggy",
-  "custom": "APP-9377",
+  "task": "868macqfg",
+  "custom": "",
   "name": "P2.2 \u00b7 Get from a clue to the session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.2.md",
   "start": "2026-10-03",
   "due": "2026-10-05"
  },
  "P2.3": {
-  "task": "868m9wgj8",
-  "custom": "APP-9378",
+  "task": "868macqj3",
+  "custom": "",
   "name": "P2.3 \u00b7 Reconstruct how a session went",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.3.md",
   "start": "2026-10-04",
   "due": "2026-10-06"
  },
  "P2.4": {
-  "task": "868m9wgkf",
-  "custom": "APP-9379",
+  "task": "868macqj7",
+  "custom": "",
   "name": "P2.4 \u00b7 Keep and share proof of a session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.4.md",
   "start": "2026-10-04",
   "due": "2026-10-06"
  },
  "P2.5": {
-  "task": "868m9wgmk",
-  "custom": "APP-9380",
+  "task": "868macq33",
+  "custom": "",
   "name": "P2.5 \u00b7 Follow and stop a run",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.5.md",
   "start": "2026-10-04",
   "due": "2026-10-06"
  },
  "P2.6": {
-  "task": "868m9x4fe",
-  "custom": "APP-9389",
+  "task": "868macqdj",
+  "custom": "",
   "name": "P2.6 \u00b7 Match the bill to sessions",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.6.md",
   "start": "2026-10-05",
   "due": "2026-10-07"
  },
  "P2.7": {
-  "task": "868m9x4fq",
-  "custom": "APP-9390",
+  "task": "868macqje",
+  "custom": "",
   "name": "P2.7 \u00b7 Know why no session shows yet",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.7.md",
   "start": "2026-10-05",
   "due": "2026-10-07"
  },
  "P2.8": {
-  "task": "868ma8evd",
-  "custom": "APP-9394",
+  "task": "868macqmt",
+  "custom": "",
   "name": "P2.8 \u00b7 Pinpoint the slow moment in a session",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.8.md",
   "start": "2026-10-05",
   "due": "2026-10-07"
  },
  "P2.9": {
-  "task": "868ma8evh",
-  "custom": "APP-9395",
+  "task": "868macqnr",
+  "custom": "",
   "name": "P2.9 \u00b7 See what the agent was doing",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.9.md",
   "start": "2026-10-06",
   "due": "2026-10-08"
  },
  "P2.10": {
-  "task": "868ma8evm",
-  "custom": "APP-9396",
+  "task": "868macqp5",
+  "custom": "",
   "name": "P2.10 \u00b7 Rule out the number or caller",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P2.10.md",
   "start": "2026-10-06",
   "due": "2026-10-08"
  },
  "P3.1": {
-  "task": "868m9wgne",
-  "custom": "APP-9381",
+  "task": "868macpmu",
+  "custom": "",
   "name": "P3.1 \u00b7 Replace a provider key without breaking agents",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.1.md",
   "start": "2026-10-06",
   "due": "2026-10-08"
  },
  "P3.2": {
-  "task": "868m9wgpc",
-  "custom": "APP-9382",
+  "task": "868macpzv",
+  "custom": "",
   "name": "P3.2 \u00b7 Route every number to an agent",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.2.md",
   "start": "2026-10-07",
   "due": "2026-10-09"
  },
  "P3.3": {
-  "task": "868m9wgq5",
-  "custom": "APP-9383",
+  "task": "868macq1a",
+  "custom": "",
   "name": "P3.3 \u00b7 Decide how sessions on numbers end",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.3.md",
   "start": "2026-10-07",
   "due": "2026-10-09"
  },
  "P3.4": {
-  "task": "868m9wgqx",
-  "custom": "APP-9384",
+  "task": "868macpgp",
+  "custom": "",
   "name": "P3.4 \u00b7 Reuse integrations across agents",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.4.md",
   "start": "2026-10-07",
   "due": "2026-10-09"
  },
  "P3.5": {
-  "task": "868m9x4gm",
-  "custom": "APP-9391",
+  "task": "868macq40",
+  "custom": "",
   "name": "P3.5 \u00b7 Switch an agent between code and hand edits",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.5.md",
   "start": "2026-10-08",
   "due": "2026-10-12"
  },
  "P3.6": {
-  "task": "868m9x4hy",
-  "custom": "APP-9392",
+  "task": "868macqpg",
+  "custom": "",
   "name": "P3.6 \u00b7 Read one word per concept",
   "desc": "/Users/shaktisoni/Documents/Agora Design & FE/ai-studio-console-redesign/references/v3/03-strategy/clickup/P3.6.md",
   "start": "2026-10-08",
